@@ -164,7 +164,7 @@ in 0.04 s and 18 MB.
 A language is `generators.<language>`: constructor functions and `render`, a
 function from a list of top-level nodes to text, built on `generators.doc`.
 Nodes are Nix values: a plain list or string where the language's own shape is
-a list of words (a Lisp list or symbol, a shell command or word), otherwise a
+a list of words (a Lisp list, a shell command or word), otherwise a
 one-attribute set made by a constructor (`str "x"` is `{str = "x";}`), so a
 printer dispatches on the node's kind. Comments and blank lines are nodes
 (`comment`, `blank`); nothing in a file is lost, except in GLSL, whose tree
@@ -176,10 +176,32 @@ with names every language shares: `rows` (written over several lines),
 function of the constructors it uses, rendered with
 `generators.<language>.render (import ./x.data.nix generators.<language>)`.
 
-Lisp (`generators.lisp`): a list is a Nix list, a symbol or number a string
-(an integer may be a Nix integer), `str` a string literal, and `quote`,
-`quasi`, `unquote`, `splice` and `function` the reader prefixes `'`, `` ` ``,
-`,`, `,@` and `#'`. A list without `rows` prints on one line. `rows [ ... ]`
+Lisp (`generators.lisp`): a list is a Nix list and every name a Nix variable.
+A form that binds names is a lambda whose formals are exactly the names it
+binds: the file (its `defun`, `defmacro`, `defvar`, `defparameter` and
+`defconstant` names); `defun`, `defmacro`, `lambda` and `define-extension`
+parameters and a local function's; `let`, `let*`, `flet`, `labels`,
+`macrolet`, `destructuring-bind`, `multiple-value-bind`, `dolist`, `dotimes`
+and the `with-open-file` and string streams; a `loop`'s `for`, `as`, `with` and
+`into` variables. `render` calls it with name nodes and throws when a formal is
+not bound by its form. Every other symbol is an attribute of `generators.lisp`,
+from fixed lists of the Common Lisp symbols, the `loop` keywords, tomoe's and
+ekko's API and the names one tomoe file or the Nix around it defines for
+another (`hud--c`, `+gap+`), taken as a data-file formal, so a misspelt name is
+an evaluation error. A name that is a Nix keyword, a constructor or such a
+global is spelled with a trailing `'` (`let'`, `char'`, a variable `list'`
+beside the function `list`), as is a rebinding its own initializer reads
+(`(let ((m (copy-list m))) ...)` binds `m'`); `render` drops it. `+x+` and
+`*x*` are `constant x` and `special x`; `&key`, `&optional`, `&rest` and a
+dotted list's `.` are `and-key`, `and-optional`, `and-rest` and `dot`; the
+operators no Nix name can spell (`+`, `1-`, `<=`, `char=`, `let*`, `list*`,
+`string=` and the rest of `operators`) are strings, the only bare strings a
+tree holds. A keyword is `kw "name"`, `#:name` is `uninterned "name"`, a
+character `char "Space"`; integers and floats are Nix numbers, `1/2` is
+`ratio 1 2`, `1d0` `double 1` and `#xF00ED` `hex 983277`; `str` is a string
+literal, and `quote`, `quasi`, `unquote`, `splice` and `function` the reader
+prefixes `'`, `` ` ``, `,`, `,@` and `#'`. A list without `rows` prints on one
+line. `rows [ ... ]`
 holds one row per source line: a list of the items on that line, or one item
 that is not a plain list. Rows after the first indent by Emacs' Common Lisp
 rules: the body of `defun`, `let`, `when` and the other forms in `bodies` by
@@ -189,20 +211,33 @@ argument, `cond` clauses by 2, anything else under the head. From
 `tomoe/lisp/deck.data.nix`, abridged:
 
 ```nix
-{blank, function, quote, rows, str, ...}: [
-  ["in-package" "#:tomoe-user"]
-  blank
-  ["defun" "deck--fronts" ["state"] ["getf" "state" ":fronts"]]
+{and, cdr, constant, defparameter, defun, getf, kw, let', quote, rows, str, ...}: ({
+  deck--entry,
+  deck--fronts,
+  deck--side-of,
+  deck--column-commands,
+}: [
+  ({state}: [defun deck--fronts [state] [getf state (kw "fronts")]])
+  ({
+    state,
+    id,
+  }:
+    rows [
+      [defun deck--side-of [state id]]
+      ({entry}: [let' [[entry [deck--entry [getf state (kw "columns")] id]]] [and entry [cdr entry]]])
+    ])
   (rows [
-    ["defun" "deck--side-of" ["state" "id"]]
-    [["let" [["entry" ["deck--entry" ["getf" "state" ":columns"] "id"]]] ["and" "entry" ["cdr" "entry"]]]]
-  ])
-  (rows [
-    ["defparameter" "+deck--column-commands+"]
+    [defparameter (constant deck--column-commands)]
     (quote [(str "focus-left") (str "focus-right") (str "swap-columns")])
   ])
-]
+])
 ```
+
+`strictix import lisp` prints this form, resolving a list's head in the
+function namespace and other symbols as variables first, so a variable and a
+function of one name stay two bindings, and refuses a symbol nothing binds
+that is no global, a name Nix cannot spell, a package-qualified symbol and
+reader syntax the printer does not write.
 
 Shell (`generators.shell`): a data file is a function of the constructors
 and shell globals it uses whose value is the script, a lambda of the names the
@@ -760,7 +795,7 @@ then runs each language's own check on every rendered tree, listed in its
 
 | Language | Gate at conversion | `checks.codegen` |
 | --- | --- | --- |
-| Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
+| Lisp (15 files; tomoe's probe and sounds forms, rendered inline, gated on bytes too) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes; binding names as Nix variables changed no rendered byte (`beat-saber-lock`, `omp-box` and both colour schemes' `osc.sh`) | `bash -n`, `shellcheck -S warning` |
 | Luau (8 files) | bytes, at conversion and again when its names became Nix bindings | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
 | VBScript (1 file) | bytes, again after its names became Nix bindings and its operators infix lists | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |

@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=3021f4b66a31dc05be873b6f14a53ceff23843ae";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=90c2f902e9b5ff39a5f179f31faf9f4e4ec0de07";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -5911,7 +5911,7 @@
         then {__toLispInline = form;}
         else throw "mkLispInline: expected a nonblank string";
 
-      probeLisp = generators.lisp.render [["in-package" "#:tomoe-user"] ["defun" "probe--sample" ["probe" "previous" "system"] ["let" [["sample" ["copy-list" "previous"]]] ["ecase" "probe" [":cpu" ["let" [["total" ["getf" "system" ":cpu-total"]] ["idle" ["getf" "system" ":cpu-idle"]]] ["when" "total" ["let" [["spent" ["-" "total" ["getf" "sample" ":total" "total"]]]] ["setf" ["getf" "sample" ":percent"] ["if" ["plusp" "spent"] ["max" 0 ["min" 100 ["round" ["*" 100 ["-" "spent" ["-" "idle" ["getf" "sample" ":idle" "idle"]]]] "spent"]]] ["getf" "sample" ":percent" 0]] ["getf" "sample" ":total"] "total" ["getf" "sample" ":idle"] "idle" ["getf" "sample" ":temp"] ["getf" "system" ":cpu-temperature"]]]]]] [":memory" ["let" [["total" ["getf" "system" ":memory-total"]] ["available" ["getf" "system" ":memory-available"]]] ["when" ["and" "total" ["plusp" "total"]] ["setf" ["getf" "sample" ":percent"] ["round" ["*" 100 ["-" "total" "available"]] "total"] ["getf" "sample" ":used"] ["round" ["-" "total" "available"] 1024]]]]] [":gpu" ["let" [["gpu" ["first" ["getf" "system" ":gpus"]]]] ["cond" ["gpu" ["setf" ["getf" "sample" ":percent"] ["max" 0 ["min" 100 ["getf" "gpu" ":busy"]]] ["getf" "sample" ":used"] ["getf" "gpu" ":vram-used"] ["getf" "sample" ":total"] ["getf" "gpu" ":vram-total"] ["getf" "sample" ":temp"] ["getf" "gpu" ":temperature"] ["getf" "sample" ":failures"] 0]] ["system" ["setf" ["getf" "sample" ":failures"] ["1+" ["getf" "sample" ":failures" 0]]]]]]]] "sample"]] ["defun" "probe--gpu-p" ["gpu"] ["and" ["getf" "gpu" ":percent"] ["<" ["getf" "gpu" ":failures" 0] 3]]]];
+      probeLisp = generators.lisp.render (modules_desktop_session_tomoe_lisp_probe_data generators.lisp);
 
       lispList = items:
         if items == []
@@ -6390,4729 +6390,7056 @@
         "(defparameter +peek+ ${toLisp peekParameters})"
         (generators.lisp.render (modules_desktop_session_tomoe_lisp_peek_data generators.lisp))
         "(defparameter +sounds+ ${toLisp soundParameters})"
-        (generators.lisp.render [["in-package" "#:tomoe-user"] ["define-extension" {str = "sounds";} [] ["snapshot" "state" "event"] ["declare" ["ignore" "snapshot" "event"]] ["values" "state" ["list" ["sound" ":key" ["getf" "+sounds+" ":key"] ":gain" ["getf" "+sounds+" ":key-gain"]] ["sound" ":button" ["getf" "+sounds+" ":button"] ":gain" ["getf" "+sounds+" ":button-gain"]] ["sound" ":close" ["getf" "+sounds+" ":close"] ":gain" ["getf" "+sounds+" ":close-gain"]]] "nil"]]])
+        (generators.lisp.render (modules_desktop_session_tomoe_lisp_sounds_data generators.lisp))
         cfg.extraConfig
       ];
     };
     modules_desktop_session_tomoe_lisp_bar_data = {
+      abs,
+      and,
+      and-optional,
+      append,
+      assoc,
       at,
+      bar,
+      below,
       blank,
+      by,
+      cddr,
+      clock-text,
+      code-char,
+      collect,
+      concatenate,
+      cond,
+      constant,
+      context,
+      copy-list,
+      define-extension,
+      defparameter,
+      defun,
+      double,
+      ecase,
+      eq,
+      eql,
+      equal,
+      exp,
+      find,
+      first,
+      flet,
+      float,
+      for,
+      format,
+      from,
       function,
+      getf,
+      hex,
+      hud,
+      hud--c,
+      hud--decay,
+      hud--dim,
+      hud--heat,
+      hud--icon,
+      hud--mix,
+      hud--now,
+      hud--off,
+      hud--panel,
+      hud--text,
+      if',
+      in',
+      in-package,
+      interval,
+      kw,
+      last,
+      length,
+      let',
+      list,
+      loop,
+      max,
+      member,
+      min,
+      multiple-value-bind,
+      nil,
+      not,
+      nthcdr,
+      null',
+      on,
+      or',
+      parse-integer,
+      plusp,
+      publish-state,
       quote,
+      realp,
+      reduce,
+      remove,
+      remove-duplicates,
+      repeat,
+      return,
+      round,
       rows,
+      second,
+      service-state,
+      setf,
+      shell-surface,
+      sin,
+      state-value,
       str,
+      string,
+      string-upcase,
+      stringp,
+      subseq,
+      t,
+      thereis,
+      ui,
+      uninterned,
+      unless,
+      values,
+      when,
       ...
+    }: ({
+      bar-probes,
+      bar--sample,
+      bar--target,
+      bar--metric,
+      bar--ease,
+      bar--moving-p,
+      bar--segments,
+      bar--spark,
+      bar--temp-color,
+      bar--gauge,
+      bar--degrees,
+      bar--gib,
+      bar--truncate,
+      bar--nonempty,
+      bar--media,
+      bar--sweep,
+      bar--eq,
+      bar--clock,
+      bar--battery,
+      bar--network,
+      bar--gpu-p,
+      bar--module,
+      bar--surfaces,
     }: [
-      ["in-package" "#:tomoe-user"]
+      [in-package (uninterned "tomoe-user")]
       blank
-      ["defparameter" "+bar-probes+" (quote [[":cpu" ":cpu"] [":memory" ":memory"] [":gpu" ":gpu"] [":vram" ":gpu"]])]
+      [defparameter (constant bar-probes) (quote [[(kw "cpu") (kw "cpu")] [(kw "memory") (kw "memory")] [(kw "gpu") (kw "gpu")] [(kw "vram") (kw "gpu")]])]
       blank
-      (rows [
-        ["defun" "bar--sample" ["probe" "previous" "system"]]
-        (rows [
-          ["let" [["sample" ["copy-list" "previous"]]]]
-          (rows [
-            ["ecase" "probe"]
-            (rows [
-              ":cpu"
+      ({
+        probe,
+        previous,
+        system,
+      }:
+        rows [
+          [defun bar--sample [probe previous system]]
+          ({sample}:
+            rows [
+              [let' [[sample [copy-list previous]]]]
               (rows [
-                ["let" [["total" ["getf" "system" ":cpu-total"]] ["idle" ["getf" "system" ":cpu-idle"]]]]
+                [ecase probe]
                 (rows [
-                  ["when" "total"]
-                  (rows [
-                    ["let" [["spent" ["-" "total" ["getf" "sample" ":total" "total"]]]]]
-                    (rows [
-                      ["setf" ["getf" "sample" ":percent"]]
+                  (kw "cpu")
+                  ({
+                    total,
+                    idle,
+                  }:
+                    rows [
+                      [let' [[total [getf system (kw "cpu-total")]] [idle [getf system (kw "cpu-idle")]]]]
                       (rows [
-                        ["if" ["plusp" "spent"]]
-                        [["max" 0 ["min" 100 ["round" ["*" 100 ["-" "spent" ["-" "idle" ["getf" "sample" ":idle" "idle"]]]] "spent"]]]]
-                        [["getf" "sample" ":percent" 0]]
-                      ])
-                      [["getf" "sample" ":total"] "total"]
-                      [["getf" "sample" ":idle"] "idle"]
-                      [["getf" "sample" ":temp"] ["getf" "system" ":cpu-temperature"]]
-                    ])
-                  ])
-                ])
-              ])
-            ])
-            (rows [
-              ":memory"
-              (rows [
-                ["let" [["total" ["getf" "system" ":memory-total"]] ["available" ["getf" "system" ":memory-available"]]]]
-                (rows [
-                  ["when" ["and" "total" ["plusp" "total"]]]
-                  (rows [
-                    ["setf" ["getf" "sample" ":percent"] ["round" ["*" 100 ["-" "total" "available"]] "total"]]
-                    [["getf" "sample" ":used"] ["round" ["-" "total" "available"] 1024]]
-                  ])
-                ])
-              ])
-            ])
-            (rows [
-              ":gpu"
-              (rows [
-                ["let" [["gpu" ["first" ["getf" "system" ":gpus"]]]]]
-                (rows [
-                  [
-                    "cond"
-                    [
-                      "gpu"
-                      (rows [
-                        ["setf" ["getf" "sample" ":util"] ["max" 0 ["min" 100 ["getf" "gpu" ":busy"]]]]
-                        [["getf" "sample" ":used"] ["getf" "gpu" ":vram-used"]]
-                        [["getf" "sample" ":total"] ["getf" "gpu" ":vram-total"]]
-                        [["getf" "sample" ":temp"] ["getf" "gpu" ":temperature"]]
-                        [["getf" "sample" ":failures"] 0]
-                      ])
-                    ]
-                  ]
-                  [["system" ["setf" ["getf" "sample" ":failures"] ["1+" ["getf" "sample" ":failures" 0]]]]]
-                ])
-              ])
-            ])
-          ])
-          "sample"
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--target" ["module" "state"]]
-        (rows [
-          ["let" [["gpu" ["getf" "state" ":gpu"]]]]
-          (rows [
-            ["ecase" "module"]
-            [[":cpu" ["getf" ["getf" "state" ":cpu"] ":percent" 0]]]
-            [[":memory" ["getf" ["getf" "state" ":memory"] ":percent" 0]]]
-            [[":gpu" ["getf" "gpu" ":util" 0]]]
-            [
-              [
-                ":vram"
-                (rows [
-                  ["if" ["plusp" ["or" ["getf" "gpu" ":total"] 0]]]
-                  [["round" ["*" 100 ["or" ["getf" "gpu" ":used"] 0]] ["getf" "gpu" ":total"]]]
-                  0
-                ])
-              ]
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--metric" ["m" "target" "push"]]
-        (rows [
-          ["let" [["m" ["copy-list" "m"]] ["old" ["getf" "m" ":target"]]]]
-          (rows [
-            ["when" ["and" "old" ["or" [">=" ["-" "target" "old"] 25] ["and" [">=" "target" 90] ["<" "old" 90]]]]]
-            [["setf" ["getf" "m" ":flash-at"] ["hud--now"]]]
-          ])
-          (rows [
-            ["when" "push"]
-            [["setf" ["getf" "m" ":history"] ["last" ["append" ["getf" "m" ":history"] ["list" "target"]] ["getf" "+bar+" ":history"]]]]
-          ])
-          [["setf" ["getf" "m" ":target"] "target"]]
-          (rows [
-            ["when" ["or" ["null" ["getf" "m" ":shown"]] ["<" ["abs" ["-" "target" ["getf" "m" ":shown"]]] 3]]]
-            [["setf" ["getf" "m" ":shown"] ["float" "target" "1d0"]]]
-          ])
-          "m"
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--ease" ["m" "dt"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["m" ["copy-list" "m"]] ["shown" ["getf" "m" ":shown"]] ["target" ["getf" "m" ":target"]]]
-              [["next" ["+" "target" ["*" ["-" "shown" "target"] ["exp" ["-" ["/" "dt" ["getf" "+bar+" ":tau"]]]]]]]]
-            ])
-          ]
-          [["setf" ["getf" "m" ":shown"] ["if" ["<" ["abs" ["-" "next" "target"]] "0.3"] ["float" "target" "1d0"] "next"]]]
-          "m"
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--moving-p" ["m"]]
-        (rows [
-          ["or" ["/=" ["getf" "m" ":shown"] ["getf" "m" ":target"]]]
-          [["plusp" ["hud--decay" ["getf" "m" ":flash-at"] ["getf" "+bar+" ":flash"]]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--segments" ["p" "value" "accent" "&optional" ["zones" "t"]]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["count" ["getf" "+bar+" ":segments"]]]
-              [["filled" ["*" "count" ["max" 0 ["min" 1 "value"]]]]]
-            ])
-          ]
-          (rows [
-            ["ui" ":row" ":gap" 1 ":align" ":center"]
-            [
-              ":children"
-              (rows [
-                ["loop" "for i below count"]
-                ["for" "lit" "=" ["max" 0 ["min" 1 ["-" "filled" "i"]]]]
-                [
-                  "collect"
-                  (rows [
-                    ["ui" ":rect" ":width" 4 ":height" 14]
-                    [
-                      ":background"
-                      (rows [
-                        ["hud--mix" ["hud--off" "p"]]
-                        [["if" "zones" ["hud--heat" ["*" 100 ["/" ["1+" "i"] "count"]] "accent" "p"] "accent"]]
-                        "lit"
-                      ])
-                    ]
-                  ])
-                ]
-              ])
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--spark" ["p" "history" "accent"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["h" 16] ["count" ["length" "history"]]]
-              [["scale" ["max" 20 ["reduce" (function "max") "history" ":initial-value" 0]]]]
-            ])
-          ]
-          (rows [
-            ["ui" ":row" ":gap" 1 ":align" ":end" ":height" "h"]
-            [
-              ":children"
-              (rows [
-                [
-                  "append"
-                  (rows [
-                    ["loop" "repeat" ["-" ["getf" "+bar+" ":history"] "count"]]
-                    ["collect" ["ui" ":rect" ":width" 2 ":height" 1 ":background" ["hud--off" "p"]]]
-                  ])
-                ]
-                (rows [
-                  ["loop" "for v in history"]
-                  "for i from 1"
-                  [
-                    "collect"
-                    (rows [
-                      ["ui" ":rect" ":width" 2 ":height" ["max" 1 ["round" ["*" "h" "v"] "scale"]]]
-                      [
-                        ":background"
-                        (rows [
-                          ["hud--mix" ["hud--c" "p" ":bg"] ["hud--heat" "v" "accent" "p"]]
-                          [["+" "0.3" ["*" "0.7" ["/" "i" "count"]]]]
-                        ])
-                      ]
-                    ])
-                  ]
-                ])
-              ])
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--temp-color" ["p" "value"]]
-        (rows [
-          ["cond" [["not" ["realp" "value"]] ["hud--dim" "p"]]]
-          [[[">=" "value" ["getf" "+bar+" ":hot"]] ["hud--c" "p" ":color1"]]]
-          [[[">=" "value" ["-" ["getf" "+bar+" ":hot"] 10]] ["hud--c" "p" ":color3"]]]
-          [["t" ["hud--dim" "p" "0.75"]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--gauge" ["p" "accent" "label" "m" "detail" "detail-color"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["shown" ["getf" "m" ":shown" 0]]]
-              [["color" ["hud--heat" ["round" "shown"] "accent" "p"]]]
-              [["flash" ["hud--decay" ["getf" "m" ":flash-at"] ["getf" "+bar+" ":flash"]]]]
-            ])
-          ]
-          (rows [
-            ["hud--panel" "p" "color"]
-            (rows [
-              ["list*" ["hud--text" "label" 11 ["hud--dim" "p"]]]
-              (rows [
-                ["ui" ":row" ":align" ":end"]
-                [
-                  ":children"
-                  (rows [
-                    ["list" ["hud--text" ["format" "nil" (str "~3D") ["round" "shown"]] 16 ["hud--mix" ["hud--c" "p" ":fg"] "color" "flash"]]]
-                    [["hud--text" (str "%") 11 ["hud--dim" "p"]]]
-                  ])
-                ]
-              ])
-              [["bar--segments" "p" ["/" "shown" 100] "accent"]]
-              [["bar--spark" "p" ["getf" "m" ":history"] "accent"]]
-              [["when" "detail" ["list" ["hud--text" "detail" 12 ["or" "detail-color" ["hud--dim" "p" "0.75"]]]]]]
-            ])
-            [":flash" "flash"]
-          ])
-        ])
-      ])
-      blank
-      ["defun" "bar--degrees" ["value"] ["when" ["realp" "value"] ["format" "nil" (str "~D°") ["round" "value"]]]]
-      blank
-      ["defun" "bar--gib" ["mib"] ["when" ["realp" "mib"] ["format" "nil" (str "~,1FG") ["/" "mib" "1024d0"]]]]
-      blank
-      (rows [
-        ["defun" "bar--truncate" ["text" "limit"]]
-        [["if" ["<=" ["length" "text"] "limit"] "text" ["concatenate" (quote "string") ["subseq" "text" 0 ["1-" "limit"]] (str "…")]]]
-      ])
-      blank
-      ["defun" "bar--nonempty" ["value"] ["and" ["stringp" "value"] ["plusp" ["length" "value"]] "value"]]
-      blank
-      (rows [
-        ["defun" "bar--media" ["snapshot" "state" "now"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["service" ["service-state" "snapshot" ":mpris"]]]
-              [["status" ["getf" "service" ":status"]]]
-              [["title" ["bar--nonempty" ["getf" "service" ":title"]]]]
-              [["artist" ["bar--nonempty" ["getf" "service" ":artist"]]]]
-              [["key" ["list" ["getf" "service" ":player-name"] "title" "status" ["getf" "service" ":position"]]]]
-            ])
-          ]
-          (rows [
-            ["unless" ["equal" "key" ["getf" "state" ":media-key"]]]
-            [["setf" ["getf" "state" ":media-key"] "key" ["getf" "state" ":media-at"] "now"]]
-          ])
-          (rows [
-            [
-              "values"
-              (rows [
-                ["when" ["and" "title" ["member" "status" (quote [(str "Playing") (str "Paused")]) ":test" (function "equal")]]]
-                (rows [
-                  [
-                    "let*"
-                    (rows [
-                      [["length" ["or" ["getf" "service" ":length"] 0]]]
-                      [["playing" ["equal" "status" (str "Playing")]]]
-                      [["elapsed" ["if" "playing" ["-" "now" ["getf" "state" ":media-at" "now"]] 0]]]
-                      [["position" ["min" "length" ["+" ["or" ["getf" "service" ":position"] 0] "elapsed"]]]]
-                    ])
-                  ]
-                  (rows [
-                    ["list" ":playing" "playing"]
-                    [
-                      ":label"
-                      [
-                        "string-upcase"
-                        (rows [
-                          ["bar--truncate" ["if" "artist" ["format" "nil" (str "~A - ~A") "artist" "title"] "title"]]
-                          [["getf" "+bar+" ":media-width"]]
-                        ])
-                      ]
-                    ]
-                    [":value" ["if" ["plusp" "length"] ["/" "position" "length"] 0]]
-                  ])
-                ])
-              ])
-            ]
-            "state"
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--sweep" ["p" "color" "value"]]
-        [["ui" ":progress" ":height" 2 ":radius" 0 ":value" "value" ":color" "color" ":track" ["hud--off" "p"]]]
-      ])
-      blank
-      (rows [
-        ["defun" "bar--eq" ["color" "playing" "now"]]
-        (rows [
-          ["ui" ":row" ":gap" 1 ":align" ":end" ":height" 14]
-          [
-            ":children"
-            (rows [
-              ["loop" "for i below 5"]
-              [
-                "collect"
-                (rows [
-                  ["ui" ":rect" ":width" 2]
-                  [
-                    ":height"
-                    (rows [
-                      ["if" "playing"]
-                      [["+" 2 ["round" ["*" 12 ["abs" ["sin" ["+" ["*" "now" ["+" "5.3" ["*" "2.1" "i"]]] ["*" "1.7" "i"]]]]]]]]
-                      2
-                    ])
-                  ]
-                  [":background" "color"]
-                ])
-              ]
-            ])
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--clock" ["p" "state" "now"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["fg" ["hud--c" "p" ":fg"]] ["accent" ["hud--c" "p" ":accent"]]]
-              [["sec" ["getf" "state" ":sec" 0]]]
-              [["tick" ["hud--decay" ["getf" "state" ":minute-at"] 700]]]
-              [["frac" ["/" ["+" "sec" ["min" 1 ["-" "now" ["getf" "state" ":sec-at" "now"]]]] 60]]]
-            ])
-          ]
-          (rows [
-            ["hud--panel" "p" "accent"]
-            (rows [
-              ["list" ["hud--icon" "#xF0150" 14 "accent"]]
-              (rows [
-                ["ui" ":column" ":gap" 1 ":align" ":stretch"]
-                [
-                  ":children"
-                  (rows [
-                    [
-                      "list"
-                      (rows [
-                        ["ui" ":row" ":align" ":end"]
-                        [
-                          ":children"
-                          (rows [
-                            ["list" ["hud--text" ["getf" "state" ":minute"] 18 ["hud--mix" "fg" "accent" "tick"]]]
-                            [["hud--text" ["format" "nil" (str ":~2,'0D") "sec"] 12 ["hud--dim" "p"]]]
-                          ])
-                        ]
-                      ])
-                    ]
-                    [["bar--sweep" "p" "accent" "frac"]]
-                  ])
-                ]
-              ])
-            ])
-            [":flash" "tick"]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--battery" ["p" "battery" "&optional" ["label" (str "BAT")]]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["percent" ["round" ["getf" "battery" ":percent" 0]]]]
-              [["charging" ["getf" "battery" ":charging"]]]
-              [
-                [
-                  "color"
-                  (rows [
-                    ["cond" ["charging" ["hud--c" "p" ":color2"]] [["<" "percent" 15] ["hud--c" "p" ":color1"]]]
-                    [[["<" "percent" 30] ["hud--c" "p" ":color3"]] ["t" ["hud--c" "p" ":color2"]]]
-                  ])
-                ]
-              ]
-            ])
-          ]
-          (rows [
-            ["hud--panel" "p" "color"]
-            (rows [
-              ["list*" ["hud--text" "label" 11 ["hud--dim" "p"]]]
-              (rows [
-                ["ui" ":row" ":align" ":end"]
-                [
-                  ":children"
-                  (rows [
-                    ["list" ["hud--text" ["format" "nil" (str "~3D") "percent"] 16 ["hud--c" "p" ":fg"]]]
-                    [["hud--text" (str "%") 11 ["hud--dim" "p"]]]
-                  ])
-                ]
-              ])
-              [["bar--segments" "p" ["/" "percent" 100] "color" "nil"]]
-              [["when" "charging" ["list" ["hud--icon" "#xF140B" 13 "color"]]]]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--network" ["p" "network"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["ssid" ["getf" "network" ":ssid"]]]
-              [["online" ["getf" "network" ":connected"]]]
-              [
-                [
-                  "label"
-                  (rows [
-                    ["cond" [["and" "online" ["stringp" "ssid"] ["plusp" ["length" "ssid"]]] ["string-upcase" ["remove" ["code-char" 0] "ssid"]]]]
-                    [["online" (str "ONLINE")]]
-                    [["t" (str "OFFLINE")]]
-                  ])
-                ]
-              ]
-              [["color" ["if" "online" ["hud--c" "p" ":color6"] ["hud--c" "p" ":color1"]]]]
-            ])
-          ]
-          [
-            [
-              "hud--panel"
-              "p"
-              "color"
-              (rows [
-                ["list" ["hud--icon" ["if" "online" "#xF05A9" "#xF05AA"] 14 "color"]]
-                [["hud--text" ["bar--truncate" "label" 20] 14 ["hud--c" "p" ":fg"]]]
-              ])
-            ]
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--gpu-p" ["state"]]
-        (rows [
-          ["let" [["gpu" ["getf" "state" ":gpu"]]]]
-          [["and" ["getf" "gpu" ":util"] ["<" ["getf" "gpu" ":failures" 0] 3]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--module" ["module" "p" "state" "snapshot" "metrics" "media" "now"]]
-        (rows [
-          ["let" [["cpu" ["getf" "state" ":cpu"]] ["gpu" ["getf" "state" ":gpu"]]]]
-          (rows [
-            ["ecase" "module"]
-            [[":time" ["bar--clock" "p" "state" "now"]]]
-            [
-              [
-                ":date"
-                (rows [
-                  ["hud--panel" "p" ["hud--c" "p" ":color4"]]
-                  (rows [
-                    ["list" ["hud--icon" "#xF00ED" 14 ["hud--c" "p" ":color4"]]]
-                    [["hud--text" ["string-upcase" ["clock-text" ["getf" "+bar+" ":date"]]] 14 ["hud--c" "p" ":fg"]]]
-                  ])
-                ])
-              ]
-            ]
-            [[":battery" ["bar--battery" "p" ["service-state" "snapshot" ":battery"]]]]
-            [[":network" ["bar--network" "p" ["service-state" "snapshot" ":network"]]]]
-            [
-              [
-                ":frame"
-                (rows [
-                  ["let" [["frame" ["state-value" "snapshot" ":frame-battery"]]]]
-                  (rows [
-                    ["when" ["getf" "frame" ":percent"]]
-                    (rows [
-                      [
-                        "bar--battery"
-                        "p"
-                        (rows [
-                          ["list" ":percent" ["getf" "frame" ":percent"]]
-                          [":charging" ["not" ["equal" ["getf" "frame" ":status"] (str "Discharging")]]]
-                        ])
-                      ]
-                      (str "VR")
-                    ])
-                  ])
-                ])
-              ]
-            ]
-            [
-              [
-                ":media"
-                (rows [
-                  ["when" "media"]
-                  (rows [
-                    ["let" [["color" ["hud--c" "p" ":color5"]]]]
-                    (rows [
-                      ["hud--panel" "p" "color"]
-                      (rows [
-                        ["list" ["bar--eq" "color" ["getf" "media" ":playing"] "now"]]
-                        (rows [
-                          ["ui" ":column" ":gap" 3 ":align" ":stretch"]
-                          [
-                            ":children"
+                        [when total]
+                        ({spent}:
+                          rows [
+                            [let' [[spent ["-" total [getf sample (kw "total") total]]]]]
                             (rows [
-                              ["list" ["hud--text" ["getf" "media" ":label"] 13 ["hud--c" "p" ":fg"]]]
-                              [["bar--sweep" "p" "color" ["getf" "media" ":value"]]]
-                            ])
-                          ]
-                        ])
-                      ])
-                    ])
-                  ])
-                ])
-              ]
-            ]
-            [
-              [
-                ":cpu"
-                (rows [
-                  ["bar--gauge" "p" ["hud--c" "p" ":color4"] (str "CPU") ["getf" "metrics" ":cpu"]]
-                  [["bar--degrees" ["getf" "cpu" ":temp"]] ["bar--temp-color" "p" ["getf" "cpu" ":temp"]]]
-                ])
-              ]
-            ]
-            [
-              [
-                ":memory"
-                (rows [
-                  ["bar--gauge" "p" ["hud--c" "p" ":color5"] (str "MEM") ["getf" "metrics" ":memory"]]
-                  [["bar--gib" ["getf" ["getf" "state" ":memory"] ":used"]] "nil"]
-                ])
-              ]
-            ]
-            [
-              [
-                ":gpu"
-                (rows [
-                  ["when" ["bar--gpu-p" "state"]]
-                  (rows [
-                    ["bar--gauge" "p" ["hud--c" "p" ":color2"] (str "GPU") ["getf" "metrics" ":gpu"]]
-                    [["bar--degrees" ["getf" "gpu" ":temp"]] ["bar--temp-color" "p" ["getf" "gpu" ":temp"]]]
-                  ])
-                ])
-              ]
-            ]
-            [
-              [
-                ":vram"
-                (rows [
-                  ["when" ["bar--gpu-p" "state"]]
-                  [["bar--gauge" "p" ["hud--c" "p" ":color6"] (str "VRAM") ["getf" "metrics" ":vram"] ["bar--gib" ["getf" "gpu" ":used"]] "nil"]]
-                ])
-              ]
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "bar--surfaces" ["modules" "panels"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["h" ["+" ["getf" "+hud+" ":height"] ["getf" "+hud+" ":shadow"]]]]
-              [["gap" ["getf" "+bar+" ":gap"]]]
-              [["margin" ["getf" "+bar+" ":margin"]]]
-              [["inset" ["getf" "+bar+" ":inset"]]]
-              [["pair" ["getf" "+bar+" ":center-between"]]]
-              [
-                [
-                  "seam"
-                  (rows [
-                    ["loop" "for" ["a" "b"] "on" "modules"]
-                    "for index from 1"
-                    ["when" ["and" "b" ["eq" "a" ["first" "pair"]] ["eq" "b" ["second" "pair"]]] "return index"]
-                  ])
-                ]
-              ]
-            ])
-          ]
-          (rows [
-            [
-              "flet"
-              [
-                (rows [
-                  ["half" ["list" "justify" "padding"]]
-                  (rows [
-                    ["ui" ":row" ":width" 0 ":grow" 1 ":height" "h" ":gap" "gap" ":justify" "justify" ":padding" "padding"]
-                    [":children" ["remove" "nil" "list"]]
-                  ])
-                ])
-              ]
-            ]
-            (rows [
-              ["loop" "for" "edge" "in" ["getf" "+bar+" ":edges"]]
-              [
-                "collect"
-                (rows [
-                  ["shell-surface" "edge"]
-                  (rows [
-                    ["ui" ":row" ":height" "h" ":justify" ":center"]
-                    [
-                      ":children"
-                      (rows [
-                        ["if" "seam"]
-                        (rows [
-                          ["list" ["half" ["subseq" "panels" 0 "seam"] ":end" ["list" 0 "inset" 0 0]]]
-                          [["half" ["nthcdr" "seam" "panels"] ":start" ["list" 0 0 0 "inset"]]]
-                        ])
-                        [["list" ["ui" ":row" ":height" "h" ":gap" "gap" ":children" ["remove" "nil" "panels"]]]]
-                      ])
-                    ]
-                  ])
-                  [":anchors" ["if" "seam" ["list" "edge" ":left" ":right"] ["list" "edge"]]]
-                  [":margin" ["if" ["eq" "edge" ":top"] ["list" "margin" 0 0 0] ["list" 0 0 "margin" 0]]]
-                  [":height" "h" ":layer" ":overlay"]
-                  [":exclusive-zone" 0]
-                  [":background" (str "#00000000") ":click-through" "t"]
-                ])
-              ]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        [
-          "define-extension"
-          (str "bar")
-          (rows [
-            [":reads" [":services" ":system" ":data"]]
-            [
-              ":state"
-              (rows [
-                ["list" ":cpu" "nil" ":memory" "nil" ":gpu" "nil" ":metrics" "nil" ":at" "nil"]
-                [":sec" "nil" ":sec-at" "nil" ":minute" "nil" ":minute-at" "nil"]
-              ])
-            ]
-          ])
-        ]
-        [["snapshot" "state" "event"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["modules" ["getf" "+bar+" ":modules"]]]
-              [
-                [
-                  "probes"
-                  [
-                    "remove-duplicates"
-                    (rows [
-                      ["loop" "for module in modules"]
-                      ["for" "source" "=" ["second" ["assoc" "module" "+bar-probes+"]]]
-                      ["when source" "collect source"]
-                    ])
-                  ]
-                ]
-              ]
-              [["probe" ["and" ["eq" ["getf" "event" ":type"] ":timer"] ["find" ["getf" "event" ":name"] "probes"]]]]
-            ])
-          ]
-          (rows [
-            ["when" "probe"]
-            [["setf" ["getf" "state" "probe"] ["bar--sample" "probe" ["getf" "state" "probe"] ["context" "snapshot" ":system"]]]]
-          ])
-          (rows [
-            [
-              "let*"
-              (rows [
-                [["p" ["state-value" "snapshot" ":hud-palette"]]]
-                [["now" ["hud--now"]]]
-                [["dt" ["if" ["getf" "state" ":at"] ["-" "now" ["getf" "state" ":at"]] 0]]]
-                [
-                  [
-                    "metrics"
-                    (rows [
-                      ["loop" "for" ["module" "source"] "in" "+bar-probes+"]
-                      ["when" ["member" "module" "modules"]]
-                      (at 8 [
-                        "append"
-                        [
-                          "list"
-                          "module"
-                          (rows [
-                            [
-                              "bar--ease"
+                              [setf [getf sample (kw "percent")]]
                               (rows [
-                                ["bar--metric" ["getf" ["getf" "state" ":metrics"] "module"]]
-                                [["bar--target" "module" "state"]]
-                                [["eq" "source" "probe"]]
+                                [if' [plusp spent]]
+                                [[max 0 [min 100 [round ["*" 100 ["-" spent ["-" idle [getf sample (kw "idle") idle]]]] spent]]]]
+                                [[getf sample (kw "percent") 0]]
                               ])
-                            ]
-                            "dt"
+                              [[getf sample (kw "total")] total]
+                              [[getf sample (kw "idle")] idle]
+                              [[getf sample (kw "temp")] [getf system (kw "cpu-temperature")]]
+                            ])
                           ])
-                        ]
                       ])
                     ])
-                  ]
-                ]
-                [["sec" ["or" ["parse-integer" ["clock-text" (str "%S")] ":junk-allowed" "t"] 0]]]
-                [["minute" ["clock-text" ["getf" "+bar+" ":time"]]]]
-              ])
-            ]
-            [["setf" ["getf" "state" ":metrics"] "metrics" ["getf" "state" ":at"] "now"]]
-            (rows [
-              ["unless" ["eql" "sec" ["getf" "state" ":sec"]]]
-              [["setf" ["getf" "state" ":sec"] "sec" ["getf" "state" ":sec-at"] "now"]]
-            ])
-            (rows [
-              ["unless" ["equal" "minute" ["getf" "state" ":minute"]]]
-              [["setf" ["getf" "state" ":minute-at"] ["when" ["getf" "state" ":minute"] "now"] ["getf" "state" ":minute"] "minute"]]
-            ])
-            (rows [
-              ["multiple-value-bind" ["media" "next"] ["if" ["member" ":media" "modules"] ["bar--media" "snapshot" "state" "now"] ["values" "nil" "state"]]]
-              [["setf" "state" "next"]]
-              (rows [
-                [
-                  "let*"
-                  (rows [
-                    [["cpu-temp" ["getf" ["getf" "state" ":cpu"] ":temp"]]]
-                    [["gpu-temp" ["getf" ["getf" "state" ":gpu"] ":temp"]]]
-                    [["limit" ["getf" "+bar+" ":hot"]]]
-                    [["hot" ["or" ["and" ["realp" "cpu-temp"] [">=" "cpu-temp" "limit"]] ["and" ["realp" "gpu-temp"] [">=" "gpu-temp" "limit"]]]]]
-                    [["moving" ["loop" "for" ["nil" "m"] "on" "metrics" "by" (function "cddr") "thereis" ["bar--moving-p" "m"]]]]
-                    [
-                      [
-                        "panels"
-                        (rows [
-                          ["loop" "for module in modules"]
-                          ["collect" ["bar--module" "module" "p" "state" "snapshot" "metrics" "media" "now"]]
-                        ])
-                      ]
-                    ]
-                  ])
-                ]
+                ])
                 (rows [
-                  ["values" "state"]
-                  (rows [
-                    ["append" ["list" ["interval" ":clock" ["getf" "+bar+" ":clock-tick"]]]]
-                    (rows [
-                      ["loop" "for source in probes"]
-                      ["when" ["<" ["getf" ["getf" "state" "source"] ":failures" 0] 3]]
-                      (at 8 ["collect" ["interval" "source" ["getf" ["getf" "+bar+" ":sample"] "source"]]])
+                  (kw "memory")
+                  ({
+                    total,
+                    available,
+                  }:
+                    rows [
+                      [let' [[total [getf system (kw "memory-total")]] [available [getf system (kw "memory-available")]]]]
+                      (rows [
+                        [when [and total [plusp total]]]
+                        (rows [
+                          [setf [getf sample (kw "percent")] [round ["*" 100 ["-" total available]] total]]
+                          [[getf sample (kw "used")] [round ["-" total available] 1024]]
+                        ])
+                      ])
                     ])
-                    [["when" "moving" ["list" ["interval" ":fast" ["getf" "+bar+" ":tick"]]]]]
-                    [["list" ["publish-state" ":hud-hot" ["and" "hot" "t"]]]]
-                    [["bar--surfaces" "modules" "panels"]]
-                  ])
-                  "nil"
                 ])
-              ])
-            ])
-          ])
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_cassette_data = {
-      at,
-      blank,
-      function,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      ["defun" "cassette--px" ["n"] ["max" 1 ["round" ["*" "n" ["getf" "+cassette+" ":scale"]]]]]
-      blank
-      ["defvar" "*cassette-mode*" ":dark"]
-      blank
-      ["defun" "cassette--c" ["key"] ["getf" ["getf" ["getf" "+cassette+" ":colors"] "*cassette-mode*"] "key"]]
-      blank
-      (rows [
-        ["defun" "cassette--text" ["text" "color"]]
-        [["ui" ":text" ":text" "text" ":size" ["cassette--px" 11] ":line-height" ["cassette--px" 11] ":color" "color" ":font" ["getf" "+cassette+" ":font"]]]
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--engraved" ["text" "color"]]
-        [
-          [
-            "ui"
-            ":stack"
-            ":children"
-            (rows [
-              ["list" ["ui" ":column" ":padding" (quote [1 0 0 0]) ":children" ["list" ["cassette--text" "text" ["cassette--c" ":shine"]]]]]
-              [["cassette--text" "text" "color"]]
-            ])
-          ]
-        ]
-      ])
-      blank
-      ["defun" "cassette--ghost" ["text"] ["map" (quote "string") ["lambda" ["c"] ["if" ["digit-char-p" "c"] "#\\8" "c"]] "text"]]
-      blank
-      (rows [
-        [
-          "defun"
-          "cassette--window"
-          (rows [
-            ["text" "&key" ["face" ["cassette--c" ":lcd"]] ["rim" ["cassette--c" ":rim"]] ["ghost" ["cassette--c" ":ghost"]]]
-            (at 11 [["ink" ["cassette--c" ":ink"]] ["shown" "text"]])
-          ])
-        ]
-        (rows [
-          ["ui" ":column" ":background" "face" ":border" 1 ":border-color" "rim"]
-          [
-            ":children"
-            (rows [
-              ["list" ["ui" ":rect" ":height" 1 ":background" "rim"]]
-              (rows [
-                ["ui" ":row" ":height" ["cassette--px" 11] ":align" ":center" ":padding" ["list" 0 ["cassette--px" 3] 0 ["cassette--px" 3]]]
-                [
-                  ":children"
-                  [
-                    "list"
-                    [
-                      "ui"
-                      ":stack"
-                      ":children"
-                      (rows [
-                        ["list" ["cassette--text" ["cassette--ghost" "text"] "ghost"]]
-                        [["cassette--text" "shown" "ink"]]
-                      ])
-                    ]
-                  ]
-                ]
-              ])
-            ])
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--zone" ["x"]]
-        [["cond" [[">" "x" "0.84"] ["cassette--c" ":red"]] [[">" "x" "0.6"] ["cassette--c" ":amber"]] ["t" ["cassette--c" ":green"]]]]
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--ladder" ["fraction"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["count" ["getf" "+cassette+" ":segments"]]]
-              [["lit" ["round" ["*" "count" ["max" 0 ["min" 1 "fraction"]]]]]]
-            ])
-          ]
-          (rows [
-            ["ui" ":row" ":gap" ["cassette--px" 1] ":align" ":center"]
-            [
-              ":children"
-              (rows [
-                ["loop" "for i below count"]
-                [
-                  "collect"
-                  (rows [
-                    ["ui" ":rect" ":width" ["cassette--px" 4] ":height" ["cassette--px" 8]]
-                    [":background" ["if" ["<" "i" "lit"] ["cassette--zone" ["/" ["1+" "i"] "count"]] ["cassette--c" ":led-off"]]]
-                  ])
-                ]
-              ])
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--led" ["on"]]
-        [["ui" ":rect" ":width" ["cassette--px" 3] ":height" ["cassette--px" 3] ":background" ["if" "on" ["cassette--c" ":orange"] ["cassette--c" ":led-off"]]]]
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--gauge" ["label" "percent" "detail" "&optional" "hot"]]
-        (rows [
-          ["let" [["percent" ["max" 0 ["min" 100 ["round" ["or" "percent" 0]]]]]]]
-          (rows [
-            ["list" ["cassette--engraved" "label" ["cassette--c" ":ink"]]]
-            [["cassette--window" ["format" "nil" (str "~3D%") "percent"]]]
-            [["cassette--ladder" ["/" "percent" 100]]]
-            [["when" "detail" ["cassette--engraved" "detail" ["if" "hot" ["cassette--c" ":orange"] ["cassette--c" ":dim"]]]]]
-          ])
-        ])
-      ])
-      blank
-      ["defun" "cassette--degrees" ["value"] ["if" ["realp" "value"] ["format" "nil" (str "~2D°") ["max" 0 ["min" 99 ["round" "value"]]]] (str "--°")]]
-      blank
-      ["defun" "cassette--gib" ["mib"] ["if" ["realp" "mib"] ["format" "nil" (str "~4,1FG") ["/" "mib" "1024d0"]] (str "--.-G")]]
-      blank
-      ["defun" "cassette--hot-p" ["value"] ["and" ["realp" "value"] [">=" "value" ["getf" "+cassette+" ":hot"]]]]
-      blank
-      (rows [
-        ["defun" "cassette--fit" ["text" "width"]]
-        (rows [
-          ["let" [["clean" ["string-upcase" ["remove-if" ["lambda" ["c"] [">" ["char-code" "c"] 126]] "text"]]]]]
-          [["format" "nil" (str "~vA") "width" ["if" [">" ["length" "clean"] "width"] ["concatenate" (quote "string") ["subseq" "clean" 0 ["-" "width" 2]] (str "..")] "clean"]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--reel" ["amount"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["box" ["cassette--px" 12]]]
-              [["hub" ["cassette--px" 4]]]
-              [["size" ["+" "hub" ["*" 2 ["round" ["*" ["-" "box" "hub"] ["max" 0 ["min" 1 "amount"]]] 2]]]]]
-            ])
-          ]
-          (rows [
-            ["ui" ":stack" ":width" "box" ":height" "box"]
-            [
-              ":children"
-              (rows [
-                [
-                  "list"
-                  (rows [
-                    ["ui" ":row" ":width" "box" ":height" "box" ":justify" ":center" ":align" ":center"]
-                    [
-                      ":children"
-                      [
-                        "list"
-                        (rows [
-                          ["ui" ":circular-progress" ":size" "size" ":thickness" ["max" 1 ["/" ["-" "size" "hub"] 2]] ":value" 1]
-                          [":color" ["cassette--c" ":tape"] ":track" ["cassette--c" ":tape"]]
-                        ])
-                      ]
-                    ]
-                  ])
-                ]
                 (rows [
-                  ["ui" ":row" ":width" "box" ":height" "box" ":justify" ":center" ":align" ":center"]
-                  [
-                    ":children"
-                    [
-                      "list"
+                  (kw "gpu")
+                  ({gpu}:
+                    rows [
+                      [let' [[gpu [first [getf system (kw "gpus")]]]]]
                       (rows [
-                        ["ui" ":circular-progress" ":size" "hub" ":thickness" 1 ":value" 1]
-                        [":color" ["cassette--c" ":ink"] ":track" ["cassette--c" ":ink"]]
-                      ])
-                    ]
-                  ]
-                ])
-              ])
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--media" ["snapshot"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["service" ["service-state" "snapshot" ":mpris"]]]
-              [["status" ["getf" "service" ":status"]]]
-              [["title" ["getf" "service" ":title"]]]
-              [["artist" ["getf" "service" ":artist"]]]
-              [["length" ["getf" "service" ":length"]]]
-              [["position" ["getf" "service" ":position"]]]
-              [["played" ["if" ["and" ["realp" "length"] ["plusp" "length"] ["realp" "position"]] ["max" 0 ["min" 1 ["/" "position" "length"]]] 0]]]
-            ])
-          ]
-          (rows [
-            ["when" ["and" ["stringp" "title"] ["plusp" ["length" "title"]] ["member" "status" (quote [(str "Playing") (str "Paused")]) ":test" (function "equal")]]]
-            (rows [
-              ["list" ["cassette--led" ["equal" "status" (str "Playing")]]]
-              (rows [
-                ["ui" ":row" ":height" ["cassette--px" 12] ":align" ":center" ":gap" ["cassette--px" 3] ":padding" ["list" 0 ["cassette--px" 4] 0 0]]
-                [":background" ["cassette--c" ":paper"] ":border" 1 ":border-color" ["cassette--c" ":rim"]]
-                [
-                  ":children"
-                  (rows [
-                    ["list" ["ui" ":rect" ":width" ["cassette--px" 2] ":height" ["-" ["cassette--px" 12] 2] ":background" ["cassette--c" ":orange"]]]
-                    [["ui" ":rect" ":width" ["cassette--px" 2] ":height" ["-" ["cassette--px" 12] 2] ":background" ["cassette--c" ":teal"]]]
-                    [["cassette--reel" ["-" 1 "played"]]]
-                    (rows [
-                      [
-                        "cassette--text"
-                        (rows [
+                        [
+                          cond
                           [
-                            "cassette--fit"
+                            gpu
                             (rows [
-                              ["if" ["and" ["stringp" "artist"] ["plusp" ["length" "artist"]]]]
-                              [["format" "nil" (str "~A - ~A") "artist" "title"]]
-                              "title"
+                              [setf [getf sample (kw "util")] [max 0 [min 100 [getf gpu (kw "busy")]]]]
+                              [[getf sample (kw "used")] [getf gpu (kw "vram-used")]]
+                              [[getf sample (kw "total")] [getf gpu (kw "vram-total")]]
+                              [[getf sample (kw "temp")] [getf gpu (kw "temperature")]]
+                              [[getf sample (kw "failures")] 0]
                             ])
                           ]
-                          [["getf" "+cassette+" ":media-width"]]
-                        ])
-                      ]
-                      [["cassette--c" ":ink"]]
-                    ])
-                    [["cassette--reel" "played"]]
-                  ])
-                ]
-              ])
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--counter" []]
-        (rows [
-          ["let" [["time" ["clock-text" ["getf" "+cassette+" ":time"]]]]]
-          [
-            [
-              "list"
-              (rows [
-                ["cassette--window" "time" ":face" ["cassette--c" ":counter"] ":rim" ["cassette--c" ":ink"] ":ghost" ["cassette--c" ":counter-ghost"]]
-                (at 23 [":ink" ["cassette--c" ":amber"]])
-                (at 23 [":shown" ["if" ["oddp" ["parse-integer" ["clock-text" (str "%S")]]] ["substitute" "#\\Space" "#\\:" "time"] "time"]])
-              ])
-            ]
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--module" ["module" "state" "snapshot"]]
-        (rows [
-          ["let" [["cpu" ["getf" "state" ":cpu"]] ["memory" ["getf" "state" ":memory"]] ["gpu" ["getf" "state" ":gpu"]]]]
-          (rows [
-            ["ecase" "module"]
-            [[":time" ["cassette--counter"]]]
-            [[":date" ["list" ["cassette--engraved" ["string-upcase" ["clock-text" ["getf" "+cassette+" ":date"]]] ["cassette--c" ":ink"]]]]]
-            [[":media" ["cassette--media" "snapshot"]]]
-            [[":cpu" ["cassette--gauge" (str "CPU") ["getf" "cpu" ":percent"] ["cassette--degrees" ["getf" "cpu" ":temp"]] ["cassette--hot-p" ["getf" "cpu" ":temp"]]]]]
-            [[":memory" ["cassette--gauge" (str "MEM") ["getf" "memory" ":percent"] ["cassette--gib" ["getf" "memory" ":used"]]]]]
-            [
-              [
-                ":gpu"
-                (rows [
-                  ["when" ["probe--gpu-p" "gpu"]]
-                  [["cassette--gauge" (str "GPU") ["getf" "gpu" ":percent"] ["cassette--degrees" ["getf" "gpu" ":temp"]] ["cassette--hot-p" ["getf" "gpu" ":temp"]]]]
-                ])
-              ]
-            ]
-            [
-              [
-                ":vram"
-                (rows [
-                  ["when" ["probe--gpu-p" "gpu"]]
-                  (rows [
-                    ["cassette--gauge" (str "VRAM") ["if" ["plusp" ["or" ["getf" "gpu" ":total"] 0]] ["round" ["*" 100 ["or" ["getf" "gpu" ":used"] 0]] ["getf" "gpu" ":total"]] 0]]
-                    [["cassette--gib" ["getf" "gpu" ":used"]]]
-                  ])
-                ])
-              ]
-            ]
-            [
-              [
-                ":battery"
-                (rows [
-                  ["let" [["battery" ["service-state" "snapshot" ":battery"]]]]
-                  [["cassette--gauge" ["if" ["getf" "battery" ":charging"] (str "CHG") (str "BAT")] ["getf" "battery" ":percent"] "nil"]]
-                ])
-              ]
-            ]
-            [
-              [
-                ":network"
-                (rows [
-                  ["let*" [["network" ["service-state" "snapshot" ":network"]] ["ssid" ["getf" "network" ":ssid"]] ["online" ["getf" "network" ":connected"]]]]
-                  (rows [
-                    ["list" ["cassette--led" "online"]]
-                    (rows [
-                      ["cassette--engraved" ["cassette--fit" ["cond" [["and" "online" ["stringp" "ssid"] ["plusp" ["length" "ssid"]]] "ssid"] ["online" (str "online")] ["t" (str "offline")]] 16]]
-                      [["cassette--c" ":ink"]]
-                    ])
-                  ])
-                ])
-              ]
-            ]
-            [
-              [
-                ":frame"
-                (rows [
-                  ["let" [["battery" ["state-value" "snapshot" ":frame-battery"]]]]
-                  (rows [
-                    ["when" ["getf" "battery" ":percent"]]
-                    [["cassette--gauge" ["if" ["equal" ["getf" "battery" ":status"] (str "Discharging")] (str "VR") (str "VR+")] ["getf" "battery" ":percent"] "nil"]]
-                  ])
-                ])
-              ]
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--grille" []]
-        (rows [
-          ["let" [["hole" ["cassette--px" 1]]]]
-          (rows [
-            ["ui" ":column" ":gap" "hole"]
-            [
-              ":children"
-              (rows [
-                ["loop" "repeat 4"]
-                [
-                  "collect"
-                  (rows [
-                    ["ui" ":row" ":gap" "hole"]
-                    [":children" ["loop" "repeat 6" "collect" ["ui" ":rect" ":width" "hole" ":height" "hole" ":background" ["cassette--c" ":hole"]]]]
-                  ])
-                ]
-              ])
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--groove" []]
-        [
-          [
-            "ui"
-            ":row"
-            ":children"
-            (rows [
-              ["list" ["ui" ":rect" ":width" 1 ":height" ["cassette--px" 10] ":background" ["cassette--c" ":groove"]]]
-              [["ui" ":rect" ":width" 1 ":height" ["cassette--px" 10] ":background" ["cassette--c" ":shine"]]]
-            ])
-          ]
-        ]
-      ])
-      blank
-      (rows [
-        ["defun" "cassette--plate" ["items" "grille" "edge"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [
-                [
-                  "parts"
-                  (rows [
-                    ["loop" "for" ["item" "." "rest"] "on" ["remove" "nil" "items"]]
-                    ["collect" ["ui" ":row" ":gap" ["cassette--px" 4] ":align" ":center" ":children" ["remove" "nil" "item"]]]
-                    ["when rest" "collect" ["cassette--groove"]]
-                  ])
-                ]
-              ]
-              [
-                [
-                  "body"
-                  (rows [
-                    ["ui" ":row" ":height" ["cassette--px" 16] ":align" ":center" ":gap" ["cassette--px" 6]]
-                    [":padding" ["list" 0 ["cassette--px" 6] 0 ["cassette--px" 6]]]
-                    [
-                      ":children"
-                      (rows [
-                        ["append" ["when" ["member" "grille" (quote [":start" ":both"])] ["list" ["cassette--grille"]]]]
-                        "parts"
-                        [["when" ["member" "grille" (quote [":end" ":both"])] ["list" ["cassette--grille"]]]]
+                        ]
+                        [[system [setf [getf sample (kw "failures")] ["1+" [getf sample (kw "failures") 0]]]]]
                       ])
-                    ]
-                  ])
-                ]
-              ]
+                    ])
+                ])
+              ])
+              sample
             ])
-          ]
-          (rows [
-            ["when" "parts"]
-            (rows [
-              [
-                "let"
+        ])
+      blank
+      ({
+        module,
+        state,
+      }:
+        rows [
+          [defun bar--target [module state]]
+          ({gpu}:
+            rows [
+              [let' [[gpu [getf state (kw "gpu")]]]]
+              (rows [
+                [ecase module]
+                [[(kw "cpu") [getf [getf state (kw "cpu")] (kw "percent") 0]]]
+                [[(kw "memory") [getf [getf state (kw "memory")] (kw "percent") 0]]]
+                [[(kw "gpu") [getf gpu (kw "util") 0]]]
                 [
                   [
-                    "plate"
+                    (kw "vram")
                     (rows [
-                      ["ui" ":column" ":align" ":stretch" ":background" ["cassette--c" ":face"] ":border" 1 ":border-color" ["cassette--c" ":ink"]]
-                      [
-                        ":children"
-                        (rows [
-                          ["list" ["ui" ":rect" ":height" 1 ":background" ["cassette--c" ":shine"]]]
-                          "body"
-                          [["ui" ":rect" ":height" 1 ":background" ["cassette--c" ":shade"]]]
-                        ])
-                      ]
+                      [if' [plusp [or' [getf gpu (kw "total")] 0]]]
+                      [[round ["*" 100 [or' [getf gpu (kw "used")] 0]] [getf gpu (kw "total")]]]
+                      0
                     ])
                   ]
                 ]
-              ]
-              (rows [
-                ["if" ["eq" "edge" ":top"]]
-                (rows [
-                  ["ui" ":column" ":align" ":stretch"]
-                  [
-                    ":children"
-                    [
-                      "list"
-                      "plate"
-                      (rows [
-                        ["ui" ":row" ":height" ["cassette--shadow"] ":padding" ["list" 0 0 0 ["cassette--shadow"]]]
-                        [":children" ["list" ["ui" ":rect" ":grow" 1 ":height" ["cassette--shadow"] ":background" ["cassette--c" ":shadow"]]]]
-                      ])
-                    ]
-                  ]
-                ])
-                "plate"
               ])
             ])
-          ])
         ])
-      ])
       blank
-      ["defun" "cassette--shadow" [] ["cassette--px" 2]]
-      blank
-      ["defun" "cassette--height" ["edge"] ["+" ["cassette--px" 16] 4 ["if" ["eq" "edge" ":top"] ["cassette--shadow"] 0]]]
-      blank
-      (rows [
-        ["defun" "cassette--split" []]
-        (rows [
-          ["let" [["pair" ["getf" "+cassette+" ":center-between"]]]]
-          (rows [
-            ["loop" "for" ["a" "b"] "on" ["getf" "+cassette+" ":modules"]]
-            "for index from 1"
-            ["when" ["and" "b" ["eq" "a" ["first" "pair"]] ["eq" "b" ["second" "pair"]]] "return index"]
-          ])
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_deck_data = {
-      blank,
-      function,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["defun" "deck--state" []]
-        (rows [
-          ["list" ":grid" "nil" ":ratio" 1 ":focus" "nil"]
-          [":columns" "nil" ":windows" "nil"]
-          [":fronts" ["list" ["cons" ":left" "nil"] ["cons" ":right" "nil"]]]
-          [":floating" "nil" ":floats" "nil" ":fullscreen" "nil"]
-        ])
-      ])
-      blank
-      ["defun" "deck--entry" ["list" "id"] ["assoc" "id" "list"]]
-      ["defun" "deck--layout-entry" ["layout" "id"] ["find" "id" "layout" ":key" ["lambda" ["entry"] ["getf" "entry" ":id"]]]]
-      ["defun" "deck--windows" ["state"] ["getf" "state" ":windows"]]
-      ["defun" "deck--fronts" ["state"] ["getf" "state" ":fronts"]]
-      (rows [
-        ["defun" "deck--side-of" ["state" "id"]]
-        [["let" [["entry" ["deck--entry" ["getf" "state" ":columns"] "id"]]] ["and" "entry" ["cdr" "entry"]]]]
-      ])
-      (rows [
-        ["defun" "deck--column" ["state" "side"]]
-        [["remove-if-not" ["lambda" ["id"] ["eql" ["deck--side-of" "state" "id"] "side"]] ["deck--windows" "state"]]]
-      ])
-      (rows [
-        ["defparameter" "+deck--column-commands+"]
-        (quote [(str "focus-left") (str "focus-right") (str "swap-columns") (str "to-left") (str "to-right") (str "ratio")])
-      ])
-      (rows [
-        ["defun" "deck--narrow-p" ["area"]]
-        (rows [
-          ["let" [["output" ["and" "area" ["getf" "area" ":output"]]]]]
-          [["and" "output" ["<" ["*" 9 ["getf" "output" ":width"]] ["*" 21 ["getf" "output" ":height"]]]]]
-        ])
-      ])
-      (rows [
-        ["defun" "deck--front" ["state" "side"]]
-        (str ''
-          The window SIDE's deck shows in front. An adopted front counts only while it is
-          still in that column: a front can outlive its window between a close and the
-          handoff that replaces it, and a column placed against a front that is gone would
-          be placed nowhere and show nothing at all.'')
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["entry" ["assoc" "side" ["deck--fronts" "state"]]]]
-              [["recorded" ["and" "entry" ["cdr" "entry"]]]]
-              [["column" ["deck--column" "state" "side"]]]
-            ])
-          ]
-          [["if" ["member" "recorded" "column"] "recorded" ["first" "column"]]]
-        ])
-      ])
-      (rows [
-        ["defun" "deck--after-front" ["state" "order" "side" "gone"]]
-        (str ''
-          The window that takes the front of SIDE in ORDER once GONE closes, or NIL when
-          the column empties. GONE still sits in ORDER, so the entry after it — wrapping,
-          the way a scroll does — is the window a scroll would have revealed.'')
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["column" ["remove-if-not" ["lambda" ["id"] ["eql" ["deck--side-of" "state" "id"] "side"]] "order"]]]
-              [["index" ["position" "gone" "column"]]]
-              [["next" ["and" "index" ["nth" ["mod" ["1+" "index"] ["length" "column"]] "column"]]]]
-            ])
-          ]
-          [["unless" ["eql" "next" "gone"] "next"]]
-        ])
-      ])
-      (rows [
-        ["defun" "deck--manageable-p" ["state" "id"]]
-        [["and" ["not" ["member" "id" ["getf" "state" ":fullscreen"]]] ["not" ["member" "id" ["getf" "state" ":floating"]]]]]
-      ])
-      blank
-      (rows [
-        ["defun" "deck--current" ["state"]]
-        (str ''
-          The window a command acts on: the focused one while it is in the window set,
-          otherwise whatever the deck still shows. A command must never depend on an id a
-          gone window left behind, or the keys go dead.'')
-        (rows [
-          [
-            "let"
-            (rows [
-              [["focus" ["getf" "state" ":focus"]]]
-              [["windows" ["deck--windows" "state"]]]
-            ])
-          ]
-          (rows [
-            ["or" ["and" ["member" "focus" "windows"] "focus"]]
-            [["deck--front" "state" ":left"]]
-            [["deck--front" "state" ":right"]]
-            [["first" "windows"]]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--output-of" ["outputs" "entry"]]
-        (rows [
-          [
-            "let"
-            (rows [
-              [["cx" ["+" ["getf" "entry" ":x"] ["floor" ["getf" "entry" ":width"] 2]]]]
-              [["cy" ["+" ["getf" "entry" ":y"] ["floor" ["getf" "entry" ":height"] 2]]]]
-            ])
-          ]
-          (rows [
-            [
-              "find-if"
+      ({
+        m,
+        target,
+        push',
+      }:
+        rows [
+          [defun bar--metric [m target push']]
+          ({
+            m',
+            old,
+          }:
+            rows [
+              [let' [[m' [copy-list m]] [old [getf m (kw "target")]]]]
               (rows [
-                ["lambda" ["output"]]
-                (rows [
-                  ["and" ["<=" ["getf" "output" ":x"] "cx" ["+" ["getf" "output" ":x"] ["getf" "output" ":width"]]]]
-                  [["<=" ["getf" "output" ":y"] "cy" ["+" ["getf" "output" ":y"] ["getf" "output" ":height"]]]]
-                ])
+                [when [and old [or' [">=" ["-" target old] 25] [and [">=" target 90] ["<" old 90]]]]]
+                [[setf [getf m' (kw "flash-at")] [hud--now]]]
               ])
-            ]
-            "outputs"
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--area" ["snapshot"]]
-        (str "The focused window's output box and the area its exclusive zones leave free.")
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["outputs" ["context" "snapshot" ":outputs"]]]
-              [["focus" ["previous-context" "snapshot" ":focus"]]]
-              [["entry" ["and" "focus" ["deck--layout-entry" ["previous-context" "snapshot" ":layout"] "focus"]]]]
-              [["output" ["or" ["and" "entry" ["deck--output-of" "outputs" "entry"]] ["first" "outputs"]]]]
-              [["area" ["and" "output" ["policy--area" "snapshot" ["getf" "output" ":name"]]]]]
-            ])
-          ]
-          (rows [
-            ["when" "area"]
-            [["list*" ":output" "output" "area"]]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--left-width" ["state" "width"]]
-        (str "How wide the left column is, out of WIDTH less the seam between the columns.")
-        [["floor" ["*" ["-" "width" ["getf" "+layout+" ":seam"]] ["nth" ["1-" ["getf" "state" ":ratio"]] ["getf" "+layout+" ":ratios"]]]]]
-      ])
-      blank
-      (rows [
-        ["defun" "deck--grid-columns" ["state"]]
-        [["ceiling" ["sqrt" ["count-if" ["lambda" ["id"] ["deck--manageable-p" "state" "id"]] ["deck--windows" "state"]]]]]
-      ])
-      blank
-      (rows [
-        ["defun" "deck--grid-extra" ["cols"]]
-        (str ''
-          How much wider than a window gap the middle of an even grid is: it splits on
-          the deck's seam, so whatever stands there stays between the columns.'')
-        [["if" ["evenp" "cols"] ["-" ["getf" "+layout+" ":seam"] ["getf" "+layout+" ":gaps"]] 0]]
-      ])
-      blank
-      (rows [
-        ["defun" "deck--grid-cell" ["cols" "width"]]
-        [["floor" ["-" "width" ["*" ["1-" "cols"] ["getf" "+layout+" ":gaps"]] ["deck--grid-extra" "cols"]] "cols"]]
-      ])
-      blank
-      (rows [
-        ["defun" "deck--split" ["state" "width"]]
-        (str ''
-          Where the seam starts within the tiled WIDTH, or NIL when the deck has no
-          middle seam: a grid with an odd number of columns.'')
-        (rows [
-          ["if" ["getf" "state" ":grid"]]
-          (rows [
-            ["let" [["cols" ["deck--grid-columns" "state"]]]]
-            (rows [
-              ["when" ["and" ["plusp" "cols"] ["evenp" "cols"]]]
               (rows [
-                ["let" [["half" ["/" "cols" 2]]]]
-                [["+" ["*" "half" ["deck--grid-cell" "cols" "width"]] ["*" ["1-" "half"] ["getf" "+layout+" ":gaps"]]]]
+                [when push']
+                [[setf [getf m' (kw "history")] [last [append [getf m' (kw "history")] [list target]] [getf (constant bar) (kw "history")]]]]
               ])
-            ])
-          ])
-          [["deck--left-width" "state" "width"]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--seam" ["state" "area"]]
-        (str ''
-          The free strip in the deck's middle seam on AREA, a window gap in from each
-          side; NIL on a narrow output, while a window is fullscreen, in a grid with an
-          odd number of columns, or when the seam is no wider than two gaps.'')
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["gaps" ["getf" "+layout+" ":gaps"]]]
-              [["x" ["and" "area" ["+" ["getf" "area" ":x"] "gaps"]]]]
-              [["split" ["and" "area" ["deck--split" "state" ["-" ["getf" "area" ":width"] ["*" 2 "gaps"]]]]]]
-              [["inner" ["-" ["getf" "+layout+" ":seam"] ["*" 2 "gaps"]]]]
-            ])
-          ]
-          (rows [
-            ["unless" ["or" ["null" "split"] ["getf" "state" ":fullscreen"] ["deck--narrow-p" "area"] ["not" ["plusp" "inner"]]]]
-            (rows [
-              ["list" ":output" ["getf" ["getf" "area" ":output"] ":name"]]
-              [":x" ["+" "x" "split" "gaps"] ":y" ["+" ["getf" "area" ":y"] "gaps"]]
-              [":width" "inner" ":height" ["-" ["getf" "area" ":height"] ["*" 2 "gaps"]]]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--box" ["state" "area" "id"]]
-        (str "Where ID goes, or NIL when it is not in the window set.")
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["gaps" ["getf" "+layout+" ":gaps"]]]
-              [["x" ["+" ["getf" "area" ":x"] "gaps"]] ["y" ["+" ["getf" "area" ":y"] "gaps"]]]
-              [["width" ["-" ["getf" "area" ":width"] ["*" 2 "gaps"]]] ["height" ["-" ["getf" "area" ":height"] ["*" 2 "gaps"]]]]
-            ])
-          ]
-          (rows [
-            "cond"
-            [[["not" ["member" "id" ["deck--windows" "state"]]] "nil"]]
-            (rows [
-              [["member" "id" ["getf" "state" ":fullscreen"]]]
+              [[setf [getf m' (kw "target")] target]]
               (rows [
-                ["let" [["output" ["getf" "area" ":output"]]]]
-                [["list" ["getf" "output" ":x"] ["getf" "output" ":y"] ["getf" "output" ":width"] ["getf" "output" ":height"]]]
+                [when [or' [null' [getf m' (kw "shown")]] ["<" [abs ["-" target [getf m' (kw "shown")]]] 3]]]
+                [[setf [getf m' (kw "shown")] [float target (double 1)]]]
               ])
+              m'
             ])
-            [[["member" "id" ["getf" "state" ":floating"]] ["cdr" ["deck--entry" ["getf" "state" ":floats"] "id"]]]]
-            (rows [
-              [["getf" "state" ":grid"]]
-              (rows [
-                [
-                  "let*"
-                  (rows [
-                    [
-                      [
-                        "wins"
-                        (rows [
-                          ["remove-if-not" ["lambda" ["candidate"] ["deck--manageable-p" "state" "candidate"]]]
-                          [["deck--windows" "state"]]
-                        ])
-                      ]
-                    ]
-                    [["index" ["position" "id" "wins"]]]
-                    [["count" ["length" "wins"]]]
-                    [["cols" ["ceiling" ["sqrt" "count"]]]]
-                    [["rows" ["ceiling" "count" "cols"]]]
-                    [["cell-width" ["deck--grid-cell" "cols" "width"]]]
-                    [["cell-height" ["floor" ["-" "height" ["*" ["1-" "rows"] "gaps"]] "rows"]]]
-                    [["column" ["mod" "index" "cols"]]]
-                    [["row" ["floor" "index" "cols"]]]
-                  ])
-                ]
-                (rows [
-                  ["list" ["+" "x" ["*" "column" ["+" "cell-width" "gaps"]] ["if" [">=" "column" ["/" "cols" 2]] ["deck--grid-extra" "cols"] 0]]]
-                  [["+" "y" ["*" "row" ["+" "cell-height" "gaps"]]]]
-                  ["cell-width" "cell-height"]
-                ])
-              ])
-            ])
-            (rows [
-              [["deck--narrow-p" "area"]]
-              (rows [
-                [
-                  "let*"
-                  (rows [
-                    [
-                      [
-                        "column"
-                        (rows [
-                          ["remove-if-not" ["lambda" ["candidate"] ["deck--manageable-p" "state" "candidate"]]]
-                          [["deck--windows" "state"]]
-                        ])
-                      ]
-                    ]
-                    [["front" ["or" ["position" ["deck--current" "state"] "column"] 0]]]
-                    [["index" ["position" "id" "column"]]]
-                  ])
-                ]
-                (rows [
-                  ["when" "index"]
-                  [["list" "x" ["+" "y" ["*" ["-" "index" "front"] ["+" "height" "gaps"]]] "width" "height"]]
-                ])
-              ])
-            ])
-            (rows [
-              "t"
-              (rows [
-                [
-                  "let*"
-                  (rows [
-                    [["seam" ["getf" "+layout+" ":seam"]]]
-                    [["left-width" ["deck--left-width" "state" "width"]]]
-                    [["right-width" ["-" "width" "seam" "left-width"]]]
-                    [["side" ["deck--side-of" "state" "id"]]]
-                    [["column" ["deck--column" "state" "side"]]]
-                    [["front" ["position" ["deck--front" "state" "side"] "column"]]]
-                    [["index" ["position" "id" "column"]]]
-                  ])
-                ]
-                (rows [
-                  ["when" ["and" "side" "index" "front"]]
-                  (rows [
-                    ["list" ["if" ["eql" "side" ":left"] "x" ["+" "x" "left-width" "seam"]]]
-                    [["+" "y" ["*" ["-" "index" "front"] ["+" "height" "gaps"]]]]
-                    [["if" ["eql" "side" ":left"] "left-width" "right-width"]]
-                    "height"
-                  ])
-                ])
-              ])
-            ])
-          ])
         ])
-      ])
       blank
-      (rows [
-        ["defun" "deck--places" ["managed" "state" "area"]]
-        (str "One place effect per managed window: exactly one owner, no duplicates.")
-        (rows [
-          ["let" [["windows" ["deck--windows" "state"]]]]
-          (rows [
-            ["loop" "for window in managed"]
-            ["for" "id" "=" ["getf" "window" ":id"]]
-            ["for" "box" "=" ["deck--box" "state" "area" "id"]]
-            [
-              "append"
-              [
-                "list"
-                (rows [
-                  ["if" "box"]
-                  [["apply" (function "place") "id" ["append" "box" ["list" "t"]]]]
-                  (rows [
-                    ["place" "id" 0 0 ["max" 1 ["getf" "window" ":width"]]]
-                    [["max" 1 ["getf" "window" ":height"]] "nil"]
-                  ])
-                ])
-              ]
-            ]
-            [
-              "append"
-              [
-                "list"
-                [
-                  "fullscreen"
-                  "id"
-                  (rows [
-                    ["and" "box" ["member" "id" "windows"]]
-                    [["member" "id" ["getf" "state" ":fullscreen"]]]
-                    "t"
-                  ])
-                ]
-              ]
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--focus-window" ["state" "id"]]
-        [["setf" ["getf" "state" ":focus"] "id"]]
-        "state"
-      ])
-      blank
-      (rows [
-        ["defun" "deck--adopt-front" ["state" "side" "id"]]
-        (rows [
-          ["let" [["fronts" ["deck--fronts" "state"]]]]
-          [["setf" ["cdr" ["assoc" "side" "fronts"]] "id"]]
-        ])
-        "state"
-      ])
-      blank
-      (rows [
-        ["defun" "deck--rotate" ["state" "direction"]]
-        (str "Scroll the side holding the current window; the deck wraps.")
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["id" ["deck--current" "state"]]]
-              [["side" ["deck--side-of" "state" "id"]]]
-              [["column" ["deck--column" "state" "side"]]]
-            ])
-          ]
-          (rows [
-            ["when" ["and" "side" "column"]]
-            (rows [
+      ({
+        m,
+        dt,
+      }:
+        rows [
+          [defun bar--ease [m dt]]
+          ({
+            m',
+            shown,
+            target,
+            next,
+          }:
+            rows [
               [
                 "let*"
                 (rows [
-                  [["index" ["position" "id" "column"]]]
-                  [["target" ["nth" ["mod" ["+" "index" "direction"] ["length" "column"]] "column"]]]
+                  [[m' [copy-list m]] [shown [getf m' (kw "shown")]] [target [getf m' (kw "target")]]]
+                  [[next ["+" target ["*" ["-" shown target] [exp ["-" ["/" dt [getf (constant bar) (kw "tau")]]]]]]]]
                 ])
               ]
-              [["deck--adopt-front" "state" "side" "target"]]
-              [["deck--focus-window" "state" "target"]]
+              [[setf [getf m' (kw "shown")] [if' ["<" [abs ["-" next target]] 0.3] [float target (double 1)] next]]]
+              m'
             ])
-          ])
         ])
-      ])
       blank
-      (rows [
-        ["defun" "deck--reorder" ["state" "direction"]]
-        (str "Swap the current window with its neighbour in its own column's order.")
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["id" ["deck--current" "state"]]]
-              [["side" ["deck--side-of" "state" "id"]]]
-              [["column" ["deck--column" "state" "side"]]]
-              [["index" ["position" "id" "column"]]]
-              [["other" ["and" "index" [">=" ["+" "index" "direction"] 0] ["nth" ["+" "index" "direction"] "column"]]]]
-              [["order" ["deck--windows" "state"]]]
-              [["mine" ["and" "other" ["position" "id" "order"]]]]
-              [["theirs" ["and" "other" ["position" "other" "order"]]]]
-            ])
-          ]
+      ({m}:
+        rows [
+          [defun bar--moving-p [m]]
           (rows [
-            ["when" ["and" "other" "mine" "theirs"]]
-            (rows [
-              ["setf" ["nth" "mine" "order"] "other"]
-              [["nth" "theirs" "order"] "id"]
-            ])
+            [or' ["/=" [getf m (kw "shown")] [getf m (kw "target")]]]
+            [[plusp [hud--decay [getf m (kw "flash-at")] [getf (constant bar) (kw "flash")]]]]
           ])
-          "state"
         ])
-      ])
       blank
-      (rows [
-        ["defun" "deck--reorder-all" ["state" "direction"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["order" ["deck--windows" "state"]]]
-              [["index" ["position" ["deck--current" "state"] "order"]]]
-              [["target" ["and" "index" ["+" "index" "direction"]]]]
-            ])
-          ]
-          (rows [
-            ["when" ["and" "target" ["<" (-1) "target" ["length" "order"]]]]
-            [["rotatef" ["nth" "index" "order"] ["nth" "target" "order"]]]
-          ])
-          "state"
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--cycle" ["state" "direction"]]
-        (str "Focus the next or previous window in the window set, wrapping.")
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["order" ["deck--windows" "state"]]]
-              [["id" ["deck--current" "state"]]]
-              [["index" ["or" ["position" "id" "order"] 0]]]
-              [["target" ["and" "order" ["nth" ["mod" ["+" "index" "direction"] ["length" "order"]] "order"]]]]
-            ])
-          ]
-          (rows [
-            ["when" "target"]
-            (rows [
-              ["let" [["side" ["deck--side-of" "state" "target"]]]]
-              [["when" "side" ["deck--adopt-front" "state" "side" "target"]]]
-            ])
-            [["deck--focus-window" "state" "target"]]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--swap-columns" ["state"]]
-        (rows [
-          ["dolist" ["entry" ["getf" "state" ":columns"]]]
-          [["setf" ["cdr" "entry"] ["if" ["eql" ["cdr" "entry"] ":left"] ":right" ":left"]]]
-        ])
-        (rows [
-          ["let" [["fronts" ["deck--fronts" "state"]]]]
-          (rows [
-            ["let" [["left" ["cdr" ["assoc" ":left" "fronts"]]] ["right" ["cdr" ["assoc" ":right" "fronts"]]]]]
-            [["setf" ["cdr" ["assoc" ":left" "fronts"]] "right" ["cdr" ["assoc" ":right" "fronts"]] "left"]]
-          ])
-        ])
-        "state"
-      ])
-      blank
-      (rows [
-        ["defun" "deck--to-column" ["state" "side"]]
-        (str "Send the current window to SIDE, where it becomes that deck's front.")
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["id" ["deck--current" "state"]]]
-              [["previous" ["deck--side-of" "state" "id"]]]
-            ])
-          ]
-          (rows [
-            ["when" ["and" "id" ["deck--manageable-p" "state" "id"]]]
-            (rows [
-              ["when" ["and" "previous" ["not" ["eql" "previous" "side"]] ["eql" "id" ["deck--front" "state" "previous"]]]]
-              (rows [
-                [
-                  "let*"
-                  (rows [
-                    [["column" ["deck--column" "state" "previous"]]]
-                    [["index" ["position" "id" "column"]]]
-                    [["next" ["and" "index" ["nth" ["mod" ["1+" "index"] ["length" "column"]] "column"]]]]
-                  ])
-                ]
-                [["deck--adopt-front" "state" "previous" ["if" ["and" "next" ["not" ["eql" "next" "id"]]] "next" "nil"]]]
-              ])
-            ])
-            [["setf" ["cdr" ["assoc" "id" ["getf" "state" ":columns"]]] "side"]]
-            [["deck--adopt-front" "state" "side" "id"]]
-          ])
-          "state"
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--set-fullscreen" ["state" "id" "on"]]
-        [["setf" ["getf" "state" ":fullscreen"] ["remove" "id" ["getf" "state" ":fullscreen"]]]]
-        (rows [
-          ["when" "on"]
-          [["setf" ["getf" "state" ":floating"] ["remove" "id" ["getf" "state" ":floating"]]]]
-          [["push" "id" ["getf" "state" ":fullscreen"]]]
-          [["deck--focus-window" "state" "id"]]
-        ])
-        "state"
-      ])
-      blank
-      (rows [
-        ["defun" "deck--toggle-floating" ["state" "area"]]
-        (rows [
-          ["let" [["id" ["deck--current" "state"]]]]
-          (rows [
-            "cond"
-            [[["null" "id"]]]
-            [[["member" "id" ["getf" "state" ":fullscreen"]] ["deck--set-fullscreen" "state" "id" "nil"]]]
-            (rows [
-              [["member" "id" ["getf" "state" ":floating"]]]
-              (rows [
-                ["setf" ["getf" "state" ":floating"] ["remove" "id" ["getf" "state" ":floating"]]]
-                [["getf" "state" ":floats"] ["remove" "id" ["getf" "state" ":floats"] ":key" (function "car")]]
-              ])
-            ])
-            (rows [
-              "area"
-              [["push" "id" ["getf" "state" ":floating"]]]
-              [["push" ["cons" "id" ["policy--centred" "area" ["getf" "+layout+" ":float-ratio"]]] ["getf" "state" ":floats"]]]
-            ])
-          ])
-          "state"
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--command" ["state" "area" "command"]]
-        (rows [
-          "cond"
-          (rows [
-            (rows [
-              ["and" ["deck--narrow-p" "area"]]
-              (rows [
-                ["or" ["member" "command" "+deck--column-commands+" ":test" (function "equal")]]
-                [["member" "command" (quote [(str "scroll-down") (str "scroll-up") (str "move-down") (str "move-up")]) ":test" (function "equal")]]
-              ])
-            ])
-            (rows [
-              ["cond" [["equal" "command" (str "scroll-down")] ["deck--cycle" "state" 1]]]
-              [[["equal" "command" (str "scroll-up")] ["deck--cycle" "state" (-1)]]]
-              [[["equal" "command" (str "move-down")] ["deck--reorder-all" "state" 1]]]
-              [[["equal" "command" (str "move-up")] ["deck--reorder-all" "state" (-1)]]]
-            ])
-          ])
-          (rows [
-            [["equal" "command" (str "focus-left")]]
-            [["deck--focus-window" "state" ["or" ["deck--front" "state" ":left"] ["deck--current" "state"]]]]
-          ])
-          (rows [
-            [["equal" "command" (str "focus-right")]]
-            [["deck--focus-window" "state" ["or" ["deck--front" "state" ":right"] ["deck--current" "state"]]]]
-          ])
-          [[["equal" "command" (str "scroll-down")] ["deck--rotate" "state" 1]]]
-          [[["equal" "command" (str "scroll-up")] ["deck--rotate" "state" (-1)]]]
-          [[["equal" "command" (str "next")] ["deck--cycle" "state" 1]]]
-          [[["equal" "command" (str "previous")] ["deck--cycle" "state" (-1)]]]
-          [[["equal" "command" (str "swap-columns")] ["deck--swap-columns" "state"]]]
-          [[["equal" "command" (str "move-down")] ["deck--reorder" "state" 1]]]
-          [[["equal" "command" (str "move-up")] ["deck--reorder" "state" (-1)]]]
-          [[["equal" "command" (str "to-left")] ["deck--to-column" "state" ":left"]]]
-          [[["equal" "command" (str "to-right")] ["deck--to-column" "state" ":right"]]]
-          [[["equal" "command" (str "grid")] ["setf" ["getf" "state" ":grid"] ["not" ["getf" "state" ":grid"]]]]]
-          (rows [
-            [["equal" "command" (str "ratio")]]
-            [["setf" ["getf" "state" ":ratio"] ["1+" ["mod" ["getf" "state" ":ratio"] ["length" ["getf" "+layout+" ":ratios"]]]]]]
-          ])
-          [[["equal" "command" (str "floating")] ["deck--toggle-floating" "state" "area"]]]
-          (rows [
-            [["equal" "command" (str "fullscreen")]]
-            (rows [
-              ["let" [["id" ["deck--current" "state"]]]]
-              [["when" "id" ["deck--set-fullscreen" "state" "id" ["not" ["member" "id" ["getf" "state" ":fullscreen"]]]]]]
-            ])
-          ])
-          [["t" "state"]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck--request" ["state" "id" "request" "requested"]]
-        (rows [
-          ["case" "request"]
-          [[":fullscreen" ["deck--set-fullscreen" "state" "id" "requested"]]]
-          [[":unfullscreen" ["deck--set-fullscreen" "state" "id" "nil"]]]
-          (rows [
-            ":activate"
-            (rows [
-              ["let" [["side" ["deck--side-of" "state" "id"]]]]
-              [["when" ["and" "side" ["deck--manageable-p" "state" "id"]] ["deck--adopt-front" "state" "side" "id"]]]
-              [["deck--focus-window" "state" "id"]]
-            ])
-          ])
-        ])
-        "state"
-      ])
-      blank
-      (rows [
-        ["defun" "deck--raises" ["state" "current"]]
-        (rows [
-          ["mapcar" (function "raise-window")]
-          (rows [
-            ["append" ["remove" "current" ["reverse" ["getf" "state" ":floating"]]]]
-            [["when" ["member" "current" ["getf" "state" ":floating"]] ["list" "current"]]]
-            [["getf" "state" ":fullscreen"]]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["define-extension" (str "deck")]
-        (rows [
-          [
-            ":reads"
-            (rows [
-              [":windows" ":rules" ":outputs" ":workareas" ":layout" ":focus" ":key" ":button" ":pointer" ":request"]
-              ":settings"
-            ])
-          ]
-          [":state" ["deck--state"] ":admission" "t"]
-        ])
-        [["snapshot" "state" "event"]]
-        (rows [
-          [
-            "let*"
-            (rows [
+      ({
+        p,
+        value',
+        accent,
+        zones,
+      }:
+        rows [
+          [defun bar--segments [p value' accent and-optional [zones t]]]
+          ({
+            count,
+            filled,
+          }:
+            rows [
               [
-                [
-                  "windows"
-                  (rows [
-                    ["remove-if" ["lambda" ["window"] ["policy--unmanaged-p" "snapshot" "window"]]]
-                    [["context" "snapshot" ":windows"]]
-                  ])
-                ]
-              ]
-              [["ids" ["mapcar" ["lambda" ["window"] ["getf" "window" ":id"]] "windows"]]]
-              [["focused" ["previous-context" "snapshot" ":focus"]]]
-              [["area" ["deck--area" "snapshot"]]]
-              [["type" ["getf" "event" ":type"]]]
-              [["command" ["and" ["eq" "type" ":key"] ["equal" ["getf" "event" ":owner"] (str "deck")] ["getf" "event" ":command"]]]]
-              [["terminal" ["and" ["equal" "command" (str "terminal")] ["policy--terminal" "windows"]]]]
-            ])
-          ]
-          (rows [
-            ["when" ["eq" "type" ":unmap"]]
-            (rows [
-              ["let" [["gone" ["getf" "event" ":id"]]]]
-              (rows [
-                ["dolist" ["side" (quote [":left" ":right"])]]
+                "let*"
                 (rows [
-                  ["when" ["eql" "gone" ["cdr" ["assoc" "side" ["getf" "state" ":fronts"]]]]]
-                  (rows [
-                    ["let" [["next" ["deck--after-front" "state" ["deck--windows" "state"] "side" "gone"]]]]
-                    [["setf" ["cdr" ["assoc" "side" ["getf" "state" ":fronts"]]] "next"]]
-                    (rows [
-                      ["when" ["and" "next" ["eql" "gone" ["getf" "state" ":focus"]]]]
-                      [["setf" ["getf" "state" ":focus"] "next"]]
+                  [[count [getf (constant bar) (kw "segments")]]]
+                  [[filled ["*" count [max 0 [min 1 value']]]]]
+                ])
+              ]
+              (rows [
+                [ui (kw "row") (kw "gap") 1 (kw "align") (kw "center")]
+                [
+                  (kw "children")
+                  ({
+                    i,
+                    lit,
+                  }:
+                    rows [
+                      [loop for i below count]
+                      [for lit "=" [max 0 [min 1 ["-" filled i]]]]
+                      [
+                        collect
+                        (rows [
+                          [ui (kw "rect") (kw "width") 4 (kw "height") 14]
+                          [
+                            (kw "background")
+                            (rows [
+                              [hud--mix [hud--off p]]
+                              [[if' zones [hud--heat ["*" 100 ["/" ["1+" i] count]] accent p] accent]]
+                              lit
+                            ])
+                          ]
+                        ])
+                      ]
                     ])
+                ]
+              ])
+            ])
+        ])
+      blank
+      ({
+        p,
+        history,
+        accent,
+      }:
+        rows [
+          [defun bar--spark [p history accent]]
+          ({
+            h,
+            count,
+            scale,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[h 16] [count [length history]]]
+                  [[scale [max 20 [reduce (function max) history (kw "initial-value") 0]]]]
+                ])
+              ]
+              (rows [
+                [ui (kw "row") (kw "gap") 1 (kw "align") (kw "end") (kw "height") h]
+                [
+                  (kw "children")
+                  (rows [
+                    [
+                      append
+                      (rows [
+                        [loop repeat ["-" [getf (constant bar) (kw "history")] count]]
+                        [collect [ui (kw "rect") (kw "width") 2 (kw "height") 1 (kw "background") [hud--off p]]]
+                      ])
+                    ]
+                    ({
+                      v,
+                      i,
+                    }:
+                      rows [
+                        [loop for v in' history]
+                        [for i from 1]
+                        [
+                          collect
+                          (rows [
+                            [ui (kw "rect") (kw "width") 2 (kw "height") [max 1 [round ["*" h v] scale]]]
+                            [
+                              (kw "background")
+                              (rows [
+                                [hud--mix [hud--c p (kw "bg")] [hud--heat v accent p]]
+                                [["+" 0.3 ["*" 0.7 ["/" i count]]]]
+                              ])
+                            ]
+                          ])
+                        ]
+                      ])
                   ])
+                ]
+              ])
+            ])
+        ])
+      blank
+      ({
+        p,
+        value',
+      }:
+        rows [
+          [defun bar--temp-color [p value']]
+          (rows [
+            [cond [[not [realp value']] [hud--dim p]]]
+            [[[">=" value' [getf (constant bar) (kw "hot")]] [hud--c p (kw "color1")]]]
+            [[[">=" value' ["-" [getf (constant bar) (kw "hot")] 10]] [hud--c p (kw "color3")]]]
+            [[t [hud--dim p 0.75]]]
+          ])
+        ])
+      blank
+      ({
+        p,
+        accent,
+        label,
+        m,
+        detail,
+        detail-color,
+      }:
+        rows [
+          [defun bar--gauge [p accent label m detail detail-color]]
+          ({
+            shown,
+            color,
+            flash,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[shown [getf m (kw "shown") 0]]]
+                  [[color [hud--heat [round shown] accent p]]]
+                  [[flash [hud--decay [getf m (kw "flash-at")] [getf (constant bar) (kw "flash")]]]]
+                ])
+              ]
+              (rows [
+                [hud--panel p color]
+                (rows [
+                  ["list*" [hud--text label 11 [hud--dim p]]]
+                  (rows [
+                    [ui (kw "row") (kw "align") (kw "end")]
+                    [
+                      (kw "children")
+                      (rows [
+                        [list [hud--text [format nil (str "~3D") [round shown]] 16 [hud--mix [hud--c p (kw "fg")] color flash]]]
+                        [[hud--text (str "%") 11 [hud--dim p]]]
+                      ])
+                    ]
+                  ])
+                  [[bar--segments p ["/" shown 100] accent]]
+                  [[bar--spark p [getf m (kw "history")] accent]]
+                  [[when detail [list [hud--text detail 12 [or' detail-color [hud--dim p 0.75]]]]]]
+                ])
+                [(kw "flash") flash]
+              ])
+            ])
+        ])
+      blank
+      ({value'}: [defun bar--degrees [value'] [when [realp value'] [format nil (str "~D°") [round value']]]])
+      blank
+      ({mib}: [defun bar--gib [mib] [when [realp mib] [format nil (str "~,1FG") ["/" mib (double 1024)]]]])
+      blank
+      ({
+        text,
+        limit,
+      }:
+        rows [
+          [defun bar--truncate [text limit]]
+          [[if' ["<=" [length text] limit] text [concatenate (quote string) [subseq text 0 ["1-" limit]] (str "…")]]]
+        ])
+      blank
+      ({value'}: [defun bar--nonempty [value'] [and [stringp value'] [plusp [length value']] value']])
+      blank
+      ({
+        snapshot,
+        state,
+        now,
+      }:
+        rows [
+          [defun bar--media [snapshot state now]]
+          ({
+            service,
+            status,
+            title,
+            artist,
+            key,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[service [service-state snapshot (kw "mpris")]]]
+                  [[status [getf service (kw "status")]]]
+                  [[title [bar--nonempty [getf service (kw "title")]]]]
+                  [[artist [bar--nonempty [getf service (kw "artist")]]]]
+                  [[key [list [getf service (kw "player-name")] title status [getf service (kw "position")]]]]
+                ])
+              ]
+              (rows [
+                [unless [equal key [getf state (kw "media-key")]]]
+                [[setf [getf state (kw "media-key")] key [getf state (kw "media-at")] now]]
+              ])
+              (rows [
+                [
+                  values
+                  (rows [
+                    [when [and title [member status (quote [(str "Playing") (str "Paused")]) (kw "test") (function equal)]]]
+                    ({
+                      length',
+                      playing,
+                      elapsed,
+                      position',
+                    }:
+                      rows [
+                        [
+                          "let*"
+                          (rows [
+                            [[length' [or' [getf service (kw "length")] 0]]]
+                            [[playing [equal status (str "Playing")]]]
+                            [[elapsed [if' playing ["-" now [getf state (kw "media-at") now]] 0]]]
+                            [[position' [min length' ["+" [or' [getf service (kw "position")] 0] elapsed]]]]
+                          ])
+                        ]
+                        (rows [
+                          [list (kw "playing") playing]
+                          [
+                            (kw "label")
+                            [
+                              string-upcase
+                              (rows [
+                                [bar--truncate [if' artist [format nil (str "~A - ~A") artist title] title]]
+                                [[getf (constant bar) (kw "media-width")]]
+                              ])
+                            ]
+                          ]
+                          [(kw "value") [if' [plusp length'] ["/" position' length'] 0]]
+                        ])
+                      ])
+                  ])
+                ]
+                state
+              ])
+            ])
+        ])
+      blank
+      ({
+        p,
+        color,
+        value',
+      }:
+        rows [
+          [defun bar--sweep [p color value']]
+          [[ui (kw "progress") (kw "height") 2 (kw "radius") 0 (kw "value") value' (kw "color") color (kw "track") [hud--off p]]]
+        ])
+      blank
+      ({
+        color,
+        playing,
+        now,
+      }:
+        rows [
+          [defun bar--eq [color playing now]]
+          (rows [
+            [ui (kw "row") (kw "gap") 1 (kw "align") (kw "end") (kw "height") 14]
+            [
+              (kw "children")
+              ({i}:
+                rows [
+                  [loop for i below 5]
+                  [
+                    collect
+                    (rows [
+                      [ui (kw "rect") (kw "width") 2]
+                      [
+                        (kw "height")
+                        (rows [
+                          [if' playing]
+                          [["+" 2 [round ["*" 12 [abs [sin ["+" ["*" now ["+" 5.3 ["*" 2.1 i]]] ["*" 1.7 i]]]]]]]]
+                          2
+                        ])
+                      ]
+                      [(kw "background") color]
+                    ])
+                  ]
+                ])
+            ]
+          ])
+        ])
+      blank
+      ({
+        p,
+        state,
+        now,
+      }:
+        rows [
+          [defun bar--clock [p state now]]
+          ({
+            fg,
+            accent,
+            sec,
+            tick,
+            frac,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[fg [hud--c p (kw "fg")]] [accent [hud--c p (kw "accent")]]]
+                  [[sec [getf state (kw "sec") 0]]]
+                  [[tick [hud--decay [getf state (kw "minute-at")] 700]]]
+                  [[frac ["/" ["+" sec [min 1 ["-" now [getf state (kw "sec-at") now]]]] 60]]]
+                ])
+              ]
+              (rows [
+                [hud--panel p accent]
+                (rows [
+                  [list [hud--icon (hex 983376) 14 accent]]
+                  (rows [
+                    [ui (kw "column") (kw "gap") 1 (kw "align") (kw "stretch")]
+                    [
+                      (kw "children")
+                      (rows [
+                        [
+                          list
+                          (rows [
+                            [ui (kw "row") (kw "align") (kw "end")]
+                            [
+                              (kw "children")
+                              (rows [
+                                [list [hud--text [getf state (kw "minute")] 18 [hud--mix fg accent tick]]]
+                                [[hud--text [format nil (str ":~2,'0D") sec] 12 [hud--dim p]]]
+                              ])
+                            ]
+                          ])
+                        ]
+                        [[bar--sweep p accent frac]]
+                      ])
+                    ]
+                  ])
+                ])
+                [(kw "flash") tick]
+              ])
+            ])
+        ])
+      blank
+      ({
+        p,
+        battery,
+        label,
+      }:
+        rows [
+          [defun bar--battery [p battery and-optional [label (str "BAT")]]]
+          ({
+            percent,
+            charging,
+            color,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[percent [round [getf battery (kw "percent") 0]]]]
+                  [[charging [getf battery (kw "charging")]]]
+                  [
+                    [
+                      color
+                      (rows [
+                        [cond [charging [hud--c p (kw "color2")]] [["<" percent 15] [hud--c p (kw "color1")]]]
+                        [[["<" percent 30] [hud--c p (kw "color3")]] [t [hud--c p (kw "color2")]]]
+                      ])
+                    ]
+                  ]
+                ])
+              ]
+              (rows [
+                [hud--panel p color]
+                (rows [
+                  ["list*" [hud--text label 11 [hud--dim p]]]
+                  (rows [
+                    [ui (kw "row") (kw "align") (kw "end")]
+                    [
+                      (kw "children")
+                      (rows [
+                        [list [hud--text [format nil (str "~3D") percent] 16 [hud--c p (kw "fg")]]]
+                        [[hud--text (str "%") 11 [hud--dim p]]]
+                      ])
+                    ]
+                  ])
+                  [[bar--segments p ["/" percent 100] color nil]]
+                  [[when charging [list [hud--icon (hex 988171) 13 color]]]]
                 ])
               ])
             ])
-          ])
-          (rows [
-            ["setf" ["getf" "state" ":windows"] ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]] ["getf" "state" ":windows"]]]
-            [
-              ["getf" "state" ":columns"]
-              (rows [
-                ["remove-if-not" ["lambda" ["entry"] ["member" ["car" "entry"] "ids"]]]
-                [["getf" "state" ":columns"]]
-              ])
-            ]
-            [["getf" "state" ":fronts"]]
-            (rows [
-              ["loop" "for" "entry" "in" ["getf" "state" ":fronts"]]
+        ])
+      blank
+      ({
+        p,
+        network,
+      }:
+        rows [
+          [defun bar--network [p network]]
+          ({
+            ssid,
+            online,
+            label,
+            color,
+          }:
+            rows [
               [
-                "collect"
+                "let*"
                 (rows [
-                  ["if" ["and" ["cdr" "entry"] ["not" ["member" ["cdr" "entry"] "ids"]]]]
-                  [["cons" ["car" "entry"] "nil"]]
-                  "entry"
+                  [[ssid [getf network (kw "ssid")]]]
+                  [[online [getf network (kw "connected")]]]
+                  [
+                    [
+                      label
+                      (rows [
+                        [cond [[and online [stringp ssid] [plusp [length ssid]]] [string-upcase [remove [code-char 0] ssid]]]]
+                        [[online (str "ONLINE")]]
+                        [[t (str "OFFLINE")]]
+                      ])
+                    ]
+                  ]
+                  [[color [if' online [hud--c p (kw "color6")] [hud--c p (kw "color1")]]]]
+                ])
+              ]
+              [
+                [
+                  hud--panel
+                  p
+                  color
+                  (rows [
+                    [list [hud--icon [if' online (hex 984489) (hex 984490)] 14 color]]
+                    [[hud--text [bar--truncate label 20] 14 [hud--c p (kw "fg")]]]
+                  ])
+                ]
+              ]
+            ])
+        ])
+      blank
+      ({state}:
+        rows [
+          [defun bar--gpu-p [state]]
+          ({gpu}:
+            rows [
+              [let' [[gpu [getf state (kw "gpu")]]]]
+              [[and [getf gpu (kw "util")] ["<" [getf gpu (kw "failures") 0] 3]]]
+            ])
+        ])
+      blank
+      ({
+        module,
+        p,
+        state,
+        snapshot,
+        metrics,
+        media,
+        now,
+      }:
+        rows [
+          [defun bar--module [module p state snapshot metrics media now]]
+          ({
+            cpu,
+            gpu,
+          }:
+            rows [
+              [let' [[cpu [getf state (kw "cpu")]] [gpu [getf state (kw "gpu")]]]]
+              (rows [
+                [ecase module]
+                [[(kw "time") [bar--clock p state now]]]
+                [
+                  [
+                    (kw "date")
+                    (rows [
+                      [hud--panel p [hud--c p (kw "color4")]]
+                      (rows [
+                        [list [hud--icon (hex 983277) 14 [hud--c p (kw "color4")]]]
+                        [[hud--text [string-upcase [clock-text [getf (constant bar) (kw "date")]]] 14 [hud--c p (kw "fg")]]]
+                      ])
+                    ])
+                  ]
+                ]
+                [[(kw "battery") [bar--battery p [service-state snapshot (kw "battery")]]]]
+                [[(kw "network") [bar--network p [service-state snapshot (kw "network")]]]]
+                [
+                  [
+                    (kw "frame")
+                    ({frame}:
+                      rows [
+                        [let' [[frame [state-value snapshot (kw "frame-battery")]]]]
+                        (rows [
+                          [when [getf frame (kw "percent")]]
+                          (rows [
+                            [
+                              bar--battery
+                              p
+                              (rows [
+                                [list (kw "percent") [getf frame (kw "percent")]]
+                                [(kw "charging") [not [equal [getf frame (kw "status")] (str "Discharging")]]]
+                              ])
+                            ]
+                            (str "VR")
+                          ])
+                        ])
+                      ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "media")
+                    (rows [
+                      [when media]
+                      ({color}:
+                        rows [
+                          [let' [[color [hud--c p (kw "color5")]]]]
+                          (rows [
+                            [hud--panel p color]
+                            (rows [
+                              [list [bar--eq color [getf media (kw "playing")] now]]
+                              (rows [
+                                [ui (kw "column") (kw "gap") 3 (kw "align") (kw "stretch")]
+                                [
+                                  (kw "children")
+                                  (rows [
+                                    [list [hud--text [getf media (kw "label")] 13 [hud--c p (kw "fg")]]]
+                                    [[bar--sweep p color [getf media (kw "value")]]]
+                                  ])
+                                ]
+                              ])
+                            ])
+                          ])
+                        ])
+                    ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "cpu")
+                    (rows [
+                      [bar--gauge p [hud--c p (kw "color4")] (str "CPU") [getf metrics (kw "cpu")]]
+                      [[bar--degrees [getf cpu (kw "temp")]] [bar--temp-color p [getf cpu (kw "temp")]]]
+                    ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "memory")
+                    (rows [
+                      [bar--gauge p [hud--c p (kw "color5")] (str "MEM") [getf metrics (kw "memory")]]
+                      [[bar--gib [getf [getf state (kw "memory")] (kw "used")]] nil]
+                    ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "gpu")
+                    (rows [
+                      [when [bar--gpu-p state]]
+                      (rows [
+                        [bar--gauge p [hud--c p (kw "color2")] (str "GPU") [getf metrics (kw "gpu")]]
+                        [[bar--degrees [getf gpu (kw "temp")]] [bar--temp-color p [getf gpu (kw "temp")]]]
+                      ])
+                    ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "vram")
+                    (rows [
+                      [when [bar--gpu-p state]]
+                      [[bar--gauge p [hud--c p (kw "color6")] (str "VRAM") [getf metrics (kw "vram")] [bar--gib [getf gpu (kw "used")]] nil]]
+                    ])
+                  ]
+                ]
+              ])
+            ])
+        ])
+      blank
+      ({
+        modules,
+        panels,
+      }:
+        rows [
+          [defun bar--surfaces [modules panels]]
+          ({
+            h,
+            gap',
+            margin,
+            inset,
+            pair,
+            seam,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[h ["+" [getf (constant hud) (kw "height")] [getf (constant hud) (kw "shadow")]]]]
+                  [[gap' [getf (constant bar) (kw "gap")]]]
+                  [[margin [getf (constant bar) (kw "margin")]]]
+                  [[inset [getf (constant bar) (kw "inset")]]]
+                  [[pair [getf (constant bar) (kw "center-between")]]]
+                  [
+                    [
+                      seam
+                      ({
+                        a,
+                        b,
+                        index,
+                      }:
+                        rows [
+                          [loop for [a b] on modules]
+                          [for index from 1]
+                          [when [and b [eq a [first pair]] [eq b [second pair]]] return index]
+                        ])
+                    ]
+                  ]
+                ])
+              ]
+              ({half}:
+                rows [
+                  [
+                    flet
+                    [
+                      ({
+                        list',
+                        justify,
+                        padding,
+                      }:
+                        rows [
+                          [half [list' justify padding]]
+                          (rows [
+                            [ui (kw "row") (kw "width") 0 (kw "grow") 1 (kw "height") h (kw "gap") gap' (kw "justify") justify (kw "padding") padding]
+                            [(kw "children") [remove nil list']]
+                          ])
+                        ])
+                    ]
+                  ]
+                  ({edge}:
+                    rows [
+                      [loop for edge in' [getf (constant bar) (kw "edges")]]
+                      [
+                        collect
+                        (rows [
+                          [shell-surface edge]
+                          (rows [
+                            [ui (kw "row") (kw "height") h (kw "justify") (kw "center")]
+                            [
+                              (kw "children")
+                              (rows [
+                                [if' seam]
+                                (rows [
+                                  [list [half [subseq panels 0 seam] (kw "end") [list 0 inset 0 0]]]
+                                  [[half [nthcdr seam panels] (kw "start") [list 0 0 0 inset]]]
+                                ])
+                                [[list [ui (kw "row") (kw "height") h (kw "gap") gap' (kw "children") [remove nil panels]]]]
+                              ])
+                            ]
+                          ])
+                          [(kw "anchors") [if' seam [list edge (kw "left") (kw "right")] [list edge]]]
+                          [(kw "margin") [if' [eq edge (kw "top")] [list margin 0 0 0] [list 0 0 margin 0]]]
+                          [(kw "height") h (kw "layer") (kw "overlay")]
+                          [(kw "exclusive-zone") 0]
+                          [(kw "background") (str "#00000000") (kw "click-through") t]
+                        ])
+                      ]
+                    ])
+                ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [
+            define-extension
+            (str "bar")
+            (rows [
+              [(kw "reads") [(kw "services") (kw "system") (kw "data")]]
+              [
+                (kw "state")
+                (rows [
+                  [list (kw "cpu") nil (kw "memory") nil (kw "gpu") nil (kw "metrics") nil (kw "at") nil]
+                  [(kw "sec") nil (kw "sec-at") nil (kw "minute") nil (kw "minute-at") nil]
                 ])
               ]
             ])
-            [["getf" "state" ":floating"] ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]] ["getf" "state" ":floating"]]]
-            [
-              ["getf" "state" ":floats"]
-              (rows [
-                ["remove-if-not" ["lambda" ["entry"] ["member" ["car" "entry"] "ids"]]]
-                [["getf" "state" ":floats"]]
-              ])
-            ]
-            [
-              ["getf" "state" ":fullscreen"]
-              (rows [
-                ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]]]
-                [["getf" "state" ":fullscreen"]]
-              ])
-            ]
-          ])
-          [["unless" ["member" ["getf" "state" ":focus"] "ids"] ["setf" ["getf" "state" ":focus"] "nil"]]]
-          (rows [
-            [
-              "when"
-              (rows [
-                ["and" "focused" ["not" ["eql" "focused" ["getf" "state" ":focus"]]]]
-                [["member" "focused" ["deck--windows" "state"]]]
-                [["deck--manageable-p" "state" "focused"]]
-              ])
-            ]
-            (rows [
-              ["let" [["side" ["deck--side-of" "state" "focused"]]]]
-              (rows [
-                ["when" "side"]
-                [["deck--adopt-front" "state" "side" "focused"]]
-                [["deck--focus-window" "state" "focused"]]
-              ])
-            ])
-          ])
-          (rows [
-            ["dolist" ["window" "windows"]]
-            (rows [
-              ["let" [["id" ["getf" "window" ":id"]]]]
-              (rows [
-                ["unless" ["or" ["deck--side-of" "state" "id"] ["member" "id" ["getf" "state" ":floating"]]]]
+          ]
+          [[snapshot state event]]
+          ({
+            modules,
+            probes,
+            probe,
+          }:
+            rows [
+              [
+                "let*"
                 (rows [
+                  [[modules [getf (constant bar) (kw "modules")]]]
+                  [
+                    [
+                      probes
+                      [
+                        remove-duplicates
+                        ({
+                          module,
+                          source,
+                        }:
+                          rows [
+                            [loop for module in' modules]
+                            [for source "=" [second [assoc module (constant bar-probes)]]]
+                            [when source collect source]
+                          ])
+                      ]
+                    ]
+                  ]
+                  [[probe [and [eq [getf event (kw "type")] (kw "timer")] [find [getf event (kw "name")] probes]]]]
+                ])
+              ]
+              (rows [
+                [when probe]
+                [[setf [getf state probe] [bar--sample probe [getf state probe] [context snapshot (kw "system")]]]]
+              ])
+              ({
+                p,
+                now,
+                dt,
+                metrics,
+                sec,
+                minute,
+              }:
+                rows [
                   [
                     "let*"
                     (rows [
-                      [["focus-side" ["and" "focused" ["deck--side-of" "state" "focused"]]]]
-                      [["left" ["length" ["deck--column" "state" ":left"]]]]
-                      [["right" ["length" ["deck--column" "state" ":right"]]]]
-                      [["side" ["or" "focus-side" ["if" ["<=" "left" "right"] ":left" ":right"]]]]
-                    ])
-                  ]
-                  [["push" ["cons" "id" "side"] ["getf" "state" ":columns"]]]
-                  [["setf" ["getf" "state" ":windows"] ["append" ["getf" "state" ":windows"] ["list" "id"]]]]
-                  [["deck--adopt-front" "state" "side" "id"]]
-                  [["setf" ["getf" "state" ":focus"] "id"]]
-                  (rows [
-                    ["when" ["getf" "window" ":fullscreen-requested"]]
-                    [["deck--set-fullscreen" "state" "id" "t"]]
-                  ])
-                ])
-              ])
-            ])
-          ])
-          (rows [
-            ["when" "command"]
-            [["deck--command" "state" "area" "command"]]
-          ])
-          (rows [
-            ["when" "terminal"]
-            [["deck--request" "state" "terminal" ":activate" "nil"]]
-          ])
-          (rows [
-            ["when" ["and" ["member" "type" (quote [":metadata" ":request"])] ["member" ["getf" "event" ":id"] "ids"]]]
-            [["deck--request" "state" ["getf" "event" ":id"] ["getf" "event" ":request"] ["getf" "event" ":requested"]]]
-          ])
-          (rows [
-            [
-              "when"
-              (rows [
-                ["or" ["and" ["eq" "type" ":button"] ["eql" ["getf" "event" ":state"] ":pressed"]]]
-                (rows [
-                  ["and" ["eq" "type" ":pointer"] ["eq" ["getf" "event" ":state"] ":enter"] ["getf" "event" ":moved"]]
-                  [["setting" "snapshot" ":focus-follows-mouse"]]
-                ])
-              ])
-            ]
-            (rows [
-              ["let" [["id" ["getf" "event" ":id"]]]]
-              (rows [
-                ["when" ["and" ["integerp" "id"] ["member" "id" ["deck--windows" "state"]]]]
-                (rows [
-                  ["when" ["and" ["deck--manageable-p" "state" "id"] ["deck--side-of" "state" "id"]]]
-                  [["deck--adopt-front" "state" ["deck--side-of" "state" "id"] "id"]]
-                ])
-                [["deck--focus-window" "state" "id"]]
-              ])
-            ])
-          ])
-          (rows [
-            ["let" [["current" ["deck--current" "state"]]]]
-            (rows [
-              ["values" "state"]
-              (rows [
-                [
-                  "append"
-                  (rows [
-                    ["mapcar" ["lambda" ["binding"] ["apply" (function "bind-key") "binding"]]]
-                    (rows [
-                      ["if" ["deck--narrow-p" "area"]]
-                      (rows [
-                        [
-                          "remove-if"
-                          (rows [
-                            ["lambda" ["binding"]]
-                            (rows [
-                              ["member" ["string-downcase" ["third" "binding"]]]
-                              ["+deck--column-commands+" ":test" (function "equal")]
-                            ])
-                          ])
-                        ]
-                        "+layout-bindings+"
-                      ])
-                      "+layout-bindings+"
-                    ])
-                  ])
-                ]
-                [["when" "area" ["deck--places" "windows" "state" "area"]]]
-                [["list" ["publish-state" ":deck-seam" ["deck--seam" "state" "area"]]]]
-                [["deck--raises" "state" "current"]]
-                [["list" ["focus" "current" ":raise" "nil"]]]
-              ])
-              (rows [
-                ["when" ["and" ["equal" "command" (str "terminal")] ["null" "terminal"]]]
-                [["list" ["apply" (function "launch") ["policy--launch" (str "terminal")]]]]
-              ])
-            ])
-          ])
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_gap_data = {
-      at,
-      blank,
-      function,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      ["defun" "gap--ascii" ["text"] ["remove-if" ["lambda" ["c"] [">" ["char-code" "c"] 126]] "text"]]
-      blank
-      ["defun" "gap--degrees" ["value"] ["if" ["realp" "value"] ["format" "nil" (str "~2D°") ["max" 0 ["min" 99 ["round" "value"]]]] (str "--°")]]
-      blank
-      ["defun" "gap--gib" ["mib"] ["if" ["realp" "mib"] ["format" "nil" (str "~4,1FG") ["/" "mib" "1024d0"]] (str "--.-G")]]
-      blank
-      (rows [
-        ["defun" "gap--fit" ["text" "width"]]
-        [["format" "nil" (str "~vA") "width" ["if" [">" ["length" "text"] "width"] ["concatenate" (quote "string") ["subseq" "text" 0 ["-" "width" 2]] (str "..")] "text"]]]
-      ])
-      blank
-      ["defun" "gap--px" ["n"] ["max" 1 ["round" ["*" "n" ["getf" "+gap+" ":scale"]]]]]
-      blank
-      (rows [
-        ["defun" "gap--text" ["text" "color"]]
-        [["ui" ":text" ":text" "text" ":size" ["gap--px" 11] ":line-height" ["gap--px" 11] ":color" "color" ":font" ["getf" "+gap+" ":font"]]]
-      ])
-      blank
-      (rows [
-        ["defun" "gap--item" ["p" "children"]]
-        [
-          [
-            "ui"
-            ":stack"
-            ":children"
-            (rows [
-              [
-                "list"
-                (rows [
-                  ["ui" ":column" ":align" ":stretch"]
-                  [
-                    ":children"
-                    (rows [
-                      ["list" ["ui" ":rect" ":height" ["gap--px" 3]]]
-                      [["ui" ":rect" ":height" ["gap--px" 8] ":background" ["hud--alpha" ["hud--c" "p" ":bg"] (str "e6")]]]
-                    ])
-                  ]
-                ])
-              ]
-              (rows [
-                ["ui" ":row" ":height" ["gap--px" 11] ":align" ":end" ":gap" ["gap--px" 4]]
-                [":padding" ["list" 0 ["gap--px" 4] 0 ["gap--px" 4]]]
-                [":children" ["remove" "nil" "children"]]
-              ])
-            ])
-          ]
-        ]
-      ])
-      blank
-      (rows [
-        ["defun" "gap--meter" ["p" "value" "accent" "zones"]]
-        (rows [
-          ["let" [["filled" ["*" 12 ["max" 0 ["min" 1 "value"]]]]]]
-          (rows [
-            ["ui" ":row" ":gap" ["gap--px" 1] ":height" ["gap--px" 8] ":align" ":end"]
-            [
-              ":children"
-              (rows [
-                ["loop" "for i below 12"]
-                [
-                  "collect"
-                  (rows [
-                    ["ui" ":rect" ":width" ["gap--px" 3] ":height" ["gap--px" 8]]
-                    [
-                      ":background"
-                      (rows [
-                        ["hud--mix" ["hud--off" "p"]]
-                        [["if" "zones" ["hud--heat" ["*" 100 ["/" ["1+" "i"] 12]] "accent" "p"] "accent"]]
-                        [["max" 0 ["min" 1 ["-" "filled" "i"]]]]
-                      ])
-                    ]
-                  ])
-                ]
-              ])
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "gap--gauge" ["p" "label" "accent" "percent" "detail" "&optional" ["zones" "t"]]]
-        [
-          [
-            "gap--item"
-            "p"
-            (rows [
-              ["list" ["gap--text" "label" "accent"]]
-              [["gap--text" ["format" "nil" (str "~3D%") ["max" 0 ["min" 100 "percent"]]] ["hud--c" "p" ":fg"]]]
-              [["gap--meter" "p" ["/" "percent" 100] "accent" "zones"]]
-              [["when" "detail" ["gap--text" "detail" ["hud--dim" "p" "0.75"]]]]
-            ])
-          ]
-        ]
-      ])
-      blank
-      (rows [
-        ["defun" "gap--words" ["p" "&rest" "parts"]]
-        [["gap--item" "p" ["loop" "for" ["text" "color"] "on" "parts" "by" (function "cddr") "collect" ["gap--text" "text" ["or" "color" ["hud--c" "p" ":fg"]]]]]]
-      ])
-      blank
-      (rows [
-        ["defun" "gap--media" ["p" "snapshot"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["service" ["service-state" "snapshot" ":mpris"]]]
-              [["status" ["getf" "service" ":status"]]]
-              [["title" ["getf" "service" ":title"]]]
-              [["artist" ["getf" "service" ":artist"]]]
-            ])
-          ]
-          (rows [
-            ["when" ["and" ["stringp" "title"] ["plusp" ["length" "title"]] ["member" "status" (quote [(str "Playing") (str "Paused")]) ":test" (function "equal")]]]
-            (rows [
-              ["gap--words" "p" ["if" ["equal" "status" (str "Playing")] (str ">>") (str "||")] ["hud--c" "p" ":color5"]]
-              (rows [
-                [
-                  "gap--fit"
-                  [
-                    "gap--ascii"
-                    [
-                      "string-upcase"
-                      (rows [
-                        ["if" ["and" ["stringp" "artist"] ["plusp" ["length" "artist"]]]]
-                        (at 5 [["format" "nil" (str "~A - ~A") "artist" "title"]])
-                        (at 5 "title")
-                      ])
-                    ]
-                  ]
-                ]
-                [["round" ["getf" "+gap+" ":media-width"] ["getf" "+gap+" ":scale"]]]
-              ])
-              "nil"
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "gap--battery" ["p" "snapshot"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["battery" ["service-state" "snapshot" ":battery"]]]
-              [["percent" ["round" ["getf" "battery" ":percent" 0]]]]
-              [
-                [
-                  "color"
-                  (rows [
-                    ["cond" [["getf" "battery" ":charging"] ["hud--c" "p" ":color2"]] [["<" "percent" 15] ["hud--c" "p" ":color1"]]]
-                    [[["<" "percent" 30] ["hud--c" "p" ":color3"]] ["t" ["hud--c" "p" ":color2"]]]
-                  ])
-                ]
-              ]
-            ])
-          ]
-          [["gap--gauge" "p" ["if" ["getf" "battery" ":charging"] (str "CHG") (str "BAT")] "color" "percent" "nil" "nil"]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "gap--network" ["p" "snapshot"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["network" ["service-state" "snapshot" ":network"]]]
-              [["ssid" ["getf" "network" ":ssid"]]]
-              [["online" ["getf" "network" ":connected"]]]
-            ])
-          ]
-          (rows [
-            [
-              "gap--words"
-              "p"
-              (rows [
-                [
-                  "gap--fit"
-                  (rows [
-                    ["cond" [["and" "online" ["stringp" "ssid"] ["plusp" ["length" "ssid"]]] ["gap--ascii" ["string-upcase" "ssid"]]]]
-                    [["online" (str "ONLINE")]]
-                    [["t" (str "OFFLINE")]]
-                  ])
-                ]
-                20
-              ])
-            ]
-            [["if" "online" ["hud--c" "p" ":color6"] ["hud--c" "p" ":color1"]]]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "gap--frame" ["p" "snapshot"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["battery" ["state-value" "snapshot" ":frame-battery"]]]
-              [["percent" ["getf" "battery" ":percent"]]]
-              [["powered" ["not" ["equal" ["getf" "battery" ":status"] (str "Discharging")]]]]
-            ])
-          ]
-          (rows [
-            ["when" "percent"]
-            (rows [
-              ["gap--gauge" "p" ["if" "powered" (str "VR+") (str "VR")]]
-              (rows [
-                ["cond" ["powered" ["hud--c" "p" ":color2"]] [["<" "percent" 15] ["hud--c" "p" ":color1"]]]
-                [[["<" "percent" 30] ["hud--c" "p" ":color3"]] ["t" ["hud--c" "p" ":color2"]]]
-              ])
-              ["percent" "nil" "nil"]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "gap--module" ["module" "p" "state" "snapshot"]]
-        (rows [
-          ["let" [["cpu" ["getf" "state" ":cpu"]] ["memory" ["getf" "state" ":memory"]] ["gpu" ["getf" "state" ":gpu"]]]]
-          (rows [
-            ["ecase" "module"]
-            [[":time" ["gap--words" "p" ["clock-text" ["getf" "+gap+" ":time"]] "nil"]]]
-            [[":date" ["gap--words" "p" ["string-upcase" ["clock-text" ["getf" "+gap+" ":date"]]] "nil"]]]
-            [[":media" ["gap--media" "p" "snapshot"]]]
-            [[":battery" ["gap--battery" "p" "snapshot"]]]
-            [[":network" ["gap--network" "p" "snapshot"]]]
-            [[":frame" ["gap--frame" "p" "snapshot"]]]
-            [[":cpu" ["gap--gauge" "p" (str "CPU") ["hud--c" "p" ":color4"] ["getf" "cpu" ":percent" 0] ["gap--degrees" ["getf" "cpu" ":temp"]]]]]
-            [[":memory" ["gap--gauge" "p" (str "MEM") ["hud--c" "p" ":color5"] ["getf" "memory" ":percent" 0] ["gap--gib" ["getf" "memory" ":used"]]]]]
-            [
-              [
-                ":gpu"
-                (rows [
-                  ["when" ["probe--gpu-p" "gpu"]]
-                  [["gap--gauge" "p" (str "GPU") ["hud--c" "p" ":color2"] ["getf" "gpu" ":percent" 0] ["gap--degrees" ["getf" "gpu" ":temp"]]]]
-                ])
-              ]
-            ]
-            [
-              [
-                ":vram"
-                (rows [
-                  ["when" ["probe--gpu-p" "gpu"]]
-                  (rows [
-                    ["gap--gauge" "p" (str "VRAM") ["hud--c" "p" ":color6"]]
-                    [["if" ["plusp" ["or" ["getf" "gpu" ":total"] 0]] ["round" ["*" 100 ["or" ["getf" "gpu" ":used"] 0]] ["getf" "gpu" ":total"]] 0]]
-                    [["gap--gib" ["getf" "gpu" ":used"]]]
-                  ])
-                ])
-              ]
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "gap--line" ["panels"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["modules" ["getf" "+gap+" ":modules"]]]
-              [["pair" ["getf" "+gap+" ":center-between"]]]
-              [["inset" ["getf" "+gap+" ":inset"]]]
-              [
-                [
-                  "seam"
-                  (rows [
-                    ["loop" "for" ["a" "b"] "on" "modules"]
-                    "for index from 1"
-                    ["when" ["and" "b" ["eq" "a" ["first" "pair"]] ["eq" "b" ["second" "pair"]]] "return index"]
-                  ])
-                ]
-              ]
-            ])
-          ]
-          (rows [
-            [
-              "flet"
-              [
-                (rows [
-                  ["half" ["items" "justify" "padding"]]
-                  (rows [
-                    ["ui" ":row" ":width" 0 ":grow" 1 ":height" ["gap--px" 11] ":gap" ["gap--px" 6] ":align" ":end" ":justify" "justify" ":padding" "padding"]
-                    [":children" ["remove" "nil" "items"]]
-                  ])
-                ])
-              ]
-            ]
-            (rows [
-              ["ui" ":row" ":height" ["gap--px" 11] ":align" ":end" ":justify" ":center"]
-              [
-                ":children"
-                (rows [
-                  ["if" "seam"]
-                  (rows [
-                    ["list" ["half" ["subseq" "panels" 0 "seam"] ":end" ["list" 0 "inset" 0 0]]]
-                    [["half" ["nthcdr" "seam" "panels"] ":start" ["list" 0 0 0 "inset"]]]
-                  ])
-                  [["list" ["ui" ":row" ":height" ["gap--px" 11] ":gap" ["gap--px" 6] ":align" ":end" ":children" ["remove" "nil" "panels"]]]]
-                ])
-              ]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        [
-          "define-extension"
-          (str "bar")
-          (rows [
-            [":reads" [":system" ":services" ":data" ":outputs"]]
-            [":state" ["list" ":cpu" "nil" ":memory" "nil" ":gpu" "nil"]]
-          ])
-        ]
-        [["snapshot" "state" "event"]]
-        (rows [
-          ["when" ["and" ["eq" ["getf" "event" ":type"] ":timer"] ["eq" ["getf" "event" ":name"] ":sample"]]]
-          (rows [
-            ["let" [["system" ["context" "snapshot" ":system"]]]]
-            (rows [
-              ["dolist" ["probe" (quote [":cpu" ":memory" ":gpu"])]]
-              [["setf" ["getf" "state" "probe"] ["probe--sample" "probe" ["getf" "state" "probe"] "system"]]]
-            ])
-          ])
-        ])
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["p" ["state-value" "snapshot" ":hud-palette"]]]
-              [
-                [
-                  "line"
-                  [
-                    "gap--line"
-                    (rows [
-                      ["loop" "for" "module" "in" ["getf" "+gap+" ":modules"]]
-                      ["collect" ["gap--module" "module" "p" "state" "snapshot"]]
-                    ])
-                  ]
-                ]
-              ]
-              [["focal" ["state-value" "snapshot" ":focal-frame"]]]
-              [["wide" ["first" ["sort" ["copy-list" ["context" "snapshot" ":outputs"]] (function ">") ":key" ["lambda" ["o"] ["getf" "o" ":width"]]]]]]
-              [["height" ["gap--px" 11]]]
-              [["lift" ["gap--px" 6]]]
-              [
-                [
-                  "hot"
-                  (rows [
-                    ["loop" "for" "probe" "in" (quote [":cpu" ":gpu"])]
-                    ["for" "temp" "=" ["getf" ["getf" "state" "probe"] ":temp"]]
-                    ["thereis" ["and" ["realp" "temp"] [">=" "temp" ["getf" "+gap+" ":hot"]]]]
-                  ])
-                ]
-              ]
-            ])
-          ]
-          (rows [
-            ["values" "state"]
-            (rows [
-              [
-                "append"
-                (rows [
-                  ["list" ["interval" ":sample" ["getf" "+gap+" ":sample"]]]
-                  [["publish-state" ":hud-hot" ["and" "hot" "t"]]]
-                  (rows [
-                    ["publish-state" ":bar-floor"]
-                    (rows [
-                      ["when" ["member" ":bottom" ["getf" "+gap+" ":edges"]]]
-                      (rows [
-                        [
-                          "cond"
-                          (rows [
-                            "focal"
-                            (rows [
-                              ["list" ":output" ["getf" "focal" ":output"]]
-                              [":y" ["+" ["getf" "focal" ":top"] ["getf" "focal" ":height"] ["-" "lift"] "height"]]
-                            ])
-                          ])
-                        ]
-                        [["wide" ["list" ":output" ["getf" "wide" ":name"] ":y" ["getf" "wide" ":height"]]]]
-                      ])
-                    ])
-                  ])
-                ])
-              ]
-              (rows [
-                ["loop" "for" "edge" "in" ["getf" "+gap+" ":edges"]]
-                [
-                  "collect"
-                  (rows [
-                    ["if" "focal"]
-                    (rows [
-                      ["shell-surface" "edge" "line" ":output" ["getf" "focal" ":output"] ":anchors" (quote [":top" ":left"])]
-                      [":width" ["getf" "focal" ":width"] ":height" "height"]
+                      [[p [state-value snapshot (kw "hud-palette")]]]
+                      [[now [hud--now]]]
+                      [[dt [if' [getf state (kw "at")] ["-" now [getf state (kw "at")]] 0]]]
                       [
-                        ":margin"
-                        (rows [
-                          [
-                            "list"
-                            (rows [
-                              [
-                                "-"
-                                (rows [
-                                  ["if" ["eq" "edge" ":top"]]
-                                  [["getf" "focal" ":top"]]
-                                  [["+" ["getf" "focal" ":top"] ["getf" "focal" ":height"]]]
-                                ])
-                              ]
-                              "lift"
+                        [
+                          metrics
+                          ({
+                            module,
+                            source,
+                          }:
+                            rows [
+                              [loop for [module source] in' (constant bar-probes)]
+                              [when [member module modules]]
+                              (at 8 [
+                                append
+                                [
+                                  list
+                                  module
+                                  (rows [
+                                    [
+                                      bar--ease
+                                      (rows [
+                                        [bar--metric [getf [getf state (kw "metrics")] module]]
+                                        [[bar--target module state]]
+                                        [[eq source probe]]
+                                      ])
+                                    ]
+                                    dt
+                                  ])
+                                ]
+                              ])
                             ])
-                          ]
-                          [0 0 ["getf" "focal" ":left"]]
-                        ])
+                        ]
                       ]
-                      [":layer" ":overlay" ":background" (str "#00000000") ":click-through" "t"]
-                    ])
-                    (rows [
-                      ["shell-surface" "edge" "line" ":output" ["getf" "wide" ":name"] ":anchors" ["list" "edge" ":left" ":right"]]
-                      [":height" "height" ":margin" ["if" ["eq" "edge" ":top"] ["list" ["-" ["gap--px" 3]] 0 0 0] 0]]
-                      [":layer" ":overlay" ":background" (str "#00000000") ":click-through" "t"]
-                    ])
-                  ])
-                ]
-              ])
-            ])
-            "nil"
-          ])
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_glass_data = {
-      blank,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["defun" "glass--margin" ["passes" "offset"]]
-        [["min" 4096 ["truncate" ["*" ["expt" 2 "passes"] ["+" "offset" 2]]]]]
-      ])
-      blank
-      (rows [
-        ["define-extension" (str "glass") [":reads" [":windows"] ":state" "nil"] ["snapshot" "state" "event"]]
-        [["declare" ["ignore" "event"]]]
-        (rows [
-          ["values" "state"]
-          (rows [
-            [
-              "cons"
-              [
-                "settings"
-                ":blur"
-                (rows [
-                  ["list*" ":enabled" "t"]
-                  ":anti-artifact-margin"
-                  [["glass--margin" ["getf" "+glass+" ":passes"] ["getf" "+glass+" ":offset"]]]
-                  "+glass+"
-                ])
-              ]
-            ]
-            (rows [
-              ["loop" "for" "window" "in" ["context" "snapshot" ":windows"]]
-              ["collect" ["window-properties" ["getf" "window" ":id"] ":blur" "t"]]
-            ])
-          ])
-          "nil"
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_hud_data = {
-      blank,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["defun" "hud--now" []]
-        [["/" ["float" ["get-internal-real-time"] "1d0"] "internal-time-units-per-second"]]
-      ])
-      blank
-      (rows [
-        ["defun" "hud--since" ["at"]]
-        [["if" "at" ["*" 1000 ["-" ["hud--now"] "at"]] "most-positive-fixnum"]]
-      ])
-      blank
-      (rows [
-        ["defun" "hud--decay" ["at" "ms"]]
-        (rows [
-          ["let" [["elapsed" ["hud--since" "at"]]]]
-          [["if" ["<" "elapsed" "ms"] ["-" 1 ["/" "elapsed" "ms"]] 0]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "hud--c" ["p" "key"]]
-        (rows [
-          ["or" ["getf" "p" "key"]]
-          [
-            [
-              "theme"
-              (rows [
-                ["case" "key"]
-                [[":bg" ":base"] [[":fg" ":color15"] ":text"] [":color1" ":red"] [":color2" ":green"] [":color3" ":yellow"]]
-                [[":color4" ":blue"] [":color5" ":mauve"] [":color6" ":sky"] [":color8" ":surface2"] ["t" ":accent"]]
-              ])
-            ]
-          ]
-        ])
-      ])
-      blank
-      ["defun" "hud--hex2" ["n"] ["format" "nil" (str "~2,'0X") ["max" 0 ["min" 255 ["round" "n"]]]]]
-      blank
-      ["defun" "hud--alpha" ["hex" "aa"] ["if" ["=" ["length" "hex"] 7] ["concatenate" (quote "string") "hex" "aa"] "hex"]]
-      blank
-      ["defun" "hud--fade" ["hex" "fraction"] ["hud--alpha" "hex" ["hud--hex2" ["*" 255 "fraction"]]]]
-      blank
-      (rows [
-        ["defun" "hud--mix" ["a" "b" "f"]]
-        (rows [
-          ["cond" [["<=" "f" 0] "a"]]
-          (rows [
-            [["and" ["=" ["length" "a"] 7] ["=" ["length" "b"] 7]]]
-            (rows [
-              ["format" "nil" (str "#~{~A~}")]
-              (rows [
-                ["loop" "for i from 1 by 2" "repeat 3"]
-                [
-                  "collect"
-                  [
-                    "hud--hex2"
-                    (rows [
-                      ["+" ["*" ["-" 1 "f"] ["parse-integer" "a" ":start" "i" ":end" ["+" "i" 2] ":radix" 16]]]
-                      [["*" "f" ["parse-integer" "b" ":start" "i" ":end" ["+" "i" 2] ":radix" 16]]]
+                      [[sec [or' [parse-integer [clock-text (str "%S")] (kw "junk-allowed") t] 0]]]
+                      [[minute [clock-text [getf (constant bar) (kw "time")]]]]
                     ])
                   ]
-                ]
-              ])
-            ])
-          ])
-          [["t" "b"]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "hud--text" ["text" "size" "color" "&optional" ["font" ["getf" "+hud+" ":font"]]]]
-        [["ui" ":text" ":text" "text" ":size" "size" ":color" "color" ":font" "font"]]
-      ])
-      blank
-      (rows [
-        ["defun" "hud--icon" ["code" "size" "color"]]
-        [["hud--text" ["string" ["code-char" "code"]] "size" "color" ["getf" "+hud+" ":icon-font"]]]
-      ])
-      blank
-      ["defun" "hud--dim" ["p" "&optional" ["fraction" "0.6"]] ["hud--fade" ["hud--c" "p" ":fg"] "fraction"]]
-      blank
-      ["defun" "hud--off" ["p"] ["hud--mix" ["hud--c" "p" ":bg"] ["hud--c" "p" ":fg"] "0.14"]]
-      blank
-      (rows [
-        ["defun" "hud--heat" ["percent" "accent" "p"]]
-        [["cond" [[">=" "percent" 90] ["hud--c" "p" ":color1"]] [[">=" "percent" 70] ["hud--c" "p" ":color3"]] ["t" "accent"]]]
-      ])
-      blank
-      (rows [
-        ["defun" "hud--frame" ["p" "accent" "flash" "content" "&key" "height"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["s" ["getf" "+hud+" ":shadow"]]]
-              [["edge" ["hud--mix" "accent" ["hud--c" "p" ":fg"] "flash"]]]
-              [
-                [
-                  "body"
+                  [[setf [getf state (kw "metrics")] metrics [getf state (kw "at")] now]]
                   (rows [
-                    ["ui" ":row" ":height" "height" ":align" ":stretch"]
-                    [":background" ["hud--alpha" ["hud--c" "p" ":bg"] (str "eb")]]
-                    [":border" 1 ":border-color" ["hud--alpha" "edge" ["if" ["plusp" "flash"] (str "ff") (str "b3")]]]
-                    [":children" ["list" ["ui" ":rect" ":width" 3 ":background" "edge"] "content"]]
+                    [unless [eql sec [getf state (kw "sec")]]]
+                    [[setf [getf state (kw "sec")] sec [getf state (kw "sec-at")] now]]
                   ])
-                ]
-              ]
-            ])
-          ]
-          [
-            [
-              "ui"
-              ":stack"
-              ":children"
-              (rows [
-                [
-                  "list"
                   (rows [
-                    ["ui" ":row" ":padding" ["list" "s" 0 0 "s"] ":align" ":stretch"]
-                    [":children" ["list" ["ui" ":rect" ":grow" 1 ":background" ["hud--mix" ["hud--c" "p" ":bg"] "edge" "0.6"]]]]
+                    [unless [equal minute [getf state (kw "minute")]]]
+                    [[setf [getf state (kw "minute-at")] [when [getf state (kw "minute")] now] [getf state (kw "minute")] minute]]
                   ])
-                ]
-                [["ui" ":row" ":padding" ["list" 0 "s" "s" 0] ":children" ["list" "body"]]]
-              ])
-            ]
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "hud--panel" ["p" "accent" "children" "&key" ["flash" 0]]]
-        (rows [
-          ["hud--frame" "p" "accent" "flash" ["ui" ":row" ":align" ":center" ":gap" 8 ":padding" (quote [0 10 0 8]) ":children" "children"]]
-          [":height" ["getf" "+hud+" ":height"]]
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_peek_data = {
-      blank,
-      function,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["define-extension" (str "peek") [":reads" [":key" ":windows"] ":state" "nil"] ["snapshot" "hidden" "event"]]
-        (rows [
-          ["let" [["live" ["mapcar" ["lambda" ["window"] ["getf" "window" ":id"]] ["context" "snapshot" ":windows"]]]]]
-          [
-            [
-              "setf"
-              "hidden"
-              (rows [
-                [
-                  "cond"
-                  (rows [
-                    [["and" ["eq" ["getf" "event" ":type"] ":key"] ["equal" ["getf" "event" ":owner"] (str "peek")]]]
-                    [["unless" "hidden" "live"]]
-                  ])
-                ]
-                [[["subsetp" "live" "hidden"] ["intersection" "hidden" "live"]]]
-              ])
-            ]
-          ]
-          (rows [
-            ["values" "hidden"]
-            (rows [
-              ["list*" ["apply" (function "bind-key") ["getf" "+peek+" ":bind"]]]
-              [["when" "hidden" ["cons" ["focus" "nil"] ["mapcar" (function "hide-window") "hidden"]]]]
-            ])
-            "nil"
-          ])
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_plates_data = {
-      blank,
-      function,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["defun" "cassette--line" ["items" "edge"]]
-        (rows [
-          [
-            "let"
-            (rows [
-              [["inset" ["getf" "+cassette+" ":inset"]]]
-              [["seam" ["cassette--split"]]]
-            ])
-          ]
-          (rows [
-            [
-              "flet"
-              [
-                (rows [
-                  ["half" ["plate" "justify" "padding"]]
-                  [["ui" ":row" ":width" 0 ":grow" 1 ":justify" "justify" ":padding" "padding" ":children" ["remove" "nil" ["list" "plate"]]]]
-                ])
-              ]
-            ]
-            (rows [
-              ["ui" ":row" ":align" ":start" ":justify" ":center"]
-              [
-                ":children"
-                (rows [
-                  ["if" "seam"]
-                  (rows [
-                    ["list" ["half" ["cassette--plate" ["subseq" "items" 0 "seam"] ":start" "edge"] ":end" ["list" 0 "inset" 0 0]]]
-                    [["half" ["cassette--plate" ["nthcdr" "seam" "items"] ":end" "edge"] ":start" ["list" 0 0 0 "inset"]]]
-                  ])
-                  [["remove" "nil" ["list" ["cassette--plate" "items" ":both" "edge"]]]]
-                ])
-              ]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        [
-          "define-extension"
-          (str "bar")
-          (rows [
-            [":reads" [":system" ":services" ":data" ":outputs"]]
-            [":state" ["list" ":cpu" "nil" ":memory" "nil" ":gpu" "nil"]]
-          ])
-        ]
-        [["snapshot" "state" "event"]]
-        (rows [
-          ["when" ["and" ["eq" ["getf" "event" ":type"] ":timer"] ["eq" ["getf" "event" ":name"] ":sample"]]]
-          (rows [
-            ["let" [["system" ["context" "snapshot" ":system"]]]]
-            (rows [
-              ["dolist" ["probe" (quote [":cpu" ":memory" ":gpu"])]]
-              [["setf" ["getf" "state" "probe"] ["probe--sample" "probe" ["getf" "state" "probe"] "system"]]]
-            ])
-          ])
-        ])
-        (rows [
-          [
-            "let*"
-            (rows [
-              [
-                [
-                  "items"
-                  (rows [
-                    ["loop" "for" "module" "in" ["getf" "+cassette+" ":modules"]]
-                    ["collect" ["cassette--module" "module" "state" "snapshot"]]
-                  ])
-                ]
-              ]
-              [["focal" ["state-value" "snapshot" ":focal-frame"]]]
-              [["wide" ["first" ["sort" ["copy-list" ["context" "snapshot" ":outputs"]] (function ">") ":key" ["lambda" ["o"] ["getf" "o" ":width"]]]]]]
-              [["height" ["cassette--height" ":bottom"]]]
-              [["hot" ["loop" "for" "probe" "in" (quote [":cpu" ":gpu"]) "thereis" ["cassette--hot-p" ["getf" ["getf" "state" "probe"] ":temp"]]]]]
-            ])
-          ]
-          (rows [
-            ["values" "state"]
-            (rows [
-              [
-                "append"
-                (rows [
-                  ["list" ["interval" ":sample" ["getf" "+cassette+" ":sample"]]]
-                  [["publish-state" ":hud-hot" ["and" "hot" "t"]]]
-                  (rows [
-                    ["publish-state" ":bar-floor"]
-                    (rows [
-                      ["when" ["member" ":bottom" ["getf" "+cassette+" ":edges"]]]
-                      (rows [
-                        [
-                          "cond"
+                  ({
+                    media,
+                    next,
+                  }:
+                    rows [
+                      [multiple-value-bind [media next] [if' [member (kw "media") modules] [bar--media snapshot state now] [values nil state]]]
+                      [[setf state next]]
+                      ({
+                        cpu-temp,
+                        gpu-temp,
+                        limit,
+                        hot,
+                        moving,
+                        panels,
+                      }:
+                        rows [
                           [
-                            "focal"
+                            "let*"
                             (rows [
-                              ["list" ":output" ["getf" "focal" ":output"]]
-                              [":y" ["+" ["getf" "focal" ":top"] ["getf" "focal" ":height"] ["round" "height" 2]]]
-                            ])
-                          ]
-                        ]
-                        [["wide" ["list" ":output" ["getf" "wide" ":name"] ":y" ["getf" "wide" ":height"]]]]
-                      ])
-                    ])
-                  ])
-                ])
-              ]
-              (rows [
-                ["loop" "for" "edge" "in" ["getf" "+cassette+" ":edges"]]
-                ["for" "line" "=" ["cassette--line" "items" "edge"]]
-                ["for" "height" "=" ["cassette--height" "edge"]]
-                [
-                  "collect"
-                  (rows [
-                    ["if" "focal"]
-                    (rows [
-                      ["shell-surface" "edge" "line" ":output" ["getf" "focal" ":output"] ":anchors" (quote [":top" ":left"])]
-                      [":width" ["getf" "focal" ":width"] ":height" "height"]
-                      [
-                        ":margin"
-                        (rows [
-                          [
-                            "list"
-                            (rows [
-                              [
-                                "-"
-                                (rows [
-                                  ["if" ["eq" "edge" ":top"]]
-                                  [["getf" "focal" ":top"]]
-                                  [["+" ["getf" "focal" ":top"] ["getf" "focal" ":height"]]]
-                                ])
-                              ]
-                              [["round" "height" 2]]
-                            ])
-                          ]
-                          [0 0 ["getf" "focal" ":left"]]
-                        ])
-                      ]
-                      [":layer" ":overlay" ":background" (str "#00000000") ":click-through" "t"]
-                    ])
-                    (rows [
-                      ["shell-surface" "edge" "line" ":output" ["getf" "wide" ":name"] ":anchors" ["list" "edge" ":left" ":right"]]
-                      [":height" "height" ":margin" ["if" ["eq" "edge" ":top"] (quote [(-1) 0 0 0]) (quote [0 0 (-1) 0])]]
-                      [":exclusive-zone" 0]
-                      [":layer" ":overlay" ":background" (str "#00000000") ":click-through" "t"]
-                    ])
-                  ])
-                ]
-              ])
-            ])
-            "nil"
-          ])
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_policy_data = {
-      blank,
-      function,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["defun" "policy--prefix-p" ["prefix" "text"]]
-        (rows [
-          ["and" ["stringp" "text"] [">=" ["length" "text"] ["length" "prefix"]]]
-          [["string=" "prefix" "text" ":end2" ["length" "prefix"]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "policy--launch" ["command"]]
-        [["second" ["assoc" "command" "+policy-launches+" ":test" (function "equal")]]]
-      ])
-      blank
-      (rows [
-        ["defun" "policy--terminal" ["windows"]]
-        (rows [
-          [
-            "getf"
-            (rows [
-              ["find" ["getf" "+policy-terminal+" ":app-id"] "windows"]
-              [":key" ["lambda" ["window"] ["getf" "window" ":app-id"]] ":test" (function "equal")]
-            ])
-          ]
-          ":id"
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "policy--unmanaged-p" ["snapshot" "window"]]
-        (rows [
-          ["let" [["properties" ["rules-for" "snapshot" "window"]]]]
-          [["or" ["cdr" ["assoc" ":float" "properties"]] ["cdr" ["assoc" ":hidden" "properties"]]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "policy--area" ["snapshot" "&optional" "name"]]
-        (rows [
-          ["let" [["areas" ["context" "snapshot" ":workareas"]]]]
-          (rows [
-            ["or" ["find" "name" "areas" ":test" (function "equal") ":key" ["lambda" ["area"] ["getf" "area" ":name"]]]]
-            [["first" "areas"]]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "policy--centred" ["area" "ratio"]]
-        (rows [
-          [
-            "let"
-            (rows [
-              [["width" ["max" 1 ["floor" ["*" ["getf" "area" ":width"] "ratio"]]]]]
-              [["height" ["max" 1 ["floor" ["*" ["getf" "area" ":height"] "ratio"]]]]]
-            ])
-          ]
-          (rows [
-            ["list" ["+" ["getf" "area" ":x"] ["floor" ["-" ["getf" "area" ":width"] "width"] 2]]]
-            [["+" ["getf" "area" ":y"] ["floor" ["-" ["getf" "area" ":height"] "height"] 2]]]
-            ["width" "height"]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["define-extension" (str "session") [] ["snapshot" "state" "event"]]
-        [["declare" ["ignore" "snapshot" "event"]]]
-        (rows [
-          ["values" "state"]
-          (rows [
-            ["append" ["mapcar" ["lambda" ["display"] ["apply" (function "configure-output") "display"]] "+policy-displays+"]]
-            [["list" ["apply" (function "settings") "+policy-settings+"]]]
-          ])
-          "nil"
-        ])
-      ])
-      blank
-      (rows [
-        ["define-extension" (str "rules") [] ["snapshot" "state" "event"]]
-        [["declare" ["ignore" "snapshot" "event"]]]
-        (rows [
-          ["values" "state"]
-          (rows [
-            [
-              "list"
-              (rows [
-                ["window-rule" ":launcher" ":app-id" ["getf" "+policy-launcher+" ":app-id"]]
-                [":properties" (quote [[":float" "." "t"]]) ":reads" (quote [":workareas"])]
-                [
-                  ":apply"
-                  (rows [
-                    ["lambda" ["window" "snapshot" "state" "event"]]
-                    [["declare" ["ignore" "event"]]]
-                    (rows [
-                      [
-                        "let"
-                        (rows [
-                          [["id" ["getf" "window" ":id"]]]
-                          [["area" ["policy--area" "snapshot"]]]
-                        ])
-                      ]
-                      (rows [
-                        ["values" "state"]
-                        (rows [
-                          [
-                            "append"
-                            (rows [
-                              ["when" "area"]
+                              [[cpu-temp [getf [getf state (kw "cpu")] (kw "temp")]]]
+                              [[gpu-temp [getf [getf state (kw "gpu")] (kw "temp")]]]
+                              [[limit [getf (constant bar) (kw "hot")]]]
+                              [[hot [or' [and [realp cpu-temp] [">=" cpu-temp limit]] [and [realp gpu-temp] [">=" gpu-temp limit]]]]]
+                              [[moving ({m}: [loop for [nil m] on metrics by (function cddr) thereis [bar--moving-p m]])]]
                               [
                                 [
-                                  "list"
-                                  [
-                                    "apply"
-                                    (function "place")
-                                    "id"
-                                    (rows [
-                                      "policy--centred"
-                                      ["area" ["getf" "+policy-launcher+" ":ratio"]]
+                                  panels
+                                  ({module}:
+                                    rows [
+                                      [loop for module in' modules]
+                                      [collect [bar--module module p state snapshot metrics media now]]
                                     ])
-                                  ]
                                 ]
                               ]
                             ])
                           ]
-                          [["list" ["focus" "id"]]]
-                        ])
-                        "nil"
-                      ])
-                    ])
-                  ])
-                ]
-              ])
-            ]
-            (rows [
-              ["window-rule" ":hidden" ":app-id" ["getf" "+policy-hidden-window+" ":app-id"]]
-              [
-                ":match"
-                (rows [
-                  ["lambda" ["window" "snapshot"]]
-                  [["declare" ["ignore" "snapshot"]]]
-                  (rows [
-                    ["policy--prefix-p" ["getf" "+policy-hidden-window+" ":title-prefix"]]
-                    [["getf" "window" ":title"]]
-                  ])
-                ])
-              ]
-              [":properties" (quote [[":hidden" "." "t"]])]
-              [
-                ":apply"
-                (rows [
-                  ["lambda" ["window" "snapshot" "state" "event"]]
-                  [["declare" ["ignore" "snapshot" "event"]]]
-                  [["values" "state" ["list" ["hide-window" ["getf" "window" ":id"]]] "nil"]]
-                ])
-              ]
-            ])
-          ])
-          "nil"
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_shader_wallpaper_data = {
-      blank,
-      function,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["defun" "shader-wallpaper--menu" ["shaders" "chosen" "outputs"]]
-        (rows [
-          ["destructuring-bind" ["&key" "width" "height" "gap" "border"] ["getf" "+shader-wallpaper+" ":preview"]]
-          (rows [
-            ["let" [["count" ["length" "shaders"]]]]
-            (rows [
-              [
-                "list*"
-                (rows [
-                  ["shell-surface" ":shader-menu" ["ui" ":column" ":on-click" ":cancel" ":background" (str "#00000066")]]
-                  [":anchors" (quote [":top" ":right" ":bottom" ":left"]) ":layer" ":overlay"]
-                  [":background" (str "#00000000") ":blur" "t"]
-                ])
-              ]
-              [["keyboard-grab"]]
-              [["bind-key" "nil" (str "Left") ":up"] ["bind-key" "nil" (str "h") ":up"]]
-              [["bind-key" "nil" (str "Right") ":down"] ["bind-key" "nil" (str "l") ":down"]]
-              [["bind-key" "nil" (str "Return") ":select"] ["bind-key" "nil" (str "Escape") ":cancel"]]
-              (rows [
-                ["loop" "for output in outputs"]
-                ["for" "scale" "=" ["getf" "output" ":scale-120" 120]]
-                ["for" "output-width" "=" ["floor" ["*" ["getf" "output" ":width"] 120] "scale"]]
-                ["for" "output-height" "=" ["floor" ["*" ["getf" "output" ":height"] 120] "scale"]]
-                ["for" "tile-width" "=" ["min" "width" ["floor" ["-" "output-width" ["*" ["1+" "count"] "gap"]] "count"]]]
-                ["for" "tile-height" "=" ["floor" ["*" "height" "tile-width"] "width"]]
-                ["for" "left" "=" ["floor" ["-" "output-width" ["-" ["*" "count" ["+" "tile-width" "gap"]] "gap"]] 2]]
-                ["for" "top" "=" ["floor" ["-" "output-height" "tile-height"] 2]]
-                [
-                  "nconc"
-                  (rows [
-                    ["loop" "for" ["path" "fps"] "in" "shaders"]
-                    "for index from 0"
-                    [
-                      "collect"
-                      (rows [
-                        "shell-surface"
-                        (rows [
-                          ["intern" ["format" "nil" (str "SHADER-PREVIEW-~A-~D") ["getf" "output" ":name"] "index"]]
-                          ":keyword"
-                        ])
-                        (rows [
-                          ["ui" ":stack" ":width" "tile-width" ":height" "tile-height"]
-                          [":border" ["if" ["=" "index" "chosen"] "border" 0]]
-                          [":border-color" ["theme" ":accent"]]
-                          [":on-click" ["intern" ["format" "nil" (str "SELECT-~D") "index"] ":keyword"]]
-                          [":on-hover" ["intern" ["format" "nil" (str "HOVER-~D") "index"] ":keyword"]]
-                        ])
-                        [":output" ["getf" "output" ":name"] ":anchors" (quote [":top" ":left"])]
-                        [":margin" ["list" "top" 0 0 ["+" "left" ["*" "index" ["+" "tile-width" "gap"]]]]]
-                        [":width" "tile-width" ":height" "tile-height" ":layer" ":overlay"]
-                        [":background" ["list" ":shader" "path" ":fps" "fps"]]
-                      ])
-                    ]
-                  ])
-                ]
-              ])
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["define-extension" (str "shader-wallpaper") [":reads" [":key" ":ui" ":outputs"] ":state" "nil"] ["snapshot" "state" "event"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["shaders" ["getf" "+shader-wallpaper+" ":shaders"]]]
-              [["count" ["length" "shaders"]]]
-            ])
-          ]
-          (rows [
-            ["destructuring-bind" ["&key" ["index" 0] "menu"] "state"]
-            (rows [
-              ["when" ["equal" ["getf" "event" ":owner"] (str "shader-wallpaper")]]
-              (rows [
-                ["if" ["equal" ["getf" "event" ":command"] (str "menu")]]
-                [["setf" "menu" "index"]]
-                (rows [
-                  ["multiple-value-bind" ["action" "choice"] ["and" "menu" ["menu-choice" "event" "menu" "count"]]]
-                  (rows [
-                    ["case" "action"]
-                    [[":select" ["setf" "index" "choice" "menu" "nil"]]]
-                    [[":cancel" ["setf" "menu" "nil"]]]
-                    [[":move" ["setf" "menu" "choice"]]]
-                  ])
-                ])
-              ])
-            ])
-            [["setf" "index" ["mod" "index" "count"] "menu" ["and" "menu" ["mod" "menu" "count"]]]]
-            (rows [
-              [
-                "let"
-                (rows [
-                  [["shown" ["nth" ["or" "menu" "index"] "shaders"]]]
-                  [["command" ["third" ["nth" "index" "shaders"]]]]
-                ])
-              ]
-              (rows [
-                ["values" ["list" ":index" "index" ":menu" "menu"]]
-                (rows [
-                  ["list*" ["apply" (function "bind-key") ["getf" "+shader-wallpaper+" ":bind"]]]
-                  (rows [
-                    ["shell-surface" ":shader-wallpaper" ["ui" ":stack"]]
-                    [":anchors" (quote [":top" ":right" ":bottom" ":left"]) ":layer" ":background"]
-                    [":background" ["list" ":shader" ["first" "shown"] ":fps" ["second" "shown"]]]
-                  ])
-                  (rows [
-                    ["append" ["when" "command" ["list" ["exec-async" ":theme" "command"]]]]
-                    [["when" "menu" ["shader-wallpaper--menu" "shaders" "menu" ["context" "snapshot" ":outputs"]]]]
-                  ])
-                ])
-                "nil"
-              ])
-            ])
-          ])
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_spine_data = {
-      at,
-      blank,
-      function,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["defun" "spine--parts" ["text"]]
-        (rows [
-          [
-            "loop"
-            ''
-              with start = 0
-                      for''
-            "i"
-            "="
-            ["position-if" ["lambda" ["c"] ["member" "c" (quote ["#\\:" "#\\Space"])]] "text" ":start" "start"]
-          ]
-          ["for" "part" "=" ["subseq" "text" "start" "i"]]
-          ["when" ["plusp" ["length" "part"]] "collect part"]
-          ["while i" "do" ["setf" "start" ["1+" "i"]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--text" ["text" "color" "&optional" ["size" 11]]]
-        (rows [
-          ["ui" ":text" ":text" "text" ":size" ["cassette--px" "size"] ":line-height" ["cassette--px" "size"] ":color" "color"]
-          [":font" ["getf" "+cassette+" ":font"]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--groove" []]
-        [["ui" ":rect" ":height" 1 ":background" ["cassette--c" ":groove"]]]
-      ])
-      blank
-      (rows [
-        ["defun" "spine--ladder" ["fraction"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["count" ["getf" "+cassette+" ":segments"]]]
-              [["lit" ["round" ["*" "count" ["max" 0 ["min" 1 "fraction"]]]]]]
-            ])
-          ]
-          (rows [
-            ["ui" ":column" ":gap" ["cassette--px" 1] ":align" ":center"]
-            [
-              ":children"
-              (rows [
-                ["loop" "for" "i" "from" ["1-" "count"] "downto" 0]
-                [
-                  "collect"
-                  (rows [
-                    ["ui" ":rect" ":width" ["cassette--px" 8] ":height" ["cassette--px" 3]]
-                    [":background" ["if" ["<" "i" "lit"] ["cassette--zone" ["/" ["1+" "i"] "count"]] ["cassette--c" ":led-off"]]]
-                  ])
-                ]
-              ])
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--gauge" ["label" "percent" "detail" "&optional" "hot"]]
-        (rows [
-          ["let" [["percent" ["max" 0 ["min" 100 ["round" ["or" "percent" 0]]]]]]]
-          (rows [
-            ["ui" ":column" ":align" ":center" ":gap" ["cassette--px" 2]]
-            [
-              ":children"
-              (rows [
-                ["remove" "nil"]
-                (rows [
-                  ["list" ["spine--text" "label" ["cassette--c" ":dim"] 7]]
-                  [["spine--ladder" ["/" "percent" 100]]]
-                  (rows [
-                    ["ui" ":row" ":align" ":end"]
-                    [
-                      ":children"
-                      (rows [
-                        ["list" ["spine--text" ["format" "nil" (str "~D") "percent"] ["cassette--c" ":ink"]]]
-                        [["spine--text" (str "%") ["cassette--c" ":dim"] 7]]
-                      ])
-                    ]
-                  ])
-                  [["when" "detail" ["spine--text" "detail" ["if" "hot" ["cassette--c" ":orange"] ["cassette--c" ":dim"]] 7]]]
-                ])
-              ])
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--counter" []]
-        (rows [
-          ["ui" ":column" ":align" ":stretch" ":gap" ["cassette--px" 1]]
-          [
-            ":children"
-            (rows [
-              ["loop" "for" "part" "in" ["spine--parts" ["clock-text" ["getf" "+cassette+" ":time"]]]]
-              [
-                "collect"
-                (rows [
-                  ["cassette--window" "part" ":face" ["cassette--c" ":counter"] ":rim" ["cassette--c" ":rim"]]
-                  (at 23 [":ghost" ["cassette--c" ":counter-ghost"] ":ink" ["cassette--c" ":amber"]])
-                ])
-              ]
-            ])
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--date" []]
-        (rows [
-          ["destructuring-bind" ["&optional" "day" "date" "month" "&rest" "rest"]]
-          [["spine--parts" ["string-upcase" ["clock-text" ["getf" "+cassette+" ":date"]]]]]
-          [["declare" ["ignore" "rest"]]]
-          (rows [
-            ["ui" ":column" ":align" ":center" ":gap" ["cassette--px" 2]]
-            [
-              ":children"
-              (rows [
-                ["remove" "nil"]
-                (rows [
-                  ["list" ["when" "day" ["spine--text" "day" ["cassette--c" ":dim"] 7]]]
-                  [["when" "date" ["spine--text" "date" ["cassette--c" ":ink"]]]]
-                  [["when" "month" ["spine--text" "month" ["cassette--c" ":dim"] 7]]]
-                ])
-              ])
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--stacked" ["text" "color"]]
-        (rows [
-          ["ui" ":column" ":align" ":center"]
-          [
-            ":children"
-            (rows [
-              ["loop" "for" "c" "across" ["string-right-trim" (str " ") "text"]]
-              ["collect" ["spine--text" ["string" "c"] "color" 8]]
-            ])
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--media" ["snapshot"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["service" ["service-state" "snapshot" ":mpris"]]]
-              [["status" ["getf" "service" ":status"]]]
-              [["title" ["getf" "service" ":title"]]]
-              [["length" ["getf" "service" ":length"]]]
-              [["position" ["getf" "service" ":position"]]]
-              [["played" ["if" ["and" ["realp" "length"] ["plusp" "length"] ["realp" "position"]] ["max" 0 ["min" 1 ["/" "position" "length"]]] 0]]]
-            ])
-          ]
-          (rows [
-            ["when" ["and" ["stringp" "title"] ["plusp" ["length" "title"]] ["member" "status" (quote [(str "Playing") (str "Paused")]) ":test" (function "equal")]]]
-            (rows [
-              ["ui" ":column" ":align" ":center" ":gap" ["cassette--px" 4]]
-              [
-                ":children"
-                (rows [
-                  ["list" ["cassette--led" ["equal" "status" (str "Playing")]]]
-                  [["cassette--reel" ["-" 1 "played"]]]
-                  [["spine--stacked" ["cassette--fit" "title" ["getf" "+cassette+" ":spine-title"]] ["cassette--c" ":ink"]]]
-                  [["cassette--reel" "played"]]
-                ])
-              ]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--module" ["module" "state" "snapshot"]]
-        (rows [
-          ["let" [["cpu" ["getf" "state" ":cpu"]] ["memory" ["getf" "state" ":memory"]] ["gpu" ["getf" "state" ":gpu"]]]]
-          (rows [
-            ["ecase" "module"]
-            [[":time" ["spine--counter"]]]
-            [[":date" ["spine--date"]]]
-            [[":media" ["spine--media" "snapshot"]]]
-            [[":cpu" ["spine--gauge" (str "CPU") ["getf" "cpu" ":percent"] ["cassette--degrees" ["getf" "cpu" ":temp"]] ["cassette--hot-p" ["getf" "cpu" ":temp"]]]]]
-            [[":memory" ["spine--gauge" (str "MEM") ["getf" "memory" ":percent"] ["cassette--gib" ["getf" "memory" ":used"]]]]]
-            [
-              [
-                ":gpu"
-                (rows [
-                  ["when" ["probe--gpu-p" "gpu"]]
-                  [["spine--gauge" (str "GPU") ["getf" "gpu" ":percent"] ["cassette--degrees" ["getf" "gpu" ":temp"]] ["cassette--hot-p" ["getf" "gpu" ":temp"]]]]
-                ])
-              ]
-            ]
-            [
-              [
-                ":vram"
-                (rows [
-                  ["when" ["probe--gpu-p" "gpu"]]
-                  (rows [
-                    ["spine--gauge" (str "VRAM") ["if" ["plusp" ["or" ["getf" "gpu" ":total"] 0]] ["round" ["*" 100 ["or" ["getf" "gpu" ":used"] 0]] ["getf" "gpu" ":total"]] 0]]
-                    [["cassette--gib" ["getf" "gpu" ":used"]]]
-                  ])
-                ])
-              ]
-            ]
-            [
-              [
-                ":battery"
-                (rows [
-                  ["let" [["battery" ["service-state" "snapshot" ":battery"]]]]
-                  [["spine--gauge" ["if" ["getf" "battery" ":charging"] (str "CHG") (str "BAT")] ["getf" "battery" ":percent"] "nil"]]
-                ])
-              ]
-            ]
-            [
-              [
-                ":network"
-                (rows [
-                  ["let" [["online" ["getf" ["service-state" "snapshot" ":network"] ":connected"]]]]
-                  (rows [
-                    ["ui" ":column" ":align" ":center" ":gap" ["cassette--px" 3]]
-                    [
-                      ":children"
-                      (rows [
-                        ["list" ["cassette--led" "online"]]
-                        [["spine--text" ["if" "online" (str "NET") (str "OFF")] ["cassette--c" ":dim"] 7]]
-                      ])
-                    ]
-                  ])
-                ])
-              ]
-            ]
-            [
-              [
-                ":frame"
-                (rows [
-                  ["let" [["battery" ["state-value" "snapshot" ":frame-battery"]]]]
-                  (rows [
-                    ["when" ["getf" "battery" ":percent"]]
-                    [["spine--gauge" ["if" ["equal" ["getf" "battery" ":status"] (str "Discharging")] (str "VR") (str "VR+")] ["getf" "battery" ":percent"] "nil"]]
-                  ])
-                ])
-              ]
-            ]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--cell" ["item"]]
-        [["ui" ":row" ":justify" ":center" ":padding" ["list" ["cassette--px" 6] 0 ["cassette--px" 6] 0] ":children" ["list" "item"]]]
-      ])
-      blank
-      (rows [
-        ["defun" "spine--run" ["items"]]
-        (rows [
-          ["ui" ":column" ":height" 0 ":grow" 1 ":align" ":stretch" ":justify" ":center"]
-          [
-            ":children"
-            (rows [
-              ["loop" "for" ["item" "." "rest"] "on" ["remove" "nil" "items"]]
-              ["collect" ["spine--cell" "item"]]
-              ["when rest" "collect" ["spine--groove"]]
-            ])
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--tray-height" ["tray"]]
-        (str ''
-          Logical height of the tray slot that TRAY, a published :shelf-tray request
-          of (:count N :size PX), asks for at the top of the spine.'')
-        [["*" ["getf" "tray" ":count" 0] ["getf" "tray" ":size" 0]]]
-      ])
-      blank
-      (rows [
-        ["defun" "spine--body" ["items" "&optional" ["tray-height" 0]]]
-        (rows [
-          ["ui" ":column" ":align" ":stretch" ":background" ["cassette--c" ":face"] ":border" 1 ":border-color" ["cassette--c" ":rim"]]
-          [
-            ":children"
-            (rows [
-              ["remove" "nil"]
-              (rows [
-                [
-                  "list"
-                  (rows [
-                    ["when" ["plusp" "tray-height"]]
-                    [["ui" ":rect" ":height" "tray-height" ":background" ["cassette--c" ":counter"]]]
-                  ])
-                ]
-                [["spine--cell" ["cassette--grille"]]]
-                [["spine--run" "items"]]
-                [["spine--cell" ["cassette--grille"]]]
-              ])
-            ])
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--covered-p" ["snapshot" "box"]]
-        (str ''
-          Whether a placed window overlaps BOX. Tiled windows never reach the seam, so
-          this is a float or a fullscreen window, which the spine then sits beneath.'')
-        (rows [
-          ["loop" "for" "entry" "in" ["context" "snapshot" ":layout"]]
-          [
-            "thereis"
-            (rows [
-              ["and" ["getf" "entry" ":visible"]]
-              [["<" ["getf" "entry" ":x"] ["+" ["getf" "box" ":x"] ["getf" "box" ":width"]]]]
-              [["<" ["getf" "box" ":x"] ["+" ["getf" "entry" ":x"] ["getf" "entry" ":width"]]]]
-              [["<" ["getf" "entry" ":y"] ["+" ["getf" "box" ":y"] ["getf" "box" ":height"]]]]
-              [["<" ["getf" "box" ":y"] ["+" ["getf" "entry" ":y"] ["getf" "entry" ":height"]]]]
-            ])
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--fullscreen-p" ["snapshot" "output"]]
-        (rows [
-          ["loop" "for" "entry" "in" ["context" "snapshot" ":layout"]]
-          [
-            "thereis"
-            (rows [
-              ["and" ["getf" "entry" ":visible"] ["getf" "entry" ":fullscreen"]]
-              [["<=" ["getf" "entry" ":x"] ["getf" "output" ":x"] ["+" ["getf" "entry" ":x"] ["getf" "entry" ":width"] (-1)]]]
-              [["<=" ["getf" "entry" ":y"] ["getf" "output" ":y"] ["+" ["getf" "entry" ":y"] ["getf" "entry" ":height"] (-1)]]]
-            ])
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "spine--plates" ["items" "output" "focal" "snapshot"]]
-        (rows [
-          [
-            "let"
-            (rows [
-              [["split" ["or" ["cassette--split"] ["length" "items"]]]]
-              [["layer" ["if" ["spine--fullscreen-p" "snapshot" "output"] ":bottom" ":top"]]]
-            ])
-          ]
-          (rows [
-            ["loop" "for" "edge" "in" (quote [":top" ":bottom"])]
-            ["for" "plate" "=" ["cassette--plate" ["if" ["eq" "edge" ":top"] ["subseq" "items" 0 "split"] ["nthcdr" "split" "items"]] ":both" "edge"]]
-            ["for" "height" "=" ["cassette--height" "edge"]]
-            "when plate"
-            (at 8 [
-              "collect"
-              (rows [
-                ["apply" (function "shell-surface") ["intern" ["format" "nil" (str "~A-~A") "edge" ["getf" "output" ":name"]] ":keyword"] "plate"]
-                [":output" ["getf" "output" ":name"] ":layer" "layer"]
-                [":background" (str "#00000000") ":blur" "t" ":click-through" "t"]
-                (rows [
-                  ["if" "focal"]
-                  (rows [
-                    ["list" ":anchors" (quote [":top"])]
-                    [
-                      ":margin"
-                      (rows [
-                        [
-                          "list"
                           (rows [
-                            ["-" ["+" ["getf" "focal" ":top"] ["if" ["eq" "edge" ":top"] 0 ["getf" "focal" ":height"]]]]
-                            [["round" "height" 2]]
+                            [values state]
+                            (rows [
+                              [append [list [interval (kw "clock") [getf (constant bar) (kw "clock-tick")]]]]
+                              ({source}:
+                                rows [
+                                  [loop for source in' probes]
+                                  [when ["<" [getf [getf state source] (kw "failures") 0] 3]]
+                                  (at 8 [collect [interval source [getf [getf (constant bar) (kw "sample")] source]]])
+                                ])
+                              [[when moving [list [interval (kw "fast") [getf (constant bar) (kw "tick")]]]]]
+                              [[list [publish-state (kw "hud-hot") [and hot t]]]]
+                              [[bar--surfaces modules panels]]
+                            ])
+                            nil
                           ])
-                        ]
-                        [0 0 0]
-                      ])
-                    ]
-                  ])
-                  (rows [
-                    ["list" ":anchors" ["list" "edge"] ":margin" ["if" ["eq" "edge" ":top"] (quote [(-1) 0 0 0]) (quote [0 0 (-1) 0])]]
-                    [":exclusive-zone" ["1-" "height"]]
-                  ])
+                        ])
+                    ])
                 ])
-              ])
             ])
-          ])
         ])
-      ])
+    ]);
+    modules_desktop_session_tomoe_lisp_cassette_data = {
+      and,
+      and-key,
+      and-optional,
+      append,
+      at,
+      below,
+      blank,
+      cassette,
+      char,
+      char-code,
+      clock-text,
+      collect,
+      concatenate,
+      cond,
+      constant,
+      defun,
+      defvar,
+      digit-char-p,
+      dot,
+      double,
+      ecase,
+      eq,
+      equal,
+      first,
+      for,
+      format,
+      from,
+      function,
+      getf,
+      if',
+      in-package,
+      kw,
+      lambda,
+      length,
+      let',
+      list,
+      loop,
+      map,
+      max,
+      member,
+      min,
+      nil,
+      oddp,
+      on,
+      or',
+      parse-integer,
+      plusp,
+      probe--gpu-p,
+      quote,
+      realp,
+      remove,
+      remove-if,
+      repeat,
+      return,
+      round,
+      rows,
+      second,
+      service-state,
+      special,
+      state-value,
+      str,
+      string,
+      string-upcase,
+      stringp,
+      subseq,
+      substitute,
+      t,
+      ui,
+      uninterned,
+      when,
+      ...
+    }: ({
+      cassette--px',
+      cassette-mode,
+      cassette--c',
+      cassette--text,
+      cassette--engraved,
+      cassette--ghost,
+      cassette--window',
+      cassette--zone',
+      cassette--ladder,
+      cassette--led',
+      cassette--gauge,
+      cassette--degrees',
+      cassette--gib',
+      cassette--hot-p',
+      cassette--fit',
+      cassette--reel',
+      cassette--media,
+      cassette--counter,
+      cassette--module',
+      cassette--grille',
+      cassette--groove,
+      cassette--plate',
+      cassette--shadow,
+      cassette--height',
+      cassette--split',
+    }: [
+      [in-package (uninterned "tomoe-user")]
       blank
-      (rows [
-        [
-          "define-extension"
-          (str "bar")
-          (rows [
-            [":reads" [":system" ":services" ":data" ":outputs" ":layout"]]
-            [":state" ["list" ":cpu" "nil" ":memory" "nil" ":gpu" "nil"]]
-          ])
-        ]
-        [["snapshot" "state" "event"]]
-        (rows [
-          ["when" ["and" ["eq" ["getf" "event" ":type"] ":timer"] ["eq" ["getf" "event" ":name"] ":sample"]]]
-          (rows [
-            ["let" [["system" ["context" "snapshot" ":system"]]]]
-            (rows [
-              ["dolist" ["probe" (quote [":cpu" ":memory" ":gpu"])]]
-              [["setf" ["getf" "state" "probe"] ["probe--sample" "probe" ["getf" "state" "probe"] "system"]]]
-            ])
-          ])
+      ({n}: [defun cassette--px' [n] [max 1 [round ["*" n [getf (constant cassette) (kw "scale")]]]]])
+      blank
+      [defvar (special cassette-mode) (kw "dark")]
+      blank
+      ({key}: [defun cassette--c' [key] [getf [getf [getf (constant cassette) (kw "colors")] (special cassette-mode)] key]])
+      blank
+      ({
+        text,
+        color,
+      }:
+        rows [
+          [defun cassette--text [text color]]
+          [[ui (kw "text") (kw "text") text (kw "size") [cassette--px' 11] (kw "line-height") [cassette--px' 11] (kw "color") color (kw "font") [getf (constant cassette) (kw "font")]]]
         ])
-        (rows [
+      blank
+      ({
+        text,
+        color,
+      }:
+        rows [
+          [defun cassette--engraved [text color]]
           [
-            "let*"
+            [
+              ui
+              (kw "stack")
+              (kw "children")
+              (rows [
+                [list [ui (kw "column") (kw "padding") (quote [1 0 0 0]) (kw "children") [list [cassette--text text [cassette--c' (kw "shine")]]]]]
+                [[cassette--text text color]]
+              ])
+            ]
+          ]
+        ])
+      blank
+      ({text}: [defun cassette--ghost [text] [map (quote string) ({c}: [lambda [c] [if' [digit-char-p c] (char "8") c]]) text]])
+      blank
+      ({
+        text,
+        face,
+        rim,
+        ghost,
+        ink,
+        shown,
+      }:
+        rows [
+          [
+            defun
+            cassette--window'
             (rows [
-              [["*cassette-mode*" ["state-value" "snapshot" ":theme-mode" ":dark"]]]
-              [["seam" ["state-value" "snapshot" ":deck-seam"]]]
-              [
-                [
-                  "output"
-                  [
-                    "and"
-                    "seam"
-                    (rows [
-                      ["find" ["getf" "seam" ":output"] ["context" "snapshot" ":outputs"]]
-                      [":key" ["lambda" ["o"] ["getf" "o" ":name"]] ":test" (function "equal")]
-                    ])
-                  ]
-                ]
-              ]
-              [["scale" ["and" "output" ["/" ["getf" "output" ":scale-120" 120] 120]]]]
-              [["narrow" ["remove-if-not" ["lambda" ["o"] ["deck--narrow-p" ["list" ":output" "o"]]] ["context" "snapshot" ":outputs"]]]]
-              [["focal" ["state-value" "snapshot" ":focal-frame"]]]
-              [["tray-height" ["spine--tray-height" ["state-value" "snapshot" ":shelf-tray"]]]]
-              [
-                [
-                  "items"
-                  (rows [
-                    ["when" "narrow"]
-                    (rows [
-                      ["loop" "for" "module" "in" ["getf" "+cassette+" ":modules"]]
-                      ["collect" ["cassette--module" "module" "state" "snapshot"]]
-                    ])
-                  ])
-                ]
-              ]
-              [["hot" ["loop" "for" "probe" "in" (quote [":cpu" ":gpu"]) "thereis" ["cassette--hot-p" ["getf" ["getf" "state" "probe"] ":temp"]]]]]
+              [text and-key [face [cassette--c' (kw "lcd")]] [rim [cassette--c' (kw "rim")]] [ghost [cassette--c' (kw "ghost")]]]
+              (at 11 [[ink [cassette--c' (kw "ink")]] [shown text]])
             ])
           ]
           (rows [
-            ["values" "state"]
-            (rows [
-              [
-                "append"
+            [ui (kw "column") (kw "background") face (kw "border") 1 (kw "border-color") rim]
+            [
+              (kw "children")
+              (rows [
+                [list [ui (kw "rect") (kw "height") 1 (kw "background") rim]]
                 (rows [
-                  ["list" ["interval" ":sample" ["getf" "+cassette+" ":sample"]]]
-                  [["publish-state" ":hud-hot" ["and" "hot" "t"]]]
+                  [ui (kw "row") (kw "height") [cassette--px' 11] (kw "align") (kw "center") (kw "padding") [list 0 [cassette--px' 3] 0 [cassette--px' 3]]]
+                  [
+                    (kw "children")
+                    [
+                      list
+                      [
+                        ui
+                        (kw "stack")
+                        (kw "children")
+                        (rows [
+                          [list [cassette--text [cassette--ghost text] ghost]]
+                          [[cassette--text shown ink]]
+                        ])
+                      ]
+                    ]
+                  ]
+                ])
+              ])
+            ]
+          ])
+        ])
+      blank
+      ({x}:
+        rows [
+          [defun cassette--zone' [x]]
+          [[cond [[">" x 0.84] [cassette--c' (kw "red")]] [[">" x 0.6] [cassette--c' (kw "amber")]] [t [cassette--c' (kw "green")]]]]
+        ])
+      blank
+      ({fraction}:
+        rows [
+          [defun cassette--ladder [fraction]]
+          ({
+            count,
+            lit,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[count [getf (constant cassette) (kw "segments")]]]
+                  [[lit [round ["*" count [max 0 [min 1 fraction]]]]]]
                 ])
               ]
               (rows [
-                ["when" ["and" "output" ["plusp" "tray-height"]]]
+                [ui (kw "row") (kw "gap") [cassette--px' 1] (kw "align") (kw "center")]
                 [
-                  [
-                    "list"
-                    (rows [
-                      ["publish-state" ":shelf-tray-rect"]
-                      (rows [
-                        ["list" ":output" ["getf" "seam" ":output"]]
-                        [":x" ["getf" "seam" ":x"] ":y" ["+" ["getf" "seam" ":y"] ["round" "scale"]]]
-                        [":width" ["getf" "seam" ":width"]]
-                        [":height" ["round" ["*" "tray-height" "scale"]]]
-                      ])
+                  (kw "children")
+                  ({i}:
+                    rows [
+                      [loop for i below count]
+                      [
+                        collect
+                        (rows [
+                          [ui (kw "rect") (kw "width") [cassette--px' 4] (kw "height") [cassette--px' 8]]
+                          [(kw "background") [if' ["<" i lit] [cassette--zone' ["/" ["1+" i] count]] [cassette--c' (kw "led-off")]]]
+                        ])
+                      ]
                     ])
-                  ]
                 ]
               ])
+            ])
+        ])
+      blank
+      ({on'}:
+        rows [
+          [defun cassette--led' [on']]
+          [[ui (kw "rect") (kw "width") [cassette--px' 3] (kw "height") [cassette--px' 3] (kw "background") [if' on' [cassette--c' (kw "orange")] [cassette--c' (kw "led-off")]]]]
+        ])
+      blank
+      ({
+        label,
+        percent,
+        detail,
+        hot,
+      }:
+        rows [
+          [defun cassette--gauge [label percent detail and-optional hot]]
+          ({percent'}:
+            rows [
+              [let' [[percent' [max 0 [min 100 [round [or' percent 0]]]]]]]
               (rows [
-                ["when" "output"]
+                [list [cassette--engraved label [cassette--c' (kw "ink")]]]
+                [[cassette--window' [format nil (str "~3D%") percent']]]
+                [[cassette--ladder ["/" percent' 100]]]
+                [[when detail [cassette--engraved detail [if' hot [cassette--c' (kw "orange")] [cassette--c' (kw "dim")]]]]]
+              ])
+            ])
+        ])
+      blank
+      ({value'}: [defun cassette--degrees' [value'] [if' [realp value'] [format nil (str "~2D°") [max 0 [min 99 [round value']]]] (str "--°")]])
+      blank
+      ({mib}: [defun cassette--gib' [mib] [if' [realp mib] [format nil (str "~4,1FG") ["/" mib (double 1024)]] (str "--.-G")]])
+      blank
+      ({value'}: [defun cassette--hot-p' [value'] [and [realp value'] [">=" value' [getf (constant cassette) (kw "hot")]]]])
+      blank
+      ({
+        text,
+        width,
+      }:
+        rows [
+          [defun cassette--fit' [text width]]
+          ({clean}:
+            rows [
+              [let' [[clean [string-upcase [remove-if ({c}: [lambda [c] [">" [char-code c] 126]]) text]]]]]
+              [[format nil (str "~vA") width [if' [">" [length clean] width] [concatenate (quote string) [subseq clean 0 ["-" width 2]] (str "..")] clean]]]
+            ])
+        ])
+      blank
+      ({amount}:
+        rows [
+          [defun cassette--reel' [amount]]
+          ({
+            box,
+            hub,
+            size,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[box [cassette--px' 12]]]
+                  [[hub [cassette--px' 4]]]
+                  [[size ["+" hub ["*" 2 [round ["*" ["-" box hub] [max 0 [min 1 amount]]] 2]]]]]
+                ])
+              ]
+              (rows [
+                [ui (kw "stack") (kw "width") box (kw "height") box]
                 [
-                  [
-                    "list"
-                    (rows [
-                      [
-                        "shell-surface"
-                        ":spine"
-                        (rows [
+                  (kw "children")
+                  (rows [
+                    [
+                      list
+                      (rows [
+                        [ui (kw "row") (kw "width") box (kw "height") box (kw "justify") (kw "center") (kw "align") (kw "center")]
+                        [
+                          (kw "children")
                           [
-                            "spine--body"
+                            list
                             (rows [
-                              ["loop" "for" "module" "in" ["getf" "+cassette+" ":modules"]]
-                              ["collect" ["spine--module" "module" "state" "snapshot"]]
+                              [ui (kw "circular-progress") (kw "size") size (kw "thickness") [max 1 ["/" ["-" size hub] 2]] (kw "value") 1]
+                              [(kw "color") [cassette--c' (kw "tape")] (kw "track") [cassette--c' (kw "tape")]]
                             ])
                           ]
-                          "tray-height"
-                        ])
-                      ]
-                      [":output" ["getf" "output" ":name"] ":anchors" (quote [":top" ":left"])]
-                      [":width" ["round" ["getf" "seam" ":width"] "scale"] ":height" ["round" ["getf" "seam" ":height"] "scale"]]
+                        ]
+                      ])
+                    ]
+                    (rows [
+                      [ui (kw "row") (kw "width") box (kw "height") box (kw "justify") (kw "center") (kw "align") (kw "center")]
                       [
-                        ":margin"
-                        (rows [
-                          ["list" ["round" ["-" ["getf" "seam" ":y"] ["getf" "output" ":y"]] "scale"] 0 0]
-                          [["round" ["-" ["getf" "seam" ":x"] ["getf" "output" ":x"]] "scale"]]
-                        ])
+                        (kw "children")
+                        [
+                          list
+                          (rows [
+                            [ui (kw "circular-progress") (kw "size") hub (kw "thickness") 1 (kw "value") 1]
+                            [(kw "color") [cassette--c' (kw "ink")] (kw "track") [cassette--c' (kw "ink")]]
+                          ])
+                        ]
                       ]
-                      [":layer" ["if" ["spine--covered-p" "snapshot" "seam"] ":bottom" ":top"]]
-                      [":background" (str "#00000000") ":blur" "t"]
-                      [":click-through" "t" ":slide" "t"]
+                    ])
+                  ])
+                ]
+              ])
+            ])
+        ])
+      blank
+      ({snapshot}:
+        rows [
+          [defun cassette--media [snapshot]]
+          ({
+            service,
+            status,
+            title,
+            artist,
+            length',
+            position',
+            played,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[service [service-state snapshot (kw "mpris")]]]
+                  [[status [getf service (kw "status")]]]
+                  [[title [getf service (kw "title")]]]
+                  [[artist [getf service (kw "artist")]]]
+                  [[length' [getf service (kw "length")]]]
+                  [[position' [getf service (kw "position")]]]
+                  [[played [if' [and [realp length'] [plusp length'] [realp position']] [max 0 [min 1 ["/" position' length']]] 0]]]
+                ])
+              ]
+              (rows [
+                [when [and [stringp title] [plusp [length title]] [member status (quote [(str "Playing") (str "Paused")]) (kw "test") (function equal)]]]
+                (rows [
+                  [list [cassette--led' [equal status (str "Playing")]]]
+                  (rows [
+                    [ui (kw "row") (kw "height") [cassette--px' 12] (kw "align") (kw "center") (kw "gap") [cassette--px' 3] (kw "padding") [list 0 [cassette--px' 4] 0 0]]
+                    [(kw "background") [cassette--c' (kw "paper")] (kw "border") 1 (kw "border-color") [cassette--c' (kw "rim")]]
+                    [
+                      (kw "children")
+                      (rows [
+                        [list [ui (kw "rect") (kw "width") [cassette--px' 2] (kw "height") ["-" [cassette--px' 12] 2] (kw "background") [cassette--c' (kw "orange")]]]
+                        [[ui (kw "rect") (kw "width") [cassette--px' 2] (kw "height") ["-" [cassette--px' 12] 2] (kw "background") [cassette--c' (kw "teal")]]]
+                        [[cassette--reel' ["-" 1 played]]]
+                        (rows [
+                          [
+                            cassette--text
+                            (rows [
+                              [
+                                cassette--fit'
+                                (rows [
+                                  [if' [and [stringp artist] [plusp [length artist]]]]
+                                  [[format nil (str "~A - ~A") artist title]]
+                                  title
+                                ])
+                              ]
+                              [[getf (constant cassette) (kw "media-width")]]
+                            ])
+                          ]
+                          [[cassette--c' (kw "ink")]]
+                        ])
+                        [[cassette--reel' played]]
+                      ])
+                    ]
+                  ])
+                ])
+              ])
+            ])
+        ])
+      blank
+      (rows [
+        [defun cassette--counter []]
+        ({time}:
+          rows [
+            [let' [[time [clock-text [getf (constant cassette) (kw "time")]]]]]
+            [
+              [
+                list
+                (rows [
+                  [cassette--window' time (kw "face") [cassette--c' (kw "counter")] (kw "rim") [cassette--c' (kw "ink")] (kw "ghost") [cassette--c' (kw "counter-ghost")]]
+                  (at 23 [(kw "ink") [cassette--c' (kw "amber")]])
+                  (at 23 [(kw "shown") [if' [oddp [parse-integer [clock-text (str "%S")]]] [substitute (char "Space") (char ":") time] time]])
+                ])
+              ]
+            ]
+          ])
+      ])
+      blank
+      ({
+        module,
+        state,
+        snapshot,
+      }:
+        rows [
+          [defun cassette--module' [module state snapshot]]
+          ({
+            cpu,
+            memory,
+            gpu,
+          }:
+            rows [
+              [let' [[cpu [getf state (kw "cpu")]] [memory [getf state (kw "memory")]] [gpu [getf state (kw "gpu")]]]]
+              (rows [
+                [ecase module]
+                [[(kw "time") [cassette--counter]]]
+                [[(kw "date") [list [cassette--engraved [string-upcase [clock-text [getf (constant cassette) (kw "date")]]] [cassette--c' (kw "ink")]]]]]
+                [[(kw "media") [cassette--media snapshot]]]
+                [[(kw "cpu") [cassette--gauge (str "CPU") [getf cpu (kw "percent")] [cassette--degrees' [getf cpu (kw "temp")]] [cassette--hot-p' [getf cpu (kw "temp")]]]]]
+                [[(kw "memory") [cassette--gauge (str "MEM") [getf memory (kw "percent")] [cassette--gib' [getf memory (kw "used")]]]]]
+                [
+                  [
+                    (kw "gpu")
+                    (rows [
+                      [when [probe--gpu-p gpu]]
+                      [[cassette--gauge (str "GPU") [getf gpu (kw "percent")] [cassette--degrees' [getf gpu (kw "temp")]] [cassette--hot-p' [getf gpu (kw "temp")]]]]
                     ])
                   ]
                 ]
-              ])
-              (rows [
-                ["loop" "for o in narrow"]
-                ["append" ["spine--plates" "items" "o" ["and" ["equal" ["getf" "focal" ":output"] ["getf" "o" ":name"]] "focal"] "snapshot"]]
+                [
+                  [
+                    (kw "vram")
+                    (rows [
+                      [when [probe--gpu-p gpu]]
+                      (rows [
+                        [cassette--gauge (str "VRAM") [if' [plusp [or' [getf gpu (kw "total")] 0]] [round ["*" 100 [or' [getf gpu (kw "used")] 0]] [getf gpu (kw "total")]] 0]]
+                        [[cassette--gib' [getf gpu (kw "used")]]]
+                      ])
+                    ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "battery")
+                    ({battery}:
+                      rows [
+                        [let' [[battery [service-state snapshot (kw "battery")]]]]
+                        [[cassette--gauge [if' [getf battery (kw "charging")] (str "CHG") (str "BAT")] [getf battery (kw "percent")] nil]]
+                      ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "network")
+                    ({
+                      network,
+                      ssid,
+                      online,
+                    }:
+                      rows [
+                        ["let*" [[network [service-state snapshot (kw "network")]] [ssid [getf network (kw "ssid")]] [online [getf network (kw "connected")]]]]
+                        (rows [
+                          [list [cassette--led' online]]
+                          (rows [
+                            [cassette--engraved [cassette--fit' [cond [[and online [stringp ssid] [plusp [length ssid]]] ssid] [online (str "online")] [t (str "offline")]] 16]]
+                            [[cassette--c' (kw "ink")]]
+                          ])
+                        ])
+                      ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "frame")
+                    ({battery}:
+                      rows [
+                        [let' [[battery [state-value snapshot (kw "frame-battery")]]]]
+                        (rows [
+                          [when [getf battery (kw "percent")]]
+                          [[cassette--gauge [if' [equal [getf battery (kw "status")] (str "Discharging")] (str "VR") (str "VR+")] [getf battery (kw "percent")] nil]]
+                        ])
+                      ])
+                  ]
+                ]
               ])
             ])
-            "nil"
+        ])
+      blank
+      (rows [
+        [defun cassette--grille' []]
+        ({hole}:
+          rows [
+            [let' [[hole [cassette--px' 1]]]]
+            (rows [
+              [ui (kw "column") (kw "gap") hole]
+              [
+                (kw "children")
+                (rows [
+                  [loop repeat 4]
+                  [
+                    collect
+                    (rows [
+                      [ui (kw "row") (kw "gap") hole]
+                      [(kw "children") [loop repeat 6 collect [ui (kw "rect") (kw "width") hole (kw "height") hole (kw "background") [cassette--c' (kw "hole")]]]]
+                    ])
+                  ]
+                ])
+              ]
+            ])
           ])
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_sway_data = {
-      blank,
-      function,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["defun" "sway--leaves" ["tree"]]
-        (rows [
-          ["cond" [["null" "tree"] "nil"]]
-          [[["integerp" "tree"] ["list" "tree"]]]
-          [["t" ["loop" "for" "kid" "in" ["rest" "tree"] "append" ["sway--leaves" "kid"]]]]
-        ])
       ])
       blank
       (rows [
-        ["defun" "sway--prune" ["tree" "keep"]]
-        (rows [
-          ["cond" [["null" "tree"] "nil"]]
-          [[["integerp" "tree"] ["when" ["member" "tree" "keep"] "tree"]]]
+        [defun cassette--groove []]
+        [
           [
-            [
-              "t"
-              (rows [
-                [
-                  "let"
+            ui
+            (kw "row")
+            (kw "children")
+            (rows [
+              [list [ui (kw "rect") (kw "width") 1 (kw "height") [cassette--px' 10] (kw "background") [cassette--c' (kw "groove")]]]
+              [[ui (kw "rect") (kw "width") 1 (kw "height") [cassette--px' 10] (kw "background") [cassette--c' (kw "shine")]]]
+            ])
+          ]
+        ]
+      ])
+      blank
+      ({
+        items,
+        grille,
+        edge,
+      }:
+        rows [
+          [defun cassette--plate' [items grille edge]]
+          ({
+            parts,
+            body,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
                   [
                     [
-                      "kids"
+                      parts
+                      ({
+                        item,
+                        rest',
+                      }:
+                        rows [
+                          [loop for [item dot rest'] on [remove nil items]]
+                          [collect [ui (kw "row") (kw "gap") [cassette--px' 4] (kw "align") (kw "center") (kw "children") [remove nil item]]]
+                          [when rest' collect [cassette--groove]]
+                        ])
+                    ]
+                  ]
+                  [
+                    [
+                      body
                       (rows [
-                        ["loop" "for" "kid" "in" ["rest" "tree"]]
-                        ["for" "pruned" "=" ["sway--prune" "kid" "keep"]]
-                        ["when pruned" "collect pruned"]
+                        [ui (kw "row") (kw "height") [cassette--px' 16] (kw "align") (kw "center") (kw "gap") [cassette--px' 6]]
+                        [(kw "padding") [list 0 [cassette--px' 6] 0 [cassette--px' 6]]]
+                        [
+                          (kw "children")
+                          (rows [
+                            [append [when [member grille (quote [(kw "start") (kw "both")])] [list [cassette--grille']]]]
+                            parts
+                            [[when [member grille (quote [(kw "end") (kw "both")])] [list [cassette--grille']]]]
+                          ])
+                        ]
                       ])
                     ]
                   ]
-                ]
-                [["if" ["rest" "kids"] ["cons" ["first" "tree"] "kids"] ["first" "kids"]]]
-              ])
-            ]
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "sway--insert" ["tree" "target" "id" "direction"]]
-        (rows [
-          ["cond" [["integerp" "tree"] ["if" ["eql" "tree" "target"] ["list" "direction" "tree" "id"] "tree"]]]
-          (rows [
-            [["and" ["eq" ["first" "tree"] "direction"] ["member" "target" ["rest" "tree"]]]]
-            (rows [
-              ["let" [["tail" ["member" "target" ["rest" "tree"]]]]]
-              [["append" ["ldiff" "tree" ["rest" "tail"]] ["list" "id"] ["rest" "tail"]]]
-            ])
-          ])
-          [
-            [
-              "t"
-              (rows [
-                ["cons" ["first" "tree"]]
-                (rows [
-                  ["loop" "for" "kid" "in" ["rest" "tree"]]
-                  [
-                    "collect"
-                    (rows [
-                      ["if" ["member" "target" ["sway--leaves" "kid"]]]
-                      [["sway--insert" "kid" "target" "id" "direction"]]
-                      "kid"
-                    ])
-                  ]
-                ])
-              ])
-            ]
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "sway--swap" ["tree" "a" "b"]]
-        (rows [
-          ["cond" [["eql" "tree" "a"] "b"]]
-          [[["eql" "tree" "b"] "a"]]
-          [[["atom" "tree"] "tree"]]
-          [["t" ["cons" ["first" "tree"] ["loop" "for" "kid" "in" ["rest" "tree"] "collect" ["sway--swap" "kid" "a" "b"]]]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "sway--boxes" ["tree" "x" "y" "width" "height" "gap"]]
-        (rows [
-          ["if" ["integerp" "tree"]]
-          [["list" ["list" "tree" "x" "y" "width" "height"]]]
-          (rows [
-            [
-              "let*"
-              (rows [
-                [["kids" ["rest" "tree"]]]
-                [["horizontal" ["eq" ["first" "tree"] ":h"]]]
-                [["origin" ["if" "horizontal" "x" "y"]]]
-                [["span" ["if" "horizontal" "width" "height"]]]
-                [["step" ["floor" ["-" "span" ["*" ["1-" ["length" "kids"]] "gap"]] ["length" "kids"]]]]
-                [["start" "origin"]]
-              ])
-            ]
-            (rows [
-              ["loop" "for" ["kid" "." "more"] "on" "kids"]
-              ["for" "size" "=" ["if" "more" "step" ["-" ["+" "origin" "span"] "start"]]]
-              [
-                "append"
-                (rows [
-                  ["if" "horizontal"]
-                  [["sway--boxes" "kid" "start" "y" "size" "height" "gap"]]
-                  [["sway--boxes" "kid" "x" "start" "width" "size" "gap"]]
                 ])
               ]
-              ["do" ["incf" "start" ["+" "size" "gap"]]]
+              (rows [
+                [when parts]
+                ({plate}:
+                  rows [
+                    [
+                      let'
+                      [
+                        [
+                          plate
+                          (rows [
+                            [ui (kw "column") (kw "align") (kw "stretch") (kw "background") [cassette--c' (kw "face")] (kw "border") 1 (kw "border-color") [cassette--c' (kw "ink")]]
+                            [
+                              (kw "children")
+                              (rows [
+                                [list [ui (kw "rect") (kw "height") 1 (kw "background") [cassette--c' (kw "shine")]]]
+                                body
+                                [[ui (kw "rect") (kw "height") 1 (kw "background") [cassette--c' (kw "shade")]]]
+                              ])
+                            ]
+                          ])
+                        ]
+                      ]
+                    ]
+                    (rows [
+                      [if' [eq edge (kw "top")]]
+                      (rows [
+                        [ui (kw "column") (kw "align") (kw "stretch")]
+                        [
+                          (kw "children")
+                          [
+                            list
+                            plate
+                            (rows [
+                              [ui (kw "row") (kw "height") [cassette--shadow] (kw "padding") [list 0 0 0 [cassette--shadow]]]
+                              [(kw "children") [list [ui (kw "rect") (kw "grow") 1 (kw "height") [cassette--shadow] (kw "background") [cassette--c' (kw "shadow")]]]]
+                            ])
+                          ]
+                        ]
+                      ])
+                      plate
+                    ])
+                  ])
+              ])
             ])
+        ])
+      blank
+      [defun cassette--shadow [] [cassette--px' 2]]
+      blank
+      ({edge}: [defun cassette--height' [edge] ["+" [cassette--px' 16] 4 [if' [eq edge (kw "top")] [cassette--shadow] 0]]])
+      blank
+      (rows [
+        [defun cassette--split' []]
+        ({pair}:
+          rows [
+            [let' [[pair [getf (constant cassette) (kw "center-between")]]]]
+            ({
+              a,
+              b,
+              index,
+            }:
+              rows [
+                [loop for [a b] on [getf (constant cassette) (kw "modules")]]
+                [for index from 1]
+                [when [and b [eq a [first pair]] [eq b [second pair]]] return index]
+              ])
           ])
+      ])
+    ]);
+    modules_desktop_session_tomoe_lisp_deck_data = {
+      and,
+      append,
+      apply,
+      assoc,
+      bind-key,
+      blank,
+      car,
+      case,
+      cdr,
+      ceiling,
+      collect,
+      cond,
+      cons,
+      constant,
+      context,
+      count-if,
+      define-extension,
+      defparameter,
+      defun,
+      dolist,
+      eq,
+      eql,
+      equal,
+      evenp,
+      find,
+      find-if,
+      first,
+      floor,
+      focus,
+      for,
+      fullscreen,
+      function,
+      getf,
+      if',
+      in',
+      in-package,
+      integerp,
+      kw,
+      lambda,
+      launch,
+      layout,
+      layout-bindings,
+      length,
+      let',
+      list,
+      loop,
+      mapcar,
+      max,
+      member,
+      mod,
+      nil,
+      not,
+      nth,
+      null',
+      or',
+      place,
+      plusp,
+      policy--area,
+      policy--centred,
+      policy--launch,
+      policy--terminal,
+      policy--unmanaged-p,
+      position,
+      previous-context,
+      publish-state,
+      push,
+      quote,
+      raise-window,
+      remove,
+      remove-if,
+      remove-if-not,
+      reverse,
+      rotatef,
+      rows,
+      setf,
+      setting,
+      sqrt,
+      str,
+      string-downcase,
+      t,
+      third,
+      uninterned,
+      unless,
+      values,
+      when,
+      ...
+    }: ({
+      deck--state,
+      deck--entry,
+      deck--layout-entry,
+      deck--windows,
+      deck--fronts,
+      deck--side-of,
+      deck--column,
+      deck--column-commands,
+      deck--narrow-p',
+      deck--front,
+      deck--after-front,
+      deck--manageable-p,
+      deck--current,
+      deck--output-of,
+      deck--area,
+      deck--left-width,
+      deck--grid-columns,
+      deck--grid-extra,
+      deck--grid-cell,
+      deck--split,
+      deck--seam,
+      deck--box,
+      deck--places,
+      deck--focus-window,
+      deck--adopt-front,
+      deck--rotate,
+      deck--reorder,
+      deck--reorder-all,
+      deck--cycle,
+      deck--swap-columns,
+      deck--to-column,
+      deck--set-fullscreen,
+      deck--toggle-floating,
+      deck--command,
+      deck--request,
+      deck--raises,
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      (rows [
+        [defun deck--state []]
+        (rows [
+          [list (kw "grid") nil (kw "ratio") 1 (kw "focus") nil]
+          [(kw "columns") nil (kw "windows") nil]
+          [(kw "fronts") [list [cons (kw "left") nil] [cons (kw "right") nil]]]
+          [(kw "floating") nil (kw "floats") nil (kw "fullscreen") nil]
         ])
       ])
       blank
+      ({
+        list',
+        id,
+      }: [defun deck--entry [list' id] [assoc id list']])
+      ({
+        layout',
+        id,
+      }: [defun deck--layout-entry [layout' id] [find id layout' (kw "key") ({entry}: [lambda [entry] [getf entry (kw "id")]])]])
+      ({state}: [defun deck--windows [state] [getf state (kw "windows")]])
+      ({state}: [defun deck--fronts [state] [getf state (kw "fronts")]])
+      ({
+        state,
+        id,
+      }:
+        rows [
+          [defun deck--side-of [state id]]
+          ({entry}: [let' [[entry [deck--entry [getf state (kw "columns")] id]]] [and entry [cdr entry]]])
+        ])
+      ({
+        state,
+        side,
+      }:
+        rows [
+          [defun deck--column [state side]]
+          [[remove-if-not ({id}: [lambda [id] [eql [deck--side-of state id] side]]) [deck--windows state]]]
+        ])
       (rows [
-        ["defun" "sway--neighbour" ["boxes" "id" "dx" "dy"]]
-        (rows [
-          ["let" [["from" ["assoc" "id" "boxes"]] ["best" "nil"] ["distance" "nil"]]]
-          (rows [
-            ["flet" [["centre" ["box"] ["list" ["+" ["second" "box"] ["/" ["fourth" "box"] 2]] ["+" ["third" "box"] ["/" ["fifth" "box"] 2]]]]]]
-            (rows [
-              ["when" "from"]
-              (rows [
-                ["destructuring-bind" ["fx" "fy"] ["centre" "from"]]
+        [defparameter (constant deck--column-commands)]
+        (quote [(str "focus-left") (str "focus-right") (str "swap-columns") (str "to-left") (str "to-right") (str "ratio")])
+      ])
+      ({area}:
+        rows [
+          [defun deck--narrow-p' [area]]
+          ({output}:
+            rows [
+              [let' [[output [and area [getf area (kw "output")]]]]]
+              [[and output ["<" ["*" 9 [getf output (kw "width")]] ["*" 21 [getf output (kw "height")]]]]]
+            ])
+        ])
+      ({
+        state,
+        side,
+      }:
+        rows [
+          [defun deck--front [state side]]
+          (str ''
+            The window SIDE's deck shows in front. An adopted front counts only while it is
+            still in that column: a front can outlive its window between a close and the
+            handoff that replaces it, and a column placed against a front that is gone would
+            be placed nowhere and show nothing at all.'')
+          ({
+            entry,
+            recorded,
+            column,
+          }:
+            rows [
+              [
+                "let*"
                 (rows [
-                  ["dolist" ["box" "boxes"]]
-                  (rows [
-                    ["destructuring-bind" ["cx" "cy"] ["centre" "box"]]
-                    (rows [
+                  [[entry [assoc side [deck--fronts state]]]]
+                  [[recorded [and entry [cdr entry]]]]
+                  [[column [deck--column state side]]]
+                ])
+              ]
+              [[if' [member recorded column] recorded [first column]]]
+            ])
+        ])
+      ({
+        state,
+        order,
+        side,
+        gone,
+      }:
+        rows [
+          [defun deck--after-front [state order side gone]]
+          (str ''
+            The window that takes the front of SIDE in ORDER once GONE closes, or NIL when
+            the column empties. GONE still sits in ORDER, so the entry after it — wrapping,
+            the way a scroll does — is the window a scroll would have revealed.'')
+          ({
+            column,
+            index,
+            next,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[column [remove-if-not ({id}: [lambda [id] [eql [deck--side-of state id] side]]) order]]]
+                  [[index [position gone column]]]
+                  [[next [and index [nth [mod ["1+" index] [length column]] column]]]]
+                ])
+              ]
+              [[unless [eql next gone] next]]
+            ])
+        ])
+      ({
+        state,
+        id,
+      }:
+        rows [
+          [defun deck--manageable-p [state id]]
+          [[and [not [member id [getf state (kw "fullscreen")]]] [not [member id [getf state (kw "floating")]]]]]
+        ])
+      blank
+      ({state}:
+        rows [
+          [defun deck--current [state]]
+          (str ''
+            The window a command acts on: the focused one while it is in the window set,
+            otherwise whatever the deck still shows. A command must never depend on an id a
+            gone window left behind, or the keys go dead.'')
+          ({
+            focus',
+            windows,
+          }:
+            rows [
+              [
+                let'
+                (rows [
+                  [[focus' [getf state (kw "focus")]]]
+                  [[windows [deck--windows state]]]
+                ])
+              ]
+              (rows [
+                [or' [and [member focus' windows] focus']]
+                [[deck--front state (kw "left")]]
+                [[deck--front state (kw "right")]]
+                [[first windows]]
+              ])
+            ])
+        ])
+      blank
+      ({
+        outputs,
+        entry,
+      }:
+        rows [
+          [defun deck--output-of [outputs entry]]
+          ({
+            cx,
+            cy,
+          }:
+            rows [
+              [
+                let'
+                (rows [
+                  [[cx ["+" [getf entry (kw "x")] [floor [getf entry (kw "width")] 2]]]]
+                  [[cy ["+" [getf entry (kw "y")] [floor [getf entry (kw "height")] 2]]]]
+                ])
+              ]
+              (rows [
+                [
+                  find-if
+                  ({output}:
+                    rows [
+                      [lambda [output]]
+                      (rows [
+                        [and ["<=" [getf output (kw "x")] cx ["+" [getf output (kw "x")] [getf output (kw "width")]]]]
+                        [["<=" [getf output (kw "y")] cy ["+" [getf output (kw "y")] [getf output (kw "height")]]]]
+                      ])
+                    ])
+                ]
+                outputs
+              ])
+            ])
+        ])
+      blank
+      ({snapshot}:
+        rows [
+          [defun deck--area [snapshot]]
+          (str "The focused window's output box and the area its exclusive zones leave free.")
+          ({
+            outputs,
+            focus',
+            entry,
+            output,
+            area,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[outputs [context snapshot (kw "outputs")]]]
+                  [[focus' [previous-context snapshot (kw "focus")]]]
+                  [[entry [and focus' [deck--layout-entry [previous-context snapshot (kw "layout")] focus']]]]
+                  [[output [or' [and entry [deck--output-of outputs entry]] [first outputs]]]]
+                  [[area [and output [policy--area snapshot [getf output (kw "name")]]]]]
+                ])
+              ]
+              (rows [
+                [when area]
+                [["list*" (kw "output") output area]]
+              ])
+            ])
+        ])
+      blank
+      ({
+        state,
+        width,
+      }:
+        rows [
+          [defun deck--left-width [state width]]
+          (str "How wide the left column is, out of WIDTH less the seam between the columns.")
+          [[floor ["*" ["-" width [getf (constant layout) (kw "seam")]] [nth ["1-" [getf state (kw "ratio")]] [getf (constant layout) (kw "ratios")]]]]]
+        ])
+      blank
+      ({state}:
+        rows [
+          [defun deck--grid-columns [state]]
+          [[ceiling [sqrt [count-if ({id}: [lambda [id] [deck--manageable-p state id]]) [deck--windows state]]]]]
+        ])
+      blank
+      ({cols}:
+        rows [
+          [defun deck--grid-extra [cols]]
+          (str ''
+            How much wider than a window gap the middle of an even grid is: it splits on
+            the deck's seam, so whatever stands there stays between the columns.'')
+          [[if' [evenp cols] ["-" [getf (constant layout) (kw "seam")] [getf (constant layout) (kw "gaps")]] 0]]
+        ])
+      blank
+      ({
+        cols,
+        width,
+      }:
+        rows [
+          [defun deck--grid-cell [cols width]]
+          [[floor ["-" width ["*" ["1-" cols] [getf (constant layout) (kw "gaps")]] [deck--grid-extra cols]] cols]]
+        ])
+      blank
+      ({
+        state,
+        width,
+      }:
+        rows [
+          [defun deck--split [state width]]
+          (str ''
+            Where the seam starts within the tiled WIDTH, or NIL when the deck has no
+            middle seam: a grid with an odd number of columns.'')
+          (rows [
+            [if' [getf state (kw "grid")]]
+            ({cols}:
+              rows [
+                [let' [[cols [deck--grid-columns state]]]]
+                (rows [
+                  [when [and [plusp cols] [evenp cols]]]
+                  ({half}:
+                    rows [
+                      [let' [[half ["/" cols 2]]]]
+                      [["+" ["*" half [deck--grid-cell cols width]] ["*" ["1-" half] [getf (constant layout) (kw "gaps")]]]]
+                    ])
+                ])
+              ])
+            [[deck--left-width state width]]
+          ])
+        ])
+      blank
+      ({
+        state,
+        area,
+      }:
+        rows [
+          [defun deck--seam [state area]]
+          (str ''
+            The free strip in the deck's middle seam on AREA, a window gap in from each
+            side; NIL on a narrow output, while a window is fullscreen, in a grid with an
+            odd number of columns, or when the seam is no wider than two gaps.'')
+          ({
+            gaps,
+            x,
+            split,
+            inner,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[gaps [getf (constant layout) (kw "gaps")]]]
+                  [[x [and area ["+" [getf area (kw "x")] gaps]]]]
+                  [[split [and area [deck--split state ["-" [getf area (kw "width")] ["*" 2 gaps]]]]]]
+                  [[inner ["-" [getf (constant layout) (kw "seam")] ["*" 2 gaps]]]]
+                ])
+              ]
+              (rows [
+                [unless [or' [null' split] [getf state (kw "fullscreen")] [deck--narrow-p' area] [not [plusp inner]]]]
+                (rows [
+                  [list (kw "output") [getf [getf area (kw "output")] (kw "name")]]
+                  [(kw "x") ["+" x split gaps] (kw "y") ["+" [getf area (kw "y")] gaps]]
+                  [(kw "width") inner (kw "height") ["-" [getf area (kw "height")] ["*" 2 gaps]]]
+                ])
+              ])
+            ])
+        ])
+      blank
+      ({
+        state,
+        area,
+        id,
+      }:
+        rows [
+          [defun deck--box [state area id]]
+          (str "Where ID goes, or NIL when it is not in the window set.")
+          ({
+            gaps,
+            x,
+            y,
+            width,
+            height,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[gaps [getf (constant layout) (kw "gaps")]]]
+                  [[x ["+" [getf area (kw "x")] gaps]] [y ["+" [getf area (kw "y")] gaps]]]
+                  [[width ["-" [getf area (kw "width")] ["*" 2 gaps]]] [height ["-" [getf area (kw "height")] ["*" 2 gaps]]]]
+                ])
+              ]
+              (rows [
+                cond
+                [[[not [member id [deck--windows state]]] nil]]
+                (rows [
+                  [[member id [getf state (kw "fullscreen")]]]
+                  ({output}:
+                    rows [
+                      [let' [[output [getf area (kw "output")]]]]
+                      [[list [getf output (kw "x")] [getf output (kw "y")] [getf output (kw "width")] [getf output (kw "height")]]]
+                    ])
+                ])
+                [[[member id [getf state (kw "floating")]] [cdr [deck--entry [getf state (kw "floats")] id]]]]
+                (rows [
+                  [[getf state (kw "grid")]]
+                  ({
+                    wins,
+                    index,
+                    count,
+                    cols,
+                    rows',
+                    cell-width,
+                    cell-height,
+                    column,
+                    row,
+                  }:
+                    rows [
                       [
                         "let*"
                         (rows [
-                          [["ddx" ["-" "cx" "fx"]] ["ddy" ["-" "cy" "fy"]]]
-                          [["along" ["if" ["zerop" "dx"] "ddy" "ddx"]]]
-                          [["across" ["if" ["zerop" "dx"] "ddx" "ddy"]]]
-                          [["far" ["+" ["abs" "ddx"] ["abs" "ddy"]]]]
+                          [
+                            [
+                              wins
+                              (rows [
+                                [remove-if-not ({candidate}: [lambda [candidate] [deck--manageable-p state candidate]])]
+                                [[deck--windows state]]
+                              ])
+                            ]
+                          ]
+                          [[index [position id wins]]]
+                          [[count [length wins]]]
+                          [[cols [ceiling [sqrt count]]]]
+                          [[rows' [ceiling count cols]]]
+                          [[cell-width [deck--grid-cell cols width]]]
+                          [[cell-height [floor ["-" height ["*" ["1-" rows'] gaps]] rows']]]
+                          [[column [mod index cols]]]
+                          [[row [floor index cols]]]
                         ])
                       ]
                       (rows [
-                        [
-                          "when"
-                          (rows [
-                            ["and" ["not" ["eq" "box" "from"]]]
-                            [["eq" ["plusp" "along"] ["plusp" ["+" "dx" "dy"]]]]
-                            [[">" ["abs" "along"] ["abs" "across"]]]
-                            [["or" ["null" "distance"] ["<" "far" "distance"]]]
-                          ])
-                        ]
-                        [["setf" "best" ["first" "box"] "distance" "far"]]
+                        [list ["+" x ["*" column ["+" cell-width gaps]] [if' [">=" column ["/" cols 2]] [deck--grid-extra cols] 0]]]
+                        [["+" y ["*" row ["+" cell-height gaps]]]]
+                        [cell-width cell-height]
                       ])
                     ])
-                  ])
+                ])
+                (rows [
+                  [[deck--narrow-p' area]]
+                  ({
+                    column,
+                    front,
+                    index,
+                  }:
+                    rows [
+                      [
+                        "let*"
+                        (rows [
+                          [
+                            [
+                              column
+                              (rows [
+                                [remove-if-not ({candidate}: [lambda [candidate] [deck--manageable-p state candidate]])]
+                                [[deck--windows state]]
+                              ])
+                            ]
+                          ]
+                          [[front [or' [position [deck--current state] column] 0]]]
+                          [[index [position id column]]]
+                        ])
+                      ]
+                      (rows [
+                        [when index]
+                        [[list x ["+" y ["*" ["-" index front] ["+" height gaps]]] width height]]
+                      ])
+                    ])
+                ])
+                (rows [
+                  t
+                  ({
+                    seam,
+                    left-width,
+                    right-width,
+                    side,
+                    column,
+                    front,
+                    index,
+                  }:
+                    rows [
+                      [
+                        "let*"
+                        (rows [
+                          [[seam [getf (constant layout) (kw "seam")]]]
+                          [[left-width [deck--left-width state width]]]
+                          [[right-width ["-" width seam left-width]]]
+                          [[side [deck--side-of state id]]]
+                          [[column [deck--column state side]]]
+                          [[front [position [deck--front state side] column]]]
+                          [[index [position id column]]]
+                        ])
+                      ]
+                      (rows [
+                        [when [and side index front]]
+                        (rows [
+                          [list [if' [eql side (kw "left")] x ["+" x left-width seam]]]
+                          [["+" y ["*" ["-" index front] ["+" height gaps]]]]
+                          [[if' [eql side (kw "left")] left-width right-width]]
+                          height
+                        ])
+                      ])
+                    ])
                 ])
               ])
             ])
+        ])
+      blank
+      ({
+        managed,
+        state,
+        area,
+      }:
+        rows [
+          [defun deck--places [managed state area]]
+          (str "One place effect per managed window: exactly one owner, no duplicates.")
+          ({windows}:
+            rows [
+              [let' [[windows [deck--windows state]]]]
+              ({
+                window,
+                id,
+                box,
+              }:
+                rows [
+                  [loop for window in' managed]
+                  [for id "=" [getf window (kw "id")]]
+                  [for box "=" [deck--box state area id]]
+                  [
+                    append
+                    [
+                      list
+                      (rows [
+                        [if' box]
+                        [[apply (function place) id [append box [list t]]]]
+                        (rows [
+                          [place id 0 0 [max 1 [getf window (kw "width")]]]
+                          [[max 1 [getf window (kw "height")]] nil]
+                        ])
+                      ])
+                    ]
+                  ]
+                  [
+                    append
+                    [
+                      list
+                      [
+                        fullscreen
+                        id
+                        (rows [
+                          [and box [member id windows]]
+                          [[member id [getf state (kw "fullscreen")]]]
+                          t
+                        ])
+                      ]
+                    ]
+                  ]
+                ])
+            ])
+        ])
+      blank
+      ({
+        state,
+        id,
+      }:
+        rows [
+          [defun deck--focus-window [state id]]
+          [[setf [getf state (kw "focus")] id]]
+          state
+        ])
+      blank
+      ({
+        state,
+        side,
+        id,
+      }:
+        rows [
+          [defun deck--adopt-front [state side id]]
+          ({fronts}:
+            rows [
+              [let' [[fronts [deck--fronts state]]]]
+              [[setf [cdr [assoc side fronts]] id]]
+            ])
+          state
+        ])
+      blank
+      ({
+        state,
+        direction,
+      }:
+        rows [
+          [defun deck--rotate [state direction]]
+          (str "Scroll the side holding the current window; the deck wraps.")
+          ({
+            id,
+            side,
+            column,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[id [deck--current state]]]
+                  [[side [deck--side-of state id]]]
+                  [[column [deck--column state side]]]
+                ])
+              ]
+              (rows [
+                [when [and side column]]
+                ({
+                  index,
+                  target,
+                }:
+                  rows [
+                    [
+                      "let*"
+                      (rows [
+                        [[index [position id column]]]
+                        [[target [nth [mod ["+" index direction] [length column]] column]]]
+                      ])
+                    ]
+                    [[deck--adopt-front state side target]]
+                    [[deck--focus-window state target]]
+                  ])
+              ])
+            ])
+        ])
+      blank
+      ({
+        state,
+        direction,
+      }:
+        rows [
+          [defun deck--reorder [state direction]]
+          (str "Swap the current window with its neighbour in its own column's order.")
+          ({
+            id,
+            side,
+            column,
+            index,
+            other,
+            order,
+            mine,
+            theirs,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[id [deck--current state]]]
+                  [[side [deck--side-of state id]]]
+                  [[column [deck--column state side]]]
+                  [[index [position id column]]]
+                  [[other [and index [">=" ["+" index direction] 0] [nth ["+" index direction] column]]]]
+                  [[order [deck--windows state]]]
+                  [[mine [and other [position id order]]]]
+                  [[theirs [and other [position other order]]]]
+                ])
+              ]
+              (rows [
+                [when [and other mine theirs]]
+                (rows [
+                  [setf [nth mine order] other]
+                  [[nth theirs order] id]
+                ])
+              ])
+              state
+            ])
+        ])
+      blank
+      ({
+        state,
+        direction,
+      }:
+        rows [
+          [defun deck--reorder-all [state direction]]
+          ({
+            order,
+            index,
+            target,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[order [deck--windows state]]]
+                  [[index [position [deck--current state] order]]]
+                  [[target [and index ["+" index direction]]]]
+                ])
+              ]
+              (rows [
+                [when [and target ["<" (-1) target [length order]]]]
+                [[rotatef [nth index order] [nth target order]]]
+              ])
+              state
+            ])
+        ])
+      blank
+      ({
+        state,
+        direction,
+      }:
+        rows [
+          [defun deck--cycle [state direction]]
+          (str "Focus the next or previous window in the window set, wrapping.")
+          ({
+            order,
+            id,
+            index,
+            target,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[order [deck--windows state]]]
+                  [[id [deck--current state]]]
+                  [[index [or' [position id order] 0]]]
+                  [[target [and order [nth [mod ["+" index direction] [length order]] order]]]]
+                ])
+              ]
+              (rows [
+                [when target]
+                ({side}:
+                  rows [
+                    [let' [[side [deck--side-of state target]]]]
+                    [[when side [deck--adopt-front state side target]]]
+                  ])
+                [[deck--focus-window state target]]
+              ])
+            ])
+        ])
+      blank
+      ({state}:
+        rows [
+          [defun deck--swap-columns [state]]
+          ({entry}:
+            rows [
+              [dolist [entry [getf state (kw "columns")]]]
+              [[setf [cdr entry] [if' [eql [cdr entry] (kw "left")] (kw "right") (kw "left")]]]
+            ])
+          ({fronts}:
+            rows [
+              [let' [[fronts [deck--fronts state]]]]
+              ({
+                left,
+                right,
+              }:
+                rows [
+                  [let' [[left [cdr [assoc (kw "left") fronts]]] [right [cdr [assoc (kw "right") fronts]]]]]
+                  [[setf [cdr [assoc (kw "left") fronts]] right [cdr [assoc (kw "right") fronts]] left]]
+                ])
+            ])
+          state
+        ])
+      blank
+      ({
+        state,
+        side,
+      }:
+        rows [
+          [defun deck--to-column [state side]]
+          (str "Send the current window to SIDE, where it becomes that deck's front.")
+          ({
+            id,
+            previous,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[id [deck--current state]]]
+                  [[previous [deck--side-of state id]]]
+                ])
+              ]
+              (rows [
+                [when [and id [deck--manageable-p state id]]]
+                (rows [
+                  [when [and previous [not [eql previous side]] [eql id [deck--front state previous]]]]
+                  ({
+                    column,
+                    index,
+                    next,
+                  }:
+                    rows [
+                      [
+                        "let*"
+                        (rows [
+                          [[column [deck--column state previous]]]
+                          [[index [position id column]]]
+                          [[next [and index [nth [mod ["1+" index] [length column]] column]]]]
+                        ])
+                      ]
+                      [[deck--adopt-front state previous [if' [and next [not [eql next id]]] next nil]]]
+                    ])
+                ])
+                [[setf [cdr [assoc id [getf state (kw "columns")]]] side]]
+                [[deck--adopt-front state side id]]
+              ])
+              state
+            ])
+        ])
+      blank
+      ({
+        state,
+        id,
+        on',
+      }:
+        rows [
+          [defun deck--set-fullscreen [state id on']]
+          [[setf [getf state (kw "fullscreen")] [remove id [getf state (kw "fullscreen")]]]]
+          (rows [
+            [when on']
+            [[setf [getf state (kw "floating")] [remove id [getf state (kw "floating")]]]]
+            [[push id [getf state (kw "fullscreen")]]]
+            [[deck--focus-window state id]]
           ])
-          "best"
+          state
+        ])
+      blank
+      ({
+        state,
+        area,
+      }:
+        rows [
+          [defun deck--toggle-floating [state area]]
+          ({id}:
+            rows [
+              [let' [[id [deck--current state]]]]
+              (rows [
+                cond
+                [[[null' id]]]
+                [[[member id [getf state (kw "fullscreen")]] [deck--set-fullscreen state id nil]]]
+                (rows [
+                  [[member id [getf state (kw "floating")]]]
+                  (rows [
+                    [setf [getf state (kw "floating")] [remove id [getf state (kw "floating")]]]
+                    [[getf state (kw "floats")] [remove id [getf state (kw "floats")] (kw "key") (function car)]]
+                  ])
+                ])
+                (rows [
+                  area
+                  [[push id [getf state (kw "floating")]]]
+                  [[push [cons id [policy--centred area [getf (constant layout) (kw "float-ratio")]]] [getf state (kw "floats")]]]
+                ])
+              ])
+              state
+            ])
+        ])
+      blank
+      ({
+        state,
+        area,
+        command,
+      }:
+        rows [
+          [defun deck--command [state area command]]
+          (rows [
+            cond
+            (rows [
+              (rows [
+                [and [deck--narrow-p' area]]
+                (rows [
+                  [or' [member command (constant deck--column-commands) (kw "test") (function equal)]]
+                  [[member command (quote [(str "scroll-down") (str "scroll-up") (str "move-down") (str "move-up")]) (kw "test") (function equal)]]
+                ])
+              ])
+              (rows [
+                [cond [[equal command (str "scroll-down")] [deck--cycle state 1]]]
+                [[[equal command (str "scroll-up")] [deck--cycle state (-1)]]]
+                [[[equal command (str "move-down")] [deck--reorder-all state 1]]]
+                [[[equal command (str "move-up")] [deck--reorder-all state (-1)]]]
+              ])
+            ])
+            (rows [
+              [[equal command (str "focus-left")]]
+              [[deck--focus-window state [or' [deck--front state (kw "left")] [deck--current state]]]]
+            ])
+            (rows [
+              [[equal command (str "focus-right")]]
+              [[deck--focus-window state [or' [deck--front state (kw "right")] [deck--current state]]]]
+            ])
+            [[[equal command (str "scroll-down")] [deck--rotate state 1]]]
+            [[[equal command (str "scroll-up")] [deck--rotate state (-1)]]]
+            [[[equal command (str "next")] [deck--cycle state 1]]]
+            [[[equal command (str "previous")] [deck--cycle state (-1)]]]
+            [[[equal command (str "swap-columns")] [deck--swap-columns state]]]
+            [[[equal command (str "move-down")] [deck--reorder state 1]]]
+            [[[equal command (str "move-up")] [deck--reorder state (-1)]]]
+            [[[equal command (str "to-left")] [deck--to-column state (kw "left")]]]
+            [[[equal command (str "to-right")] [deck--to-column state (kw "right")]]]
+            [[[equal command (str "grid")] [setf [getf state (kw "grid")] [not [getf state (kw "grid")]]]]]
+            (rows [
+              [[equal command (str "ratio")]]
+              [[setf [getf state (kw "ratio")] ["1+" [mod [getf state (kw "ratio")] [length [getf (constant layout) (kw "ratios")]]]]]]
+            ])
+            [[[equal command (str "floating")] [deck--toggle-floating state area]]]
+            (rows [
+              [[equal command (str "fullscreen")]]
+              ({id}:
+                rows [
+                  [let' [[id [deck--current state]]]]
+                  [[when id [deck--set-fullscreen state id [not [member id [getf state (kw "fullscreen")]]]]]]
+                ])
+            ])
+            [[t state]]
+          ])
+        ])
+      blank
+      ({
+        state,
+        id,
+        request,
+        requested,
+      }:
+        rows [
+          [defun deck--request [state id request requested]]
+          (rows [
+            [case request]
+            [[(kw "fullscreen") [deck--set-fullscreen state id requested]]]
+            [[(kw "unfullscreen") [deck--set-fullscreen state id nil]]]
+            (rows [
+              (kw "activate")
+              ({side}:
+                rows [
+                  [let' [[side [deck--side-of state id]]]]
+                  [[when [and side [deck--manageable-p state id]] [deck--adopt-front state side id]]]
+                  [[deck--focus-window state id]]
+                ])
+            ])
+          ])
+          state
+        ])
+      blank
+      ({
+        state,
+        current,
+      }:
+        rows [
+          [defun deck--raises [state current]]
+          (rows [
+            [mapcar (function raise-window)]
+            (rows [
+              [append [remove current [reverse [getf state (kw "floating")]]]]
+              [[when [member current [getf state (kw "floating")]] [list current]]]
+              [[getf state (kw "fullscreen")]]
+            ])
+          ])
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [define-extension (str "deck")]
+          (rows [
+            [
+              (kw "reads")
+              (rows [
+                [(kw "windows") (kw "rules") (kw "outputs") (kw "workareas") (kw "layout") (kw "focus") (kw "key") (kw "button") (kw "pointer") (kw "request")]
+                (kw "settings")
+              ])
+            ]
+            [(kw "state") [deck--state] (kw "admission") t]
+          ])
+          [[snapshot state event]]
+          ({
+            windows,
+            ids,
+            focused,
+            area,
+            type,
+            command,
+            terminal,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [
+                    [
+                      windows
+                      (rows [
+                        [remove-if ({window}: [lambda [window] [policy--unmanaged-p snapshot window]])]
+                        [[context snapshot (kw "windows")]]
+                      ])
+                    ]
+                  ]
+                  [[ids [mapcar ({window}: [lambda [window] [getf window (kw "id")]]) windows]]]
+                  [[focused [previous-context snapshot (kw "focus")]]]
+                  [[area [deck--area snapshot]]]
+                  [[type [getf event (kw "type")]]]
+                  [[command [and [eq type (kw "key")] [equal [getf event (kw "owner")] (str "deck")] [getf event (kw "command")]]]]
+                  [[terminal [and [equal command (str "terminal")] [policy--terminal windows]]]]
+                ])
+              ]
+              (rows [
+                [when [eq type (kw "unmap")]]
+                ({gone}:
+                  rows [
+                    [let' [[gone [getf event (kw "id")]]]]
+                    ({side}:
+                      rows [
+                        [dolist [side (quote [(kw "left") (kw "right")])]]
+                        (rows [
+                          [when [eql gone [cdr [assoc side [getf state (kw "fronts")]]]]]
+                          ({next}:
+                            rows [
+                              [let' [[next [deck--after-front state [deck--windows state] side gone]]]]
+                              [[setf [cdr [assoc side [getf state (kw "fronts")]]] next]]
+                              (rows [
+                                [when [and next [eql gone [getf state (kw "focus")]]]]
+                                [[setf [getf state (kw "focus")] next]]
+                              ])
+                            ])
+                        ])
+                      ])
+                  ])
+              ])
+              (rows [
+                [setf [getf state (kw "windows")] [remove-if-not ({id}: [lambda [id] [member id ids]]) [getf state (kw "windows")]]]
+                [
+                  [getf state (kw "columns")]
+                  (rows [
+                    [remove-if-not ({entry}: [lambda [entry] [member [car entry] ids]])]
+                    [[getf state (kw "columns")]]
+                  ])
+                ]
+                [[getf state (kw "fronts")]]
+                ({entry}:
+                  rows [
+                    [loop for entry in' [getf state (kw "fronts")]]
+                    [
+                      collect
+                      (rows [
+                        [if' [and [cdr entry] [not [member [cdr entry] ids]]]]
+                        [[cons [car entry] nil]]
+                        entry
+                      ])
+                    ]
+                  ])
+                [[getf state (kw "floating")] [remove-if-not ({id}: [lambda [id] [member id ids]]) [getf state (kw "floating")]]]
+                [
+                  [getf state (kw "floats")]
+                  (rows [
+                    [remove-if-not ({entry}: [lambda [entry] [member [car entry] ids]])]
+                    [[getf state (kw "floats")]]
+                  ])
+                ]
+                [
+                  [getf state (kw "fullscreen")]
+                  (rows [
+                    [remove-if-not ({id}: [lambda [id] [member id ids]])]
+                    [[getf state (kw "fullscreen")]]
+                  ])
+                ]
+              ])
+              [[unless [member [getf state (kw "focus")] ids] [setf [getf state (kw "focus")] nil]]]
+              (rows [
+                [
+                  when
+                  (rows [
+                    [and focused [not [eql focused [getf state (kw "focus")]]]]
+                    [[member focused [deck--windows state]]]
+                    [[deck--manageable-p state focused]]
+                  ])
+                ]
+                ({side}:
+                  rows [
+                    [let' [[side [deck--side-of state focused]]]]
+                    (rows [
+                      [when side]
+                      [[deck--adopt-front state side focused]]
+                      [[deck--focus-window state focused]]
+                    ])
+                  ])
+              ])
+              ({window}:
+                rows [
+                  [dolist [window windows]]
+                  ({id}:
+                    rows [
+                      [let' [[id [getf window (kw "id")]]]]
+                      (rows [
+                        [unless [or' [deck--side-of state id] [member id [getf state (kw "floating")]]]]
+                        ({
+                          focus-side,
+                          left,
+                          right,
+                          side,
+                        }:
+                          rows [
+                            [
+                              "let*"
+                              (rows [
+                                [[focus-side [and focused [deck--side-of state focused]]]]
+                                [[left [length [deck--column state (kw "left")]]]]
+                                [[right [length [deck--column state (kw "right")]]]]
+                                [[side [or' focus-side [if' ["<=" left right] (kw "left") (kw "right")]]]]
+                              ])
+                            ]
+                            [[push [cons id side] [getf state (kw "columns")]]]
+                            [[setf [getf state (kw "windows")] [append [getf state (kw "windows")] [list id]]]]
+                            [[deck--adopt-front state side id]]
+                            [[setf [getf state (kw "focus")] id]]
+                            (rows [
+                              [when [getf window (kw "fullscreen-requested")]]
+                              [[deck--set-fullscreen state id t]]
+                            ])
+                          ])
+                      ])
+                    ])
+                ])
+              (rows [
+                [when command]
+                [[deck--command state area command]]
+              ])
+              (rows [
+                [when terminal]
+                [[deck--request state terminal (kw "activate") nil]]
+              ])
+              (rows [
+                [when [and [member type (quote [(kw "metadata") (kw "request")])] [member [getf event (kw "id")] ids]]]
+                [[deck--request state [getf event (kw "id")] [getf event (kw "request")] [getf event (kw "requested")]]]
+              ])
+              (rows [
+                [
+                  when
+                  (rows [
+                    [or' [and [eq type (kw "button")] [eql [getf event (kw "state")] (kw "pressed")]]]
+                    (rows [
+                      [and [eq type (kw "pointer")] [eq [getf event (kw "state")] (kw "enter")] [getf event (kw "moved")]]
+                      [[setting snapshot (kw "focus-follows-mouse")]]
+                    ])
+                  ])
+                ]
+                ({id}:
+                  rows [
+                    [let' [[id [getf event (kw "id")]]]]
+                    (rows [
+                      [when [and [integerp id] [member id [deck--windows state]]]]
+                      (rows [
+                        [when [and [deck--manageable-p state id] [deck--side-of state id]]]
+                        [[deck--adopt-front state [deck--side-of state id] id]]
+                      ])
+                      [[deck--focus-window state id]]
+                    ])
+                  ])
+              ])
+              ({current}:
+                rows [
+                  [let' [[current [deck--current state]]]]
+                  (rows [
+                    [values state]
+                    (rows [
+                      [
+                        append
+                        (rows [
+                          [mapcar ({binding}: [lambda [binding] [apply (function bind-key) binding]])]
+                          (rows [
+                            [if' [deck--narrow-p' area]]
+                            (rows [
+                              [
+                                remove-if
+                                ({binding}:
+                                  rows [
+                                    [lambda [binding]]
+                                    (rows [
+                                      [member [string-downcase [third binding]]]
+                                      [(constant deck--column-commands) (kw "test") (function equal)]
+                                    ])
+                                  ])
+                              ]
+                              (constant layout-bindings)
+                            ])
+                            (constant layout-bindings)
+                          ])
+                        ])
+                      ]
+                      [[when area [deck--places windows state area]]]
+                      [[list [publish-state (kw "deck-seam") [deck--seam state area]]]]
+                      [[deck--raises state current]]
+                      [[list [focus current (kw "raise") nil]]]
+                    ])
+                    (rows [
+                      [when [and [equal command (str "terminal")] [null' terminal]]]
+                      [[list [apply (function launch) [policy--launch (str "terminal")]]]]
+                    ])
+                  ])
+                ])
+            ])
+        ])
+    ]);
+    modules_desktop_session_tomoe_lisp_gap_data = {
+      and,
+      and-optional,
+      and-rest,
+      append,
+      at,
+      below,
+      blank,
+      by,
+      cddr,
+      char-code,
+      clock-text,
+      collect,
+      concatenate,
+      cond,
+      constant,
+      context,
+      copy-list,
+      define-extension,
+      defun,
+      dolist,
+      double,
+      ecase,
+      eq,
+      equal,
+      first,
+      flet,
+      for,
+      format,
+      from,
+      function,
+      gap,
+      getf,
+      hud--alpha,
+      hud--c,
+      hud--dim,
+      hud--heat,
+      hud--mix,
+      hud--off,
+      if',
+      in',
+      in-package,
+      interval,
+      kw,
+      lambda,
+      length,
+      let',
+      list,
+      loop,
+      max,
+      member,
+      min,
+      nil,
+      not,
+      nthcdr,
+      on,
+      or',
+      plusp,
+      probe--gpu-p,
+      probe--sample,
+      publish-state,
+      quote,
+      realp,
+      remove,
+      remove-if,
+      return,
+      round,
+      rows,
+      second,
+      service-state,
+      setf,
+      shell-surface,
+      sort,
+      state-value,
+      str,
+      string,
+      string-upcase,
+      stringp,
+      subseq,
+      t,
+      thereis,
+      ui,
+      uninterned,
+      values,
+      when,
+      ...
+    }: ({
+      gap--ascii,
+      gap--degrees,
+      gap--gib,
+      gap--fit,
+      gap--px,
+      gap--text,
+      gap--item,
+      gap--meter,
+      gap--gauge,
+      gap--words,
+      gap--media,
+      gap--battery,
+      gap--network,
+      gap--frame,
+      gap--module,
+      gap--line,
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      ({text}: [defun gap--ascii [text] [remove-if ({c}: [lambda [c] [">" [char-code c] 126]]) text]])
+      blank
+      ({value'}: [defun gap--degrees [value'] [if' [realp value'] [format nil (str "~2D°") [max 0 [min 99 [round value']]]] (str "--°")]])
+      blank
+      ({mib}: [defun gap--gib [mib] [if' [realp mib] [format nil (str "~4,1FG") ["/" mib (double 1024)]] (str "--.-G")]])
+      blank
+      ({
+        text,
+        width,
+      }:
+        rows [
+          [defun gap--fit [text width]]
+          [[format nil (str "~vA") width [if' [">" [length text] width] [concatenate (quote string) [subseq text 0 ["-" width 2]] (str "..")] text]]]
+        ])
+      blank
+      ({n}: [defun gap--px [n] [max 1 [round ["*" n [getf (constant gap) (kw "scale")]]]]])
+      blank
+      ({
+        text,
+        color,
+      }:
+        rows [
+          [defun gap--text [text color]]
+          [[ui (kw "text") (kw "text") text (kw "size") [gap--px 11] (kw "line-height") [gap--px 11] (kw "color") color (kw "font") [getf (constant gap) (kw "font")]]]
+        ])
+      blank
+      ({
+        p,
+        children,
+      }:
+        rows [
+          [defun gap--item [p children]]
+          [
+            [
+              ui
+              (kw "stack")
+              (kw "children")
+              (rows [
+                [
+                  list
+                  (rows [
+                    [ui (kw "column") (kw "align") (kw "stretch")]
+                    [
+                      (kw "children")
+                      (rows [
+                        [list [ui (kw "rect") (kw "height") [gap--px 3]]]
+                        [[ui (kw "rect") (kw "height") [gap--px 8] (kw "background") [hud--alpha [hud--c p (kw "bg")] (str "e6")]]]
+                      ])
+                    ]
+                  ])
+                ]
+                (rows [
+                  [ui (kw "row") (kw "height") [gap--px 11] (kw "align") (kw "end") (kw "gap") [gap--px 4]]
+                  [(kw "padding") [list 0 [gap--px 4] 0 [gap--px 4]]]
+                  [(kw "children") [remove nil children]]
+                ])
+              ])
+            ]
+          ]
+        ])
+      blank
+      ({
+        p,
+        value',
+        accent,
+        zones,
+      }:
+        rows [
+          [defun gap--meter [p value' accent zones]]
+          ({filled}:
+            rows [
+              [let' [[filled ["*" 12 [max 0 [min 1 value']]]]]]
+              (rows [
+                [ui (kw "row") (kw "gap") [gap--px 1] (kw "height") [gap--px 8] (kw "align") (kw "end")]
+                [
+                  (kw "children")
+                  ({i}:
+                    rows [
+                      [loop for i below 12]
+                      [
+                        collect
+                        (rows [
+                          [ui (kw "rect") (kw "width") [gap--px 3] (kw "height") [gap--px 8]]
+                          [
+                            (kw "background")
+                            (rows [
+                              [hud--mix [hud--off p]]
+                              [[if' zones [hud--heat ["*" 100 ["/" ["1+" i] 12]] accent p] accent]]
+                              [[max 0 [min 1 ["-" filled i]]]]
+                            ])
+                          ]
+                        ])
+                      ]
+                    ])
+                ]
+              ])
+            ])
+        ])
+      blank
+      ({
+        p,
+        label,
+        accent,
+        percent,
+        detail,
+        zones,
+      }:
+        rows [
+          [defun gap--gauge [p label accent percent detail and-optional [zones t]]]
+          [
+            [
+              gap--item
+              p
+              (rows [
+                [list [gap--text label accent]]
+                [[gap--text [format nil (str "~3D%") [max 0 [min 100 percent]]] [hud--c p (kw "fg")]]]
+                [[gap--meter p ["/" percent 100] accent zones]]
+                [[when detail [gap--text detail [hud--dim p 0.75]]]]
+              ])
+            ]
+          ]
+        ])
+      blank
+      ({
+        p,
+        parts,
+      }:
+        rows [
+          [defun gap--words [p and-rest parts]]
+          [
+            [
+              gap--item
+              p
+              ({
+                text,
+                color,
+              }: [loop for [text color] on parts by (function cddr) collect [gap--text text [or' color [hud--c p (kw "fg")]]]])
+            ]
+          ]
+        ])
+      blank
+      ({
+        p,
+        snapshot,
+      }:
+        rows [
+          [defun gap--media [p snapshot]]
+          ({
+            service,
+            status,
+            title,
+            artist,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[service [service-state snapshot (kw "mpris")]]]
+                  [[status [getf service (kw "status")]]]
+                  [[title [getf service (kw "title")]]]
+                  [[artist [getf service (kw "artist")]]]
+                ])
+              ]
+              (rows [
+                [when [and [stringp title] [plusp [length title]] [member status (quote [(str "Playing") (str "Paused")]) (kw "test") (function equal)]]]
+                (rows [
+                  [gap--words p [if' [equal status (str "Playing")] (str ">>") (str "||")] [hud--c p (kw "color5")]]
+                  (rows [
+                    [
+                      gap--fit
+                      [
+                        gap--ascii
+                        [
+                          string-upcase
+                          (rows [
+                            [if' [and [stringp artist] [plusp [length artist]]]]
+                            (at 5 [[format nil (str "~A - ~A") artist title]])
+                            (at 5 title)
+                          ])
+                        ]
+                      ]
+                    ]
+                    [[round [getf (constant gap) (kw "media-width")] [getf (constant gap) (kw "scale")]]]
+                  ])
+                  nil
+                ])
+              ])
+            ])
+        ])
+      blank
+      ({
+        p,
+        snapshot,
+      }:
+        rows [
+          [defun gap--battery [p snapshot]]
+          ({
+            battery,
+            percent,
+            color,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[battery [service-state snapshot (kw "battery")]]]
+                  [[percent [round [getf battery (kw "percent") 0]]]]
+                  [
+                    [
+                      color
+                      (rows [
+                        [cond [[getf battery (kw "charging")] [hud--c p (kw "color2")]] [["<" percent 15] [hud--c p (kw "color1")]]]
+                        [[["<" percent 30] [hud--c p (kw "color3")]] [t [hud--c p (kw "color2")]]]
+                      ])
+                    ]
+                  ]
+                ])
+              ]
+              [[gap--gauge p [if' [getf battery (kw "charging")] (str "CHG") (str "BAT")] color percent nil nil]]
+            ])
+        ])
+      blank
+      ({
+        p,
+        snapshot,
+      }:
+        rows [
+          [defun gap--network [p snapshot]]
+          ({
+            network,
+            ssid,
+            online,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[network [service-state snapshot (kw "network")]]]
+                  [[ssid [getf network (kw "ssid")]]]
+                  [[online [getf network (kw "connected")]]]
+                ])
+              ]
+              (rows [
+                [
+                  gap--words
+                  p
+                  (rows [
+                    [
+                      gap--fit
+                      (rows [
+                        [cond [[and online [stringp ssid] [plusp [length ssid]]] [gap--ascii [string-upcase ssid]]]]
+                        [[online (str "ONLINE")]]
+                        [[t (str "OFFLINE")]]
+                      ])
+                    ]
+                    20
+                  ])
+                ]
+                [[if' online [hud--c p (kw "color6")] [hud--c p (kw "color1")]]]
+              ])
+            ])
+        ])
+      blank
+      ({
+        p,
+        snapshot,
+      }:
+        rows [
+          [defun gap--frame [p snapshot]]
+          ({
+            battery,
+            percent,
+            powered,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[battery [state-value snapshot (kw "frame-battery")]]]
+                  [[percent [getf battery (kw "percent")]]]
+                  [[powered [not [equal [getf battery (kw "status")] (str "Discharging")]]]]
+                ])
+              ]
+              (rows [
+                [when percent]
+                (rows [
+                  [gap--gauge p [if' powered (str "VR+") (str "VR")]]
+                  (rows [
+                    [cond [powered [hud--c p (kw "color2")]] [["<" percent 15] [hud--c p (kw "color1")]]]
+                    [[["<" percent 30] [hud--c p (kw "color3")]] [t [hud--c p (kw "color2")]]]
+                  ])
+                  [percent nil nil]
+                ])
+              ])
+            ])
+        ])
+      blank
+      ({
+        module,
+        p,
+        state,
+        snapshot,
+      }:
+        rows [
+          [defun gap--module [module p state snapshot]]
+          ({
+            cpu,
+            memory,
+            gpu,
+          }:
+            rows [
+              [let' [[cpu [getf state (kw "cpu")]] [memory [getf state (kw "memory")]] [gpu [getf state (kw "gpu")]]]]
+              (rows [
+                [ecase module]
+                [[(kw "time") [gap--words p [clock-text [getf (constant gap) (kw "time")]] nil]]]
+                [[(kw "date") [gap--words p [string-upcase [clock-text [getf (constant gap) (kw "date")]]] nil]]]
+                [[(kw "media") [gap--media p snapshot]]]
+                [[(kw "battery") [gap--battery p snapshot]]]
+                [[(kw "network") [gap--network p snapshot]]]
+                [[(kw "frame") [gap--frame p snapshot]]]
+                [[(kw "cpu") [gap--gauge p (str "CPU") [hud--c p (kw "color4")] [getf cpu (kw "percent") 0] [gap--degrees [getf cpu (kw "temp")]]]]]
+                [[(kw "memory") [gap--gauge p (str "MEM") [hud--c p (kw "color5")] [getf memory (kw "percent") 0] [gap--gib [getf memory (kw "used")]]]]]
+                [
+                  [
+                    (kw "gpu")
+                    (rows [
+                      [when [probe--gpu-p gpu]]
+                      [[gap--gauge p (str "GPU") [hud--c p (kw "color2")] [getf gpu (kw "percent") 0] [gap--degrees [getf gpu (kw "temp")]]]]
+                    ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "vram")
+                    (rows [
+                      [when [probe--gpu-p gpu]]
+                      (rows [
+                        [gap--gauge p (str "VRAM") [hud--c p (kw "color6")]]
+                        [[if' [plusp [or' [getf gpu (kw "total")] 0]] [round ["*" 100 [or' [getf gpu (kw "used")] 0]] [getf gpu (kw "total")]] 0]]
+                        [[gap--gib [getf gpu (kw "used")]]]
+                      ])
+                    ])
+                  ]
+                ]
+              ])
+            ])
+        ])
+      blank
+      ({panels}:
+        rows [
+          [defun gap--line [panels]]
+          ({
+            modules,
+            pair,
+            inset,
+            seam,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[modules [getf (constant gap) (kw "modules")]]]
+                  [[pair [getf (constant gap) (kw "center-between")]]]
+                  [[inset [getf (constant gap) (kw "inset")]]]
+                  [
+                    [
+                      seam
+                      ({
+                        a,
+                        b,
+                        index,
+                      }:
+                        rows [
+                          [loop for [a b] on modules]
+                          [for index from 1]
+                          [when [and b [eq a [first pair]] [eq b [second pair]]] return index]
+                        ])
+                    ]
+                  ]
+                ])
+              ]
+              ({half}:
+                rows [
+                  [
+                    flet
+                    [
+                      ({
+                        items,
+                        justify,
+                        padding,
+                      }:
+                        rows [
+                          [half [items justify padding]]
+                          (rows [
+                            [ui (kw "row") (kw "width") 0 (kw "grow") 1 (kw "height") [gap--px 11] (kw "gap") [gap--px 6] (kw "align") (kw "end") (kw "justify") justify (kw "padding") padding]
+                            [(kw "children") [remove nil items]]
+                          ])
+                        ])
+                    ]
+                  ]
+                  (rows [
+                    [ui (kw "row") (kw "height") [gap--px 11] (kw "align") (kw "end") (kw "justify") (kw "center")]
+                    [
+                      (kw "children")
+                      (rows [
+                        [if' seam]
+                        (rows [
+                          [list [half [subseq panels 0 seam] (kw "end") [list 0 inset 0 0]]]
+                          [[half [nthcdr seam panels] (kw "start") [list 0 0 0 inset]]]
+                        ])
+                        [[list [ui (kw "row") (kw "height") [gap--px 11] (kw "gap") [gap--px 6] (kw "align") (kw "end") (kw "children") [remove nil panels]]]]
+                      ])
+                    ]
+                  ])
+                ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [
+            define-extension
+            (str "bar")
+            (rows [
+              [(kw "reads") [(kw "system") (kw "services") (kw "data") (kw "outputs")]]
+              [(kw "state") [list (kw "cpu") nil (kw "memory") nil (kw "gpu") nil]]
+            ])
+          ]
+          [[snapshot state event]]
+          (rows [
+            [when [and [eq [getf event (kw "type")] (kw "timer")] [eq [getf event (kw "name")] (kw "sample")]]]
+            ({system}:
+              rows [
+                [let' [[system [context snapshot (kw "system")]]]]
+                ({probe}:
+                  rows [
+                    [dolist [probe (quote [(kw "cpu") (kw "memory") (kw "gpu")])]]
+                    [[setf [getf state probe] [probe--sample probe [getf state probe] system]]]
+                  ])
+              ])
+          ])
+          ({
+            p,
+            line,
+            focal,
+            wide,
+            height,
+            lift,
+            hot,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[p [state-value snapshot (kw "hud-palette")]]]
+                  [
+                    [
+                      line
+                      [
+                        gap--line
+                        ({module}:
+                          rows [
+                            [loop for module in' [getf (constant gap) (kw "modules")]]
+                            [collect [gap--module module p state snapshot]]
+                          ])
+                      ]
+                    ]
+                  ]
+                  [[focal [state-value snapshot (kw "focal-frame")]]]
+                  [[wide [first [sort [copy-list [context snapshot (kw "outputs")]] (function ">") (kw "key") ({o}: [lambda [o] [getf o (kw "width")]])]]]]
+                  [[height [gap--px 11]]]
+                  [[lift [gap--px 6]]]
+                  [
+                    [
+                      hot
+                      ({
+                        probe,
+                        temp,
+                      }:
+                        rows [
+                          [loop for probe in' (quote [(kw "cpu") (kw "gpu")])]
+                          [for temp "=" [getf [getf state probe] (kw "temp")]]
+                          [thereis [and [realp temp] [">=" temp [getf (constant gap) (kw "hot")]]]]
+                        ])
+                    ]
+                  ]
+                ])
+              ]
+              (rows [
+                [values state]
+                (rows [
+                  [
+                    append
+                    (rows [
+                      [list [interval (kw "sample") [getf (constant gap) (kw "sample")]]]
+                      [[publish-state (kw "hud-hot") [and hot t]]]
+                      (rows [
+                        [publish-state (kw "bar-floor")]
+                        (rows [
+                          [when [member (kw "bottom") [getf (constant gap) (kw "edges")]]]
+                          (rows [
+                            [
+                              cond
+                              (rows [
+                                focal
+                                (rows [
+                                  [list (kw "output") [getf focal (kw "output")]]
+                                  [(kw "y") ["+" [getf focal (kw "top")] [getf focal (kw "height")] ["-" lift] height]]
+                                ])
+                              ])
+                            ]
+                            [[wide [list (kw "output") [getf wide (kw "name")] (kw "y") [getf wide (kw "height")]]]]
+                          ])
+                        ])
+                      ])
+                    ])
+                  ]
+                  ({edge}:
+                    rows [
+                      [loop for edge in' [getf (constant gap) (kw "edges")]]
+                      [
+                        collect
+                        (rows [
+                          [if' focal]
+                          (rows [
+                            [shell-surface edge line (kw "output") [getf focal (kw "output")] (kw "anchors") (quote [(kw "top") (kw "left")])]
+                            [(kw "width") [getf focal (kw "width")] (kw "height") height]
+                            [
+                              (kw "margin")
+                              (rows [
+                                [
+                                  list
+                                  (rows [
+                                    [
+                                      "-"
+                                      (rows [
+                                        [if' [eq edge (kw "top")]]
+                                        [[getf focal (kw "top")]]
+                                        [["+" [getf focal (kw "top")] [getf focal (kw "height")]]]
+                                      ])
+                                    ]
+                                    lift
+                                  ])
+                                ]
+                                [0 0 [getf focal (kw "left")]]
+                              ])
+                            ]
+                            [(kw "layer") (kw "overlay") (kw "background") (str "#00000000") (kw "click-through") t]
+                          ])
+                          (rows [
+                            [shell-surface edge line (kw "output") [getf wide (kw "name")] (kw "anchors") [list edge (kw "left") (kw "right")]]
+                            [(kw "height") height (kw "margin") [if' [eq edge (kw "top")] [list ["-" [gap--px 3]] 0 0 0] 0]]
+                            [(kw "layer") (kw "overlay") (kw "background") (str "#00000000") (kw "click-through") t]
+                          ])
+                        ])
+                      ]
+                    ])
+                ])
+                nil
+              ])
+            ])
+        ])
+    ]);
+    modules_desktop_session_tomoe_lisp_glass_data = {
+      blank,
+      collect,
+      cons,
+      constant,
+      context,
+      declare,
+      define-extension,
+      defun,
+      expt,
+      for,
+      getf,
+      glass,
+      ignore,
+      in',
+      in-package,
+      kw,
+      loop,
+      min,
+      nil,
+      rows,
+      settings,
+      str,
+      t,
+      truncate,
+      uninterned,
+      values,
+      window-properties,
+      ...
+    }: ({glass--margin}: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      ({
+        passes,
+        offset,
+      }:
+        rows [
+          [defun glass--margin [passes offset]]
+          [[min 4096 [truncate ["*" [expt 2 passes] ["+" offset 2]]]]]
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [define-extension (str "glass") [(kw "reads") [(kw "windows")] (kw "state") nil] [snapshot state event]]
+          [[declare [ignore event]]]
+          (rows [
+            [values state]
+            (rows [
+              [
+                cons
+                [
+                  settings
+                  (kw "blur")
+                  (rows [
+                    ["list*" (kw "enabled") t]
+                    (kw "anti-artifact-margin")
+                    [[glass--margin [getf (constant glass) (kw "passes")] [getf (constant glass) (kw "offset")]]]
+                    (constant glass)
+                  ])
+                ]
+              ]
+              ({window}:
+                rows [
+                  [loop for window in' [context snapshot (kw "windows")]]
+                  [collect [window-properties [getf window (kw "id")] (kw "blur") t]]
+                ])
+            ])
+            nil
+          ])
+        ])
+    ]);
+    modules_desktop_session_tomoe_lisp_hud_data = {
+      and,
+      and-key,
+      and-optional,
+      blank,
+      by,
+      case,
+      code-char,
+      collect,
+      concatenate,
+      cond,
+      constant,
+      defun,
+      double,
+      float,
+      for,
+      format,
+      from,
+      get-internal-real-time,
+      getf,
+      hud,
+      if',
+      in-package,
+      internal-time-units-per-second,
+      kw,
+      length,
+      let',
+      list,
+      loop,
+      max,
+      min,
+      most-positive-fixnum,
+      nil,
+      or',
+      parse-integer,
+      plusp,
+      quote,
+      repeat,
+      round,
+      rows,
+      str,
+      string,
+      t,
+      theme,
+      ui,
+      uninterned,
+      ...
+    }: ({
+      hud--now',
+      hud--since,
+      hud--decay',
+      hud--c',
+      hud--hex2,
+      hud--alpha',
+      hud--fade,
+      hud--mix',
+      hud--text',
+      hud--icon',
+      hud--dim',
+      hud--off',
+      hud--heat',
+      hud--frame,
+      hud--panel',
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      (rows [
+        [defun hud--now' []]
+        [["/" [float [get-internal-real-time] (double 1)] internal-time-units-per-second]]
+      ])
+      blank
+      ({at'}:
+        rows [
+          [defun hud--since [at']]
+          [[if' at' ["*" 1000 ["-" [hud--now'] at']] most-positive-fixnum]]
+        ])
+      blank
+      ({
+        at',
+        ms,
+      }:
+        rows [
+          [defun hud--decay' [at' ms]]
+          ({elapsed}:
+            rows [
+              [let' [[elapsed [hud--since at']]]]
+              [[if' ["<" elapsed ms] ["-" 1 ["/" elapsed ms]] 0]]
+            ])
+        ])
+      blank
+      ({
+        p,
+        key,
+      }:
+        rows [
+          [defun hud--c' [p key]]
+          (rows [
+            [or' [getf p key]]
+            [
+              [
+                theme
+                (rows [
+                  [case key]
+                  [[(kw "bg") (kw "base")] [[(kw "fg") (kw "color15")] (kw "text")] [(kw "color1") (kw "red")] [(kw "color2") (kw "green")] [(kw "color3") (kw "yellow")]]
+                  [[(kw "color4") (kw "blue")] [(kw "color5") (kw "mauve")] [(kw "color6") (kw "sky")] [(kw "color8") (kw "surface2")] [t (kw "accent")]]
+                ])
+              ]
+            ]
+          ])
+        ])
+      blank
+      ({n}: [defun hud--hex2 [n] [format nil (str "~2,'0X") [max 0 [min 255 [round n]]]]])
+      blank
+      ({
+        hex',
+        aa,
+      }: [defun hud--alpha' [hex' aa] [if' ["=" [length hex'] 7] [concatenate (quote string) hex' aa] hex']])
+      blank
+      ({
+        hex',
+        fraction,
+      }: [defun hud--fade [hex' fraction] [hud--alpha' hex' [hud--hex2 ["*" 255 fraction]]]])
+      blank
+      ({
+        a,
+        b,
+        f,
+      }:
+        rows [
+          [defun hud--mix' [a b f]]
+          (rows [
+            [cond [["<=" f 0] a]]
+            (rows [
+              [[and ["=" [length a] 7] ["=" [length b] 7]]]
+              (rows [
+                [format nil (str "#~{~A~}")]
+                ({i}:
+                  rows [
+                    [loop for i from 1 by 2 repeat 3]
+                    [
+                      collect
+                      [
+                        hud--hex2
+                        (rows [
+                          ["+" ["*" ["-" 1 f] [parse-integer a (kw "start") i (kw "end") ["+" i 2] (kw "radix") 16]]]
+                          [["*" f [parse-integer b (kw "start") i (kw "end") ["+" i 2] (kw "radix") 16]]]
+                        ])
+                      ]
+                    ]
+                  ])
+              ])
+            ])
+            [[t b]]
+          ])
+        ])
+      blank
+      ({
+        text,
+        size,
+        color,
+        font,
+      }:
+        rows [
+          [defun hud--text' [text size color and-optional [font [getf (constant hud) (kw "font")]]]]
+          [[ui (kw "text") (kw "text") text (kw "size") size (kw "color") color (kw "font") font]]
+        ])
+      blank
+      ({
+        code,
+        size,
+        color,
+      }:
+        rows [
+          [defun hud--icon' [code size color]]
+          [[hud--text' [string [code-char code]] size color [getf (constant hud) (kw "icon-font")]]]
+        ])
+      blank
+      ({
+        p,
+        fraction,
+      }: [defun hud--dim' [p and-optional [fraction 0.6]] [hud--fade [hud--c' p (kw "fg")] fraction]])
+      blank
+      ({p}: [defun hud--off' [p] [hud--mix' [hud--c' p (kw "bg")] [hud--c' p (kw "fg")] 0.14]])
+      blank
+      ({
+        percent,
+        accent,
+        p,
+      }:
+        rows [
+          [defun hud--heat' [percent accent p]]
+          [[cond [[">=" percent 90] [hud--c' p (kw "color1")]] [[">=" percent 70] [hud--c' p (kw "color3")]] [t accent]]]
+        ])
+      blank
+      ({
+        p,
+        accent,
+        flash,
+        content,
+        height,
+      }:
+        rows [
+          [defun hud--frame [p accent flash content and-key height]]
+          ({
+            s,
+            edge,
+            body,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[s [getf (constant hud) (kw "shadow")]]]
+                  [[edge [hud--mix' accent [hud--c' p (kw "fg")] flash]]]
+                  [
+                    [
+                      body
+                      (rows [
+                        [ui (kw "row") (kw "height") height (kw "align") (kw "stretch")]
+                        [(kw "background") [hud--alpha' [hud--c' p (kw "bg")] (str "eb")]]
+                        [(kw "border") 1 (kw "border-color") [hud--alpha' edge [if' [plusp flash] (str "ff") (str "b3")]]]
+                        [(kw "children") [list [ui (kw "rect") (kw "width") 3 (kw "background") edge] content]]
+                      ])
+                    ]
+                  ]
+                ])
+              ]
+              [
+                [
+                  ui
+                  (kw "stack")
+                  (kw "children")
+                  (rows [
+                    [
+                      list
+                      (rows [
+                        [ui (kw "row") (kw "padding") [list s 0 0 s] (kw "align") (kw "stretch")]
+                        [(kw "children") [list [ui (kw "rect") (kw "grow") 1 (kw "background") [hud--mix' [hud--c' p (kw "bg")] edge 0.6]]]]
+                      ])
+                    ]
+                    [[ui (kw "row") (kw "padding") [list 0 s s 0] (kw "children") [list body]]]
+                  ])
+                ]
+              ]
+            ])
+        ])
+      blank
+      ({
+        p,
+        accent,
+        children,
+        flash,
+      }:
+        rows [
+          [defun hud--panel' [p accent children and-key [flash 0]]]
+          (rows [
+            [hud--frame p accent flash [ui (kw "row") (kw "align") (kw "center") (kw "gap") 8 (kw "padding") (quote [0 10 0 8]) (kw "children") children]]
+            [(kw "height") [getf (constant hud) (kw "height")]]
+          ])
+        ])
+    ]);
+    modules_desktop_session_tomoe_lisp_peek_data = {
+      and,
+      apply,
+      bind-key,
+      blank,
+      cond,
+      cons,
+      constant,
+      context,
+      define-extension,
+      eq,
+      equal,
+      focus,
+      function,
+      getf,
+      hide-window,
+      in-package,
+      intersection,
+      kw,
+      lambda,
+      let',
+      mapcar,
+      nil,
+      peek,
+      rows,
+      setf,
+      str,
+      subsetp,
+      uninterned,
+      unless,
+      values,
+      when,
+      ...
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      ({
+        snapshot,
+        hidden,
+        event,
+      }:
+        rows [
+          [define-extension (str "peek") [(kw "reads") [(kw "key") (kw "windows")] (kw "state") nil] [snapshot hidden event]]
+          ({live}:
+            rows [
+              [let' [[live [mapcar ({window}: [lambda [window] [getf window (kw "id")]]) [context snapshot (kw "windows")]]]]]
+              [
+                [
+                  setf
+                  hidden
+                  (rows [
+                    [
+                      cond
+                      (rows [
+                        [[and [eq [getf event (kw "type")] (kw "key")] [equal [getf event (kw "owner")] (str "peek")]]]
+                        [[unless hidden live]]
+                      ])
+                    ]
+                    [[[subsetp live hidden] [intersection hidden live]]]
+                  ])
+                ]
+              ]
+              (rows [
+                [values hidden]
+                (rows [
+                  ["list*" [apply (function bind-key) [getf (constant peek) (kw "bind")]]]
+                  [[when hidden [cons [focus nil] [mapcar (function hide-window) hidden]]]]
+                ])
+                nil
+              ])
+            ])
+        ])
+    ];
+    modules_desktop_session_tomoe_lisp_plates_data = {
+      and,
+      append,
+      blank,
+      cassette,
+      cassette--height,
+      cassette--hot-p,
+      cassette--module,
+      cassette--plate,
+      cassette--split,
+      collect,
+      cond,
+      constant,
+      context,
+      copy-list,
+      define-extension,
+      defun,
+      dolist,
+      eq,
+      first,
+      flet,
+      for,
+      function,
+      getf,
+      if',
+      in',
+      in-package,
+      interval,
+      kw,
+      lambda,
+      let',
+      list,
+      loop,
+      member,
+      nil,
+      nthcdr,
+      probe--sample,
+      publish-state,
+      quote,
+      remove,
+      round,
+      rows,
+      setf,
+      shell-surface,
+      sort,
+      state-value,
+      str,
+      subseq,
+      t,
+      thereis,
+      ui,
+      uninterned,
+      values,
+      when,
+      ...
+    }: ({cassette--line}: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      ({
+        items,
+        edge,
+      }:
+        rows [
+          [defun cassette--line [items edge]]
+          ({
+            inset,
+            seam,
+          }:
+            rows [
+              [
+                let'
+                (rows [
+                  [[inset [getf (constant cassette) (kw "inset")]]]
+                  [[seam [cassette--split]]]
+                ])
+              ]
+              ({half}:
+                rows [
+                  [
+                    flet
+                    [
+                      ({
+                        plate,
+                        justify,
+                        padding,
+                      }:
+                        rows [
+                          [half [plate justify padding]]
+                          [[ui (kw "row") (kw "width") 0 (kw "grow") 1 (kw "justify") justify (kw "padding") padding (kw "children") [remove nil [list plate]]]]
+                        ])
+                    ]
+                  ]
+                  (rows [
+                    [ui (kw "row") (kw "align") (kw "start") (kw "justify") (kw "center")]
+                    [
+                      (kw "children")
+                      (rows [
+                        [if' seam]
+                        (rows [
+                          [list [half [cassette--plate [subseq items 0 seam] (kw "start") edge] (kw "end") [list 0 inset 0 0]]]
+                          [[half [cassette--plate [nthcdr seam items] (kw "end") edge] (kw "start") [list 0 0 0 inset]]]
+                        ])
+                        [[remove nil [list [cassette--plate items (kw "both") edge]]]]
+                      ])
+                    ]
+                  ])
+                ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [
+            define-extension
+            (str "bar")
+            (rows [
+              [(kw "reads") [(kw "system") (kw "services") (kw "data") (kw "outputs")]]
+              [(kw "state") [list (kw "cpu") nil (kw "memory") nil (kw "gpu") nil]]
+            ])
+          ]
+          [[snapshot state event]]
+          (rows [
+            [when [and [eq [getf event (kw "type")] (kw "timer")] [eq [getf event (kw "name")] (kw "sample")]]]
+            ({system}:
+              rows [
+                [let' [[system [context snapshot (kw "system")]]]]
+                ({probe}:
+                  rows [
+                    [dolist [probe (quote [(kw "cpu") (kw "memory") (kw "gpu")])]]
+                    [[setf [getf state probe] [probe--sample probe [getf state probe] system]]]
+                  ])
+              ])
+          ])
+          ({
+            items,
+            focal,
+            wide,
+            height,
+            hot,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [
+                    [
+                      items
+                      ({module}:
+                        rows [
+                          [loop for module in' [getf (constant cassette) (kw "modules")]]
+                          [collect [cassette--module module state snapshot]]
+                        ])
+                    ]
+                  ]
+                  [[focal [state-value snapshot (kw "focal-frame")]]]
+                  [[wide [first [sort [copy-list [context snapshot (kw "outputs")]] (function ">") (kw "key") ({o}: [lambda [o] [getf o (kw "width")]])]]]]
+                  [[height [cassette--height (kw "bottom")]]]
+                  [[hot ({probe}: [loop for probe in' (quote [(kw "cpu") (kw "gpu")]) thereis [cassette--hot-p [getf [getf state probe] (kw "temp")]]])]]
+                ])
+              ]
+              (rows [
+                [values state]
+                (rows [
+                  [
+                    append
+                    (rows [
+                      [list [interval (kw "sample") [getf (constant cassette) (kw "sample")]]]
+                      [[publish-state (kw "hud-hot") [and hot t]]]
+                      (rows [
+                        [publish-state (kw "bar-floor")]
+                        (rows [
+                          [when [member (kw "bottom") [getf (constant cassette) (kw "edges")]]]
+                          (rows [
+                            [
+                              cond
+                              [
+                                focal
+                                (rows [
+                                  [list (kw "output") [getf focal (kw "output")]]
+                                  [(kw "y") ["+" [getf focal (kw "top")] [getf focal (kw "height")] [round height 2]]]
+                                ])
+                              ]
+                            ]
+                            [[wide [list (kw "output") [getf wide (kw "name")] (kw "y") [getf wide (kw "height")]]]]
+                          ])
+                        ])
+                      ])
+                    ])
+                  ]
+                  ({
+                    edge,
+                    line,
+                    height,
+                  }:
+                    rows [
+                      [loop for edge in' [getf (constant cassette) (kw "edges")]]
+                      [for line "=" [cassette--line items edge]]
+                      [for height "=" [cassette--height edge]]
+                      [
+                        collect
+                        (rows [
+                          [if' focal]
+                          (rows [
+                            [shell-surface edge line (kw "output") [getf focal (kw "output")] (kw "anchors") (quote [(kw "top") (kw "left")])]
+                            [(kw "width") [getf focal (kw "width")] (kw "height") height]
+                            [
+                              (kw "margin")
+                              (rows [
+                                [
+                                  list
+                                  (rows [
+                                    [
+                                      "-"
+                                      (rows [
+                                        [if' [eq edge (kw "top")]]
+                                        [[getf focal (kw "top")]]
+                                        [["+" [getf focal (kw "top")] [getf focal (kw "height")]]]
+                                      ])
+                                    ]
+                                    [[round height 2]]
+                                  ])
+                                ]
+                                [0 0 [getf focal (kw "left")]]
+                              ])
+                            ]
+                            [(kw "layer") (kw "overlay") (kw "background") (str "#00000000") (kw "click-through") t]
+                          ])
+                          (rows [
+                            [shell-surface edge line (kw "output") [getf wide (kw "name")] (kw "anchors") [list edge (kw "left") (kw "right")]]
+                            [(kw "height") height (kw "margin") [if' [eq edge (kw "top")] (quote [(-1) 0 0 0]) (quote [0 0 (-1) 0])]]
+                            [(kw "exclusive-zone") 0]
+                            [(kw "layer") (kw "overlay") (kw "background") (str "#00000000") (kw "click-through") t]
+                          ])
+                        ])
+                      ]
+                    ])
+                ])
+                nil
+              ])
+            ])
+        ])
+    ]);
+    modules_desktop_session_tomoe_lisp_policy_data = {
+      and,
+      and-optional,
+      append,
+      apply,
+      assoc,
+      blank,
+      cdr,
+      configure-output,
+      constant,
+      context,
+      declare,
+      define-extension,
+      defun,
+      dot,
+      equal,
+      find,
+      first,
+      floor,
+      focus,
+      function,
+      getf,
+      hide-window,
+      ignore,
+      in-package,
+      kw,
+      lambda,
+      length,
+      let',
+      list,
+      mapcar,
+      max,
+      nil,
+      or',
+      place,
+      policy-displays,
+      policy-hidden-window,
+      policy-launcher,
+      policy-launches,
+      policy-settings,
+      policy-terminal,
+      quote,
+      rows,
+      rules-for,
+      second,
+      settings,
+      str,
+      stringp,
+      t,
+      uninterned,
+      values,
+      when,
+      window-rule,
+      ...
+    }: ({
+      policy--prefix-p,
+      policy--launch',
+      policy--terminal',
+      policy--unmanaged-p',
+      policy--area',
+      policy--centred',
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      ({
+        prefix,
+        text,
+      }:
+        rows [
+          [defun policy--prefix-p [prefix text]]
+          (rows [
+            [and [stringp text] [">=" [length text] [length prefix]]]
+            [["string=" prefix text (kw "end2") [length prefix]]]
+          ])
+        ])
+      blank
+      ({command}:
+        rows [
+          [defun policy--launch' [command]]
+          [[second [assoc command (constant policy-launches) (kw "test") (function equal)]]]
+        ])
+      blank
+      ({windows}:
+        rows [
+          [defun policy--terminal' [windows]]
+          (rows [
+            [
+              getf
+              (rows [
+                [find [getf (constant policy-terminal) (kw "app-id")] windows]
+                [(kw "key") ({window}: [lambda [window] [getf window (kw "app-id")]]) (kw "test") (function equal)]
+              ])
+            ]
+            (kw "id")
+          ])
+        ])
+      blank
+      ({
+        snapshot,
+        window,
+      }:
+        rows [
+          [defun policy--unmanaged-p' [snapshot window]]
+          ({properties}:
+            rows [
+              [let' [[properties [rules-for snapshot window]]]]
+              [[or' [cdr [assoc (kw "float") properties]] [cdr [assoc (kw "hidden") properties]]]]
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        name,
+      }:
+        rows [
+          [defun policy--area' [snapshot and-optional name]]
+          ({areas}:
+            rows [
+              [let' [[areas [context snapshot (kw "workareas")]]]]
+              (rows [
+                [or' [find name areas (kw "test") (function equal) (kw "key") ({area}: [lambda [area] [getf area (kw "name")]])]]
+                [[first areas]]
+              ])
+            ])
+        ])
+      blank
+      ({
+        area,
+        ratio',
+      }:
+        rows [
+          [defun policy--centred' [area ratio']]
+          ({
+            width,
+            height,
+          }:
+            rows [
+              [
+                let'
+                (rows [
+                  [[width [max 1 [floor ["*" [getf area (kw "width")] ratio']]]]]
+                  [[height [max 1 [floor ["*" [getf area (kw "height")] ratio']]]]]
+                ])
+              ]
+              (rows [
+                [list ["+" [getf area (kw "x")] [floor ["-" [getf area (kw "width")] width] 2]]]
+                [["+" [getf area (kw "y")] [floor ["-" [getf area (kw "height")] height] 2]]]
+                [width height]
+              ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [define-extension (str "session") [] [snapshot state event]]
+          [[declare [ignore snapshot event]]]
+          (rows [
+            [values state]
+            (rows [
+              [append [mapcar ({display}: [lambda [display] [apply (function configure-output) display]]) (constant policy-displays)]]
+              [[list [apply (function settings) (constant policy-settings)]]]
+            ])
+            nil
+          ])
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [define-extension (str "rules") [] [snapshot state event]]
+          [[declare [ignore snapshot event]]]
+          (rows [
+            [values state]
+            (rows [
+              [
+                list
+                (rows [
+                  [window-rule (kw "launcher") (kw "app-id") [getf (constant policy-launcher) (kw "app-id")]]
+                  [(kw "properties") (quote [[(kw "float") dot t]]) (kw "reads") (quote [(kw "workareas")])]
+                  [
+                    (kw "apply")
+                    ({
+                      window,
+                      snapshot,
+                      state,
+                      event,
+                    }:
+                      rows [
+                        [lambda [window snapshot state event]]
+                        [[declare [ignore event]]]
+                        ({
+                          id,
+                          area,
+                        }:
+                          rows [
+                            [
+                              let'
+                              (rows [
+                                [[id [getf window (kw "id")]]]
+                                [[area [policy--area' snapshot]]]
+                              ])
+                            ]
+                            (rows [
+                              [values state]
+                              (rows [
+                                [
+                                  append
+                                  (rows [
+                                    [when area]
+                                    [
+                                      [
+                                        list
+                                        [
+                                          apply
+                                          (function place)
+                                          id
+                                          (rows [
+                                            policy--centred'
+                                            [area [getf (constant policy-launcher) (kw "ratio")]]
+                                          ])
+                                        ]
+                                      ]
+                                    ]
+                                  ])
+                                ]
+                                [[list [focus id]]]
+                              ])
+                              nil
+                            ])
+                          ])
+                      ])
+                  ]
+                ])
+              ]
+              (rows [
+                [window-rule (kw "hidden") (kw "app-id") [getf (constant policy-hidden-window) (kw "app-id")]]
+                [
+                  (kw "match")
+                  ({
+                    window,
+                    snapshot,
+                  }:
+                    rows [
+                      [lambda [window snapshot]]
+                      [[declare [ignore snapshot]]]
+                      (rows [
+                        [policy--prefix-p [getf (constant policy-hidden-window) (kw "title-prefix")]]
+                        [[getf window (kw "title")]]
+                      ])
+                    ])
+                ]
+                [(kw "properties") (quote [[(kw "hidden") dot t]])]
+                [
+                  (kw "apply")
+                  ({
+                    window,
+                    snapshot,
+                    state,
+                    event,
+                  }:
+                    rows [
+                      [lambda [window snapshot state event]]
+                      [[declare [ignore snapshot event]]]
+                      [[values state [list [hide-window [getf window (kw "id")]]] nil]]
+                    ])
+                ]
+              ])
+            ])
+            nil
+          ])
+        ])
+    ]);
+    modules_desktop_session_tomoe_lisp_probe_data = {
+      and,
+      cond,
+      copy-list,
+      defun,
+      ecase,
+      first,
+      getf,
+      if',
+      in-package,
+      kw,
+      let',
+      max,
+      min,
+      plusp,
+      round,
+      setf,
+      uninterned,
+      when,
+      ...
+    }: ({
+      probe--sample',
+      probe--gpu-p',
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      ({
+        probe,
+        previous,
+        system,
+      }: [
+        defun
+        probe--sample'
+        [probe previous system]
+        ({sample}: [
+          let'
+          [[sample [copy-list previous]]]
+          [
+            ecase
+            probe
+            [
+              (kw "cpu")
+              ({
+                total,
+                idle,
+              }: [let' [[total [getf system (kw "cpu-total")]] [idle [getf system (kw "cpu-idle")]]] [when total ({spent}: [let' [[spent ["-" total [getf sample (kw "total") total]]]] [setf [getf sample (kw "percent")] [if' [plusp spent] [max 0 [min 100 [round ["*" 100 ["-" spent ["-" idle [getf sample (kw "idle") idle]]]] spent]]] [getf sample (kw "percent") 0]] [getf sample (kw "total")] total [getf sample (kw "idle")] idle [getf sample (kw "temp")] [getf system (kw "cpu-temperature")]]])]])
+            ]
+            [
+              (kw "memory")
+              ({
+                total,
+                available,
+              }: [let' [[total [getf system (kw "memory-total")]] [available [getf system (kw "memory-available")]]] [when [and total [plusp total]] [setf [getf sample (kw "percent")] [round ["*" 100 ["-" total available]] total] [getf sample (kw "used")] [round ["-" total available] 1024]]]])
+            ]
+            [(kw "gpu") ({gpu}: [let' [[gpu [first [getf system (kw "gpus")]]]] [cond [gpu [setf [getf sample (kw "percent")] [max 0 [min 100 [getf gpu (kw "busy")]]] [getf sample (kw "used")] [getf gpu (kw "vram-used")] [getf sample (kw "total")] [getf gpu (kw "vram-total")] [getf sample (kw "temp")] [getf gpu (kw "temperature")] [getf sample (kw "failures")] 0]] [system [setf [getf sample (kw "failures")] ["1+" [getf sample (kw "failures") 0]]]]]])]
+          ]
+          sample
+        ])
+      ])
+      ({gpu}: [defun probe--gpu-p' [gpu] [and [getf gpu (kw "percent")] ["<" [getf gpu (kw "failures") 0] 3]]])
+    ]);
+    modules_desktop_session_tomoe_lisp_shader_wallpaper_data = {
+      and,
+      and-key,
+      append,
+      apply,
+      bind-key,
+      blank,
+      case,
+      collect,
+      constant,
+      context,
+      define-extension,
+      defun,
+      destructuring-bind,
+      equal,
+      exec-async,
+      first,
+      floor,
+      for,
+      format,
+      from,
+      function,
+      getf,
+      if',
+      in',
+      in-package,
+      intern,
+      keyboard-grab,
+      kw,
+      length,
+      let',
+      list,
+      loop,
+      menu-choice,
+      min,
+      mod,
+      multiple-value-bind,
+      nconc,
+      nil,
+      nth,
+      or',
+      quote,
+      rows,
+      second,
+      setf,
+      shader-wallpaper,
+      shell-surface,
+      str,
+      t,
+      theme,
+      third,
+      ui,
+      uninterned,
+      values,
+      when,
+      ...
+    }: ({shader-wallpaper--menu}: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      ({
+        shaders,
+        chosen,
+        outputs,
+      }:
+        rows [
+          [defun shader-wallpaper--menu [shaders chosen outputs]]
+          ({
+            width,
+            height,
+            gap',
+            border,
+          }:
+            rows [
+              [destructuring-bind [and-key width height gap' border] [getf (constant shader-wallpaper) (kw "preview")]]
+              ({count}:
+                rows [
+                  [let' [[count [length shaders]]]]
+                  (rows [
+                    [
+                      "list*"
+                      (rows [
+                        [shell-surface (kw "shader-menu") [ui (kw "column") (kw "on-click") (kw "cancel") (kw "background") (str "#00000066")]]
+                        [(kw "anchors") (quote [(kw "top") (kw "right") (kw "bottom") (kw "left")]) (kw "layer") (kw "overlay")]
+                        [(kw "background") (str "#00000000") (kw "blur") t]
+                      ])
+                    ]
+                    [[keyboard-grab]]
+                    [[bind-key nil (str "Left") (kw "up")] [bind-key nil (str "h") (kw "up")]]
+                    [[bind-key nil (str "Right") (kw "down")] [bind-key nil (str "l") (kw "down")]]
+                    [[bind-key nil (str "Return") (kw "select")] [bind-key nil (str "Escape") (kw "cancel")]]
+                    ({
+                      output,
+                      scale,
+                      output-width,
+                      output-height,
+                      tile-width,
+                      tile-height,
+                      left,
+                      top,
+                    }:
+                      rows [
+                        [loop for output in' outputs]
+                        [for scale "=" [getf output (kw "scale-120") 120]]
+                        [for output-width "=" [floor ["*" [getf output (kw "width")] 120] scale]]
+                        [for output-height "=" [floor ["*" [getf output (kw "height")] 120] scale]]
+                        [for tile-width "=" [min width [floor ["-" output-width ["*" ["1+" count] gap']] count]]]
+                        [for tile-height "=" [floor ["*" height tile-width] width]]
+                        [for left "=" [floor ["-" output-width ["-" ["*" count ["+" tile-width gap']] gap']] 2]]
+                        [for top "=" [floor ["-" output-height tile-height] 2]]
+                        [
+                          nconc
+                          ({
+                            path,
+                            fps,
+                            index,
+                          }:
+                            rows [
+                              [loop for [path fps] in' shaders]
+                              [for index from 0]
+                              [
+                                collect
+                                (rows [
+                                  shell-surface
+                                  (rows [
+                                    [intern [format nil (str "SHADER-PREVIEW-~A-~D") [getf output (kw "name")] index]]
+                                    (kw "keyword")
+                                  ])
+                                  (rows [
+                                    [ui (kw "stack") (kw "width") tile-width (kw "height") tile-height]
+                                    [(kw "border") [if' ["=" index chosen] border 0]]
+                                    [(kw "border-color") [theme (kw "accent")]]
+                                    [(kw "on-click") [intern [format nil (str "SELECT-~D") index] (kw "keyword")]]
+                                    [(kw "on-hover") [intern [format nil (str "HOVER-~D") index] (kw "keyword")]]
+                                  ])
+                                  [(kw "output") [getf output (kw "name")] (kw "anchors") (quote [(kw "top") (kw "left")])]
+                                  [(kw "margin") [list top 0 0 ["+" left ["*" index ["+" tile-width gap']]]]]
+                                  [(kw "width") tile-width (kw "height") tile-height (kw "layer") (kw "overlay")]
+                                  [(kw "background") [list (kw "shader") path (kw "fps") fps]]
+                                ])
+                              ]
+                            ])
+                        ]
+                      ])
+                  ])
+                ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [define-extension (str "shader-wallpaper") [(kw "reads") [(kw "key") (kw "ui") (kw "outputs")] (kw "state") nil] [snapshot state event]]
+          ({
+            shaders,
+            count,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[shaders [getf (constant shader-wallpaper) (kw "shaders")]]]
+                  [[count [length shaders]]]
+                ])
+              ]
+              ({
+                index,
+                menu,
+              }:
+                rows [
+                  [destructuring-bind [and-key [index 0] menu] state]
+                  (rows [
+                    [when [equal [getf event (kw "owner")] (str "shader-wallpaper")]]
+                    (rows [
+                      [if' [equal [getf event (kw "command")] (str "menu")]]
+                      [[setf menu index]]
+                      ({
+                        action',
+                        choice,
+                      }:
+                        rows [
+                          [multiple-value-bind [action' choice] [and menu [menu-choice event menu count]]]
+                          (rows [
+                            [case action']
+                            [[(kw "select") [setf index choice menu nil]]]
+                            [[(kw "cancel") [setf menu nil]]]
+                            [[(kw "move") [setf menu choice]]]
+                          ])
+                        ])
+                    ])
+                  ])
+                  [[setf index [mod index count] menu [and menu [mod menu count]]]]
+                  ({
+                    shown,
+                    command,
+                  }:
+                    rows [
+                      [
+                        let'
+                        (rows [
+                          [[shown [nth [or' menu index] shaders]]]
+                          [[command [third [nth index shaders]]]]
+                        ])
+                      ]
+                      (rows [
+                        [values [list (kw "index") index (kw "menu") menu]]
+                        (rows [
+                          ["list*" [apply (function bind-key) [getf (constant shader-wallpaper) (kw "bind")]]]
+                          (rows [
+                            [shell-surface (kw "shader-wallpaper") [ui (kw "stack")]]
+                            [(kw "anchors") (quote [(kw "top") (kw "right") (kw "bottom") (kw "left")]) (kw "layer") (kw "background")]
+                            [(kw "background") [list (kw "shader") [first shown] (kw "fps") [second shown]]]
+                          ])
+                          (rows [
+                            [append [when command [list [exec-async (kw "theme") command]]]]
+                            [[when menu [shader-wallpaper--menu shaders menu [context snapshot (kw "outputs")]]]]
+                          ])
+                        ])
+                        nil
+                      ])
+                    ])
+                ])
+            ])
+        ])
+    ]);
+    modules_desktop_session_tomoe_lisp_sounds_data = {
+      constant,
+      declare,
+      define-extension,
+      getf,
+      ignore,
+      in-package,
+      kw,
+      list,
+      nil,
+      sound,
+      sounds,
+      str,
+      uninterned,
+      values,
+      ...
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      ({
+        snapshot,
+        state,
+        event,
+      }: [define-extension (str "sounds") [] [snapshot state event] [declare [ignore snapshot event]] [values state [list [sound (kw "key") [getf (constant sounds) (kw "key")] (kw "gain") [getf (constant sounds) (kw "key-gain")]] [sound (kw "button") [getf (constant sounds) (kw "button")] (kw "gain") [getf (constant sounds) (kw "button-gain")]] [sound (kw "close") [getf (constant sounds) (kw "close")] (kw "gain") [getf (constant sounds) (kw "close-gain")]]] nil]])
+    ];
+    modules_desktop_session_tomoe_lisp_spine_data = {
+      across,
+      and,
+      and-optional,
+      and-rest,
+      append,
+      apply,
+      at,
+      blank,
+      cassette,
+      cassette--c,
+      cassette--degrees,
+      cassette--fit,
+      cassette--gib,
+      cassette--grille,
+      cassette--height,
+      cassette--hot-p,
+      cassette--led,
+      cassette--module,
+      cassette--plate,
+      cassette--px,
+      cassette--reel,
+      cassette--split,
+      cassette--window,
+      cassette--zone,
+      char,
+      clock-text,
+      collect,
+      constant,
+      context,
+      deck--narrow-p,
+      declare,
+      define-extension,
+      defun,
+      destructuring-bind,
+      do,
+      dolist,
+      dot,
+      downto,
+      ecase,
+      eq,
+      equal,
+      find,
+      for,
+      format,
+      from,
+      function,
+      getf,
+      if',
+      ignore,
+      in',
+      in-package,
+      intern,
+      interval,
+      kw,
+      lambda,
+      length,
+      let',
+      list,
+      loop,
+      max,
+      member,
+      min,
+      nil,
+      nthcdr,
+      on,
+      or',
+      plusp,
+      position-if,
+      probe--gpu-p,
+      probe--sample,
+      publish-state,
+      quote,
+      realp,
+      remove,
+      remove-if-not,
+      round,
+      rows,
+      service-state,
+      setf,
+      shell-surface,
+      special,
+      state-value,
+      str,
+      string,
+      string-right-trim,
+      string-upcase,
+      stringp,
+      subseq,
+      t,
+      thereis,
+      ui,
+      uninterned,
+      values,
+      when,
+      while,
+      with',
+      ...
+    }: ({
+      spine--parts,
+      spine--text,
+      spine--groove,
+      spine--ladder,
+      spine--gauge,
+      spine--counter,
+      spine--date,
+      spine--stacked,
+      spine--media,
+      spine--module,
+      spine--cell,
+      spine--run,
+      spine--tray-height,
+      spine--body,
+      spine--covered-p,
+      spine--fullscreen-p,
+      spine--plates,
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      ({text}:
+        rows [
+          [defun spine--parts [text]]
+          ({
+            start,
+            i,
+            part,
+          }:
+            rows [
+              [loop with' start "=" 0]
+              [for i "=" [position-if ({c}: [lambda [c] [member c (quote [(char ":") (char "Space")])]]) text (kw "start") start]]
+              [for part "=" [subseq text start i]]
+              [when [plusp [length part]] collect part]
+              [while i do [setf start ["1+" i]]]
+            ])
+        ])
+      blank
+      ({
+        text,
+        color,
+        size,
+      }:
+        rows [
+          [defun spine--text [text color and-optional [size 11]]]
+          (rows [
+            [ui (kw "text") (kw "text") text (kw "size") [cassette--px size] (kw "line-height") [cassette--px size] (kw "color") color]
+            [(kw "font") [getf (constant cassette) (kw "font")]]
+          ])
+        ])
+      blank
+      (rows [
+        [defun spine--groove []]
+        [[ui (kw "rect") (kw "height") 1 (kw "background") [cassette--c (kw "groove")]]]
+      ])
+      blank
+      ({fraction}:
+        rows [
+          [defun spine--ladder [fraction]]
+          ({
+            count,
+            lit,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[count [getf (constant cassette) (kw "segments")]]]
+                  [[lit [round ["*" count [max 0 [min 1 fraction]]]]]]
+                ])
+              ]
+              (rows [
+                [ui (kw "column") (kw "gap") [cassette--px 1] (kw "align") (kw "center")]
+                [
+                  (kw "children")
+                  ({i}:
+                    rows [
+                      [loop for i from ["1-" count] downto 0]
+                      [
+                        collect
+                        (rows [
+                          [ui (kw "rect") (kw "width") [cassette--px 8] (kw "height") [cassette--px 3]]
+                          [(kw "background") [if' ["<" i lit] [cassette--zone ["/" ["1+" i] count]] [cassette--c (kw "led-off")]]]
+                        ])
+                      ]
+                    ])
+                ]
+              ])
+            ])
+        ])
+      blank
+      ({
+        label,
+        percent,
+        detail,
+        hot,
+      }:
+        rows [
+          [defun spine--gauge [label percent detail and-optional hot]]
+          ({percent'}:
+            rows [
+              [let' [[percent' [max 0 [min 100 [round [or' percent 0]]]]]]]
+              (rows [
+                [ui (kw "column") (kw "align") (kw "center") (kw "gap") [cassette--px 2]]
+                [
+                  (kw "children")
+                  (rows [
+                    [remove nil]
+                    (rows [
+                      [list [spine--text label [cassette--c (kw "dim")] 7]]
+                      [[spine--ladder ["/" percent' 100]]]
+                      (rows [
+                        [ui (kw "row") (kw "align") (kw "end")]
+                        [
+                          (kw "children")
+                          (rows [
+                            [list [spine--text [format nil (str "~D") percent'] [cassette--c (kw "ink")]]]
+                            [[spine--text (str "%") [cassette--c (kw "dim")] 7]]
+                          ])
+                        ]
+                      ])
+                      [[when detail [spine--text detail [if' hot [cassette--c (kw "orange")] [cassette--c (kw "dim")]] 7]]]
+                    ])
+                  ])
+                ]
+              ])
+            ])
+        ])
+      blank
+      (rows [
+        [defun spine--counter []]
+        (rows [
+          [ui (kw "column") (kw "align") (kw "stretch") (kw "gap") [cassette--px 1]]
+          [
+            (kw "children")
+            ({part}:
+              rows [
+                [loop for part in' [spine--parts [clock-text [getf (constant cassette) (kw "time")]]]]
+                [
+                  collect
+                  (rows [
+                    [cassette--window part (kw "face") [cassette--c (kw "counter")] (kw "rim") [cassette--c (kw "rim")]]
+                    (at 23 [(kw "ghost") [cassette--c (kw "counter-ghost")] (kw "ink") [cassette--c (kw "amber")]])
+                  ])
+                ]
+              ])
+          ]
         ])
       ])
       blank
       (rows [
-        ["define-extension" (str "sway")]
-        (rows [
-          [":reads" [":windows" ":rules" ":workareas" ":outputs" ":focus" ":key" ":button" ":pointer" ":request" ":settings"]]
-          [
-            ":state"
+        [defun spine--date []]
+        ({
+          day,
+          date,
+          month,
+          rest',
+        }:
+          rows [
+            [destructuring-bind [and-optional day date month and-rest rest']]
+            [[spine--parts [string-upcase [clock-text [getf (constant cassette) (kw "date")]]]]]
+            [[declare [ignore rest']]]
             (rows [
-              ["list" ":active" 1 ":workspaces" "nil" ":trees" "nil" ":split" "nil" ":focus" "nil"]
-              [":fullscreen" "nil" ":floating" "nil"]
-            ])
-          ]
-          [":admission" "t"]
-        ])
-        [["snapshot" "state" "event"]]
-        (rows [
-          [
-            "let*"
-            (rows [
+              [ui (kw "column") (kw "align") (kw "center") (kw "gap") [cassette--px 2]]
               [
-                [
-                  "windows"
-                  (rows [
-                    ["remove-if" ["lambda" ["window"] ["policy--unmanaged-p" "snapshot" "window"]]]
-                    [["context" "snapshot" ":windows"]]
-                  ])
-                ]
-              ]
-              [["ids" ["mapcar" ["lambda" ["window"] ["getf" "window" ":id"]] "windows"]]]
-              [["count" ["getf" "+layout+" ":workspaces"]]]
-              [["gap" ["getf" "+layout+" ":gaps"]]]
-              [["area" ["policy--area" "snapshot"]]]
-              [
-                [
-                  "output"
-                  [
-                    "and"
-                    "area"
-                    (rows [
-                      ["find" ["getf" "area" ":name"] ["context" "snapshot" ":outputs"]]
-                      [":test" (function "equal") ":key" ["lambda" ["output"] ["getf" "output" ":name"]]]
-                    ])
-                  ]
-                ]
-              ]
-              [["type" ["getf" "event" ":type"]]]
-              [["command" ["and" ["eq" "type" ":key"] ["equal" ["getf" "event" ":owner"] (str "sway")] ["getf" "event" ":command"]]]]
-              [
-                [
-                  "motion"
-                  [
-                    "rest"
-                    (rows [
-                      [
-                        "assoc"
-                        "command"
-                        (quote (rows [
-                          [[(str "focus-left") (-1) 0] [(str "focus-right") 1 0]]
-                          [[(str "focus-up") 0 (-1)] [(str "focus-down") 0 1]]
-                        ]))
-                      ]
-                      [":test" (function "equal")]
-                    ])
-                  ]
-                ]
-              ]
-              [["active" ["max" 1 ["min" "count" ["getf" "state" ":active"]]]]]
-              [
-                [
-                  "workspaces"
-                  (rows [
-                    ["loop" "for index below count"]
-                    [
-                      "collect"
-                      (rows [
-                        ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]]]
-                        [["nth" "index" ["getf" "state" ":workspaces"]]]
-                      ])
-                    ]
-                  ])
-                ]
-              ]
-              [["trees" ["loop" "for index below count" "collect" ["nth" "index" ["getf" "state" ":trees"]]]]]
-              [["split" ["remove-if-not" ["lambda" ["entry"] ["member" ["car" "entry"] "ids"]] ["getf" "state" ":split"]]]]
-              [["focused" ["getf" "state" ":focus"]]]
-              [["fullscreen" ["remove-if-not" ["lambda" ["id"] ["member" "id" "ids"]] ["getf" "state" ":fullscreen"]]]]
-              [["floating" ["remove-if-not" ["lambda" ["entry"] ["member" ["car" "entry"] "ids"]] ["getf" "state" ":floating"]]]]
-              [["external" ["previous-context" "snapshot" ":focus"]]]
-              [["terminal" ["and" ["equal" "command" (str "terminal")] ["policy--terminal" "windows"]]]]
-              [["new" "nil"]]
-            ])
-          ]
-          (rows [
-            [
-              "labels"
-              (rows [
-                [["workspace" ["number"] ["nth" ["1-" "number"] "workspaces"]]]
-                [
-                  [
-                    "home"
-                    ["id"]
-                    (rows [
-                      ["loop" "for list in workspaces" "for number from 1"]
-                      ["when" ["member" "id" "list"] "return number"]
-                    ])
-                  ]
-                ]
+                (kw "children")
                 (rows [
-                  ["boxes" ["tree"]]
+                  [remove nil]
                   (rows [
-                    ["when" ["and" "tree" "area"]]
+                    [list [when day [spine--text day [cassette--c (kw "dim")] 7]]]
+                    [[when date [spine--text date [cassette--c (kw "ink")]]]]
+                    [[when month [spine--text month [cassette--c (kw "dim")] 7]]]
+                  ])
+                ])
+              ]
+            ])
+          ])
+      ])
+      blank
+      ({
+        text,
+        color,
+      }:
+        rows [
+          [defun spine--stacked [text color]]
+          (rows [
+            [ui (kw "column") (kw "align") (kw "center")]
+            [
+              (kw "children")
+              ({c}:
+                rows [
+                  [loop for c across [string-right-trim (str " ") text]]
+                  [collect [spine--text [string c] color 8]]
+                ])
+            ]
+          ])
+        ])
+      blank
+      ({snapshot}:
+        rows [
+          [defun spine--media [snapshot]]
+          ({
+            service,
+            status,
+            title,
+            length',
+            position',
+            played,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[service [service-state snapshot (kw "mpris")]]]
+                  [[status [getf service (kw "status")]]]
+                  [[title [getf service (kw "title")]]]
+                  [[length' [getf service (kw "length")]]]
+                  [[position' [getf service (kw "position")]]]
+                  [[played [if' [and [realp length'] [plusp length'] [realp position']] [max 0 [min 1 ["/" position' length']]] 0]]]
+                ])
+              ]
+              (rows [
+                [when [and [stringp title] [plusp [length title]] [member status (quote [(str "Playing") (str "Paused")]) (kw "test") (function equal)]]]
+                (rows [
+                  [ui (kw "column") (kw "align") (kw "center") (kw "gap") [cassette--px 4]]
+                  [
+                    (kw "children")
                     (rows [
-                      ["sway--boxes" "tree" ["+" ["getf" "area" ":x"] "gap"] ["+" ["getf" "area" ":y"] "gap"]]
-                      [["-" ["getf" "area" ":width"] ["*" 2 "gap"]] ["-" ["getf" "area" ":height"] ["*" 2 "gap"]] "gap"]
+                      [list [cassette--led [equal status (str "Playing")]]]
+                      [[cassette--reel ["-" 1 played]]]
+                      [[spine--stacked [cassette--fit title [getf (constant cassette) (kw "spine-title")]] [cassette--c (kw "ink")]]]
+                      [[cassette--reel played]]
+                    ])
+                  ]
+                ])
+              ])
+            ])
+        ])
+      blank
+      ({
+        module,
+        state,
+        snapshot,
+      }:
+        rows [
+          [defun spine--module [module state snapshot]]
+          ({
+            cpu,
+            memory,
+            gpu,
+          }:
+            rows [
+              [let' [[cpu [getf state (kw "cpu")]] [memory [getf state (kw "memory")]] [gpu [getf state (kw "gpu")]]]]
+              (rows [
+                [ecase module]
+                [[(kw "time") [spine--counter]]]
+                [[(kw "date") [spine--date]]]
+                [[(kw "media") [spine--media snapshot]]]
+                [[(kw "cpu") [spine--gauge (str "CPU") [getf cpu (kw "percent")] [cassette--degrees [getf cpu (kw "temp")]] [cassette--hot-p [getf cpu (kw "temp")]]]]]
+                [[(kw "memory") [spine--gauge (str "MEM") [getf memory (kw "percent")] [cassette--gib [getf memory (kw "used")]]]]]
+                [
+                  [
+                    (kw "gpu")
+                    (rows [
+                      [when [probe--gpu-p gpu]]
+                      [[spine--gauge (str "GPU") [getf gpu (kw "percent")] [cassette--degrees [getf gpu (kw "temp")]] [cassette--hot-p [getf gpu (kw "temp")]]]]
+                    ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "vram")
+                    (rows [
+                      [when [probe--gpu-p gpu]]
+                      (rows [
+                        [spine--gauge (str "VRAM") [if' [plusp [or' [getf gpu (kw "total")] 0]] [round ["*" 100 [or' [getf gpu (kw "used")] 0]] [getf gpu (kw "total")]] 0]]
+                        [[cassette--gib [getf gpu (kw "used")]]]
+                      ])
+                    ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "battery")
+                    ({battery}:
+                      rows [
+                        [let' [[battery [service-state snapshot (kw "battery")]]]]
+                        [[spine--gauge [if' [getf battery (kw "charging")] (str "CHG") (str "BAT")] [getf battery (kw "percent")] nil]]
+                      ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "network")
+                    ({online}:
+                      rows [
+                        [let' [[online [getf [service-state snapshot (kw "network")] (kw "connected")]]]]
+                        (rows [
+                          [ui (kw "column") (kw "align") (kw "center") (kw "gap") [cassette--px 3]]
+                          [
+                            (kw "children")
+                            (rows [
+                              [list [cassette--led online]]
+                              [[spine--text [if' online (str "NET") (str "OFF")] [cassette--c (kw "dim")] 7]]
+                            ])
+                          ]
+                        ])
+                      ])
+                  ]
+                ]
+                [
+                  [
+                    (kw "frame")
+                    ({battery}:
+                      rows [
+                        [let' [[battery [state-value snapshot (kw "frame-battery")]]]]
+                        (rows [
+                          [when [getf battery (kw "percent")]]
+                          [[spine--gauge [if' [equal [getf battery (kw "status")] (str "Discharging")] (str "VR") (str "VR+")] [getf battery (kw "percent")] nil]]
+                        ])
+                      ])
+                  ]
+                ]
+              ])
+            ])
+        ])
+      blank
+      ({item}:
+        rows [
+          [defun spine--cell [item]]
+          [[ui (kw "row") (kw "justify") (kw "center") (kw "padding") [list [cassette--px 6] 0 [cassette--px 6] 0] (kw "children") [list item]]]
+        ])
+      blank
+      ({items}:
+        rows [
+          [defun spine--run [items]]
+          (rows [
+            [ui (kw "column") (kw "height") 0 (kw "grow") 1 (kw "align") (kw "stretch") (kw "justify") (kw "center")]
+            [
+              (kw "children")
+              ({
+                item,
+                rest',
+              }:
+                rows [
+                  [loop for [item dot rest'] on [remove nil items]]
+                  [collect [spine--cell item]]
+                  [when rest' collect [spine--groove]]
+                ])
+            ]
+          ])
+        ])
+      blank
+      ({tray}:
+        rows [
+          [defun spine--tray-height [tray]]
+          (str ''
+            Logical height of the tray slot that TRAY, a published :shelf-tray request
+            of (:count N :size PX), asks for at the top of the spine.'')
+          [["*" [getf tray (kw "count") 0] [getf tray (kw "size") 0]]]
+        ])
+      blank
+      ({
+        items,
+        tray-height,
+      }:
+        rows [
+          [defun spine--body [items and-optional [tray-height 0]]]
+          (rows [
+            [ui (kw "column") (kw "align") (kw "stretch") (kw "background") [cassette--c (kw "face")] (kw "border") 1 (kw "border-color") [cassette--c (kw "rim")]]
+            [
+              (kw "children")
+              (rows [
+                [remove nil]
+                (rows [
+                  [
+                    list
+                    (rows [
+                      [when [plusp tray-height]]
+                      [[ui (kw "rect") (kw "height") tray-height (kw "background") [cassette--c (kw "counter")]]]
+                    ])
+                  ]
+                  [[spine--cell [cassette--grille]]]
+                  [[spine--run items]]
+                  [[spine--cell [cassette--grille]]]
+                ])
+              ])
+            ]
+          ])
+        ])
+      blank
+      ({
+        snapshot,
+        box,
+      }:
+        rows [
+          [defun spine--covered-p [snapshot box]]
+          (str ''
+            Whether a placed window overlaps BOX. Tiled windows never reach the seam, so
+            this is a float or a fullscreen window, which the spine then sits beneath.'')
+          ({entry}:
+            rows [
+              [loop for entry in' [context snapshot (kw "layout")]]
+              [
+                thereis
+                (rows [
+                  [and [getf entry (kw "visible")]]
+                  [["<" [getf entry (kw "x")] ["+" [getf box (kw "x")] [getf box (kw "width")]]]]
+                  [["<" [getf box (kw "x")] ["+" [getf entry (kw "x")] [getf entry (kw "width")]]]]
+                  [["<" [getf entry (kw "y")] ["+" [getf box (kw "y")] [getf box (kw "height")]]]]
+                  [["<" [getf box (kw "y")] ["+" [getf entry (kw "y")] [getf entry (kw "height")]]]]
+                ])
+              ]
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        output,
+      }:
+        rows [
+          [defun spine--fullscreen-p [snapshot output]]
+          ({entry}:
+            rows [
+              [loop for entry in' [context snapshot (kw "layout")]]
+              [
+                thereis
+                (rows [
+                  [and [getf entry (kw "visible")] [getf entry (kw "fullscreen")]]
+                  [["<=" [getf entry (kw "x")] [getf output (kw "x")] ["+" [getf entry (kw "x")] [getf entry (kw "width")] (-1)]]]
+                  [["<=" [getf entry (kw "y")] [getf output (kw "y")] ["+" [getf entry (kw "y")] [getf entry (kw "height")] (-1)]]]
+                ])
+              ]
+            ])
+        ])
+      blank
+      ({
+        items,
+        output,
+        focal,
+        snapshot,
+      }:
+        rows [
+          [defun spine--plates [items output focal snapshot]]
+          ({
+            split,
+            layer,
+          }:
+            rows [
+              [
+                let'
+                (rows [
+                  [[split [or' [cassette--split] [length items]]]]
+                  [[layer [if' [spine--fullscreen-p snapshot output] (kw "bottom") (kw "top")]]]
+                ])
+              ]
+              ({
+                edge,
+                plate,
+                height,
+              }:
+                rows [
+                  [loop for edge in' (quote [(kw "top") (kw "bottom")])]
+                  [for plate "=" [cassette--plate [if' [eq edge (kw "top")] [subseq items 0 split] [nthcdr split items]] (kw "both") edge]]
+                  [for height "=" [cassette--height edge]]
+                  [when plate]
+                  (at 8 [
+                    collect
+                    (rows [
+                      [apply (function shell-surface) [intern [format nil (str "~A-~A") edge [getf output (kw "name")]] (kw "keyword")] plate]
+                      [(kw "output") [getf output (kw "name")] (kw "layer") layer]
+                      [(kw "background") (str "#00000000") (kw "blur") t (kw "click-through") t]
+                      (rows [
+                        [if' focal]
+                        (rows [
+                          [list (kw "anchors") (quote [(kw "top")])]
+                          [
+                            (kw "margin")
+                            (rows [
+                              [
+                                list
+                                (rows [
+                                  ["-" ["+" [getf focal (kw "top")] [if' [eq edge (kw "top")] 0 [getf focal (kw "height")]]]]
+                                  [[round height 2]]
+                                ])
+                              ]
+                              [0 0 0]
+                            ])
+                          ]
+                        ])
+                        (rows [
+                          [list (kw "anchors") [list edge] (kw "margin") [if' [eq edge (kw "top")] (quote [(-1) 0 0 0]) (quote [0 0 (-1) 0])]]
+                          [(kw "exclusive-zone") ["1-" height]]
+                        ])
+                      ])
                     ])
                   ])
                 ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [
+            define-extension
+            (str "bar")
+            (rows [
+              [(kw "reads") [(kw "system") (kw "services") (kw "data") (kw "outputs") (kw "layout")]]
+              [(kw "state") [list (kw "cpu") nil (kw "memory") nil (kw "gpu") nil]]
+            ])
+          ]
+          [[snapshot state event]]
+          (rows [
+            [when [and [eq [getf event (kw "type")] (kw "timer")] [eq [getf event (kw "name")] (kw "sample")]]]
+            ({system}:
+              rows [
+                [let' [[system [context snapshot (kw "system")]]]]
+                ({probe}:
+                  rows [
+                    [dolist [probe (quote [(kw "cpu") (kw "memory") (kw "gpu")])]]
+                    [[setf [getf state probe] [probe--sample probe [getf state probe] system]]]
+                  ])
+              ])
+          ])
+          ({
+            cassette-mode,
+            seam,
+            output,
+            scale,
+            narrow,
+            focal,
+            tray-height,
+            items,
+            hot,
+          }:
+            rows [
+              [
+                "let*"
                 (rows [
-                  ["arrange" ["number"]]
-                  (rows [
+                  [[(special cassette-mode) [state-value snapshot (kw "theme-mode") (kw "dark")]]]
+                  [[seam [state-value snapshot (kw "deck-seam")]]]
+                  [
                     [
-                      "let*"
+                      output
+                      [
+                        and
+                        seam
+                        (rows [
+                          [find [getf seam (kw "output")] [context snapshot (kw "outputs")]]
+                          [(kw "key") ({o}: [lambda [o] [getf o (kw "name")]]) (kw "test") (function equal)]
+                        ])
+                      ]
+                    ]
+                  ]
+                  [[scale [and output ["/" [getf output (kw "scale-120") 120] 120]]]]
+                  [[narrow [remove-if-not ({o}: [lambda [o] [deck--narrow-p [list (kw "output") o]]]) [context snapshot (kw "outputs")]]]]
+                  [[focal [state-value snapshot (kw "focal-frame")]]]
+                  [[tray-height [spine--tray-height [state-value snapshot (kw "shelf-tray")]]]]
+                  [
+                    [
+                      items
                       (rows [
-                        [
-                          [
-                            "keep"
-                            (rows [
-                              ["remove-if" ["lambda" ["id"] ["or" ["member" "id" "fullscreen"] ["assoc" "id" "floating"]]]]
-                              [["workspace" "number"]]
-                            ])
-                          ]
-                        ]
-                        [["tree" ["sway--prune" ["nth" ["1-" "number"] "trees"] "keep"]]]
+                        [when narrow]
+                        ({module}:
+                          rows [
+                            [loop for module in' [getf (constant cassette) (kw "modules")]]
+                            [collect [cassette--module module state snapshot]]
+                          ])
                       ])
                     ]
+                  ]
+                  [[hot ({probe}: [loop for probe in' (quote [(kw "cpu") (kw "gpu")]) thereis [cassette--hot-p [getf [getf state probe] (kw "temp")]]])]]
+                ])
+              ]
+              (rows [
+                [values state]
+                (rows [
+                  [
+                    append
                     (rows [
-                      ["dolist" ["id" "keep"]]
-                      (rows [
-                        ["unless" ["member" "id" ["sway--leaves" "tree"]]]
+                      [list [interval (kw "sample") [getf (constant cassette) (kw "sample")]]]
+                      [[publish-state (kw "hud-hot") [and hot t]]]
+                    ])
+                  ]
+                  (rows [
+                    [when [and output [plusp tray-height]]]
+                    [
+                      [
+                        list
                         (rows [
-                          ["setf" "tree"]
+                          [publish-state (kw "shelf-tray-rect")]
                           (rows [
-                            ["if" ["null" "tree"]]
-                            "id"
+                            [list (kw "output") [getf seam (kw "output")]]
+                            [(kw "x") [getf seam (kw "x")] (kw "y") ["+" [getf seam (kw "y")] [round scale]]]
+                            [(kw "width") [getf seam (kw "width")]]
+                            [(kw "height") [round ["*" tray-height scale]]]
+                          ])
+                        ])
+                      ]
+                    ]
+                  ])
+                  (rows [
+                    [when output]
+                    [
+                      [
+                        list
+                        (rows [
+                          [
+                            shell-surface
+                            (kw "spine")
                             (rows [
+                              [
+                                spine--body
+                                ({module}:
+                                  rows [
+                                    [loop for module in' [getf (constant cassette) (kw "modules")]]
+                                    [collect [spine--module module state snapshot]]
+                                  ])
+                              ]
+                              tray-height
+                            ])
+                          ]
+                          [(kw "output") [getf output (kw "name")] (kw "anchors") (quote [(kw "top") (kw "left")])]
+                          [(kw "width") [round [getf seam (kw "width")] scale] (kw "height") [round [getf seam (kw "height")] scale]]
+                          [
+                            (kw "margin")
+                            (rows [
+                              [list [round ["-" [getf seam (kw "y")] [getf output (kw "y")]] scale] 0 0]
+                              [[round ["-" [getf seam (kw "x")] [getf output (kw "x")]] scale]]
+                            ])
+                          ]
+                          [(kw "layer") [if' [spine--covered-p snapshot seam] (kw "bottom") (kw "top")]]
+                          [(kw "background") (str "#00000000") (kw "blur") t]
+                          [(kw "click-through") t (kw "slide") t]
+                        ])
+                      ]
+                    ]
+                  ])
+                  ({o}:
+                    rows [
+                      [loop for o in' narrow]
+                      [append [spine--plates items o [and [equal [getf focal (kw "output")] [getf o (kw "name")]] focal] snapshot]]
+                    ])
+                ])
+                nil
+              ])
+            ])
+        ])
+    ]);
+    modules_desktop_session_tomoe_lisp_sway_data = {
+      abs,
+      acons,
+      and,
+      append,
+      apply,
+      assoc,
+      atom,
+      below,
+      bind-key,
+      blank,
+      car,
+      case,
+      cdr,
+      collect,
+      cond,
+      cons,
+      constant,
+      context,
+      define-extension,
+      defun,
+      destructuring-bind,
+      do,
+      dolist,
+      dot,
+      eq,
+      eql,
+      equal,
+      fifth,
+      find,
+      first,
+      flet,
+      floor,
+      focus,
+      for,
+      fourth,
+      from,
+      fullscreen,
+      function,
+      getf,
+      hide-window,
+      if',
+      in',
+      in-package,
+      incf,
+      integerp,
+      kw,
+      labels,
+      lambda,
+      last,
+      launch,
+      layout,
+      layout-bindings,
+      ldiff,
+      length,
+      let',
+      list,
+      loop,
+      mapcar,
+      max,
+      member,
+      min,
+      mod,
+      nil,
+      not,
+      nreverse,
+      nth,
+      null',
+      on,
+      or',
+      place,
+      plusp,
+      policy--area,
+      policy--centred,
+      policy--launch,
+      policy--terminal,
+      policy--unmanaged-p,
+      position,
+      previous-context,
+      push,
+      quote,
+      raise-window,
+      remove,
+      remove-if,
+      remove-if-not,
+      rest,
+      return,
+      reverse,
+      rows,
+      second,
+      setf,
+      setting,
+      settings,
+      show-window,
+      str,
+      t,
+      third,
+      to,
+      uninterned,
+      unless,
+      values,
+      when,
+      zerop,
+      ...
+    }: ({
+      sway--leaves,
+      sway--prune,
+      sway--insert,
+      sway--swap,
+      sway--boxes,
+      sway--neighbour,
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      ({tree}:
+        rows [
+          [defun sway--leaves [tree]]
+          (rows [
+            [cond [[null' tree] nil]]
+            [[[integerp tree] [list tree]]]
+            [[t ({kid}: [loop for kid in' [rest tree] append [sway--leaves kid]])]]
+          ])
+        ])
+      blank
+      ({
+        tree,
+        keep,
+      }:
+        rows [
+          [defun sway--prune [tree keep]]
+          (rows [
+            [cond [[null' tree] nil]]
+            [[[integerp tree] [when [member tree keep] tree]]]
+            [
+              [
+                t
+                ({kids}:
+                  rows [
+                    [
+                      let'
+                      [
+                        [
+                          kids
+                          ({
+                            kid,
+                            pruned,
+                          }:
+                            rows [
+                              [loop for kid in' [rest tree]]
+                              [for pruned "=" [sway--prune kid keep]]
+                              [when pruned collect pruned]
+                            ])
+                        ]
+                      ]
+                    ]
+                    [[if' [rest kids] [cons [first tree] kids] [first kids]]]
+                  ])
+              ]
+            ]
+          ])
+        ])
+      blank
+      ({
+        tree,
+        target,
+        id,
+        direction,
+      }:
+        rows [
+          [defun sway--insert [tree target id direction]]
+          (rows [
+            [cond [[integerp tree] [if' [eql tree target] [list direction tree id] tree]]]
+            (rows [
+              [[and [eq [first tree] direction] [member target [rest tree]]]]
+              ({tail}:
+                rows [
+                  [let' [[tail [member target [rest tree]]]]]
+                  [[append [ldiff tree [rest tail]] [list id] [rest tail]]]
+                ])
+            ])
+            [
+              [
+                t
+                (rows [
+                  [cons [first tree]]
+                  ({kid}:
+                    rows [
+                      [loop for kid in' [rest tree]]
+                      [
+                        collect
+                        (rows [
+                          [if' [member target [sway--leaves kid]]]
+                          [[sway--insert kid target id direction]]
+                          kid
+                        ])
+                      ]
+                    ])
+                ])
+              ]
+            ]
+          ])
+        ])
+      blank
+      ({
+        tree,
+        a,
+        b,
+      }:
+        rows [
+          [defun sway--swap [tree a b]]
+          (rows [
+            [cond [[eql tree a] b]]
+            [[[eql tree b] a]]
+            [[[atom tree] tree]]
+            [[t [cons [first tree] ({kid}: [loop for kid in' [rest tree] collect [sway--swap kid a b]])]]]
+          ])
+        ])
+      blank
+      ({
+        tree,
+        x,
+        y,
+        width,
+        height,
+        gap',
+      }:
+        rows [
+          [defun sway--boxes [tree x y width height gap']]
+          (rows [
+            [if' [integerp tree]]
+            [[list [list tree x y width height]]]
+            ({
+              kids,
+              horizontal,
+              origin,
+              span,
+              step,
+              start,
+            }:
+              rows [
+                [
+                  "let*"
+                  (rows [
+                    [[kids [rest tree]]]
+                    [[horizontal [eq [first tree] (kw "h")]]]
+                    [[origin [if' horizontal x y]]]
+                    [[span [if' horizontal width height]]]
+                    [[step [floor ["-" span ["*" ["1-" [length kids]] gap']] [length kids]]]]
+                    [[start origin]]
+                  ])
+                ]
+                ({
+                  kid,
+                  more,
+                  size,
+                }:
+                  rows [
+                    [loop for [kid dot more] on kids]
+                    [for size "=" [if' more step ["-" ["+" origin span] start]]]
+                    [
+                      append
+                      (rows [
+                        [if' horizontal]
+                        [[sway--boxes kid start y size height gap']]
+                        [[sway--boxes kid x start width size gap']]
+                      ])
+                    ]
+                    [do [incf start ["+" size gap']]]
+                  ])
+              ])
+          ])
+        ])
+      blank
+      ({
+        boxes,
+        id,
+        dx,
+        dy,
+      }:
+        rows [
+          [defun sway--neighbour [boxes id dx dy]]
+          ({
+            from',
+            best,
+            distance,
+          }:
+            rows [
+              [let' [[from' [assoc id boxes]] [best nil] [distance nil]]]
+              ({centre}:
+                rows [
+                  [flet [({box}: [centre [box] [list ["+" [second box] ["/" [fourth box] 2]] ["+" [third box] ["/" [fifth box] 2]]]])]]
+                  (rows [
+                    [when from']
+                    ({
+                      fx,
+                      fy,
+                    }:
+                      rows [
+                        [destructuring-bind [fx fy] [centre from']]
+                        ({box}:
+                          rows [
+                            [dolist [box boxes]]
+                            ({
+                              cx,
+                              cy,
+                            }:
+                              rows [
+                                [destructuring-bind [cx cy] [centre box]]
+                                ({
+                                  ddx,
+                                  ddy,
+                                  along,
+                                  across',
+                                  far,
+                                }:
+                                  rows [
+                                    [
+                                      "let*"
+                                      (rows [
+                                        [[ddx ["-" cx fx]] [ddy ["-" cy fy]]]
+                                        [[along [if' [zerop dx] ddy ddx]]]
+                                        [[across' [if' [zerop dx] ddx ddy]]]
+                                        [[far ["+" [abs ddx] [abs ddy]]]]
+                                      ])
+                                    ]
+                                    (rows [
+                                      [
+                                        when
+                                        (rows [
+                                          [and [not [eq box from']]]
+                                          [[eq [plusp along] [plusp ["+" dx dy]]]]
+                                          [[">" [abs along] [abs across']]]
+                                          [[or' [null' distance] ["<" far distance]]]
+                                        ])
+                                      ]
+                                      [[setf best [first box] distance far]]
+                                    ])
+                                  ])
+                              ])
+                          ])
+                      ])
+                  ])
+                ])
+              best
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [define-extension (str "sway")]
+          (rows [
+            [(kw "reads") [(kw "windows") (kw "rules") (kw "workareas") (kw "outputs") (kw "focus") (kw "key") (kw "button") (kw "pointer") (kw "request") (kw "settings")]]
+            [
+              (kw "state")
+              (rows [
+                [list (kw "active") 1 (kw "workspaces") nil (kw "trees") nil (kw "split") nil (kw "focus") nil]
+                [(kw "fullscreen") nil (kw "floating") nil]
+              ])
+            ]
+            [(kw "admission") t]
+          ])
+          [[snapshot state event]]
+          ({
+            windows,
+            ids,
+            count,
+            gap',
+            area,
+            output',
+            type,
+            command,
+            motion,
+            active,
+            workspaces,
+            trees,
+            split,
+            focused,
+            fullscreen',
+            floating,
+            external,
+            terminal,
+            new,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [
+                    [
+                      windows
+                      (rows [
+                        [remove-if ({window}: [lambda [window] [policy--unmanaged-p snapshot window]])]
+                        [[context snapshot (kw "windows")]]
+                      ])
+                    ]
+                  ]
+                  [[ids [mapcar ({window}: [lambda [window] [getf window (kw "id")]]) windows]]]
+                  [[count [getf (constant layout) (kw "workspaces")]]]
+                  [[gap' [getf (constant layout) (kw "gaps")]]]
+                  [[area [policy--area snapshot]]]
+                  [
+                    [
+                      output'
+                      [
+                        and
+                        area
+                        (rows [
+                          [find [getf area (kw "name")] [context snapshot (kw "outputs")]]
+                          [(kw "test") (function equal) (kw "key") ({output}: [lambda [output] [getf output (kw "name")]])]
+                        ])
+                      ]
+                    ]
+                  ]
+                  [[type [getf event (kw "type")]]]
+                  [[command [and [eq type (kw "key")] [equal [getf event (kw "owner")] (str "sway")] [getf event (kw "command")]]]]
+                  [
+                    [
+                      motion
+                      [
+                        rest
+                        (rows [
+                          [
+                            assoc
+                            command
+                            (quote (rows [
+                              [[(str "focus-left") (-1) 0] [(str "focus-right") 1 0]]
+                              [[(str "focus-up") 0 (-1)] [(str "focus-down") 0 1]]
+                            ]))
+                          ]
+                          [(kw "test") (function equal)]
+                        ])
+                      ]
+                    ]
+                  ]
+                  [[active [max 1 [min count [getf state (kw "active")]]]]]
+                  [
+                    [
+                      workspaces
+                      ({index}:
+                        rows [
+                          [loop for index below count]
+                          [
+                            collect
+                            (rows [
+                              [remove-if-not ({id}: [lambda [id] [member id ids]])]
+                              [[nth index [getf state (kw "workspaces")]]]
+                            ])
+                          ]
+                        ])
+                    ]
+                  ]
+                  [[trees ({index}: [loop for index below count collect [nth index [getf state (kw "trees")]]])]]
+                  [[split [remove-if-not ({entry}: [lambda [entry] [member [car entry] ids]]) [getf state (kw "split")]]]]
+                  [[focused [getf state (kw "focus")]]]
+                  [[fullscreen' [remove-if-not ({id}: [lambda [id] [member id ids]]) [getf state (kw "fullscreen")]]]]
+                  [[floating [remove-if-not ({entry}: [lambda [entry] [member [car entry] ids]]) [getf state (kw "floating")]]]]
+                  [[external [previous-context snapshot (kw "focus")]]]
+                  [[terminal [and [equal command (str "terminal")] [policy--terminal windows]]]]
+                  [[new nil]]
+                ])
+              ]
+              ({
+                workspace,
+                home,
+                boxes,
+                arrange,
+                arrange-all,
+                switch,
+                neighbour,
+              }:
+                rows [
+                  [
+                    labels
+                    (rows [
+                      ({number}: [workspace [number] [nth ["1-" number] workspaces]])
+                      ({id}: [
+                        home
+                        [id]
+                        ({
+                          list',
+                          number,
+                        }:
+                          rows [
+                            [loop for list' in' workspaces for number from 1]
+                            [when [member id list'] return number]
+                          ])
+                      ])
+                      ({tree}:
+                        rows [
+                          [boxes [tree]]
+                          (rows [
+                            [when [and tree area]]
+                            (rows [
+                              [sway--boxes tree ["+" [getf area (kw "x")] gap'] ["+" [getf area (kw "y")] gap']]
+                              [["-" [getf area (kw "width")] ["*" 2 gap']] ["-" [getf area (kw "height")] ["*" 2 gap']] gap']
+                            ])
+                          ])
+                        ])
+                      ({number}:
+                        rows [
+                          [arrange [number]]
+                          ({
+                            keep,
+                            tree,
+                          }:
+                            rows [
                               [
                                 "let*"
                                 (rows [
-                                  [["leaves" ["sway--leaves" "tree"]]]
-                                  [["target" ["if" ["member" "focused" "leaves"] "focused" ["car" ["last" "leaves"]]]]]
-                                  [["box" ["assoc" "target" ["boxes" "tree"]]]]
                                   [
                                     [
-                                      "direction"
+                                      keep
                                       (rows [
-                                        ["or" ["cdr" ["assoc" "target" "split"]]]
-                                        [["if" ["and" "box" [">" ["fifth" "box"] ["fourth" "box"]]] ":v" ":h"]]
+                                        [remove-if ({id}: [lambda [id] [or' [member id fullscreen'] [assoc id floating]]])]
+                                        [[workspace number]]
+                                      ])
+                                    ]
+                                  ]
+                                  [[tree [sway--prune [nth ["1-" number] trees] keep]]]
+                                ])
+                              ]
+                              ({id}:
+                                rows [
+                                  [dolist [id keep]]
+                                  (rows [
+                                    [unless [member id [sway--leaves tree]]]
+                                    (rows [
+                                      [setf tree]
+                                      (rows [
+                                        [if' [null' tree]]
+                                        id
+                                        ({
+                                          leaves,
+                                          target,
+                                          box,
+                                          direction,
+                                        }:
+                                          rows [
+                                            [
+                                              "let*"
+                                              (rows [
+                                                [[leaves [sway--leaves tree]]]
+                                                [[target [if' [member focused leaves] focused [car [last leaves]]]]]
+                                                [[box [assoc target [boxes tree]]]]
+                                                [
+                                                  [
+                                                    direction
+                                                    (rows [
+                                                      [or' [cdr [assoc target split]]]
+                                                      [[if' [and box [">" [fifth box] [fourth box]]] (kw "v") (kw "h")]]
+                                                    ])
+                                                  ]
+                                                ]
+                                              ])
+                                            ]
+                                            [[setf split [remove target split (kw "key") (function car)]]]
+                                            [[sway--insert tree target id direction]]
+                                          ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              [[setf [nth ["1-" number] trees] tree]]
+                            ])
+                        ])
+                      [[arrange-all [] ({number}: [loop for number from 1 to count do [arrange number]])]]
+                      ({number}:
+                        rows [
+                          [switch [number]]
+                          [[setf active number focused [car [last [workspace number]]]]]
+                        ])
+                      ({direction}: [neighbour [direction] ["1+" [mod ["+" active (-1) direction] count]]])
+                    ])
+                  ]
+                  (rows [
+                    [when [and [member external ids] [not [eql external focused]]]]
+                    [[setf focused external active [or' [home external] active]]]
+                  ])
+                  ({known}:
+                    rows [
+                      [let' [[known ({list'}: [loop for list' in' workspaces append list'])]]]
+                      ({window}:
+                        rows [
+                          [dolist [window windows]]
+                          ({id}:
+                            rows [
+                              [let' [[id [getf window (kw "id")]]]]
+                              (rows [
+                                [unless [member id known]]
+                                [[setf [nth ["1-" active] workspaces] [append [workspace active] [list id]]]]
+                                [[when [getf window (kw "fullscreen-requested")] [push id fullscreen']]]
+                                [[push id new]]
+                              ])
+                            ])
+                        ])
+                    ])
+                  (rows [
+                    [case type]
+                    (rows [
+                      (kw "button")
+                      (rows [
+                        [when [and [eq [getf event (kw "state")] (kw "pressed")] [member [getf event (kw "id")] [workspace active]]]]
+                        [[setf focused [getf event (kw "id")]]]
+                      ])
+                    ])
+                    (rows [
+                      (kw "pointer")
+                      (rows [
+                        [
+                          when
+                          (rows [
+                            [and [eq [getf event (kw "state")] (kw "enter")] [getf event (kw "moved")]]
+                            [[setting snapshot (kw "focus-follows-mouse")]]
+                            [[member [getf event (kw "id")] [workspace active]]]
+                          ])
+                        ]
+                        [[setf focused [getf event (kw "id")]]]
+                      ])
+                    ])
+                    (rows [
+                      [[(kw "metadata") (kw "request")]]
+                      ({id}:
+                        rows [
+                          [let' [[id [getf event (kw "id")]]]]
+                          (rows [
+                            [when [member id ids]]
+                            (rows [
+                              [case [getf event (kw "request")]]
+                              (rows [
+                                (kw "fullscreen")
+                                [[setf fullscreen' [remove id fullscreen']]]
+                                [[when [getf event (kw "requested")] [push id fullscreen'] [setf focused id]]]
+                              ])
+                              [[(kw "unfullscreen") [setf fullscreen' [remove id fullscreen']]]]
+                              [[(kw "activate") [setf active [or' [home id] active] focused id]]]
+                            ])
+                          ])
+                        ])
+                    ])
+                  ])
+                  (rows [
+                    [when terminal]
+                    [[setf active [or' [home terminal] active] focused terminal]]
+                  ])
+                  [[arrange-all]]
+                  ({current}:
+                    rows [
+                      [let' [[current [and [member focused [workspace active]] focused]]]]
+                      (rows [
+                        cond
+                        [[[null' command]]]
+                        (rows [
+                          motion
+                          ({target}:
+                            rows [
+                              [let' [[target [apply (function sway--neighbour) [boxes [nth ["1-" active] trees]] current motion]]]]
+                              [[when target [setf focused target]]]
+                            ])
+                        ])
+                        [[[equal command (str "workspace-next")] [switch [neighbour 1]]]]
+                        [[[equal command (str "workspace-previous")] [switch [neighbour (-1)]]]]
+                        [[[null' current]]]
+                        (rows [
+                          [[member command (quote [(str "move-next") (str "move-previous")]) (kw "test") (function equal)]]
+                          ({number}:
+                            rows [
+                              [let' [[number [neighbour [if' [equal command (str "move-next")] 1 (-1)]]]]]
+                              (rows [
+                                [setf [nth ["1-" active] workspaces] [remove current [workspace active]]]
+                                [[nth ["1-" number] workspaces] [append [workspace number] [list current]]]
+                              ])
+                              [[switch number]]
+                            ])
+                        ])
+                        (rows [
+                          [[member command (quote [(str "swap-previous") (str "swap-next")]) (kw "test") (function equal)]]
+                          ({
+                            leaves,
+                            index,
+                            other,
+                          }:
+                            rows [
+                              [
+                                "let*"
+                                (rows [
+                                  [[leaves [sway--leaves [nth ["1-" active] trees]]]]
+                                  [[index [position current leaves]]]
+                                  [[other [and index ["+" index [if' [equal command (str "swap-next")] 1 (-1)]]]]]
+                                ])
+                              ]
+                              (rows [
+                                [when [and other ["<" (-1) other [length leaves]]]]
+                                (rows [
+                                  [setf [nth ["1-" active] trees]]
+                                  [[sway--swap [nth ["1-" active] trees] current [nth other leaves]]]
+                                ])
+                              ])
+                            ])
+                        ])
+                        (rows [
+                          [[equal command (str "split-horizontal")]]
+                          [[setf split [acons current (kw "h") [remove current split (kw "key") (function car)]]]]
+                        ])
+                        (rows [
+                          [[equal command (str "split-vertical")]]
+                          [[setf split [acons current (kw "v") [remove current split (kw "key") (function car)]]]]
+                        ])
+                        (rows [
+                          [[equal command (str "fullscreen")]]
+                          (rows [
+                            [if' [member current fullscreen']]
+                            [[setf fullscreen' [remove current fullscreen']]]
+                            [[push current fullscreen']]
+                          ])
+                        ])
+                        (rows [
+                          [[equal command (str "floating")]]
+                          (rows [
+                            [cond [[member current fullscreen'] [setf fullscreen' [remove current fullscreen']]]]
+                            [[[assoc current floating] [setf floating [remove current floating (kw "key") (function car)]]]]
+                            [
+                              [
+                                area
+                                (rows [
+                                  [push [cons current [policy--centred area [getf (constant layout) (kw "float-ratio")]]]]
+                                  floating
+                                ])
+                              ]
+                            ]
+                          ])
+                        ])
+                      ])
+                    ])
+                  [[arrange-all]]
+                  ({arrived}:
+                    rows [
+                      [let' [[arrived [remove-if-not ({id}: [lambda [id] [member id [workspace active]]]) new]]]]
+                      [[when arrived [setf focused [first arrived]]]]
+                    ])
+                  (rows [
+                    [unless [member focused [workspace active]]]
+                    [[setf focused [car [last [workspace active]]]]]
+                  ])
+                  ({effects}:
+                    rows [
+                      [let' [[effects nil]]]
+                      ({id}:
+                        rows [
+                          [dolist [id ids]]
+                          ({
+                            number,
+                            shown,
+                            box,
+                          }:
+                            rows [
+                              [
+                                "let*"
+                                (rows [
+                                  [[number [home id]]]
+                                  [[shown [eql number active]]]
+                                  [
+                                    [
+                                      box
+                                      (rows [
+                                        [
+                                          cond
+                                          (rows [
+                                            [[member id fullscreen']]
+                                            [
+                                              [
+                                                and
+                                                output'
+                                                (rows [
+                                                  [list [getf output' (kw "x")] [getf output' (kw "y")]]
+                                                  [[getf output' (kw "width")] [getf output' (kw "height")]]
+                                                ])
+                                              ]
+                                            ]
+                                          ])
+                                        ]
+                                        [[[cdr [assoc id floating]]]]
+                                        [[t [rest [assoc id [boxes [nth ["1-" number] trees]]]]]]
                                       ])
                                     ]
                                   ]
                                 ])
                               ]
-                              [["setf" "split" ["remove" "target" "split" ":key" (function "car")]]]
-                              [["sway--insert" "tree" "target" "id" "direction"]]
+                              (rows [
+                                [
+                                  push
+                                  (rows [
+                                    [if' box]
+                                    ({
+                                      x,
+                                      y,
+                                      width,
+                                      height,
+                                    }:
+                                      rows [
+                                        [destructuring-bind [x y width height] box]
+                                        [[place id x y [max 1 width] [max 1 height] shown]]
+                                      ])
+                                    [[if' shown [show-window id] [hide-window id]]]
+                                  ])
+                                ]
+                                effects
+                              ])
+                              [[push [fullscreen id [and [member id fullscreen'] t]] effects]]
+                            ])
+                        ])
+                      ({floats}:
+                        rows [
+                          [
+                            let'
+                            [
+                              [
+                                floats
+                                (rows [
+                                  [remove-if ({id}: [lambda [id] [member id fullscreen']])]
+                                  [[mapcar (function car) [reverse floating]]]
+                                ])
+                              ]
+                            ]
+                          ]
+                          ({id}:
+                            rows [
+                              [
+                                dolist
+                                [
+                                  id
+                                  (rows [
+                                    [append [remove focused floats]]
+                                    [[when [member focused floats] [list focused]]]
+                                    fullscreen'
+                                  ])
+                                ]
+                              ]
+                              [[when [member id [workspace active]] [push [raise-window id] effects]]]
+                            ])
+                        ])
+                      [[push [focus focused (kw "raise") nil] effects]]
+                      [[push [settings (kw "animations") nil] effects]]
+                      ({binding}: [dolist [binding (constant layout-bindings)] [push [apply (function bind-key) binding] effects]])
+                      (rows [
+                        [
+                          values
+                          (rows [
+                            [list (kw "active") active (kw "workspaces") workspaces (kw "trees") trees (kw "split") split]
+                            [(kw "focus") focused (kw "fullscreen") fullscreen' (kw "floating") floating]
+                          ])
+                        ]
+                        [[nreverse effects]]
+                        (rows [
+                          [when [and [equal command (str "terminal")] [null' terminal]]]
+                          [[list [apply (function launch) [policy--launch (str "terminal")]]]]
+                        ])
+                      ])
+                    ])
+                ])
+            ])
+        ])
+    ]);
+    modules_desktop_session_tomoe_lisp_theme_data = {
+      and,
+      append,
+      assoc,
+      at,
+      blank,
+      by,
+      cdr,
+      char,
+      char',
+      cond,
+      cons,
+      constant,
+      context,
+      define-extension,
+      defun,
+      digit-char-p,
+      do,
+      dotimes,
+      eq,
+      eql,
+      equal,
+      every,
+      exec-async,
+      first,
+      for,
+      from,
+      function,
+      getf,
+      hud--c,
+      hud--decay,
+      hud--mix,
+      hud--now,
+      hud-theme,
+      if',
+      in',
+      in-package,
+      intern,
+      interval,
+      kw,
+      lambda,
+      length,
+      let',
+      list,
+      loop,
+      member,
+      nil,
+      not,
+      nreverse,
+      null',
+      or',
+      parse-integer,
+      plusp,
+      publish-state,
+      push,
+      quote,
+      read-line,
+      repeat,
+      return,
+      reverse,
+      rows,
+      second,
+      setf,
+      settings,
+      str,
+      string-upcase,
+      subseq,
+      sum,
+      t,
+      third,
+      uninterned,
+      unless,
+      values,
+      watch-file,
+      when,
+      while,
+      with',
+      with-input-from-string,
+      ...
+    }: ({
+      theme--words,
+      theme--hex-p,
+      theme--resolve,
+      theme--palette,
+      theme--mode,
+    }: [
+      [in-package (uninterned "tomoe-user")]
+      blank
+      ({line}:
+        rows [
+          [defun theme--words [line]]
+          ({
+            words,
+            start,
+          }:
+            rows [
+              [let' [[words nil] [start nil]]]
+              ({i}:
+                rows [
+                  [dotimes [i ["1+" [length line]] [nreverse words]]]
+                  (rows [
+                    [if' [and ["<" i [length line]] [not [member [char' line i] (quote [(char "Space") (char "Tab") (char ";") (char "Return")])]]]]
+                    [[unless start [setf start i]]]
+                    [[when start [push [subseq line start i] words] [setf start nil]]]
+                  ])
+                ])
+            ])
+        ])
+      blank
+      ({value'}:
+        rows [
+          [defun theme--hex-p [value']]
+          (rows [
+            [and [member [length value'] (quote [4 7 9])] ["char=" [char' value' 0] (char "#")]]
+            [[every ({c}: [lambda [c] [digit-char-p c 16]]) [subseq value' 1]]]
+          ])
+        ])
+      blank
+      ({
+        name,
+        table,
+      }:
+        rows [
+          [defun theme--resolve [name table]]
+          ({key}:
+            rows [
+              [loop with' key "=" name]
+              [repeat 8]
+              [
+                do
+                ({value'}:
+                  rows [
+                    [let' [[value' [cdr [assoc key table (kw "test") (function equal)]]]]]
+                    (rows [
+                      [cond [[null' value'] [return nil]]]
+                      [[["char=" [char' value' 0] (char "@")] [setf key [subseq value' 1]]]]
+                      [[[theme--hex-p value'] [return value']]]
+                      [[t [return nil]]]
+                    ])
+                  ])
+              ]
+            ])
+        ])
+      blank
+      ({css}:
+        rows [
+          [defun theme--palette [css]]
+          ({table}:
+            rows [
+              [let' [[table nil]]]
+              ({in'}:
+                rows [
+                  [with-input-from-string [in' css]]
+                  ({line}:
+                    rows [
+                      [loop for line "=" [read-line in' nil] while line]
+                      [
+                        do
+                        ({words}:
+                          rows [
+                            [let' [[words [theme--words line]]]]
+                            (rows [
+                              [when [and ["=" 3 [length words]] [equal [first words] (str "@define-color")]]]
+                              [[push [cons [second words] [third words]] table]]
                             ])
                           ])
-                        ])
-                      ])
-                    ])
-                    [["setf" ["nth" ["1-" "number"] "trees"] "tree"]]
-                  ])
-                ])
-                [["arrange-all" [] ["loop" "for number from 1 to count" "do" ["arrange" "number"]]]]
-                (rows [
-                  ["switch" ["number"]]
-                  [["setf" "active" "number" "focused" ["car" ["last" ["workspace" "number"]]]]]
-                ])
-                [["neighbour" ["direction"] ["1+" ["mod" ["+" "active" (-1) "direction"] "count"]]]]
-              ])
-            ]
-            (rows [
-              ["when" ["and" ["member" "external" "ids"] ["not" ["eql" "external" "focused"]]]]
-              [["setf" "focused" "external" "active" ["or" ["home" "external"] "active"]]]
-            ])
-            (rows [
-              ["let" [["known" ["loop" "for list in workspaces" "append list"]]]]
-              (rows [
-                ["dolist" ["window" "windows"]]
-                (rows [
-                  ["let" [["id" ["getf" "window" ":id"]]]]
-                  (rows [
-                    ["unless" ["member" "id" "known"]]
-                    [["setf" ["nth" ["1-" "active"] "workspaces"] ["append" ["workspace" "active"] ["list" "id"]]]]
-                    [["when" ["getf" "window" ":fullscreen-requested"] ["push" "id" "fullscreen"]]]
-                    [["push" "id" "new"]]
-                  ])
-                ])
-              ])
-            ])
-            (rows [
-              ["case" "type"]
-              (rows [
-                ":button"
-                (rows [
-                  ["when" ["and" ["eq" ["getf" "event" ":state"] ":pressed"] ["member" ["getf" "event" ":id"] ["workspace" "active"]]]]
-                  [["setf" "focused" ["getf" "event" ":id"]]]
-                ])
-              ])
-              (rows [
-                ":pointer"
-                (rows [
-                  [
-                    "when"
-                    (rows [
-                      ["and" ["eq" ["getf" "event" ":state"] ":enter"] ["getf" "event" ":moved"]]
-                      [["setting" "snapshot" ":focus-follows-mouse"]]
-                      [["member" ["getf" "event" ":id"] ["workspace" "active"]]]
-                    ])
-                  ]
-                  [["setf" "focused" ["getf" "event" ":id"]]]
-                ])
-              ])
-              (rows [
-                [[":metadata" ":request"]]
-                (rows [
-                  ["let" [["id" ["getf" "event" ":id"]]]]
-                  (rows [
-                    ["when" ["member" "id" "ids"]]
-                    (rows [
-                      ["case" ["getf" "event" ":request"]]
-                      (rows [
-                        ":fullscreen"
-                        [["setf" "fullscreen" ["remove" "id" "fullscreen"]]]
-                        [["when" ["getf" "event" ":requested"] ["push" "id" "fullscreen"] ["setf" "focused" "id"]]]
-                      ])
-                      [[":unfullscreen" ["setf" "fullscreen" ["remove" "id" "fullscreen"]]]]
-                      [[":activate" ["setf" "active" ["or" ["home" "id"] "active"] "focused" "id"]]]
-                    ])
-                  ])
-                ])
-              ])
-            ])
-            (rows [
-              ["when" "terminal"]
-              [["setf" "active" ["or" ["home" "terminal"] "active"] "focused" "terminal"]]
-            ])
-            [["arrange-all"]]
-            (rows [
-              ["let" [["current" ["and" ["member" "focused" ["workspace" "active"]] "focused"]]]]
-              (rows [
-                "cond"
-                [[["null" "command"]]]
-                (rows [
-                  "motion"
-                  (rows [
-                    ["let" [["target" ["apply" (function "sway--neighbour") ["boxes" ["nth" ["1-" "active"] "trees"]] "current" "motion"]]]]
-                    [["when" "target" ["setf" "focused" "target"]]]
-                  ])
-                ])
-                [[["equal" "command" (str "workspace-next")] ["switch" ["neighbour" 1]]]]
-                [[["equal" "command" (str "workspace-previous")] ["switch" ["neighbour" (-1)]]]]
-                [[["null" "current"]]]
-                (rows [
-                  [["member" "command" (quote [(str "move-next") (str "move-previous")]) ":test" (function "equal")]]
-                  (rows [
-                    ["let" [["number" ["neighbour" ["if" ["equal" "command" (str "move-next")] 1 (-1)]]]]]
-                    (rows [
-                      ["setf" ["nth" ["1-" "active"] "workspaces"] ["remove" "current" ["workspace" "active"]]]
-                      [["nth" ["1-" "number"] "workspaces"] ["append" ["workspace" "number"] ["list" "current"]]]
-                    ])
-                    [["switch" "number"]]
-                  ])
-                ])
-                (rows [
-                  [["member" "command" (quote [(str "swap-previous") (str "swap-next")]) ":test" (function "equal")]]
-                  (rows [
-                    [
-                      "let*"
-                      (rows [
-                        [["leaves" ["sway--leaves" ["nth" ["1-" "active"] "trees"]]]]
-                        [["index" ["position" "current" "leaves"]]]
-                        [["other" ["and" "index" ["+" "index" ["if" ["equal" "command" (str "swap-next")] 1 (-1)]]]]]
-                      ])
-                    ]
-                    (rows [
-                      ["when" ["and" "other" ["<" (-1) "other" ["length" "leaves"]]]]
-                      (rows [
-                        ["setf" ["nth" ["1-" "active"] "trees"]]
-                        [["sway--swap" ["nth" ["1-" "active"] "trees"] "current" ["nth" "other" "leaves"]]]
-                      ])
-                    ])
-                  ])
-                ])
-                (rows [
-                  [["equal" "command" (str "split-horizontal")]]
-                  [["setf" "split" ["acons" "current" ":h" ["remove" "current" "split" ":key" (function "car")]]]]
-                ])
-                (rows [
-                  [["equal" "command" (str "split-vertical")]]
-                  [["setf" "split" ["acons" "current" ":v" ["remove" "current" "split" ":key" (function "car")]]]]
-                ])
-                (rows [
-                  [["equal" "command" (str "fullscreen")]]
-                  (rows [
-                    ["if" ["member" "current" "fullscreen"]]
-                    [["setf" "fullscreen" ["remove" "current" "fullscreen"]]]
-                    [["push" "current" "fullscreen"]]
-                  ])
-                ])
-                (rows [
-                  [["equal" "command" (str "floating")]]
-                  (rows [
-                    ["cond" [["member" "current" "fullscreen"] ["setf" "fullscreen" ["remove" "current" "fullscreen"]]]]
-                    [[["assoc" "current" "floating"] ["setf" "floating" ["remove" "current" "floating" ":key" (function "car")]]]]
-                    [
-                      [
-                        "area"
-                        (rows [
-                          ["push" ["cons" "current" ["policy--centred" "area" ["getf" "+layout+" ":float-ratio"]]]]
-                          "floating"
-                        ])
                       ]
-                    ]
-                  ])
+                    ])
                 ])
+              ({
+                name,
+                value',
+              }:
+                rows [
+                  [loop for [name] in' [reverse table]]
+                  [for value' "=" [theme--resolve name table]]
+                  [when value' append [list [intern [string-upcase name] (kw "keyword")] value']]
+                ])
+            ])
+        ])
+      blank
+      ({p}:
+        rows [
+          [defun theme--mode [p]]
+          ({bg}:
+            rows [
+              [let' [[bg [getf p (kw "bg")]]]]
+              (rows [
+                [
+                  if'
+                  (rows [
+                    [and bg ["=" [length bg] 7]]
+                    (rows [
+                      [
+                        ">"
+                        ({
+                          i,
+                          weight,
+                        }:
+                          rows [
+                            [loop for i from 1 by 2]
+                            [for weight in' (quote [0.2126 0.7152 0.0722])]
+                            [sum ["*" weight [parse-integer bg (kw "start") i (kw "end") ["+" i 2] (kw "radix") 16]]]
+                          ])
+                      ]
+                      127.5
+                    ])
+                  ])
+                ]
+                (kw "light")
+                (kw "dark")
               ])
             ])
-            [["arrange-all"]]
-            (rows [
-              ["let" [["arrived" ["remove-if-not" ["lambda" ["id"] ["member" "id" ["workspace" "active"]]] "new"]]]]
-              [["when" "arrived" ["setf" "focused" ["first" "arrived"]]]]
-            ])
-            (rows [
-              ["unless" ["member" "focused" ["workspace" "active"]]]
-              [["setf" "focused" ["car" ["last" ["workspace" "active"]]]]]
-            ])
-            (rows [
-              ["let" [["effects" "nil"]]]
+        ])
+      blank
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [define-extension (str "theme") [(kw "reads") [(kw "focus")] (kw "state") [list (kw "palette") nil (kw "watch") nil (kw "focus") nil (kw "focus-at") nil]]]
+          [[snapshot state event]]
+          ({
+            type,
+            name,
+            focus',
+          }:
+            rows [
+              [let' [[type [getf event (kw "type")]] [name [getf event (kw "name")]] [focus' [context snapshot (kw "focus")]]]]
               (rows [
-                ["dolist" ["id" "ids"]]
+                [
+                  cond
+                  (rows [
+                    [[and [eq type (kw "exec")] [member name (quote [(kw "palette") (kw "reread")])] [eql [getf event (kw "code")] 0]]]
+                    (rows [
+                      [setf [getf state (kw "palette")] [or' [theme--palette [getf event (kw "stdout")]] [getf state (kw "palette")]]]
+                      [[getf state (kw "watch")] t]
+                    ])
+                  ])
+                ]
                 (rows [
+                  [[and [eq type (kw "watch")] [eq name (kw "palette")]]]
+                  [[setf [getf state (kw "palette")] [or' [theme--palette [getf event (kw "content")]] [getf state (kw "palette")]]]]
+                ])
+              ])
+              (rows [
+                [unless [equal focus' [getf state (kw "focus")]]]
+                [[setf [getf state (kw "focus")] focus' [getf state (kw "focus-at")] [when focus' [hud--now]]]]
+              ])
+              ({
+                fixed,
+                p,
+                flash,
+              }:
+                rows [
                   [
                     "let*"
                     (rows [
-                      [["number" ["home" "id"]]]
-                      [["shown" ["eql" "number" "active"]]]
+                      [[fixed [getf (constant hud-theme) (kw "palette")]]]
+                      [[p [or' fixed [getf state (kw "palette")]]]]
+                      [[flash [hud--decay [getf state (kw "focus-at")] [getf (constant hud-theme) (kw "focus-flash")]]]]
+                    ])
+                  ]
+                  (rows [
+                    [values state]
+                    (rows [
+                      [
+                        append
+                        [
+                          unless
+                          fixed
+                          [
+                            list
+                            (rows [
+                              [exec-async [if' [getf state (kw "watch")] (kw "reread") (kw "palette")]]
+                              (at 16 [[getf (constant hud-theme) (kw "palette-command")]])
+                            ])
+                          ]
+                        ]
+                      ]
+                      [[when [getf state (kw "watch")] [list [watch-file (kw "palette") [getf (constant hud-theme) (kw "palette-file")]]]]]
+                      [[when [plusp flash] [list [interval (kw "tick") [getf (constant hud-theme) (kw "tick")]]]]]
                       [
                         [
-                          "box"
+                          when
+                          p
                           (rows [
+                            [list [publish-state (kw "hud-palette") p]]
+                            [[publish-state (kw "theme-mode") [theme--mode p]]]
                             [
-                              "cond"
-                              (rows [
-                                [["member" "id" "fullscreen"]]
-                                [
-                                  [
-                                    "and"
-                                    "output"
-                                    (rows [
-                                      ["list" ["getf" "output" ":x"] ["getf" "output" ":y"]]
-                                      [["getf" "output" ":width"] ["getf" "output" ":height"]]
-                                    ])
-                                  ]
-                                ]
-                              ])
+                              [
+                                publish-state
+                                (kw "theme")
+                                (rows [
+                                  [list (kw "base") [hud--c p (kw "bg")] (kw "text") [hud--c p (kw "fg")]]
+                                  [(kw "accent") [hud--c p (kw "accent")] (kw "error") [hud--c p (kw "color1")]]
+                                  [(kw "surface1") [hud--c p (kw "color8")]]
+                                  [(kw "subtext0") [hud--mix [hud--c p (kw "bg")] [hud--c p (kw "fg")] 0.78]]
+                                ])
+                              ]
                             ]
-                            [[["cdr" ["assoc" "id" "floating"]]]]
-                            [["t" ["rest" ["assoc" "id" ["boxes" ["nth" ["1-" "number"] "trees"]]]]]]
                           ])
                         ]
                       ]
-                    ])
-                  ]
-                  (rows [
-                    [
-                      "push"
-                      (rows [
-                        ["if" "box"]
-                        (rows [
-                          ["destructuring-bind" ["x" "y" "width" "height"] "box"]
-                          [["place" "id" "x" "y" ["max" 1 "width"] ["max" 1 "height"] "shown"]]
-                        ])
-                        [["if" "shown" ["show-window" "id"] ["hide-window" "id"]]]
-                      ])
-                    ]
-                    "effects"
-                  ])
-                  [["push" ["fullscreen" "id" ["and" ["member" "id" "fullscreen"] "t"]] "effects"]]
-                ])
-              ])
-              (rows [
-                [
-                  "let"
-                  [
-                    [
-                      "floats"
-                      (rows [
-                        ["remove-if" ["lambda" ["id"] ["member" "id" "fullscreen"]]]
-                        [["mapcar" (function "car") ["reverse" "floating"]]]
-                      ])
-                    ]
-                  ]
-                ]
-                (rows [
-                  [
-                    "dolist"
-                    [
-                      "id"
-                      (rows [
-                        ["append" ["remove" "focused" "floats"]]
-                        [["when" ["member" "focused" "floats"] ["list" "focused"]]]
-                        "fullscreen"
-                      ])
-                    ]
-                  ]
-                  [["when" ["member" "id" ["workspace" "active"]] ["push" ["raise-window" "id"] "effects"]]]
-                ])
-              ])
-              [["push" ["focus" "focused" ":raise" "nil"] "effects"]]
-              [["push" ["settings" ":animations" "nil"] "effects"]]
-              [["dolist" ["binding" "+layout-bindings+"] ["push" ["apply" (function "bind-key") "binding"] "effects"]]]
-              (rows [
-                [
-                  "values"
-                  (rows [
-                    ["list" ":active" "active" ":workspaces" "workspaces" ":trees" "trees" ":split" "split"]
-                    [":focus" "focused" ":fullscreen" "fullscreen" ":floating" "floating"]
-                  ])
-                ]
-                [["nreverse" "effects"]]
-                (rows [
-                  ["when" ["and" ["equal" "command" (str "terminal")] ["null" "terminal"]]]
-                  [["list" ["apply" (function "launch") ["policy--launch" (str "terminal")]]]]
-                ])
-              ])
-            ])
-          ])
-        ])
-      ])
-    ];
-    modules_desktop_session_tomoe_lisp_theme_data = {
-      at,
-      blank,
-      function,
-      quote,
-      rows,
-      str,
-      ...
-    }: [
-      ["in-package" "#:tomoe-user"]
-      blank
-      (rows [
-        ["defun" "theme--words" ["line"]]
-        (rows [
-          ["let" [["words" "nil"] ["start" "nil"]]]
-          (rows [
-            ["dotimes" ["i" ["1+" ["length" "line"]] ["nreverse" "words"]]]
-            (rows [
-              ["if" ["and" ["<" "i" ["length" "line"]] ["not" ["member" ["char" "line" "i"] (quote ["#\\Space" "#\\Tab" "#\\;" "#\\Return"])]]]]
-              [["unless" "start" ["setf" "start" "i"]]]
-              [["when" "start" ["push" ["subseq" "line" "start" "i"] "words"] ["setf" "start" "nil"]]]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "theme--hex-p" ["value"]]
-        (rows [
-          ["and" ["member" ["length" "value"] (quote [4 7 9])] ["char=" ["char" "value" 0] "#\\#"]]
-          [["every" ["lambda" ["c"] ["digit-char-p" "c" 16]] ["subseq" "value" 1]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "theme--resolve" ["name" "table"]]
-        (rows [
-          [
-            "loop"
-            ''
-              with key = name
-                      repeat 8''
-          ]
-          [
-            "do"
-            (rows [
-              ["let" [["value" ["cdr" ["assoc" "key" "table" ":test" (function "equal")]]]]]
-              (rows [
-                ["cond" [["null" "value"] ["return" "nil"]]]
-                [[["char=" ["char" "value" 0] "#\\@"] ["setf" "key" ["subseq" "value" 1]]]]
-                [[["theme--hex-p" "value"] ["return" "value"]]]
-                [["t" ["return" "nil"]]]
-              ])
-            ])
-          ]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "theme--palette" ["css"]]
-        (rows [
-          ["let" [["table" "nil"]]]
-          (rows [
-            ["with-input-from-string" ["in" "css"]]
-            (rows [
-              ["loop" "for" "line" "=" ["read-line" "in" "nil"] "while line"]
-              [
-                "do"
-                (rows [
-                  ["let" [["words" ["theme--words" "line"]]]]
-                  (rows [
-                    ["when" ["and" ["=" 3 ["length" "words"]] ["equal" ["first" "words"] (str "@define-color")]]]
-                    [["push" ["cons" ["second" "words"] ["third" "words"]] "table"]]
-                  ])
-                ])
-              ]
-            ])
-          ])
-          (rows [
-            ["loop" "for" ["name"] "in" ["reverse" "table"]]
-            ["for" "value" "=" ["theme--resolve" "name" "table"]]
-            ["when value" "append" ["list" ["intern" ["string-upcase" "name"] ":keyword"] "value"]]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "theme--mode" ["p"]]
-        (rows [
-          ["let" [["bg" ["getf" "p" ":bg"]]]]
-          (rows [
-            [
-              "if"
-              (rows [
-                ["and" "bg" ["=" ["length" "bg"] 7]]
-                (rows [
-                  [
-                    ">"
-                    (rows [
-                      ["loop" "for i from 1 by 2"]
-                      ["for" "weight" "in" (quote ["0.2126" "0.7152" "0.0722"])]
-                      ["sum" ["*" "weight" ["parse-integer" "bg" ":start" "i" ":end" ["+" "i" 2] ":radix" 16]]]
-                    ])
-                  ]
-                  "127.5"
-                ])
-              ])
-            ]
-            ":light"
-            ":dark"
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["define-extension" (str "theme") [":reads" [":focus"] ":state" ["list" ":palette" "nil" ":watch" "nil" ":focus" "nil" ":focus-at" "nil"]]]
-        [["snapshot" "state" "event"]]
-        (rows [
-          ["let" [["type" ["getf" "event" ":type"]] ["name" ["getf" "event" ":name"]] ["focus" ["context" "snapshot" ":focus"]]]]
-          (rows [
-            [
-              "cond"
-              (rows [
-                [["and" ["eq" "type" ":exec"] ["member" "name" (quote [":palette" ":reread"])] ["eql" ["getf" "event" ":code"] 0]]]
-                (rows [
-                  ["setf" ["getf" "state" ":palette"] ["or" ["theme--palette" ["getf" "event" ":stdout"]] ["getf" "state" ":palette"]]]
-                  [["getf" "state" ":watch"] "t"]
-                ])
-              ])
-            ]
-            (rows [
-              [["and" ["eq" "type" ":watch"] ["eq" "name" ":palette"]]]
-              [["setf" ["getf" "state" ":palette"] ["or" ["theme--palette" ["getf" "event" ":content"]] ["getf" "state" ":palette"]]]]
-            ])
-          ])
-          (rows [
-            ["unless" ["equal" "focus" ["getf" "state" ":focus"]]]
-            [["setf" ["getf" "state" ":focus"] "focus" ["getf" "state" ":focus-at"] ["when" "focus" ["hud--now"]]]]
-          ])
-          (rows [
-            [
-              "let*"
-              (rows [
-                [["fixed" ["getf" "+hud-theme+" ":palette"]]]
-                [["p" ["or" "fixed" ["getf" "state" ":palette"]]]]
-                [["flash" ["hud--decay" ["getf" "state" ":focus-at"] ["getf" "+hud-theme+" ":focus-flash"]]]]
-              ])
-            ]
-            (rows [
-              ["values" "state"]
-              (rows [
-                [
-                  "append"
-                  [
-                    "unless"
-                    "fixed"
-                    [
-                      "list"
-                      (rows [
-                        ["exec-async" ["if" ["getf" "state" ":watch"] ":reread" ":palette"]]
-                        (at 16 [["getf" "+hud-theme+" ":palette-command"]])
-                      ])
-                    ]
-                  ]
-                ]
-                [["when" ["getf" "state" ":watch"] ["list" ["watch-file" ":palette" ["getf" "+hud-theme+" ":palette-file"]]]]]
-                [["when" ["plusp" "flash"] ["list" ["interval" ":tick" ["getf" "+hud-theme+" ":tick"]]]]]
-                [
-                  [
-                    "when"
-                    "p"
-                    (rows [
-                      ["list" ["publish-state" ":hud-palette" "p"]]
-                      [["publish-state" ":theme-mode" ["theme--mode" "p"]]]
                       [
                         [
-                          "publish-state"
-                          ":theme"
-                          (rows [
-                            ["list" ":base" ["hud--c" "p" ":bg"] ":text" ["hud--c" "p" ":fg"]]
-                            [":accent" ["hud--c" "p" ":accent"] ":error" ["hud--c" "p" ":color1"]]
-                            [":surface1" ["hud--c" "p" ":color8"]]
-                            [":subtext0" ["hud--mix" ["hud--c" "p" ":bg"] ["hud--c" "p" ":fg"] "0.78"]]
-                          ])
+                          list
+                          [
+                            settings
+                            (kw "border")
+                            (rows [
+                              [list (kw "width") [getf (constant hud-theme) (kw "border")] (kw "radius") 0]
+                              [(kw "focused") [hud--mix [hud--c p (kw "accent")] [hud--c p (kw "fg")] flash]]
+                              [(kw "unfocused") [hud--c p (kw "color8")]]
+                            ])
+                          ]
                         ]
                       ]
                     ])
-                  ]
-                ]
-                [
-                  [
-                    "list"
-                    [
-                      "settings"
-                      ":border"
-                      (rows [
-                        ["list" ":width" ["getf" "+hud-theme+" ":border"] ":radius" 0]
-                        [":focused" ["hud--mix" ["hud--c" "p" ":accent"] ["hud--c" "p" ":fg"] "flash"]]
-                        [":unfocused" ["hud--c" "p" ":color8"]]
-                      ])
-                    ]
-                  ]
-                ]
-              ])
-              "nil"
+                    nil
+                  ])
+                ])
             ])
-          ])
         ])
-      ])
-    ];
+    ]);
     modules_desktop_session_tomoe_lisp_user_data = {
+      adjust-brightness,
+      and,
+      apply,
+      bind-key,
       blank,
+      close-window,
+      cond,
+      constant,
+      context,
+      declare,
+      define-extension,
+      eq,
+      equal,
       function,
+      getf,
+      ignore,
+      in-package,
+      kw,
+      lambda,
+      launch,
+      let',
+      list,
+      mapcar,
+      media-control,
+      nil,
+      null',
+      output-power,
+      policy--launch,
+      policy-bindings,
+      quit,
       rows,
+      screenshot,
       str,
+      t,
+      uninterned,
+      values,
+      when,
       ...
     }: [
-      ["in-package" "#:tomoe-user"]
+      [in-package (uninterned "tomoe-user")]
       blank
-      (rows [
-        ["define-extension" (str "user") [":reads" [":key" ":focus"] ":state" "nil"] ["snapshot" "state" "event"]]
-        [["declare" ["ignore" "state"]]]
-        (rows [
-          [
-            "let"
-            (rows [
+      ({
+        snapshot,
+        state,
+        event,
+      }:
+        rows [
+          [define-extension (str "user") [(kw "reads") [(kw "key") (kw "focus")] (kw "state") nil] [snapshot state event]]
+          [[declare [ignore state]]]
+          ({
+            command,
+            focused,
+          }:
+            rows [
               [
-                [
-                  "command"
-                  (rows [
+                let'
+                (rows [
+                  [
                     [
-                      "when"
+                      command
                       (rows [
-                        ["and" ["eq" ["getf" "event" ":type"] ":key"]]
-                        [["equal" ["getf" "event" ":owner"] (str "user")]]
+                        [
+                          when
+                          (rows [
+                            [and [eq [getf event (kw "type")] (kw "key")]]
+                            [[equal [getf event (kw "owner")] (str "user")]]
+                          ])
+                        ]
+                        [[getf event (kw "command")]]
                       ])
                     ]
-                    [["getf" "event" ":command"]]
-                  ])
-                ]
+                  ]
+                  [[focused [context snapshot (kw "focus")]]]
+                ])
               ]
-              [["focused" ["context" "snapshot" ":focus"]]]
-            ])
-          ]
-          (rows [
-            ["values" "nil"]
-            [["mapcar" ["lambda" ["binding"] ["apply" (function "bind-key") "binding"]] "+policy-bindings+"]]
-            (rows [
-              "cond"
-              [[["null" "command"] "nil"]]
-              [[["equal" "command" (str "close")] ["when" "focused" ["list" ["close-window" "focused"]]]]]
-              [[["equal" "command" (str "quit")] ["list" ["quit"]]]]
-              [[["equal" "command" (str "power")] ["list" ["output-power" ":toggle"]]]]
-              [[["equal" "command" (str "screenshot")] ["list" ["screenshot"]]]]
-              [[["equal" "command" (str "screenshot-screen")] ["list" ["screenshot" ":screen"]]]]
-              [[["equal" "command" (str "play-pause")] ["list" ["media-control" ":play-pause"]]]]
-              [[["equal" "command" (str "track-next")] ["list" ["media-control" ":next"]]]]
-              [[["equal" "command" (str "track-prev")] ["list" ["media-control" ":previous"]]]]
-              [[["equal" "command" (str "brightness-up")] ["list" ["adjust-brightness" 5]]]]
-              [[["equal" "command" (str "brightness-down")] ["list" ["adjust-brightness" (-5)]]]]
               (rows [
-                "t"
+                [values nil]
+                [[mapcar ({binding}: [lambda [binding] [apply (function bind-key) binding]]) (constant policy-bindings)]]
                 (rows [
-                  ["let" [["argv" ["policy--launch" "command"]]]]
-                  [["when" "argv" ["list" ["apply" (function "launch") "argv"]]]]
+                  cond
+                  [[[null' command] nil]]
+                  [[[equal command (str "close")] [when focused [list [close-window focused]]]]]
+                  [[[equal command (str "quit")] [list [quit]]]]
+                  [[[equal command (str "power")] [list [output-power (kw "toggle")]]]]
+                  [[[equal command (str "screenshot")] [list [screenshot]]]]
+                  [[[equal command (str "screenshot-screen")] [list [screenshot (kw "screen")]]]]
+                  [[[equal command (str "play-pause")] [list [media-control (kw "play-pause")]]]]
+                  [[[equal command (str "track-next")] [list [media-control (kw "next")]]]]
+                  [[[equal command (str "track-prev")] [list [media-control (kw "previous")]]]]
+                  [[[equal command (str "brightness-up")] [list [adjust-brightness 5]]]]
+                  [[[equal command (str "brightness-down")] [list [adjust-brightness (-5)]]]]
+                  (rows [
+                    t
+                    ({argv}:
+                      rows [
+                        [let' [[argv [policy--launch command]]]]
+                        [[when argv [list [apply (function launch) argv]]]]
+                      ])
+                  ])
                 ])
               ])
             ])
-          ])
         ])
-      ])
     ];
     modules_desktop_session_tomoe_shaders_balatro_data = {
       abs,
@@ -34751,25 +37078,446 @@
 
         locals = ["flet" "labels" "macrolet"];
 
-        symbol = head: builtins.isString head && builtins.match "[:#\"].*|[-+]?([0-9]+([./][0-9]*)?|[.][0-9]+)([eEdD][-+]?[0-9]+)?" head == null;
+        definers = ["defconstant" "defmacro" "defparameter" "defun" "defvar"];
+
+        operators = [
+          "*"
+          "+"
+          "-"
+          "/"
+          "/="
+          "1+"
+          "1-"
+          "<"
+          "<="
+          "="
+          ">"
+          ">="
+          "char="
+          "let*"
+          "list*"
+          "string="
+        ];
+
+        cl = [
+          "abs"
+          "acons"
+          "and"
+          "append"
+          "apply"
+          "assoc"
+          "atom"
+          "car"
+          "case"
+          "cddr"
+          "cdr"
+          "ceiling"
+          "char"
+          "char-code"
+          "code-char"
+          "concatenate"
+          "cond"
+          "cons"
+          "copy-list"
+          "count-if"
+          "declare"
+          "defpackage"
+          "defparameter"
+          "defun"
+          "defvar"
+          "destructuring-bind"
+          "digit-char-p"
+          "do"
+          "dolist"
+          "dotimes"
+          "ecase"
+          "eq"
+          "eql"
+          "equal"
+          "evenp"
+          "every"
+          "exp"
+          "expt"
+          "fifth"
+          "find"
+          "find-if"
+          "first"
+          "flet"
+          "float"
+          "floor"
+          "format"
+          "fourth"
+          "get-internal-real-time"
+          "getf"
+          "if"
+          "ignore"
+          "in-package"
+          "incf"
+          "integerp"
+          "intern"
+          "internal-time-units-per-second"
+          "intersection"
+          "labels"
+          "lambda"
+          "last"
+          "ldiff"
+          "length"
+          "let"
+          "list"
+          "listp"
+          "loop"
+          "map"
+          "mapcar"
+          "max"
+          "member"
+          "min"
+          "mod"
+          "most-positive-fixnum"
+          "multiple-value-bind"
+          "nconc"
+          "nil"
+          "not"
+          "nreverse"
+          "nth"
+          "nthcdr"
+          "null"
+          "oddp"
+          "or"
+          "parse-integer"
+          "plusp"
+          "position"
+          "position-if"
+          "progn"
+          "push"
+          "read-line"
+          "realp"
+          "reduce"
+          "remove"
+          "remove-duplicates"
+          "remove-if"
+          "remove-if-not"
+          "rest"
+          "return"
+          "reverse"
+          "rotatef"
+          "round"
+          "second"
+          "setf"
+          "sin"
+          "sort"
+          "sqrt"
+          "string"
+          "string-downcase"
+          "string-right-trim"
+          "string-upcase"
+          "stringp"
+          "subseq"
+          "subsetp"
+          "substitute"
+          "t"
+          "third"
+          "truncate"
+          "unless"
+          "values"
+          "when"
+          "with-input-from-string"
+          "zerop"
+        ];
+
+        loop = [
+          "across"
+          "below"
+          "by"
+          "collect"
+          "downto"
+          "for"
+          "from"
+          "in"
+          "on"
+          "repeat"
+          "sum"
+          "thereis"
+          "to"
+          "while"
+          "with"
+        ];
+
+        tomoe = [
+          "+bar+"
+          "+cassette+"
+          "+gap+"
+          "+glass+"
+          "+hud+"
+          "+hud-theme+"
+          "+layout+"
+          "+layout-bindings+"
+          "+peek+"
+          "+policy-bindings+"
+          "+policy-displays+"
+          "+policy-hidden-window+"
+          "+policy-launcher+"
+          "+policy-launches+"
+          "+policy-settings+"
+          "+policy-terminal+"
+          "+shader-wallpaper+"
+          "+sounds+"
+          "adjust-brightness"
+          "bind-key"
+          "cassette--c"
+          "cassette--degrees"
+          "cassette--fit"
+          "cassette--gib"
+          "cassette--grille"
+          "cassette--height"
+          "cassette--hot-p"
+          "cassette--led"
+          "cassette--module"
+          "cassette--plate"
+          "cassette--px"
+          "cassette--reel"
+          "cassette--split"
+          "cassette--window"
+          "cassette--zone"
+          "clock-text"
+          "close-window"
+          "configure-output"
+          "context"
+          "deck--narrow-p"
+          "define-extension"
+          "exec-async"
+          "focus"
+          "fullscreen"
+          "hide-window"
+          "hud--alpha"
+          "hud--c"
+          "hud--decay"
+          "hud--dim"
+          "hud--heat"
+          "hud--icon"
+          "hud--mix"
+          "hud--now"
+          "hud--off"
+          "hud--panel"
+          "hud--text"
+          "interval"
+          "keyboard-grab"
+          "launch"
+          "media-control"
+          "menu-choice"
+          "output-power"
+          "place"
+          "policy--area"
+          "policy--centred"
+          "policy--launch"
+          "policy--terminal"
+          "policy--unmanaged-p"
+          "previous-context"
+          "probe--gpu-p"
+          "probe--sample"
+          "publish-state"
+          "quit"
+          "raise-window"
+          "rules-for"
+          "screenshot"
+          "service-state"
+          "setting"
+          "settings"
+          "shell-surface"
+          "show-window"
+          "sound"
+          "state-value"
+          "theme"
+          "ui"
+          "watch-file"
+          "window-properties"
+          "window-rule"
+        ];
+
+        ekko = [
+          "action"
+          "register-command"
+          "register-component"
+          "register-keymap"
+          "register-layout-provider"
+          "registry"
+          "set-option"
+          "value"
+        ];
+
+        nixKeywords = ["assert" "else" "false" "if" "in" "inherit" "let" "null" "or" "rec" "then" "true" "with"];
+
+        convention = spelled: let
+          constant = builtins.match "[+](.+)[+]" spelled;
+          special = builtins.match "[*](.+)[*]" spelled;
+        in
+          if constant != null
+          then builtins.head constant
+          else if special != null
+          then builtins.head special
+          else null;
+
+        escaped = name:
+          if builtins.elem name nixKeywords || constructors ? ${name}
+          then "${name}'"
+          else name;
+
+        global = spelled: let
+          base = convention spelled;
+        in
+          if base == null
+          then lib.nameValuePair (escaped spelled) {symbol = spelled;}
+          else lib.nameValuePair (escaped base) {inherit base spelled;};
+
+        globals = builtins.listToAttrs (map global (cl ++ loop ++ tomoe ++ ekko));
+
+        muffed = mark: name: let
+          base = name.base or name.symbol;
+          spelled = "${mark}${base}${mark}";
+        in
+          if name ? spelled && name.spelled != spelled
+          then throw "lisp: ${name.spelled} is not ${spelled}"
+          else {
+            symbol = spelled;
+            inherit base;
+          };
+
+        symbolName = value:
+          if builtins.isString value && builtins.elem value operators
+          then value
+          else value.symbol or null;
+
+        nodeKind = value:
+          if value ? symbol
+          then "symbol"
+          else kindOf value;
+
+        bound = boundBlock {
+          language = "lisp";
+          name = spelled: {symbol = spelled;};
+          declared = declares;
+        };
+
+        listy = value: builtins.isList value || value ? rows || value ? wrap;
+
+        elements = value: let
+          resolved = bound value;
+        in
+          if builtins.isList resolved
+          then resolved
+          else if resolved ? rows
+          then lib.concatMap rowItems resolved.rows
+          else resolved.wrap or [];
+
+        nameOf = value: lib.optional (value ? symbol) (value.base or value.symbol);
+
+        marker = value: lib.hasPrefix "&" (toString (symbolName value));
+
+        first = value: lib.concatMap nameOf (lib.take 1 (elements value));
+
+        lambdaList = value:
+          lib.concatMap (part:
+            if listy part
+            then first part
+            else if marker part
+            then []
+            else nameOf part)
+          (elements value);
+
+        heads = value:
+          lib.concatMap (part:
+            if listy part
+            then first part
+            else nameOf part)
+          (elements value);
+
+        entryNames = defaulted: part:
+          if defaulted && listy part
+          then first part
+          else pattern part;
+
+        patternStep = acc: part:
+          if marker part
+          then acc // {defaulted = symbolName part != "&rest";}
+          else acc // {names = acc.names ++ entryNames acc.defaulted part;};
+
+        pattern = value:
+          if listy value
+          then
+            (builtins.foldl' patternStep {
+              defaulted = false;
+              names = [];
+            } (elements value)).names
+          else if marker value || builtins.elem (symbolName value) ["." "nil"]
+          then []
+          else nameOf value;
+
+        loopNames = parts:
+          lib.concatLists (lib.imap0 (index: part:
+            if builtins.elem (symbolName part) ["as" "for" "into" "with"] && index + 1 < builtins.length parts
+            then pattern (builtins.elemAt parts (index + 1))
+            else [])
+          parts);
+
+        declares = result: let
+          parts = elements result;
+          at = index:
+            if index < builtins.length parts
+            then builtins.elemAt parts index
+            else [];
+          definitions = lib.concatMap first (elements (at 1));
+          table = {
+            defun = lambdaList (at 2);
+            defmacro = lambdaList (at 2);
+            lambda = lambdaList (at 1);
+            define-extension = lambdaList (at 3);
+            "let" = heads (at 1);
+            "let*" = heads (at 1);
+            flet = definitions;
+            labels = definitions;
+            macrolet = definitions;
+            destructuring-bind = pattern (at 1);
+            multiple-value-bind = pattern (at 1);
+            dolist = first (at 1);
+            dotimes = first (at 1);
+            with-input-from-string = first (at 1);
+            with-open-file = first (at 1);
+            with-output-to-string = first (at 1);
+            loop = loopNames parts;
+          };
+          head = symbolName (builtins.head parts);
+        in
+          if parts != [] && head != null && table ? ${head}
+          then table.${head}
+          else lambdaList (at 1);
+
+        defined = lib.concatMap (value: let
+          parts = elements value;
+        in
+          if parts != [] && builtins.elem (symbolName (builtins.head parts)) definers
+          then nameOf (builtins.elemAt parts 1)
+          else []);
 
         bodyOffset = distinguished: index:
           if index > distinguished
           then 2
           else 4;
 
-        headOffset = head: firstRow:
-          if symbol head && firstRow >= 2
-          then builtins.stringLength head + 2
-          else if head == "cond"
+        headOffset = head: firstRow: let
+          name = symbolName head;
+        in
+          if name != null && firstRow >= 2
+          then builtins.stringLength name + 2
+          else if name == "cond"
           then 2
           else 1;
 
-        offset = head: local: index: firstRow:
+        offset = head: local: index: firstRow: let
+          name = symbolName head;
+        in
           if local
           then bodyOffset 1 index
-          else if builtins.isString head && bodies ? ${head}
-          then bodyOffset bodies.${head} index
+          else if name != null && bodies ? ${name}
+          then bodyOffset bodies.${name} index
           else headOffset head firstRow;
 
         escape = lib.replaceStrings ["\\" "\""] ["\\\\" "\\\""];
@@ -34786,9 +37534,27 @@
 
         forms =
           {
-            string = _: lib.id;
+            string = _: value:
+              if builtins.elem value operators
+              then value
+              else throw "lisp: \"${value}\" is a bare string, not one of the operator symbols; a name is a Nix variable and a string literal (str ...)";
             int = _: toString;
+            float = _: builtins.toJSON;
+            lambda = local: value: form local (bound value);
             list = _: plain false;
+            symbol = _: value: value.symbol;
+            base = _: value:
+              throw "lisp: ${value.spelled} is written (${
+                if lib.hasPrefix "+" value.spelled
+                then "constant"
+                else "special"
+              } ${value.base})";
+            keyword = _: value: ":${value.keyword}";
+            uninterned = _: value: "#:${value.uninterned}";
+            char = _: value: "#\\${value.char}";
+            ratio = _: value: "${toString value.ratio.numerator}/${toString value.ratio.denominator}";
+            double = _: value: "${toString value.double}d0";
+            hex = _: value: "#x${lib.toHexString value.hex}";
             str = _: value: "\"${escape value.str}\"";
             comment = _: value: value.comment;
             rows = local: value: broken local false value.rows;
@@ -34796,24 +37562,23 @@
           }
           // lib.mapAttrs (kind: mark: _: value: [mark (form false value.${kind})]) prefixes;
 
-        form = local: value: (forms.${kindOf value} or (throw "lisp: no form ${kindOf value}")) local value;
+        form = local: value: (forms.${nodeKind value} or (throw "lisp: no form ${nodeKind value}")) local value;
 
         bindingList = value: builtins.isList value || value ? rows;
 
-        definitions = value:
+        definitionForms = value:
           if builtins.isList value
           then plain true value
           else broken false true value.rows;
 
         items = children: values: let
-          binds = builtins.elem (builtins.head values) locals;
+          binds = builtins.elem (symbolName (builtins.head values)) locals;
         in
           lib.imap0 (index: value:
             if binds && index == 1 && bindingList value
-            then definitions value
+            then definitionForms value
             else form children value)
           values;
-
         plain = children: values: ["(" (spaced (items children values)) ")"];
 
         broken = local: children: rowList: let
@@ -34836,9 +37601,10 @@
 
         fill = local: values: let
           head = builtins.head values;
+          name = symbolName head;
           kept =
-            if builtins.isString head && bodies ? ${head}
-            then bodies.${head} + 1
+            if name != null && bodies ? ${name}
+            then bodies.${name} + 1
             else lib.min 2 (builtins.length values);
           rendered = items false values;
         in
@@ -34853,34 +37619,67 @@
           if value ? blank
           then [hardline]
           else [(form false value) hardline];
-      in {
-        blank = {blank = true;};
 
-        str = string: {str = string;};
+        constructors = {
+          blank = {blank = true;};
 
-        comment = string: {comment = string;};
+          str = string: {str = string;};
 
-        rows = rowList: {rows = rowList;};
+          comment = string: {comment = string;};
 
-        at = by: row: {
-          at = by;
-          inherit row;
+          rows = rowList: {rows = rowList;};
+
+          at = by: row: {
+            at = by;
+            inherit row;
+          };
+
+          wrap = values: {wrap = values;};
+
+          quote = value: {quote = value;};
+
+          quasi = value: {quasi = value;};
+
+          unquote = value: {unquote = value;};
+
+          splice = value: {splice = value;};
+
+          function = value: {function = value;};
+
+          kw = name: {keyword = name;};
+
+          uninterned = name: {uninterned = name;};
+
+          char = name: {char = name;};
+
+          ratio = numerator: denominator: {ratio = {inherit numerator denominator;};};
+
+          double = value: {double = value;};
+
+          hex = value: {hex = value;};
+
+          constant = muffed "+";
+
+          special = muffed "*";
+
+          dot = {symbol = ".";};
+
+          and-key = {symbol = "&key";};
+
+          and-optional = {symbol = "&optional";};
+
+          and-rest = {symbol = "&rest";};
+
+          render = tree:
+            doc.render 80 (map top (boundBlock {
+                language = "lisp";
+                name = spelled: {symbol = spelled;};
+                declared = defined;
+              }
+              tree));
         };
-
-        wrap = values: {wrap = values;};
-
-        quote = value: {quote = value;};
-
-        quasi = value: {quasi = value;};
-
-        unquote = value: {unquote = value;};
-
-        splice = value: {splice = value;};
-
-        function = value: {function = value;};
-
-        render = values: doc.render 80 (map top values);
-      };
+      in
+        globals // constructors;
 
       shell = let
         inherit (doc) hardline nest;
@@ -43821,835 +46620,1212 @@
       '';
     };
     modules_shell_ekko_init_data = {
+      action,
+      and,
+      append,
+      apply,
+      assoc,
       at,
+      bind-key,
       blank,
+      car,
+      cdr,
+      ceiling,
+      collect,
+      cond,
+      constant,
+      copy-list,
+      declare,
+      defpackage,
+      defparameter,
+      defun,
+      destructuring-bind,
+      do,
+      dolist,
+      dot,
+      eq,
+      eql,
+      equal,
+      find,
+      first,
+      flet,
+      floor,
+      for,
+      fourth,
+      from,
       function,
+      getf,
+      if',
+      ignore,
+      in',
+      in-package,
+      integerp,
+      kw,
+      lambda,
+      last,
+      length,
+      let',
+      list,
+      listp,
+      loop,
+      mapcar,
+      max,
+      member,
+      min,
+      mod,
+      multiple-value-bind,
+      nil,
+      not,
+      nth,
+      null',
+      or',
+      plusp,
+      position,
+      progn,
       quote,
+      ratio,
+      register-command,
+      register-component,
+      register-keymap,
+      register-layout-provider,
+      registry,
+      remove,
+      remove-if,
+      remove-if-not,
+      rest,
+      rotatef,
       rows,
+      second,
+      set-option,
+      setf,
+      sort,
+      sqrt,
       str,
+      t,
+      third,
+      uninterned,
+      unless,
+      value,
+      values,
+      when,
       ...
+    }: ({
+      ratios,
+      pane-id,
+      sorted-panes,
+      tiled-p,
+      deck-state,
+      state-list,
+      deck-model,
+      model-state,
+      fit-insets,
+      deck-viewport,
+      deck-frame,
+      floating-rect,
+      deck-columns,
+      deck-grid,
+      deck-place,
+      column-of,
+      focus-column,
+      scroll-deck,
+      move-in-deck,
+      swap-columns,
+      to-column,
+      close-pane,
     }: [
       (rows [
-        ["defpackage" "#:ekko-deck"]
-        [[":use" "#:cl" "#:ekko/extensions"]]
+        [defpackage (uninterned "ekko-deck")]
+        [[(kw "use") (uninterned "cl") (uninterned "ekko/extensions")]]
       ])
-      ["in-package" "#:ekko-deck"]
+      [in-package (uninterned "ekko-deck")]
       blank
       (rows [
-        ["defparameter" "+ratios+" (quote ["1/2" "2/3" "1/3"])]
+        [defparameter (constant ratios) (quote [(ratio 1 2) (ratio 2 3) (ratio 1 3)])]
         (str "Ctrl+r column split cycle, like tomoe's 16:9+16:9 / 21:9+11:9 / 11:9+21:9.")
       ])
       blank
-      ["defun" "pane-id" ["pane"] ["getf" "pane" ":id"]]
+      ({pane}: [defun pane-id [pane] [getf pane (kw "id")]])
       blank
-      (rows [
-        ["defun" "sorted-panes" ["snapshot"]]
-        [["sort" ["copy-list" ["value" "snapshot" ":panes"]] (function "<") ":key" (function "pane-id")]]
-      ])
-      blank
-      (rows [
-        ["defun" "tiled-p" ["pane"]]
-        [["not" ["or" ["getf" "pane" ":minimized"] ["getf" "pane" ":floating"]]]]
-      ])
-      blank
-      (rows [
-        ["defun" "deck-state" ["snapshot"]]
-        [["rest" ["assoc" (str "deck") ["value" "snapshot" ":component-state"] ":test" (function "equal")]]]
-      ])
-      blank
-      (rows [
-        ["defun" "state-list" ["state" "key"]]
-        (rows [
-          ["let" [["value" ["getf" "state" "key"]]]]
-          [["and" ["listp" "value"] "value"]]
+      ({snapshot}:
+        rows [
+          [defun sorted-panes [snapshot]]
+          [[sort [copy-list [value snapshot (kw "panes")]] (function "<") (kw "key") (function pane-id)]]
         ])
-      ])
       blank
-      (rows [
-        ["defun" "deck-model" ["snapshot"]]
-        (str ''
-          Resolve the workspace into (:left :right) ordered column id lists, their
-          tiled subsets (:vl :vr), front ids (:fl :fr), :ratio, :grid and :pending.
-          Dead panes drop out; unassigned panes join the :pending column — the deck a
-          command last worked in, like a spawn joining the focused window's column in
-          tomoe — or balance into the shorter one (ties go left), and take its front.'')
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["state" ["deck-state" "snapshot"]]]
-              [["panes" ["sorted-panes" "snapshot"]]]
-              [["live" ["mapcar" (function "pane-id") "panes"]]]
-              [["visible" ["mapcar" (function "pane-id") ["remove-if-not" (function "tiled-p") "panes"]]]]
-              [
-                [
-                  "left"
-                  (rows [
-                    ["remove-if-not" ["lambda" ["id"] ["member" "id" "live"]]]
-                    [["state-list" "state" ":left"]]
-                  ])
-                ]
-              ]
-              [
-                [
-                  "right"
-                  (rows [
-                    ["remove-if-not" ["lambda" ["id"] ["member" "id" "live"]]]
-                    [["state-list" "state" ":right"]]
-                  ])
-                ]
-              ]
-              [["pending" ["let" [["p" ["getf" "state" ":pending"]]] ["and" ["member" "p" (quote [":left" ":right"])] "p"]]]]
-              [
-                [
-                  "new"
-                  (rows [
-                    ["remove-if" ["lambda" ["id"] ["or" ["member" "id" "left"] ["member" "id" "right"]]]]
-                    "live"
-                  ])
-                ]
-              ]
-            ])
-          ]
-          (rows [
-            ["dolist" ["id" "new"]]
-            (rows [
-              [
-                "if"
-                (rows [
-                  ["or" ["eq" "pending" ":left"]]
-                  [["and" ["null" "pending"] ["<=" ["length" "left"] ["length" "right"]]]]
-                ])
-              ]
-              [["setf" "left" ["append" "left" ["list" "id"]]]]
-              [["setf" "right" ["append" "right" ["list" "id"]]]]
-            ])
-          ])
-          (rows [
-            [
-              "flet"
-              (rows [
-                [["subset" ["col"] ["remove-if-not" ["lambda" ["id"] ["member" "id" "visible"]] "col"]]]
-                [["joined" ["col"] ["car" ["last" ["remove-if-not" ["lambda" ["id"] ["member" "id" "col"]] "new"]]]]]
-              ])
-            ]
-            (rows [
-              [
-                "let"
-                (rows [
-                  [["vl" ["subset" "left"]] ["vr" ["subset" "right"]]]
-                  [["focus" ["value" "snapshot" ":focus"]]]
-                ])
-              ]
-              (rows [
-                [
-                  "flet"
-                  [
-                    (rows [
-                      ["front" ["col" "vcol" "stored"]]
-                      (rows [
-                        ["or" ["joined" "col"]]
-                        [["and" ["member" "focus" "vcol"] "focus"]]
-                        [["and" ["member" "stored" "vcol"] "stored"]]
-                        [["first" "vcol"]]
-                      ])
-                    ])
-                  ]
-                ]
-                (rows [
-                  ["list" ":left" "left" ":right" "right" ":vl" "vl" ":vr" "vr"]
-                  [":fl" ["front" "left" "vl" ["getf" "state" ":fl"]]]
-                  [":fr" ["front" "right" "vr" ["getf" "state" ":fr"]]]
-                  [":ratio" ["let" [["r" ["getf" "state" ":ratio"]]] ["if" ["integerp" "r"] "r" 0]]]
-                  [":grid" ["and" ["getf" "state" ":grid"] "t"]]
-                  [":pending" "pending"]
-                  [":visible" "visible"]
-                ])
-              ])
-            ])
-          ])
+      ({pane}:
+        rows [
+          [defun tiled-p [pane]]
+          [[not [or' [getf pane (kw "minimized")] [getf pane (kw "floating")]]]]
         ])
-      ])
       blank
-      (rows [
-        ["defun" "model-state" ["model"]]
-        (rows [
-          ["list" ":left" ["getf" "model" ":left"] ":right" ["getf" "model" ":right"]]
-          [":fl" ["getf" "model" ":fl"] ":fr" ["getf" "model" ":fr"]]
-          [":ratio" ["getf" "model" ":ratio"] ":grid" ["getf" "model" ":grid"]]
-          [":pending" ["getf" "model" ":pending"]]
+      ({snapshot}:
+        rows [
+          [defun deck-state [snapshot]]
+          [[rest [assoc (str "deck") [value snapshot (kw "component-state")] (kw "test") (function equal)]]]
         ])
-      ])
       blank
-      (rows [
-        ["defun" "fit-insets" ["width" "height" "insets"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["top" ["min" ["first" "insets"] ["max" 0 ["1-" "height"]]]]]
-              [["left" ["min" ["fourth" "insets"] ["max" 0 ["1-" "width"]]]]]
-              [["bottom" ["min" ["third" "insets"] ["max" 0 ["-" "height" "top" 1]]]]]
-              [["right" ["min" ["second" "insets"] ["max" 0 ["-" "width" "left" 1]]]]]
+      ({
+        state,
+        key,
+      }:
+        rows [
+          [defun state-list [state key]]
+          ({value'}:
+            rows [
+              [let' [[value' [getf state key]]]]
+              [[and [listp value'] value']]
             ])
-          ]
-          [["list" "top" "right" "bottom" "left"]]
         ])
-      ])
       blank
-      (rows [
-        ["defun" "deck-viewport" ["snapshot"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["viewport" ["value" "snapshot" ":viewport"]] ["geometry" ["value" "snapshot" ":geometry"]]]
-              [["cols" ["getf" "viewport" ":cols"]] ["rows" ["getf" "viewport" ":rows"]]]
-              [["insets" ["fit-insets" "cols" "rows" ["getf" "geometry" ":viewport-insets" (quote [0 0 1 0])]]]]
-            ])
-          ]
-          (rows [
-            ["values" ["fourth" "insets"] ["first" "insets"]]
-            [["-" "cols" ["second" "insets"] ["fourth" "insets"]]]
-            [["-" "rows" ["first" "insets"] ["third" "insets"]]]
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck-frame" ["snapshot" "id" "x" "y" "width" "height"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["geometry" ["value" "snapshot" ":geometry"]]]
-              [["requested" ["copy-list" ["getf" "geometry" ":pane-insets" (quote [1 0 0 0])]]]]
-              [["boundary" ["getf" "geometry" ":boundary-insets"]]]
-            ])
-          ]
-          (rows [
-            ["when" "boundary"]
-            (rows [
-              ["multiple-value-bind" ["left" "top" "vw" "vh"] ["deck-viewport" "snapshot"]]
-              (rows [
-                [
-                  "loop"
-                  "for"
-                  "outside"
-                  "in"
-                  (rows [
-                    ["list" ["=" "y" "top"] ["=" ["+" "x" "width"] ["+" "left" "vw"]]]
-                    [["=" ["+" "y" "height"] ["+" "top" "vh"]] ["=" "x" "left"]]
-                  ])
-                ]
-                ["for index from 0" "when outside" "do" ["setf" ["nth" "index" "requested"] ["nth" "index" "boundary"]]]
-              ])
-            ])
-          ])
-          (rows [
-            ["let" [["insets" ["fit-insets" "width" "height" "requested"]]]]
-            (rows [
-              ["list" ":pane" "id" ":x" ["+" "x" ["fourth" "insets"]] ":y" ["+" "y" ["first" "insets"]]]
-              [":cols" ["-" "width" ["second" "insets"] ["fourth" "insets"]]]
-              [":rows" ["-" "height" ["first" "insets"] ["third" "insets"]]]
-              [":outer" ["list" "x" "y" "width" "height"]]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "floating-rect" ["pane" "index" "left" "top" "width" "height"]]
-        (rows [
-          ["destructuring-bind" ["x" "y" "w" "h"]]
-          (rows [
-            ["let" [["f" ["getf" "pane" ":floating"]]]]
-            (rows [
-              ["if" ["and" ["listp" "f"] ["=" ["length" "f"] 4]] "f"]
-              (rows [
-                ["list" ["+" "left" ["*" 3 ["mod" "index" 8]]] ["+" "top" ["mod" "index" 8]]]
-                [["max" 12 ["floor" ["*" "width" 3] 4]] ["max" 4 ["floor" ["*" "height" 3] 4]]]
-              ])
-            ])
-          ])
-          (rows [
-            ["let" [["w" ["min" "width" ["max" 12 "w"]]] ["h" ["min" "height" ["max" 4 "h"]]]]]
-            (rows [
-              ["list" ["max" "left" ["min" "x" ["+" "left" "width" ["-" "w"]]]]]
-              [["max" "top" ["min" "y" ["+" "top" "height" ["-" "h"]]]] "w" "h"]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck-columns" ["snapshot" "model" "x" "y" "w" "h" "gap"]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["ratio" ["nth" ["mod" ["getf" "model" ":ratio"] ["length" "+ratios+"]] "+ratios+"]]]
-              [["lw" ["max" 1 ["min" ["-" "w" "gap" 1] ["floor" ["*" ["-" "w" "gap"] "ratio"]]]]]]
-              [["rw" ["max" 1 ["-" "w" "gap" "lw"]]]]
-            ])
-          ]
-          (rows [
-            [
-              "flet"
-              [
-                (rows [
-                  ["place" ["vcol" "front" "cx" "cw"]]
-                  (rows [
-                    ["let" [["fi" ["or" ["position" "front" "vcol"] 0]]]]
-                    (rows [
-                      ["loop" "for id in vcol" "for i from 0"]
-                      ["collect" ["deck-frame" "snapshot" "id" "cx" ["+" "y" ["*" ["-" "i" "fi"] "h"]] "cw" "h"]]
-                    ])
-                  ])
-                ])
-              ]
-            ]
-            (rows [
-              ["append" ["place" ["getf" "model" ":vl"] ["getf" "model" ":fl"] "x" "lw"]]
-              [["place" ["getf" "model" ":vr"] ["getf" "model" ":fr"] ["+" "x" "lw" "gap"] "rw"]]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck-grid" ["snapshot" "model" "x" "y" "w" "h" "gap"]]
-        (rows [
-          ["let*" [["ids" ["getf" "model" ":visible"]] ["n" ["length" "ids"]]]]
-          (rows [
-            ["when" ["plusp" "n"]]
-            (rows [
+      ({snapshot}:
+        rows [
+          [defun deck-model [snapshot]]
+          (str ''
+            Resolve the workspace into (:left :right) ordered column id lists, their
+            tiled subsets (:vl :vr), front ids (:fl :fr), :ratio, :grid and :pending.
+            Dead panes drop out; unassigned panes join the :pending column — the deck a
+            command last worked in, like a spawn joining the focused window's column in
+            tomoe — or balance into the shorter one (ties go left), and take its front.'')
+          ({
+            state,
+            panes,
+            live,
+            visible,
+            left,
+            right,
+            pending,
+            new,
+          }:
+            rows [
               [
                 "let*"
                 (rows [
-                  [["cols" ["max" 1 ["ceiling" ["sqrt" "n"]]]]]
-                  [["rows" ["ceiling" "n" "cols"]]]
-                  [["cw" ["max" 1 ["floor" ["-" "w" ["*" ["1-" "cols"] "gap"]] "cols"]]]]
-                  [["ch" ["max" 1 ["floor" ["-" "h" ["*" ["1-" "rows"] "gap"]] "rows"]]]]
-                ])
-              ]
-              (rows [
-                ["loop" "for id in ids" "for i from 0"]
-                [
-                  "collect"
-                  (rows [
-                    ["deck-frame" "snapshot" "id"]
-                    [["+" "x" ["*" ["mod" "i" "cols"] ["+" "cw" "gap"]]]]
-                    [["+" "y" ["*" ["floor" "i" "cols"] ["+" "ch" "gap"]]]]
-                    ["cw" "ch"]
-                  ])
-                ]
-              ])
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "deck-place" ["snapshot" "event"]]
-        [["declare" ["ignore" "event"]]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["model" ["deck-model" "snapshot"]]]
-              [["gap" ["first" ["getf" ["value" "snapshot" ":geometry"] ":split-gaps" (quote [1 0])]]]]
-              [["focus" ["value" "snapshot" ":focus"]]]
-            ])
-          ]
-          (rows [
-            ["multiple-value-bind" ["x" "y" "w" "h"] ["deck-viewport" "snapshot"]]
-            (rows [
-              [
-                "let"
-                [
-                  (rows [
-                    "placements"
-                    (at 2 (rows [
-                      [
-                        "append"
-                        (rows [
-                          ["if" ["getf" "model" ":grid"]]
-                          [["deck-grid" "snapshot" "model" "x" "y" "w" "h" "gap"]]
-                          [["deck-columns" "snapshot" "model" "x" "y" "w" "h" "gap"]]
-                        ])
-                      ]
-                      (rows [
-                        ["loop" "for" "pane" "in" ["sorted-panes" "snapshot"] "for i from 0"]
-                        ["when" ["getf" "pane" ":floating"]]
-                        [
-                          "collect"
-                          (rows [
-                            ["apply" (function "deck-frame") "snapshot" ["pane-id" "pane"]]
-                            [["floating-rect" "pane" "i" "x" "y" "w" "h"]]
-                          ])
-                        ]
-                      ])
-                    ]))
-                  ])
-                ]
-              ]
-              (rows [
-                [
-                  "when"
-                  (rows [
-                    ["and" ["value" "snapshot" ":zoom"]]
-                    [["find" "focus" "placements" ":key" ["lambda" ["pl"] ["getf" "pl" ":pane"]]]]
-                  ])
-                ]
-                (rows [
-                  ["setf" "placements"]
-                  (rows [
+                  [[state [deck-state snapshot]]]
+                  [[panes [sorted-panes snapshot]]]
+                  [[live [mapcar (function pane-id) panes]]]
+                  [[visible [mapcar (function pane-id) [remove-if-not (function tiled-p) panes]]]]
+                  [
                     [
-                      "append"
+                      left
                       (rows [
-                        ["loop" "for pl in placements"]
-                        ["unless" ["eql" "focus" ["getf" "pl" ":pane"]]]
-                        [
-                          "collect"
-                          (rows [
-                            ["let" [["hidden" ["copy-list" "pl"]]]]
-                            [["setf" ["getf" "hidden" ":visible"] "nil"]]
-                            "hidden"
-                          ])
-                        ]
+                        [remove-if-not ({id}: [lambda [id] [member id live]])]
+                        [[state-list state (kw "left")]]
                       ])
                     ]
-                    [["list" ["deck-frame" "snapshot" "focus" "x" "y" "w" "h"]]]
-                  ])
+                  ]
+                  [
+                    [
+                      right
+                      (rows [
+                        [remove-if-not ({id}: [lambda [id] [member id live]])]
+                        [[state-list state (kw "right")]]
+                      ])
+                    ]
+                  ]
+                  [[pending ({p}: [let' [[p [getf state (kw "pending")]]] [and [member p (quote [(kw "left") (kw "right")])] p]])]]
+                  [
+                    [
+                      new
+                      (rows [
+                        [remove-if ({id}: [lambda [id] [or' [member id left] [member id right]]])]
+                        live
+                      ])
+                    ]
+                  ]
                 ])
-              ])
-              [
-                [
-                  "list"
-                  (rows [
-                    ["action" ":place-panes" (quote ":version") 1 (quote ":placements") "placements"]
-                    [(quote ":camera") (quote [0 0])]
-                  ])
-                ]
               ]
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "column-of" ["model" "focus"]]
-        (rows [
-          ["cond" [["member" "focus" ["getf" "model" ":vl"]] ":left"]]
-          [[["member" "focus" ["getf" "model" ":vr"]] ":right"]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "focus-column" ["side"]]
-        (rows [
-          ["lambda" ["snapshot" "event"]]
-          [["declare" ["ignore" "event"]]]
-          (rows [
-            [
-              "let*"
-              (rows [
-                [["model" ["deck-model" "snapshot"]]]
-                [["front" ["getf" "model" ["if" ["eq" "side" ":left"] ":fl" ":fr"]]]]
-              ])
-            ]
-            (rows [
-              ["when" "front"]
-              [["setf" ["getf" "model" ":pending"] "side"]]
-              (rows [
-                ["list" ["action" ":focus" (quote ":pane") "front"]]
-                [["action" ":set-state" (quote ":value") ["model-state" "model"]]]
-              ])
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "scroll-deck" ["dir"]]
-        (rows [
-          ["lambda" ["snapshot" "event"]]
-          [["declare" ["ignore" "event"]]]
-          (rows [
-            [
-              "let*"
-              (rows [
-                [["model" ["deck-model" "snapshot"]]]
-                [["side" ["column-of" "model" ["value" "snapshot" ":focus"]]]]
-              ])
-            ]
-            (rows [
-              ["when" "side"]
-              (rows [
-                [
-                  "let"
-                  (rows [
-                    [["vcol" ["getf" "model" ["if" ["eq" "side" ":left"] ":vl" ":vr"]]]]
-                    [["fkey" ["if" ["eq" "side" ":left"] ":fl" ":fr"]]]
-                  ])
-                ]
-                (rows [
-                  ["when" [">" ["length" "vcol"] 1]]
+              ({id}:
+                rows [
+                  [dolist [id new]]
                   (rows [
                     [
-                      "let"
+                      if'
+                      (rows [
+                        [or' [eq pending (kw "left")]]
+                        [[and [null' pending] ["<=" [length left] [length right]]]]
+                      ])
+                    ]
+                    [[setf left [append left [list id]]]]
+                    [[setf right [append right [list id]]]]
+                  ])
+                ])
+              ({
+                subset,
+                joined,
+              }:
+                rows [
+                  [
+                    flet
+                    (rows [
+                      ({col}: [subset [col] [remove-if-not ({id}: [lambda [id] [member id visible]]) col]])
+                      ({col}: [joined [col] [car [last [remove-if-not ({id}: [lambda [id] [member id col]]) new]]]])
+                    ])
+                  ]
+                  ({
+                    vl,
+                    vr,
+                    focus',
+                  }:
+                    rows [
                       [
+                        let'
+                        (rows [
+                          [[vl [subset left]] [vr [subset right]]]
+                          [[focus' [value snapshot (kw "focus")]]]
+                        ])
+                      ]
+                      ({front}:
+                        rows [
+                          [
+                            flet
+                            [
+                              ({
+                                col,
+                                vcol,
+                                stored,
+                              }:
+                                rows [
+                                  [front [col vcol stored]]
+                                  (rows [
+                                    [or' [joined col]]
+                                    [[and [member focus' vcol] focus']]
+                                    [[and [member stored vcol] stored]]
+                                    [[first vcol]]
+                                  ])
+                                ])
+                            ]
+                          ]
+                          (rows [
+                            [list (kw "left") left (kw "right") right (kw "vl") vl (kw "vr") vr]
+                            [(kw "fl") [front left vl [getf state (kw "fl")]]]
+                            [(kw "fr") [front right vr [getf state (kw "fr")]]]
+                            [(kw "ratio") ({r}: [let' [[r [getf state (kw "ratio")]]] [if' [integerp r] r 0]])]
+                            [(kw "grid") [and [getf state (kw "grid")] t]]
+                            [(kw "pending") pending]
+                            [(kw "visible") visible]
+                          ])
+                        ])
+                    ])
+                ])
+            ])
+        ])
+      blank
+      ({model}:
+        rows [
+          [defun model-state [model]]
+          (rows [
+            [list (kw "left") [getf model (kw "left")] (kw "right") [getf model (kw "right")]]
+            [(kw "fl") [getf model (kw "fl")] (kw "fr") [getf model (kw "fr")]]
+            [(kw "ratio") [getf model (kw "ratio")] (kw "grid") [getf model (kw "grid")]]
+            [(kw "pending") [getf model (kw "pending")]]
+          ])
+        ])
+      blank
+      ({
+        width,
+        height,
+        insets,
+      }:
+        rows [
+          [defun fit-insets [width height insets]]
+          ({
+            top,
+            left,
+            bottom,
+            right,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[top [min [first insets] [max 0 ["1-" height]]]]]
+                  [[left [min [fourth insets] [max 0 ["1-" width]]]]]
+                  [[bottom [min [third insets] [max 0 ["-" height top 1]]]]]
+                  [[right [min [second insets] [max 0 ["-" width left 1]]]]]
+                ])
+              ]
+              [[list top right bottom left]]
+            ])
+        ])
+      blank
+      ({snapshot}:
+        rows [
+          [defun deck-viewport [snapshot]]
+          ({
+            viewport,
+            geometry,
+            cols,
+            rows',
+            insets,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[viewport [value snapshot (kw "viewport")]] [geometry [value snapshot (kw "geometry")]]]
+                  [[cols [getf viewport (kw "cols")]] [rows' [getf viewport (kw "rows")]]]
+                  [[insets [fit-insets cols rows' [getf geometry (kw "viewport-insets") (quote [0 0 1 0])]]]]
+                ])
+              ]
+              (rows [
+                [values [fourth insets] [first insets]]
+                [["-" cols [second insets] [fourth insets]]]
+                [["-" rows' [first insets] [third insets]]]
+              ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        id,
+        x,
+        y,
+        width,
+        height,
+      }:
+        rows [
+          [defun deck-frame [snapshot id x y width height]]
+          ({
+            geometry,
+            requested,
+            boundary,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[geometry [value snapshot (kw "geometry")]]]
+                  [[requested [copy-list [getf geometry (kw "pane-insets") (quote [1 0 0 0])]]]]
+                  [[boundary [getf geometry (kw "boundary-insets")]]]
+                ])
+              ]
+              (rows [
+                [when boundary]
+                ({
+                  left,
+                  top,
+                  vw,
+                  vh,
+                }:
+                  rows [
+                    [multiple-value-bind [left top vw vh] [deck-viewport snapshot]]
+                    ({
+                      outside,
+                      index,
+                    }:
+                      rows [
                         [
-                          "target"
+                          loop
+                          for
+                          outside
+                          in'
+                          (rows [
+                            [list ["=" y top] ["=" ["+" x width] ["+" left vw]]]
+                            [["=" ["+" y height] ["+" top vh]] ["=" x left]]
+                          ])
+                        ]
+                        [for index from 0 when outside do [setf [nth index requested] [nth index boundary]]]
+                      ])
+                  ])
+              ])
+              ({insets}:
+                rows [
+                  [let' [[insets [fit-insets width height requested]]]]
+                  (rows [
+                    [list (kw "pane") id (kw "x") ["+" x [fourth insets]] (kw "y") ["+" y [first insets]]]
+                    [(kw "cols") ["-" width [second insets] [fourth insets]]]
+                    [(kw "rows") ["-" height [first insets] [third insets]]]
+                    [(kw "outer") [list x y width height]]
+                  ])
+                ])
+            ])
+        ])
+      blank
+      ({
+        pane,
+        index,
+        left,
+        top,
+        width,
+        height,
+      }:
+        rows [
+          [defun floating-rect [pane index left top width height]]
+          ({
+            x,
+            y,
+            w,
+            h,
+          }:
+            rows [
+              [destructuring-bind [x y w h]]
+              ({f}:
+                rows [
+                  [let' [[f [getf pane (kw "floating")]]]]
+                  (rows [
+                    [if' [and [listp f] ["=" [length f] 4]] f]
+                    (rows [
+                      [list ["+" left ["*" 3 [mod index 8]]] ["+" top [mod index 8]]]
+                      [[max 12 [floor ["*" width 3] 4]] [max 4 [floor ["*" height 3] 4]]]
+                    ])
+                  ])
+                ])
+              ({
+                w',
+                h',
+              }:
+                rows [
+                  [let' [[w' [min width [max 12 w]]] [h' [min height [max 4 h]]]]]
+                  (rows [
+                    [list [max left [min x ["+" left width ["-" w']]]]]
+                    [[max top [min y ["+" top height ["-" h']]]] w' h']
+                  ])
+                ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        model,
+        x,
+        y,
+        w,
+        h,
+        gap',
+      }:
+        rows [
+          [defun deck-columns [snapshot model x y w h gap']]
+          ({
+            ratio',
+            lw,
+            rw,
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[ratio' [nth [mod [getf model (kw "ratio")] [length (constant ratios)]] (constant ratios)]]]
+                  [[lw [max 1 [min ["-" w gap' 1] [floor ["*" ["-" w gap'] ratio']]]]]]
+                  [[rw [max 1 ["-" w gap' lw]]]]
+                ])
+              ]
+              ({place'}:
+                rows [
+                  [
+                    flet
+                    [
+                      ({
+                        vcol,
+                        front,
+                        cx,
+                        cw,
+                      }:
+                        rows [
+                          [place' [vcol front cx cw]]
+                          ({fi}:
+                            rows [
+                              [let' [[fi [or' [position front vcol] 0]]]]
+                              ({
+                                id,
+                                i,
+                              }:
+                                rows [
+                                  [loop for id in' vcol for i from 0]
+                                  [collect [deck-frame snapshot id cx ["+" y ["*" ["-" i fi] h]] cw h]]
+                                ])
+                            ])
+                        ])
+                    ]
+                  ]
+                  (rows [
+                    [append [place' [getf model (kw "vl")] [getf model (kw "fl")] x lw]]
+                    [[place' [getf model (kw "vr")] [getf model (kw "fr")] ["+" x lw gap'] rw]]
+                  ])
+                ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        model,
+        x,
+        y,
+        w,
+        h,
+        gap',
+      }:
+        rows [
+          [defun deck-grid [snapshot model x y w h gap']]
+          ({
+            ids,
+            n,
+          }:
+            rows [
+              ["let*" [[ids [getf model (kw "visible")]] [n [length ids]]]]
+              (rows [
+                [when [plusp n]]
+                ({
+                  cols,
+                  rows',
+                  cw,
+                  ch,
+                }:
+                  rows [
+                    [
+                      "let*"
+                      (rows [
+                        [[cols [max 1 [ceiling [sqrt n]]]]]
+                        [[rows' [ceiling n cols]]]
+                        [[cw [max 1 [floor ["-" w ["*" ["1-" cols] gap']] cols]]]]
+                        [[ch [max 1 [floor ["-" h ["*" ["1-" rows'] gap']] rows']]]]
+                      ])
+                    ]
+                    ({
+                      id,
+                      i,
+                    }:
+                      rows [
+                        [loop for id in' ids for i from 0]
+                        [
+                          collect
+                          (rows [
+                            [deck-frame snapshot id]
+                            [["+" x ["*" [mod i cols] ["+" cw gap']]]]
+                            [["+" y ["*" [floor i cols] ["+" ch gap']]]]
+                            [cw ch]
+                          ])
+                        ]
+                      ])
+                  ])
+              ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        event,
+      }:
+        rows [
+          [defun deck-place [snapshot event]]
+          [[declare [ignore event]]]
+          ({
+            model,
+            gap',
+            focus',
+          }:
+            rows [
+              [
+                "let*"
+                (rows [
+                  [[model [deck-model snapshot]]]
+                  [[gap' [first [getf [value snapshot (kw "geometry")] (kw "split-gaps") (quote [1 0])]]]]
+                  [[focus' [value snapshot (kw "focus")]]]
+                ])
+              ]
+              ({
+                x,
+                y,
+                w,
+                h,
+              }:
+                rows [
+                  [multiple-value-bind [x y w h] [deck-viewport snapshot]]
+                  ({placements}:
+                    rows [
+                      [
+                        let'
+                        [
+                          (rows [
+                            placements
+                            (at 2 (rows [
+                              [
+                                append
+                                (rows [
+                                  [if' [getf model (kw "grid")]]
+                                  [[deck-grid snapshot model x y w h gap']]
+                                  [[deck-columns snapshot model x y w h gap']]
+                                ])
+                              ]
+                              ({
+                                pane,
+                                i,
+                              }:
+                                rows [
+                                  [loop for pane in' [sorted-panes snapshot] for i from 0]
+                                  [when [getf pane (kw "floating")]]
+                                  [
+                                    collect
+                                    (rows [
+                                      [apply (function deck-frame) snapshot [pane-id pane]]
+                                      [[floating-rect pane i x y w h]]
+                                    ])
+                                  ]
+                                ])
+                            ]))
+                          ])
+                        ]
+                      ]
+                      (rows [
+                        [
+                          when
+                          (rows [
+                            [and [value snapshot (kw "zoom")]]
+                            [[find focus' placements (kw "key") ({pl}: [lambda [pl] [getf pl (kw "pane")]])]]
+                          ])
+                        ]
+                        (rows [
+                          [setf placements]
                           (rows [
                             [
-                              "nth"
-                              (rows [
-                                ["mod" ["+" ["or" ["position" ["getf" "model" "fkey"] "vcol"] 0] "dir"]]
-                                (at 4 [["length" "vcol"]])
-                              ])
+                              append
+                              ({pl}:
+                                rows [
+                                  [loop for pl in' placements]
+                                  [unless [eql focus' [getf pl (kw "pane")]]]
+                                  [
+                                    collect
+                                    ({hidden}:
+                                      rows [
+                                        [let' [[hidden [copy-list pl]]]]
+                                        [[setf [getf hidden (kw "visible")] nil]]
+                                        hidden
+                                      ])
+                                  ]
+                                ])
                             ]
-                            "vcol"
+                            [[list [deck-frame snapshot focus' x y w h]]]
+                          ])
+                        ])
+                      ])
+                      [
+                        [
+                          list
+                          (rows [
+                            [action (kw "place-panes") (quote (kw "version")) 1 (quote (kw "placements")) placements]
+                            [(quote (kw "camera")) (quote [0 0])]
                           ])
                         ]
                       ]
-                    ]
-                    (rows [
-                      ["setf" ["getf" "model" "fkey"] "target"]
-                      [["getf" "model" ":pending"] "side"]
                     ])
-                    (rows [
-                      ["list" ["action" ":focus" (quote ":pane") "target"]]
-                      [["action" ":set-state" (quote ":value") ["model-state" "model"]]]
-                    ])
-                  ])
                 ])
-              ])
             ])
+        ])
+      blank
+      ({
+        model,
+        focus',
+      }:
+        rows [
+          [defun column-of [model focus']]
+          (rows [
+            [cond [[member focus' [getf model (kw "vl")]] (kw "left")]]
+            [[[member focus' [getf model (kw "vr")]] (kw "right")]]
           ])
         ])
-      ])
       blank
-      (rows [
-        ["defun" "move-in-deck" ["dir"]]
-        (rows [
-          ["lambda" ["snapshot" "event"]]
-          [["declare" ["ignore" "event"]]]
-          (rows [
-            [
-              "let*"
-              (rows [
-                [["model" ["deck-model" "snapshot"]]]
-                [["focus" ["value" "snapshot" ":focus"]]]
-                [
+      ({side}:
+        rows [
+          [defun focus-column [side]]
+          ({
+            snapshot,
+            event,
+          }:
+            rows [
+              [lambda [snapshot event]]
+              [[declare [ignore event]]]
+              ({
+                model,
+                front,
+              }:
+                rows [
                   [
-                    "side"
+                    "let*"
                     (rows [
-                      ["cond" [["member" "focus" ["getf" "model" ":left"]] ":left"]]
-                      [[["member" "focus" ["getf" "model" ":right"]] ":right"]]
+                      [[model [deck-model snapshot]]]
+                      [[front [getf model [if' [eq side (kw "left")] (kw "fl") (kw "fr")]]]]
                     ])
                   ]
-                ]
-              ])
-            ]
-            (rows [
-              ["when" "side"]
-              (rows [
-                [
-                  "let*"
                   (rows [
-                    [["col" ["getf" "model" "side"]]]
-                    [["i" ["position" "focus" "col"]] ["j" ["and" "i" ["+" "i" "dir"]]]]
-                  ])
-                ]
-                (rows [
-                  ["when" ["and" "j" ["<=" 0 "j"] ["<" "j" ["length" "col"]]]]
-                  [["rotatef" ["nth" "i" "col"] ["nth" "j" "col"]]]
-                  [["setf" ["getf" "model" ":pending"] "side"]]
-                  [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
-                ])
-              ])
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "swap-columns" ["snapshot" "event"]]
-        [["declare" ["ignore" "event"]]]
-        (rows [
-          ["let" [["model" ["deck-model" "snapshot"]]]]
-          [["rotatef" ["getf" "model" ":left"] ["getf" "model" ":right"]]]
-          [["rotatef" ["getf" "model" ":vl"] ["getf" "model" ":vr"]]]
-          [["rotatef" ["getf" "model" ":fl"] ["getf" "model" ":fr"]]]
-          (rows [
-            ["let" [["focus" ["value" "snapshot" ":focus"]]]]
-            (rows [
-              ["setf" ["getf" "model" ":pending"]]
-              (rows [
-                ["cond" [["member" "focus" ["getf" "model" ":left"]] ":left"]]
-                [[["member" "focus" ["getf" "model" ":right"]] ":right"]]
-                [["t" ["getf" "model" ":pending"]]]
-              ])
-            ])
-          ])
-          [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "to-column" ["target"]]
-        (rows [
-          ["lambda" ["snapshot" "event"]]
-          [["declare" ["ignore" "event"]]]
-          (rows [
-            [
-              "let*"
-              (rows [
-                [["model" ["deck-model" "snapshot"]]]
-                [["focus" ["value" "snapshot" ":focus"]]]
-                [
-                  [
-                    "side"
+                    [when front]
+                    [[setf [getf model (kw "pending")] side]]
                     (rows [
-                      ["cond" [["member" "focus" ["getf" "model" ":left"]] ":left"]]
-                      [[["member" "focus" ["getf" "model" ":right"]] ":right"]]
+                      [list [action (kw "focus") (quote (kw "pane")) front]]
+                      [[action (kw "set-state") (quote (kw "value")) [model-state model]]]
+                    ])
+                  ])
+                ])
+            ])
+        ])
+      blank
+      ({dir}:
+        rows [
+          [defun scroll-deck [dir]]
+          ({
+            snapshot,
+            event,
+          }:
+            rows [
+              [lambda [snapshot event]]
+              [[declare [ignore event]]]
+              ({
+                model,
+                side,
+              }:
+                rows [
+                  [
+                    "let*"
+                    (rows [
+                      [[model [deck-model snapshot]]]
+                      [[side [column-of model [value snapshot (kw "focus")]]]]
                     ])
                   ]
-                ]
-              ])
-            ]
-            (rows [
-              ["when" ["and" "side" ["not" ["eq" "side" "target"]]]]
-              (rows [
-                [
-                  "let*"
                   (rows [
-                    [["col" ["getf" "model" "side"]] ["i" ["position" "focus" "col"]]]
-                    [["skey" ["if" ["eq" "side" ":left"] ":fl" ":fr"]]]
-                    [["tkey" ["if" ["eq" "target" ":left"] ":left" ":right"]]]
-                    [["tfkey" ["if" ["eq" "target" ":left"] ":fl" ":fr"]]]
-                  ])
-                ]
-                (rows [
-                  ["when" ["eql" "focus" ["getf" "model" "skey"]]]
-                  [["setf" ["getf" "model" "skey"] ["nth" ["mod" ["1+" "i"] ["length" "col"]] "col"]]]
-                ])
-                (rows [
-                  ["setf" ["getf" "model" "side"] ["remove" "focus" "col"]]
-                  [["getf" "model" "tkey"] ["append" ["getf" "model" "tkey"] ["list" "focus"]]]
-                  [["getf" "model" "tfkey"] "focus"]
-                  [["getf" "model" ":pending"] "target"]
-                ])
-                [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
-              ])
-            ])
-          ])
-        ])
-      ])
-      blank
-      (rows [
-        ["defun" "close-pane" ["snapshot" "event"]]
-        [["declare" ["ignore" "event"]]]
-        (rows [
-          [
-            "let*"
-            (rows [
-              [["model" ["deck-model" "snapshot"]]]
-              [["focus" ["value" "snapshot" ":focus"]]]
-              [["side" ["column-of" "model" "focus"]]]
-            ])
-          ]
-          (rows [
-            ["if" "side"]
-            (rows [
-              [
-                "let*"
-                (rows [
-                  [["vcol" ["getf" "model" ["if" ["eq" "side" ":left"] ":vl" ":vr"]]]]
-                  [["fkey" ["if" ["eq" "side" ":left"] ":fl" ":fr"]]]
-                  [
-                    [
-                      "target"
-                      (rows [
-                        ["and" [">" ["length" "vcol"] 1]]
+                    [when side]
+                    ({
+                      vcol,
+                      fkey,
+                    }:
+                      rows [
+                        [
+                          let'
+                          (rows [
+                            [[vcol [getf model [if' [eq side (kw "left")] (kw "vl") (kw "vr")]]]]
+                            [[fkey [if' [eq side (kw "left")] (kw "fl") (kw "fr")]]]
+                          ])
+                        ]
                         (rows [
-                          [
-                            "nth"
-                            (rows [
-                              ["mod" ["1+" ["or" ["position" "focus" "vcol"] 0]]]
-                              [["length" "vcol"]]
+                          [when [">" [length vcol] 1]]
+                          ({target}:
+                            rows [
+                              [
+                                let'
+                                [
+                                  [
+                                    target
+                                    (rows [
+                                      [
+                                        nth
+                                        (rows [
+                                          [mod ["+" [or' [position [getf model fkey] vcol] 0] dir]]
+                                          (at 4 [[length vcol]])
+                                        ])
+                                      ]
+                                      vcol
+                                    ])
+                                  ]
+                                ]
+                              ]
+                              (rows [
+                                [setf [getf model fkey] target]
+                                [[getf model (kw "pending")] side]
+                              ])
+                              (rows [
+                                [list [action (kw "focus") (quote (kw "pane")) target]]
+                                [[action (kw "set-state") (quote (kw "value")) [model-state model]]]
+                              ])
                             ])
-                          ]
-                          "vcol"
                         ])
                       ])
-                    ]
-                  ]
+                  ])
                 ])
-              ]
-              (rows [
-                ["if" "target"]
-                (rows [
+            ])
+        ])
+      blank
+      ({dir}:
+        rows [
+          [defun move-in-deck [dir]]
+          ({
+            snapshot,
+            event,
+          }:
+            rows [
+              [lambda [snapshot event]]
+              [[declare [ignore event]]]
+              ({
+                model,
+                focus',
+                side,
+              }:
+                rows [
                   [
-                    "progn"
+                    "let*"
                     (rows [
-                      ["setf" ["getf" "model" "fkey"] "target"]
-                      [["getf" "model" ":pending"] "side"]
+                      [[model [deck-model snapshot]]]
+                      [[focus' [value snapshot (kw "focus")]]]
+                      [
+                        [
+                          side
+                          (rows [
+                            [cond [[member focus' [getf model (kw "left")]] (kw "left")]]
+                            [[[member focus' [getf model (kw "right")]] (kw "right")]]
+                          ])
+                        ]
+                      ]
                     ])
                   ]
-                  (at 7 (rows [
-                    ["list" ["action" ":close" (quote ":focus") "target"]]
-                    [["action" ":set-state" (quote ":value") ["model-state" "model"]]]
-                  ]))
+                  (rows [
+                    [when side]
+                    ({
+                      col,
+                      i,
+                      j,
+                    }:
+                      rows [
+                        [
+                          "let*"
+                          (rows [
+                            [[col [getf model side]]]
+                            [[i [position focus' col]] [j [and i ["+" i dir]]]]
+                          ])
+                        ]
+                        (rows [
+                          [when [and j ["<=" 0 j] ["<" j [length col]]]]
+                          [[rotatef [nth i col] [nth j col]]]
+                          [[setf [getf model (kw "pending")] side]]
+                          [[list [action (kw "set-state") (quote (kw "value")) [model-state model]]]]
+                        ])
+                      ])
+                  ])
                 ])
-                [["list" ["action" ":close"]]]
-              ])
             ])
-            [["list" ["action" ":close"]]]
-          ])
         ])
-      ])
       blank
-      ["register-component" ":id" (quote ":deck") ":reads" (quote [":panes" ":focus" ":component-state"])]
-      (rows [
-        ["register-layout-provider" ":component" (quote ":deck") ":name" (str "deck") ":api-version" 1]
-        [
-          ":reads"
-          (quote (rows [
-            [":panes" ":focus" ":viewport" ":geometry"]
-            [":component-state" ":zoom"]
-          ]))
-        ]
-        [":handler" (function "deck-place")]
-      ])
-      ["set-option" ":component" (quote ":deck") ":name" (quote ":layout-provider") ":value" (str "deck")]
-      ["set-option" ":component" (quote ":deck") ":name" (quote ":split-gaps") ":value" (quote [1 0])]
+      ({
+        snapshot,
+        event,
+      }:
+        rows [
+          [defun swap-columns [snapshot event]]
+          [[declare [ignore event]]]
+          ({model}:
+            rows [
+              [let' [[model [deck-model snapshot]]]]
+              [[rotatef [getf model (kw "left")] [getf model (kw "right")]]]
+              [[rotatef [getf model (kw "vl")] [getf model (kw "vr")]]]
+              [[rotatef [getf model (kw "fl")] [getf model (kw "fr")]]]
+              ({focus'}:
+                rows [
+                  [let' [[focus' [value snapshot (kw "focus")]]]]
+                  (rows [
+                    [setf [getf model (kw "pending")]]
+                    (rows [
+                      [cond [[member focus' [getf model (kw "left")]] (kw "left")]]
+                      [[[member focus' [getf model (kw "right")]] (kw "right")]]
+                      [[t [getf model (kw "pending")]]]
+                    ])
+                  ])
+                ])
+              [[list [action (kw "set-state") (quote (kw "value")) [model-state model]]]]
+            ])
+        ])
       blank
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-focus-left") ":handler" ["focus-column" ":left"]]
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-focus-right") ":handler" ["focus-column" ":right"]]
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-scroll-down") ":handler" ["scroll-deck" 1]]
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-scroll-up") ":handler" ["scroll-deck" (-1)]]
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-move-down") ":handler" ["move-in-deck" 1]]
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-move-up") ":handler" ["move-in-deck" (-1)]]
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-swap-columns") ":handler" (function "swap-columns")]
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-to-left") ":handler" ["to-column" ":left"]]
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-to-right") ":handler" ["to-column" ":right"]]
-      ["register-command" ":component" (quote ":deck") ":name" (str "deck-close") ":handler" (function "close-pane")]
-      (rows [
-        ["register-command" ":component" (quote ":deck") ":name" (str "deck-new")]
-        [
-          ":handler"
-          (rows [
-            ["lambda" ["snapshot" "event"] ["declare" ["ignore" "event"]]]
-            (rows [
+      ({target}:
+        rows [
+          [defun to-column [target]]
+          ({
+            snapshot,
+            event,
+          }:
+            rows [
+              [lambda [snapshot event]]
+              [[declare [ignore event]]]
+              ({
+                model,
+                focus',
+                side,
+              }:
+                rows [
+                  [
+                    "let*"
+                    (rows [
+                      [[model [deck-model snapshot]]]
+                      [[focus' [value snapshot (kw "focus")]]]
+                      [
+                        [
+                          side
+                          (rows [
+                            [cond [[member focus' [getf model (kw "left")]] (kw "left")]]
+                            [[[member focus' [getf model (kw "right")]] (kw "right")]]
+                          ])
+                        ]
+                      ]
+                    ])
+                  ]
+                  (rows [
+                    [when [and side [not [eq side target]]]]
+                    ({
+                      col,
+                      i,
+                      skey,
+                      tkey,
+                      tfkey,
+                    }:
+                      rows [
+                        [
+                          "let*"
+                          (rows [
+                            [[col [getf model side]] [i [position focus' col]]]
+                            [[skey [if' [eq side (kw "left")] (kw "fl") (kw "fr")]]]
+                            [[tkey [if' [eq target (kw "left")] (kw "left") (kw "right")]]]
+                            [[tfkey [if' [eq target (kw "left")] (kw "fl") (kw "fr")]]]
+                          ])
+                        ]
+                        (rows [
+                          [when [eql focus' [getf model skey]]]
+                          [[setf [getf model skey] [nth [mod ["1+" i] [length col]] col]]]
+                        ])
+                        (rows [
+                          [setf [getf model side] [remove focus' col]]
+                          [[getf model tkey] [append [getf model tkey] [list focus']]]
+                          [[getf model tfkey] focus']
+                          [[getf model (kw "pending")] target]
+                        ])
+                        [[list [action (kw "set-state") (quote (kw "value")) [model-state model]]]]
+                      ])
+                  ])
+                ])
+            ])
+        ])
+      blank
+      ({
+        snapshot,
+        event,
+      }:
+        rows [
+          [defun close-pane [snapshot event]]
+          [[declare [ignore event]]]
+          ({
+            model,
+            focus',
+            side,
+          }:
+            rows [
               [
                 "let*"
                 (rows [
-                  [["model" ["deck-model" "snapshot"]]]
-                  [["side" ["column-of" "model" ["value" "snapshot" ":focus"]]]]
+                  [[model [deck-model snapshot]]]
+                  [[focus' [value snapshot (kw "focus")]]]
+                  [[side [column-of model focus']]]
                 ])
               ]
-              [["when" "side" ["setf" ["getf" "model" ":pending"] "side"]]]
               (rows [
-                ["list" ["action" ":split" (quote ":axis") (quote ":columns")]]
-                [["action" ":set-state" (quote ":value") ["model-state" "model"]]]
+                [if' side]
+                ({
+                  vcol,
+                  fkey,
+                  target,
+                }:
+                  rows [
+                    [
+                      "let*"
+                      (rows [
+                        [[vcol [getf model [if' [eq side (kw "left")] (kw "vl") (kw "vr")]]]]
+                        [[fkey [if' [eq side (kw "left")] (kw "fl") (kw "fr")]]]
+                        [
+                          [
+                            target
+                            (rows [
+                              [and [">" [length vcol] 1]]
+                              (rows [
+                                [
+                                  nth
+                                  (rows [
+                                    [mod ["1+" [or' [position focus' vcol] 0]]]
+                                    [[length vcol]]
+                                  ])
+                                ]
+                                vcol
+                              ])
+                            ])
+                          ]
+                        ]
+                      ])
+                    ]
+                    (rows [
+                      [if' target]
+                      (rows [
+                        [
+                          progn
+                          (rows [
+                            [setf [getf model fkey] target]
+                            [[getf model (kw "pending")] side]
+                          ])
+                        ]
+                        (at 7 (rows [
+                          [list [action (kw "close") (quote (kw "focus")) target]]
+                          [[action (kw "set-state") (quote (kw "value")) [model-state model]]]
+                        ]))
+                      ])
+                      [[list [action (kw "close")]]]
+                    ])
+                  ])
+                [[list [action (kw "close")]]]
               ])
             ])
-          ])
-        ]
-      ])
+        ])
+      blank
+      [register-component (kw "id") (quote (kw "deck")) (kw "reads") (quote [(kw "panes") (kw "focus") (kw "component-state")])]
       (rows [
-        ["register-command" ":component" (quote ":deck") ":name" (str "deck-grid-toggle")]
+        [register-layout-provider (kw "component") (quote (kw "deck")) (kw "name") (str "deck") (kw "api-version") 1]
         [
-          ":handler"
-          (rows [
-            ["lambda" ["snapshot" "event"] ["declare" ["ignore" "event"]]]
-            (rows [
-              ["let" [["model" ["deck-model" "snapshot"]]]]
-              [["setf" ["getf" "model" ":grid"] ["not" ["getf" "model" ":grid"]]]]
-              [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
+          (kw "reads")
+          (quote (rows [
+            [(kw "panes") (kw "focus") (kw "viewport") (kw "geometry")]
+            [(kw "component-state") (kw "zoom")]
+          ]))
+        ]
+        [(kw "handler") (function deck-place)]
+      ])
+      [set-option (kw "component") (quote (kw "deck")) (kw "name") (quote (kw "layout-provider")) (kw "value") (str "deck")]
+      [set-option (kw "component") (quote (kw "deck")) (kw "name") (quote (kw "split-gaps")) (kw "value") (quote [1 0])]
+      blank
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-focus-left") (kw "handler") [focus-column (kw "left")]]
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-focus-right") (kw "handler") [focus-column (kw "right")]]
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-scroll-down") (kw "handler") [scroll-deck 1]]
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-scroll-up") (kw "handler") [scroll-deck (-1)]]
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-move-down") (kw "handler") [move-in-deck 1]]
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-move-up") (kw "handler") [move-in-deck (-1)]]
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-swap-columns") (kw "handler") (function swap-columns)]
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-to-left") (kw "handler") [to-column (kw "left")]]
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-to-right") (kw "handler") [to-column (kw "right")]]
+      [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-close") (kw "handler") (function close-pane)]
+      (rows [
+        [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-new")]
+        [
+          (kw "handler")
+          ({
+            snapshot,
+            event,
+          }:
+            rows [
+              [lambda [snapshot event] [declare [ignore event]]]
+              ({
+                model,
+                side,
+              }:
+                rows [
+                  [
+                    "let*"
+                    (rows [
+                      [[model [deck-model snapshot]]]
+                      [[side [column-of model [value snapshot (kw "focus")]]]]
+                    ])
+                  ]
+                  [[when side [setf [getf model (kw "pending")] side]]]
+                  (rows [
+                    [list [action (kw "split") (quote (kw "axis")) (quote (kw "columns"))]]
+                    [[action (kw "set-state") (quote (kw "value")) [model-state model]]]
+                  ])
+                ])
             ])
-          ])
         ]
       ])
       (rows [
-        ["register-command" ":component" (quote ":deck") ":name" (str "deck-ratio-cycle")]
+        [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-grid-toggle")]
         [
-          ":handler"
-          (rows [
-            ["lambda" ["snapshot" "event"] ["declare" ["ignore" "event"]]]
-            (rows [
-              ["let" [["model" ["deck-model" "snapshot"]]]]
-              (rows [
-                ["setf" ["getf" "model" ":ratio"]]
-                [["mod" ["1+" ["getf" "model" ":ratio"]] ["length" "+ratios+"]]]
-              ])
-              [["list" ["action" ":set-state" (quote ":value") ["model-state" "model"]]]]
+          (kw "handler")
+          ({
+            snapshot,
+            event,
+          }:
+            rows [
+              [lambda [snapshot event] [declare [ignore event]]]
+              ({model}:
+                rows [
+                  [let' [[model [deck-model snapshot]]]]
+                  [[setf [getf model (kw "grid")] [not [getf model (kw "grid")]]]]
+                  [[list [action (kw "set-state") (quote (kw "value")) [model-state model]]]]
+                ])
             ])
-          ])
         ]
       ])
       (rows [
-        ["register-command" ":component" (quote ":deck") ":name" (str "deck-mode")]
+        [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-ratio-cycle")]
         [
-          ":handler"
-          (rows [
-            ["lambda" ["snapshot" "event"] ["declare" ["ignore" "snapshot" "event"]]]
-            [["list" ["action" ":set-keymap" (quote ":name") (quote ":deck")]]]
-          ])
+          (kw "handler")
+          ({
+            snapshot,
+            event,
+          }:
+            rows [
+              [lambda [snapshot event] [declare [ignore event]]]
+              ({model}:
+                rows [
+                  [let' [[model [deck-model snapshot]]]]
+                  (rows [
+                    [setf [getf model (kw "ratio")]]
+                    [[mod ["1+" [getf model (kw "ratio")]] [length (constant ratios)]]]
+                  ])
+                  [[list [action (kw "set-state") (quote (kw "value")) [model-state model]]]]
+                ])
+            ])
+        ]
+      ])
+      (rows [
+        [register-command (kw "component") (quote (kw "deck")) (kw "name") (str "deck-mode")]
+        [
+          (kw "handler")
+          ({
+            snapshot,
+            event,
+          }:
+            rows [
+              [lambda [snapshot event] [declare [ignore snapshot event]]]
+              [[list [action (kw "set-keymap") (quote (kw "name")) (quote (kw "deck"))]]]
+            ])
         ]
       ])
       blank
       (rows [
         [
-          "when"
+          when
           (rows [
-            ["find" (quote ":normal") ["getf" ["registry"] (quote ":keymaps")]]
-            [":key" ["lambda" ["m"] ["getf" "m" (quote ":name")]]]
+            [find (quote (kw "normal")) [getf [registry] (quote (kw "keymaps"))]]
+            [(kw "key") ({m}: [lambda [m] [getf m (quote (kw "name"))]])]
           ])
         ]
-        [["register-keymap" ":component" (quote ":deck") ":name" (quote ":deck") ":unbound" (quote ":ignore")]]
-        (rows [
-          [
-            "dolist"
+        [[register-keymap (kw "component") (quote (kw "deck")) (kw "name") (quote (kw "deck")) (kw "unbound") (quote (kw "ignore"))]]
+        ({spec}:
+          rows [
             [
-              "spec"
-              (quote (rows [
-                [[(str "C-h") "." (str "deck-focus-left")] [(str "C-l") "." (str "deck-focus-right")]]
-                [[(str "C-j") "." (str "deck-scroll-down")] [(str "C-k") "." (str "deck-scroll-up")]]
-                [[(str "C-o") "." (str "deck-grid-toggle")] [(str "C-r") "." (str "deck-ratio-cycle")]]
-                [[(str "C-d") "." (str "deck-mode")]]
-                [[(str "C-[") "." (str "deck-to-left")] [(str "C-]") "." (str "deck-to-right")]]
-                [[(str "C-Tab") "." (str "deck-swap-columns")]]
-                [[(str "C-J") "." (str "deck-move-down")] [(str "C-K") "." (str "deck-move-up")]]
-              ]))
+              dolist
+              [
+                spec
+                (quote (rows [
+                  [[(str "C-h") dot (str "deck-focus-left")] [(str "C-l") dot (str "deck-focus-right")]]
+                  [[(str "C-j") dot (str "deck-scroll-down")] [(str "C-k") dot (str "deck-scroll-up")]]
+                  [[(str "C-o") dot (str "deck-grid-toggle")] [(str "C-r") dot (str "deck-ratio-cycle")]]
+                  [[(str "C-d") dot (str "deck-mode")]]
+                  [[(str "C-[") dot (str "deck-to-left")] [(str "C-]") dot (str "deck-to-right")]]
+                  [[(str "C-Tab") dot (str "deck-swap-columns")]]
+                  [[(str "C-J") dot (str "deck-move-down")] [(str "C-K") dot (str "deck-move-up")]]
+                ]))
+              ]
             ]
-          ]
-          [["bind-key" ":component" (quote ":deck") ":map" (quote ":normal") ":key" ["car" "spec"] ":command" ["cdr" "spec"]]]
-        ])
-        (rows [
-          [
-            "dolist"
+            [[bind-key (kw "component") (quote (kw "deck")) (kw "map") (quote (kw "normal")) (kw "key") [car spec] (kw "command") [cdr spec]]]
+          ])
+        ({spec}:
+          rows [
             [
-              "spec"
-              (quote (rows [
-                [[(str "h") "." (str "deck-focus-left")] [(str "l") "." (str "deck-focus-right")]]
-                [[(str "j") "." (str "deck-scroll-down")] [(str "k") "." (str "deck-scroll-up")]]
-                [[(str "J") "." (str "deck-move-down")] [(str "K") "." (str "deck-move-up")]]
-                [[(str "H") "." (str "deck-swap-columns")] [(str "L") "." (str "deck-swap-columns")]]
-                [[(str "[") "." (str "deck-to-left")] [(str "]") "." (str "deck-to-right")]]
-                [[(str "o") "." (str "deck-grid-toggle")] [(str "r") "." (str "deck-ratio-cycle")]]
-                [[(str "n") "." (str "deck-new")] [(str "q") "." (str "deck-close")]]
-                [[(str "Escape") "." (str "normal-mode")] [(str "Enter") "." (str "normal-mode")]]
-              ]))
+              dolist
+              [
+                spec
+                (quote (rows [
+                  [[(str "h") dot (str "deck-focus-left")] [(str "l") dot (str "deck-focus-right")]]
+                  [[(str "j") dot (str "deck-scroll-down")] [(str "k") dot (str "deck-scroll-up")]]
+                  [[(str "J") dot (str "deck-move-down")] [(str "K") dot (str "deck-move-up")]]
+                  [[(str "H") dot (str "deck-swap-columns")] [(str "L") dot (str "deck-swap-columns")]]
+                  [[(str "[") dot (str "deck-to-left")] [(str "]") dot (str "deck-to-right")]]
+                  [[(str "o") dot (str "deck-grid-toggle")] [(str "r") dot (str "deck-ratio-cycle")]]
+                  [[(str "n") dot (str "deck-new")] [(str "q") dot (str "deck-close")]]
+                  [[(str "Escape") dot (str "normal-mode")] [(str "Enter") dot (str "normal-mode")]]
+                ]))
+              ]
             ]
-          ]
-          [["bind-key" ":component" (quote ":deck") ":map" (quote ":deck") ":key" ["car" "spec"] ":command" ["cdr" "spec"]]]
-        ])
+            [[bind-key (kw "component") (quote (kw "deck")) (kw "map") (quote (kw "deck")) (kw "key") [car spec] (kw "command") [cdr spec]]]
+          ])
       ])
-    ];
+    ]);
     modules_shell_rush = {
       config,
       lib,
@@ -49566,7 +52742,9 @@
         modules_desktop_session_tomoe_lisp_peek_data = "modules/desktop/session/tomoe/lisp/peek.data.nix";
         modules_desktop_session_tomoe_lisp_plates_data = "modules/desktop/session/tomoe/lisp/plates.data.nix";
         modules_desktop_session_tomoe_lisp_policy_data = "modules/desktop/session/tomoe/lisp/policy.data.nix";
+        modules_desktop_session_tomoe_lisp_probe_data = "modules/desktop/session/tomoe/lisp/probe.data.nix";
         modules_desktop_session_tomoe_lisp_shader_wallpaper_data = "modules/desktop/session/tomoe/lisp/shader-wallpaper.data.nix";
+        modules_desktop_session_tomoe_lisp_sounds_data = "modules/desktop/session/tomoe/lisp/sounds.data.nix";
         modules_desktop_session_tomoe_lisp_spine_data = "modules/desktop/session/tomoe/lisp/spine.data.nix";
         modules_desktop_session_tomoe_lisp_sway_data = "modules/desktop/session/tomoe/lisp/sway.data.nix";
         modules_desktop_session_tomoe_lisp_theme_data = "modules/desktop/session/tomoe/lisp/theme.data.nix";
@@ -49935,8 +53113,7 @@
         }
       ];
       verbatim = {
-        "modules/generators.nix" = "{lib}: let\n  declarations = set:\n    if builtins.isList set\n    then set\n    else throw \"cssSource: `set` must be a list of [property value] pairs, because declaration order matters in CSS\";\n\n  declaration = pair: \"  \${builtins.elemAt pair 0}: \${builtins.elemAt pair 1};\\n\";\n\n  indent = text: lib.concatMapStringsSep \"\\n\" (line: lib.optionalString (line != \"\") \"  \${line}\") (lib.splitString \"\\n\" text);\n\n  node = n:\n    if n ? select\n    then \"\${n.select} {\\n\${lib.concatMapStrings declaration (declarations n.set)}}\"\n    else if n ? rules\n    then \"\${n.at} {\\n\${indent (nodes n.rules)}\\n}\"\n    else \"\${n.at};\";\n\n  nodes = lib.concatMapStringsSep \"\\n\\n\" node;\n\n  jsonValue = prefix: value: let\n    inner = prefix + \"  \";\n    items = open: close: list:\n      if list == []\n      then open + close\n      else \"\${open}\\n\${lib.concatMapStringsSep \",\\n\" (item: inner + item) list}\\n\${prefix}\${close}\";\n  in\n    if builtins.isAttrs value\n    then items \"{\" \"}\" (map (key: \"\${builtins.toJSON key}: \${jsonValue inner value.\${key}}\") (value.__keys or (builtins.attrNames value)))\n    else if builtins.isList value\n    then items \"[\" \"]\" (map (jsonValue inner) value)\n    else builtins.toJSON value;\n\n  tomlValue = value:\n    if builtins.isList value\n    then \"[\${lib.concatMapStringsSep \", \" tomlValue value}]\"\n    else if builtins.isBool value\n    then lib.boolToString value\n    else if builtins.isString value\n    then builtins.toJSON value\n    else toString value;\n\n  tomlLine = item:\n    if builtins.isList item\n    then \"\${builtins.elemAt item 0} = \${tomlValue (builtins.elemAt item 1)}\"\n    else if item ? comment\n    then \"# \${item.comment}\"\n    else \"[[\${item.arrayTable}]]\";\n\n  cargoPackage = package:\n    \"\\n[[package]]\\n\"\n    + lib.concatMapStrings (key: lib.optionalString (package ? \${key}) \"\${key} = \${builtins.toJSON package.\${key}}\\n\") [\"name\" \"version\" \"source\" \"checksum\"]\n    + lib.optionalString (package ? dependencies) \"dependencies = [\\n\${lib.concatMapStrings (dependency: \" \${builtins.toJSON dependency},\\n\") package.dependencies}]\\n\";\n\n  keyValueSource = prefix: lib.concatMapStringsSep \"\\n\" (lib.concatMapStrings (pair: \"\${prefix}\${builtins.elemAt pair 0}=\${builtins.elemAt pair 1}\\n\"));\n\n  xmlElement = prefix: element:\n    if element ? children\n    then \"\${prefix}<\${element.name}>\\n\${lib.concatMapStrings (xmlElement \"\${prefix} \") element.children}\${prefix}</\${element.name}>\\n\"\n    else \"\${prefix}<\${element.name}>\${element.text}</\${element.name}>\\n\";\n\n  wrap = width: text:\n    lib.optionalString (text != \"\") \"\${builtins.substring 0 width text}\\n\${wrap width (builtins.substring width (builtins.stringLength text) text)}\";\n\n  kindOf = value:\n    if builtins.isAttrs value\n    then builtins.head (builtins.attrNames value)\n    else builtins.typeOf value;\n\n  spelling = lib.removeSuffix \"'\";\n\n  boundBlock = {\n    language,\n    name,\n    declared,\n  }: body: let\n    formals = builtins.attrNames (builtins.functionArgs body);\n    result = body (lib.genAttrs formals (formal: name (spelling formal)));\n    missing = lib.subtractLists (declared result) (map spelling formals);\n  in\n    if !builtins.isFunction body\n    then body\n    else if missing != []\n    then throw \"\${language}: \${lib.concatStringsSep \", \" missing} bound but not declared in its block\"\n    else result;\n\n  infixTree = {\n    language,\n    precedence,\n    right ? [],\n    operand,\n  }: let\n    parse = items: let\n      count = builtins.length items;\n      operators = lib.genList (index: builtins.elemAt items (2 * index + 1)) (count / 2);\n      levels = map (symbol: precedence.\${symbol} or (throw \"\${language}: `\${toString symbol}` is not a binary operator\")) operators;\n      lowest = lib.foldl' lib.min 1000 levels;\n      indices = builtins.filter (index: builtins.elemAt levels index == lowest) (lib.range 0 (builtins.length operators - 1));\n      at =\n        if builtins.elem (builtins.elemAt operators (builtins.head indices)) right\n        then builtins.head indices\n        else lib.last indices;\n    in\n      if count == 1\n      then operand (builtins.head items)\n      else if lib.mod count 2 == 0\n      then throw \"\${language}: an infix list alternates operands and operators and ends in an operand\"\n      else {\n        binary = {\n          operator = builtins.elemAt operators at;\n          left = parse (lib.take (2 * at + 1) items);\n          right = parse (lib.drop (2 * at + 2) items);\n        };\n      };\n  in\n    parse;\n\n  doc = let\n    cons = margin: flat: part: tail: {\n      head = {inherit margin flat part;};\n      inherit tail;\n    };\n\n    push = margin: flat: parts: rest: builtins.foldl' (tail: part: cons margin flat part tail) rest (lib.reverseList parts);\n\n    multiline = lib.hasInfix \"\\n\";\n\n    firstLine = string: builtins.head (lib.splitString \"\\n\" string);\n\n    lastLine = string: lib.last (lib.splitString \"\\n\" string);\n\n    inner = part: part.group or part.align or part.nest.part;\n\n    fitting = {\n      string = width: frame: rest:\n        if multiline frame.part\n        then !frame.flat && builtins.stringLength (firstLine frame.part) <= width\n        else fits (width - builtins.stringLength frame.part) rest;\n      list = width: frame: rest: fits width (push frame.margin frame.flat frame.part rest);\n      break = width: frame: rest: !frame.flat || frame.part.break != null && fits (width - builtins.stringLength frame.part.break) rest;\n      nest = width: frame: rest: fits width (cons frame.margin frame.flat (inner frame.part) rest);\n      align = fitting.nest;\n      group = fitting.nest;\n    };\n\n    fits = width: stack: width >= 0 && (stack == null || fitting.\${kindOf stack.head.part} width stack.head stack.tail);\n\n    emit = state: out: column: pad: stack:\n      builtins.seq column (builtins.seq out {\n        key = state.key + 1;\n        inherit (state) unit;\n        inherit out column pad stack;\n      });\n\n    start = state:\n      if state.pad == null\n      then state.column\n      else state.pad;\n\n    after = state: string:\n      if multiline string\n      then builtins.stringLength (lastLine string)\n      else start state + builtins.stringLength string;\n\n    write = state: string:\n      if string == \"\"\n      then emit state \"\" state.column state.pad\n      else emit state (lib.optionalString (state.pad != null) (lib.strings.replicate state.pad state.unit) + string) (after state string) null;\n\n    move = state: emit state \"\" state.column state.pad;\n\n    steps = {\n      string = _: state: frame: write state frame.part;\n      list = _: state: frame: rest: move state (push frame.margin frame.flat frame.part rest);\n      break = _: state: frame:\n        if frame.flat && frame.part.break != null\n        then write state frame.part.break\n        else emit state \"\\n\" 0 frame.margin;\n      nest = _: state: frame: rest: move state (cons (frame.margin + frame.part.nest.by) frame.flat frame.part.nest.part rest);\n      align = _: state: frame: rest: move state (cons (start state) frame.flat frame.part.align rest);\n      group = width: state: frame: rest: let\n        flat = frame.flat || width == null || fits (width - start state) (cons frame.margin true frame.part.group rest);\n      in\n        move state (cons frame.margin flat frame.part.group rest);\n    };\n\n    step = width: state: steps.\${kindOf state.stack.head.part} width state state.stack.head state.stack.tail;\n\n    renderWith = unit: width: part:\n      lib.concatMapStrings (state: state.out) (builtins.genericClosure {\n        startSet = [\n          {\n            key = 0;\n            out = \"\";\n            column = 0;\n            pad = null;\n            inherit unit;\n            stack = cons 0 false part null;\n          }\n        ];\n        operator = state: lib.optional (state.stack != null) (step width state);\n      });\n  in {\n    line = {break = \" \";};\n\n    softline = {break = \"\";};\n\n    hardline = {break = null;};\n\n    nest = by: part: {nest = {inherit by part;};};\n\n    align = part: {align = part;};\n\n    group = part: {group = part;};\n\n    render = renderWith \" \";\n\n    inherit renderWith;\n  };\n\n  lisp = let\n    inherit (doc) hardline line nest align group;\n\n    prefixes = {\n      quote = \"'\";\n      quasi = \"`\";\n      unquote = \",\";\n      splice = \",@\";\n      function = \"#'\";\n    };\n\n    bodies = {\n      block = 1;\n      case = 1;\n      define-extension = 3;\n      defconstant = 1;\n      defgeneric = 2;\n      defmacro = 2;\n      defmethod = 2;\n      defpackage = 1;\n      defparameter = 1;\n      defstruct = 1;\n      defun = 2;\n      defvar = 1;\n      destructuring-bind = 2;\n      dolist = 1;\n      dotimes = 1;\n      ecase = 1;\n      etypecase = 1;\n      flet = 1;\n      handler-bind = 1;\n      handler-case = 1;\n      ignore-errors = 0;\n      labels = 1;\n      lambda = 1;\n      \"let\" = 1;\n      \"let*\" = 1;\n      macrolet = 1;\n      multiple-value-bind = 2;\n      prog1 = 1;\n      progn = 0;\n      typecase = 1;\n      unless = 1;\n      unwind-protect = 1;\n      when = 1;\n      with-input-from-string = 1;\n      with-open-file = 1;\n      with-output-to-string = 1;\n      with-slots = 2;\n    };\n\n    locals = [\"flet\" \"labels\" \"macrolet\"];\n\n    symbol = head: builtins.isString head && builtins.match \"[:#\\\"].*|[-+]?([0-9]+([./][0-9]*)?|[.][0-9]+)([eEdD][-+]?[0-9]+)?\" head == null;\n\n    bodyOffset = distinguished: index:\n      if index > distinguished\n      then 2\n      else 4;\n\n    headOffset = head: firstRow:\n      if symbol head && firstRow >= 2\n      then builtins.stringLength head + 2\n      else if head == \"cond\"\n      then 2\n      else 1;\n\n    offset = head: local: index: firstRow:\n      if local\n      then bodyOffset 1 index\n      else if builtins.isString head && bodies ? \${head}\n      then bodyOffset bodies.\${head} index\n      else headOffset head firstRow;\n\n    escape = lib.replaceStrings [\"\\\\\" \"\\\"\"] [\"\\\\\\\\\" \"\\\\\\\"\"];\n\n    rowShapes = {\n      list = lib.id;\n      blank = _: [];\n      at = row: rowItems row.row;\n    };\n\n    rowItems = row: (rowShapes.\${kindOf row} or lib.toList) row;\n\n    spaced = lib.intersperse \" \";\n\n    forms =\n      {\n        string = _: lib.id;\n        int = _: toString;\n        list = _: plain false;\n        str = _: value: \"\\\"\${escape value.str}\\\"\";\n        comment = _: value: value.comment;\n        rows = local: value: broken local false value.rows;\n        wrap = local: value: fill local value.wrap;\n      }\n      // lib.mapAttrs (kind: mark: _: value: [mark (form false value.\${kind})]) prefixes;\n\n    form = local: value: (forms.\${kindOf value} or (throw \"lisp: no form \${kindOf value}\")) local value;\n\n    bindingList = value: builtins.isList value || value ? rows;\n\n    definitions = value:\n      if builtins.isList value\n      then plain true value\n      else broken false true value.rows;\n\n    items = children: values: let\n      binds = builtins.elem (builtins.head values) locals;\n    in\n      lib.imap0 (index: value:\n        if binds && index == 1 && bindingList value\n        then definitions value\n        else form children value)\n      values;\n\n    plain = children: values: [\"(\" (spaced (items children values)) \")\"];\n\n    broken = local: children: rowList: let\n      firstRow = rowItems (builtins.head rowList);\n      head = builtins.head firstRow;\n      rendered = items children (lib.concatMap rowItems rowList);\n      starts = builtins.foldl' (acc: row: acc ++ [(lib.last acc + builtins.length (rowItems row))]) [0] rowList;\n      by = index: row: row.at or (offset head local (builtins.elemAt starts index) (builtins.length firstRow));\n      written = index: row: spaced (lib.sublist (builtins.elemAt starts index) (builtins.length (rowItems row)) rendered);\n      placed = index: row:\n        if index == 0\n        then written index row\n        else if row ? blank\n        then hardline\n        else nest (by index row) [hardline (written index row)];\n    in\n      if lib.any (value: value ? comment) (rowItems (lib.last rowList))\n      then throw \"lisp: a comment cannot end a list's last row\"\n      else align [\"(\" (lib.imap0 placed rowList) \")\"];\n\n    fill = local: values: let\n      head = builtins.head values;\n      kept =\n        if builtins.isString head && bodies ? \${head}\n        then bodies.\${head} + 1\n        else lib.min 2 (builtins.length values);\n      rendered = items false values;\n    in\n      group (align [\n        \"(\"\n        (spaced (lib.take kept rendered))\n        (lib.imap0 (index: value: nest (offset head local (index + kept) kept) [line value]) (lib.drop kept rendered))\n        \")\"\n      ]);\n\n    top = value:\n      if value ? blank\n      then [hardline]\n      else [(form false value) hardline];\n  in {\n    blank = {blank = true;};\n\n    str = string: {str = string;};\n\n    comment = string: {comment = string;};\n\n    rows = rowList: {rows = rowList;};\n\n    at = by: row: {\n      at = by;\n      inherit row;\n    };\n\n    wrap = values: {wrap = values;};\n\n    quote = value: {quote = value;};\n\n    quasi = value: {quasi = value;};\n\n    unquote = value: {unquote = value;};\n\n    splice = value: {splice = value;};\n\n    function = value: {function = value;};\n\n    render = values: doc.render 80 (map top values);\n  };\n\n  shell = let\n    inherit (doc) hardline nest;\n\n    spaced = lib.intersperse \" \";\n\n    named = spelled: {name = spelled;};\n\n    free = [\"HOME\" \"IFS\" \"LANG\" \"OLDPWD\" \"PATH\" \"PWD\" \"SHELL\" \"TERM\" \"TMPDIR\" \"USER\" \"XDG_CACHE_HOME\" \"XDG_CONFIG_HOME\" \"XDG_DATA_HOME\" \"XDG_RUNTIME_DIR\" \"XDG_STATE_HOME\"];\n\n    specials = {\n      args = \"@\";\n      argsJoined = \"*\";\n      argCount = \"#\";\n      exitStatus = \"?\";\n    };\n\n    expansions = {\n      default = \":-\";\n      required = \":?\";\n      dropPrefix = \"#\";\n      dropLongestPrefix = \"##\";\n      dropSuffix = \"%\";\n      dropLongestSuffix = \"%%\";\n    };\n\n    unaryTests = {\n      nonEmpty = \"-n\";\n      isEmpty = \"-z\";\n      exists = \"-e\";\n      isDir = \"-d\";\n      isFile = \"-f\";\n    };\n\n    binaryTests = [\"=\" \"!=\" \"-eq\" \"-ne\" \"-lt\" \"-le\" \"-gt\" \"-ge\"];\n\n    redirections = [\"<\" \">\" \">>\" \"2>\" \"2>>\" \">&\" \"2>&\" \"&>\"];\n\n    unsafe = {\n      bare = [\"$\" \"`\" \"\\\"\" \"'\" \"\\\\\" \";\" \"&\" \"|\" \"<\" \">\" \"(\" \")\" \" \" \"\\t\" \"\\n\"];\n      operand = [\"$\" \"`\" \"\\\"\" \"'\" \"\\\\\" \"}\"];\n    };\n\n    spellingOf = target: target.name or (throw \"shell: a \${kindOf target} where a name is expected\");\n\n    parameterOf = target:\n      if builtins.isInt target && target >= 0\n      then toString target\n      else target.name or target.special or (throw \"shell: a \${kindOf target} where a variable or parameter is expected\");\n\n    expansion = operator: target: operand: {\n      expand = {\n        parameter = parameterOf target;\n        inherit operator operand;\n      };\n    };\n\n    rejected = context: text: context == \"bare\" && (text == \"\" || lib.hasPrefix \"#\" text) || lib.any (symbol: lib.hasInfix symbol text) unsafe.\${context};\n\n    literal = context: text:\n      if context == \"quoted\"\n      then builtins.replaceStrings [\"\\\\\" \"\\\"\" \"$\" \"`\"] [\"\\\\\\\\\" \"\\\\\\\"\" \"\\\\$\" \"\\\\`\"] text\n      else if rejected context text\n      then throw \"shell: `\${text}` cannot be written as it is here; quote it with sq or dq, or build it from nodes\"\n      else text;\n\n    leading = part:\n      if builtins.isString part || builtins.isInt part\n      then builtins.substring 0 1 (toString part)\n      else \"\";\n\n    braced = next: parameter:\n      if builtins.match \"[0-9]+\" parameter != null\n      then builtins.stringLength parameter > 1 || builtins.match \"[0-9]\" next != null\n      else builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" parameter != null && builtins.match \"[A-Za-z0-9_]\" next != null;\n\n    within = contexts: kind: context: output:\n      if builtins.elem context contexts\n      then output\n      else throw \"shell: \${kind} is not written inside \${context} text\";\n\n    pieces = {\n      name = context: _: value: within [\"bare\"] \"a name (use var for its value)\" context value.name;\n      expand = _: next: value: let\n        inherit (value.expand) parameter operator operand;\n      in\n        if operator == \"[@]\"\n        then \"\\\${\${parameter}[@]}\"\n        else if operator != null\n        then [\"\\\${\${parameter}\${operator}\" (written \"operand\" operand) \"}\"]\n        else if braced next parameter\n        then \"\\\${\${parameter}}\"\n        else \"$\" + parameter;\n      sub = _: _: value: [\"$(\" (sequence value.sub) \")\"];\n      dq = context: _: value: within [\"bare\"] \"dq\" context [\"\\\"\" (joined \"quoted\" (lib.toList value.dq)) \"\\\"\"];\n      sq = context: _: value:\n        within [\"bare\"] \"sq\" context (\n          if lib.hasInfix \"'\" value.sq\n          then throw \"shell: sq cannot hold a single quote\"\n          else \"'\${value.sq}'\"\n        );\n      ansic = context: _: value: within [\"bare\"] \"ansic\" context \"$'\${builtins.replaceStrings [\"\\\\\" \"'\" \"\\t\" \"\\n\"] [\"\\\\\\\\\" \"\\\\'\" \"\\\\t\" \"\\\\n\"] value.ansic}'\";\n      word = context: _: value: within [\"bare\" \"operand\"] \"word\" context (joined context value.word);\n      array = context: _: value: within [\"bare\"] \"array\" context [\"(\" (spaced (map (written \"bare\") value.array)) \")\"];\n      assign = context: _: value:\n        within [\"bare\"] \"assign\" context [\n          value.assign.name\n          \"=\"\n          (lib.optional (value.assign.value != \"\") (written \"bare\" value.assign.value))\n        ];\n      redir = context: _: value: let\n        inherit (value.redir) operator target;\n      in\n        within [\"bare\"] \"redir\" context (\n          if builtins.elem operator redirections\n          then [operator (lib.optionalString (quoted target) \" \") (written \"bare\" target)]\n          else throw \"shell: `\${operator}` is not a redirection\"\n        );\n      heredoc = context: _: value: within [\"bare\"] \"heredoc\" context \"<<'\${value.heredoc.delimiter}'\";\n    };\n\n    piece = context: next: value:\n      if builtins.isString value\n      then literal context value\n      else if builtins.isInt value\n      then toString value\n      else (pieces.\${kindOf value} or (throw \"shell: no word \${kindOf value}\")) context next value;\n\n    joined = context: parts: let\n      count = builtins.length parts;\n    in\n      lib.imap0 (index: piece context (lib.optionalString (index + 1 < count) (leading (builtins.elemAt parts (index + 1))))) parts;\n\n    written = context: piece context \"\";\n\n    quoted = value: builtins.elem (kindOf value) [\"dq\" \"sq\" \"ansic\"] || (kindOf value == \"word\" && quoted (builtins.head value.word));\n\n    documents = {\n      list = lib.concatMap heredocs;\n      heredoc = value: [\"\\n\${value.heredoc.body}\${value.heredoc.delimiter}\"];\n      pipe = value: heredocs (value.pipe.rows or value.pipe);\n      chain = value: heredocs (value.chain.rows or value.chain);\n    };\n\n    heredocs = value: (documents.\${kindOf value} or (_: [])) value;\n\n    sequence = values: lib.intersperse \"; \" (map statement values);\n\n    stages = operator: value:\n      if value ? rows\n      then [(statement (builtins.head value.rows)) (map (stage: nest 2 [operator hardline (statement stage)]) (builtins.tail value.rows))]\n      else lib.intersperse \"\${operator} \" (map statement value);\n\n    link = broke: index: value:\n      if lib.mod index 2 == 0\n      then statement value\n      else if !builtins.elem value [\"&&\" \"||\"]\n      then throw \"shell: a chain alternates statements and && or ||\"\n      else if broke\n      then nest 2 [\" \${value}\" hardline]\n      else \" \${value} \";\n\n    chain = value: lib.imap0 (link (value ? rows)) (value.rows or value);\n\n    entry = value:\n      if value ? blank\n      then []\n      else if value ? inline\n      then sequence value.inline\n      else [(statement value) (heredocs value)];\n\n    indented = values: map (value: [hardline (entry value)]) values;\n\n    block = values: nest 2 (indented values);\n\n    enclosed = open: close: value:\n      if value ? inline\n      then [open \" \" (sequence value.inline) \"; \" close]\n      else [open (block value) hardline close];\n\n    branch = value:\n      if value ? inline\n      then [\" \" (sequence value.inline) \"; \"]\n      else [(block value) hardline];\n\n    alternative = value:\n      if value ? inline\n      then [\"else \" (sequence value.inline) \"; \"]\n      else [\"else\" (block value) hardline];\n\n    arm = value: let\n      patterns = lib.intersperse \"|\" (map (written \"bare\") (lib.toList value.arm.patterns));\n    in\n      if value.arm.body ? inline\n      then [patterns \") \" (sequence value.arm.body.inline) \" ;;\"]\n      else [patterns \")\" (nest 2 [(indented value.arm.body) hardline \";;\"])];\n\n    armList = value:\n      if value ? inline\n      then [\" in \" (spaced (map arm value.inline)) \" esac\"]\n      else [\" in\" (nest 2 (map (one: [hardline (arm one)]) value)) hardline \"esac\"];\n\n    comparison = value: builtins.isList value && builtins.length value == 3 && builtins.elem (builtins.elemAt value 1) binaryTests;\n\n    condition = value:\n      if value ? unaryTest\n      then [value.unaryTest.operator \" \" (written \"bare\" value.unaryTest.operand)]\n      else if comparison value\n      then [(written \"bare\" (builtins.head value)) \" \${builtins.elemAt value 1} \" (written \"bare\" (lib.last value))]\n      else throw \"shell: a test is a unary test or [left operator right] with an operator of \${toString binaryTests}\";\n\n    statementForms = {\n      list = value:\n        if value == []\n        then throw \"shell: an empty command\"\n        else spaced (map (written \"bare\") value);\n      comment = value: \"#\${lib.optionalString (value.comment != \"\") \" \"}\${value.comment}\";\n      shebang = value: \"#!\${value.shebang}\";\n      assign = written \"bare\";\n      test = value: [\"[ \" (condition value.test) \" ]\"];\n      pipe = value: stages \" |\" value.pipe;\n      chain = value: chain value.chain;\n      fn = value: [value.fn.name \"() \" (enclosed \"{\" \"}\" value.fn.body)];\n      braces = value: enclosed \"{\" \"}\" value.braces;\n      \"if\" = value: [\"if \" (statement value.\"if\".test) \"; then\" (branch value.\"if\".body) (lib.optional (value.\"if\" ? otherwise) (alternative value.\"if\".otherwise)) \"fi\"];\n      for = value: [\"for \${value.for.name} in \" (spaced (map (written \"bare\") value.for.words)) \"; \" (enclosed \"do\" \"done\" value.for.body)];\n      while = value: [\"while \" (statement value.while.test) \"; \" (enclosed \"do\" \"done\" value.while.body)];\n      case = value: [\"case \" (written \"bare\" value.case.subject) (armList value.case.arms)];\n    };\n\n    statement = value: (statementForms.\${kindOf value} or (throw \"shell: no statement \${kindOf value}\")) value;\n\n    statementsOf = value: value.inline or value;\n\n    inner = {\n      inline = value: value.inline;\n      pipe = value: value.pipe.rows or value.pipe;\n      chain = value: builtins.filter (one: !builtins.isString one) (value.chain.rows or value.chain);\n      braces = value: statementsOf value.braces;\n      \"if\" = value: [value.\"if\".test] ++ statementsOf value.\"if\".body ++ lib.optionals (value.\"if\" ? otherwise) (statementsOf value.\"if\".otherwise);\n      for = value: statementsOf value.for.body;\n      while = value: [value.while.test] ++ statementsOf value.while.body;\n      case = value: lib.concatMap (one: statementsOf one.arm.body) (statementsOf value.case.arms);\n    };\n\n    reachable = lib.concatMap (one: [one] ++ reachable ((inner.\${kindOf one} or (_: [])) one));\n\n    commandWords = one:\n      if builtins.isList one\n      then one\n      else lib.optional (one ? assign) one;\n\n    assigned = words: map (word: word.assign.name) (builtins.filter (word: word ? assign) words);\n\n    namesIn = words: map (word: word.name) (builtins.filter (word: word ? name) words);\n\n    leader = lib.findFirst (word: !(word ? assign)) null;\n\n    givenBy = one: let\n      words = commandWords one;\n    in\n      assigned words\n      ++ lib.optionals (builtins.isString (leader words)) (namesIn words)\n      ++ lib.optional (one ? for) one.for.name\n      ++ lib.optional (one ? fn) one.fn.name\n      ++ lib.optionals (one ? fn) (lib.subtractLists one.fn.locals (lib.concatMap givenBy (reachable (statementsOf one.fn.body))));\n\n    localsBy = one: let\n      words = commandWords one;\n    in\n      lib.optionals (leader words == \"local\") (assigned words ++ namesIn words);\n\n    bound = declared: boundBlock {\n      language = \"shell\";\n      name = named;\n      inherit declared;\n    };\n  in\n    lib.genAttrs free named\n    // builtins.mapAttrs (_: special: {inherit special;}) specials\n    // builtins.mapAttrs (_: expansion) expansions\n    // builtins.mapAttrs (_: operator: operand: {unaryTest = {inherit operator operand;};}) unaryTests\n    // {\n      blank = {blank = true;};\n\n      comment = string: {comment = string;};\n\n      shebang = string: {shebang = string;};\n\n      inline = values: {inline = values;};\n\n      rows = values: {rows = values;};\n\n      var = target: expansion null target null;\n\n      elements = target: {\n        expand = {\n          parameter = spellingOf target;\n          operator = \"[@]\";\n          operand = null;\n        };\n      };\n\n      dq = parts: {dq = parts;};\n\n      sq = string: {sq = string;};\n\n      ansic = string: {ansic = string;};\n\n      sub = values: {sub = values;};\n\n      word = parts: {word = parts;};\n\n      array = values: {array = values;};\n\n      assign = target: value: {\n        assign = {\n          name = spellingOf target;\n          inherit value;\n        };\n      };\n\n      redir = operator: target: {redir = {inherit operator target;};};\n\n      heredoc = delimiter: body:\n        if body != \"\" && !(lib.hasSuffix \"\\n\" body)\n        then throw \"shell: a heredoc body ends with a newline\"\n        else if builtins.elem delimiter (lib.splitString \"\\n\" body)\n        then throw \"shell: a heredoc body holds its delimiter `\${delimiter}` as a line\"\n        else {heredoc = {inherit delimiter body;};};\n\n      test = expression: {test = expression;};\n\n      pipe = values: {pipe = values;};\n\n      chain = values: {chain = values;};\n\n      fn = target: body: {\n        fn = {\n          name = spellingOf target;\n          locals = lib.optionals (builtins.isFunction body) (map spelling (builtins.attrNames (builtins.functionArgs body)));\n          body = bound (statements: lib.concatMap localsBy (reachable (statementsOf statements))) body;\n        };\n      };\n\n      braces = value: {braces = value;};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      for = target: words: body: {\n        for = {\n          name = spellingOf target;\n          inherit words body;\n        };\n      };\n\n      while = test: body: {while = {inherit test body;};};\n\n      case = subject: arms: {case = {inherit subject arms;};};\n\n      arm = patterns: body: {arm = {inherit patterns body;};};\n\n      render = script: doc.render 80 (map (value: [(entry value) hardline]) (bound (statements: lib.concatMap givenBy (reachable statements)) script));\n    };\n\n  luau = let\n    inherit (doc) hardline;\n\n    newline = depth: [hardline (lib.strings.replicate depth \"\\t\")];\n\n    comma = lib.intersperse \", \";\n\n    spaced = lib.intersperse \" \";\n\n    count = needle: string: builtins.length (lib.splitString needle string) - 1;\n\n    plain = parts: lib.concatStrings (builtins.filter builtins.isString parts);\n\n    mark = string:\n      if count \"\\\"\" string > count \"'\" string\n      then \"'\"\n      else \"\\\"\";\n\n    escape = quote: lib.replaceStrings [\"\\\\\" quote \"\\n\" \"\\t\" \"\\r\"] [\"\\\\\\\\\" \"\\\\\${quote}\" \"\\\\n\" \"\\\\t\" \"\\\\r\"];\n\n    quoted = value: let\n      parts = lib.toList value;\n      quote = mark (plain parts);\n    in [\n      quote\n      (map (part:\n        if builtins.isString part\n        then escape quote part\n        else \"\\\\u{\${part.unicode}}\")\n      parts)\n      quote\n    ];\n\n    binary = {\n      \"or\" = 1;\n      \"and\" = 2;\n      \"<\" = 3;\n      \">\" = 3;\n      \"<=\" = 3;\n      \">=\" = 3;\n      \"~=\" = 3;\n      \"==\" = 3;\n      \"..\" = 4;\n      \"+\" = 5;\n      \"-\" = 5;\n      \"*\" = 6;\n      \"/\" = 6;\n      \"//\" = 6;\n      \"%\" = 6;\n      \"^\" = 8;\n    };\n\n    right = [\"..\" \"^\"];\n\n    tree = infixTree {\n      language = \"luau\";\n      precedence = binary;\n      inherit right;\n      operand = lib.id;\n    };\n\n    globals = [\n      \"AgentBlock\"\n      \"AgentFinishedEvent\"\n      \"AgentStateEvent\"\n      \"CommandFinishedEvent\"\n      \"FocusEvent\"\n      \"PaneInfo\"\n      \"PickItem\"\n      \"ProcessResult\"\n      \"StatusPaneInfo\"\n      \"StatusSegment\"\n      \"TabEvent\"\n      \"TabInfo\"\n      \"WindowCx\"\n      \"any\"\n      \"boolean\"\n      \"ipairs\"\n      \"math\"\n      \"number\"\n      \"os\"\n      \"pairs\"\n      \"pcall\"\n      \"proproblems\"\n      \"require\"\n      \"string\"\n      \"table\"\n      \"tern\"\n      \"tonumber\"\n      \"tostring\"\n      \"type\"\n      \"utf8\"\n    ];\n\n    word = \"[A-Za-z_][A-Za-z0-9_]*\";\n\n    identifier = value:\n      if builtins.isString value && builtins.match word value != null\n      then value\n      else throw \"luau: `\${toString value}` is not a name\";\n\n    named = spelled: {name = identifier spelled;};\n\n    nameOf = value: value.name or (throw \"luau: a declaration names a bound name, not a \${kindOf value}\");\n\n    declaredName = value:\n      nameOf (\n        if value ? typed\n        then value.typed.value\n        else value\n      );\n\n    declaring = {\n      local = value: map declaredName (lib.toList value.local.names);\n      localFunction = value: [(nameOf value.localFunction.name)];\n      type = value: [(nameOf value.type.name)];\n      trailing = value: declares value.trailing.statement;\n    };\n\n    declares = value: (declaring.\${kindOf value} or (_: [])) value;\n\n    single = value:\n      if builtins.isAttrs value && builtins.length (builtins.attrNames value) == 1\n      then builtins.head (builtins.attrNames value)\n      else throw \"luau: a parameter or loop variable is a one-attribute set, {name = type;} or {name = null;}\";\n\n    bound = value: identifier (spelling (single value));\n\n    resolve = given: body: let\n      formals =\n        if builtins.isFunction body\n        then map spelling (builtins.attrNames (builtins.functionArgs body))\n        else [];\n      statements =\n        boundBlock {\n          language = \"luau\";\n          name = named;\n          declared = listed: given ++ lib.concatMap declares listed;\n        }\n        body;\n      unbound = lib.subtractLists formals (lib.concatMap declares statements);\n    in\n      if unbound != []\n      then throw \"luau: \${lib.concatStringsSep \", \" unbound} declared but not bound by its block\"\n      else statements;\n\n    modes = {\n      value = {\n        separator = \" = \";\n        item = expression;\n      };\n      type = {\n        separator = \": \";\n        item = type;\n      };\n    };\n\n    entryForms = mode: {\n      field = depth: value: [(identifier value.field.name) mode.separator (mode.item depth value.field.value)];\n      pair = depth: value: [\"[\" (mode.item depth value.pair.key) \"]\" mode.separator (mode.item depth value.pair.value)];\n    };\n\n    entry = mode: depth: value: ((entryForms mode).\${kindOf value} or mode.item) depth value;\n\n    table = mode: depth: value:\n      if value.table == []\n      then \"{}\"\n      else [\"{ \" (comma (map (entry mode depth) value.table)) \" }\"];\n\n    tableRow = mode: depth: value:\n      if value ? blank\n      then hardline\n      else if value ? comment\n      then [(newline depth) value.comment]\n      else [(newline depth) (entry mode depth value) \",\"];\n\n    tableRows = mode: depth: value: [\"{\" (map (tableRow mode (depth + 1)) value.table) (newline depth) \"}\"];\n\n    keyword = last: index:\n      if index == 0\n      then \"if\"\n      else if lib.mod index 2 == 1\n      then \"then\"\n      else if index == last\n      then \"else\"\n      else \"elseif\";\n\n    clauses = depth: parts: lib.imap0 (index: part: [(keyword (builtins.length parts - 1) index) \" \" (expression depth part)]) parts;\n\n    signed = value:\n      if value < 0\n      then 7\n      else 9;\n\n    strengths = {\n      int = signed;\n      float = signed;\n      binary = value: binary.\${value.binary.operator};\n      infix = value: strength (tree value.infix);\n      unary = _: 7;\n      ifExpr = _: 0;\n      cast = _: 0;\n      rows = value: strength value.rows;\n    };\n\n    strength = value: (strengths.\${kindOf value} or (_: 9)) value;\n\n    grouped = depth: needed: value:\n      if needed\n      then [\"(\" (expression depth value) \")\"]\n      else expression depth value;\n\n    side = depth: operator: left: value: let\n      level = strength value;\n      tight = binary.\${operator};\n    in\n      grouped depth (level < tight || level == tight && left == builtins.elem operator right) value;\n\n    prefix = value: builtins.elem (kindOf value) [\"list\" \"name\" \"dot\" \"idx\" \"paren\"] || kindOf value == \"rows\" && prefix value.rows;\n\n    prefixed = depth: value: grouped depth (!prefix value) value;\n\n    suffix = path:\n      if builtins.match \":\${word}|\${word}([.]\${word})*(:\${word})?\" path == null\n      then throw \"luau: `\${toString path}` is not a field path\"\n      else if lib.hasPrefix \":\" path\n      then path\n      else \".\${path}\";\n\n    sameOperator = items: let\n      operators = lib.unique (lib.genList (index: builtins.elemAt items (2 * index + 1)) (builtins.length items / 2));\n    in\n      if builtins.length operators == 1\n      then builtins.head operators\n      else throw \"luau: rows breaks an infix run of one operator\";\n\n    brokenInfix = depth: items: let\n      operator = sameOperator items;\n      operands = lib.genList (index: builtins.elemAt items (2 * index)) (builtins.length items / 2 + 1);\n      last = builtins.length operands - 1;\n      leaning = builtins.elem operator right;\n      left = index:\n        if leaning\n        then index < last\n        else index == 0;\n    in [\n      (side (depth + 1) operator true (builtins.head operands))\n      (lib.imap1 (index: operand: [(newline (depth + 1)) operator \" \" (side (depth + 1) operator (left index) operand)]) (builtins.tail operands))\n    ];\n\n    callDepth = depth: head:\n      if head ? rows && head.rows ? dot\n      then depth + 1\n      else depth;\n\n    brokenCall = depth: value: let\n      inner = callDepth depth (builtins.head value);\n    in [(prefixed depth (builtins.head value)) \"(\" (lib.intersperse \",\" (map (argument: [(newline (inner + 1)) (expression (inner + 1) argument)]) (builtins.tail value))) (newline inner) \")\"];\n\n    rowForms = {\n      list = brokenCall;\n      table = tableRows modes.value;\n      infix = depth: value: brokenInfix depth value.infix;\n      ifExpr = depth: value: let\n        rows = value.ifExpr;\n        parts = clauses (depth + 1) (lib.concatLists rows);\n        starts = builtins.foldl' (acc: row: acc ++ [(lib.last acc + builtins.length row)]) [0] rows;\n      in\n        lib.imap0 (index: row: [(lib.optional (index > 0) (newline (depth + 1))) (spaced (lib.sublist (builtins.elemAt starts index) (builtins.length row) parts))]) rows;\n      dot = depth: value: [(prefixed depth value.dot.value) (newline (depth + 1)) (suffix value.dot.path)];\n    };\n\n    unary = depth: value: let\n      inherit (value.unary) operator operand;\n      level = strength operand;\n      doubled = operator == \"-\" && level == 7 && (!builtins.isAttrs operand || operand.unary.operator == \"-\");\n    in [\n      operator\n      (lib.optionalString (operator == \"not\") \" \")\n      (grouped depth (level < 7 || doubled) operand)\n    ];\n\n    parameters = params:\n      if params ? typed\n      then params.typed.value\n      else params;\n\n    variable = depth: value: let\n      kind = value.\${single value};\n    in [\n      (bound value)\n      (lib.optionals (kind != null) [\": \" (type depth kind)])\n    ];\n\n    signature = depth: value:\n      if value ? typed\n      then [(signature depth value.typed.value) \": \" (type depth value.typed.type)]\n      else [\"(\" (comma (map (variable depth) value)) \")\"];\n\n    function = depth: params: body: let\n      statements = resolve (map bound (parameters params)) body;\n    in [\n      (signature depth params)\n      (\n        if statements == []\n        then \" \"\n        else lines depth statements\n      )\n      \"end\"\n    ];\n\n    expressionForms = {\n      string = _: value: throw \"luau: the string `\${value}` where an expression is expected; a name is a Nix variable, a literal is str\";\n      int = _: toString;\n      float = _: value: let\n        text = builtins.toJSON value;\n      in\n        if builtins.match \"-?[0-9]+[.][0-9]+\" text != null\n        then text\n        else throw \"luau: the float \${text} has no decimal spelling\";\n      bool = _: value:\n        if value\n        then \"true\"\n        else \"false\";\n      name = _: value: value.name;\n      nil = _: _: \"nil\";\n      hex = _: value: \"0x\${lib.toHexString value.hex}\";\n      list = depth: value: [(prefixed depth (builtins.head value)) \"(\" (comma (map (expression (callDepth depth (builtins.head value))) (builtins.tail value))) \")\"];\n      str = _: value: quoted value.str;\n      long = _: value: \"[[\${value.long}]]\";\n      table = table modes.value;\n      rows = depth: value: rowForms.\${kindOf value.rows} depth value.rows;\n      infix = depth: value: expression depth (tree value.infix);\n      binary = depth: value: [(side depth value.binary.operator true value.binary.left) \" \${value.binary.operator} \" (side depth value.binary.operator false value.binary.right)];\n      inherit unary;\n      paren = depth: value: [\"(\" (expression depth value.paren) \")\"];\n      dot = depth: value: [(prefixed depth value.dot.value) (suffix value.dot.path)];\n      idx = depth: value: [(prefixed depth value.idx.value) \"[\" (expression depth value.idx.key) \"]\"];\n      fn = depth: value: [\"function\" (function depth value.fn.params value.fn.body)];\n      ifExpr = depth: value: spaced (clauses depth value.ifExpr);\n      cast = depth: value: [(expression depth value.cast.value) \" :: \" (type depth value.cast.type)];\n      tuple = depth: value: comma (map (expression depth) value.tuple);\n      typed = depth: value: [(expression depth value.typed.value) \": \" (type depth value.typed.type)];\n    };\n\n    expression = depth: value: (expressionForms.\${kindOf value} or (throw \"luau: no expression \${kindOf value}\")) depth value;\n\n    typeForms = {\n      string = _: value: throw \"luau: the string `\${value}` where a type is expected; a type name is a Nix variable\";\n      name = _: value: value.name;\n      nil = _: _: \"nil\";\n      opt = depth: value: [(type depth value.opt) \"?\"];\n      table = table modes.type;\n      rows = depth: value: tableRows modes.type depth value.rows;\n      tuple = depth: value: [\"(\" (comma (map (type depth) value.tuple)) \")\"];\n    };\n\n    type = depth: value: (typeForms.\${kindOf value} or (throw \"luau: no type \${kindOf value}\")) depth value;\n\n    targets = depth: value:\n      if builtins.isList value\n      then comma (map (expression depth) value)\n      else expression depth value;\n\n    line = depth: value:\n      if value ? blank\n      then hardline\n      else [(newline depth) (statement depth value)];\n\n    lines = depth: statements: [(map (line (depth + 1)) statements) (newline depth)];\n\n    block = depth: given: body: lines depth (resolve given body);\n\n    alternative = depth: value:\n      if value ? \"if\"\n      then [\"elseif \" (clause depth value.\"if\")]\n      else [\"else\" (block depth [] value) \"end\"];\n\n    clause = depth: value: [\n      (expression depth value.test)\n      \" then\"\n      (block depth [] value.body)\n      (\n        if value ? otherwise\n        then alternative depth value.otherwise\n        else \"end\"\n      )\n    ];\n\n    statementForms = {\n      string = _: value: throw \"luau: the string `\${value}` where a statement is expected\";\n      list = expression;\n      rows = expression;\n      comment = _: value: value.comment;\n      local = depth: value: [\"local \" (targets depth value.local.names) \" = \" (expression depth value.local.value)];\n      assign = depth: value: [(targets depth value.assign.targets) \" = \" (expression depth value.assign.value)];\n      update = depth: value: [(targets depth value.update.targets) \" \${value.update.operator} \" (expression depth value.update.value)];\n      return = depth: value: [\"return \" (expression depth value.return)];\n      localFunction = depth: value: [\"local function \" (nameOf value.localFunction.name) (function depth value.localFunction.params value.localFunction.body)];\n      \"if\" = depth: value: [\"if \" (clause depth value.\"if\")];\n      for = depth: value: [\"for \" (comma (map (variable depth) value.for.names)) \" in \" (expression depth value.for.values) \" do\" (block depth (map bound value.for.names) value.for.body) \"end\"];\n      forRange = depth: value: [\"for \" (variable depth value.forRange.name) \" = \" (expression depth value.forRange.bounds) \" do\" (block depth [(bound value.forRange.name)] value.forRange.body) \"end\"];\n      while = depth: value: [\"while \" (expression depth value.while.test) \" do\" (block depth [] value.while.body) \"end\"];\n      type = depth: value: [\"type \" (nameOf value.type.name) \" = \" (type depth value.type.value)];\n      trailing = depth: value: [(statement depth value.trailing.statement) \" \" value.trailing.comment];\n    };\n\n    statement = depth: value:\n      if value ? __functor\n      then \"return\"\n      else (statementForms.\${kindOf value} or (throw \"luau: no statement \${kindOf value}\")) depth value;\n\n    prefixOperator = operator: operand: {unary = {inherit operator operand;};};\n\n    constructors = {\n      blank = {blank = true;};\n\n      comment = string: {comment = string;};\n\n      trailing = command: note: {\n        trailing = {\n          statement = command;\n          comment = note;\n        };\n      };\n\n      rows = value: {rows = value;};\n\n      str = value: {str = value;};\n\n      unicode = code: {unicode = code;};\n\n      long = string: {long = string;};\n\n      nil = {nil = true;};\n\n      hex = value: {hex = value;};\n\n      table = entries: {table = entries;};\n\n      field = name: value: {field = {inherit name value;};};\n\n      pair = key: value: {pair = {inherit key value;};};\n\n      infix = values: {infix = values;};\n\n      not = prefixOperator \"not\";\n\n      neg = prefixOperator \"-\";\n\n      len = prefixOperator \"#\";\n\n      paren = value: {paren = value;};\n\n      dot = value: path: {dot = {inherit value path;};};\n\n      idx = value: key: {idx = {inherit value key;};};\n\n      fn = params: body: {fn = {inherit params body;};};\n\n      ifExpr = parts: {ifExpr = parts;};\n\n      cast = value: kind: {\n        cast = {\n          inherit value;\n          type = kind;\n        };\n      };\n\n      tuple = values: {tuple = values;};\n\n      typed = value: kind: {\n        typed = {\n          inherit value;\n          type = kind;\n        };\n      };\n\n      opt = kind: {opt = kind;};\n\n      local = names: value: {local = {inherit names value;};};\n\n      assign = names: value: {\n        assign = {\n          targets = names;\n          inherit value;\n        };\n      };\n\n      update = operator: names: value: {\n        update = {\n          inherit operator value;\n          targets = names;\n        };\n      };\n\n      return = {__functor = _: value: {return = value;};};\n\n      localFunction = name: params: body: {localFunction = {inherit name params body;};};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      for = names: values: body: {for = {inherit names values body;};};\n\n      forRange = name: bounds: body: {forRange = {inherit name bounds body;};};\n\n      while = test: body: {while = {inherit test body;};};\n\n      type = name: value: {type = {inherit name value;};};\n\n      render = body: doc.render null (map (value: [(lib.optional (!(value ? blank)) (statement 0 value)) hardline]) (resolve [] body));\n    };\n  in\n    constructors\n    // builtins.listToAttrs (map (global: {\n        name =\n          if constructors ? \${global}\n          then \"\${global}'\"\n          else global;\n        value = named global;\n      })\n      globals);\n\n  vbs = let\n    inherit (doc) hardline;\n\n    binary = {\n      Imp = 1;\n      Eqv = 2;\n      Xor = 3;\n      Or = 4;\n      And = 5;\n      \"=\" = 7;\n      \"<>\" = 7;\n      \"<\" = 7;\n      \">\" = 7;\n      \"<=\" = 7;\n      \">=\" = 7;\n      Is = 7;\n      \"&\" = 8;\n      \"+\" = 9;\n      \"-\" = 9;\n      Mod = 10;\n      \"\\\\\" = 11;\n      \"*\" = 12;\n      \"/\" = 12;\n      \"^\" = 14;\n    };\n\n    globals = [\"CBool\" \"CInt\" \"CLng\" \"CStr\" \"Chr\" \"CreateObject\" \"Empty\" \"Err\" \"GetObject\" \"InStr\" \"IsEmpty\" \"IsNull\" \"IsObject\" \"Join\" \"LCase\" \"Left\" \"Len\" \"Mid\" \"MsgBox\" \"Nothing\" \"Now\" \"Null\" \"Replace\" \"Right\" \"Split\" \"Trim\" \"UBound\" \"UCase\" \"WScript\"];\n\n    nameNode = spelled: {name = spelled;};\n\n    identifier = text:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" text != null\n      then text\n      else throw \"vbs: `\${text}` is not a name\";\n\n    memberPath = text:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*([.][A-Za-z_][A-Za-z0-9_]*)*\" text != null\n      then text\n      else throw \"vbs: `\${text}` is not a member path\";\n\n    tabs = depth: lib.strings.replicate depth \"\\t\";\n\n    atom = part: {\n      precedence = 15;\n      doc = part;\n    };\n\n    paren = least: printed:\n      if printed.precedence < least\n      then [\"(\" printed.doc \")\"]\n      else printed.doc;\n\n    infix = infixTree {\n      language = \"vbs\";\n      precedence = binary;\n      operand = value:\n        if builtins.isList value\n        then infix value\n        else value;\n    };\n\n    argumentList = values: lib.intersperse \", \" (map (value: paren 0 (expression value)) values);\n\n    forms = {\n      int = value:\n        if value < 0\n        then {\n          precedence = 13;\n          doc = toString value;\n        }\n        else atom (toString value);\n      bool = value:\n        atom (\n          if value\n          then \"True\"\n          else \"False\"\n        );\n      string = value: throw \"vbs: the string `\${value}` is not an expression: a name is a bound variable or a generator attribute, a literal is `str`\";\n      list = value: expression (infix value);\n      name = value: atom (identifier value.name);\n      str = value: atom \"\\\"\${lib.replaceStrings [\"\\\"\"] [\"\\\"\\\"\"] value.str}\\\"\";\n      dot = value: atom [(paren 15 (expression value.dot.base)) \".\" (memberPath value.dot.path)];\n      call = value: atom [(paren 15 (expression value.call.function)) \"(\" (argumentList value.call.arguments) \")\"];\n      not = value: {\n        precedence = 6;\n        doc = [\"Not \" (paren 6 (expression value.not))];\n      };\n      neg = value: {\n        precedence = 13;\n        doc = [\"-\" (paren 13 (expression value.neg))];\n      };\n      binary = value: let\n        precedence = binary.\${value.binary.operator};\n      in {\n        inherit precedence;\n        doc = [(paren precedence (expression value.binary.left)) \" \${value.binary.operator} \" (paren (precedence + 1) (expression value.binary.right))];\n      };\n    };\n\n    expression = value: (forms.\${kindOf value} or (throw \"vbs: no expression \${kindOf value}\")) value;\n\n    written = value: paren 0 (expression value);\n\n    assignable = value:\n      if builtins.elem (kindOf value) [\"name\" \"dot\"]\n      then written value\n      else throw \"vbs: an assignment's target is a name or a member, not \${kindOf value}\";\n\n    declaredName = value:\n      if kindOf value == \"name\"\n      then identifier value.name\n      else throw \"vbs: a declaration names a bound variable, not \${kindOf value}\";\n\n    branch = body:\n      if builtins.isList body\n      then body\n      else throw \"vbs: an If branch is a list of statements; a Dim in it declares a name of the script or procedure around it\";\n\n    declaring = {\n      dim = value: map (one: one.name) value.dim;\n      sub = value: [value.sub.name.name];\n      function = value: [value.function.name.name];\n      \"if\" = value: declaredIn (branch value.\"if\".body) ++ declaredIn (branch (value.\"if\".otherwise or []));\n    };\n\n    declaredIn = lib.concatMap (value: (declaring.\${kindOf value} or (_: [])) value);\n\n    scope = parameters:\n      boundBlock {\n        language = \"vbs\";\n        name = nameNode;\n        declared = result: parameters ++ declaredIn result;\n      };\n\n    modes = {\n      null = \"\";\n      byVal = \"ByVal \";\n      byRef = \"ByRef \";\n    };\n\n    parameterName = parameter: spelling (builtins.head (builtins.attrNames parameter));\n\n    parameterDoc = value: let\n      mode = value.\${builtins.head (builtins.attrNames value)};\n    in\n      if builtins.length (builtins.attrNames value) != 1\n      then throw \"vbs: a parameter is `{name = mode;}`\"\n      else [(modes.\${kindOf mode} or (throw \"vbs: a parameter's mode is null, byVal or byRef\")) (identifier (parameterName value))];\n\n    block = depth: map (value: [hardline (entry depth value)]);\n\n    entry = depth: value:\n      if value ? blank\n      then []\n      else [(tabs depth) (statement depth value)];\n\n    procedure = keyword: depth: value: [\n      \"\${keyword} \"\n      (declaredName value.name)\n      \"(\"\n      (lib.intersperse \", \" (map parameterDoc value.parameters))\n      \")\"\n      (block (depth + 1) (scope (map parameterName value.parameters) value.body))\n      hardline\n      (tabs depth)\n      \"End \${keyword}\"\n    ];\n\n    conditional = depth: value: [\n      \"If \"\n      (written value.test)\n      \" Then\"\n      (block (depth + 1) (branch value.body))\n      (lib.optionals (value ? otherwise) [hardline (tabs depth) \"Else\" (block (depth + 1) (branch value.otherwise))])\n      hardline\n      (tabs depth)\n      \"End If\"\n    ];\n\n    statementForms = {\n      comment = _: value:\n        if value.comment == \"\"\n        then \"'\"\n        else \"' \${value.comment}\";\n      optionExplicit = _: _: \"Option Explicit\";\n      onErrorResumeNext = _: _: \"On Error Resume Next\";\n      onErrorGoTo0 = _: _: \"On Error GoTo 0\";\n      dim = _: value: [\"Dim \" (lib.intersperse \", \" (map declaredName value.dim))];\n      assign = _: value: [(assignable value.assign.target) \" = \" (written value.assign.value)];\n      set = _: value: [\"Set \" (assignable value.set.target) \" = \" (written value.set.value)];\n      call = _: value: [(paren 15 (expression value.call.function)) (lib.optionals (value.call.arguments != []) [\" \" (argumentList value.call.arguments)])];\n      \"if\" = depth: value: conditional depth value.\"if\";\n      sub = depth: value: procedure \"Sub\" depth value.sub;\n      function = depth: value: procedure \"Function\" depth value.function;\n    };\n\n    statement = depth: value: (statementForms.\${kindOf value} or (throw \"vbs: no statement \${kindOf value}\")) depth value;\n  in\n    lib.genAttrs globals nameNode\n    // {\n      blank = {blank = true;};\n\n      comment = string: {comment = string;};\n\n      optionExplicit = {optionExplicit = {};};\n\n      onErrorResumeNext = {onErrorResumeNext = {};};\n\n      onErrorGoTo0 = {onErrorGoTo0 = {};};\n\n      str = string: {str = string;};\n\n      dot = base: path: {dot = {inherit base path;};};\n\n      call = function: arguments: {call = {inherit function arguments;};};\n\n      not = value: {not = value;};\n\n      neg = value: {neg = value;};\n\n      dim = names: {dim = names;};\n\n      assign = target: value: {assign = {inherit target value;};};\n\n      set = target: value: {set = {inherit target value;};};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      sub = name: parameters: body: {sub = {inherit name parameters body;};};\n\n      function = name: parameters: body: {function = {inherit name parameters body;};};\n\n      byVal = {byVal = {};};\n\n      byRef = {byRef = {};};\n\n      render = script: doc.render null (map (value: [(entry 0 value) hardline]) (scope [] script));\n    };\n\n  patch = let\n    inherit (doc) hardline;\n\n    marks = {\n      string = text: \" \${text}\";\n      add = value: \"+\${value.add}\";\n      del = value: \"-\${value.del}\";\n    };\n\n    change = value: [((marks.\${kindOf value} or (throw \"patch: no change \${kindOf value}\")) value) hardline];\n\n    span = start: count:\n      if count == 1\n      then toString start\n      else \"\${toString start},\${toString count}\";\n\n    counted = kind: lib.count (value: kindOf value != kind);\n\n    empty = count:\n      if count == 0\n      then 1\n      else 0;\n\n    header = delta: value: let\n      old = counted \"add\" value.hunk.lines;\n      new = counted \"del\" value.hunk.lines;\n      start = value.hunk.start + delta + empty old - empty new;\n    in {\n      delta = delta + new - old;\n      doc = [\"@@ -\${span value.hunk.start old} +\${span start new} @@\" (lib.optionalString (value.hunk ? heading) \" \${value.hunk.heading}\") hardline (map change value.hunk.lines)];\n    };\n\n    hunkDocs = values:\n      (builtins.foldl' (state: value: let\n          next = header state.delta value;\n        in {\n          inherit (next) delta;\n          docs = state.docs ++ [next.doc];\n        }) {\n          delta = 0;\n          docs = [];\n        }\n        values).docs;\n\n    file = value: [\n      (lib.optionals (value.file ? index) [\"diff --git a/\${value.file.path} b/\${value.file.path}\" hardline \"index \${value.file.index}\" hardline])\n      \"--- a/\${value.file.path}\"\n      hardline\n      \"+++ b/\${value.file.path}\"\n      hardline\n      (hunkDocs value.file.hunks)\n    ];\n  in {\n    file = path: hunks: {file = {inherit path hunks;};};\n\n    git = path: index: hunks: {file = {inherit path index hunks;};};\n\n    hunk = start: lines: {hunk = {inherit start lines;};};\n\n    section = start: heading: lines: {hunk = {inherit start heading lines;};};\n\n    add = text: {add = text;};\n\n    del = text: {del = text;};\n\n    render = values: doc.render null (map file values);\n  };\n\n  markdown = let\n    inherit (doc) hardline line group nest;\n\n    literal = text:\n      if builtins.match \".*([`*\\\\<&]|~~|]\\\\(|]\\\\[|!\\\\[|(^|[^[:alnum:]])_|_($|[^[:alnum:]])).*\" text != null\n      then throw \"markdown: the text `\${text}` holds markup; code, emphasis and links are constructors, and text is only literal\"\n      else text;\n\n    words = string: lib.intersperse (group line) (lib.splitString \" \" (literal string));\n\n    codeSpan = text:\n      if text == \"\" || lib.hasInfix \"`\" text || lib.hasPrefix \" \" text || lib.hasSuffix \" \" text\n      then throw \"markdown: the code span `\${text}` is empty, holds a backtick or starts or ends with a space\"\n      else \"`\${text}`\";\n\n    destination = url:\n      if builtins.match \"[^ ()<>]+\" url != null\n      then url\n      else throw \"markdown: the link destination `\${url}` needs escaping\";\n\n    inlineForms = {\n      string = flow: value:\n        if flow\n        then words value\n        else literal value;\n      list = flow: map (inline flow);\n      code = _: value: codeSpan value.code;\n      strong = flow: value: [\"**\" (inline flow value.strong) \"**\"];\n      em = flow: value: [\"*\" (inline flow value.em) \"*\"];\n      link = flow: value: [\"[\" (inline flow value.link.text) \"](\${destination value.link.url})\"];\n    };\n\n    inline = flow: value: (inlineForms.\${kindOf value} or (throw \"markdown: no inline \${kindOf value}\")) flow value;\n\n    paragraph = value:\n      if value ? wrap\n      then inline true value.wrap\n      else inline false value;\n\n    cells = width: row:\n      if builtins.length row != width\n      then throw \"markdown: a table row of \${toString (builtins.length row)} cells under a header of \${toString width}\"\n      else [\"| \" (lib.intersperse \" | \" (map (inline false) row)) \" |\"];\n\n    blockForms = {\n      string = paragraph;\n      list = paragraph;\n      wrap = paragraph;\n      heading = value:\n        if value.heading.level < 1 || value.heading.level > 6\n        then throw \"markdown: no heading level \${toString value.heading.level}\"\n        else [(lib.strings.replicate value.heading.level \"#\") \" \" (inline false value.heading.text)];\n      bullets = value: lib.intersperse hardline (map (item: [\"- \" (nest 2 (paragraph item))]) value.bullets);\n      comment = value:\n        if lib.hasInfix \"-->\" value.comment\n        then throw \"markdown: a comment holding `-->`\"\n        else \"<!--\${value.comment}-->\";\n      table = value: let\n        width = builtins.length value.table.header;\n      in\n        lib.intersperse hardline ([(cells width value.table.header) \"|\${lib.strings.replicate width \"---|\"}\"] ++ map (cells width) value.table.rows);\n    };\n\n    block = value:\n      if value ? blank\n      then []\n      else (blockForms.\${kindOf value} or (throw \"markdown: no block \${kindOf value}\")) value;\n  in {\n    blank = {blank = true;};\n\n    comment = string: {comment = string;};\n\n    wrap = value: {wrap = value;};\n\n    code = string: {code = string;};\n\n    strong = value: {strong = value;};\n\n    em = value: {em = value;};\n\n    link = text: url: {link = {inherit text url;};};\n\n    heading = level: text: {heading = {inherit level text;};};\n\n    bullets = items: {bullets = items;};\n\n    table = header: rows: {table = {inherit header rows;};};\n\n    render = values: doc.render 78 (map (value: [(block value) hardline]) values);\n  };\n\n  glsl = let\n    inherit (doc) hardline nest group line;\n\n    binary = {\n      \"*\" = 12;\n      \"/\" = 12;\n      \"%\" = 12;\n      \"+\" = 11;\n      \"-\" = 11;\n      \"<<\" = 10;\n      \">>\" = 10;\n      \"<\" = 9;\n      \">\" = 9;\n      \"<=\" = 9;\n      \">=\" = 9;\n      \"==\" = 8;\n      \"!=\" = 8;\n      \"&\" = 7;\n      \"^\" = 6;\n      \"|\" = 5;\n      \"&&\" = 4;\n      \"^^\" = 3;\n      \"||\" = 2;\n    };\n\n    scalars = [\"bool\" \"int\" \"uint\" \"float\"];\n\n    types =\n      scalars\n      ++ lib.concatMap (n: [\"vec\${n}\" \"ivec\${n}\" \"uvec\${n}\" \"bvec\${n}\" \"mat\${n}\"] ++ map (m: \"mat\${n}x\${m}\") [\"2\" \"3\" \"4\"]) [\"2\" \"3\" \"4\"]\n      ++ [\"sampler2D\" \"void\"];\n\n    builtinFunctions = {\n      same = {\n        \"1\" = [\"abs\" \"sign\" \"floor\" \"ceil\" \"fract\" \"round\" \"trunc\" \"sin\" \"cos\" \"tan\" \"asin\" \"acos\" \"atan\" \"exp\" \"log\" \"exp2\" \"log2\" \"sqrt\" \"inversesqrt\" \"normalize\" \"radians\" \"degrees\" \"fwidth\" \"dFdx\" \"dFdy\"];\n        \"2\" = [\"min\" \"max\" \"mod\" \"pow\" \"reflect\" \"atan2\"];\n        \"3\" = [\"clamp\" \"mix\"];\n      };\n      float = {\n        \"1\" = [\"length\"];\n        \"2\" = [\"distance\" \"dot\"];\n      };\n    };\n\n    prefixes = {\n      float = \"\";\n      int = \"i\";\n      uint = \"u\";\n      bool = \"b\";\n    };\n\n    components = [\"x\" \"y\" \"z\" \"w\"];\n\n    palettes = [components [\"r\" \"g\" \"b\" \"a\"] [\"s\" \"t\" \"p\" \"q\"]];\n\n    swizzles = let\n      grow = names: lib.concatMap (name: map (letter: name + letter) components) names;\n      lengths = builtins.genList (n: lib.foldl' (names: _: grow names) [\"\"] (lib.range 1 (n + 1))) 4;\n    in\n      lib.concatLists lengths;\n\n    vectorParts = type: builtins.match \"([biu]?)vec([234])\" type;\n\n    dimension = type:\n      if builtins.elem type scalars\n      then 1\n      else if vectorParts type != null\n      then lib.toInt (builtins.elemAt (vectorParts type) 1)\n      else null;\n\n    scalarOf = type:\n      if builtins.elem type scalars\n      then type\n      else if vectorParts type != null\n      then lib.findFirst (scalar: prefixes.\${scalar} == builtins.head (vectorParts type)) null scalars\n      else if builtins.match \"mat.*\" type != null\n      then \"float\"\n      else null;\n\n    vectorOf = scalar: size:\n      if size == 1\n      then scalar\n      else \"\${prefixes.\${scalar}}vec\${toString size}\";\n\n    identifier = value:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" value != null\n      then value\n      else throw \"glsl: `\${value}` is not a name\";\n\n    pointed = mantissa:\n      if lib.hasInfix \".\" mantissa\n      then mantissa\n      else \"\${mantissa}.0\";\n\n    float = value: let\n      text = builtins.toJSON value;\n      parts = builtins.match \"(-?[0-9.]+)e[+]?(-?)0*([0-9]+)\" text;\n    in\n      if parts == null\n      then text\n      else \"\${pointed (builtins.head parts)}e\${builtins.elemAt parts 1}\${builtins.elemAt parts 2}\";\n\n    located = value: let\n      self = builtins.listToAttrs ([\n          {\n            name = \"ast\";\n            value = value.ast;\n          }\n          {\n            name = \"type\";\n            value = value.type;\n          }\n        ]\n        ++ map (name: {\n          inherit name;\n          value = swizzle self name;\n        })\n        swizzles);\n    in\n      self;\n\n    swizzle = value: name: let\n      letters = lib.stringToCharacters name;\n      table = lib.findFirst (letters': lib.all (letter: builtins.elem letter letters') letters) (throw \"glsl: `.\${name}` is not a swizzle\") palettes;\n      size = dimension value.type;\n      reach = lib.foldl' lib.max 0 (map (letter: lib.lists.findFirstIndex (one: one == letter) 0 table) letters);\n    in\n      if value.type == null\n      then throw \"glsl: `.\${name}` of a value whose type is not known\"\n      else if size == null || reach >= size\n      then throw \"glsl: \${value.type} has no `.\${name}`\"\n      else\n        located {\n          ast.field = {\n            base = value.ast;\n            inherit name;\n          };\n          type = vectorOf (scalarOf value.type) (builtins.length letters);\n        };\n\n    comparisons = [\"<\" \">\" \"<=\" \">=\" \"==\" \"!=\" \"&&\" \"||\" \"^^\"];\n\n    matrix = type: builtins.match \"mat([234])\" type;\n\n    product = matrixType: vector: matrix matrixType != null && vector == \"vec\${builtins.head (matrix matrixType)}\";\n\n    scalarWith = scalar: other: dimension scalar == 1 && scalarOf other == scalar;\n\n    combine = operator: left: right: let\n      known = left != null && right != null;\n      rules = [\n        {\n          when = builtins.elem operator comparisons;\n          type = \"bool\";\n        }\n        {\n          when = !known;\n          type = null;\n        }\n        {\n          when = left == right || builtins.elem operator [\"<<\" \">>\"];\n          type = left;\n        }\n        {\n          when = scalarWith left right;\n          type = right;\n        }\n        {\n          when = scalarWith right left;\n          type = left;\n        }\n        {\n          when = operator == \"*\" && product left right;\n          type = right;\n        }\n        {\n          when = operator == \"*\" && product right left;\n          type = left;\n        }\n      ];\n    in\n      (lib.findFirst (rule: rule.when) {type = throw \"glsl: \${left} \${operator} \${right} is not a GLSL operation\";} rules).type;\n\n    typed' = type: value: {\n      ast = value;\n      inherit type;\n    };\n\n    termForms = {\n      int = typed' \"int\";\n      float = typed' \"float\";\n      bool = typed' \"bool\";\n      list = infix;\n      set = value:\n        if value ? ast\n        then value\n        else if value ? glslType\n        then throw \"glsl: the type \${value.glslType.name} is not a value\"\n        else throw \"glsl: an attribute set that is not a GLSL value\";\n    };\n\n    term = value: (termForms.\${builtins.typeOf value} or (_: throw \"glsl: \${builtins.typeOf value} `\${toString value}` is not a GLSL value; a name is a bound value\")) value;\n\n    ast = value: (term value).ast;\n\n    infix = items: let\n      count = builtins.length items;\n      operators = lib.genList (index: builtins.elemAt items (2 * index + 1)) (count / 2);\n      precedences = map (symbol: binary.\${symbol} or (throw \"glsl: `\${toString symbol}` is not a binary operator\")) operators;\n      lowest = lib.foldl' lib.min 99 precedences;\n      at = lib.foldl' (found: index:\n        if builtins.elemAt precedences index == lowest\n        then index\n        else found)\n      0 (lib.range 0 (builtins.length operators - 1));\n      operator = builtins.elemAt operators at;\n      left = infix (lib.take (2 * at + 1) items);\n      right = infix (lib.drop (2 * at + 2) items);\n    in\n      if count == 1\n      then term (builtins.head items)\n      else if lib.mod count 2 == 0\n      then throw \"glsl: an infix list alternates operands and operators and ends in an operand\"\n      else {\n        ast.binary = {\n          inherit operator;\n          left = left.ast;\n          right = right.ast;\n        };\n        type = combine operator left.type right.type;\n      };\n\n    curried = count: finish: let\n      gather = collected:\n        if builtins.length collected == count\n        then finish collected\n        else argument: gather (collected ++ [argument]);\n    in\n      gather [];\n\n    invoke = function: type: arguments:\n      located {\n        ast.call = {\n          inherit function;\n          arguments = map ast arguments;\n        };\n        inherit type;\n      };\n\n    builtin = name: count: typing:\n      curried count (arguments:\n        invoke (\n          if name == \"atan2\"\n          then \"atan\"\n          else name\n        ) (typing arguments)\n        arguments);\n\n    construct = name: arguments: {\n      ast.call = {\n        function = name;\n        arguments = map ast arguments;\n      };\n      type = name;\n      __functor = _: argument: construct name (arguments ++ [argument]);\n    };\n\n    typeValue = name: {\n      glslType = {\n        inherit name;\n        qualifiers = [];\n        size = null;\n      };\n      __functor = _: argument: construct name [argument];\n    };\n\n    typeName = type:\n      if type.size == null\n      then type.name\n      else \"\${type.name}[\${toString type.size}]\";\n\n    element = type: let\n      sized = builtins.match \"(.*)\\\\[[0-9]+]\" type;\n    in\n      if type == null\n      then null\n      else if sized != null\n      then builtins.head sized\n      else if matrix type != null\n      then \"vec\${builtins.head (matrix type)}\"\n      else scalarOf type;\n\n    reference = type: name: extra:\n      located {\n        ast.ref = {inherit name;} // extra;\n        inherit type;\n      };\n\n    qualified = qualifier: type:\n      type\n      // {\n        glslType = type.glslType // {qualifiers = [qualifier] ++ type.glslType.qualifiers;};\n      };\n\n    unary = operator: type: operand: {\n      ast.unary = {\n        inherit operator;\n        operand = ast operand;\n      };\n      type =\n        if type == null\n        then (term operand).type\n        else type;\n    };\n\n    postfix = operator: operand: {\n      ast.postfix = {\n        inherit operator;\n        operand = ast operand;\n      };\n      inherit (term operand) type;\n    };\n\n    declaredIn = lib.concatMap (one: lib.optional (builtins.isAttrs one && one ? var) one.var);\n\n    scoped = given: function: listed: let\n      names = builtins.attrNames (builtins.functionArgs function);\n      result = function (lib.genAttrs names (name: given.\${name} or (reference (declared name) name {})));\n      declared = name: typeName (lib.findFirst (one: one.name == name) (throw \"glsl: `\${name}` is bound but not declared in its block\") (declaredIn (listed result))).type;\n    in\n      result;\n\n    block = body:\n      if builtins.isFunction body\n      then scoped {} body lib.id\n      else body;\n\n    statementOf = one:\n      if one ? ast\n      then {expression = one.ast;}\n      else one;\n\n    statements = body: map statementOf (block body);\n\n    checked = target: value: let\n      wanted = (term target).type;\n      given = (term value).type;\n    in\n      if wanted != null && given != null && wanted != given\n      then throw \"glsl: a \${given} value for a \${wanted}\"\n      else ast value;\n\n    atom = text: {\n      precedence = 15;\n      doc = text;\n    };\n\n    signed = value: text: {\n      precedence =\n        if value < 0\n        then 13\n        else 15;\n      doc = text;\n    };\n\n    paren = least: printed:\n      if printed.precedence < least\n      then [\"(\" printed.doc \")\"]\n      else printed.doc;\n\n    kind = value:\n      if builtins.isAttrs value\n      then builtins.head (builtins.attrNames value)\n      else builtins.typeOf value;\n\n    argumentList = values: [\"(\" (lib.intersperse \", \" (map (value: paren 1 (expression value)) values)) \")\"];\n\n    rows = values: [\"(\" (nest 4 (lib.intersperse \",\" (map (value: [hardline (paren 1 (expression value))]) values))) hardline \")\"];\n\n    negative = value: (builtins.isInt value || builtins.isFloat value) && value < 0 || kind value == \"unary\";\n\n    forms = {\n      int = value: signed value (toString value);\n      float = value: signed value (float value);\n      bool = value:\n        atom (\n          if value\n          then \"true\"\n          else \"false\"\n        );\n      ref = value:\n        atom (\n          if value.ref.macro or false\n          then \"(\${identifier value.ref.name})\"\n          else identifier value.ref.name\n        );\n      binary = value: let\n        precedence = binary.\${value.binary.operator};\n      in {\n        inherit precedence;\n        doc = group [(paren precedence (expression value.binary.left)) (nest 4 [line value.binary.operator \" \" (paren (precedence + 1) (expression value.binary.right))])];\n      };\n      unary = value: {\n        precedence = 13;\n        doc = [\n          value.unary.operator\n          (paren (\n            if negative value.unary.operand\n            then 14\n            else 13\n          ) (expression value.unary.operand))\n        ];\n      };\n      postfix = value: {\n        precedence = 14;\n        doc = [(paren 14 (expression value.postfix.operand)) value.postfix.operator];\n      };\n      call = value: {\n        precedence = 14;\n        doc = [(identifier value.call.function) (argumentList value.call.arguments)];\n      };\n      array = value: {\n        precedence = 14;\n        doc = [(identifier value.array.type) \"[\${toString (builtins.length value.array.elements)}]\" (rows value.array.elements)];\n      };\n      index = value: {\n        precedence = 14;\n        doc = [(paren 14 (expression value.index.base)) \"[\" (paren 0 (expression value.index.at)) \"]\"];\n      };\n      field = value: {\n        precedence = 14;\n        doc = [(paren 14 (expression value.field.base)) \".\" value.field.name];\n      };\n      cond = value: {\n        precedence = 1;\n        doc = [(paren 2 (expression value.cond.test)) \" ? \" (paren 1 (expression value.cond.yes)) \" : \" (paren 1 (expression value.cond.no))];\n      };\n      unsigned = value: atom \"\${toString value.unsigned}u\";\n    };\n\n    expression = value: (forms.\${kind value} or (throw \"glsl: no expression \${kind value}\")) value;\n\n    written = value: (expression value).doc;\n\n    typeDoc = type: lib.concatStringsSep \" \" (type.qualifiers ++ [(identifier type.name)]);\n\n    declarator = type: target: [(typeDoc type) \" \" (identifier target) (lib.optionalString (type.size != null) \"[\${toString type.size}]\")];\n\n    simple = value: !builtins.elem (kind value) [\"if\" \"for\" \"while\" \"comment\"];\n\n    braced = body: [\"{\" (nest 4 (map (one: [hardline (statement one)]) body)) hardline \"}\"];\n\n    single = body: builtins.length body == 1 && simple (builtins.head body);\n\n    clause = body:\n      if single body\n      then [\" \" (statement (builtins.head body))]\n      else [\" \" (braced body)];\n\n    alternative = body: otherwise: [\n      (\n        if single body\n        then hardline\n        else \" \"\n      )\n      \"else\"\n      (\n        if builtins.isAttrs otherwise\n        then [\" \" (statement otherwise)]\n        else clause otherwise\n      )\n    ];\n\n    header = value:\n      if value == null\n      then \"\"\n      else if kind value == \"var\"\n      then [(declarator value.var.type value.var.name) (lib.optionals (value.var.value != null) [\" = \" (written value.var.value)])]\n      else statementBody value;\n\n    statementBody = value:\n      {\n        assign = [(written value.assign.target) \" = \" (written value.assign.value)];\n        update = [(written value.update.target) \" \${value.update.operator} \" (written value.update.value)];\n        expression = written value.expression;\n      }\n          .\${\n        kind value\n      };\n\n    statementForms = {\n      comment = value: \"// \${value.comment}\";\n      var = value: [(header value) \";\"];\n      return = value:\n        if value.return == null\n        then \"return;\"\n        else [\"return \" (written value.return) \";\"];\n      jump = value: \"\${value.jump};\";\n      \"if\" = value: [\"if (\" (written value.\"if\".test) \")\" (clause value.\"if\".body) (lib.optional (value.\"if\" ? otherwise) (alternative value.\"if\".body value.\"if\".otherwise))];\n      for = value: [\"for (\" (lib.intersperse \"; \" [(header value.for.init) (written value.for.test) (statementBody value.for.step)]) \") \" (braced value.for.body)];\n      while = value: [\"while (\" (written value.while.test) \") \" (braced value.while.body)];\n    };\n\n    statement = value: (statementForms.\${kind value} or (one: [(statementBody one) \";\"])) value;\n\n    noted = value: print:\n      if value ? commented\n      then [\"// \${value.commented.text}\" hardline (print value.commented.declaration)]\n      else print value;\n\n    bare = value:\n      if value ? commented\n      then bare value.commented.declaration\n      else value;\n\n    globalForms = {\n      list = lib.concatMap globals;\n      set = value: lib.optional (value ? ref) value.ref.name ++ lib.optional (value ? call) value.call.function ++ lib.concatMap globals (builtins.attrValues value);\n    };\n\n    globals = value: (globalForms.\${builtins.typeOf value} or (_: [])) value;\n\n    ordered = dependencies: let\n      go = done: let\n        left = builtins.filter (one: !builtins.elem one done) (builtins.attrNames dependencies);\n        next = lib.findFirst (one: lib.all (other: builtins.elem other done) dependencies.\${one}) null left;\n      in\n        if left == []\n        then done\n        else if next == null\n        then throw \"glsl: \${lib.concatStringsSep \", \" left} depend on each other\"\n        else go (done ++ [next]);\n    in\n      go [];\n\n    among = set: key: found: builtins.filter (one: one != key && set ? \${one}) (lib.unique found);\n\n    constantValue = value: let\n      inner = bare value;\n    in\n      inner.typed.value or inner;\n\n    parsedType = text: let\n      sized = builtins.match \"(.*)\\\\[([0-9]+)]\" text;\n    in {\n      name = builtins.head (lib.defaultTo [text] sized);\n      qualifiers = [];\n      size = lib.mapNullable (parts: lib.toInt (builtins.elemAt parts 1)) sized;\n    };\n\n    constantType = value: let\n      inner = bare value;\n      inferred = (term inner).type;\n    in\n      inner.typed.type.glslType or (parsedType (lib.throwIf (inferred == null) \"glsl: a constant's type is its value's; write `typed type value` for this one\" inferred));\n\n    constant = key: value: [\"const \" (declarator (constantType value) key) \" = \" (written (ast (constantValue value))) \";\"];\n\n    macroBody = value:\n      if value ? macro\n      then value.macro.function (lib.genAttrs value.macro.params (name: reference null name {macro = true;}))\n      else value;\n\n    number = value: builtins.isInt value || builtins.isFloat value;\n\n    define = key: value: let\n      body = macroBody value;\n    in [\n      \"#define \${identifier key}\"\n      (lib.optionalString (value ? macro) \"(\${lib.concatMapStringsSep \", \" identifier value.macro.params})\")\n      \" \"\n      (paren (\n        if number body\n        then 0\n        else 14\n      ) (expression (ast body)))\n    ];\n\n    definition = key: value: [\n      (typeDoc value.fn.returns)\n      \" \${identifier key}(\"\n      (lib.intersperse \", \" (map (param: [(typeDoc param.type) \" \" (identifier param.name)]) value.fn.params))\n      \") \"\n      (braced value.fn.body)\n    ];\n\n    globalValue = key: value: let\n      inner = bare value;\n    in\n      if inner ? fn\n      then curried (builtins.length inner.fn.params) (invoke key (typeName inner.fn.returns))\n      else if inner ? macro\n      then curried (builtins.length inner.macro.params) (invoke key null)\n      else reference (typeName (constantType value)) key {};\n\n    defineValue = key: value:\n      if value ? macro\n      then curried (builtins.length value.macro.params) (invoke key null)\n      else reference (term value).type key {};\n\n    rgbPart = text: index: (lib.fromHexString (builtins.substring (1 + 2 * index) 2 text) * 2000 + 255) / 510 / 1000.0;\n\n    typeValues = lib.genAttrs types typeValue;\n  in\n    typeValues\n    // lib.concatMapAttrs (typing:\n      lib.concatMapAttrs (count: names:\n        lib.genAttrs names (name:\n          builtin name (lib.toInt count) (\n            if typing == \"same\"\n            then arguments: (term (builtins.head arguments)).type\n            else _: \"float\"\n          ))))\n    builtinFunctions\n    // {\n      step = builtin \"step\" 2 (arguments: (term (builtins.elemAt arguments 1)).type);\n      smoothstep = builtin \"smoothstep\" 3 (arguments: (term (builtins.elemAt arguments 2)).type);\n      cross = builtin \"cross\" 2 (_: \"vec3\");\n      texture = builtin \"texture\" 2 (_: \"vec4\");\n\n      iResolution = reference \"vec3\" \"iResolution\" {};\n      iTime = reference \"float\" \"iTime\" {};\n      iFrame = reference \"int\" \"iFrame\" {};\n      iMouse = reference \"vec4\" \"iMouse\" {};\n      iChannel0 = reference \"sampler2D\" \"iChannel0\" {};\n\n      math = {\n        pi = 3.141592653589793;\n\n        round = digits: value: let\n          scale = lib.foldl' (built: _: built * 10.0) 1.0 (lib.range 1 digits);\n        in\n          builtins.floor (value * scale + 0.5) / scale;\n\n        sqrt = value:\n          if value == 0\n          then 0.0\n          else lib.foldl' (guess: _: (guess + value / guess) / 2.0) (value * 1.0) (lib.range 1 64);\n      };\n\n      rgb = text: let\n        parts = map (rgbPart text) [0 1 2];\n      in\n        if lib.all (part: part == builtins.head parts) parts\n        then typeValues.vec3 (builtins.head parts)\n        else lib.foldl' lib.id typeValues.vec3 parts;\n\n      array = type: elements: {\n        ast.array = {\n          type = type.glslType.name;\n          elements = map ast elements;\n        };\n        type = \"\${type.glslType.name}[\${toString (builtins.length elements)}]\";\n      };\n\n      index = base: at:\n        located {\n          ast.index = {\n            base = ast base;\n            at = ast at;\n          };\n          type = element (term base).type;\n        };\n\n      swizzle = value: swizzle (term value);\n\n      neg = unary \"-\" null;\n\n      not = unary \"!\" \"bool\";\n\n      bitNot = unary \"~\" null;\n\n      preInc = unary \"++\" null;\n\n      preDec = unary \"--\" null;\n\n      inc = postfix \"++\";\n\n      dec = postfix \"--\";\n\n      cond = test: yes: no: {\n        ast.cond = {\n          test = ast test;\n          yes = ast yes;\n          no = ast no;\n        };\n        inherit (term yes) type;\n      };\n\n      unsigned = value: {\n        ast.unsigned = value;\n        type = \"uint\";\n      };\n\n      sized = type: size: type // {glslType = type.glslType // {inherit size;};};\n\n      out = qualified \"out\";\n\n      in' = qualified \"in\";\n\n      inout = qualified \"inout\";\n\n      typed = type: value: {typed = {inherit type value;};};\n\n      macro = function: {\n        macro = {\n          inherit function;\n          params = builtins.attrNames (builtins.functionArgs function);\n        };\n      };\n\n      local = target: type: value: {\n        var = {\n          inherit (target.ast.ref) name;\n          type = type.glslType;\n          value =\n            if value == null\n            then null\n            else if (term value).type != null && (term value).type != typeName type.glslType\n            then throw \"glsl: \${target.ast.ref.name} is a \${typeName type.glslType} but its value is a \${(term value).type}\"\n            else ast value;\n        };\n      };\n\n      set = target: value: {\n        assign = {\n          target = ast target;\n          value = checked target value;\n        };\n      };\n\n      update = target: operator: value: {\n        update = {\n          inherit operator;\n          target = ast target;\n          value = ast value;\n        };\n      };\n\n      return = value: {\n        return =\n          if value == null\n          then null\n          else ast value;\n      };\n\n      break = {jump = \"break\";};\n\n      continue = {jump = \"continue\";};\n\n      if' = test: body: {\n        \"if\" = {\n          test = ast test;\n          body = statements body;\n        };\n      };\n\n      ifElse = test: body: otherwise: {\n        \"if\" = {\n          test = ast test;\n          body = statements body;\n          otherwise =\n            if builtins.isAttrs otherwise\n            then otherwise\n            else statements otherwise;\n        };\n      };\n\n      for = loop: let\n        spec =\n          if builtins.isFunction loop\n          then scoped {} loop (result: lib.optional (result.init != null) result.init ++ block result.body)\n          else loop;\n      in {\n        for = {\n          inherit (spec) init;\n          test = ast spec.test;\n          step = statementOf spec.step;\n          body = statements spec.body;\n        };\n      };\n\n      while = test: body: {\n        while = {\n          test = ast test;\n          body = statements body;\n        };\n      };\n\n      comment = text: {comment = text;};\n\n      commented = text: subject: {\n        commented = {\n          inherit text;\n          declaration = subject;\n        };\n      };\n\n      fn = returns: params: body: let\n        named =\n          map (param: let\n            name = builtins.head (builtins.attrNames param);\n          in {\n            inherit name;\n            type = param.\${name}.glslType;\n          })\n          params;\n        given = builtins.listToAttrs (map (param: {\n            inherit (param) name;\n            value = reference (typeName param.type) param.name {};\n          })\n          named);\n      in {\n        fn = {\n          returns = returns.glslType;\n          params = named;\n          body = map statementOf (\n            if builtins.isFunction body\n            then scoped given body lib.id\n            else body\n          );\n        };\n      };\n\n      render = shader: let\n        result = shader self;\n        defines = result.defines or {};\n        consts = result.consts or {};\n        fns = result.fns or {};\n        self = builtins.mapAttrs defineValue defines // builtins.mapAttrs globalValue consts // builtins.mapAttrs globalValue fns;\n        constOrder = ordered (builtins.mapAttrs (key: value: among consts key (globals (ast (constantValue value)))) consts);\n        fnOrder = ordered (builtins.mapAttrs (key: value: among fns key (globals (bare value).fn.body)) fns);\n        sections = builtins.filter (section: section != []) [\n          (lib.optional (defines != {}) (lib.intersperse hardline (lib.mapAttrsToList (key: value: noted value (define key)) defines)))\n          (lib.optional (consts != {}) (lib.intersperse hardline (map (key: noted consts.\${key} (constant key)) constOrder)))\n          (map (key: noted fns.\${key} (definition key)) fnOrder)\n        ];\n      in\n        doc.render 100 [(lib.intersperse [hardline hardline] (lib.concatLists sections)) hardline];\n    };\n  lua = let\n    inherit (doc) hardline nest;\n\n    precedence = {\n      \"or\" = 1;\n      \"and\" = 2;\n      \"<\" = 3;\n      \">\" = 3;\n      \"<=\" = 3;\n      \">=\" = 3;\n      \"~=\" = 3;\n      \"==\" = 3;\n      \"|\" = 4;\n      \"~\" = 5;\n      \"&\" = 6;\n      \"<<\" = 7;\n      \">>\" = 7;\n      \"..\" = 8;\n      \"+\" = 9;\n      \"-\" = 9;\n      \"*\" = 10;\n      \"/\" = 10;\n      \"//\" = 10;\n      \"%\" = 10;\n      \"^\" = 12;\n    };\n\n    unaryPrecedence = 11;\n\n    parse = infixTree {\n      language = \"lua\";\n      inherit precedence;\n      right = [\"..\" \"^\"];\n      operand = lib.id;\n    };\n\n    nixKeywords = [\"assert\" \"else\" \"false\" \"if\" \"in\" \"inherit\" \"let\" \"null\" \"or\" \"rec\" \"then\" \"true\" \"with\"];\n\n    globals = [\"CS\" \"Vector3\" \"_G\" \"_VERSION\" \"assert\" \"bit\" \"collectgarbage\" \"coroutine\" \"debug\" \"dofile\" \"error\" \"getfenv\" \"getmetatable\" \"hl\" \"io\" \"ipairs\" \"jit\" \"load\" \"loadfile\" \"loadstring\" \"math\" \"next\" \"os\" \"package\" \"pairs\" \"pcall\" \"pg\" \"print\" \"rawequal\" \"rawget\" \"rawlen\" \"rawset\" \"require\" \"select\" \"setfenv\" \"setmetatable\" \"string\" \"table\" \"tonumber\" \"tostring\" \"type\" \"unpack\" \"utf8\" \"xpcall\"];\n\n    identifier = name:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" name != null\n      then name\n      else throw \"lua: `\${name}` is not a name\";\n\n    fieldPath = text:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*([.][A-Za-z_][A-Za-z0-9_]*)*\" text != null\n      then text\n      else throw \"lua: `\${text}` is not a field path\";\n\n    binder = value:\n      if kindOf value == \"name\"\n      then identifier value.name\n      else if kindOf value == \"vararg\"\n      then \"...\"\n      else throw \"lua: a declared name is a bound variable, not a \${kindOf value}\";\n\n    nameList = values: lib.concatStringsSep \", \" (map binder (lib.toList values));\n\n    infix = value: builtins.isList value && builtins.length value >= 3 && builtins.isString (builtins.elemAt value 1);\n\n    unaries = {\n      not = \"not \";\n      neg = \"-\";\n      len = \"#\";\n      bnot = \"~\";\n    };\n\n    operatorRank = items: precedence.\${(parse items).binary.operator};\n\n    signedRank = value:\n      if value < 0\n      then unaryPrecedence\n      else 13;\n\n    ranks =\n      {\n        list = value:\n          if infix value\n          then operatorRank value\n          else 13;\n        rows = value: operatorRank (lib.concatLists value.rows);\n        int = signedRank;\n        float = signedRank;\n      }\n      // lib.mapAttrs (_: _: _: unaryPrecedence) unaries;\n\n    rank = value: (ranks.\${kindOf value} or (_: 13)) value;\n\n    powerBase = items: index: index + 1 < builtins.length items && builtins.elemAt items (index + 1) == \"^\" && rank (builtins.elemAt items index) == unaryPrecedence;\n\n    term = items: index: let\n      item = builtins.elemAt items index;\n    in\n      if lib.mod index 2 == 1\n      then item\n      else if infix item\n      then [\"(\" (infixDoc item) \")\"]\n      else if powerBase items index\n      then [\"(\" (expression item) \")\"]\n      else expression item;\n\n    infixDoc = items: builtins.seq (parse items).binary.operator (lib.intersperse \" \" (builtins.genList (term items) (builtins.length items)));\n\n    rowsDoc = rowList: let\n      items = lib.concatLists rowList;\n      offsets = builtins.foldl' (sums: one: sums ++ [(lib.last sums + builtins.length one)]) [0] rowList;\n      row = index: lib.intersperse \" \" (builtins.genList (at: term items (builtins.elemAt offsets index + at)) (builtins.length (builtins.elemAt rowList index)));\n      broken = lib.all (one: builtins.isString (builtins.head one)) (builtins.tail rowList);\n    in\n      if !broken\n      then throw \"lua: each row of an infix expression after the first starts with its operator\"\n      else builtins.seq (parse items).binary.operator [(row 0) (builtins.genList (index: nest 2 [hardline (row (index + 1))]) (builtins.length rowList - 1))];\n\n    commas = values: lib.intersperse \", \" (map expression values);\n\n    prefixKinds = [\"name\" \"dot\" \"index\" \"paren\" \"apply\"];\n\n    prefix = value:\n      if builtins.elem (kindOf value) prefixKinds || builtins.isList value && !infix value\n      then expression value\n      else [\"(\" (expression value) \")\"];\n\n    callee = head:\n      if kindOf head == \"method\"\n      then [(prefix head.method.table) \":\" (identifier head.method.name)]\n      else prefix head;\n\n    call = value: [(callee (builtins.head value)) \"(\" (commas (builtins.tail value)) \")\"];\n\n    fieldForms = {\n      field = value: [(identifier value.field.name) \" = \" (expression value.field.value)];\n      key = value: [\"[\" (expression value.key.key) \"] = \" (expression value.key.value)];\n    };\n\n    tableField = value: (fieldForms.\${kindOf value} or expression) value;\n\n    fieldRow = row: [hardline (lib.intersperse \", \" (map tableField (lib.toList row))) \",\"];\n\n    braces = fields:\n      if fields ? rows\n      then [\"{\" (nest 2 (map fieldRow fields.rows)) hardline \"}\"]\n      else if fields == []\n      then \"{}\"\n      else [\"{ \" (lib.intersperse \", \" (map tableField fields)) \" }\"];\n\n    declarers = {\n      local = one: lib.catAttrs \"name\" (lib.toList one.local.names);\n      localFunction = one: [one.localFunction.name.name];\n    };\n\n    declaredIn = one: (declarers.\${kindOf one} or (_: [])) one;\n\n    statementsOf = value: value.inline or value;\n\n    binders = header: builtins.filter builtins.isString (map (one: one.name or null) (header.params or header.names or [header.name]));\n\n    declared = result:\n      if result ? body\n      then binders result ++ lib.concatMap declaredIn (statementsOf result.body)\n      else lib.concatMap declaredIn (statementsOf result);\n\n    bound = boundBlock {\n      language = \"lua\";\n      name = spelled: {name = spelled;};\n      inherit declared;\n    };\n\n    block = value:\n      if value ? inline\n      then {inline = bound value.inline;}\n      else bound value;\n\n    functionSpec = value: let\n      result = block value;\n    in\n      if result ? body\n      then result\n      else {\n        params = [];\n        body = result;\n      };\n\n    sequence = values: lib.imap0 (index: value: [(lib.optionalString (index > 0 && kindOf value != \"semicolon\") \" \") (statement value)]) values;\n\n    layout = value:\n      if value ? inline\n      then [\" \" (sequence value.inline) (lib.optionalString (value.inline != []) \" \")]\n      else if builtins.isList value\n      then [(nest 2 (map (one: [hardline (entry one)]) value)) hardline]\n      else throw \"lua: a block is a list of statements, `inline [ ... ]` or a lambda of the names it declares\";\n\n    function = head: value: let\n      resolved = functionSpec value;\n    in [head \"(\" (nameList resolved.params) \")\" (layout resolved.body) \"end\"];\n\n    expressions =\n      {\n        name = value: identifier value.name;\n        vararg = _: \"...\";\n        nil = _: \"nil\";\n        int = toString;\n        float = builtins.toJSON;\n        bool = lib.boolToString;\n        string = value: throw \"lua: the bare string \\\"\${value}\\\" is not an expression (a literal is `str`, a name a bound variable)\";\n        list = value:\n          if infix value\n          then infixDoc value\n          else call value;\n        rows = value: rowsDoc value.rows;\n        str = value: \"\\\"\${value.str}\\\"\";\n        sq = value: \"'\${value.sq}'\";\n        table = value: braces value.table;\n        fn = value: function \"function\" value.fn;\n        apply = value: [(callee value.apply.head) (expression value.apply.arg)];\n        paren = value:\n          if builtins.elem (kindOf value.paren) [\"vararg\" \"apply\"] || builtins.isList value.paren && !infix value.paren\n          then [\"(\" (expression value.paren) \")\"]\n          else throw \"lua: `paren` keeps the first value of a call or `...`; a grouping is a nested infix list\";\n        dot = value: [(prefix value.dot.table) \".\" (fieldPath value.dot.path)];\n        index = value: [(prefix value.index.table) \"[\" (expression value.index.key) \"]\"];\n      }\n      // lib.mapAttrs (kind: mark: value: [\n        mark\n        (\n          if rank value.\${kind} < unaryPrecedence\n          then [\"(\" (expression value.\${kind}) \")\"]\n          else expression value.\${kind}\n        )\n      ])\n      unaries;\n\n    expression = value: (expressions.\${kindOf value} or (throw \"lua: a \${kindOf value} is not an expression\")) value;\n\n    assigned = values: lib.optionals (values != []) [\" = \" (commas values)];\n\n    clause = value: [\n      (expression value.test)\n      \" then\"\n      (layout (block value.body))\n      (\n        if !(value ? otherwise)\n        then \"end\"\n        else if value.otherwise ? \"if\"\n        then [\"elseif \" (clause value.otherwise.\"if\")]\n        else [\"else\" (layout (block value.otherwise)) \"end\"]\n      )\n    ];\n\n    loop = head: body: [head \" do\" (layout body) \"end\"];\n\n    statements = {\n      list = value:\n        if infix value\n        then throw \"lua: an infix expression is not a statement\"\n        else call value;\n      comment = value: value.comment;\n      break = _: \"break\";\n      semicolon = _: \";\";\n      local = value: [\"local \" (nameList value.local.names) (assigned value.local.values)];\n      assign = value: [(commas (lib.toList value.assign.targets)) (assigned value.assign.values)];\n      localFunction = value: function \"local function \${binder value.localFunction.name}\" value.localFunction.spec;\n      return = value: [\"return\" (lib.optionals (value.return != []) [\" \" (commas value.return)])];\n      \"if\" = value: [\"if \" (clause value.\"if\")];\n      forIn = value: let\n        resolved = block value.forIn;\n      in\n        loop [\"for \" (nameList resolved.names) \" in \" (commas resolved.values)] resolved.body;\n      forNum = value: let\n        resolved = block value.forNum;\n      in\n        loop [\"for \" (binder resolved.name) \" = \" (commas resolved.range)] resolved.body;\n      while = value: loop [\"while \" (expression value.while.test)] (block value.while.body);\n      do = value: [\"do\" (layout (block value.do)) \"end\"];\n    };\n\n    statement = value: (statements.\${kindOf value} or (throw \"lua: a \${kindOf value} is not a statement\")) value;\n\n    entry = value:\n      if value ? blank\n      then []\n      else statement value;\n\n    constructors = {\n      blank = {blank = true;};\n\n      comment = text: {comment = text;};\n\n      inline = values: {inline = values;};\n\n      rows = values: {rows = values;};\n\n      str = text: {str = text;};\n\n      sq = text: {sq = text;};\n\n      table = fields: {table = fields;};\n\n      field = name: value: {field = {inherit name value;};};\n\n      key = key: value: {key = {inherit key value;};};\n\n      fn = spec: {fn = spec;};\n\n      apply = head: arg: {apply = {inherit head arg;};};\n\n      paren = value: {paren = value;};\n\n      not = value: {not = value;};\n\n      neg = value: {neg = value;};\n\n      len = value: {len = value;};\n\n      bnot = value: {bnot = value;};\n\n      dot = table: path: {dot = {inherit table path;};};\n\n      method = table: name: {method = {inherit table name;};};\n\n      index = table: key: {index = {inherit table key;};};\n\n      local = names: values: {local = {inherit names values;};};\n\n      assign = targets: values: {assign = {inherit targets values;};};\n\n      localFunction = name: spec: {localFunction = {inherit name spec;};};\n\n      return = values: {return = values;};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      forIn = spec: {forIn = spec;};\n\n      forNum = spec: {forNum = spec;};\n\n      while = test: body: {while = {inherit test body;};};\n\n      do = body: {do = body;};\n\n      break = {break = true;};\n\n      semicolon = {semicolon = true;};\n\n      nil = {nil = true;};\n\n      vararg = {vararg = true;};\n\n      render = top: doc.render 80 (map (value: [(entry value) hardline]) (block top));\n    };\n  in\n    constructors\n    // builtins.listToAttrs (map (global: {\n        name =\n          if constructors ? \${global} || builtins.elem global nixKeywords\n          then \"\${global}'\"\n          else global;\n        value = {name = global;};\n      })\n      globals);\n\n  python = let\n    inherit (doc) hardline nest align;\n\n    nameNode = spelled: {name = spelled;};\n\n    keyword = word: {keyword = word;};\n\n    nameOf = value:\n      if kindOf value == \"name\"\n      then value.name\n      else throw \"python: a \${kindOf value} where a name is expected\";\n\n    levels = {\n      \"or\" = 4;\n      \"and\" = 5;\n      \"in\" = 7;\n      \"not in\" = 7;\n      \"is\" = 7;\n      \"is not\" = 7;\n      \"<\" = 7;\n      \"<=\" = 7;\n      \">\" = 7;\n      \">=\" = 7;\n      \"!=\" = 7;\n      \"==\" = 7;\n      \"|\" = 8;\n      \"^\" = 9;\n      \"&\" = 10;\n      \"<<\" = 11;\n      \">>\" = 11;\n      \"+\" = 12;\n      \"-\" = 12;\n      \"*\" = 13;\n      \"/\" = 13;\n      \"//\" = 13;\n      \"%\" = 13;\n      \"@\" = 13;\n      \"**\" = 15;\n    };\n\n    rowItems = row:\n      if builtins.isList row\n      then row\n      else [row];\n\n    contentItems = content:\n      if builtins.isList content\n      then content\n      else lib.concatMap rowItems (content.rows or content.aligned or (throw \"python: no bracket content \${kindOf content}\"));\n\n    marked = rows: let\n      ends = builtins.foldl' (sums: row: sums ++ [(lib.last sums + builtins.length (rowItems row))]) [0] rows;\n      breaks = lib.init (builtins.tail ends);\n    in\n      lib.imap0 (index: piece:\n        if lib.mod index 2 == 0\n        then piece\n        else if builtins.isString piece\n        then {\n          symbol = piece;\n          before = builtins.elem index breaks;\n          after = builtins.elem (index + 1) breaks;\n        }\n        else throw \"python: an infix list alternates operands and operator strings\")\n      (lib.concatMap rowItems rows);\n\n    tree = pieces: let\n      count = builtins.length pieces;\n      operators = lib.genList (index: builtins.elemAt pieces (2 * index + 1)) (count / 2);\n      ranks = map (operator: levels.\${operator.symbol} or (throw \"python: `\${operator.symbol}` is not a binary operator\")) operators;\n      lowest = lib.foldl' lib.min 99 ranks;\n      indices = builtins.filter (index: builtins.elemAt ranks index == lowest) (lib.range 0 (builtins.length operators - 1));\n      root =\n        if lowest == levels.\"**\"\n        then builtins.head indices\n        else lib.last indices;\n    in\n      if count == 1\n      then operand (builtins.head pieces)\n      else if lib.mod count 2 == 0\n      then throw \"python: an infix list alternates operands and operators and ends in an operand\"\n      else {\n        binary = {\n          operator = builtins.elemAt operators root;\n          left = tree (lib.take (2 * root + 1) pieces);\n          right = tree (lib.drop (2 * root + 2) pieces);\n        };\n      };\n\n    operand = value:\n      if builtins.isList value\n      then {group = tree (marked [value]);}\n      else value;\n\n    form = level: print: {\n      inherit level;\n      doc = print;\n    };\n\n    atom = text: form 17 (_: text);\n\n    printed = value: (forms.\${kindOf value} or (throw \"python: \${kindOf value} is not a Python expression\")) value;\n\n    at = need: mode: value: let\n      it = printed value;\n    in\n      if it.level < need\n      then [\"(\" (align (it.doc inside)) \")\"]\n      else it.doc mode;\n\n    top = mode: value:\n      if kindOf value == \"commas\"\n      then (printed value).doc mode\n      else at 2 mode value;\n\n    inside = 0;\n\n    bare = 1;\n\n    continued = 2;\n\n    continuing = mode:\n      if mode == bare\n      then continued\n      else mode;\n\n    broken = mode: rest:\n      if mode == inside\n      then [hardline rest]\n      else if mode == bare\n      then [\" \\\\\" (nest 4 [hardline rest])]\n      else [\" \\\\\" hardline rest];\n\n    item = at 2 inside;\n\n    separated = values: lib.intersperse \", \" (map item values);\n\n    contents = {\n      list = open: close: tuple: values: [open (align (separated values)) (lib.optional (tuple && builtins.length values == 1) \",\") close];\n      rows = open: close: _: value: let\n        comma = lib.optionalString (builtins.length value.rows > 1) \",\";\n      in [open (nest 4 (map (row: [hardline (separated (rowItems row)) comma]) value.rows)) hardline close];\n      aligned = open: close: _: value: [open (align (lib.intersperse [\",\" hardline] (map (row: separated (rowItems row)) value.aligned))) close];\n    };\n\n    bracket = open: close: tuple: content: (contents.\${kindOf content} or (throw \"python: no bracket content \${kindOf content}\")) open close tuple content;\n\n    argumentsOf = values:\n      if builtins.isList values && builtins.length values == 1 && kindOf (builtins.head values) == \"gen\"\n      then [\"(\" (align (comprehension (builtins.head values).gen)) \")\"]\n      else bracket \"(\" \")\" false values;\n\n    fstringParts = {\n      string = lib.id;\n      field = value: [\"{\" (item value.field) \"}\"];\n      spec = value: [\"{\" (item value.spec.value) \":\" value.spec.format \"}\"];\n    };\n\n    literal = quote: content:\n      atom (\n        if builtins.isList content\n        then [\"f\" quote (map (part: (fstringParts.\${kindOf part} or (throw \"python: no f-string part \${kindOf part}\")) part) content) quote]\n        else [quote content quote]\n      );\n\n    simple = value: value == null || builtins.isInt value || kindOf value == \"name\";\n\n    bound = side: value: lib.optional (value != null) (side (item value));\n\n    subscript = key:\n      if kindOf key == \"slice\"\n      then let\n        inherit (key.slice) lower upper;\n        pad = lib.optionalString (!(simple lower && simple upper)) \" \";\n      in [(bound (side: [side pad]) lower) \":\" (bound (side: [pad side]) upper)]\n      else top inside key;\n\n    lines = mode: docs: [(builtins.head docs) (map (broken mode) (builtins.tail docs))];\n\n    infix = value: printed (tree value);\n\n    forms = {\n      string = value: throw \"python: the string \\\"\${value}\\\" where an expression is expected (a name is a bound variable, a literal is `str`)\";\n      name = value: atom value.name;\n      int = value:\n        form (\n          if value < 0\n          then 14\n          else 17\n        ) (_: toString value);\n      bool = value:\n        atom (\n          if value\n          then \"True\"\n          else \"False\"\n        );\n      octal = value: atom \"0o\${lib.concatMapStrings toString (lib.toBaseDigits 8 value.octal)}\";\n      placeholder = value: atom \"@\${value.placeholder}@\";\n      str = value: literal \"\\\"\" value.str;\n      sq = value: literal \"'\" value.sq;\n      triple = value: literal \"\\\"\\\"\\\"\" value.triple;\n      raw = value: atom [\"r\" (item value.raw)];\n      bytes = value: atom [\"b\" (item value.bytes)];\n      strings = value:\n        form 17 (mode:\n          if builtins.isList value.strings\n          then lib.intersperse \" \" (map item value.strings)\n          else lines mode (map item value.strings.rows));\n      list = value: infix (marked [value]);\n      rows = value: infix (marked value.rows);\n      aligned = value: atom [\"(\" (align ((infix (marked value.aligned)).doc inside)) \")\"];\n      hang = value: atom [\"(\" (nest 4 [hardline ((printed value.hang).doc inside)]) hardline \")\"];\n      binary = value: let\n        inherit (value.binary) operator left right;\n        level = levels.\${operator.symbol};\n        power = operator.symbol == \"**\";\n        after = mode: rest:\n          if operator.after\n          then broken mode rest\n          else [\" \" rest];\n        right' = mode:\n          at (\n            if power\n            then 14\n            else level + 1\n          ) (\n            if operator.before || operator.after\n            then continuing mode\n            else mode\n          )\n          right;\n      in\n        form level (mode: [\n          (at (\n              if power\n              then 16\n              else level\n            )\n            mode\n            left)\n          (\n            if operator.before\n            then broken mode [operator.symbol (after (continuing mode) (right' mode))]\n            else [\" \" operator.symbol (after mode (right' mode))]\n          )\n        ]);\n      group = value: let\n        inner = printed value.group;\n      in {\n        level =\n          if kindOf value.group == \"binary\" && levels.\${value.group.binary.operator.symbol} == levels.\"==\"\n          then 6.5\n          else inner.level;\n        inherit (inner) doc;\n      };\n      call = value: form 17 (mode: [(at 17 mode value.call.function) (argumentsOf value.call.arguments)]);\n      dot = value: form 17 (mode: [(at 17 mode value.dot.value) \".\" value.dot.name]);\n      index = value: form 17 (mode: [(at 17 mode value.index.value) \"[\" (align (subscript value.index.key)) \"]\"]);\n      \"list'\" = value: atom (bracket \"[\" \"]\" false value.\"list'\");\n      tuple = value: atom (bracket \"(\" \")\" true value.tuple);\n      set = value: atom (bracket \"{\" \"}\" false value.set);\n      dict = value: atom (bracket \"{\" \"}\" false value.dict);\n      listComp = value: atom [\"[\" (align (comprehension value.listComp)) \"]\"];\n      setComp = value: atom [\"{\" (align (comprehension value.setComp)) \"}\"];\n      dictComp = value: atom [\"{\" (align (comprehension value.dictComp)) \"}\"];\n      gen = value: atom [\"(\" (align (comprehension value.gen)) \")\"];\n      commas = value: form 0 (mode: lib.intersperse \", \" (map (at 2 mode) value.commas));\n      pair = value: atom [(item value.pair.key) \": \" (item value.pair.value)];\n      kw = value: atom [value.kw.name \"=\" (item value.kw.value)];\n      default = value: atom [(nameOf value.default.name) \"=\" (item value.default.value)];\n      star = value: atom [\"*\" (at 8 inside value.star)];\n      starstar = value: atom [\"**\" (at 8 inside value.starstar)];\n      neg = value: form 14 (mode: [\"-\" (at 14 mode value.neg)]);\n      invert = value: form 14 (mode: [\"~\" (at 14 mode value.invert)]);\n      not = value: form 6 (mode: [\"not \" (at 6 mode value.not)]);\n      await = value: form 16 (mode: [\"await \" (at 17 mode value.await)]);\n      lambda = value: let\n        scope = lambdaScope value.lambda;\n      in\n        form 2 (mode: [\"lambda\" (lib.optionals (scope.params != []) [\" \" (separated scope.params)]) \": \" (at 2 mode scope.body)]);\n      ternary = value: let\n        inherit (value.ternary) body test orelse;\n      in\n        form 3 (mode: [(at 4 mode body) \" if \" (at 4 mode test) \" else \" (at 3 mode orelse)]);\n      walrus = value: form 1 (mode: [(nameOf value.walrus.target) \" := \" (at 2 mode value.walrus.value)]);\n      as = value: atom [(item value.as.value) \" as \" (item value.as.target)];\n    };\n\n    comprehensionClauses = {\n      compFor = value: [\"for \" (top inside value.compFor.target) \" in \" (at 4 inside value.compFor.iter)];\n      compIf = value: [\"if \" (at 4 inside value.compIf)];\n    };\n\n    comprehensionPart = value: (comprehensionClauses.\${kindOf value} or item) value;\n\n    comprehension = body: let\n      parts = comprehensionScope body;\n    in\n      if builtins.isList parts\n      then lib.intersperse \" \" (map comprehensionPart parts)\n      else lines inside (map (row: lib.intersperse \" \" (map comprehensionPart (rowItems row))) parts.rows);\n\n    boundForms = {\n      name = value: [value.name];\n      commas = value: lib.concatMap boundNames value.commas;\n      tuple = value: lib.concatMap boundNames (contentItems value.tuple);\n      \"list'\" = value: lib.concatMap boundNames (contentItems value.\"list'\");\n      star = value: boundNames value.star;\n    };\n\n    boundNames = value: (boundForms.\${kindOf value} or (_: [])) value;\n\n    parameterForms = {\n      default = value: [(nameOf value.default.name)];\n      star = value: boundNames value.star;\n      starstar = value: boundNames value.starstar;\n    };\n\n    parameter = value: (parameterForms.\${kindOf value} or boundNames) value;\n\n    walrusTarget = value: lib.optional (kindOf value == \"walrus\") (nameOf value.walrus.target);\n\n    binders = {\n      \"import\" = value: [(nameOf value.\"import\")];\n      from = value: map nameOf value.from.names;\n      assign = value: boundNames value.assign.target;\n      augAssign = value: boundNames value.augAssign.target;\n      del = value: lib.concatMap boundNames value.del;\n      def = value: [(nameOf value.def.name)];\n      class = value: [(nameOf value.class.name)];\n      async = value: declares value.async;\n      \"if\" = value:\n        walrusTarget value.\"if\".test\n        ++ declared value.\"if\".body\n        ++ lib.optionals (value.\"if\" ? otherwise) (\n          if builtins.isList value.\"if\".otherwise\n          then declared value.\"if\".otherwise\n          else declares value.\"if\".otherwise\n        );\n      for = value: boundNames value.for.target ++ declared value.for.body;\n      while = value: walrusTarget value.while.test ++ declared value.while.body;\n      \"with\" = value: lib.concatMap (one: lib.optionals (kindOf one == \"as\") (boundNames one.as.target)) value.\"with\".items ++ declared value.\"with\".body;\n      try = value: declared value.try.body ++ declared value.try.clauses;\n      except = value: lib.optionals (kindOf value.except.caught == \"as\") (boundNames value.except.caught.as.target) ++ declared value.except.body;\n      finally = value: declared value.finally;\n    };\n\n    declares = value: (binders.\${kindOf value} or (_: [])) value;\n\n    declared = lib.concatMap declares;\n\n    scoped = declaring:\n      boundBlock {\n        language = \"python\";\n        name = nameNode;\n        declared = declaring;\n      };\n\n    blockScope = scoped declared;\n\n    functionScope = scoped (result: lib.concatMap parameter (contentItems result.params) ++ declared result.body);\n\n    lambdaScope = scoped (result: lib.concatMap parameter result.params);\n\n    comprehensionScope = scoped (result: lib.concatMap (one: lib.optionals (kindOf one == \"compFor\") (boundNames one.compFor.target)) (contentItems result));\n\n    block = body: nest 4 (map (value: [hardline (entry value)]) body);\n\n    alternative = value:\n      if builtins.isList value\n      then [hardline \"else:\" (block value)]\n      else if kindOf value == \"if\"\n      then [hardline \"el\" (statement value)]\n      else throw \"python: an else branch is a body or an if\";\n\n    handlers = {\n      except = value: [\"except\" (lib.optionals (value.except.caught != null) [\" \" (at 2 bare value.except.caught)]) \":\" (block value.except.body)];\n      finally = value: [\"finally:\" (block value.finally)];\n    };\n\n    statements = {\n      keyword = value: value.keyword;\n      comment = value: value.comment;\n      \"import\" = value: [\"import \" (nameOf value.\"import\")];\n      from = value: [\"from \" value.from.module \" import \" (lib.concatMapStringsSep \", \" nameOf value.from.names)];\n      assign = value: [(top bare value.assign.target) \" = \" (top bare value.assign.value)];\n      augAssign = value: [(top bare value.augAssign.target) \" \${value.augAssign.operator} \" (top bare value.augAssign.value)];\n      return = value: [\"return\" (lib.optionals (value.return != null) [\" \" (top bare value.return)])];\n      raise = value: [\"raise\" (lib.optionals (value.raise != null) [\" \" (at 2 bare value.raise)])];\n      del = value: [\"del \" (lib.intersperse \", \" (map (at 2 bare) value.del))];\n      global = value: [\"global \" (lib.concatMapStringsSep \", \" nameOf value.global)];\n      nonlocal = value: [\"nonlocal \" (lib.concatMapStringsSep \", \" nameOf value.nonlocal)];\n      \"assert\" = value: [\"assert \" (at 2 bare value.\"assert\")];\n      def = value: let\n        scope = functionScope value.def.function;\n      in [\"def \" (nameOf value.def.name) (bracket \"(\" \")\" false scope.params) \":\" (block scope.body)];\n      async = value: [\"async \" (statement value.async)];\n      class = value: [\"class \" (nameOf value.class.name) (lib.optional (value.class.bases != null) (bracket \"(\" \")\" false value.class.bases)) \":\" (block (blockScope value.class.body))];\n      \"if\" = value: [\"if \" (at 1 bare value.\"if\".test) \":\" (block value.\"if\".body) (lib.optional (value.\"if\" ? otherwise) (alternative value.\"if\".otherwise))];\n      for = value: [\"for \" (top bare value.for.target) \" in \" (top bare value.for.iter) \":\" (block value.for.body)];\n      while = value: [\"while \" (at 1 bare value.while.test) \":\" (block value.while.body)];\n      \"with\" = value: [\"with \" (lib.intersperse \", \" (map (at 2 bare) value.\"with\".items)) \":\" (block value.\"with\".body)];\n      try = value: [\"try:\" (block value.try.body) (map (clause: [hardline ((handlers.\${kindOf clause} or (throw \"python: \${kindOf clause} is not a try clause\")) clause)]) value.try.clauses)];\n    };\n\n    statement = value: (statements.\${kindOf value} or (top bare)) value;\n\n    entry = value:\n      if value ? blank\n      then []\n      else statement value;\n\n    builtinNames = [\n      \"None\"\n      \"NotImplemented\"\n      \"Ellipsis\"\n      \"__name__\"\n      \"__doc__\"\n      \"__file__\"\n      \"abs\"\n      \"aiter\"\n      \"all\"\n      \"anext\"\n      \"any\"\n      \"ascii\"\n      \"bin\"\n      \"bool\"\n      \"breakpoint\"\n      \"bytearray\"\n      \"bytes\"\n      \"callable\"\n      \"chr\"\n      \"classmethod\"\n      \"compile\"\n      \"complex\"\n      \"delattr\"\n      \"dict\"\n      \"dir\"\n      \"divmod\"\n      \"enumerate\"\n      \"eval\"\n      \"exec\"\n      \"filter\"\n      \"float\"\n      \"format\"\n      \"frozenset\"\n      \"getattr\"\n      \"globals\"\n      \"hasattr\"\n      \"hash\"\n      \"help\"\n      \"hex\"\n      \"id\"\n      \"input\"\n      \"int\"\n      \"isinstance\"\n      \"issubclass\"\n      \"iter\"\n      \"len\"\n      \"list\"\n      \"locals\"\n      \"map\"\n      \"max\"\n      \"memoryview\"\n      \"min\"\n      \"next\"\n      \"object\"\n      \"oct\"\n      \"open\"\n      \"ord\"\n      \"pow\"\n      \"print\"\n      \"property\"\n      \"range\"\n      \"repr\"\n      \"reversed\"\n      \"round\"\n      \"set\"\n      \"setattr\"\n      \"slice\"\n      \"sorted\"\n      \"staticmethod\"\n      \"str\"\n      \"sum\"\n      \"super\"\n      \"tuple\"\n      \"type\"\n      \"vars\"\n      \"zip\"\n      \"BaseException\"\n      \"Exception\"\n      \"ArithmeticError\"\n      \"AssertionError\"\n      \"AttributeError\"\n      \"BlockingIOError\"\n      \"BrokenPipeError\"\n      \"BufferError\"\n      \"ChildProcessError\"\n      \"ConnectionAbortedError\"\n      \"ConnectionError\"\n      \"ConnectionRefusedError\"\n      \"ConnectionResetError\"\n      \"EOFError\"\n      \"FileExistsError\"\n      \"FileNotFoundError\"\n      \"GeneratorExit\"\n      \"ImportError\"\n      \"IndexError\"\n      \"InterruptedError\"\n      \"IsADirectoryError\"\n      \"KeyError\"\n      \"KeyboardInterrupt\"\n      \"LookupError\"\n      \"MemoryError\"\n      \"ModuleNotFoundError\"\n      \"NameError\"\n      \"NotADirectoryError\"\n      \"NotImplementedError\"\n      \"OSError\"\n      \"OverflowError\"\n      \"PermissionError\"\n      \"ProcessLookupError\"\n      \"RecursionError\"\n      \"RuntimeError\"\n      \"StopAsyncIteration\"\n      \"StopIteration\"\n      \"SyntaxError\"\n      \"SystemExit\"\n      \"TimeoutError\"\n      \"TypeError\"\n      \"UnicodeDecodeError\"\n      \"UnicodeEncodeError\"\n      \"UnicodeError\"\n      \"ValueError\"\n      \"ZeroDivisionError\"\n    ];\n\n    constructors = {\n      blank = {blank = true;};\n\n      comment = text: {comment = text;};\n\n      str = content: {str = content;};\n\n      sq = content: {sq = content;};\n\n      triple = content: {triple = content;};\n\n      raw = value: {raw = value;};\n\n      bytes = value: {bytes = value;};\n\n      field = value: {field = value;};\n\n      spec = value: format: {spec = {inherit value format;};};\n\n      strings = values: {strings = values;};\n\n      octal = value: {octal = value;};\n\n      placeholder = text: {placeholder = text;};\n\n      rows = values: {rows = values;};\n\n      aligned = values: {aligned = values;};\n\n      hang = value: {hang = value;};\n\n      call = function: arguments: {call = {inherit function arguments;};};\n\n      dot = value: name: {dot = {inherit value name;};};\n\n      index = value: key: {index = {inherit value key;};};\n\n      slice = lower: upper: {slice = {inherit lower upper;};};\n\n      list = values: {\"list'\" = values;};\n\n      tuple = values: {tuple = values;};\n\n      set = values: {set = values;};\n\n      dict = values: {dict = values;};\n\n      pair = key: value: {pair = {inherit key value;};};\n\n      kw = name: value: {kw = {inherit name value;};};\n\n      default = name: value: {default = {inherit name value;};};\n\n      star = value: {star = value;};\n\n      starstar = value: {starstar = value;};\n\n      commas = values: {commas = values;};\n\n      neg = value: {neg = value;};\n\n      invert = value: {invert = value;};\n\n      not = value: {not = value;};\n\n      await = value: {await = value;};\n\n      lambda = function: {lambda = function;};\n\n      ternary = body: test: orelse: {ternary = {inherit body test orelse;};};\n\n      walrus = target: value: {walrus = {inherit target value;};};\n\n      listComp = body: {listComp = body;};\n\n      setComp = body: {setComp = body;};\n\n      dictComp = body: {dictComp = body;};\n\n      gen = body: {gen = body;};\n\n      compFor = target: iter: {compFor = {inherit target iter;};};\n\n      compIf = test: {compIf = test;};\n\n      as = value: target: {as = {inherit value target;};};\n\n      assign = target: value: {assign = {inherit target value;};};\n\n      augAssign = target: operator: value: {augAssign = {inherit target operator value;};};\n\n      return = value: {return = value;};\n\n      raise = value: {raise = value;};\n\n      pass = keyword \"pass\";\n\n      break = keyword \"break\";\n\n      continue = keyword \"continue\";\n\n      del = targets: {del = targets;};\n\n      global = names: {global = names;};\n\n      nonlocal = names: {nonlocal = names;};\n\n      assert' = test: {\"assert\" = test;};\n\n      import' = module: {\"import\" = module;};\n\n      from = module: names: {from = {inherit module names;};};\n\n      def = name: function: {def = {inherit name function;};};\n\n      async = value: {async = value;};\n\n      class = name: bases: body: {class = {inherit name bases body;};};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      for = target: iter: body: {for = {inherit target iter body;};};\n\n      while = test: body: {while = {inherit test body;};};\n\n      with' = items: body: {\"with\" = {inherit items body;};};\n\n      try = body: clauses: {try = {inherit body clauses;};};\n\n      except = caught: body: {except = {inherit caught body;};};\n\n      finally = body: {finally = body;};\n\n      render = module: doc.render 80 (map (value: [(entry value) hardline]) (blockScope module));\n    };\n  in\n    constructors\n    // builtins.listToAttrs (map (spelled:\n      lib.nameValuePair (\n        if constructors ? \${spelled}\n        then \"\${spelled}'\"\n        else spelled\n      ) (nameNode spelled))\n    builtinNames);\n\n  javascript = let\n    inherit (doc) hardline nest;\n\n    language = \"javascript\";\n\n    levels = [\n      [\"=\" \"+=\" \"-=\" \"*=\" \"/=\" \"%=\" \"**=\" \"<<=\" \">>=\" \">>>=\" \"&=\" \"|=\" \"^=\" \"&&=\" \"||=\" \"??=\"]\n      [\"??\"]\n      [\"||\"]\n      [\"&&\"]\n      [\"|\"]\n      [\"^\"]\n      [\"&\"]\n      [\"==\" \"!=\" \"===\" \"!==\"]\n      [\"<\" \">\" \"<=\" \">=\" \"in\" \"instanceof\"]\n      [\"<<\" \">>\" \">>>\"]\n      [\"+\" \"-\"]\n      [\"*\" \"/\" \"%\"]\n      [\"**\"]\n    ];\n\n    binary = builtins.listToAttrs (lib.concatLists (lib.imap1 (level: map (operator: lib.nameValuePair operator level)) levels));\n\n    right = [\"**\"] ++ builtins.head levels;\n\n    logical = [\"??\" \"||\" \"&&\"];\n\n    bitwise = [\"|\" \"^\" \"&\" \"<<\" \">>\" \">>>\"];\n\n    flattens = parent: child: let\n      both = group: builtins.elem parent group && builtins.elem child group;\n    in\n      parent != \"**\" && !(both [\"==\" \"!=\" \"===\" \"!==\"]) && !(both [\"*\" \"/\" \"%\"] && parent != child) && !(both [\"<<\" \">>\" \">>>\"]);\n\n    mixed = parent: operator: builtins.elem parent logical && builtins.elem operator logical && parent != operator;\n\n    clarified = parent: operator: operator == \"%\" && builtins.elem parent [\"+\" \"-\"] || builtins.elem parent bitwise;\n\n    unaryBase = parent: side: child: parent == \"**\" && side == \"left\" && child.precedence < 15;\n\n    grouped = parent: side: child: let\n      level = binary.\${parent};\n      operator = child.operator or null;\n      rules = [\n        {\n          when = child.precedence < level;\n          value = true;\n        }\n        {\n          when = operator == null;\n          value = unaryBase parent side child;\n        }\n        {\n          when = mixed parent operator;\n          value = true;\n        }\n        {\n          when = child.precedence > level;\n          value = clarified parent operator;\n        }\n        {\n          when = level == 1;\n          value = side == \"left\";\n        }\n      ];\n    in\n      (lib.findFirst (rule: rule.when) {value = side == \"right\" || !flattens parent operator;} rules).value;\n\n    parse = infixTree {\n      inherit language right;\n      precedence = binary;\n      operand = item: {operand = item;};\n    };\n\n    infix = split: items: let\n      walk = tree:\n        if tree ? binary\n        then let\n          inherit (tree.binary) operator;\n          side = which: let\n            child = walk tree.binary.\${which};\n          in\n            if grouped operator which child\n            then [\"(\" child.doc \")\"]\n            else child.doc;\n        in {\n          precedence = binary.\${operator};\n          inherit operator;\n          doc =\n            if split\n            then [(side \"left\") (nest 2 [\" \" operator hardline (side \"right\")])]\n            else [(side \"left\") \" \${operator} \" (side \"right\")];\n        }\n        else expression tree.operand;\n    in\n      walk (parse items);\n\n    printed = precedence: shown: {\n      inherit precedence;\n      doc = shown;\n    };\n\n    wrapped = least: value: let\n      out = expression value;\n    in\n      if out.precedence < least\n      then [\"(\" out.doc \")\"]\n      else out.doc;\n\n    negative = value: (builtins.isInt value || builtins.isFloat value) && value < 0 || value ? neg;\n\n    number = value:\n      printed (\n        if value < 0\n        then 14\n        else 15\n      ) (builtins.toJSON value);\n\n    identifier = \"[A-Za-z_$][A-Za-z0-9_$]*\";\n\n    property = path:\n      if builtins.match \"\${identifier}([.]\${identifier})*\" path != null\n      then path\n      else throw \"javascript: `\${path}` is not a property path\";\n\n    commas = lib.intersperse \", \";\n\n    entries = values: values.rows or values;\n\n    broken = value: builtins.isAttrs value && (value.obj or value.array or null) ? rows;\n\n    layout = open: close: item: values:\n      if values ? rows\n      then [open (nest 2 (lib.imap1 (index: value: [hardline (item value) (lib.optional (index < builtins.length values.rows) \",\")]) values.rows)) hardline close]\n      else [open (commas (map item values)) close];\n\n    key = value:\n      if builtins.isString value\n      then property value\n      else if value ? str\n      then \"\\\"\${value.str}\\\"\"\n      else throw \"javascript: an object key is a property name or a str\";\n\n    entry = value:\n      if builtins.isList value && builtins.length value == 2\n      then [(key (builtins.head value)) \": \" (wrapped 1 (lib.last value))]\n      else value.name or (throw \"javascript: an object entry is a name or a [key value] pair\");\n\n    hugged = values: builtins.isList (lib.last values) && broken (lib.last (lib.last values));\n\n    braced = values:\n      if values ? rows || values == []\n      then layout \"{\" \"}\" entry values\n      else layout \"{ \" (lib.optionalString (!hugged values) \" \" + \"}\") entry values;\n\n    argumentList = values: [\"(\" (commas (map (wrapped 1) values)) \")\"];\n\n    patterns = values: commas (map (value: (expression value).doc) values);\n\n    expressionForms = {\n      int = number;\n      float = number;\n      bool = value: printed 20 (lib.boolToString value);\n      name = value: printed 20 value.name;\n      keyword = value: printed 20 value.keyword;\n      string = value: throw \"javascript: the string `\${value}` where an expression is expected; a name is a Nix variable, a literal a str\";\n      str = value: printed 20 \"\\\"\${value.str}\\\"\";\n      number = value: printed 15 value.number;\n      list = infix false;\n      rows = value: infix true value.rows;\n      obj = value: printed 20 (braced value.obj);\n      array = value: printed 20 (layout \"[\" \"]\" (wrapped 1) value.array);\n      dot = value: printed 18 [(wrapped 18 value.dot.object) \".\" (property value.dot.path)];\n      optional = value: printed 18 [(wrapped 18 value.optional.object) \"?.\" (property value.optional.path)];\n      call = value: printed 18 [(wrapped 18 value.call.callee) (argumentList value.call.arguments)];\n      new = value: printed 18 [\"new \" (expression value.new.callee).doc (argumentList value.new.arguments)];\n      not = value: printed 14 [\"!\" (wrapped 14 value.not)];\n      neg = value:\n        printed 14 [\n          \"-\"\n          (\n            if negative value.neg\n            then [\"(\" (expression value.neg).doc \")\"]\n            else wrapped 14 value.neg\n          )\n        ];\n      typeof = value: printed 14 [\"typeof \" (wrapped 14 value.typeof)];\n      await = value: printed 14 [\"await \" (wrapped 14 value.await)];\n      async = value: let\n        inner = expression value.async;\n      in\n        inner // {doc = [\"async \" inner.doc];};\n      arrow = value: printed 1 [\"(\" (patterns value.arrow.params) \") => \" (concise value.arrow.body)];\n    };\n\n    expression = value: (expressionForms.\${kindOf value} or (throw \"javascript: no expression \${kindOf value}\")) value;\n\n    statements = value:\n      if builtins.isList value\n      then value\n      else value.inline or [];\n\n    blockLike = value: builtins.isList value || value ? inline;\n\n    braces = value:\n      if value ? inline\n      then\n        if value.inline == []\n        then \"{}\"\n        else [\"{ \" (lib.intersperse \" \" (map statement value.inline)) \" }\"]\n      else [\"{\" (nest 2 (map (one: [hardline (statement one)]) value)) hardline \"}\"];\n\n    clause = value:\n      if blockLike value\n      then braces value\n      else statement value;\n\n    concise = value:\n      if blockLike value\n      then braces value\n      else if value ? obj\n      then [\"(\" (expression value).doc \")\"]\n      else wrapped 1 value;\n\n    function = value: [\"function \" value.function.name.name \"(\" (patterns value.function.params) \") \" (braces value.function.body)];\n\n    statementForms = {\n      blank = _: \"\";\n      comment = value: value.comment;\n      const = value: [\"const \" (expression value.const.target).doc \" = \" (wrapped 1 value.const.value) \";\"];\n      \"let\" = value: [\"let \" (expression value.\"let\".target).doc (lib.optionals (value.\"let\".value != null) [\" = \" (wrapped 1 value.\"let\".value)]) \";\"];\n      import = value: [\"import { \" (commas (map (one: one.name) value.import.names)) \" } from \\\"\" value.import.source \"\\\";\"];\n      inherit function;\n      async = value:\n        if value.async ? function\n        then [\"async \" (function value.async)]\n        else [(expression value).doc \";\"];\n      return = value:\n        if value.return == null\n        then \"return;\"\n        else [\"return \" (wrapped 1 value.return) \";\"];\n      throw = value: [\"throw \" (wrapped 1 value.throw) \";\"];\n      continue = _: \"continue;\";\n      \"if\" = value: [\"if (\" (wrapped 1 value.\"if\".test) \") \" (clause value.\"if\".body) (lib.optionals (value.\"if\" ? otherwise) [\" else \" (clause value.\"if\".otherwise)])];\n      while = value: [\"while (\" (wrapped 1 value.while.test) \") \" (clause value.while.body)];\n      try = value: [\"try \" (braces value.try.body) \" catch \" (lib.optionals (value.try ? param) [\"(\" (expression value.try.param).doc \") \"]) (braces value.try.handler)];\n    };\n\n    statement = value: (statementForms.\${kindOf value} or (_: [(expression value).doc \";\"])) value;\n\n    name = spelled:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" spelled != null\n      then {name = spelled;}\n      else throw \"javascript: `\${spelled}` is not a name Nix can spell\";\n\n    patternForms = {\n      name = value: [value.name];\n      obj = value:\n        lib.concatMap (one:\n          patternNames (\n            if builtins.isList one\n            then lib.last one\n            else one\n          )) (entries value.obj);\n      array = value: lib.concatMap patternNames (entries value.array);\n    };\n\n    patternNames = value: (patternForms.\${kindOf value} or (throw \"javascript: \${kindOf value} is not a binding pattern; a name is a Nix variable\")) value;\n\n    binding = target: lib.throwIf (patternNames target == []) \"javascript: a binding pattern that declares no name\" target;\n\n    declaring = {\n      const = value: patternNames value.const.target;\n      \"let\" = value: patternNames value.\"let\".target;\n      import = value: map (one: one.name) value.import.names;\n      function = value: [value.function.name.name];\n      async = value: declares value.async;\n    };\n\n    declares = value: (declaring.\${kindOf value} or (_: [])) value;\n\n    declaredIn = value: lib.concatMap declares (statements value);\n\n    scope = declared: boundBlock {inherit language name declared;};\n\n    block = scope declaredIn;\n\n    callable = definition: let\n      result = scope (scoped: lib.concatMap patternNames scoped.params ++ declaredIn scoped.body) definition;\n    in {\n      params = map binding result.params;\n      inherit (result) body;\n    };\n\n    handler = scope (result:\n      if result ? param\n      then patternNames result.param ++ declaredIn result.body\n      else declaredIn result);\n\n    clauseOf = value:\n      if builtins.isFunction value || blockLike value\n      then block value\n      else value;\n\n    globals = [\"AbortController\" \"Array\" \"Boolean\" \"Buffer\" \"Date\" \"Error\" \"JSON\" \"Map\" \"Math\" \"Number\" \"Object\" \"Promise\" \"RegExp\" \"Set\" \"String\" \"Symbol\" \"TypeError\" \"URL\" \"URLSearchParams\" \"clearInterval\" \"clearTimeout\" \"console\" \"fetch\" \"globalThis\" \"parseFloat\" \"parseInt\" \"process\" \"queueMicrotask\" \"setInterval\" \"setTimeout\" \"structuredClone\" \"undefined\"];\n  in\n    lib.genAttrs globals name\n    // {\n      null' = {keyword = \"null\";};\n\n      blank = {blank = true;};\n\n      continue = {continue = true;};\n\n      comment = string: {comment = string;};\n\n      inline = values: {inline = values;};\n\n      rows = values: {rows = values;};\n\n      str = string: {str = string;};\n\n      number = written: {number = written;};\n\n      obj = values: {obj = values;};\n\n      array = values: {array = values;};\n\n      dot = object: path: {dot = {inherit object path;};};\n\n      optional = object: path: {optional = {inherit object path;};};\n\n      call = callee: arguments: {call = {inherit callee arguments;};};\n\n      new = callee: arguments:\n        if callee ? name || callee ? dot\n        then {new = {inherit callee arguments;};}\n        else throw \"javascript: new takes a name or a dot path\";\n\n      not = value: {not = value;};\n\n      neg = value: {neg = value;};\n\n      typeof = value: {typeof = value;};\n\n      await = value: {await = value;};\n\n      async = value: {async = value;};\n\n      arrow = definition: {arrow = callable definition;};\n\n      function = named: definition: {function = {name = named;} // callable definition;};\n\n      const = target: value: {\n        const = {\n          target = binding target;\n          inherit value;\n        };\n      };\n\n      let' = target: value: {\n        \"let\" = {\n          target = binding target;\n          inherit value;\n        };\n      };\n\n      import' = names: source: {\n        import = {\n          names = map (one: lib.throwIfNot (one ? name) \"javascript: an import names Nix variables\" one) names;\n          inherit source;\n        };\n      };\n\n      return = value: {return = value;};\n\n      throw' = value: {throw = value;};\n\n      if' = test: body: {\n        \"if\" = {\n          inherit test;\n          body = clauseOf body;\n        };\n      };\n\n      ifElse = test: body: otherwise: {\n        \"if\" = {\n          inherit test;\n          body = clauseOf body;\n          otherwise = clauseOf otherwise;\n        };\n      };\n\n      while = test: body: {\n        while = {\n          inherit test;\n          body = clauseOf body;\n        };\n      };\n\n      try' = body: caught: let\n        catching = handler caught;\n      in {\n        try =\n          {body = block body;}\n          // (\n            if catching ? param\n            then {\n              param = binding catching.param;\n              handler = catching.body;\n            }\n            else {handler = catching;}\n          );\n      };\n\n      render = top: doc.render 80 (map (value: [(statement value) hardline]) (block top));\n    };\n\n  ts = let\n    inherit (doc) hardline nest;\n\n    nameNode = spelled: {name = spelled;};\n\n    see = value:\n      if builtins.isFunction value\n      then\n        boundBlock {\n          language = \"ts\";\n          name = nameNode;\n          declared = binds;\n        }\n        value\n      else if value ? infix\n      then infixNode value.infix\n      else value;\n\n    never = _: false;\n\n    items = value: value.rows or value;\n\n    patternForms = {\n      name = value: [value.name];\n      obj = value: lib.concatMap patternNames (items value.obj);\n      array = value: lib.concatMap patternNames (items value.array);\n      prop = value: patternNames value.prop.value;\n      spread = value: patternNames value.spread;\n      typed = value: patternNames value.typed.value;\n      opt = value: patternNames value.opt;\n      readonly = value: patternNames value.readonly;\n      binary = value: patternNames value.binary.left;\n    };\n\n    patternNames = value: let\n      seen = see value;\n    in\n      (patternForms.\${kindOf seen} or (_: [])) seen;\n\n    parameterForms = {\n      list = lib.concatMap patternNames;\n      rows = value: parameterNames value.rows;\n      typed = value: parameterNames value.typed.value;\n    };\n\n    parameterNames = value: (parameterForms.\${kindOf value} or patternNames) value;\n\n    headName = head: let\n      seen = see head;\n    in\n      if seen ? extends\n      then seen.extends.name.name\n      else seen.name;\n\n    importForms = {\n      list = lib.concatMap imported;\n      rows = value: imported value.rows;\n      typeOnly = value: imported value.typeOnly;\n      namespace = value: imported value.namespace;\n      name = value: [value.name];\n    };\n\n    imported = value: let\n      seen = see value;\n    in\n      importForms.\${kindOf seen} seen;\n\n    declarationForms = {\n      const = value: patternNames value.const.target;\n      \"let\" = value: patternNames value.\"let\".target;\n      fn = value: lib.optional (value.fn.name != null) value.fn.name.name;\n      async = value: declares value.async;\n      class = value: [(headName value.class.head)];\n      interface = value: [(headName value.interface.head)];\n      type = value: [value.type.name.name];\n      import = value: imported value.import.clause;\n      export = value: declares value.export;\n      default = value: declares value.default;\n    };\n\n    declares = value: let\n      seen = see value;\n    in\n      (declarationForms.\${kindOf seen} or (_: [])) seen;\n\n    statementsOf = body:\n      if builtins.isList body\n      then lib.concatMap declares body\n      else [];\n\n    loopBinds = loop: patternNames loop.target ++ statementsOf loop.body;\n\n    bindForms = {\n      list = lib.concatMap declares;\n      fn = value: parameterNames value.fn.parameters ++ statementsOf value.fn.body;\n      arrow = value: parameterNames value.arrow.parameters ++ statementsOf value.arrow.body;\n      method = value: parameterNames value.method.parameters ++ statementsOf value.method.body;\n      for = value: lib.optionals (value.for.init != null) (declares value.for.init) ++ statementsOf value.for.body;\n      forOf = value: loopBinds value.forOf;\n      forIn = value: loopBinds value.forIn;\n      forAwait = value: loopBinds value.forAwait;\n      catch = value: lib.optionals (value.catch.parameter != null) (patternNames value.catch.parameter) ++ statementsOf value.catch.body;\n      switch = value: lib.concatMap (arm: lib.optionals (arm ? case) (statementsOf arm.case.body)) value.switch.cases;\n    };\n\n    binds = value: (bindForms.\${kindOf value} or (_: throw \"ts: a lambda around a \${kindOf value}, which binds no names\")) value;\n\n    assignments = [\"=\" \"+=\" \"-=\" \"*=\" \"/=\" \"%=\" \"**=\" \"<<=\" \">>=\" \">>>=\" \"&=\" \"|=\" \"^=\" \"&&=\" \"||=\" \"??=\"];\n\n    precedence =\n      lib.genAttrs assignments (_: 1)\n      // {\n        \"??\" = 2;\n        \"||\" = 3;\n        \"&&\" = 4;\n        \"|\" = 5;\n        \"^\" = 6;\n        \"&\" = 7;\n        \"==\" = 8;\n        \"!=\" = 8;\n        \"===\" = 8;\n        \"!==\" = 8;\n        \"<\" = 9;\n        \">\" = 9;\n        \"<=\" = 9;\n        \">=\" = 9;\n        \"in\" = 9;\n        \"instanceof\" = 9;\n        \"as\" = 9;\n        \"satisfies\" = 9;\n        \"<<\" = 10;\n        \">>\" = 10;\n        \">>>\" = 10;\n        \"+\" = 11;\n        \"-\" = 11;\n        \"*\" = 12;\n        \"/\" = 12;\n        \"%\" = 12;\n        \"**\" = 13;\n      };\n\n    parse = infixTree {\n      language = \"ts\";\n      inherit precedence;\n      right = assignments ++ [\"**\"];\n      operand = item:\n        if builtins.isList item\n        then parse item\n        else if builtins.isString item\n        then throw \"ts: the bare string \\\"\${item}\\\" is not an operand; a name is a Nix variable, text is `str`\"\n        else if item ? infix\n        then throw \"ts: an infix inside an infix list is a nested list\"\n        else item;\n    };\n\n    infixNode = value: let\n      tree = parse (items value);\n    in\n      if value ? rows\n      then {binary = tree.binary // {broken = true;};}\n      else tree;\n\n    assignment = operator: precedence.\${operator} == 1;\n\n    cast = operator: operator == \"as\" || operator == \"satisfies\";\n\n    multiplicative = operator: builtins.elem operator [\"*\" \"/\" \"%\"];\n\n    bitshift = operator: builtins.elem operator [\"<<\" \">>\" \">>>\"];\n\n    bitwise = operator: bitshift operator || builtins.elem operator [\"|\" \"^\" \"&\"];\n\n    equality = operator: builtins.elem operator [\"==\" \"!=\" \"===\" \"!==\"];\n\n    logical = operator: builtins.elem operator [\"??\" \"||\" \"&&\"];\n\n    both = test: outer: inner: test outer && test inner;\n\n    unflattened = [\n      (outer: _: outer == \"**\")\n      (both equality)\n      (both bitshift)\n      (outer: inner: both multiplicative outer inner && (outer != inner || outer == \"%\"))\n    ];\n\n    flattens = outer: inner: precedence.\${outer} == precedence.\${inner} && !(builtins.any (rule: rule outer inner) unflattened);\n\n    mixed = outer: inner: both logical outer inner && (outer == \"??\") != (inner == \"??\") || outer == \"||\" && inner == \"&&\";\n\n    nestedRules = [\n      {\n        when = _: inner: _: cast inner;\n        wants = outer: _: side: !(cast outer) || side == \"right\";\n      }\n      {\n        when = outer: inner: _: assignment inner || cast outer || mixed outer inner;\n        wants = _: _: _: true;\n      }\n      {\n        when = outer: inner: _: precedence.\${outer} > precedence.\${inner};\n        wants = _: _: _: true;\n      }\n      {\n        when = outer: inner: _: precedence.\${outer} == precedence.\${inner};\n        wants = outer: inner: side: side == \"right\" || !(flattens outer inner);\n      }\n      {\n        when = _: inner: _: inner == \"%\";\n        wants = outer: _: _: outer == \"+\" || outer == \"-\";\n      }\n    ];\n\n    nested = outer: inner: side:\n      (lib.findFirst (rule: rule.when outer inner side) {wants = parent: _: _: bitwise parent;} nestedRules).wants outer inner side;\n\n    classForms = {\n      binary = _: \"binary\";\n      ternary = _: \"ternary\";\n      arrow = _: \"arrow\";\n      fn = _: \"function\";\n      async = value: classOf (see value.async);\n      await = _: \"await\";\n      not = _: \"unary\";\n      neg = _: \"unary\";\n      typeof = _: \"unary\";\n      delete = _: \"unary\";\n      int = signed;\n      float = signed;\n      obj = _: \"object\";\n      union = _: \"union\";\n      intersection = _: \"intersection\";\n    };\n\n    signed = value:\n      if value < 0\n      then \"negative\"\n      else \"atom\";\n\n    classOf = value: (classForms.\${kindOf value} or (_: \"atom\")) value;\n\n    listed = classes: value: builtins.elem (classOf value) classes;\n\n    binaryWith = test: value: classOf value == \"binary\" && test value.binary.operator;\n\n    slotWants = {\n      unary = listed [\"binary\" \"ternary\" \"arrow\" \"await\"];\n      spread = listed [\"binary\" \"ternary\" \"await\"];\n      member = listed [\"binary\" \"ternary\" \"arrow\" \"function\" \"await\" \"unary\" \"negative\"];\n      test = value: listed [\"ternary\" \"arrow\" \"await\"] value || binaryWith (operator: cast operator || assignment operator) value;\n      branch = binaryWith (operator: cast operator || operator == \"??\");\n      arrowBody = listed [\"ternary\" \"object\"];\n      statement = listed [\"object\" \"function\"];\n      arrayOf = listed [\"union\" \"intersection\" \"arrow\" \"unary\"];\n      union = listed [\"arrow\"];\n      intersection = listed [\"union\" \"arrow\"];\n    };\n\n    always = _: _: true;\n\n    powerLeft = slot: _: slot.operator == \"**\" && slot.side == \"left\";\n\n    operandWants = {\n      binary = slot: value: nested slot.operator value.binary.operator slot.side;\n      ternary = always;\n      arrow = always;\n      await = always;\n      unary = powerLeft;\n      negative = powerLeft;\n    };\n\n    binaryWants = slot: value:\n      if assignment slot.operator\n      then slot.side == \"left\" && binaryWith cast value\n      else (operandWants.\${classOf value} or (_: never)) slot value;\n\n    wants = slot: value:\n      if builtins.isAttrs slot\n      then binaryWants slot value\n      else (slotWants.\${slot} or never) value;\n\n    operand = slot: value: let\n      seen = see value;\n      printed = expr seen;\n    in\n      if wants slot seen\n      then [\"(\" printed \")\"]\n      else printed;\n\n    hangForms = {\n      arrow = value: see value.arrow.body ? below;\n      async = value: hangs value.async;\n    };\n\n    hangs = value: let\n      seen = see value;\n    in\n      (hangForms.\${kindOf seen} or never) seen;\n\n    entry = printer: mark: last: value:\n      if value ? blank\n      then hardline\n      else if value ? comment\n      then [hardline value.comment]\n      else [hardline (printer value) (lib.optionalString (!last) mark)];\n\n    broken = printer: open: close: mark: final: rows: let\n      count = builtins.length rows;\n    in [open (nest 1 (lib.imap1 (index: entry printer mark (index == count && final (lib.last rows))) rows)) hardline close];\n\n    flat = printer: open: close: mark: padded: values: let\n      pad = lib.optionalString padded \" \";\n      hug = !padded && mark == \",\" && hangs (lib.last values);\n    in [\n      open\n      pad\n      (lib.intersperse \"\${mark} \" (map printer values))\n      (\n        if hug\n        then [mark hardline]\n        else pad\n      )\n      close\n    ];\n\n    delimitedWith = printer: open: close: mark: padded: final: values:\n      if values ? rows\n      then broken printer open close mark final values.rows\n      else if values == []\n      then open + close\n      else flat printer open close mark padded values;\n\n    delimited = delimitedWith expr;\n\n    terminatedForms = {\n      async = value: terminated value.async;\n      readonly = value: terminated value.readonly;\n      method = value: value.method.body == null;\n      comment = never;\n    };\n\n    terminated = value: let\n      seen = see value;\n    in\n      (terminatedForms.\${kindOf seen} or (_: true)) seen;\n\n    rest = value: let\n      seen = see value;\n    in\n      seen ? spread || seen ? comment;\n\n    array = delimited \"[\" \"]\" \",\" false never;\n\n    argumentList = delimited \"(\" \")\" \",\" false never;\n\n    parameterListForms = {\n      list = delimited \"(\" \")\" \",\" false rest;\n      rows = delimited \"(\" \")\" \",\" false rest;\n      typed = value: [(parameterList value.typed.value) \": \" (expr value.typed.type)];\n    };\n\n    parameterList = value: (parameterListForms.\${kindOf value} or expr) value;\n\n    hang = slot: value: let\n      seen = see value;\n    in\n      if seen ? below\n      then nest 1 [hardline (operand slot seen.below)]\n      else [\" \" (operand slot seen)];\n\n    branch = mark: value: let\n      seen = see value;\n    in\n      if seen ? below\n      then nest 1 [hardline mark \" \" (nest 1 (operand \"branch\" seen.below))]\n      else [\" \" mark \" \" (operand \"branch\" seen)];\n\n    keyDoc = value:\n      if builtins.isString value\n      then value\n      else expr value;\n\n    block = value: let\n      values = see value;\n    in\n      if values == []\n      then \"{}\"\n      else [\"{\" (nest 1 (map (one: [hardline (line one)]) values)) hardline \"}\"];\n\n    line = value:\n      if value ? blank\n      then []\n      else statement value;\n\n    memberForms = {\n      string = lib.id;\n      typed = value: [(memberDoc value.typed.value) \": \" (expr value.typed.type)];\n      opt = value: [(memberDoc value.opt) \"?\"];\n      readonly = value: [\"readonly \" (memberDoc value.readonly)];\n      async = value: [\"async \" (memberDoc value.async)];\n      field = value: [(memberDoc value.field.key) \" =\" (hang \"value\" value.field.value)];\n    };\n\n    memberDoc = value: let\n      seen = see value;\n    in\n      (memberForms.\${kindOf seen} or expr) seen;\n\n    member = value: let\n      seen = see value;\n    in\n      if seen ? blank\n      then []\n      else if terminated seen\n      then [(memberDoc seen) \";\"]\n      else memberDoc seen;\n\n    memberBlock = values:\n      if values == []\n      then \"{}\"\n      else [\"{\" (nest 1 (map (value: [hardline (member value)]) values)) hardline \"}\"];\n\n    consequent = value:\n      if builtins.isList (see value)\n      then [\" \" (block value)]\n      else [\" \" (statement value)];\n\n    parenthesized = value: let\n      seen = see value;\n    in\n      if seen ? below\n      then [\"(\" (nest 1 [hardline (expr seen.below)]) hardline \")\"]\n      else [\"(\" (expr seen) \")\"];\n\n    binding = kind: value: [\n      kind\n      \" \"\n      (expr value.target)\n      (lib.optionals (value.value != null) [\" =\" (hang \"value\" value.value)])\n    ];\n\n    clauseDoc = value: let\n      seen = see value;\n    in\n      if builtins.isList seen || seen ? rows\n      then delimited \"{\" \"}\" \",\" true never seen\n      else expr seen;\n\n    alternative = value:\n      if builtins.isList (see value)\n      then [\"else \" (block value)]\n      else [\"else \" (statement value)];\n\n    loopDoc = word: op: value: [\"for\" word \" (const \" (expr value.target) \" \${op} \" (expr value.subject) \")\" (consequent value.body)];\n\n    label = test:\n      if test == null\n      then \"default:\"\n      else [\"case \" (expr test) \":\"];\n\n    clauseBody = body:\n      if body ? braces\n      then [\" \" (block body.braces)]\n      else nest 1 (map (one: [hardline (line one)]) body);\n\n    armForms = {\n      blank = _: [];\n      comment = value: value.comment;\n      case = value: [(label value.case.test) (clauseBody value.case.body)];\n    };\n\n    armDoc = value: armForms.\${kindOf value} value;\n\n    initForms = {\n      const = value: binding \"const\" value.const;\n      \"let\" = value: binding \"let\" value.\"let\";\n    };\n\n    initializer = value: let\n      seen = see value;\n    in\n      (initForms.\${kindOf seen} or expr) seen;\n\n    forClause = value: [\";\" (lib.optionals (value != null) [\" \" (expr value)])];\n\n    handler = value: let\n      seen = see value;\n    in\n      if seen ? finally\n      then [\" finally \" (block seen.finally)]\n      else [\" catch\" (lib.optionals (seen.catch.parameter != null) [\" (\" (expr seen.catch.parameter) \")\"]) \" \" (block seen.catch.body)];\n\n    statementForms = {\n      comment = value: value.comment;\n      const = value: [(binding \"const\" value.const) \";\"];\n      \"let\" = value: [(binding \"let\" value.\"let\") \";\"];\n      return = value:\n        if value.return == null\n        then \"return;\"\n        else if see value.return ? below\n        then [\"return \" (parenthesized value.return) \";\"]\n        else [\"return \" (expr value.return) \";\"];\n      throw = value: [\"throw \" (expr value.throw) \";\"];\n      break = _: \"break;\";\n      continue = _: \"continue;\";\n      \"if\" = value: let\n        test = value.\"if\";\n      in [\n        \"if \"\n        (parenthesized test.test)\n        (consequent test.body)\n        (lib.optionals (test ? otherwise) [\n          (\n            if builtins.isList (see test.body)\n            then \" \"\n            else hardline\n          )\n          (alternative test.otherwise)\n        ])\n      ];\n      for = value: [\n        \"for (\"\n        (lib.optional (value.for.init != null) (initializer value.for.init))\n        (forClause value.for.condition)\n        (forClause value.for.update)\n        \")\"\n        (consequent value.for.body)\n      ];\n      forOf = value: loopDoc \"\" \"of\" value.forOf;\n      forIn = value: loopDoc \"\" \"in\" value.forIn;\n      forAwait = value: loopDoc \" await\" \"of\" value.forAwait;\n      while = value: [\"while \" (parenthesized value.while.test) (consequent value.while.body)];\n      switch = value: [\"switch \" (parenthesized value.switch.subject) \" {\" (nest 1 (map (one: [hardline (armDoc one)]) value.switch.cases)) hardline \"}\"];\n      try = value: [\"try \" (block value.try.body) (map handler value.try.handlers)];\n      fn = expr;\n      class = expr;\n      interface = expr;\n      type = value: [\"type \" (expr value.type.name) \" = \" (expr value.type.value) \";\"];\n      import = value: [\"import \" (clauseDoc value.import.clause) \" from \" (expr value.import.source) \";\"];\n      async = value: [\"async \" (statement value.async)];\n      export = value: [\"export \" (statement value.export)];\n      default = value: [\"default \" (statement value.default)];\n    };\n\n    statement = value: let\n      seen = see value;\n    in\n      (statementForms.\${kindOf seen} or (one: [(operand \"statement\" one) \";\"])) seen;\n\n    continues = split: slot: left: split && left ? binary && precedence.\${left.binary.operator} == precedence.\${slot.operator} && !(wants slot left);\n\n    stacked = slot: value: [hardline (operand slot value)];\n\n    binaryDoc = value: let\n      operation = value.binary;\n      split = operation.broken or false;\n      left = see operation.left;\n      leftSlot = {\n        inherit (operation) operator;\n        side = \"left\";\n      };\n      rightSlot = {\n        inherit (operation) operator;\n        side = \"right\";\n      };\n    in [\n      (\n        if continues split leftSlot left\n        then binaryDoc {binary = left.binary // {broken = true;};}\n        else operand leftSlot left\n      )\n      \" \"\n      operation.operator\n      (\n        (\n          if split\n          then stacked\n          else hang\n        )\n        rightSlot\n        operation.right\n      )\n    ];\n\n    dotted = path:\n      if lib.hasPrefix \"?.\" path\n      then path\n      else \".\${path}\";\n\n    pathLinks = path: let\n      parts = builtins.split \"(\\\\?\\\\.|\\\\.)\" (dotted path);\n    in\n      lib.zipListsWith (mark: segment: {\n        kind = \"member\";\n        doc = \"\${mark}\${segment}\";\n      }) (map builtins.head (builtins.filter builtins.isList parts)) (builtins.tail (builtins.filter builtins.isString parts));\n\n    literalKinds = [\"int\" \"str\" \"sq\"];\n\n    called = callee: mark: arguments: let\n      seen = see callee;\n      generic = seen ? generic;\n    in {\n      base = seen.generic.callee or seen;\n      links = [\n        {\n          kind = \"call\";\n          doc = [\n            (lib.optionals generic (delimited \"<\" \">\" \",\" false never seen.generic.types))\n            mark\n            (argumentList arguments)\n          ];\n        }\n      ];\n    };\n\n    indexed = value: open: index: {\n      base = value;\n      links = [\n        {\n          kind =\n            if builtins.elem (kindOf (see index)) literalKinds\n            then \"literalIndex\"\n            else \"index\";\n          doc = [open (expr index) \"]\"];\n        }\n      ];\n    };\n\n    linkForms = {\n      dot = value: {\n        base = value.dot.value;\n        links = pathLinks value.dot.path;\n      };\n      call = value: called value.call.callee \"\" value.call.arguments;\n      optCall = value: called value.optCall.callee \"?.\" value.optCall.arguments;\n      idx = value: indexed value.idx.value \"[\" value.idx.index;\n      optIdx = value: indexed value.optIdx.value \"?.[\" value.optIdx.index;\n      nonNull = value: {\n        base = value.nonNull;\n        links = [\n          {\n            kind = \"nonNull\";\n            doc = \"!\";\n          }\n        ];\n      };\n    };\n\n    spine = value: let\n      seen = see value;\n      step = (linkForms.\${kindOf seen} or (_: null)) seen;\n      inner = spine step.base;\n    in\n      if step == null\n      then {\n        base = seen;\n        links = [];\n      }\n      else {\n        inherit (inner) base;\n        links = inner.links ++ step.links;\n      };\n\n    prefix = test: values:\n      if values != [] && test (builtins.head values)\n      then 1 + prefix test (builtins.tail values)\n      else 0;\n\n    kinds = names: link: builtins.elem link.kind names;\n\n    memberish = kinds [\"member\" \"index\" \"literalIndex\"];\n\n    opens = state: link: state.groups == [] || state.called && kinds [\"member\" \"literalIndex\"] link;\n\n    grouping = state: link: let\n      starts = opens state link;\n    in {\n      groups =\n        if starts\n        then state.groups ++ [[link]]\n        else lib.init state.groups ++ [(lib.last state.groups ++ [link])];\n      called = link.kind == \"call\" || !starts && state.called;\n    };\n\n    chainDoc = value: let\n      whole = spine value;\n      inherit (whole) links;\n      calls = prefix (kinds [\"call\" \"nonNull\" \"literalIndex\"]) links;\n      after = lib.drop calls links;\n      merged = prefix lib.id (lib.zipListsWith (one: next: memberish one && memberish next) after (lib.drop 1 after));\n      lead =\n        if links != [] && (builtins.head links).kind != \"call\"\n        then calls + merged\n        else calls;\n      inherit\n        (lib.foldl' grouping {\n          groups = [];\n          called = false;\n        } (lib.drop lead links))\n        groups\n        ;\n    in [\n      (operand \"member\" whole.base)\n      (map (link: link.doc) (lib.take lead links))\n      (map (group: nest 1 [hardline (map (link: link.doc) group)]) groups)\n    ];\n\n    forms = {\n      name = value: value.name;\n      int = toString;\n      float = builtins.toJSON;\n      bool = lib.boolToString;\n      num = value: value.num;\n      string = value: throw \"ts: the bare string \\\"\${value}\\\" where an expression is expected; a name is a Nix variable, text is `str`\";\n      list = _: throw \"ts: a list where an expression is expected; an array is `array [...]`, operators are `infix [...]`\";\n      array = value: array value.array;\n      str = value: \"\\\"\${value.str}\\\"\";\n      sq = value: \"'\${value.sq}'\";\n      tpl = value: let\n        tick = \"`\";\n      in [\n        tick\n        (map (part:\n          if builtins.isString part\n          then part\n          else [\"\\\${\" (expr part.sub) \"}\"])\n        value.tpl)\n        tick\n      ];\n      regex = value: \"/\${value.regex.pattern}/\${value.regex.flags}\";\n      obj = value: delimited \"{\" \"}\" \",\" true never value.obj;\n      shape = value: delimitedWith memberDoc \"{\" \"}\" \";\" true never value.shape;\n      prop = value: [(keyDoc value.prop.key) \":\" (hang \"value\" value.prop.value)];\n      typed = value: [(expr value.typed.value) \": \" (expr value.typed.type)];\n      opt = value: [(expr value.opt) \"?\"];\n      computed = value: [\"[\" (expr value.computed) \"]\"];\n      call = value: [(operand \"member\" value.call.callee) (argumentList value.call.arguments)];\n      optCall = value: [(operand \"member\" value.optCall.callee) \"?.\" (argumentList value.optCall.arguments)];\n      new = value: [\"new \" (operand \"member\" value.new.callee) (argumentList value.new.arguments)];\n      generic = value: [(operand \"member\" value.generic.callee) (delimited \"<\" \">\" \",\" false never value.generic.types)];\n      dot = value: [(operand \"member\" value.dot.value) (dotted value.dot.path)];\n      idx = value: [(operand \"member\" value.idx.value) \"[\" (expr value.idx.index) \"]\"];\n      optIdx = value: [(operand \"member\" value.optIdx.value) \"?.[\" (expr value.optIdx.index) \"]\"];\n      nonNull = value: [(operand \"member\" value.nonNull) \"!\"];\n      inc = value: [(operand \"member\" value.inc) \"++\"];\n      dec = value: [(operand \"member\" value.dec) \"--\"];\n      not = value: [\"!\" (operand \"unary\" value.not)];\n      neg = value: [\"-\" (operand \"unary\" value.neg)];\n      typeof = value: [\"typeof \" (operand \"unary\" value.typeof)];\n      delete = value: [\"delete \" (operand \"unary\" value.delete)];\n      await = value: [\"await \" (operand \"unary\" value.await)];\n      readonly = value: [\"readonly \" (expr value.readonly)];\n      spread = value: [\"...\" (operand \"spread\" value.spread)];\n      async = value: [\"async \" (expr value.async)];\n      typeOnly = value: [\"type \" (clauseDoc value.typeOnly)];\n      namespace = value: [\"* as \" (expr value.namespace)];\n      arrayOf = value: [(operand \"arrayOf\" value.arrayOf) \"[]\"];\n      union = value: lib.intersperse \" | \" (map (operand \"union\") value.union);\n      intersection = value: lib.intersperse \" & \" (map (operand \"intersection\") value.intersection);\n      is = value: [(expr value.is.name) \" is \" (expr value.is.type)];\n      extends = value: [(expr value.extends.name) \" extends \" (expr value.extends.base)];\n      binary = binaryDoc;\n      ternary = value: [(operand \"test\" value.ternary.test) (branch \"?\" value.ternary.yes) (branch \":\" value.ternary.no)];\n      arrow = value: [\n        (parameterList value.arrow.parameters)\n        \" =>\"\n        (\n          if builtins.isList (see value.arrow.body)\n          then [\" \" (block value.arrow.body)]\n          else if see value.arrow.body ? below\n          then hang \"value\" value.arrow.body\n          else hang \"arrowBody\" value.arrow.body\n        )\n      ];\n      fn = value: [\"function\" (lib.optionals (value.fn.name != null) [\" \" (expr value.fn.name)]) (lib.optionalString (value.fn.name == null) \" \") (parameterList value.fn.parameters) \" \" (block value.fn.body)];\n      method = value: [(memberDoc value.method.key) (parameterList value.method.parameters) (lib.optionals (value.method.body != null) [\" \" (block value.method.body)])];\n      chain = value: chainDoc value.chain;\n      class = value: [\"class \" (expr value.class.head) \" \" (memberBlock value.class.members)];\n      interface = value: [\"interface \" (expr value.interface.head) \" \" (memberBlock value.interface.members)];\n    };\n\n    expr = value: let\n      seen = see value;\n    in\n      (forms.\${kindOf seen} or (throw \"ts: no expression \${kindOf seen}\")) seen;\n\n    top = value:\n      if value ? blank\n      then hardline\n      else [(statement value) hardline];\n\n    globals =\n      lib.genAttrs [\n        \"Array\"\n        \"Awaited\"\n        \"Boolean\"\n        \"Buffer\"\n        \"Bun\"\n        \"Date\"\n        \"Error\"\n        \"Extract\"\n        \"Intl\"\n        \"JSON\"\n        \"Map\"\n        \"Math\"\n        \"NodeJS\"\n        \"Number\"\n        \"Object\"\n        \"Parameters\"\n        \"Partial\"\n        \"Promise\"\n        \"Readonly\"\n        \"ReadonlySet\"\n        \"Record\"\n        \"Response\"\n        \"ReturnType\"\n        \"Set\"\n        \"String\"\n        \"Symbol\"\n        \"WeakMap\"\n        \"WeakSet\"\n        \"any\"\n        \"boolean\"\n        \"console\"\n        \"globalThis\"\n        \"never\"\n        \"number\"\n        \"object\"\n        \"performance\"\n        \"process\"\n        \"string\"\n        \"super\"\n        \"this\"\n        \"undefined\"\n        \"unknown\"\n        \"void\"\n      ]\n      nameNode;\n  in\n    globals\n    // {\n      null' = nameNode \"null\";\n\n      const' = nameNode \"const\";\n\n      blank = {blank = true;};\n\n      comment = string: {comment = string;};\n\n      rows = values: {rows = values;};\n\n      below = value: {below = value;};\n\n      spaces = by: values: {spaces = {inherit by values;};};\n\n      str = string: {str = string;};\n\n      sq = string: {sq = string;};\n\n      num = text: {num = text;};\n\n      tpl = parts: {tpl = parts;};\n\n      sub = value: {sub = value;};\n\n      regex = pattern: flags: {regex = {inherit pattern flags;};};\n\n      array = values: {array = values;};\n\n      obj = members: {obj = members;};\n\n      shape = members: {shape = members;};\n\n      prop = key: value: {prop = {inherit key value;};};\n\n      field = key: value: {field = {inherit key value;};};\n\n      typed = value: type: {typed = {inherit value type;};};\n\n      opt = value: {opt = value;};\n\n      computed = value: {computed = value;};\n\n      call = callee: arguments: {call = {inherit callee arguments;};};\n\n      optCall = callee: arguments: {optCall = {inherit callee arguments;};};\n\n      new = callee: arguments: {new = {inherit callee arguments;};};\n\n      generic = callee: types: {generic = {inherit callee types;};};\n\n      dot = value: path: {dot = {inherit value path;};};\n\n      idx = value: index: {idx = {inherit value index;};};\n\n      optIdx = value: index: {optIdx = {inherit value index;};};\n\n      nonNull = value: {nonNull = value;};\n\n      inc = value: {inc = value;};\n\n      dec = value: {dec = value;};\n\n      not = value: {not = value;};\n\n      neg = value: {neg = value;};\n\n      typeof = value: {typeof = value;};\n\n      delete = value: {delete = value;};\n\n      await = value: {await = value;};\n\n      readonly = value: {readonly = value;};\n\n      spread = value: {spread = value;};\n\n      async = value: {async = value;};\n\n      export = value: {export = value;};\n\n      default = value: {default = value;};\n\n      typeOnly = value: {typeOnly = value;};\n\n      namespace = value: {namespace = value;};\n\n      arrayOf = value: {arrayOf = value;};\n\n      union = values: {union = values;};\n\n      intersection = values: {intersection = values;};\n\n      is = name: type: {is = {inherit name type;};};\n\n      extends = name: base: {extends = {inherit name base;};};\n\n      infix = values: {infix = values;};\n\n      ternary = test: yes: no: {ternary = {inherit test yes no;};};\n\n      arrow = parameters: body: {arrow = {inherit parameters body;};};\n\n      fn = name: parameters: body: {fn = {inherit name parameters body;};};\n\n      method = key: parameters: body: {method = {inherit key parameters body;};};\n\n      chain = value: {chain = value;};\n\n      class = head: members: {class = {inherit head members;};};\n\n      interface = head: members: {interface = {inherit head members;};};\n\n      type = name: value: {type = {inherit name value;};};\n\n      const = target: value: {const = {inherit target value;};};\n\n      let' = target: value: {\"let\" = {inherit target value;};};\n\n      return = value: {return = value;};\n\n      return' = {return = null;};\n\n      throw' = value: {throw = value;};\n\n      break = {break = true;};\n\n      continue = {continue = true;};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      for = init: condition: update: body: {for = {inherit init condition update body;};};\n\n      forOf = target: subject: body: {forOf = {inherit target subject body;};};\n\n      forIn = target: subject: body: {forIn = {inherit target subject body;};};\n\n      forAwait = target: subject: body: {forAwait = {inherit target subject body;};};\n\n      while = test: body: {while = {inherit test body;};};\n\n      switch = subject: cases: {switch = {inherit subject cases;};};\n\n      case = test: body: {case = {inherit test body;};};\n\n      braces = values: {braces = values;};\n\n      try = body: handlers: {try = {inherit body handlers;};};\n\n      catch = parameter: body: {catch = {inherit parameter body;};};\n\n      finally = values: {finally = values;};\n\n      import' = clause: source: {import = {inherit clause source;};};\n\n      render = file: let\n        spaced = (see file) ? spaces;\n        values =\n          if spaced\n          then file.spaces.values\n          else file;\n      in\n        doc.renderWith (\n          if spaced\n          then lib.strings.replicate file.spaces.by \" \"\n          else \"\\t\"\n        )\n        null (map top (see values));\n    };\n\n  sourceFile = name: text:\n    builtins.path {\n      path = builtins.toFile name text;\n      inherit name;\n    };\nin {\n  cssSource = list: \"\${nodes list}\\n\";\n\n  inherit doc glsl javascript lisp lua luau markdown patch python shell ts vbs;\n\n  inherit sourceFile;\n\n  sourceDir = pkgs: name: files: pkgs.runCommand name {} \"mkdir $out\\n\${lib.concatStrings (lib.mapAttrsToList (file: text: \"cp \${sourceFile file text} $out/\${file}\\n\") files)}\";\n\n  jsonSource = value: jsonValue \"\" value + \"\\n\";\n\n  tomlSource = groups: lib.concatMapStringsSep \"\\n\" (lib.concatMapStrings (item: \"\${tomlLine item}\\n\")) groups;\n\n  cargoLockSource = lock: \"# This file is automatically @generated by Cargo.\\n# It is not intended for manual editing.\\nversion = \${toString lock.version}\\n\${lib.concatMapStrings cargoPackage lock.package}\";\n\n  iniSource = lib.concatMapStringsSep \"\\n\" (section: \"[\${section.name}]\\n\${keyValueSource \"\" section.groups}\");\n\n  keyValueSource = keyValueSource \"\";\n\n  cmusThemeSource = keyValueSource \"set \";\n\n  xmlSource = root: \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n\${xmlElement \"\" root}\";\n\n  sshPublicKey = key: \"\${key.type} \${key.key} \${key.comment}\";\n\n  sshKeySource = key: \"\${key.type} \${key.key} \${key.comment}\\n\";\n\n  pemSource = pem: lib.concatMapStrings (block: \"-----BEGIN \${pem.label}-----\\n\${wrap pem.width block}-----END \${pem.label}-----\\n\") pem.blocks;\n\n  gitignoreSource = lib.concatMapStrings (pattern: \"\${pattern}\\n\");\n\n  pathSource = path: \"\${path}\\n\";\n}\n";
-        "modules/desktop/session/tomoe/lisp/sway.data.nix" = "{\n      blank,\n      function,\n      quote,\n      rows,\n      str,\n      ...\n    }: [\n      [\"in-package\" \"#:tomoe-user\"]\n      blank\n      (rows [\n        [\"defun\" \"sway--leaves\" [\"tree\"]]\n        (rows [\n          [\"cond\" [[\"null\" \"tree\"] \"nil\"]]\n          [[[\"integerp\" \"tree\"] [\"list\" \"tree\"]]]\n          [[\"t\" [\"loop\" \"for\" \"kid\" \"in\" [\"rest\" \"tree\"] \"append\" [\"sway--leaves\" \"kid\"]]]]\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--prune\" [\"tree\" \"keep\"]]\n        (rows [\n          [\"cond\" [[\"null\" \"tree\"] \"nil\"]]\n          [[[\"integerp\" \"tree\"] [\"when\" [\"member\" \"tree\" \"keep\"] \"tree\"]]]\n          [\n            [\n              \"t\"\n              (rows [\n                [\n                  \"let\"\n                  [\n                    [\n                      \"kids\"\n                      (rows [\n                        [\"loop\" \"for\" \"kid\" \"in\" [\"rest\" \"tree\"]]\n                        [\"for\" \"pruned\" \"=\" [\"sway--prune\" \"kid\" \"keep\"]]\n                        [\"when pruned\" \"collect pruned\"]\n                      ])\n                    ]\n                  ]\n                ]\n                [[\"if\" [\"rest\" \"kids\"] [\"cons\" [\"first\" \"tree\"] \"kids\"] [\"first\" \"kids\"]]]\n              ])\n            ]\n          ]\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--insert\" [\"tree\" \"target\" \"id\" \"direction\"]]\n        (rows [\n          [\"cond\" [[\"integerp\" \"tree\"] [\"if\" [\"eql\" \"tree\" \"target\"] [\"list\" \"direction\" \"tree\" \"id\"] \"tree\"]]]\n          (rows [\n            [[\"and\" [\"eq\" [\"first\" \"tree\"] \"direction\"] [\"member\" \"target\" [\"rest\" \"tree\"]]]]\n            (rows [\n              [\"let\" [[\"tail\" [\"member\" \"target\" [\"rest\" \"tree\"]]]]]\n              [[\"append\" [\"ldiff\" \"tree\" [\"rest\" \"tail\"]] [\"list\" \"id\"] [\"rest\" \"tail\"]]]\n            ])\n          ])\n          [\n            [\n              \"t\"\n              (rows [\n                [\"cons\" [\"first\" \"tree\"]]\n                (rows [\n                  [\"loop\" \"for\" \"kid\" \"in\" [\"rest\" \"tree\"]]\n                  [\n                    \"collect\"\n                    (rows [\n                      [\"if\" [\"member\" \"target\" [\"sway--leaves\" \"kid\"]]]\n                      [[\"sway--insert\" \"kid\" \"target\" \"id\" \"direction\"]]\n                      \"kid\"\n                    ])\n                  ]\n                ])\n              ])\n            ]\n          ]\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--swap\" [\"tree\" \"a\" \"b\"]]\n        (rows [\n          [\"cond\" [[\"eql\" \"tree\" \"a\"] \"b\"]]\n          [[[\"eql\" \"tree\" \"b\"] \"a\"]]\n          [[[\"atom\" \"tree\"] \"tree\"]]\n          [[\"t\" [\"cons\" [\"first\" \"tree\"] [\"loop\" \"for\" \"kid\" \"in\" [\"rest\" \"tree\"] \"collect\" [\"sway--swap\" \"kid\" \"a\" \"b\"]]]]]\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--boxes\" [\"tree\" \"x\" \"y\" \"width\" \"height\" \"gap\"]]\n        (rows [\n          [\"if\" [\"integerp\" \"tree\"]]\n          [[\"list\" [\"list\" \"tree\" \"x\" \"y\" \"width\" \"height\"]]]\n          (rows [\n            [\n              \"let*\"\n              (rows [\n                [[\"kids\" [\"rest\" \"tree\"]]]\n                [[\"horizontal\" [\"eq\" [\"first\" \"tree\"] \":h\"]]]\n                [[\"origin\" [\"if\" \"horizontal\" \"x\" \"y\"]]]\n                [[\"span\" [\"if\" \"horizontal\" \"width\" \"height\"]]]\n                [[\"step\" [\"floor\" [\"-\" \"span\" [\"*\" [\"1-\" [\"length\" \"kids\"]] \"gap\"]] [\"length\" \"kids\"]]]]\n                [[\"start\" \"origin\"]]\n              ])\n            ]\n            (rows [\n              [\"loop\" \"for\" [\"kid\" \".\" \"more\"] \"on\" \"kids\"]\n              [\"for\" \"size\" \"=\" [\"if\" \"more\" \"step\" [\"-\" [\"+\" \"origin\" \"span\"] \"start\"]]]\n              [\n                \"append\"\n                (rows [\n                  [\"if\" \"horizontal\"]\n                  [[\"sway--boxes\" \"kid\" \"start\" \"y\" \"size\" \"height\" \"gap\"]]\n                  [[\"sway--boxes\" \"kid\" \"x\" \"start\" \"width\" \"size\" \"gap\"]]\n                ])\n              ]\n              [\"do\" [\"incf\" \"start\" [\"+\" \"size\" \"gap\"]]]\n            ])\n          ])\n        ])\n      ])\n      blank\n      (rows [\n        [\"defun\" \"sway--neighbour\" [\"boxes\" \"id\" \"dx\" \"dy\"]]\n        (rows [\n          [\"let\" [[\"from\" [\"assoc\" \"id\" \"boxes\"]] [\"best\" \"nil\"] [\"distance\" \"nil\"]]]\n          (rows [\n            [\"flet\" [[\"centre\" [\"box\"] [\"list\" [\"+\" [\"second\" \"box\"] [\"/\" [\"fourth\" \"box\"] 2]] [\"+\" [\"third\" \"box\"] [\"/\" [\"fifth\" \"box\"] 2]]]]]]\n            (rows [\n              [\"when\" \"from\"]\n              (rows [\n                [\"destructuring-bind\" [\"fx\" \"fy\"] [\"centre\" \"from\"]]\n                (rows [\n                  [\"dolist\" [\"box\" \"boxes\"]]\n                  (rows [\n                    [\"destructuring-bind\" [\"cx\" \"cy\"] [\"centre\" \"box\"]]\n                    (rows [\n                      [\n                        \"let*\"\n                        (rows [\n                          [[\"ddx\" [\"-\" \"cx\" \"fx\"]] [\"ddy\" [\"-\" \"cy\" \"fy\"]]]\n                          [[\"along\" [\"if\" [\"zerop\" \"dx\"] \"ddy\" \"ddx\"]]]\n                          [[\"across\" [\"if\" [\"zerop\" \"dx\"] \"ddx\" \"ddy\"]]]\n                          [[\"far\" [\"+\" [\"abs\" \"ddx\"] [\"abs\" \"ddy\"]]]]\n                        ])\n                      ]\n                      (rows [\n                        [\n                          \"when\"\n                          (rows [\n                            [\"and\" [\"not\" [\"eq\" \"box\" \"from\"]]]\n                            [[\"eq\" [\"plusp\" \"along\"] [\"plusp\" [\"+\" \"dx\" \"dy\"]]]]\n                            [[\">\" [\"abs\" \"along\"] [\"abs\" \"across\"]]]\n                            [[\"or\" [\"null\" \"distance\"] [\"<\" \"far\" \"distance\"]]]\n                          ])\n                        ]\n                        [[\"setf\" \"best\" [\"first\" \"box\"] \"distance\" \"far\"]]\n                      ])\n                    ])\n                  ])\n                ])\n              ])\n            ])\n          ])\n          \"best\"\n        ])\n      ])\n      blank\n      (rows [\n        [\"define-extension\" (str \"sway\")]\n        (rows [\n          [\":reads\" [\":windows\" \":rules\" \":workareas\" \":outputs\" \":focus\" \":key\" \":button\" \":pointer\" \":request\" \":settings\"]]\n          [\n            \":state\"\n            (rows [\n              [\"list\" \":active\" 1 \":workspaces\" \"nil\" \":trees\" \"nil\" \":split\" \"nil\" \":focus\" \"nil\"]\n              [\":fullscreen\" \"nil\" \":floating\" \"nil\"]\n            ])\n          ]\n          [\":admission\" \"t\"]\n        ])\n        [[\"snapshot\" \"state\" \"event\"]]\n        (rows [\n          [\n            \"let*\"\n            (rows [\n              [\n                [\n                  \"windows\"\n                  (rows [\n                    [\"remove-if\" [\"lambda\" [\"window\"] [\"policy--unmanaged-p\" \"snapshot\" \"window\"]]]\n                    [[\"context\" \"snapshot\" \":windows\"]]\n                  ])\n                ]\n              ]\n              [[\"ids\" [\"mapcar\" [\"lambda\" [\"window\"] [\"getf\" \"window\" \":id\"]] \"windows\"]]]\n              [[\"count\" [\"getf\" \"+layout+\" \":workspaces\"]]]\n              [[\"gap\" [\"getf\" \"+layout+\" \":gaps\"]]]\n              [[\"area\" [\"policy--area\" \"snapshot\"]]]\n              [\n                [\n                  \"output\"\n                  [\n                    \"and\"\n                    \"area\"\n                    (rows [\n                      [\"find\" [\"getf\" \"area\" \":name\"] [\"context\" \"snapshot\" \":outputs\"]]\n                      [\":test\" (function \"equal\") \":key\" [\"lambda\" [\"output\"] [\"getf\" \"output\" \":name\"]]]\n                    ])\n                  ]\n                ]\n              ]\n              [[\"type\" [\"getf\" \"event\" \":type\"]]]\n              [[\"command\" [\"and\" [\"eq\" \"type\" \":key\"] [\"equal\" [\"getf\" \"event\" \":owner\"] (str \"sway\")] [\"getf\" \"event\" \":command\"]]]]\n              [\n                [\n                  \"motion\"\n                  [\n                    \"rest\"\n                    (rows [\n                      [\n                        \"assoc\"\n                        \"command\"\n                        (quote (rows [\n                          [[(str \"focus-left\") (-1) 0] [(str \"focus-right\") 1 0]]\n                          [[(str \"focus-up\") 0 (-1)] [(str \"focus-down\") 0 1]]\n                        ]))\n                      ]\n                      [\":test\" (function \"equal\")]\n                    ])\n                  ]\n                ]\n              ]\n              [[\"active\" [\"max\" 1 [\"min\" \"count\" [\"getf\" \"state\" \":active\"]]]]]\n              [\n                [\n                  \"workspaces\"\n                  (rows [\n                    [\"loop\" \"for index below count\"]\n                    [\n                      \"collect\"\n                      (rows [\n                        [\"remove-if-not\" [\"lambda\" [\"id\"] [\"member\" \"id\" \"ids\"]]]\n                        [[\"nth\" \"index\" [\"getf\" \"state\" \":workspaces\"]]]\n                      ])\n                    ]\n                  ])\n                ]\n              ]\n              [[\"trees\" [\"loop\" \"for index below count\" \"collect\" [\"nth\" \"index\" [\"getf\" \"state\" \":trees\"]]]]]\n              [[\"split\" [\"remove-if-not\" [\"lambda\" [\"entry\"] [\"member\" [\"car\" \"entry\"] \"ids\"]] [\"getf\" \"state\" \":split\"]]]]\n              [[\"focused\" [\"getf\" \"state\" \":focus\"]]]\n              [[\"fullscreen\" [\"remove-if-not\" [\"lambda\" [\"id\"] [\"member\" \"id\" \"ids\"]] [\"getf\" \"state\" \":fullscreen\"]]]]\n              [[\"floating\" [\"remove-if-not\" [\"lambda\" [\"entry\"] [\"member\" [\"car\" \"entry\"] \"ids\"]] [\"getf\" \"state\" \":floating\"]]]]\n              [[\"external\" [\"previous-context\" \"snapshot\" \":focus\"]]]\n              [[\"terminal\" [\"and\" [\"equal\" \"command\" (str \"terminal\")] [\"policy--terminal\" \"windows\"]]]]\n              [[\"new\" \"nil\"]]\n            ])\n          ]\n          (rows [\n            [\n              \"labels\"\n              (rows [\n                [[\"workspace\" [\"number\"] [\"nth\" [\"1-\" \"number\"] \"workspaces\"]]]\n                [\n                  [\n                    \"home\"\n                    [\"id\"]\n                    (rows [\n                      [\"loop\" \"for list in workspaces\" \"for number from 1\"]\n                      [\"when\" [\"member\" \"id\" \"list\"] \"return number\"]\n                    ])\n                  ]\n                ]\n                (rows [\n                  [\"boxes\" [\"tree\"]]\n                  (rows [\n                    [\"when\" [\"and\" \"tree\" \"area\"]]\n                    (rows [\n                      [\"sway--boxes\" \"tree\" [\"+\" [\"getf\" \"area\" \":x\"] \"gap\"] [\"+\" [\"getf\" \"area\" \":y\"] \"gap\"]]\n                      [[\"-\" [\"getf\" \"area\" \":width\"] [\"*\" 2 \"gap\"]] [\"-\" [\"getf\" \"area\" \":height\"] [\"*\" 2 \"gap\"]] \"gap\"]\n                    ])\n                  ])\n                ])\n                (rows [\n                  [\"arrange\" [\"number\"]]\n                  (rows [\n                    [\n                      \"let*\"\n                      (rows [\n                        [\n                          [\n                            \"keep\"\n                            (rows [\n                              [\"remove-if\" [\"lambda\" [\"id\"] [\"or\" [\"member\" \"id\" \"fullscreen\"] [\"assoc\" \"id\" \"floating\"]]]]\n                              [[\"workspace\" \"number\"]]\n                            ])\n                          ]\n                        ]\n                        [[\"tree\" [\"sway--prune\" [\"nth\" [\"1-\" \"number\"] \"trees\"] \"keep\"]]]\n                      ])\n                    ]\n                    (rows [\n                      [\"dolist\" [\"id\" \"keep\"]]\n                      (rows [\n                        [\"unless\" [\"member\" \"id\" [\"sway--leaves\" \"tree\"]]]\n                        (rows [\n                          [\"setf\" \"tree\"]\n                          (rows [\n                            [\"if\" [\"null\" \"tree\"]]\n                            \"id\"\n                            (rows [\n                              [\n                                \"let*\"\n                                (rows [\n                                  [[\"leaves\" [\"sway--leaves\" \"tree\"]]]\n                                  [[\"target\" [\"if\" [\"member\" \"focused\" \"leaves\"] \"focused\" [\"car\" [\"last\" \"leaves\"]]]]]\n                                  [[\"box\" [\"assoc\" \"target\" [\"boxes\" \"tree\"]]]]\n                                  [\n                                    [\n                                      \"direction\"\n                                      (rows [\n                                        [\"or\" [\"cdr\" [\"assoc\" \"target\" \"split\"]]]\n                                        [[\"if\" [\"and\" \"box\" [\">\" [\"fifth\" \"box\"] [\"fourth\" \"box\"]]] \":v\" \":h\"]]\n                                      ])\n                                    ]\n                                  ]\n                                ])\n                              ]\n                              [[\"setf\" \"split\" [\"remove\" \"target\" \"split\" \":key\" (function \"car\")]]]\n                              [[\"sway--insert\" \"tree\" \"target\" \"id\" \"direction\"]]\n                            ])\n                          ])\n                        ])\n                      ])\n                    ])\n                    [[\"setf\" [\"nth\" [\"1-\" \"number\"] \"trees\"] \"tree\"]]\n                  ])\n                ])\n                [[\"arrange-all\" [] [\"loop\" \"for number from 1 to count\" \"do\" [\"arrange\" \"number\"]]]]\n                (rows [\n                  [\"switch\" [\"number\"]]\n                  [[\"setf\" \"active\" \"number\" \"focused\" [\"car\" [\"last\" [\"workspace\" \"number\"]]]]]\n                ])\n                [[\"neighbour\" [\"direction\"] [\"1+\" [\"mod\" [\"+\" \"active\" (-1) \"direction\"] \"count\"]]]]\n              ])\n            ]\n            (rows [\n              [\"when\" [\"and\" [\"member\" \"external\" \"ids\"] [\"not\" [\"eql\" \"external\" \"focused\"]]]]\n              [[\"setf\" \"focused\" \"external\" \"active\" [\"or\" [\"home\" \"external\"] \"active\"]]]\n            ])\n            (rows [\n              [\"let\" [[\"known\" [\"loop\" \"for list in workspaces\" \"append list\"]]]]\n              (rows [\n                [\"dolist\" [\"window\" \"windows\"]]\n                (rows [\n                  [\"let\" [[\"id\" [\"getf\" \"window\" \":id\"]]]]\n                  (rows [\n                    [\"unless\" [\"member\" \"id\" \"known\"]]\n                    [[\"setf\" [\"nth\" [\"1-\" \"active\"] \"workspaces\"] [\"append\" [\"workspace\" \"active\"] [\"list\" \"id\"]]]]\n                    [[\"when\" [\"getf\" \"window\" \":fullscreen-requested\"] [\"push\" \"id\" \"fullscreen\"]]]\n                    [[\"push\" \"id\" \"new\"]]\n                  ])\n                ])\n              ])\n            ])\n            (rows [\n              [\"case\" \"type\"]\n              (rows [\n                \":button\"\n                (rows [\n                  [\"when\" [\"and\" [\"eq\" [\"getf\" \"event\" \":state\"] \":pressed\"] [\"member\" [\"getf\" \"event\" \":id\"] [\"workspace\" \"active\"]]]]\n                  [[\"setf\" \"focused\" [\"getf\" \"event\" \":id\"]]]\n                ])\n              ])\n              (rows [\n                \":pointer\"\n                (rows [\n                  [\n                    \"when\"\n                    (rows [\n                      [\"and\" [\"eq\" [\"getf\" \"event\" \":state\"] \":enter\"] [\"getf\" \"event\" \":moved\"]]\n                      [[\"setting\" \"snapshot\" \":focus-follows-mouse\"]]\n                      [[\"member\" [\"getf\" \"event\" \":id\"] [\"workspace\" \"active\"]]]\n                    ])\n                  ]\n                  [[\"setf\" \"focused\" [\"getf\" \"event\" \":id\"]]]\n                ])\n              ])\n              (rows [\n                [[\":metadata\" \":request\"]]\n                (rows [\n                  [\"let\" [[\"id\" [\"getf\" \"event\" \":id\"]]]]\n                  (rows [\n                    [\"when\" [\"member\" \"id\" \"ids\"]]\n                    (rows [\n                      [\"case\" [\"getf\" \"event\" \":request\"]]\n                      (rows [\n                        \":fullscreen\"\n                        [[\"setf\" \"fullscreen\" [\"remove\" \"id\" \"fullscreen\"]]]\n                        [[\"when\" [\"getf\" \"event\" \":requested\"] [\"push\" \"id\" \"fullscreen\"] [\"setf\" \"focused\" \"id\"]]]\n                      ])\n                      [[\":unfullscreen\" [\"setf\" \"fullscreen\" [\"remove\" \"id\" \"fullscreen\"]]]]\n                      [[\":activate\" [\"setf\" \"active\" [\"or\" [\"home\" \"id\"] \"active\"] \"focused\" \"id\"]]]\n                    ])\n                  ])\n                ])\n              ])\n            ])\n            (rows [\n              [\"when\" \"terminal\"]\n              [[\"setf\" \"active\" [\"or\" [\"home\" \"terminal\"] \"active\"] \"focused\" \"terminal\"]]\n            ])\n            [[\"arrange-all\"]]\n            (rows [\n              [\"let\" [[\"current\" [\"and\" [\"member\" \"focused\" [\"workspace\" \"active\"]] \"focused\"]]]]\n              (rows [\n                \"cond\"\n                [[[\"null\" \"command\"]]]\n                (rows [\n                  \"motion\"\n                  (rows [\n                    [\"let\" [[\"target\" [\"apply\" (function \"sway--neighbour\") [\"boxes\" [\"nth\" [\"1-\" \"active\"] \"trees\"]] \"current\" \"motion\"]]]]\n                    [[\"when\" \"target\" [\"setf\" \"focused\" \"target\"]]]\n                  ])\n                ])\n                [[[\"equal\" \"command\" (str \"workspace-next\")] [\"switch\" [\"neighbour\" 1]]]]\n                [[[\"equal\" \"command\" (str \"workspace-previous\")] [\"switch\" [\"neighbour\" (-1)]]]]\n                [[[\"null\" \"current\"]]]\n                (rows [\n                  [[\"member\" \"command\" (quote [(str \"move-next\") (str \"move-previous\")]) \":test\" (function \"equal\")]]\n                  (rows [\n                    [\"let\" [[\"number\" [\"neighbour\" [\"if\" [\"equal\" \"command\" (str \"move-next\")] 1 (-1)]]]]]\n                    (rows [\n                      [\"setf\" [\"nth\" [\"1-\" \"active\"] \"workspaces\"] [\"remove\" \"current\" [\"workspace\" \"active\"]]]\n                      [[\"nth\" [\"1-\" \"number\"] \"workspaces\"] [\"append\" [\"workspace\" \"number\"] [\"list\" \"current\"]]]\n                    ])\n                    [[\"switch\" \"number\"]]\n                  ])\n                ])\n                (rows [\n                  [[\"member\" \"command\" (quote [(str \"swap-previous\") (str \"swap-next\")]) \":test\" (function \"equal\")]]\n                  (rows [\n                    [\n                      \"let*\"\n                      (rows [\n                        [[\"leaves\" [\"sway--leaves\" [\"nth\" [\"1-\" \"active\"] \"trees\"]]]]\n                        [[\"index\" [\"position\" \"current\" \"leaves\"]]]\n                        [[\"other\" [\"and\" \"index\" [\"+\" \"index\" [\"if\" [\"equal\" \"command\" (str \"swap-next\")] 1 (-1)]]]]]\n                      ])\n                    ]\n                    (rows [\n                      [\"when\" [\"and\" \"other\" [\"<\" (-1) \"other\" [\"length\" \"leaves\"]]]]\n                      (rows [\n                        [\"setf\" [\"nth\" [\"1-\" \"active\"] \"trees\"]]\n                        [[\"sway--swap\" [\"nth\" [\"1-\" \"active\"] \"trees\"] \"current\" [\"nth\" \"other\" \"leaves\"]]]\n                      ])\n                    ])\n                  ])\n                ])\n                (rows [\n                  [[\"equal\" \"command\" (str \"split-horizontal\")]]\n                  [[\"setf\" \"split\" [\"acons\" \"current\" \":h\" [\"remove\" \"current\" \"split\" \":key\" (function \"car\")]]]]\n                ])\n                (rows [\n                  [[\"equal\" \"command\" (str \"split-vertical\")]]\n                  [[\"setf\" \"split\" [\"acons\" \"current\" \":v\" [\"remove\" \"current\" \"split\" \":key\" (function \"car\")]]]]\n                ])\n                (rows [\n                  [[\"equal\" \"command\" (str \"fullscreen\")]]\n                  (rows [\n                    [\"if\" [\"member\" \"current\" \"fullscreen\"]]\n                    [[\"setf\" \"fullscreen\" [\"remove\" \"current\" \"fullscreen\"]]]\n                    [[\"push\" \"current\" \"fullscreen\"]]\n                  ])\n                ])\n                (rows [\n                  [[\"equal\" \"command\" (str \"floating\")]]\n                  (rows [\n                    [\"cond\" [[\"member\" \"current\" \"fullscreen\"] [\"setf\" \"fullscreen\" [\"remove\" \"current\" \"fullscreen\"]]]]\n                    [[[\"assoc\" \"current\" \"floating\"] [\"setf\" \"floating\" [\"remove\" \"current\" \"floating\" \":key\" (function \"car\")]]]]\n                    [\n                      [\n                        \"area\"\n                        (rows [\n                          [\"push\" [\"cons\" \"current\" [\"policy--centred\" \"area\" [\"getf\" \"+layout+\" \":float-ratio\"]]]]\n                          \"floating\"\n                        ])\n                      ]\n                    ]\n                  ])\n                ])\n              ])\n            ])\n            [[\"arrange-all\"]]\n            (rows [\n              [\"let\" [[\"arrived\" [\"remove-if-not\" [\"lambda\" [\"id\"] [\"member\" \"id\" [\"workspace\" \"active\"]]] \"new\"]]]]\n              [[\"when\" \"arrived\" [\"setf\" \"focused\" [\"first\" \"arrived\"]]]]\n            ])\n            (rows [\n              [\"unless\" [\"member\" \"focused\" [\"workspace\" \"active\"]]]\n              [[\"setf\" \"focused\" [\"car\" [\"last\" [\"workspace\" \"active\"]]]]]\n            ])\n            (rows [\n              [\"let\" [[\"effects\" \"nil\"]]]\n              (rows [\n                [\"dolist\" [\"id\" \"ids\"]]\n                (rows [\n                  [\n                    \"let*\"\n                    (rows [\n                      [[\"number\" [\"home\" \"id\"]]]\n                      [[\"shown\" [\"eql\" \"number\" \"active\"]]]\n                      [\n                        [\n                          \"box\"\n                          (rows [\n                            [\n                              \"cond\"\n                              (rows [\n                                [[\"member\" \"id\" \"fullscreen\"]]\n                                [\n                                  [\n                                    \"and\"\n                                    \"output\"\n                                    (rows [\n                                      [\"list\" [\"getf\" \"output\" \":x\"] [\"getf\" \"output\" \":y\"]]\n                                      [[\"getf\" \"output\" \":width\"] [\"getf\" \"output\" \":height\"]]\n                                    ])\n                                  ]\n                                ]\n                              ])\n                            ]\n                            [[[\"cdr\" [\"assoc\" \"id\" \"floating\"]]]]\n                            [[\"t\" [\"rest\" [\"assoc\" \"id\" [\"boxes\" [\"nth\" [\"1-\" \"number\"] \"trees\"]]]]]]\n                          ])\n                        ]\n                      ]\n                    ])\n                  ]\n                  (rows [\n                    [\n                      \"push\"\n                      (rows [\n                        [\"if\" \"box\"]\n                        (rows [\n                          [\"destructuring-bind\" [\"x\" \"y\" \"width\" \"height\"] \"box\"]\n                          [[\"place\" \"id\" \"x\" \"y\" [\"max\" 1 \"width\"] [\"max\" 1 \"height\"] \"shown\"]]\n                        ])\n                        [[\"if\" \"shown\" [\"show-window\" \"id\"] [\"hide-window\" \"id\"]]]\n                      ])\n                    ]\n                    \"effects\"\n                  ])\n                  [[\"push\" [\"fullscreen\" \"id\" [\"and\" [\"member\" \"id\" \"fullscreen\"] \"t\"]] \"effects\"]]\n                ])\n              ])\n              (rows [\n                [\n                  \"let\"\n                  [\n                    [\n                      \"floats\"\n                      (rows [\n                        [\"remove-if\" [\"lambda\" [\"id\"] [\"member\" \"id\" \"fullscreen\"]]]\n                        [[\"mapcar\" (function \"car\") [\"reverse\" \"floating\"]]]\n                      ])\n                    ]\n                  ]\n                ]\n                (rows [\n                  [\n                    \"dolist\"\n                    [\n                      \"id\"\n                      (rows [\n                        [\"append\" [\"remove\" \"focused\" \"floats\"]]\n                        [[\"when\" [\"member\" \"focused\" \"floats\"] [\"list\" \"focused\"]]]\n                        \"fullscreen\"\n                      ])\n                    ]\n                  ]\n                  [[\"when\" [\"member\" \"id\" [\"workspace\" \"active\"]] [\"push\" [\"raise-window\" \"id\"] \"effects\"]]]\n                ])\n              ])\n              [[\"push\" [\"focus\" \"focused\" \":raise\" \"nil\"] \"effects\"]]\n              [[\"push\" [\"settings\" \":animations\" \"nil\"] \"effects\"]]\n              [[\"dolist\" [\"binding\" \"+layout-bindings+\"] [\"push\" [\"apply\" (function \"bind-key\") \"binding\"] \"effects\"]]]\n              (rows [\n                [\n                  \"values\"\n                  (rows [\n                    [\"list\" \":active\" \"active\" \":workspaces\" \"workspaces\" \":trees\" \"trees\" \":split\" \"split\"]\n                    [\":focus\" \"focused\" \":fullscreen\" \"fullscreen\" \":floating\" \"floating\"]\n                  ])\n                ]\n                [[\"nreverse\" \"effects\"]]\n                (rows [\n                  [\"when\" [\"and\" [\"equal\" \"command\" (str \"terminal\")] [\"null\" \"terminal\"]]]\n                  [[\"list\" [\"apply\" (function \"launch\") [\"policy--launch\" (str \"terminal\")]]]]\n                ])\n              ])\n            ])\n          ])\n        ])\n      ])\n    ]\n";
+        "modules/generators.nix" = "{lib}: let\n  declarations = set:\n    if builtins.isList set\n    then set\n    else throw \"cssSource: `set` must be a list of [property value] pairs, because declaration order matters in CSS\";\n\n  declaration = pair: \"  \${builtins.elemAt pair 0}: \${builtins.elemAt pair 1};\\n\";\n\n  indent = text: lib.concatMapStringsSep \"\\n\" (line: lib.optionalString (line != \"\") \"  \${line}\") (lib.splitString \"\\n\" text);\n\n  node = n:\n    if n ? select\n    then \"\${n.select} {\\n\${lib.concatMapStrings declaration (declarations n.set)}}\"\n    else if n ? rules\n    then \"\${n.at} {\\n\${indent (nodes n.rules)}\\n}\"\n    else \"\${n.at};\";\n\n  nodes = lib.concatMapStringsSep \"\\n\\n\" node;\n\n  jsonValue = prefix: value: let\n    inner = prefix + \"  \";\n    items = open: close: list:\n      if list == []\n      then open + close\n      else \"\${open}\\n\${lib.concatMapStringsSep \",\\n\" (item: inner + item) list}\\n\${prefix}\${close}\";\n  in\n    if builtins.isAttrs value\n    then items \"{\" \"}\" (map (key: \"\${builtins.toJSON key}: \${jsonValue inner value.\${key}}\") (value.__keys or (builtins.attrNames value)))\n    else if builtins.isList value\n    then items \"[\" \"]\" (map (jsonValue inner) value)\n    else builtins.toJSON value;\n\n  tomlValue = value:\n    if builtins.isList value\n    then \"[\${lib.concatMapStringsSep \", \" tomlValue value}]\"\n    else if builtins.isBool value\n    then lib.boolToString value\n    else if builtins.isString value\n    then builtins.toJSON value\n    else toString value;\n\n  tomlLine = item:\n    if builtins.isList item\n    then \"\${builtins.elemAt item 0} = \${tomlValue (builtins.elemAt item 1)}\"\n    else if item ? comment\n    then \"# \${item.comment}\"\n    else \"[[\${item.arrayTable}]]\";\n\n  cargoPackage = package:\n    \"\\n[[package]]\\n\"\n    + lib.concatMapStrings (key: lib.optionalString (package ? \${key}) \"\${key} = \${builtins.toJSON package.\${key}}\\n\") [\"name\" \"version\" \"source\" \"checksum\"]\n    + lib.optionalString (package ? dependencies) \"dependencies = [\\n\${lib.concatMapStrings (dependency: \" \${builtins.toJSON dependency},\\n\") package.dependencies}]\\n\";\n\n  keyValueSource = prefix: lib.concatMapStringsSep \"\\n\" (lib.concatMapStrings (pair: \"\${prefix}\${builtins.elemAt pair 0}=\${builtins.elemAt pair 1}\\n\"));\n\n  xmlElement = prefix: element:\n    if element ? children\n    then \"\${prefix}<\${element.name}>\\n\${lib.concatMapStrings (xmlElement \"\${prefix} \") element.children}\${prefix}</\${element.name}>\\n\"\n    else \"\${prefix}<\${element.name}>\${element.text}</\${element.name}>\\n\";\n\n  wrap = width: text:\n    lib.optionalString (text != \"\") \"\${builtins.substring 0 width text}\\n\${wrap width (builtins.substring width (builtins.stringLength text) text)}\";\n\n  kindOf = value:\n    if builtins.isAttrs value\n    then builtins.head (builtins.attrNames value)\n    else builtins.typeOf value;\n\n  spelling = lib.removeSuffix \"'\";\n\n  boundBlock = {\n    language,\n    name,\n    declared,\n  }: body: let\n    formals = builtins.attrNames (builtins.functionArgs body);\n    result = body (lib.genAttrs formals (formal: name (spelling formal)));\n    missing = lib.subtractLists (declared result) (map spelling formals);\n  in\n    if !builtins.isFunction body\n    then body\n    else if missing != []\n    then throw \"\${language}: \${lib.concatStringsSep \", \" missing} bound but not declared in its block\"\n    else result;\n\n  infixTree = {\n    language,\n    precedence,\n    right ? [],\n    operand,\n  }: let\n    parse = items: let\n      count = builtins.length items;\n      operators = lib.genList (index: builtins.elemAt items (2 * index + 1)) (count / 2);\n      levels = map (symbol: precedence.\${symbol} or (throw \"\${language}: `\${toString symbol}` is not a binary operator\")) operators;\n      lowest = lib.foldl' lib.min 1000 levels;\n      indices = builtins.filter (index: builtins.elemAt levels index == lowest) (lib.range 0 (builtins.length operators - 1));\n      at =\n        if builtins.elem (builtins.elemAt operators (builtins.head indices)) right\n        then builtins.head indices\n        else lib.last indices;\n    in\n      if count == 1\n      then operand (builtins.head items)\n      else if lib.mod count 2 == 0\n      then throw \"\${language}: an infix list alternates operands and operators and ends in an operand\"\n      else {\n        binary = {\n          operator = builtins.elemAt operators at;\n          left = parse (lib.take (2 * at + 1) items);\n          right = parse (lib.drop (2 * at + 2) items);\n        };\n      };\n  in\n    parse;\n\n  doc = let\n    cons = margin: flat: part: tail: {\n      head = {inherit margin flat part;};\n      inherit tail;\n    };\n\n    push = margin: flat: parts: rest: builtins.foldl' (tail: part: cons margin flat part tail) rest (lib.reverseList parts);\n\n    multiline = lib.hasInfix \"\\n\";\n\n    firstLine = string: builtins.head (lib.splitString \"\\n\" string);\n\n    lastLine = string: lib.last (lib.splitString \"\\n\" string);\n\n    inner = part: part.group or part.align or part.nest.part;\n\n    fitting = {\n      string = width: frame: rest:\n        if multiline frame.part\n        then !frame.flat && builtins.stringLength (firstLine frame.part) <= width\n        else fits (width - builtins.stringLength frame.part) rest;\n      list = width: frame: rest: fits width (push frame.margin frame.flat frame.part rest);\n      break = width: frame: rest: !frame.flat || frame.part.break != null && fits (width - builtins.stringLength frame.part.break) rest;\n      nest = width: frame: rest: fits width (cons frame.margin frame.flat (inner frame.part) rest);\n      align = fitting.nest;\n      group = fitting.nest;\n    };\n\n    fits = width: stack: width >= 0 && (stack == null || fitting.\${kindOf stack.head.part} width stack.head stack.tail);\n\n    emit = state: out: column: pad: stack:\n      builtins.seq column (builtins.seq out {\n        key = state.key + 1;\n        inherit (state) unit;\n        inherit out column pad stack;\n      });\n\n    start = state:\n      if state.pad == null\n      then state.column\n      else state.pad;\n\n    after = state: string:\n      if multiline string\n      then builtins.stringLength (lastLine string)\n      else start state + builtins.stringLength string;\n\n    write = state: string:\n      if string == \"\"\n      then emit state \"\" state.column state.pad\n      else emit state (lib.optionalString (state.pad != null) (lib.strings.replicate state.pad state.unit) + string) (after state string) null;\n\n    move = state: emit state \"\" state.column state.pad;\n\n    steps = {\n      string = _: state: frame: write state frame.part;\n      list = _: state: frame: rest: move state (push frame.margin frame.flat frame.part rest);\n      break = _: state: frame:\n        if frame.flat && frame.part.break != null\n        then write state frame.part.break\n        else emit state \"\\n\" 0 frame.margin;\n      nest = _: state: frame: rest: move state (cons (frame.margin + frame.part.nest.by) frame.flat frame.part.nest.part rest);\n      align = _: state: frame: rest: move state (cons (start state) frame.flat frame.part.align rest);\n      group = width: state: frame: rest: let\n        flat = frame.flat || width == null || fits (width - start state) (cons frame.margin true frame.part.group rest);\n      in\n        move state (cons frame.margin flat frame.part.group rest);\n    };\n\n    step = width: state: steps.\${kindOf state.stack.head.part} width state state.stack.head state.stack.tail;\n\n    renderWith = unit: width: part:\n      lib.concatMapStrings (state: state.out) (builtins.genericClosure {\n        startSet = [\n          {\n            key = 0;\n            out = \"\";\n            column = 0;\n            pad = null;\n            inherit unit;\n            stack = cons 0 false part null;\n          }\n        ];\n        operator = state: lib.optional (state.stack != null) (step width state);\n      });\n  in {\n    line = {break = \" \";};\n\n    softline = {break = \"\";};\n\n    hardline = {break = null;};\n\n    nest = by: part: {nest = {inherit by part;};};\n\n    align = part: {align = part;};\n\n    group = part: {group = part;};\n\n    render = renderWith \" \";\n\n    inherit renderWith;\n  };\n\n  lisp = let\n    inherit (doc) hardline line nest align group;\n\n    prefixes = {\n      quote = \"'\";\n      quasi = \"`\";\n      unquote = \",\";\n      splice = \",@\";\n      function = \"#'\";\n    };\n\n    bodies = {\n      block = 1;\n      case = 1;\n      define-extension = 3;\n      defconstant = 1;\n      defgeneric = 2;\n      defmacro = 2;\n      defmethod = 2;\n      defpackage = 1;\n      defparameter = 1;\n      defstruct = 1;\n      defun = 2;\n      defvar = 1;\n      destructuring-bind = 2;\n      dolist = 1;\n      dotimes = 1;\n      ecase = 1;\n      etypecase = 1;\n      flet = 1;\n      handler-bind = 1;\n      handler-case = 1;\n      ignore-errors = 0;\n      labels = 1;\n      lambda = 1;\n      \"let\" = 1;\n      \"let*\" = 1;\n      macrolet = 1;\n      multiple-value-bind = 2;\n      prog1 = 1;\n      progn = 0;\n      typecase = 1;\n      unless = 1;\n      unwind-protect = 1;\n      when = 1;\n      with-input-from-string = 1;\n      with-open-file = 1;\n      with-output-to-string = 1;\n      with-slots = 2;\n    };\n\n    locals = [\"flet\" \"labels\" \"macrolet\"];\n\n    definers = [\"defconstant\" \"defmacro\" \"defparameter\" \"defun\" \"defvar\"];\n\n    operators = [\n      \"*\"\n      \"+\"\n      \"-\"\n      \"/\"\n      \"/=\"\n      \"1+\"\n      \"1-\"\n      \"<\"\n      \"<=\"\n      \"=\"\n      \">\"\n      \">=\"\n      \"char=\"\n      \"let*\"\n      \"list*\"\n      \"string=\"\n    ];\n\n    cl = [\n      \"abs\"\n      \"acons\"\n      \"and\"\n      \"append\"\n      \"apply\"\n      \"assoc\"\n      \"atom\"\n      \"car\"\n      \"case\"\n      \"cddr\"\n      \"cdr\"\n      \"ceiling\"\n      \"char\"\n      \"char-code\"\n      \"code-char\"\n      \"concatenate\"\n      \"cond\"\n      \"cons\"\n      \"copy-list\"\n      \"count-if\"\n      \"declare\"\n      \"defpackage\"\n      \"defparameter\"\n      \"defun\"\n      \"defvar\"\n      \"destructuring-bind\"\n      \"digit-char-p\"\n      \"do\"\n      \"dolist\"\n      \"dotimes\"\n      \"ecase\"\n      \"eq\"\n      \"eql\"\n      \"equal\"\n      \"evenp\"\n      \"every\"\n      \"exp\"\n      \"expt\"\n      \"fifth\"\n      \"find\"\n      \"find-if\"\n      \"first\"\n      \"flet\"\n      \"float\"\n      \"floor\"\n      \"format\"\n      \"fourth\"\n      \"get-internal-real-time\"\n      \"getf\"\n      \"if\"\n      \"ignore\"\n      \"in-package\"\n      \"incf\"\n      \"integerp\"\n      \"intern\"\n      \"internal-time-units-per-second\"\n      \"intersection\"\n      \"labels\"\n      \"lambda\"\n      \"last\"\n      \"ldiff\"\n      \"length\"\n      \"let\"\n      \"list\"\n      \"listp\"\n      \"loop\"\n      \"map\"\n      \"mapcar\"\n      \"max\"\n      \"member\"\n      \"min\"\n      \"mod\"\n      \"most-positive-fixnum\"\n      \"multiple-value-bind\"\n      \"nconc\"\n      \"nil\"\n      \"not\"\n      \"nreverse\"\n      \"nth\"\n      \"nthcdr\"\n      \"null\"\n      \"oddp\"\n      \"or\"\n      \"parse-integer\"\n      \"plusp\"\n      \"position\"\n      \"position-if\"\n      \"progn\"\n      \"push\"\n      \"read-line\"\n      \"realp\"\n      \"reduce\"\n      \"remove\"\n      \"remove-duplicates\"\n      \"remove-if\"\n      \"remove-if-not\"\n      \"rest\"\n      \"return\"\n      \"reverse\"\n      \"rotatef\"\n      \"round\"\n      \"second\"\n      \"setf\"\n      \"sin\"\n      \"sort\"\n      \"sqrt\"\n      \"string\"\n      \"string-downcase\"\n      \"string-right-trim\"\n      \"string-upcase\"\n      \"stringp\"\n      \"subseq\"\n      \"subsetp\"\n      \"substitute\"\n      \"t\"\n      \"third\"\n      \"truncate\"\n      \"unless\"\n      \"values\"\n      \"when\"\n      \"with-input-from-string\"\n      \"zerop\"\n    ];\n\n    loop = [\n      \"across\"\n      \"below\"\n      \"by\"\n      \"collect\"\n      \"downto\"\n      \"for\"\n      \"from\"\n      \"in\"\n      \"on\"\n      \"repeat\"\n      \"sum\"\n      \"thereis\"\n      \"to\"\n      \"while\"\n      \"with\"\n    ];\n\n    tomoe = [\n      \"+bar+\"\n      \"+cassette+\"\n      \"+gap+\"\n      \"+glass+\"\n      \"+hud+\"\n      \"+hud-theme+\"\n      \"+layout+\"\n      \"+layout-bindings+\"\n      \"+peek+\"\n      \"+policy-bindings+\"\n      \"+policy-displays+\"\n      \"+policy-hidden-window+\"\n      \"+policy-launcher+\"\n      \"+policy-launches+\"\n      \"+policy-settings+\"\n      \"+policy-terminal+\"\n      \"+shader-wallpaper+\"\n      \"+sounds+\"\n      \"adjust-brightness\"\n      \"bind-key\"\n      \"cassette--c\"\n      \"cassette--degrees\"\n      \"cassette--fit\"\n      \"cassette--gib\"\n      \"cassette--grille\"\n      \"cassette--height\"\n      \"cassette--hot-p\"\n      \"cassette--led\"\n      \"cassette--module\"\n      \"cassette--plate\"\n      \"cassette--px\"\n      \"cassette--reel\"\n      \"cassette--split\"\n      \"cassette--window\"\n      \"cassette--zone\"\n      \"clock-text\"\n      \"close-window\"\n      \"configure-output\"\n      \"context\"\n      \"deck--narrow-p\"\n      \"define-extension\"\n      \"exec-async\"\n      \"focus\"\n      \"fullscreen\"\n      \"hide-window\"\n      \"hud--alpha\"\n      \"hud--c\"\n      \"hud--decay\"\n      \"hud--dim\"\n      \"hud--heat\"\n      \"hud--icon\"\n      \"hud--mix\"\n      \"hud--now\"\n      \"hud--off\"\n      \"hud--panel\"\n      \"hud--text\"\n      \"interval\"\n      \"keyboard-grab\"\n      \"launch\"\n      \"media-control\"\n      \"menu-choice\"\n      \"output-power\"\n      \"place\"\n      \"policy--area\"\n      \"policy--centred\"\n      \"policy--launch\"\n      \"policy--terminal\"\n      \"policy--unmanaged-p\"\n      \"previous-context\"\n      \"probe--gpu-p\"\n      \"probe--sample\"\n      \"publish-state\"\n      \"quit\"\n      \"raise-window\"\n      \"rules-for\"\n      \"screenshot\"\n      \"service-state\"\n      \"setting\"\n      \"settings\"\n      \"shell-surface\"\n      \"show-window\"\n      \"sound\"\n      \"state-value\"\n      \"theme\"\n      \"ui\"\n      \"watch-file\"\n      \"window-properties\"\n      \"window-rule\"\n    ];\n\n    ekko = [\n      \"action\"\n      \"register-command\"\n      \"register-component\"\n      \"register-keymap\"\n      \"register-layout-provider\"\n      \"registry\"\n      \"set-option\"\n      \"value\"\n    ];\n\n    nixKeywords = [\"assert\" \"else\" \"false\" \"if\" \"in\" \"inherit\" \"let\" \"null\" \"or\" \"rec\" \"then\" \"true\" \"with\"];\n\n    convention = spelled: let\n      constant = builtins.match \"[+](.+)[+]\" spelled;\n      special = builtins.match \"[*](.+)[*]\" spelled;\n    in\n      if constant != null\n      then builtins.head constant\n      else if special != null\n      then builtins.head special\n      else null;\n\n    escaped = name:\n      if builtins.elem name nixKeywords || constructors ? \${name}\n      then \"\${name}'\"\n      else name;\n\n    global = spelled: let\n      base = convention spelled;\n    in\n      if base == null\n      then lib.nameValuePair (escaped spelled) {symbol = spelled;}\n      else lib.nameValuePair (escaped base) {inherit base spelled;};\n\n    globals = builtins.listToAttrs (map global (cl ++ loop ++ tomoe ++ ekko));\n\n    muffed = mark: name: let\n      base = name.base or name.symbol;\n      spelled = \"\${mark}\${base}\${mark}\";\n    in\n      if name ? spelled && name.spelled != spelled\n      then throw \"lisp: \${name.spelled} is not \${spelled}\"\n      else {\n        symbol = spelled;\n        inherit base;\n      };\n\n    symbolName = value:\n      if builtins.isString value && builtins.elem value operators\n      then value\n      else value.symbol or null;\n\n    nodeKind = value:\n      if value ? symbol\n      then \"symbol\"\n      else kindOf value;\n\n    bound = boundBlock {\n      language = \"lisp\";\n      name = spelled: {symbol = spelled;};\n      declared = declares;\n    };\n\n    listy = value: builtins.isList value || value ? rows || value ? wrap;\n\n    elements = value: let\n      resolved = bound value;\n    in\n      if builtins.isList resolved\n      then resolved\n      else if resolved ? rows\n      then lib.concatMap rowItems resolved.rows\n      else resolved.wrap or [];\n\n    nameOf = value: lib.optional (value ? symbol) (value.base or value.symbol);\n\n    marker = value: lib.hasPrefix \"&\" (toString (symbolName value));\n\n    first = value: lib.concatMap nameOf (lib.take 1 (elements value));\n\n    lambdaList = value:\n      lib.concatMap (part:\n        if listy part\n        then first part\n        else if marker part\n        then []\n        else nameOf part)\n      (elements value);\n\n    heads = value:\n      lib.concatMap (part:\n        if listy part\n        then first part\n        else nameOf part)\n      (elements value);\n\n    entryNames = defaulted: part:\n      if defaulted && listy part\n      then first part\n      else pattern part;\n\n    patternStep = acc: part:\n      if marker part\n      then acc // {defaulted = symbolName part != \"&rest\";}\n      else acc // {names = acc.names ++ entryNames acc.defaulted part;};\n\n    pattern = value:\n      if listy value\n      then\n        (builtins.foldl' patternStep {\n          defaulted = false;\n          names = [];\n        } (elements value)).names\n      else if marker value || builtins.elem (symbolName value) [\".\" \"nil\"]\n      then []\n      else nameOf value;\n\n    loopNames = parts:\n      lib.concatLists (lib.imap0 (index: part:\n        if builtins.elem (symbolName part) [\"as\" \"for\" \"into\" \"with\"] && index + 1 < builtins.length parts\n        then pattern (builtins.elemAt parts (index + 1))\n        else [])\n      parts);\n\n    declares = result: let\n      parts = elements result;\n      at = index:\n        if index < builtins.length parts\n        then builtins.elemAt parts index\n        else [];\n      definitions = lib.concatMap first (elements (at 1));\n      table = {\n        defun = lambdaList (at 2);\n        defmacro = lambdaList (at 2);\n        lambda = lambdaList (at 1);\n        define-extension = lambdaList (at 3);\n        \"let\" = heads (at 1);\n        \"let*\" = heads (at 1);\n        flet = definitions;\n        labels = definitions;\n        macrolet = definitions;\n        destructuring-bind = pattern (at 1);\n        multiple-value-bind = pattern (at 1);\n        dolist = first (at 1);\n        dotimes = first (at 1);\n        with-input-from-string = first (at 1);\n        with-open-file = first (at 1);\n        with-output-to-string = first (at 1);\n        loop = loopNames parts;\n      };\n      head = symbolName (builtins.head parts);\n    in\n      if parts != [] && head != null && table ? \${head}\n      then table.\${head}\n      else lambdaList (at 1);\n\n    defined = lib.concatMap (value: let\n      parts = elements value;\n    in\n      if parts != [] && builtins.elem (symbolName (builtins.head parts)) definers\n      then nameOf (builtins.elemAt parts 1)\n      else []);\n\n    bodyOffset = distinguished: index:\n      if index > distinguished\n      then 2\n      else 4;\n\n    headOffset = head: firstRow: let\n      name = symbolName head;\n    in\n      if name != null && firstRow >= 2\n      then builtins.stringLength name + 2\n      else if name == \"cond\"\n      then 2\n      else 1;\n\n    offset = head: local: index: firstRow: let\n      name = symbolName head;\n    in\n      if local\n      then bodyOffset 1 index\n      else if name != null && bodies ? \${name}\n      then bodyOffset bodies.\${name} index\n      else headOffset head firstRow;\n\n    escape = lib.replaceStrings [\"\\\\\" \"\\\"\"] [\"\\\\\\\\\" \"\\\\\\\"\"];\n\n    rowShapes = {\n      list = lib.id;\n      blank = _: [];\n      at = row: rowItems row.row;\n    };\n\n    rowItems = row: (rowShapes.\${kindOf row} or lib.toList) row;\n\n    spaced = lib.intersperse \" \";\n\n    forms =\n      {\n        string = _: value:\n          if builtins.elem value operators\n          then value\n          else throw \"lisp: \\\"\${value}\\\" is a bare string, not one of the operator symbols; a name is a Nix variable and a string literal (str ...)\";\n        int = _: toString;\n        float = _: builtins.toJSON;\n        lambda = local: value: form local (bound value);\n        list = _: plain false;\n        symbol = _: value: value.symbol;\n        base = _: value:\n          throw \"lisp: \${value.spelled} is written (\${\n            if lib.hasPrefix \"+\" value.spelled\n            then \"constant\"\n            else \"special\"\n          } \${value.base})\";\n        keyword = _: value: \":\${value.keyword}\";\n        uninterned = _: value: \"#:\${value.uninterned}\";\n        char = _: value: \"#\\\\\${value.char}\";\n        ratio = _: value: \"\${toString value.ratio.numerator}/\${toString value.ratio.denominator}\";\n        double = _: value: \"\${toString value.double}d0\";\n        hex = _: value: \"#x\${lib.toHexString value.hex}\";\n        str = _: value: \"\\\"\${escape value.str}\\\"\";\n        comment = _: value: value.comment;\n        rows = local: value: broken local false value.rows;\n        wrap = local: value: fill local value.wrap;\n      }\n      // lib.mapAttrs (kind: mark: _: value: [mark (form false value.\${kind})]) prefixes;\n\n    form = local: value: (forms.\${nodeKind value} or (throw \"lisp: no form \${nodeKind value}\")) local value;\n\n    bindingList = value: builtins.isList value || value ? rows;\n\n    definitionForms = value:\n      if builtins.isList value\n      then plain true value\n      else broken false true value.rows;\n\n    items = children: values: let\n      binds = builtins.elem (symbolName (builtins.head values)) locals;\n    in\n      lib.imap0 (index: value:\n        if binds && index == 1 && bindingList value\n        then definitionForms value\n        else form children value)\n      values;\n    plain = children: values: [\"(\" (spaced (items children values)) \")\"];\n\n    broken = local: children: rowList: let\n      firstRow = rowItems (builtins.head rowList);\n      head = builtins.head firstRow;\n      rendered = items children (lib.concatMap rowItems rowList);\n      starts = builtins.foldl' (acc: row: acc ++ [(lib.last acc + builtins.length (rowItems row))]) [0] rowList;\n      by = index: row: row.at or (offset head local (builtins.elemAt starts index) (builtins.length firstRow));\n      written = index: row: spaced (lib.sublist (builtins.elemAt starts index) (builtins.length (rowItems row)) rendered);\n      placed = index: row:\n        if index == 0\n        then written index row\n        else if row ? blank\n        then hardline\n        else nest (by index row) [hardline (written index row)];\n    in\n      if lib.any (value: value ? comment) (rowItems (lib.last rowList))\n      then throw \"lisp: a comment cannot end a list's last row\"\n      else align [\"(\" (lib.imap0 placed rowList) \")\"];\n\n    fill = local: values: let\n      head = builtins.head values;\n      name = symbolName head;\n      kept =\n        if name != null && bodies ? \${name}\n        then bodies.\${name} + 1\n        else lib.min 2 (builtins.length values);\n      rendered = items false values;\n    in\n      group (align [\n        \"(\"\n        (spaced (lib.take kept rendered))\n        (lib.imap0 (index: value: nest (offset head local (index + kept) kept) [line value]) (lib.drop kept rendered))\n        \")\"\n      ]);\n\n    top = value:\n      if value ? blank\n      then [hardline]\n      else [(form false value) hardline];\n\n    constructors = {\n      blank = {blank = true;};\n\n      str = string: {str = string;};\n\n      comment = string: {comment = string;};\n\n      rows = rowList: {rows = rowList;};\n\n      at = by: row: {\n        at = by;\n        inherit row;\n      };\n\n      wrap = values: {wrap = values;};\n\n      quote = value: {quote = value;};\n\n      quasi = value: {quasi = value;};\n\n      unquote = value: {unquote = value;};\n\n      splice = value: {splice = value;};\n\n      function = value: {function = value;};\n\n      kw = name: {keyword = name;};\n\n      uninterned = name: {uninterned = name;};\n\n      char = name: {char = name;};\n\n      ratio = numerator: denominator: {ratio = {inherit numerator denominator;};};\n\n      double = value: {double = value;};\n\n      hex = value: {hex = value;};\n\n      constant = muffed \"+\";\n\n      special = muffed \"*\";\n\n      dot = {symbol = \".\";};\n\n      and-key = {symbol = \"&key\";};\n\n      and-optional = {symbol = \"&optional\";};\n\n      and-rest = {symbol = \"&rest\";};\n\n      render = tree:\n        doc.render 80 (map top (boundBlock {\n            language = \"lisp\";\n            name = spelled: {symbol = spelled;};\n            declared = defined;\n          }\n          tree));\n    };\n  in\n    globals // constructors;\n\n  shell = let\n    inherit (doc) hardline nest;\n\n    spaced = lib.intersperse \" \";\n\n    named = spelled: {name = spelled;};\n\n    free = [\"HOME\" \"IFS\" \"LANG\" \"OLDPWD\" \"PATH\" \"PWD\" \"SHELL\" \"TERM\" \"TMPDIR\" \"USER\" \"XDG_CACHE_HOME\" \"XDG_CONFIG_HOME\" \"XDG_DATA_HOME\" \"XDG_RUNTIME_DIR\" \"XDG_STATE_HOME\"];\n\n    specials = {\n      args = \"@\";\n      argsJoined = \"*\";\n      argCount = \"#\";\n      exitStatus = \"?\";\n    };\n\n    expansions = {\n      default = \":-\";\n      required = \":?\";\n      dropPrefix = \"#\";\n      dropLongestPrefix = \"##\";\n      dropSuffix = \"%\";\n      dropLongestSuffix = \"%%\";\n    };\n\n    unaryTests = {\n      nonEmpty = \"-n\";\n      isEmpty = \"-z\";\n      exists = \"-e\";\n      isDir = \"-d\";\n      isFile = \"-f\";\n    };\n\n    binaryTests = [\"=\" \"!=\" \"-eq\" \"-ne\" \"-lt\" \"-le\" \"-gt\" \"-ge\"];\n\n    redirections = [\"<\" \">\" \">>\" \"2>\" \"2>>\" \">&\" \"2>&\" \"&>\"];\n\n    unsafe = {\n      bare = [\"$\" \"`\" \"\\\"\" \"'\" \"\\\\\" \";\" \"&\" \"|\" \"<\" \">\" \"(\" \")\" \" \" \"\\t\" \"\\n\"];\n      operand = [\"$\" \"`\" \"\\\"\" \"'\" \"\\\\\" \"}\"];\n    };\n\n    spellingOf = target: target.name or (throw \"shell: a \${kindOf target} where a name is expected\");\n\n    parameterOf = target:\n      if builtins.isInt target && target >= 0\n      then toString target\n      else target.name or target.special or (throw \"shell: a \${kindOf target} where a variable or parameter is expected\");\n\n    expansion = operator: target: operand: {\n      expand = {\n        parameter = parameterOf target;\n        inherit operator operand;\n      };\n    };\n\n    rejected = context: text: context == \"bare\" && (text == \"\" || lib.hasPrefix \"#\" text) || lib.any (symbol: lib.hasInfix symbol text) unsafe.\${context};\n\n    literal = context: text:\n      if context == \"quoted\"\n      then builtins.replaceStrings [\"\\\\\" \"\\\"\" \"$\" \"`\"] [\"\\\\\\\\\" \"\\\\\\\"\" \"\\\\$\" \"\\\\`\"] text\n      else if rejected context text\n      then throw \"shell: `\${text}` cannot be written as it is here; quote it with sq or dq, or build it from nodes\"\n      else text;\n\n    leading = part:\n      if builtins.isString part || builtins.isInt part\n      then builtins.substring 0 1 (toString part)\n      else \"\";\n\n    braced = next: parameter:\n      if builtins.match \"[0-9]+\" parameter != null\n      then builtins.stringLength parameter > 1 || builtins.match \"[0-9]\" next != null\n      else builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" parameter != null && builtins.match \"[A-Za-z0-9_]\" next != null;\n\n    within = contexts: kind: context: output:\n      if builtins.elem context contexts\n      then output\n      else throw \"shell: \${kind} is not written inside \${context} text\";\n\n    pieces = {\n      name = context: _: value: within [\"bare\"] \"a name (use var for its value)\" context value.name;\n      expand = _: next: value: let\n        inherit (value.expand) parameter operator operand;\n      in\n        if operator == \"[@]\"\n        then \"\\\${\${parameter}[@]}\"\n        else if operator != null\n        then [\"\\\${\${parameter}\${operator}\" (written \"operand\" operand) \"}\"]\n        else if braced next parameter\n        then \"\\\${\${parameter}}\"\n        else \"$\" + parameter;\n      sub = _: _: value: [\"$(\" (sequence value.sub) \")\"];\n      dq = context: _: value: within [\"bare\"] \"dq\" context [\"\\\"\" (joined \"quoted\" (lib.toList value.dq)) \"\\\"\"];\n      sq = context: _: value:\n        within [\"bare\"] \"sq\" context (\n          if lib.hasInfix \"'\" value.sq\n          then throw \"shell: sq cannot hold a single quote\"\n          else \"'\${value.sq}'\"\n        );\n      ansic = context: _: value: within [\"bare\"] \"ansic\" context \"$'\${builtins.replaceStrings [\"\\\\\" \"'\" \"\\t\" \"\\n\"] [\"\\\\\\\\\" \"\\\\'\" \"\\\\t\" \"\\\\n\"] value.ansic}'\";\n      word = context: _: value: within [\"bare\" \"operand\"] \"word\" context (joined context value.word);\n      array = context: _: value: within [\"bare\"] \"array\" context [\"(\" (spaced (map (written \"bare\") value.array)) \")\"];\n      assign = context: _: value:\n        within [\"bare\"] \"assign\" context [\n          value.assign.name\n          \"=\"\n          (lib.optional (value.assign.value != \"\") (written \"bare\" value.assign.value))\n        ];\n      redir = context: _: value: let\n        inherit (value.redir) operator target;\n      in\n        within [\"bare\"] \"redir\" context (\n          if builtins.elem operator redirections\n          then [operator (lib.optionalString (quoted target) \" \") (written \"bare\" target)]\n          else throw \"shell: `\${operator}` is not a redirection\"\n        );\n      heredoc = context: _: value: within [\"bare\"] \"heredoc\" context \"<<'\${value.heredoc.delimiter}'\";\n    };\n\n    piece = context: next: value:\n      if builtins.isString value\n      then literal context value\n      else if builtins.isInt value\n      then toString value\n      else (pieces.\${kindOf value} or (throw \"shell: no word \${kindOf value}\")) context next value;\n\n    joined = context: parts: let\n      count = builtins.length parts;\n    in\n      lib.imap0 (index: piece context (lib.optionalString (index + 1 < count) (leading (builtins.elemAt parts (index + 1))))) parts;\n\n    written = context: piece context \"\";\n\n    quoted = value: builtins.elem (kindOf value) [\"dq\" \"sq\" \"ansic\"] || (kindOf value == \"word\" && quoted (builtins.head value.word));\n\n    documents = {\n      list = lib.concatMap heredocs;\n      heredoc = value: [\"\\n\${value.heredoc.body}\${value.heredoc.delimiter}\"];\n      pipe = value: heredocs (value.pipe.rows or value.pipe);\n      chain = value: heredocs (value.chain.rows or value.chain);\n    };\n\n    heredocs = value: (documents.\${kindOf value} or (_: [])) value;\n\n    sequence = values: lib.intersperse \"; \" (map statement values);\n\n    stages = operator: value:\n      if value ? rows\n      then [(statement (builtins.head value.rows)) (map (stage: nest 2 [operator hardline (statement stage)]) (builtins.tail value.rows))]\n      else lib.intersperse \"\${operator} \" (map statement value);\n\n    link = broke: index: value:\n      if lib.mod index 2 == 0\n      then statement value\n      else if !builtins.elem value [\"&&\" \"||\"]\n      then throw \"shell: a chain alternates statements and && or ||\"\n      else if broke\n      then nest 2 [\" \${value}\" hardline]\n      else \" \${value} \";\n\n    chain = value: lib.imap0 (link (value ? rows)) (value.rows or value);\n\n    entry = value:\n      if value ? blank\n      then []\n      else if value ? inline\n      then sequence value.inline\n      else [(statement value) (heredocs value)];\n\n    indented = values: map (value: [hardline (entry value)]) values;\n\n    block = values: nest 2 (indented values);\n\n    enclosed = open: close: value:\n      if value ? inline\n      then [open \" \" (sequence value.inline) \"; \" close]\n      else [open (block value) hardline close];\n\n    branch = value:\n      if value ? inline\n      then [\" \" (sequence value.inline) \"; \"]\n      else [(block value) hardline];\n\n    alternative = value:\n      if value ? inline\n      then [\"else \" (sequence value.inline) \"; \"]\n      else [\"else\" (block value) hardline];\n\n    arm = value: let\n      patterns = lib.intersperse \"|\" (map (written \"bare\") (lib.toList value.arm.patterns));\n    in\n      if value.arm.body ? inline\n      then [patterns \") \" (sequence value.arm.body.inline) \" ;;\"]\n      else [patterns \")\" (nest 2 [(indented value.arm.body) hardline \";;\"])];\n\n    armList = value:\n      if value ? inline\n      then [\" in \" (spaced (map arm value.inline)) \" esac\"]\n      else [\" in\" (nest 2 (map (one: [hardline (arm one)]) value)) hardline \"esac\"];\n\n    comparison = value: builtins.isList value && builtins.length value == 3 && builtins.elem (builtins.elemAt value 1) binaryTests;\n\n    condition = value:\n      if value ? unaryTest\n      then [value.unaryTest.operator \" \" (written \"bare\" value.unaryTest.operand)]\n      else if comparison value\n      then [(written \"bare\" (builtins.head value)) \" \${builtins.elemAt value 1} \" (written \"bare\" (lib.last value))]\n      else throw \"shell: a test is a unary test or [left operator right] with an operator of \${toString binaryTests}\";\n\n    statementForms = {\n      list = value:\n        if value == []\n        then throw \"shell: an empty command\"\n        else spaced (map (written \"bare\") value);\n      comment = value: \"#\${lib.optionalString (value.comment != \"\") \" \"}\${value.comment}\";\n      shebang = value: \"#!\${value.shebang}\";\n      assign = written \"bare\";\n      test = value: [\"[ \" (condition value.test) \" ]\"];\n      pipe = value: stages \" |\" value.pipe;\n      chain = value: chain value.chain;\n      fn = value: [value.fn.name \"() \" (enclosed \"{\" \"}\" value.fn.body)];\n      braces = value: enclosed \"{\" \"}\" value.braces;\n      \"if\" = value: [\"if \" (statement value.\"if\".test) \"; then\" (branch value.\"if\".body) (lib.optional (value.\"if\" ? otherwise) (alternative value.\"if\".otherwise)) \"fi\"];\n      for = value: [\"for \${value.for.name} in \" (spaced (map (written \"bare\") value.for.words)) \"; \" (enclosed \"do\" \"done\" value.for.body)];\n      while = value: [\"while \" (statement value.while.test) \"; \" (enclosed \"do\" \"done\" value.while.body)];\n      case = value: [\"case \" (written \"bare\" value.case.subject) (armList value.case.arms)];\n    };\n\n    statement = value: (statementForms.\${kindOf value} or (throw \"shell: no statement \${kindOf value}\")) value;\n\n    statementsOf = value: value.inline or value;\n\n    inner = {\n      inline = value: value.inline;\n      pipe = value: value.pipe.rows or value.pipe;\n      chain = value: builtins.filter (one: !builtins.isString one) (value.chain.rows or value.chain);\n      braces = value: statementsOf value.braces;\n      \"if\" = value: [value.\"if\".test] ++ statementsOf value.\"if\".body ++ lib.optionals (value.\"if\" ? otherwise) (statementsOf value.\"if\".otherwise);\n      for = value: statementsOf value.for.body;\n      while = value: [value.while.test] ++ statementsOf value.while.body;\n      case = value: lib.concatMap (one: statementsOf one.arm.body) (statementsOf value.case.arms);\n    };\n\n    reachable = lib.concatMap (one: [one] ++ reachable ((inner.\${kindOf one} or (_: [])) one));\n\n    commandWords = one:\n      if builtins.isList one\n      then one\n      else lib.optional (one ? assign) one;\n\n    assigned = words: map (word: word.assign.name) (builtins.filter (word: word ? assign) words);\n\n    namesIn = words: map (word: word.name) (builtins.filter (word: word ? name) words);\n\n    leader = lib.findFirst (word: !(word ? assign)) null;\n\n    givenBy = one: let\n      words = commandWords one;\n    in\n      assigned words\n      ++ lib.optionals (builtins.isString (leader words)) (namesIn words)\n      ++ lib.optional (one ? for) one.for.name\n      ++ lib.optional (one ? fn) one.fn.name\n      ++ lib.optionals (one ? fn) (lib.subtractLists one.fn.locals (lib.concatMap givenBy (reachable (statementsOf one.fn.body))));\n\n    localsBy = one: let\n      words = commandWords one;\n    in\n      lib.optionals (leader words == \"local\") (assigned words ++ namesIn words);\n\n    bound = declared: boundBlock {\n      language = \"shell\";\n      name = named;\n      inherit declared;\n    };\n  in\n    lib.genAttrs free named\n    // builtins.mapAttrs (_: special: {inherit special;}) specials\n    // builtins.mapAttrs (_: expansion) expansions\n    // builtins.mapAttrs (_: operator: operand: {unaryTest = {inherit operator operand;};}) unaryTests\n    // {\n      blank = {blank = true;};\n\n      comment = string: {comment = string;};\n\n      shebang = string: {shebang = string;};\n\n      inline = values: {inline = values;};\n\n      rows = values: {rows = values;};\n\n      var = target: expansion null target null;\n\n      elements = target: {\n        expand = {\n          parameter = spellingOf target;\n          operator = \"[@]\";\n          operand = null;\n        };\n      };\n\n      dq = parts: {dq = parts;};\n\n      sq = string: {sq = string;};\n\n      ansic = string: {ansic = string;};\n\n      sub = values: {sub = values;};\n\n      word = parts: {word = parts;};\n\n      array = values: {array = values;};\n\n      assign = target: value: {\n        assign = {\n          name = spellingOf target;\n          inherit value;\n        };\n      };\n\n      redir = operator: target: {redir = {inherit operator target;};};\n\n      heredoc = delimiter: body:\n        if body != \"\" && !(lib.hasSuffix \"\\n\" body)\n        then throw \"shell: a heredoc body ends with a newline\"\n        else if builtins.elem delimiter (lib.splitString \"\\n\" body)\n        then throw \"shell: a heredoc body holds its delimiter `\${delimiter}` as a line\"\n        else {heredoc = {inherit delimiter body;};};\n\n      test = expression: {test = expression;};\n\n      pipe = values: {pipe = values;};\n\n      chain = values: {chain = values;};\n\n      fn = target: body: {\n        fn = {\n          name = spellingOf target;\n          locals = lib.optionals (builtins.isFunction body) (map spelling (builtins.attrNames (builtins.functionArgs body)));\n          body = bound (statements: lib.concatMap localsBy (reachable (statementsOf statements))) body;\n        };\n      };\n\n      braces = value: {braces = value;};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      for = target: words: body: {\n        for = {\n          name = spellingOf target;\n          inherit words body;\n        };\n      };\n\n      while = test: body: {while = {inherit test body;};};\n\n      case = subject: arms: {case = {inherit subject arms;};};\n\n      arm = patterns: body: {arm = {inherit patterns body;};};\n\n      render = script: doc.render 80 (map (value: [(entry value) hardline]) (bound (statements: lib.concatMap givenBy (reachable statements)) script));\n    };\n\n  luau = let\n    inherit (doc) hardline;\n\n    newline = depth: [hardline (lib.strings.replicate depth \"\\t\")];\n\n    comma = lib.intersperse \", \";\n\n    spaced = lib.intersperse \" \";\n\n    count = needle: string: builtins.length (lib.splitString needle string) - 1;\n\n    plain = parts: lib.concatStrings (builtins.filter builtins.isString parts);\n\n    mark = string:\n      if count \"\\\"\" string > count \"'\" string\n      then \"'\"\n      else \"\\\"\";\n\n    escape = quote: lib.replaceStrings [\"\\\\\" quote \"\\n\" \"\\t\" \"\\r\"] [\"\\\\\\\\\" \"\\\\\${quote}\" \"\\\\n\" \"\\\\t\" \"\\\\r\"];\n\n    quoted = value: let\n      parts = lib.toList value;\n      quote = mark (plain parts);\n    in [\n      quote\n      (map (part:\n        if builtins.isString part\n        then escape quote part\n        else \"\\\\u{\${part.unicode}}\")\n      parts)\n      quote\n    ];\n\n    binary = {\n      \"or\" = 1;\n      \"and\" = 2;\n      \"<\" = 3;\n      \">\" = 3;\n      \"<=\" = 3;\n      \">=\" = 3;\n      \"~=\" = 3;\n      \"==\" = 3;\n      \"..\" = 4;\n      \"+\" = 5;\n      \"-\" = 5;\n      \"*\" = 6;\n      \"/\" = 6;\n      \"//\" = 6;\n      \"%\" = 6;\n      \"^\" = 8;\n    };\n\n    right = [\"..\" \"^\"];\n\n    tree = infixTree {\n      language = \"luau\";\n      precedence = binary;\n      inherit right;\n      operand = lib.id;\n    };\n\n    globals = [\n      \"AgentBlock\"\n      \"AgentFinishedEvent\"\n      \"AgentStateEvent\"\n      \"CommandFinishedEvent\"\n      \"FocusEvent\"\n      \"PaneInfo\"\n      \"PickItem\"\n      \"ProcessResult\"\n      \"StatusPaneInfo\"\n      \"StatusSegment\"\n      \"TabEvent\"\n      \"TabInfo\"\n      \"WindowCx\"\n      \"any\"\n      \"boolean\"\n      \"ipairs\"\n      \"math\"\n      \"number\"\n      \"os\"\n      \"pairs\"\n      \"pcall\"\n      \"proproblems\"\n      \"require\"\n      \"string\"\n      \"table\"\n      \"tern\"\n      \"tonumber\"\n      \"tostring\"\n      \"type\"\n      \"utf8\"\n    ];\n\n    word = \"[A-Za-z_][A-Za-z0-9_]*\";\n\n    identifier = value:\n      if builtins.isString value && builtins.match word value != null\n      then value\n      else throw \"luau: `\${toString value}` is not a name\";\n\n    named = spelled: {name = identifier spelled;};\n\n    nameOf = value: value.name or (throw \"luau: a declaration names a bound name, not a \${kindOf value}\");\n\n    declaredName = value:\n      nameOf (\n        if value ? typed\n        then value.typed.value\n        else value\n      );\n\n    declaring = {\n      local = value: map declaredName (lib.toList value.local.names);\n      localFunction = value: [(nameOf value.localFunction.name)];\n      type = value: [(nameOf value.type.name)];\n      trailing = value: declares value.trailing.statement;\n    };\n\n    declares = value: (declaring.\${kindOf value} or (_: [])) value;\n\n    single = value:\n      if builtins.isAttrs value && builtins.length (builtins.attrNames value) == 1\n      then builtins.head (builtins.attrNames value)\n      else throw \"luau: a parameter or loop variable is a one-attribute set, {name = type;} or {name = null;}\";\n\n    bound = value: identifier (spelling (single value));\n\n    resolve = given: body: let\n      formals =\n        if builtins.isFunction body\n        then map spelling (builtins.attrNames (builtins.functionArgs body))\n        else [];\n      statements =\n        boundBlock {\n          language = \"luau\";\n          name = named;\n          declared = listed: given ++ lib.concatMap declares listed;\n        }\n        body;\n      unbound = lib.subtractLists formals (lib.concatMap declares statements);\n    in\n      if unbound != []\n      then throw \"luau: \${lib.concatStringsSep \", \" unbound} declared but not bound by its block\"\n      else statements;\n\n    modes = {\n      value = {\n        separator = \" = \";\n        item = expression;\n      };\n      type = {\n        separator = \": \";\n        item = type;\n      };\n    };\n\n    entryForms = mode: {\n      field = depth: value: [(identifier value.field.name) mode.separator (mode.item depth value.field.value)];\n      pair = depth: value: [\"[\" (mode.item depth value.pair.key) \"]\" mode.separator (mode.item depth value.pair.value)];\n    };\n\n    entry = mode: depth: value: ((entryForms mode).\${kindOf value} or mode.item) depth value;\n\n    table = mode: depth: value:\n      if value.table == []\n      then \"{}\"\n      else [\"{ \" (comma (map (entry mode depth) value.table)) \" }\"];\n\n    tableRow = mode: depth: value:\n      if value ? blank\n      then hardline\n      else if value ? comment\n      then [(newline depth) value.comment]\n      else [(newline depth) (entry mode depth value) \",\"];\n\n    tableRows = mode: depth: value: [\"{\" (map (tableRow mode (depth + 1)) value.table) (newline depth) \"}\"];\n\n    keyword = last: index:\n      if index == 0\n      then \"if\"\n      else if lib.mod index 2 == 1\n      then \"then\"\n      else if index == last\n      then \"else\"\n      else \"elseif\";\n\n    clauses = depth: parts: lib.imap0 (index: part: [(keyword (builtins.length parts - 1) index) \" \" (expression depth part)]) parts;\n\n    signed = value:\n      if value < 0\n      then 7\n      else 9;\n\n    strengths = {\n      int = signed;\n      float = signed;\n      binary = value: binary.\${value.binary.operator};\n      infix = value: strength (tree value.infix);\n      unary = _: 7;\n      ifExpr = _: 0;\n      cast = _: 0;\n      rows = value: strength value.rows;\n    };\n\n    strength = value: (strengths.\${kindOf value} or (_: 9)) value;\n\n    grouped = depth: needed: value:\n      if needed\n      then [\"(\" (expression depth value) \")\"]\n      else expression depth value;\n\n    side = depth: operator: left: value: let\n      level = strength value;\n      tight = binary.\${operator};\n    in\n      grouped depth (level < tight || level == tight && left == builtins.elem operator right) value;\n\n    prefix = value: builtins.elem (kindOf value) [\"list\" \"name\" \"dot\" \"idx\" \"paren\"] || kindOf value == \"rows\" && prefix value.rows;\n\n    prefixed = depth: value: grouped depth (!prefix value) value;\n\n    suffix = path:\n      if builtins.match \":\${word}|\${word}([.]\${word})*(:\${word})?\" path == null\n      then throw \"luau: `\${toString path}` is not a field path\"\n      else if lib.hasPrefix \":\" path\n      then path\n      else \".\${path}\";\n\n    sameOperator = items: let\n      operators = lib.unique (lib.genList (index: builtins.elemAt items (2 * index + 1)) (builtins.length items / 2));\n    in\n      if builtins.length operators == 1\n      then builtins.head operators\n      else throw \"luau: rows breaks an infix run of one operator\";\n\n    brokenInfix = depth: items: let\n      operator = sameOperator items;\n      operands = lib.genList (index: builtins.elemAt items (2 * index)) (builtins.length items / 2 + 1);\n      last = builtins.length operands - 1;\n      leaning = builtins.elem operator right;\n      left = index:\n        if leaning\n        then index < last\n        else index == 0;\n    in [\n      (side (depth + 1) operator true (builtins.head operands))\n      (lib.imap1 (index: operand: [(newline (depth + 1)) operator \" \" (side (depth + 1) operator (left index) operand)]) (builtins.tail operands))\n    ];\n\n    callDepth = depth: head:\n      if head ? rows && head.rows ? dot\n      then depth + 1\n      else depth;\n\n    brokenCall = depth: value: let\n      inner = callDepth depth (builtins.head value);\n    in [(prefixed depth (builtins.head value)) \"(\" (lib.intersperse \",\" (map (argument: [(newline (inner + 1)) (expression (inner + 1) argument)]) (builtins.tail value))) (newline inner) \")\"];\n\n    rowForms = {\n      list = brokenCall;\n      table = tableRows modes.value;\n      infix = depth: value: brokenInfix depth value.infix;\n      ifExpr = depth: value: let\n        rows = value.ifExpr;\n        parts = clauses (depth + 1) (lib.concatLists rows);\n        starts = builtins.foldl' (acc: row: acc ++ [(lib.last acc + builtins.length row)]) [0] rows;\n      in\n        lib.imap0 (index: row: [(lib.optional (index > 0) (newline (depth + 1))) (spaced (lib.sublist (builtins.elemAt starts index) (builtins.length row) parts))]) rows;\n      dot = depth: value: [(prefixed depth value.dot.value) (newline (depth + 1)) (suffix value.dot.path)];\n    };\n\n    unary = depth: value: let\n      inherit (value.unary) operator operand;\n      level = strength operand;\n      doubled = operator == \"-\" && level == 7 && (!builtins.isAttrs operand || operand.unary.operator == \"-\");\n    in [\n      operator\n      (lib.optionalString (operator == \"not\") \" \")\n      (grouped depth (level < 7 || doubled) operand)\n    ];\n\n    parameters = params:\n      if params ? typed\n      then params.typed.value\n      else params;\n\n    variable = depth: value: let\n      kind = value.\${single value};\n    in [\n      (bound value)\n      (lib.optionals (kind != null) [\": \" (type depth kind)])\n    ];\n\n    signature = depth: value:\n      if value ? typed\n      then [(signature depth value.typed.value) \": \" (type depth value.typed.type)]\n      else [\"(\" (comma (map (variable depth) value)) \")\"];\n\n    function = depth: params: body: let\n      statements = resolve (map bound (parameters params)) body;\n    in [\n      (signature depth params)\n      (\n        if statements == []\n        then \" \"\n        else lines depth statements\n      )\n      \"end\"\n    ];\n\n    expressionForms = {\n      string = _: value: throw \"luau: the string `\${value}` where an expression is expected; a name is a Nix variable, a literal is str\";\n      int = _: toString;\n      float = _: value: let\n        text = builtins.toJSON value;\n      in\n        if builtins.match \"-?[0-9]+[.][0-9]+\" text != null\n        then text\n        else throw \"luau: the float \${text} has no decimal spelling\";\n      bool = _: value:\n        if value\n        then \"true\"\n        else \"false\";\n      name = _: value: value.name;\n      nil = _: _: \"nil\";\n      hex = _: value: \"0x\${lib.toHexString value.hex}\";\n      list = depth: value: [(prefixed depth (builtins.head value)) \"(\" (comma (map (expression (callDepth depth (builtins.head value))) (builtins.tail value))) \")\"];\n      str = _: value: quoted value.str;\n      long = _: value: \"[[\${value.long}]]\";\n      table = table modes.value;\n      rows = depth: value: rowForms.\${kindOf value.rows} depth value.rows;\n      infix = depth: value: expression depth (tree value.infix);\n      binary = depth: value: [(side depth value.binary.operator true value.binary.left) \" \${value.binary.operator} \" (side depth value.binary.operator false value.binary.right)];\n      inherit unary;\n      paren = depth: value: [\"(\" (expression depth value.paren) \")\"];\n      dot = depth: value: [(prefixed depth value.dot.value) (suffix value.dot.path)];\n      idx = depth: value: [(prefixed depth value.idx.value) \"[\" (expression depth value.idx.key) \"]\"];\n      fn = depth: value: [\"function\" (function depth value.fn.params value.fn.body)];\n      ifExpr = depth: value: spaced (clauses depth value.ifExpr);\n      cast = depth: value: [(expression depth value.cast.value) \" :: \" (type depth value.cast.type)];\n      tuple = depth: value: comma (map (expression depth) value.tuple);\n      typed = depth: value: [(expression depth value.typed.value) \": \" (type depth value.typed.type)];\n    };\n\n    expression = depth: value: (expressionForms.\${kindOf value} or (throw \"luau: no expression \${kindOf value}\")) depth value;\n\n    typeForms = {\n      string = _: value: throw \"luau: the string `\${value}` where a type is expected; a type name is a Nix variable\";\n      name = _: value: value.name;\n      nil = _: _: \"nil\";\n      opt = depth: value: [(type depth value.opt) \"?\"];\n      table = table modes.type;\n      rows = depth: value: tableRows modes.type depth value.rows;\n      tuple = depth: value: [\"(\" (comma (map (type depth) value.tuple)) \")\"];\n    };\n\n    type = depth: value: (typeForms.\${kindOf value} or (throw \"luau: no type \${kindOf value}\")) depth value;\n\n    targets = depth: value:\n      if builtins.isList value\n      then comma (map (expression depth) value)\n      else expression depth value;\n\n    line = depth: value:\n      if value ? blank\n      then hardline\n      else [(newline depth) (statement depth value)];\n\n    lines = depth: statements: [(map (line (depth + 1)) statements) (newline depth)];\n\n    block = depth: given: body: lines depth (resolve given body);\n\n    alternative = depth: value:\n      if value ? \"if\"\n      then [\"elseif \" (clause depth value.\"if\")]\n      else [\"else\" (block depth [] value) \"end\"];\n\n    clause = depth: value: [\n      (expression depth value.test)\n      \" then\"\n      (block depth [] value.body)\n      (\n        if value ? otherwise\n        then alternative depth value.otherwise\n        else \"end\"\n      )\n    ];\n\n    statementForms = {\n      string = _: value: throw \"luau: the string `\${value}` where a statement is expected\";\n      list = expression;\n      rows = expression;\n      comment = _: value: value.comment;\n      local = depth: value: [\"local \" (targets depth value.local.names) \" = \" (expression depth value.local.value)];\n      assign = depth: value: [(targets depth value.assign.targets) \" = \" (expression depth value.assign.value)];\n      update = depth: value: [(targets depth value.update.targets) \" \${value.update.operator} \" (expression depth value.update.value)];\n      return = depth: value: [\"return \" (expression depth value.return)];\n      localFunction = depth: value: [\"local function \" (nameOf value.localFunction.name) (function depth value.localFunction.params value.localFunction.body)];\n      \"if\" = depth: value: [\"if \" (clause depth value.\"if\")];\n      for = depth: value: [\"for \" (comma (map (variable depth) value.for.names)) \" in \" (expression depth value.for.values) \" do\" (block depth (map bound value.for.names) value.for.body) \"end\"];\n      forRange = depth: value: [\"for \" (variable depth value.forRange.name) \" = \" (expression depth value.forRange.bounds) \" do\" (block depth [(bound value.forRange.name)] value.forRange.body) \"end\"];\n      while = depth: value: [\"while \" (expression depth value.while.test) \" do\" (block depth [] value.while.body) \"end\"];\n      type = depth: value: [\"type \" (nameOf value.type.name) \" = \" (type depth value.type.value)];\n      trailing = depth: value: [(statement depth value.trailing.statement) \" \" value.trailing.comment];\n    };\n\n    statement = depth: value:\n      if value ? __functor\n      then \"return\"\n      else (statementForms.\${kindOf value} or (throw \"luau: no statement \${kindOf value}\")) depth value;\n\n    prefixOperator = operator: operand: {unary = {inherit operator operand;};};\n\n    constructors = {\n      blank = {blank = true;};\n\n      comment = string: {comment = string;};\n\n      trailing = command: note: {\n        trailing = {\n          statement = command;\n          comment = note;\n        };\n      };\n\n      rows = value: {rows = value;};\n\n      str = value: {str = value;};\n\n      unicode = code: {unicode = code;};\n\n      long = string: {long = string;};\n\n      nil = {nil = true;};\n\n      hex = value: {hex = value;};\n\n      table = entries: {table = entries;};\n\n      field = name: value: {field = {inherit name value;};};\n\n      pair = key: value: {pair = {inherit key value;};};\n\n      infix = values: {infix = values;};\n\n      not = prefixOperator \"not\";\n\n      neg = prefixOperator \"-\";\n\n      len = prefixOperator \"#\";\n\n      paren = value: {paren = value;};\n\n      dot = value: path: {dot = {inherit value path;};};\n\n      idx = value: key: {idx = {inherit value key;};};\n\n      fn = params: body: {fn = {inherit params body;};};\n\n      ifExpr = parts: {ifExpr = parts;};\n\n      cast = value: kind: {\n        cast = {\n          inherit value;\n          type = kind;\n        };\n      };\n\n      tuple = values: {tuple = values;};\n\n      typed = value: kind: {\n        typed = {\n          inherit value;\n          type = kind;\n        };\n      };\n\n      opt = kind: {opt = kind;};\n\n      local = names: value: {local = {inherit names value;};};\n\n      assign = names: value: {\n        assign = {\n          targets = names;\n          inherit value;\n        };\n      };\n\n      update = operator: names: value: {\n        update = {\n          inherit operator value;\n          targets = names;\n        };\n      };\n\n      return = {__functor = _: value: {return = value;};};\n\n      localFunction = name: params: body: {localFunction = {inherit name params body;};};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      for = names: values: body: {for = {inherit names values body;};};\n\n      forRange = name: bounds: body: {forRange = {inherit name bounds body;};};\n\n      while = test: body: {while = {inherit test body;};};\n\n      type = name: value: {type = {inherit name value;};};\n\n      render = body: doc.render null (map (value: [(lib.optional (!(value ? blank)) (statement 0 value)) hardline]) (resolve [] body));\n    };\n  in\n    constructors\n    // builtins.listToAttrs (map (global: {\n        name =\n          if constructors ? \${global}\n          then \"\${global}'\"\n          else global;\n        value = named global;\n      })\n      globals);\n\n  vbs = let\n    inherit (doc) hardline;\n\n    binary = {\n      Imp = 1;\n      Eqv = 2;\n      Xor = 3;\n      Or = 4;\n      And = 5;\n      \"=\" = 7;\n      \"<>\" = 7;\n      \"<\" = 7;\n      \">\" = 7;\n      \"<=\" = 7;\n      \">=\" = 7;\n      Is = 7;\n      \"&\" = 8;\n      \"+\" = 9;\n      \"-\" = 9;\n      Mod = 10;\n      \"\\\\\" = 11;\n      \"*\" = 12;\n      \"/\" = 12;\n      \"^\" = 14;\n    };\n\n    globals = [\"CBool\" \"CInt\" \"CLng\" \"CStr\" \"Chr\" \"CreateObject\" \"Empty\" \"Err\" \"GetObject\" \"InStr\" \"IsEmpty\" \"IsNull\" \"IsObject\" \"Join\" \"LCase\" \"Left\" \"Len\" \"Mid\" \"MsgBox\" \"Nothing\" \"Now\" \"Null\" \"Replace\" \"Right\" \"Split\" \"Trim\" \"UBound\" \"UCase\" \"WScript\"];\n\n    nameNode = spelled: {name = spelled;};\n\n    identifier = text:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" text != null\n      then text\n      else throw \"vbs: `\${text}` is not a name\";\n\n    memberPath = text:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*([.][A-Za-z_][A-Za-z0-9_]*)*\" text != null\n      then text\n      else throw \"vbs: `\${text}` is not a member path\";\n\n    tabs = depth: lib.strings.replicate depth \"\\t\";\n\n    atom = part: {\n      precedence = 15;\n      doc = part;\n    };\n\n    paren = least: printed:\n      if printed.precedence < least\n      then [\"(\" printed.doc \")\"]\n      else printed.doc;\n\n    infix = infixTree {\n      language = \"vbs\";\n      precedence = binary;\n      operand = value:\n        if builtins.isList value\n        then infix value\n        else value;\n    };\n\n    argumentList = values: lib.intersperse \", \" (map (value: paren 0 (expression value)) values);\n\n    forms = {\n      int = value:\n        if value < 0\n        then {\n          precedence = 13;\n          doc = toString value;\n        }\n        else atom (toString value);\n      bool = value:\n        atom (\n          if value\n          then \"True\"\n          else \"False\"\n        );\n      string = value: throw \"vbs: the string `\${value}` is not an expression: a name is a bound variable or a generator attribute, a literal is `str`\";\n      list = value: expression (infix value);\n      name = value: atom (identifier value.name);\n      str = value: atom \"\\\"\${lib.replaceStrings [\"\\\"\"] [\"\\\"\\\"\"] value.str}\\\"\";\n      dot = value: atom [(paren 15 (expression value.dot.base)) \".\" (memberPath value.dot.path)];\n      call = value: atom [(paren 15 (expression value.call.function)) \"(\" (argumentList value.call.arguments) \")\"];\n      not = value: {\n        precedence = 6;\n        doc = [\"Not \" (paren 6 (expression value.not))];\n      };\n      neg = value: {\n        precedence = 13;\n        doc = [\"-\" (paren 13 (expression value.neg))];\n      };\n      binary = value: let\n        precedence = binary.\${value.binary.operator};\n      in {\n        inherit precedence;\n        doc = [(paren precedence (expression value.binary.left)) \" \${value.binary.operator} \" (paren (precedence + 1) (expression value.binary.right))];\n      };\n    };\n\n    expression = value: (forms.\${kindOf value} or (throw \"vbs: no expression \${kindOf value}\")) value;\n\n    written = value: paren 0 (expression value);\n\n    assignable = value:\n      if builtins.elem (kindOf value) [\"name\" \"dot\"]\n      then written value\n      else throw \"vbs: an assignment's target is a name or a member, not \${kindOf value}\";\n\n    declaredName = value:\n      if kindOf value == \"name\"\n      then identifier value.name\n      else throw \"vbs: a declaration names a bound variable, not \${kindOf value}\";\n\n    branch = body:\n      if builtins.isList body\n      then body\n      else throw \"vbs: an If branch is a list of statements; a Dim in it declares a name of the script or procedure around it\";\n\n    declaring = {\n      dim = value: map (one: one.name) value.dim;\n      sub = value: [value.sub.name.name];\n      function = value: [value.function.name.name];\n      \"if\" = value: declaredIn (branch value.\"if\".body) ++ declaredIn (branch (value.\"if\".otherwise or []));\n    };\n\n    declaredIn = lib.concatMap (value: (declaring.\${kindOf value} or (_: [])) value);\n\n    scope = parameters:\n      boundBlock {\n        language = \"vbs\";\n        name = nameNode;\n        declared = result: parameters ++ declaredIn result;\n      };\n\n    modes = {\n      null = \"\";\n      byVal = \"ByVal \";\n      byRef = \"ByRef \";\n    };\n\n    parameterName = parameter: spelling (builtins.head (builtins.attrNames parameter));\n\n    parameterDoc = value: let\n      mode = value.\${builtins.head (builtins.attrNames value)};\n    in\n      if builtins.length (builtins.attrNames value) != 1\n      then throw \"vbs: a parameter is `{name = mode;}`\"\n      else [(modes.\${kindOf mode} or (throw \"vbs: a parameter's mode is null, byVal or byRef\")) (identifier (parameterName value))];\n\n    block = depth: map (value: [hardline (entry depth value)]);\n\n    entry = depth: value:\n      if value ? blank\n      then []\n      else [(tabs depth) (statement depth value)];\n\n    procedure = keyword: depth: value: [\n      \"\${keyword} \"\n      (declaredName value.name)\n      \"(\"\n      (lib.intersperse \", \" (map parameterDoc value.parameters))\n      \")\"\n      (block (depth + 1) (scope (map parameterName value.parameters) value.body))\n      hardline\n      (tabs depth)\n      \"End \${keyword}\"\n    ];\n\n    conditional = depth: value: [\n      \"If \"\n      (written value.test)\n      \" Then\"\n      (block (depth + 1) (branch value.body))\n      (lib.optionals (value ? otherwise) [hardline (tabs depth) \"Else\" (block (depth + 1) (branch value.otherwise))])\n      hardline\n      (tabs depth)\n      \"End If\"\n    ];\n\n    statementForms = {\n      comment = _: value:\n        if value.comment == \"\"\n        then \"'\"\n        else \"' \${value.comment}\";\n      optionExplicit = _: _: \"Option Explicit\";\n      onErrorResumeNext = _: _: \"On Error Resume Next\";\n      onErrorGoTo0 = _: _: \"On Error GoTo 0\";\n      dim = _: value: [\"Dim \" (lib.intersperse \", \" (map declaredName value.dim))];\n      assign = _: value: [(assignable value.assign.target) \" = \" (written value.assign.value)];\n      set = _: value: [\"Set \" (assignable value.set.target) \" = \" (written value.set.value)];\n      call = _: value: [(paren 15 (expression value.call.function)) (lib.optionals (value.call.arguments != []) [\" \" (argumentList value.call.arguments)])];\n      \"if\" = depth: value: conditional depth value.\"if\";\n      sub = depth: value: procedure \"Sub\" depth value.sub;\n      function = depth: value: procedure \"Function\" depth value.function;\n    };\n\n    statement = depth: value: (statementForms.\${kindOf value} or (throw \"vbs: no statement \${kindOf value}\")) depth value;\n  in\n    lib.genAttrs globals nameNode\n    // {\n      blank = {blank = true;};\n\n      comment = string: {comment = string;};\n\n      optionExplicit = {optionExplicit = {};};\n\n      onErrorResumeNext = {onErrorResumeNext = {};};\n\n      onErrorGoTo0 = {onErrorGoTo0 = {};};\n\n      str = string: {str = string;};\n\n      dot = base: path: {dot = {inherit base path;};};\n\n      call = function: arguments: {call = {inherit function arguments;};};\n\n      not = value: {not = value;};\n\n      neg = value: {neg = value;};\n\n      dim = names: {dim = names;};\n\n      assign = target: value: {assign = {inherit target value;};};\n\n      set = target: value: {set = {inherit target value;};};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      sub = name: parameters: body: {sub = {inherit name parameters body;};};\n\n      function = name: parameters: body: {function = {inherit name parameters body;};};\n\n      byVal = {byVal = {};};\n\n      byRef = {byRef = {};};\n\n      render = script: doc.render null (map (value: [(entry 0 value) hardline]) (scope [] script));\n    };\n\n  patch = let\n    inherit (doc) hardline;\n\n    marks = {\n      string = text: \" \${text}\";\n      add = value: \"+\${value.add}\";\n      del = value: \"-\${value.del}\";\n    };\n\n    change = value: [((marks.\${kindOf value} or (throw \"patch: no change \${kindOf value}\")) value) hardline];\n\n    span = start: count:\n      if count == 1\n      then toString start\n      else \"\${toString start},\${toString count}\";\n\n    counted = kind: lib.count (value: kindOf value != kind);\n\n    empty = count:\n      if count == 0\n      then 1\n      else 0;\n\n    header = delta: value: let\n      old = counted \"add\" value.hunk.lines;\n      new = counted \"del\" value.hunk.lines;\n      start = value.hunk.start + delta + empty old - empty new;\n    in {\n      delta = delta + new - old;\n      doc = [\"@@ -\${span value.hunk.start old} +\${span start new} @@\" (lib.optionalString (value.hunk ? heading) \" \${value.hunk.heading}\") hardline (map change value.hunk.lines)];\n    };\n\n    hunkDocs = values:\n      (builtins.foldl' (state: value: let\n          next = header state.delta value;\n        in {\n          inherit (next) delta;\n          docs = state.docs ++ [next.doc];\n        }) {\n          delta = 0;\n          docs = [];\n        }\n        values).docs;\n\n    file = value: [\n      (lib.optionals (value.file ? index) [\"diff --git a/\${value.file.path} b/\${value.file.path}\" hardline \"index \${value.file.index}\" hardline])\n      \"--- a/\${value.file.path}\"\n      hardline\n      \"+++ b/\${value.file.path}\"\n      hardline\n      (hunkDocs value.file.hunks)\n    ];\n  in {\n    file = path: hunks: {file = {inherit path hunks;};};\n\n    git = path: index: hunks: {file = {inherit path index hunks;};};\n\n    hunk = start: lines: {hunk = {inherit start lines;};};\n\n    section = start: heading: lines: {hunk = {inherit start heading lines;};};\n\n    add = text: {add = text;};\n\n    del = text: {del = text;};\n\n    render = values: doc.render null (map file values);\n  };\n\n  markdown = let\n    inherit (doc) hardline line group nest;\n\n    literal = text:\n      if builtins.match \".*([`*\\\\<&]|~~|]\\\\(|]\\\\[|!\\\\[|(^|[^[:alnum:]])_|_($|[^[:alnum:]])).*\" text != null\n      then throw \"markdown: the text `\${text}` holds markup; code, emphasis and links are constructors, and text is only literal\"\n      else text;\n\n    words = string: lib.intersperse (group line) (lib.splitString \" \" (literal string));\n\n    codeSpan = text:\n      if text == \"\" || lib.hasInfix \"`\" text || lib.hasPrefix \" \" text || lib.hasSuffix \" \" text\n      then throw \"markdown: the code span `\${text}` is empty, holds a backtick or starts or ends with a space\"\n      else \"`\${text}`\";\n\n    destination = url:\n      if builtins.match \"[^ ()<>]+\" url != null\n      then url\n      else throw \"markdown: the link destination `\${url}` needs escaping\";\n\n    inlineForms = {\n      string = flow: value:\n        if flow\n        then words value\n        else literal value;\n      list = flow: map (inline flow);\n      code = _: value: codeSpan value.code;\n      strong = flow: value: [\"**\" (inline flow value.strong) \"**\"];\n      em = flow: value: [\"*\" (inline flow value.em) \"*\"];\n      link = flow: value: [\"[\" (inline flow value.link.text) \"](\${destination value.link.url})\"];\n    };\n\n    inline = flow: value: (inlineForms.\${kindOf value} or (throw \"markdown: no inline \${kindOf value}\")) flow value;\n\n    paragraph = value:\n      if value ? wrap\n      then inline true value.wrap\n      else inline false value;\n\n    cells = width: row:\n      if builtins.length row != width\n      then throw \"markdown: a table row of \${toString (builtins.length row)} cells under a header of \${toString width}\"\n      else [\"| \" (lib.intersperse \" | \" (map (inline false) row)) \" |\"];\n\n    blockForms = {\n      string = paragraph;\n      list = paragraph;\n      wrap = paragraph;\n      heading = value:\n        if value.heading.level < 1 || value.heading.level > 6\n        then throw \"markdown: no heading level \${toString value.heading.level}\"\n        else [(lib.strings.replicate value.heading.level \"#\") \" \" (inline false value.heading.text)];\n      bullets = value: lib.intersperse hardline (map (item: [\"- \" (nest 2 (paragraph item))]) value.bullets);\n      comment = value:\n        if lib.hasInfix \"-->\" value.comment\n        then throw \"markdown: a comment holding `-->`\"\n        else \"<!--\${value.comment}-->\";\n      table = value: let\n        width = builtins.length value.table.header;\n      in\n        lib.intersperse hardline ([(cells width value.table.header) \"|\${lib.strings.replicate width \"---|\"}\"] ++ map (cells width) value.table.rows);\n    };\n\n    block = value:\n      if value ? blank\n      then []\n      else (blockForms.\${kindOf value} or (throw \"markdown: no block \${kindOf value}\")) value;\n  in {\n    blank = {blank = true;};\n\n    comment = string: {comment = string;};\n\n    wrap = value: {wrap = value;};\n\n    code = string: {code = string;};\n\n    strong = value: {strong = value;};\n\n    em = value: {em = value;};\n\n    link = text: url: {link = {inherit text url;};};\n\n    heading = level: text: {heading = {inherit level text;};};\n\n    bullets = items: {bullets = items;};\n\n    table = header: rows: {table = {inherit header rows;};};\n\n    render = values: doc.render 78 (map (value: [(block value) hardline]) values);\n  };\n\n  glsl = let\n    inherit (doc) hardline nest group line;\n\n    binary = {\n      \"*\" = 12;\n      \"/\" = 12;\n      \"%\" = 12;\n      \"+\" = 11;\n      \"-\" = 11;\n      \"<<\" = 10;\n      \">>\" = 10;\n      \"<\" = 9;\n      \">\" = 9;\n      \"<=\" = 9;\n      \">=\" = 9;\n      \"==\" = 8;\n      \"!=\" = 8;\n      \"&\" = 7;\n      \"^\" = 6;\n      \"|\" = 5;\n      \"&&\" = 4;\n      \"^^\" = 3;\n      \"||\" = 2;\n    };\n\n    scalars = [\"bool\" \"int\" \"uint\" \"float\"];\n\n    types =\n      scalars\n      ++ lib.concatMap (n: [\"vec\${n}\" \"ivec\${n}\" \"uvec\${n}\" \"bvec\${n}\" \"mat\${n}\"] ++ map (m: \"mat\${n}x\${m}\") [\"2\" \"3\" \"4\"]) [\"2\" \"3\" \"4\"]\n      ++ [\"sampler2D\" \"void\"];\n\n    builtinFunctions = {\n      same = {\n        \"1\" = [\"abs\" \"sign\" \"floor\" \"ceil\" \"fract\" \"round\" \"trunc\" \"sin\" \"cos\" \"tan\" \"asin\" \"acos\" \"atan\" \"exp\" \"log\" \"exp2\" \"log2\" \"sqrt\" \"inversesqrt\" \"normalize\" \"radians\" \"degrees\" \"fwidth\" \"dFdx\" \"dFdy\"];\n        \"2\" = [\"min\" \"max\" \"mod\" \"pow\" \"reflect\" \"atan2\"];\n        \"3\" = [\"clamp\" \"mix\"];\n      };\n      float = {\n        \"1\" = [\"length\"];\n        \"2\" = [\"distance\" \"dot\"];\n      };\n    };\n\n    prefixes = {\n      float = \"\";\n      int = \"i\";\n      uint = \"u\";\n      bool = \"b\";\n    };\n\n    components = [\"x\" \"y\" \"z\" \"w\"];\n\n    palettes = [components [\"r\" \"g\" \"b\" \"a\"] [\"s\" \"t\" \"p\" \"q\"]];\n\n    swizzles = let\n      grow = names: lib.concatMap (name: map (letter: name + letter) components) names;\n      lengths = builtins.genList (n: lib.foldl' (names: _: grow names) [\"\"] (lib.range 1 (n + 1))) 4;\n    in\n      lib.concatLists lengths;\n\n    vectorParts = type: builtins.match \"([biu]?)vec([234])\" type;\n\n    dimension = type:\n      if builtins.elem type scalars\n      then 1\n      else if vectorParts type != null\n      then lib.toInt (builtins.elemAt (vectorParts type) 1)\n      else null;\n\n    scalarOf = type:\n      if builtins.elem type scalars\n      then type\n      else if vectorParts type != null\n      then lib.findFirst (scalar: prefixes.\${scalar} == builtins.head (vectorParts type)) null scalars\n      else if builtins.match \"mat.*\" type != null\n      then \"float\"\n      else null;\n\n    vectorOf = scalar: size:\n      if size == 1\n      then scalar\n      else \"\${prefixes.\${scalar}}vec\${toString size}\";\n\n    identifier = value:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" value != null\n      then value\n      else throw \"glsl: `\${value}` is not a name\";\n\n    pointed = mantissa:\n      if lib.hasInfix \".\" mantissa\n      then mantissa\n      else \"\${mantissa}.0\";\n\n    float = value: let\n      text = builtins.toJSON value;\n      parts = builtins.match \"(-?[0-9.]+)e[+]?(-?)0*([0-9]+)\" text;\n    in\n      if parts == null\n      then text\n      else \"\${pointed (builtins.head parts)}e\${builtins.elemAt parts 1}\${builtins.elemAt parts 2}\";\n\n    located = value: let\n      self = builtins.listToAttrs ([\n          {\n            name = \"ast\";\n            value = value.ast;\n          }\n          {\n            name = \"type\";\n            value = value.type;\n          }\n        ]\n        ++ map (name: {\n          inherit name;\n          value = swizzle self name;\n        })\n        swizzles);\n    in\n      self;\n\n    swizzle = value: name: let\n      letters = lib.stringToCharacters name;\n      table = lib.findFirst (letters': lib.all (letter: builtins.elem letter letters') letters) (throw \"glsl: `.\${name}` is not a swizzle\") palettes;\n      size = dimension value.type;\n      reach = lib.foldl' lib.max 0 (map (letter: lib.lists.findFirstIndex (one: one == letter) 0 table) letters);\n    in\n      if value.type == null\n      then throw \"glsl: `.\${name}` of a value whose type is not known\"\n      else if size == null || reach >= size\n      then throw \"glsl: \${value.type} has no `.\${name}`\"\n      else\n        located {\n          ast.field = {\n            base = value.ast;\n            inherit name;\n          };\n          type = vectorOf (scalarOf value.type) (builtins.length letters);\n        };\n\n    comparisons = [\"<\" \">\" \"<=\" \">=\" \"==\" \"!=\" \"&&\" \"||\" \"^^\"];\n\n    matrix = type: builtins.match \"mat([234])\" type;\n\n    product = matrixType: vector: matrix matrixType != null && vector == \"vec\${builtins.head (matrix matrixType)}\";\n\n    scalarWith = scalar: other: dimension scalar == 1 && scalarOf other == scalar;\n\n    combine = operator: left: right: let\n      known = left != null && right != null;\n      rules = [\n        {\n          when = builtins.elem operator comparisons;\n          type = \"bool\";\n        }\n        {\n          when = !known;\n          type = null;\n        }\n        {\n          when = left == right || builtins.elem operator [\"<<\" \">>\"];\n          type = left;\n        }\n        {\n          when = scalarWith left right;\n          type = right;\n        }\n        {\n          when = scalarWith right left;\n          type = left;\n        }\n        {\n          when = operator == \"*\" && product left right;\n          type = right;\n        }\n        {\n          when = operator == \"*\" && product right left;\n          type = left;\n        }\n      ];\n    in\n      (lib.findFirst (rule: rule.when) {type = throw \"glsl: \${left} \${operator} \${right} is not a GLSL operation\";} rules).type;\n\n    typed' = type: value: {\n      ast = value;\n      inherit type;\n    };\n\n    termForms = {\n      int = typed' \"int\";\n      float = typed' \"float\";\n      bool = typed' \"bool\";\n      list = infix;\n      set = value:\n        if value ? ast\n        then value\n        else if value ? glslType\n        then throw \"glsl: the type \${value.glslType.name} is not a value\"\n        else throw \"glsl: an attribute set that is not a GLSL value\";\n    };\n\n    term = value: (termForms.\${builtins.typeOf value} or (_: throw \"glsl: \${builtins.typeOf value} `\${toString value}` is not a GLSL value; a name is a bound value\")) value;\n\n    ast = value: (term value).ast;\n\n    infix = items: let\n      count = builtins.length items;\n      operators = lib.genList (index: builtins.elemAt items (2 * index + 1)) (count / 2);\n      precedences = map (symbol: binary.\${symbol} or (throw \"glsl: `\${toString symbol}` is not a binary operator\")) operators;\n      lowest = lib.foldl' lib.min 99 precedences;\n      at = lib.foldl' (found: index:\n        if builtins.elemAt precedences index == lowest\n        then index\n        else found)\n      0 (lib.range 0 (builtins.length operators - 1));\n      operator = builtins.elemAt operators at;\n      left = infix (lib.take (2 * at + 1) items);\n      right = infix (lib.drop (2 * at + 2) items);\n    in\n      if count == 1\n      then term (builtins.head items)\n      else if lib.mod count 2 == 0\n      then throw \"glsl: an infix list alternates operands and operators and ends in an operand\"\n      else {\n        ast.binary = {\n          inherit operator;\n          left = left.ast;\n          right = right.ast;\n        };\n        type = combine operator left.type right.type;\n      };\n\n    curried = count: finish: let\n      gather = collected:\n        if builtins.length collected == count\n        then finish collected\n        else argument: gather (collected ++ [argument]);\n    in\n      gather [];\n\n    invoke = function: type: arguments:\n      located {\n        ast.call = {\n          inherit function;\n          arguments = map ast arguments;\n        };\n        inherit type;\n      };\n\n    builtin = name: count: typing:\n      curried count (arguments:\n        invoke (\n          if name == \"atan2\"\n          then \"atan\"\n          else name\n        ) (typing arguments)\n        arguments);\n\n    construct = name: arguments: {\n      ast.call = {\n        function = name;\n        arguments = map ast arguments;\n      };\n      type = name;\n      __functor = _: argument: construct name (arguments ++ [argument]);\n    };\n\n    typeValue = name: {\n      glslType = {\n        inherit name;\n        qualifiers = [];\n        size = null;\n      };\n      __functor = _: argument: construct name [argument];\n    };\n\n    typeName = type:\n      if type.size == null\n      then type.name\n      else \"\${type.name}[\${toString type.size}]\";\n\n    element = type: let\n      sized = builtins.match \"(.*)\\\\[[0-9]+]\" type;\n    in\n      if type == null\n      then null\n      else if sized != null\n      then builtins.head sized\n      else if matrix type != null\n      then \"vec\${builtins.head (matrix type)}\"\n      else scalarOf type;\n\n    reference = type: name: extra:\n      located {\n        ast.ref = {inherit name;} // extra;\n        inherit type;\n      };\n\n    qualified = qualifier: type:\n      type\n      // {\n        glslType = type.glslType // {qualifiers = [qualifier] ++ type.glslType.qualifiers;};\n      };\n\n    unary = operator: type: operand: {\n      ast.unary = {\n        inherit operator;\n        operand = ast operand;\n      };\n      type =\n        if type == null\n        then (term operand).type\n        else type;\n    };\n\n    postfix = operator: operand: {\n      ast.postfix = {\n        inherit operator;\n        operand = ast operand;\n      };\n      inherit (term operand) type;\n    };\n\n    declaredIn = lib.concatMap (one: lib.optional (builtins.isAttrs one && one ? var) one.var);\n\n    scoped = given: function: listed: let\n      names = builtins.attrNames (builtins.functionArgs function);\n      result = function (lib.genAttrs names (name: given.\${name} or (reference (declared name) name {})));\n      declared = name: typeName (lib.findFirst (one: one.name == name) (throw \"glsl: `\${name}` is bound but not declared in its block\") (declaredIn (listed result))).type;\n    in\n      result;\n\n    block = body:\n      if builtins.isFunction body\n      then scoped {} body lib.id\n      else body;\n\n    statementOf = one:\n      if one ? ast\n      then {expression = one.ast;}\n      else one;\n\n    statements = body: map statementOf (block body);\n\n    checked = target: value: let\n      wanted = (term target).type;\n      given = (term value).type;\n    in\n      if wanted != null && given != null && wanted != given\n      then throw \"glsl: a \${given} value for a \${wanted}\"\n      else ast value;\n\n    atom = text: {\n      precedence = 15;\n      doc = text;\n    };\n\n    signed = value: text: {\n      precedence =\n        if value < 0\n        then 13\n        else 15;\n      doc = text;\n    };\n\n    paren = least: printed:\n      if printed.precedence < least\n      then [\"(\" printed.doc \")\"]\n      else printed.doc;\n\n    kind = value:\n      if builtins.isAttrs value\n      then builtins.head (builtins.attrNames value)\n      else builtins.typeOf value;\n\n    argumentList = values: [\"(\" (lib.intersperse \", \" (map (value: paren 1 (expression value)) values)) \")\"];\n\n    rows = values: [\"(\" (nest 4 (lib.intersperse \",\" (map (value: [hardline (paren 1 (expression value))]) values))) hardline \")\"];\n\n    negative = value: (builtins.isInt value || builtins.isFloat value) && value < 0 || kind value == \"unary\";\n\n    forms = {\n      int = value: signed value (toString value);\n      float = value: signed value (float value);\n      bool = value:\n        atom (\n          if value\n          then \"true\"\n          else \"false\"\n        );\n      ref = value:\n        atom (\n          if value.ref.macro or false\n          then \"(\${identifier value.ref.name})\"\n          else identifier value.ref.name\n        );\n      binary = value: let\n        precedence = binary.\${value.binary.operator};\n      in {\n        inherit precedence;\n        doc = group [(paren precedence (expression value.binary.left)) (nest 4 [line value.binary.operator \" \" (paren (precedence + 1) (expression value.binary.right))])];\n      };\n      unary = value: {\n        precedence = 13;\n        doc = [\n          value.unary.operator\n          (paren (\n            if negative value.unary.operand\n            then 14\n            else 13\n          ) (expression value.unary.operand))\n        ];\n      };\n      postfix = value: {\n        precedence = 14;\n        doc = [(paren 14 (expression value.postfix.operand)) value.postfix.operator];\n      };\n      call = value: {\n        precedence = 14;\n        doc = [(identifier value.call.function) (argumentList value.call.arguments)];\n      };\n      array = value: {\n        precedence = 14;\n        doc = [(identifier value.array.type) \"[\${toString (builtins.length value.array.elements)}]\" (rows value.array.elements)];\n      };\n      index = value: {\n        precedence = 14;\n        doc = [(paren 14 (expression value.index.base)) \"[\" (paren 0 (expression value.index.at)) \"]\"];\n      };\n      field = value: {\n        precedence = 14;\n        doc = [(paren 14 (expression value.field.base)) \".\" value.field.name];\n      };\n      cond = value: {\n        precedence = 1;\n        doc = [(paren 2 (expression value.cond.test)) \" ? \" (paren 1 (expression value.cond.yes)) \" : \" (paren 1 (expression value.cond.no))];\n      };\n      unsigned = value: atom \"\${toString value.unsigned}u\";\n    };\n\n    expression = value: (forms.\${kind value} or (throw \"glsl: no expression \${kind value}\")) value;\n\n    written = value: (expression value).doc;\n\n    typeDoc = type: lib.concatStringsSep \" \" (type.qualifiers ++ [(identifier type.name)]);\n\n    declarator = type: target: [(typeDoc type) \" \" (identifier target) (lib.optionalString (type.size != null) \"[\${toString type.size}]\")];\n\n    simple = value: !builtins.elem (kind value) [\"if\" \"for\" \"while\" \"comment\"];\n\n    braced = body: [\"{\" (nest 4 (map (one: [hardline (statement one)]) body)) hardline \"}\"];\n\n    single = body: builtins.length body == 1 && simple (builtins.head body);\n\n    clause = body:\n      if single body\n      then [\" \" (statement (builtins.head body))]\n      else [\" \" (braced body)];\n\n    alternative = body: otherwise: [\n      (\n        if single body\n        then hardline\n        else \" \"\n      )\n      \"else\"\n      (\n        if builtins.isAttrs otherwise\n        then [\" \" (statement otherwise)]\n        else clause otherwise\n      )\n    ];\n\n    header = value:\n      if value == null\n      then \"\"\n      else if kind value == \"var\"\n      then [(declarator value.var.type value.var.name) (lib.optionals (value.var.value != null) [\" = \" (written value.var.value)])]\n      else statementBody value;\n\n    statementBody = value:\n      {\n        assign = [(written value.assign.target) \" = \" (written value.assign.value)];\n        update = [(written value.update.target) \" \${value.update.operator} \" (written value.update.value)];\n        expression = written value.expression;\n      }\n          .\${\n        kind value\n      };\n\n    statementForms = {\n      comment = value: \"// \${value.comment}\";\n      var = value: [(header value) \";\"];\n      return = value:\n        if value.return == null\n        then \"return;\"\n        else [\"return \" (written value.return) \";\"];\n      jump = value: \"\${value.jump};\";\n      \"if\" = value: [\"if (\" (written value.\"if\".test) \")\" (clause value.\"if\".body) (lib.optional (value.\"if\" ? otherwise) (alternative value.\"if\".body value.\"if\".otherwise))];\n      for = value: [\"for (\" (lib.intersperse \"; \" [(header value.for.init) (written value.for.test) (statementBody value.for.step)]) \") \" (braced value.for.body)];\n      while = value: [\"while (\" (written value.while.test) \") \" (braced value.while.body)];\n    };\n\n    statement = value: (statementForms.\${kind value} or (one: [(statementBody one) \";\"])) value;\n\n    noted = value: print:\n      if value ? commented\n      then [\"// \${value.commented.text}\" hardline (print value.commented.declaration)]\n      else print value;\n\n    bare = value:\n      if value ? commented\n      then bare value.commented.declaration\n      else value;\n\n    globalForms = {\n      list = lib.concatMap globals;\n      set = value: lib.optional (value ? ref) value.ref.name ++ lib.optional (value ? call) value.call.function ++ lib.concatMap globals (builtins.attrValues value);\n    };\n\n    globals = value: (globalForms.\${builtins.typeOf value} or (_: [])) value;\n\n    ordered = dependencies: let\n      go = done: let\n        left = builtins.filter (one: !builtins.elem one done) (builtins.attrNames dependencies);\n        next = lib.findFirst (one: lib.all (other: builtins.elem other done) dependencies.\${one}) null left;\n      in\n        if left == []\n        then done\n        else if next == null\n        then throw \"glsl: \${lib.concatStringsSep \", \" left} depend on each other\"\n        else go (done ++ [next]);\n    in\n      go [];\n\n    among = set: key: found: builtins.filter (one: one != key && set ? \${one}) (lib.unique found);\n\n    constantValue = value: let\n      inner = bare value;\n    in\n      inner.typed.value or inner;\n\n    parsedType = text: let\n      sized = builtins.match \"(.*)\\\\[([0-9]+)]\" text;\n    in {\n      name = builtins.head (lib.defaultTo [text] sized);\n      qualifiers = [];\n      size = lib.mapNullable (parts: lib.toInt (builtins.elemAt parts 1)) sized;\n    };\n\n    constantType = value: let\n      inner = bare value;\n      inferred = (term inner).type;\n    in\n      inner.typed.type.glslType or (parsedType (lib.throwIf (inferred == null) \"glsl: a constant's type is its value's; write `typed type value` for this one\" inferred));\n\n    constant = key: value: [\"const \" (declarator (constantType value) key) \" = \" (written (ast (constantValue value))) \";\"];\n\n    macroBody = value:\n      if value ? macro\n      then value.macro.function (lib.genAttrs value.macro.params (name: reference null name {macro = true;}))\n      else value;\n\n    number = value: builtins.isInt value || builtins.isFloat value;\n\n    define = key: value: let\n      body = macroBody value;\n    in [\n      \"#define \${identifier key}\"\n      (lib.optionalString (value ? macro) \"(\${lib.concatMapStringsSep \", \" identifier value.macro.params})\")\n      \" \"\n      (paren (\n        if number body\n        then 0\n        else 14\n      ) (expression (ast body)))\n    ];\n\n    definition = key: value: [\n      (typeDoc value.fn.returns)\n      \" \${identifier key}(\"\n      (lib.intersperse \", \" (map (param: [(typeDoc param.type) \" \" (identifier param.name)]) value.fn.params))\n      \") \"\n      (braced value.fn.body)\n    ];\n\n    globalValue = key: value: let\n      inner = bare value;\n    in\n      if inner ? fn\n      then curried (builtins.length inner.fn.params) (invoke key (typeName inner.fn.returns))\n      else if inner ? macro\n      then curried (builtins.length inner.macro.params) (invoke key null)\n      else reference (typeName (constantType value)) key {};\n\n    defineValue = key: value:\n      if value ? macro\n      then curried (builtins.length value.macro.params) (invoke key null)\n      else reference (term value).type key {};\n\n    rgbPart = text: index: (lib.fromHexString (builtins.substring (1 + 2 * index) 2 text) * 2000 + 255) / 510 / 1000.0;\n\n    typeValues = lib.genAttrs types typeValue;\n  in\n    typeValues\n    // lib.concatMapAttrs (typing:\n      lib.concatMapAttrs (count: names:\n        lib.genAttrs names (name:\n          builtin name (lib.toInt count) (\n            if typing == \"same\"\n            then arguments: (term (builtins.head arguments)).type\n            else _: \"float\"\n          ))))\n    builtinFunctions\n    // {\n      step = builtin \"step\" 2 (arguments: (term (builtins.elemAt arguments 1)).type);\n      smoothstep = builtin \"smoothstep\" 3 (arguments: (term (builtins.elemAt arguments 2)).type);\n      cross = builtin \"cross\" 2 (_: \"vec3\");\n      texture = builtin \"texture\" 2 (_: \"vec4\");\n\n      iResolution = reference \"vec3\" \"iResolution\" {};\n      iTime = reference \"float\" \"iTime\" {};\n      iFrame = reference \"int\" \"iFrame\" {};\n      iMouse = reference \"vec4\" \"iMouse\" {};\n      iChannel0 = reference \"sampler2D\" \"iChannel0\" {};\n\n      math = {\n        pi = 3.141592653589793;\n\n        round = digits: value: let\n          scale = lib.foldl' (built: _: built * 10.0) 1.0 (lib.range 1 digits);\n        in\n          builtins.floor (value * scale + 0.5) / scale;\n\n        sqrt = value:\n          if value == 0\n          then 0.0\n          else lib.foldl' (guess: _: (guess + value / guess) / 2.0) (value * 1.0) (lib.range 1 64);\n      };\n\n      rgb = text: let\n        parts = map (rgbPart text) [0 1 2];\n      in\n        if lib.all (part: part == builtins.head parts) parts\n        then typeValues.vec3 (builtins.head parts)\n        else lib.foldl' lib.id typeValues.vec3 parts;\n\n      array = type: elements: {\n        ast.array = {\n          type = type.glslType.name;\n          elements = map ast elements;\n        };\n        type = \"\${type.glslType.name}[\${toString (builtins.length elements)}]\";\n      };\n\n      index = base: at:\n        located {\n          ast.index = {\n            base = ast base;\n            at = ast at;\n          };\n          type = element (term base).type;\n        };\n\n      swizzle = value: swizzle (term value);\n\n      neg = unary \"-\" null;\n\n      not = unary \"!\" \"bool\";\n\n      bitNot = unary \"~\" null;\n\n      preInc = unary \"++\" null;\n\n      preDec = unary \"--\" null;\n\n      inc = postfix \"++\";\n\n      dec = postfix \"--\";\n\n      cond = test: yes: no: {\n        ast.cond = {\n          test = ast test;\n          yes = ast yes;\n          no = ast no;\n        };\n        inherit (term yes) type;\n      };\n\n      unsigned = value: {\n        ast.unsigned = value;\n        type = \"uint\";\n      };\n\n      sized = type: size: type // {glslType = type.glslType // {inherit size;};};\n\n      out = qualified \"out\";\n\n      in' = qualified \"in\";\n\n      inout = qualified \"inout\";\n\n      typed = type: value: {typed = {inherit type value;};};\n\n      macro = function: {\n        macro = {\n          inherit function;\n          params = builtins.attrNames (builtins.functionArgs function);\n        };\n      };\n\n      local = target: type: value: {\n        var = {\n          inherit (target.ast.ref) name;\n          type = type.glslType;\n          value =\n            if value == null\n            then null\n            else if (term value).type != null && (term value).type != typeName type.glslType\n            then throw \"glsl: \${target.ast.ref.name} is a \${typeName type.glslType} but its value is a \${(term value).type}\"\n            else ast value;\n        };\n      };\n\n      set = target: value: {\n        assign = {\n          target = ast target;\n          value = checked target value;\n        };\n      };\n\n      update = target: operator: value: {\n        update = {\n          inherit operator;\n          target = ast target;\n          value = ast value;\n        };\n      };\n\n      return = value: {\n        return =\n          if value == null\n          then null\n          else ast value;\n      };\n\n      break = {jump = \"break\";};\n\n      continue = {jump = \"continue\";};\n\n      if' = test: body: {\n        \"if\" = {\n          test = ast test;\n          body = statements body;\n        };\n      };\n\n      ifElse = test: body: otherwise: {\n        \"if\" = {\n          test = ast test;\n          body = statements body;\n          otherwise =\n            if builtins.isAttrs otherwise\n            then otherwise\n            else statements otherwise;\n        };\n      };\n\n      for = loop: let\n        spec =\n          if builtins.isFunction loop\n          then scoped {} loop (result: lib.optional (result.init != null) result.init ++ block result.body)\n          else loop;\n      in {\n        for = {\n          inherit (spec) init;\n          test = ast spec.test;\n          step = statementOf spec.step;\n          body = statements spec.body;\n        };\n      };\n\n      while = test: body: {\n        while = {\n          test = ast test;\n          body = statements body;\n        };\n      };\n\n      comment = text: {comment = text;};\n\n      commented = text: subject: {\n        commented = {\n          inherit text;\n          declaration = subject;\n        };\n      };\n\n      fn = returns: params: body: let\n        named =\n          map (param: let\n            name = builtins.head (builtins.attrNames param);\n          in {\n            inherit name;\n            type = param.\${name}.glslType;\n          })\n          params;\n        given = builtins.listToAttrs (map (param: {\n            inherit (param) name;\n            value = reference (typeName param.type) param.name {};\n          })\n          named);\n      in {\n        fn = {\n          returns = returns.glslType;\n          params = named;\n          body = map statementOf (\n            if builtins.isFunction body\n            then scoped given body lib.id\n            else body\n          );\n        };\n      };\n\n      render = shader: let\n        result = shader self;\n        defines = result.defines or {};\n        consts = result.consts or {};\n        fns = result.fns or {};\n        self = builtins.mapAttrs defineValue defines // builtins.mapAttrs globalValue consts // builtins.mapAttrs globalValue fns;\n        constOrder = ordered (builtins.mapAttrs (key: value: among consts key (globals (ast (constantValue value)))) consts);\n        fnOrder = ordered (builtins.mapAttrs (key: value: among fns key (globals (bare value).fn.body)) fns);\n        sections = builtins.filter (section: section != []) [\n          (lib.optional (defines != {}) (lib.intersperse hardline (lib.mapAttrsToList (key: value: noted value (define key)) defines)))\n          (lib.optional (consts != {}) (lib.intersperse hardline (map (key: noted consts.\${key} (constant key)) constOrder)))\n          (map (key: noted fns.\${key} (definition key)) fnOrder)\n        ];\n      in\n        doc.render 100 [(lib.intersperse [hardline hardline] (lib.concatLists sections)) hardline];\n    };\n  lua = let\n    inherit (doc) hardline nest;\n\n    precedence = {\n      \"or\" = 1;\n      \"and\" = 2;\n      \"<\" = 3;\n      \">\" = 3;\n      \"<=\" = 3;\n      \">=\" = 3;\n      \"~=\" = 3;\n      \"==\" = 3;\n      \"|\" = 4;\n      \"~\" = 5;\n      \"&\" = 6;\n      \"<<\" = 7;\n      \">>\" = 7;\n      \"..\" = 8;\n      \"+\" = 9;\n      \"-\" = 9;\n      \"*\" = 10;\n      \"/\" = 10;\n      \"//\" = 10;\n      \"%\" = 10;\n      \"^\" = 12;\n    };\n\n    unaryPrecedence = 11;\n\n    parse = infixTree {\n      language = \"lua\";\n      inherit precedence;\n      right = [\"..\" \"^\"];\n      operand = lib.id;\n    };\n\n    nixKeywords = [\"assert\" \"else\" \"false\" \"if\" \"in\" \"inherit\" \"let\" \"null\" \"or\" \"rec\" \"then\" \"true\" \"with\"];\n\n    globals = [\"CS\" \"Vector3\" \"_G\" \"_VERSION\" \"assert\" \"bit\" \"collectgarbage\" \"coroutine\" \"debug\" \"dofile\" \"error\" \"getfenv\" \"getmetatable\" \"hl\" \"io\" \"ipairs\" \"jit\" \"load\" \"loadfile\" \"loadstring\" \"math\" \"next\" \"os\" \"package\" \"pairs\" \"pcall\" \"pg\" \"print\" \"rawequal\" \"rawget\" \"rawlen\" \"rawset\" \"require\" \"select\" \"setfenv\" \"setmetatable\" \"string\" \"table\" \"tonumber\" \"tostring\" \"type\" \"unpack\" \"utf8\" \"xpcall\"];\n\n    identifier = name:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" name != null\n      then name\n      else throw \"lua: `\${name}` is not a name\";\n\n    fieldPath = text:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*([.][A-Za-z_][A-Za-z0-9_]*)*\" text != null\n      then text\n      else throw \"lua: `\${text}` is not a field path\";\n\n    binder = value:\n      if kindOf value == \"name\"\n      then identifier value.name\n      else if kindOf value == \"vararg\"\n      then \"...\"\n      else throw \"lua: a declared name is a bound variable, not a \${kindOf value}\";\n\n    nameList = values: lib.concatStringsSep \", \" (map binder (lib.toList values));\n\n    infix = value: builtins.isList value && builtins.length value >= 3 && builtins.isString (builtins.elemAt value 1);\n\n    unaries = {\n      not = \"not \";\n      neg = \"-\";\n      len = \"#\";\n      bnot = \"~\";\n    };\n\n    operatorRank = items: precedence.\${(parse items).binary.operator};\n\n    signedRank = value:\n      if value < 0\n      then unaryPrecedence\n      else 13;\n\n    ranks =\n      {\n        list = value:\n          if infix value\n          then operatorRank value\n          else 13;\n        rows = value: operatorRank (lib.concatLists value.rows);\n        int = signedRank;\n        float = signedRank;\n      }\n      // lib.mapAttrs (_: _: _: unaryPrecedence) unaries;\n\n    rank = value: (ranks.\${kindOf value} or (_: 13)) value;\n\n    powerBase = items: index: index + 1 < builtins.length items && builtins.elemAt items (index + 1) == \"^\" && rank (builtins.elemAt items index) == unaryPrecedence;\n\n    term = items: index: let\n      item = builtins.elemAt items index;\n    in\n      if lib.mod index 2 == 1\n      then item\n      else if infix item\n      then [\"(\" (infixDoc item) \")\"]\n      else if powerBase items index\n      then [\"(\" (expression item) \")\"]\n      else expression item;\n\n    infixDoc = items: builtins.seq (parse items).binary.operator (lib.intersperse \" \" (builtins.genList (term items) (builtins.length items)));\n\n    rowsDoc = rowList: let\n      items = lib.concatLists rowList;\n      offsets = builtins.foldl' (sums: one: sums ++ [(lib.last sums + builtins.length one)]) [0] rowList;\n      row = index: lib.intersperse \" \" (builtins.genList (at: term items (builtins.elemAt offsets index + at)) (builtins.length (builtins.elemAt rowList index)));\n      broken = lib.all (one: builtins.isString (builtins.head one)) (builtins.tail rowList);\n    in\n      if !broken\n      then throw \"lua: each row of an infix expression after the first starts with its operator\"\n      else builtins.seq (parse items).binary.operator [(row 0) (builtins.genList (index: nest 2 [hardline (row (index + 1))]) (builtins.length rowList - 1))];\n\n    commas = values: lib.intersperse \", \" (map expression values);\n\n    prefixKinds = [\"name\" \"dot\" \"index\" \"paren\" \"apply\"];\n\n    prefix = value:\n      if builtins.elem (kindOf value) prefixKinds || builtins.isList value && !infix value\n      then expression value\n      else [\"(\" (expression value) \")\"];\n\n    callee = head:\n      if kindOf head == \"method\"\n      then [(prefix head.method.table) \":\" (identifier head.method.name)]\n      else prefix head;\n\n    call = value: [(callee (builtins.head value)) \"(\" (commas (builtins.tail value)) \")\"];\n\n    fieldForms = {\n      field = value: [(identifier value.field.name) \" = \" (expression value.field.value)];\n      key = value: [\"[\" (expression value.key.key) \"] = \" (expression value.key.value)];\n    };\n\n    tableField = value: (fieldForms.\${kindOf value} or expression) value;\n\n    fieldRow = row: [hardline (lib.intersperse \", \" (map tableField (lib.toList row))) \",\"];\n\n    braces = fields:\n      if fields ? rows\n      then [\"{\" (nest 2 (map fieldRow fields.rows)) hardline \"}\"]\n      else if fields == []\n      then \"{}\"\n      else [\"{ \" (lib.intersperse \", \" (map tableField fields)) \" }\"];\n\n    declarers = {\n      local = one: lib.catAttrs \"name\" (lib.toList one.local.names);\n      localFunction = one: [one.localFunction.name.name];\n    };\n\n    declaredIn = one: (declarers.\${kindOf one} or (_: [])) one;\n\n    statementsOf = value: value.inline or value;\n\n    binders = header: builtins.filter builtins.isString (map (one: one.name or null) (header.params or header.names or [header.name]));\n\n    declared = result:\n      if result ? body\n      then binders result ++ lib.concatMap declaredIn (statementsOf result.body)\n      else lib.concatMap declaredIn (statementsOf result);\n\n    bound = boundBlock {\n      language = \"lua\";\n      name = spelled: {name = spelled;};\n      inherit declared;\n    };\n\n    block = value:\n      if value ? inline\n      then {inline = bound value.inline;}\n      else bound value;\n\n    functionSpec = value: let\n      result = block value;\n    in\n      if result ? body\n      then result\n      else {\n        params = [];\n        body = result;\n      };\n\n    sequence = values: lib.imap0 (index: value: [(lib.optionalString (index > 0 && kindOf value != \"semicolon\") \" \") (statement value)]) values;\n\n    layout = value:\n      if value ? inline\n      then [\" \" (sequence value.inline) (lib.optionalString (value.inline != []) \" \")]\n      else if builtins.isList value\n      then [(nest 2 (map (one: [hardline (entry one)]) value)) hardline]\n      else throw \"lua: a block is a list of statements, `inline [ ... ]` or a lambda of the names it declares\";\n\n    function = head: value: let\n      resolved = functionSpec value;\n    in [head \"(\" (nameList resolved.params) \")\" (layout resolved.body) \"end\"];\n\n    expressions =\n      {\n        name = value: identifier value.name;\n        vararg = _: \"...\";\n        nil = _: \"nil\";\n        int = toString;\n        float = builtins.toJSON;\n        bool = lib.boolToString;\n        string = value: throw \"lua: the bare string \\\"\${value}\\\" is not an expression (a literal is `str`, a name a bound variable)\";\n        list = value:\n          if infix value\n          then infixDoc value\n          else call value;\n        rows = value: rowsDoc value.rows;\n        str = value: \"\\\"\${value.str}\\\"\";\n        sq = value: \"'\${value.sq}'\";\n        table = value: braces value.table;\n        fn = value: function \"function\" value.fn;\n        apply = value: [(callee value.apply.head) (expression value.apply.arg)];\n        paren = value:\n          if builtins.elem (kindOf value.paren) [\"vararg\" \"apply\"] || builtins.isList value.paren && !infix value.paren\n          then [\"(\" (expression value.paren) \")\"]\n          else throw \"lua: `paren` keeps the first value of a call or `...`; a grouping is a nested infix list\";\n        dot = value: [(prefix value.dot.table) \".\" (fieldPath value.dot.path)];\n        index = value: [(prefix value.index.table) \"[\" (expression value.index.key) \"]\"];\n      }\n      // lib.mapAttrs (kind: mark: value: [\n        mark\n        (\n          if rank value.\${kind} < unaryPrecedence\n          then [\"(\" (expression value.\${kind}) \")\"]\n          else expression value.\${kind}\n        )\n      ])\n      unaries;\n\n    expression = value: (expressions.\${kindOf value} or (throw \"lua: a \${kindOf value} is not an expression\")) value;\n\n    assigned = values: lib.optionals (values != []) [\" = \" (commas values)];\n\n    clause = value: [\n      (expression value.test)\n      \" then\"\n      (layout (block value.body))\n      (\n        if !(value ? otherwise)\n        then \"end\"\n        else if value.otherwise ? \"if\"\n        then [\"elseif \" (clause value.otherwise.\"if\")]\n        else [\"else\" (layout (block value.otherwise)) \"end\"]\n      )\n    ];\n\n    loop = head: body: [head \" do\" (layout body) \"end\"];\n\n    statements = {\n      list = value:\n        if infix value\n        then throw \"lua: an infix expression is not a statement\"\n        else call value;\n      comment = value: value.comment;\n      break = _: \"break\";\n      semicolon = _: \";\";\n      local = value: [\"local \" (nameList value.local.names) (assigned value.local.values)];\n      assign = value: [(commas (lib.toList value.assign.targets)) (assigned value.assign.values)];\n      localFunction = value: function \"local function \${binder value.localFunction.name}\" value.localFunction.spec;\n      return = value: [\"return\" (lib.optionals (value.return != []) [\" \" (commas value.return)])];\n      \"if\" = value: [\"if \" (clause value.\"if\")];\n      forIn = value: let\n        resolved = block value.forIn;\n      in\n        loop [\"for \" (nameList resolved.names) \" in \" (commas resolved.values)] resolved.body;\n      forNum = value: let\n        resolved = block value.forNum;\n      in\n        loop [\"for \" (binder resolved.name) \" = \" (commas resolved.range)] resolved.body;\n      while = value: loop [\"while \" (expression value.while.test)] (block value.while.body);\n      do = value: [\"do\" (layout (block value.do)) \"end\"];\n    };\n\n    statement = value: (statements.\${kindOf value} or (throw \"lua: a \${kindOf value} is not a statement\")) value;\n\n    entry = value:\n      if value ? blank\n      then []\n      else statement value;\n\n    constructors = {\n      blank = {blank = true;};\n\n      comment = text: {comment = text;};\n\n      inline = values: {inline = values;};\n\n      rows = values: {rows = values;};\n\n      str = text: {str = text;};\n\n      sq = text: {sq = text;};\n\n      table = fields: {table = fields;};\n\n      field = name: value: {field = {inherit name value;};};\n\n      key = key: value: {key = {inherit key value;};};\n\n      fn = spec: {fn = spec;};\n\n      apply = head: arg: {apply = {inherit head arg;};};\n\n      paren = value: {paren = value;};\n\n      not = value: {not = value;};\n\n      neg = value: {neg = value;};\n\n      len = value: {len = value;};\n\n      bnot = value: {bnot = value;};\n\n      dot = table: path: {dot = {inherit table path;};};\n\n      method = table: name: {method = {inherit table name;};};\n\n      index = table: key: {index = {inherit table key;};};\n\n      local = names: values: {local = {inherit names values;};};\n\n      assign = targets: values: {assign = {inherit targets values;};};\n\n      localFunction = name: spec: {localFunction = {inherit name spec;};};\n\n      return = values: {return = values;};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      forIn = spec: {forIn = spec;};\n\n      forNum = spec: {forNum = spec;};\n\n      while = test: body: {while = {inherit test body;};};\n\n      do = body: {do = body;};\n\n      break = {break = true;};\n\n      semicolon = {semicolon = true;};\n\n      nil = {nil = true;};\n\n      vararg = {vararg = true;};\n\n      render = top: doc.render 80 (map (value: [(entry value) hardline]) (block top));\n    };\n  in\n    constructors\n    // builtins.listToAttrs (map (global: {\n        name =\n          if constructors ? \${global} || builtins.elem global nixKeywords\n          then \"\${global}'\"\n          else global;\n        value = {name = global;};\n      })\n      globals);\n\n  python = let\n    inherit (doc) hardline nest align;\n\n    nameNode = spelled: {name = spelled;};\n\n    keyword = word: {keyword = word;};\n\n    nameOf = value:\n      if kindOf value == \"name\"\n      then value.name\n      else throw \"python: a \${kindOf value} where a name is expected\";\n\n    levels = {\n      \"or\" = 4;\n      \"and\" = 5;\n      \"in\" = 7;\n      \"not in\" = 7;\n      \"is\" = 7;\n      \"is not\" = 7;\n      \"<\" = 7;\n      \"<=\" = 7;\n      \">\" = 7;\n      \">=\" = 7;\n      \"!=\" = 7;\n      \"==\" = 7;\n      \"|\" = 8;\n      \"^\" = 9;\n      \"&\" = 10;\n      \"<<\" = 11;\n      \">>\" = 11;\n      \"+\" = 12;\n      \"-\" = 12;\n      \"*\" = 13;\n      \"/\" = 13;\n      \"//\" = 13;\n      \"%\" = 13;\n      \"@\" = 13;\n      \"**\" = 15;\n    };\n\n    rowItems = row:\n      if builtins.isList row\n      then row\n      else [row];\n\n    contentItems = content:\n      if builtins.isList content\n      then content\n      else lib.concatMap rowItems (content.rows or content.aligned or (throw \"python: no bracket content \${kindOf content}\"));\n\n    marked = rows: let\n      ends = builtins.foldl' (sums: row: sums ++ [(lib.last sums + builtins.length (rowItems row))]) [0] rows;\n      breaks = lib.init (builtins.tail ends);\n    in\n      lib.imap0 (index: piece:\n        if lib.mod index 2 == 0\n        then piece\n        else if builtins.isString piece\n        then {\n          symbol = piece;\n          before = builtins.elem index breaks;\n          after = builtins.elem (index + 1) breaks;\n        }\n        else throw \"python: an infix list alternates operands and operator strings\")\n      (lib.concatMap rowItems rows);\n\n    tree = pieces: let\n      count = builtins.length pieces;\n      operators = lib.genList (index: builtins.elemAt pieces (2 * index + 1)) (count / 2);\n      ranks = map (operator: levels.\${operator.symbol} or (throw \"python: `\${operator.symbol}` is not a binary operator\")) operators;\n      lowest = lib.foldl' lib.min 99 ranks;\n      indices = builtins.filter (index: builtins.elemAt ranks index == lowest) (lib.range 0 (builtins.length operators - 1));\n      root =\n        if lowest == levels.\"**\"\n        then builtins.head indices\n        else lib.last indices;\n    in\n      if count == 1\n      then operand (builtins.head pieces)\n      else if lib.mod count 2 == 0\n      then throw \"python: an infix list alternates operands and operators and ends in an operand\"\n      else {\n        binary = {\n          operator = builtins.elemAt operators root;\n          left = tree (lib.take (2 * root + 1) pieces);\n          right = tree (lib.drop (2 * root + 2) pieces);\n        };\n      };\n\n    operand = value:\n      if builtins.isList value\n      then {group = tree (marked [value]);}\n      else value;\n\n    form = level: print: {\n      inherit level;\n      doc = print;\n    };\n\n    atom = text: form 17 (_: text);\n\n    printed = value: (forms.\${kindOf value} or (throw \"python: \${kindOf value} is not a Python expression\")) value;\n\n    at = need: mode: value: let\n      it = printed value;\n    in\n      if it.level < need\n      then [\"(\" (align (it.doc inside)) \")\"]\n      else it.doc mode;\n\n    top = mode: value:\n      if kindOf value == \"commas\"\n      then (printed value).doc mode\n      else at 2 mode value;\n\n    inside = 0;\n\n    bare = 1;\n\n    continued = 2;\n\n    continuing = mode:\n      if mode == bare\n      then continued\n      else mode;\n\n    broken = mode: rest:\n      if mode == inside\n      then [hardline rest]\n      else if mode == bare\n      then [\" \\\\\" (nest 4 [hardline rest])]\n      else [\" \\\\\" hardline rest];\n\n    item = at 2 inside;\n\n    separated = values: lib.intersperse \", \" (map item values);\n\n    contents = {\n      list = open: close: tuple: values: [open (align (separated values)) (lib.optional (tuple && builtins.length values == 1) \",\") close];\n      rows = open: close: _: value: let\n        comma = lib.optionalString (builtins.length value.rows > 1) \",\";\n      in [open (nest 4 (map (row: [hardline (separated (rowItems row)) comma]) value.rows)) hardline close];\n      aligned = open: close: _: value: [open (align (lib.intersperse [\",\" hardline] (map (row: separated (rowItems row)) value.aligned))) close];\n    };\n\n    bracket = open: close: tuple: content: (contents.\${kindOf content} or (throw \"python: no bracket content \${kindOf content}\")) open close tuple content;\n\n    argumentsOf = values:\n      if builtins.isList values && builtins.length values == 1 && kindOf (builtins.head values) == \"gen\"\n      then [\"(\" (align (comprehension (builtins.head values).gen)) \")\"]\n      else bracket \"(\" \")\" false values;\n\n    fstringParts = {\n      string = lib.id;\n      field = value: [\"{\" (item value.field) \"}\"];\n      spec = value: [\"{\" (item value.spec.value) \":\" value.spec.format \"}\"];\n    };\n\n    literal = quote: content:\n      atom (\n        if builtins.isList content\n        then [\"f\" quote (map (part: (fstringParts.\${kindOf part} or (throw \"python: no f-string part \${kindOf part}\")) part) content) quote]\n        else [quote content quote]\n      );\n\n    simple = value: value == null || builtins.isInt value || kindOf value == \"name\";\n\n    bound = side: value: lib.optional (value != null) (side (item value));\n\n    subscript = key:\n      if kindOf key == \"slice\"\n      then let\n        inherit (key.slice) lower upper;\n        pad = lib.optionalString (!(simple lower && simple upper)) \" \";\n      in [(bound (side: [side pad]) lower) \":\" (bound (side: [pad side]) upper)]\n      else top inside key;\n\n    lines = mode: docs: [(builtins.head docs) (map (broken mode) (builtins.tail docs))];\n\n    infix = value: printed (tree value);\n\n    forms = {\n      string = value: throw \"python: the string \\\"\${value}\\\" where an expression is expected (a name is a bound variable, a literal is `str`)\";\n      name = value: atom value.name;\n      int = value:\n        form (\n          if value < 0\n          then 14\n          else 17\n        ) (_: toString value);\n      bool = value:\n        atom (\n          if value\n          then \"True\"\n          else \"False\"\n        );\n      octal = value: atom \"0o\${lib.concatMapStrings toString (lib.toBaseDigits 8 value.octal)}\";\n      placeholder = value: atom \"@\${value.placeholder}@\";\n      str = value: literal \"\\\"\" value.str;\n      sq = value: literal \"'\" value.sq;\n      triple = value: literal \"\\\"\\\"\\\"\" value.triple;\n      raw = value: atom [\"r\" (item value.raw)];\n      bytes = value: atom [\"b\" (item value.bytes)];\n      strings = value:\n        form 17 (mode:\n          if builtins.isList value.strings\n          then lib.intersperse \" \" (map item value.strings)\n          else lines mode (map item value.strings.rows));\n      list = value: infix (marked [value]);\n      rows = value: infix (marked value.rows);\n      aligned = value: atom [\"(\" (align ((infix (marked value.aligned)).doc inside)) \")\"];\n      hang = value: atom [\"(\" (nest 4 [hardline ((printed value.hang).doc inside)]) hardline \")\"];\n      binary = value: let\n        inherit (value.binary) operator left right;\n        level = levels.\${operator.symbol};\n        power = operator.symbol == \"**\";\n        after = mode: rest:\n          if operator.after\n          then broken mode rest\n          else [\" \" rest];\n        right' = mode:\n          at (\n            if power\n            then 14\n            else level + 1\n          ) (\n            if operator.before || operator.after\n            then continuing mode\n            else mode\n          )\n          right;\n      in\n        form level (mode: [\n          (at (\n              if power\n              then 16\n              else level\n            )\n            mode\n            left)\n          (\n            if operator.before\n            then broken mode [operator.symbol (after (continuing mode) (right' mode))]\n            else [\" \" operator.symbol (after mode (right' mode))]\n          )\n        ]);\n      group = value: let\n        inner = printed value.group;\n      in {\n        level =\n          if kindOf value.group == \"binary\" && levels.\${value.group.binary.operator.symbol} == levels.\"==\"\n          then 6.5\n          else inner.level;\n        inherit (inner) doc;\n      };\n      call = value: form 17 (mode: [(at 17 mode value.call.function) (argumentsOf value.call.arguments)]);\n      dot = value: form 17 (mode: [(at 17 mode value.dot.value) \".\" value.dot.name]);\n      index = value: form 17 (mode: [(at 17 mode value.index.value) \"[\" (align (subscript value.index.key)) \"]\"]);\n      \"list'\" = value: atom (bracket \"[\" \"]\" false value.\"list'\");\n      tuple = value: atom (bracket \"(\" \")\" true value.tuple);\n      set = value: atom (bracket \"{\" \"}\" false value.set);\n      dict = value: atom (bracket \"{\" \"}\" false value.dict);\n      listComp = value: atom [\"[\" (align (comprehension value.listComp)) \"]\"];\n      setComp = value: atom [\"{\" (align (comprehension value.setComp)) \"}\"];\n      dictComp = value: atom [\"{\" (align (comprehension value.dictComp)) \"}\"];\n      gen = value: atom [\"(\" (align (comprehension value.gen)) \")\"];\n      commas = value: form 0 (mode: lib.intersperse \", \" (map (at 2 mode) value.commas));\n      pair = value: atom [(item value.pair.key) \": \" (item value.pair.value)];\n      kw = value: atom [value.kw.name \"=\" (item value.kw.value)];\n      default = value: atom [(nameOf value.default.name) \"=\" (item value.default.value)];\n      star = value: atom [\"*\" (at 8 inside value.star)];\n      starstar = value: atom [\"**\" (at 8 inside value.starstar)];\n      neg = value: form 14 (mode: [\"-\" (at 14 mode value.neg)]);\n      invert = value: form 14 (mode: [\"~\" (at 14 mode value.invert)]);\n      not = value: form 6 (mode: [\"not \" (at 6 mode value.not)]);\n      await = value: form 16 (mode: [\"await \" (at 17 mode value.await)]);\n      lambda = value: let\n        scope = lambdaScope value.lambda;\n      in\n        form 2 (mode: [\"lambda\" (lib.optionals (scope.params != []) [\" \" (separated scope.params)]) \": \" (at 2 mode scope.body)]);\n      ternary = value: let\n        inherit (value.ternary) body test orelse;\n      in\n        form 3 (mode: [(at 4 mode body) \" if \" (at 4 mode test) \" else \" (at 3 mode orelse)]);\n      walrus = value: form 1 (mode: [(nameOf value.walrus.target) \" := \" (at 2 mode value.walrus.value)]);\n      as = value: atom [(item value.as.value) \" as \" (item value.as.target)];\n    };\n\n    comprehensionClauses = {\n      compFor = value: [\"for \" (top inside value.compFor.target) \" in \" (at 4 inside value.compFor.iter)];\n      compIf = value: [\"if \" (at 4 inside value.compIf)];\n    };\n\n    comprehensionPart = value: (comprehensionClauses.\${kindOf value} or item) value;\n\n    comprehension = body: let\n      parts = comprehensionScope body;\n    in\n      if builtins.isList parts\n      then lib.intersperse \" \" (map comprehensionPart parts)\n      else lines inside (map (row: lib.intersperse \" \" (map comprehensionPart (rowItems row))) parts.rows);\n\n    boundForms = {\n      name = value: [value.name];\n      commas = value: lib.concatMap boundNames value.commas;\n      tuple = value: lib.concatMap boundNames (contentItems value.tuple);\n      \"list'\" = value: lib.concatMap boundNames (contentItems value.\"list'\");\n      star = value: boundNames value.star;\n    };\n\n    boundNames = value: (boundForms.\${kindOf value} or (_: [])) value;\n\n    parameterForms = {\n      default = value: [(nameOf value.default.name)];\n      star = value: boundNames value.star;\n      starstar = value: boundNames value.starstar;\n    };\n\n    parameter = value: (parameterForms.\${kindOf value} or boundNames) value;\n\n    walrusTarget = value: lib.optional (kindOf value == \"walrus\") (nameOf value.walrus.target);\n\n    binders = {\n      \"import\" = value: [(nameOf value.\"import\")];\n      from = value: map nameOf value.from.names;\n      assign = value: boundNames value.assign.target;\n      augAssign = value: boundNames value.augAssign.target;\n      del = value: lib.concatMap boundNames value.del;\n      def = value: [(nameOf value.def.name)];\n      class = value: [(nameOf value.class.name)];\n      async = value: declares value.async;\n      \"if\" = value:\n        walrusTarget value.\"if\".test\n        ++ declared value.\"if\".body\n        ++ lib.optionals (value.\"if\" ? otherwise) (\n          if builtins.isList value.\"if\".otherwise\n          then declared value.\"if\".otherwise\n          else declares value.\"if\".otherwise\n        );\n      for = value: boundNames value.for.target ++ declared value.for.body;\n      while = value: walrusTarget value.while.test ++ declared value.while.body;\n      \"with\" = value: lib.concatMap (one: lib.optionals (kindOf one == \"as\") (boundNames one.as.target)) value.\"with\".items ++ declared value.\"with\".body;\n      try = value: declared value.try.body ++ declared value.try.clauses;\n      except = value: lib.optionals (kindOf value.except.caught == \"as\") (boundNames value.except.caught.as.target) ++ declared value.except.body;\n      finally = value: declared value.finally;\n    };\n\n    declares = value: (binders.\${kindOf value} or (_: [])) value;\n\n    declared = lib.concatMap declares;\n\n    scoped = declaring:\n      boundBlock {\n        language = \"python\";\n        name = nameNode;\n        declared = declaring;\n      };\n\n    blockScope = scoped declared;\n\n    functionScope = scoped (result: lib.concatMap parameter (contentItems result.params) ++ declared result.body);\n\n    lambdaScope = scoped (result: lib.concatMap parameter result.params);\n\n    comprehensionScope = scoped (result: lib.concatMap (one: lib.optionals (kindOf one == \"compFor\") (boundNames one.compFor.target)) (contentItems result));\n\n    block = body: nest 4 (map (value: [hardline (entry value)]) body);\n\n    alternative = value:\n      if builtins.isList value\n      then [hardline \"else:\" (block value)]\n      else if kindOf value == \"if\"\n      then [hardline \"el\" (statement value)]\n      else throw \"python: an else branch is a body or an if\";\n\n    handlers = {\n      except = value: [\"except\" (lib.optionals (value.except.caught != null) [\" \" (at 2 bare value.except.caught)]) \":\" (block value.except.body)];\n      finally = value: [\"finally:\" (block value.finally)];\n    };\n\n    statements = {\n      keyword = value: value.keyword;\n      comment = value: value.comment;\n      \"import\" = value: [\"import \" (nameOf value.\"import\")];\n      from = value: [\"from \" value.from.module \" import \" (lib.concatMapStringsSep \", \" nameOf value.from.names)];\n      assign = value: [(top bare value.assign.target) \" = \" (top bare value.assign.value)];\n      augAssign = value: [(top bare value.augAssign.target) \" \${value.augAssign.operator} \" (top bare value.augAssign.value)];\n      return = value: [\"return\" (lib.optionals (value.return != null) [\" \" (top bare value.return)])];\n      raise = value: [\"raise\" (lib.optionals (value.raise != null) [\" \" (at 2 bare value.raise)])];\n      del = value: [\"del \" (lib.intersperse \", \" (map (at 2 bare) value.del))];\n      global = value: [\"global \" (lib.concatMapStringsSep \", \" nameOf value.global)];\n      nonlocal = value: [\"nonlocal \" (lib.concatMapStringsSep \", \" nameOf value.nonlocal)];\n      \"assert\" = value: [\"assert \" (at 2 bare value.\"assert\")];\n      def = value: let\n        scope = functionScope value.def.function;\n      in [\"def \" (nameOf value.def.name) (bracket \"(\" \")\" false scope.params) \":\" (block scope.body)];\n      async = value: [\"async \" (statement value.async)];\n      class = value: [\"class \" (nameOf value.class.name) (lib.optional (value.class.bases != null) (bracket \"(\" \")\" false value.class.bases)) \":\" (block (blockScope value.class.body))];\n      \"if\" = value: [\"if \" (at 1 bare value.\"if\".test) \":\" (block value.\"if\".body) (lib.optional (value.\"if\" ? otherwise) (alternative value.\"if\".otherwise))];\n      for = value: [\"for \" (top bare value.for.target) \" in \" (top bare value.for.iter) \":\" (block value.for.body)];\n      while = value: [\"while \" (at 1 bare value.while.test) \":\" (block value.while.body)];\n      \"with\" = value: [\"with \" (lib.intersperse \", \" (map (at 2 bare) value.\"with\".items)) \":\" (block value.\"with\".body)];\n      try = value: [\"try:\" (block value.try.body) (map (clause: [hardline ((handlers.\${kindOf clause} or (throw \"python: \${kindOf clause} is not a try clause\")) clause)]) value.try.clauses)];\n    };\n\n    statement = value: (statements.\${kindOf value} or (top bare)) value;\n\n    entry = value:\n      if value ? blank\n      then []\n      else statement value;\n\n    builtinNames = [\n      \"None\"\n      \"NotImplemented\"\n      \"Ellipsis\"\n      \"__name__\"\n      \"__doc__\"\n      \"__file__\"\n      \"abs\"\n      \"aiter\"\n      \"all\"\n      \"anext\"\n      \"any\"\n      \"ascii\"\n      \"bin\"\n      \"bool\"\n      \"breakpoint\"\n      \"bytearray\"\n      \"bytes\"\n      \"callable\"\n      \"chr\"\n      \"classmethod\"\n      \"compile\"\n      \"complex\"\n      \"delattr\"\n      \"dict\"\n      \"dir\"\n      \"divmod\"\n      \"enumerate\"\n      \"eval\"\n      \"exec\"\n      \"filter\"\n      \"float\"\n      \"format\"\n      \"frozenset\"\n      \"getattr\"\n      \"globals\"\n      \"hasattr\"\n      \"hash\"\n      \"help\"\n      \"hex\"\n      \"id\"\n      \"input\"\n      \"int\"\n      \"isinstance\"\n      \"issubclass\"\n      \"iter\"\n      \"len\"\n      \"list\"\n      \"locals\"\n      \"map\"\n      \"max\"\n      \"memoryview\"\n      \"min\"\n      \"next\"\n      \"object\"\n      \"oct\"\n      \"open\"\n      \"ord\"\n      \"pow\"\n      \"print\"\n      \"property\"\n      \"range\"\n      \"repr\"\n      \"reversed\"\n      \"round\"\n      \"set\"\n      \"setattr\"\n      \"slice\"\n      \"sorted\"\n      \"staticmethod\"\n      \"str\"\n      \"sum\"\n      \"super\"\n      \"tuple\"\n      \"type\"\n      \"vars\"\n      \"zip\"\n      \"BaseException\"\n      \"Exception\"\n      \"ArithmeticError\"\n      \"AssertionError\"\n      \"AttributeError\"\n      \"BlockingIOError\"\n      \"BrokenPipeError\"\n      \"BufferError\"\n      \"ChildProcessError\"\n      \"ConnectionAbortedError\"\n      \"ConnectionError\"\n      \"ConnectionRefusedError\"\n      \"ConnectionResetError\"\n      \"EOFError\"\n      \"FileExistsError\"\n      \"FileNotFoundError\"\n      \"GeneratorExit\"\n      \"ImportError\"\n      \"IndexError\"\n      \"InterruptedError\"\n      \"IsADirectoryError\"\n      \"KeyError\"\n      \"KeyboardInterrupt\"\n      \"LookupError\"\n      \"MemoryError\"\n      \"ModuleNotFoundError\"\n      \"NameError\"\n      \"NotADirectoryError\"\n      \"NotImplementedError\"\n      \"OSError\"\n      \"OverflowError\"\n      \"PermissionError\"\n      \"ProcessLookupError\"\n      \"RecursionError\"\n      \"RuntimeError\"\n      \"StopAsyncIteration\"\n      \"StopIteration\"\n      \"SyntaxError\"\n      \"SystemExit\"\n      \"TimeoutError\"\n      \"TypeError\"\n      \"UnicodeDecodeError\"\n      \"UnicodeEncodeError\"\n      \"UnicodeError\"\n      \"ValueError\"\n      \"ZeroDivisionError\"\n    ];\n\n    constructors = {\n      blank = {blank = true;};\n\n      comment = text: {comment = text;};\n\n      str = content: {str = content;};\n\n      sq = content: {sq = content;};\n\n      triple = content: {triple = content;};\n\n      raw = value: {raw = value;};\n\n      bytes = value: {bytes = value;};\n\n      field = value: {field = value;};\n\n      spec = value: format: {spec = {inherit value format;};};\n\n      strings = values: {strings = values;};\n\n      octal = value: {octal = value;};\n\n      placeholder = text: {placeholder = text;};\n\n      rows = values: {rows = values;};\n\n      aligned = values: {aligned = values;};\n\n      hang = value: {hang = value;};\n\n      call = function: arguments: {call = {inherit function arguments;};};\n\n      dot = value: name: {dot = {inherit value name;};};\n\n      index = value: key: {index = {inherit value key;};};\n\n      slice = lower: upper: {slice = {inherit lower upper;};};\n\n      list = values: {\"list'\" = values;};\n\n      tuple = values: {tuple = values;};\n\n      set = values: {set = values;};\n\n      dict = values: {dict = values;};\n\n      pair = key: value: {pair = {inherit key value;};};\n\n      kw = name: value: {kw = {inherit name value;};};\n\n      default = name: value: {default = {inherit name value;};};\n\n      star = value: {star = value;};\n\n      starstar = value: {starstar = value;};\n\n      commas = values: {commas = values;};\n\n      neg = value: {neg = value;};\n\n      invert = value: {invert = value;};\n\n      not = value: {not = value;};\n\n      await = value: {await = value;};\n\n      lambda = function: {lambda = function;};\n\n      ternary = body: test: orelse: {ternary = {inherit body test orelse;};};\n\n      walrus = target: value: {walrus = {inherit target value;};};\n\n      listComp = body: {listComp = body;};\n\n      setComp = body: {setComp = body;};\n\n      dictComp = body: {dictComp = body;};\n\n      gen = body: {gen = body;};\n\n      compFor = target: iter: {compFor = {inherit target iter;};};\n\n      compIf = test: {compIf = test;};\n\n      as = value: target: {as = {inherit value target;};};\n\n      assign = target: value: {assign = {inherit target value;};};\n\n      augAssign = target: operator: value: {augAssign = {inherit target operator value;};};\n\n      return = value: {return = value;};\n\n      raise = value: {raise = value;};\n\n      pass = keyword \"pass\";\n\n      break = keyword \"break\";\n\n      continue = keyword \"continue\";\n\n      del = targets: {del = targets;};\n\n      global = names: {global = names;};\n\n      nonlocal = names: {nonlocal = names;};\n\n      assert' = test: {\"assert\" = test;};\n\n      import' = module: {\"import\" = module;};\n\n      from = module: names: {from = {inherit module names;};};\n\n      def = name: function: {def = {inherit name function;};};\n\n      async = value: {async = value;};\n\n      class = name: bases: body: {class = {inherit name bases body;};};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      for = target: iter: body: {for = {inherit target iter body;};};\n\n      while = test: body: {while = {inherit test body;};};\n\n      with' = items: body: {\"with\" = {inherit items body;};};\n\n      try = body: clauses: {try = {inherit body clauses;};};\n\n      except = caught: body: {except = {inherit caught body;};};\n\n      finally = body: {finally = body;};\n\n      render = module: doc.render 80 (map (value: [(entry value) hardline]) (blockScope module));\n    };\n  in\n    constructors\n    // builtins.listToAttrs (map (spelled:\n      lib.nameValuePair (\n        if constructors ? \${spelled}\n        then \"\${spelled}'\"\n        else spelled\n      ) (nameNode spelled))\n    builtinNames);\n\n  javascript = let\n    inherit (doc) hardline nest;\n\n    language = \"javascript\";\n\n    levels = [\n      [\"=\" \"+=\" \"-=\" \"*=\" \"/=\" \"%=\" \"**=\" \"<<=\" \">>=\" \">>>=\" \"&=\" \"|=\" \"^=\" \"&&=\" \"||=\" \"??=\"]\n      [\"??\"]\n      [\"||\"]\n      [\"&&\"]\n      [\"|\"]\n      [\"^\"]\n      [\"&\"]\n      [\"==\" \"!=\" \"===\" \"!==\"]\n      [\"<\" \">\" \"<=\" \">=\" \"in\" \"instanceof\"]\n      [\"<<\" \">>\" \">>>\"]\n      [\"+\" \"-\"]\n      [\"*\" \"/\" \"%\"]\n      [\"**\"]\n    ];\n\n    binary = builtins.listToAttrs (lib.concatLists (lib.imap1 (level: map (operator: lib.nameValuePair operator level)) levels));\n\n    right = [\"**\"] ++ builtins.head levels;\n\n    logical = [\"??\" \"||\" \"&&\"];\n\n    bitwise = [\"|\" \"^\" \"&\" \"<<\" \">>\" \">>>\"];\n\n    flattens = parent: child: let\n      both = group: builtins.elem parent group && builtins.elem child group;\n    in\n      parent != \"**\" && !(both [\"==\" \"!=\" \"===\" \"!==\"]) && !(both [\"*\" \"/\" \"%\"] && parent != child) && !(both [\"<<\" \">>\" \">>>\"]);\n\n    mixed = parent: operator: builtins.elem parent logical && builtins.elem operator logical && parent != operator;\n\n    clarified = parent: operator: operator == \"%\" && builtins.elem parent [\"+\" \"-\"] || builtins.elem parent bitwise;\n\n    unaryBase = parent: side: child: parent == \"**\" && side == \"left\" && child.precedence < 15;\n\n    grouped = parent: side: child: let\n      level = binary.\${parent};\n      operator = child.operator or null;\n      rules = [\n        {\n          when = child.precedence < level;\n          value = true;\n        }\n        {\n          when = operator == null;\n          value = unaryBase parent side child;\n        }\n        {\n          when = mixed parent operator;\n          value = true;\n        }\n        {\n          when = child.precedence > level;\n          value = clarified parent operator;\n        }\n        {\n          when = level == 1;\n          value = side == \"left\";\n        }\n      ];\n    in\n      (lib.findFirst (rule: rule.when) {value = side == \"right\" || !flattens parent operator;} rules).value;\n\n    parse = infixTree {\n      inherit language right;\n      precedence = binary;\n      operand = item: {operand = item;};\n    };\n\n    infix = split: items: let\n      walk = tree:\n        if tree ? binary\n        then let\n          inherit (tree.binary) operator;\n          side = which: let\n            child = walk tree.binary.\${which};\n          in\n            if grouped operator which child\n            then [\"(\" child.doc \")\"]\n            else child.doc;\n        in {\n          precedence = binary.\${operator};\n          inherit operator;\n          doc =\n            if split\n            then [(side \"left\") (nest 2 [\" \" operator hardline (side \"right\")])]\n            else [(side \"left\") \" \${operator} \" (side \"right\")];\n        }\n        else expression tree.operand;\n    in\n      walk (parse items);\n\n    printed = precedence: shown: {\n      inherit precedence;\n      doc = shown;\n    };\n\n    wrapped = least: value: let\n      out = expression value;\n    in\n      if out.precedence < least\n      then [\"(\" out.doc \")\"]\n      else out.doc;\n\n    negative = value: (builtins.isInt value || builtins.isFloat value) && value < 0 || value ? neg;\n\n    number = value:\n      printed (\n        if value < 0\n        then 14\n        else 15\n      ) (builtins.toJSON value);\n\n    identifier = \"[A-Za-z_$][A-Za-z0-9_$]*\";\n\n    property = path:\n      if builtins.match \"\${identifier}([.]\${identifier})*\" path != null\n      then path\n      else throw \"javascript: `\${path}` is not a property path\";\n\n    commas = lib.intersperse \", \";\n\n    entries = values: values.rows or values;\n\n    broken = value: builtins.isAttrs value && (value.obj or value.array or null) ? rows;\n\n    layout = open: close: item: values:\n      if values ? rows\n      then [open (nest 2 (lib.imap1 (index: value: [hardline (item value) (lib.optional (index < builtins.length values.rows) \",\")]) values.rows)) hardline close]\n      else [open (commas (map item values)) close];\n\n    key = value:\n      if builtins.isString value\n      then property value\n      else if value ? str\n      then \"\\\"\${value.str}\\\"\"\n      else throw \"javascript: an object key is a property name or a str\";\n\n    entry = value:\n      if builtins.isList value && builtins.length value == 2\n      then [(key (builtins.head value)) \": \" (wrapped 1 (lib.last value))]\n      else value.name or (throw \"javascript: an object entry is a name or a [key value] pair\");\n\n    hugged = values: builtins.isList (lib.last values) && broken (lib.last (lib.last values));\n\n    braced = values:\n      if values ? rows || values == []\n      then layout \"{\" \"}\" entry values\n      else layout \"{ \" (lib.optionalString (!hugged values) \" \" + \"}\") entry values;\n\n    argumentList = values: [\"(\" (commas (map (wrapped 1) values)) \")\"];\n\n    patterns = values: commas (map (value: (expression value).doc) values);\n\n    expressionForms = {\n      int = number;\n      float = number;\n      bool = value: printed 20 (lib.boolToString value);\n      name = value: printed 20 value.name;\n      keyword = value: printed 20 value.keyword;\n      string = value: throw \"javascript: the string `\${value}` where an expression is expected; a name is a Nix variable, a literal a str\";\n      str = value: printed 20 \"\\\"\${value.str}\\\"\";\n      number = value: printed 15 value.number;\n      list = infix false;\n      rows = value: infix true value.rows;\n      obj = value: printed 20 (braced value.obj);\n      array = value: printed 20 (layout \"[\" \"]\" (wrapped 1) value.array);\n      dot = value: printed 18 [(wrapped 18 value.dot.object) \".\" (property value.dot.path)];\n      optional = value: printed 18 [(wrapped 18 value.optional.object) \"?.\" (property value.optional.path)];\n      call = value: printed 18 [(wrapped 18 value.call.callee) (argumentList value.call.arguments)];\n      new = value: printed 18 [\"new \" (expression value.new.callee).doc (argumentList value.new.arguments)];\n      not = value: printed 14 [\"!\" (wrapped 14 value.not)];\n      neg = value:\n        printed 14 [\n          \"-\"\n          (\n            if negative value.neg\n            then [\"(\" (expression value.neg).doc \")\"]\n            else wrapped 14 value.neg\n          )\n        ];\n      typeof = value: printed 14 [\"typeof \" (wrapped 14 value.typeof)];\n      await = value: printed 14 [\"await \" (wrapped 14 value.await)];\n      async = value: let\n        inner = expression value.async;\n      in\n        inner // {doc = [\"async \" inner.doc];};\n      arrow = value: printed 1 [\"(\" (patterns value.arrow.params) \") => \" (concise value.arrow.body)];\n    };\n\n    expression = value: (expressionForms.\${kindOf value} or (throw \"javascript: no expression \${kindOf value}\")) value;\n\n    statements = value:\n      if builtins.isList value\n      then value\n      else value.inline or [];\n\n    blockLike = value: builtins.isList value || value ? inline;\n\n    braces = value:\n      if value ? inline\n      then\n        if value.inline == []\n        then \"{}\"\n        else [\"{ \" (lib.intersperse \" \" (map statement value.inline)) \" }\"]\n      else [\"{\" (nest 2 (map (one: [hardline (statement one)]) value)) hardline \"}\"];\n\n    clause = value:\n      if blockLike value\n      then braces value\n      else statement value;\n\n    concise = value:\n      if blockLike value\n      then braces value\n      else if value ? obj\n      then [\"(\" (expression value).doc \")\"]\n      else wrapped 1 value;\n\n    function = value: [\"function \" value.function.name.name \"(\" (patterns value.function.params) \") \" (braces value.function.body)];\n\n    statementForms = {\n      blank = _: \"\";\n      comment = value: value.comment;\n      const = value: [\"const \" (expression value.const.target).doc \" = \" (wrapped 1 value.const.value) \";\"];\n      \"let\" = value: [\"let \" (expression value.\"let\".target).doc (lib.optionals (value.\"let\".value != null) [\" = \" (wrapped 1 value.\"let\".value)]) \";\"];\n      import = value: [\"import { \" (commas (map (one: one.name) value.import.names)) \" } from \\\"\" value.import.source \"\\\";\"];\n      inherit function;\n      async = value:\n        if value.async ? function\n        then [\"async \" (function value.async)]\n        else [(expression value).doc \";\"];\n      return = value:\n        if value.return == null\n        then \"return;\"\n        else [\"return \" (wrapped 1 value.return) \";\"];\n      throw = value: [\"throw \" (wrapped 1 value.throw) \";\"];\n      continue = _: \"continue;\";\n      \"if\" = value: [\"if (\" (wrapped 1 value.\"if\".test) \") \" (clause value.\"if\".body) (lib.optionals (value.\"if\" ? otherwise) [\" else \" (clause value.\"if\".otherwise)])];\n      while = value: [\"while (\" (wrapped 1 value.while.test) \") \" (clause value.while.body)];\n      try = value: [\"try \" (braces value.try.body) \" catch \" (lib.optionals (value.try ? param) [\"(\" (expression value.try.param).doc \") \"]) (braces value.try.handler)];\n    };\n\n    statement = value: (statementForms.\${kindOf value} or (_: [(expression value).doc \";\"])) value;\n\n    name = spelled:\n      if builtins.match \"[A-Za-z_][A-Za-z0-9_]*\" spelled != null\n      then {name = spelled;}\n      else throw \"javascript: `\${spelled}` is not a name Nix can spell\";\n\n    patternForms = {\n      name = value: [value.name];\n      obj = value:\n        lib.concatMap (one:\n          patternNames (\n            if builtins.isList one\n            then lib.last one\n            else one\n          )) (entries value.obj);\n      array = value: lib.concatMap patternNames (entries value.array);\n    };\n\n    patternNames = value: (patternForms.\${kindOf value} or (throw \"javascript: \${kindOf value} is not a binding pattern; a name is a Nix variable\")) value;\n\n    binding = target: lib.throwIf (patternNames target == []) \"javascript: a binding pattern that declares no name\" target;\n\n    declaring = {\n      const = value: patternNames value.const.target;\n      \"let\" = value: patternNames value.\"let\".target;\n      import = value: map (one: one.name) value.import.names;\n      function = value: [value.function.name.name];\n      async = value: declares value.async;\n    };\n\n    declares = value: (declaring.\${kindOf value} or (_: [])) value;\n\n    declaredIn = value: lib.concatMap declares (statements value);\n\n    scope = declared: boundBlock {inherit language name declared;};\n\n    block = scope declaredIn;\n\n    callable = definition: let\n      result = scope (scoped: lib.concatMap patternNames scoped.params ++ declaredIn scoped.body) definition;\n    in {\n      params = map binding result.params;\n      inherit (result) body;\n    };\n\n    handler = scope (result:\n      if result ? param\n      then patternNames result.param ++ declaredIn result.body\n      else declaredIn result);\n\n    clauseOf = value:\n      if builtins.isFunction value || blockLike value\n      then block value\n      else value;\n\n    globals = [\"AbortController\" \"Array\" \"Boolean\" \"Buffer\" \"Date\" \"Error\" \"JSON\" \"Map\" \"Math\" \"Number\" \"Object\" \"Promise\" \"RegExp\" \"Set\" \"String\" \"Symbol\" \"TypeError\" \"URL\" \"URLSearchParams\" \"clearInterval\" \"clearTimeout\" \"console\" \"fetch\" \"globalThis\" \"parseFloat\" \"parseInt\" \"process\" \"queueMicrotask\" \"setInterval\" \"setTimeout\" \"structuredClone\" \"undefined\"];\n  in\n    lib.genAttrs globals name\n    // {\n      null' = {keyword = \"null\";};\n\n      blank = {blank = true;};\n\n      continue = {continue = true;};\n\n      comment = string: {comment = string;};\n\n      inline = values: {inline = values;};\n\n      rows = values: {rows = values;};\n\n      str = string: {str = string;};\n\n      number = written: {number = written;};\n\n      obj = values: {obj = values;};\n\n      array = values: {array = values;};\n\n      dot = object: path: {dot = {inherit object path;};};\n\n      optional = object: path: {optional = {inherit object path;};};\n\n      call = callee: arguments: {call = {inherit callee arguments;};};\n\n      new = callee: arguments:\n        if callee ? name || callee ? dot\n        then {new = {inherit callee arguments;};}\n        else throw \"javascript: new takes a name or a dot path\";\n\n      not = value: {not = value;};\n\n      neg = value: {neg = value;};\n\n      typeof = value: {typeof = value;};\n\n      await = value: {await = value;};\n\n      async = value: {async = value;};\n\n      arrow = definition: {arrow = callable definition;};\n\n      function = named: definition: {function = {name = named;} // callable definition;};\n\n      const = target: value: {\n        const = {\n          target = binding target;\n          inherit value;\n        };\n      };\n\n      let' = target: value: {\n        \"let\" = {\n          target = binding target;\n          inherit value;\n        };\n      };\n\n      import' = names: source: {\n        import = {\n          names = map (one: lib.throwIfNot (one ? name) \"javascript: an import names Nix variables\" one) names;\n          inherit source;\n        };\n      };\n\n      return = value: {return = value;};\n\n      throw' = value: {throw = value;};\n\n      if' = test: body: {\n        \"if\" = {\n          inherit test;\n          body = clauseOf body;\n        };\n      };\n\n      ifElse = test: body: otherwise: {\n        \"if\" = {\n          inherit test;\n          body = clauseOf body;\n          otherwise = clauseOf otherwise;\n        };\n      };\n\n      while = test: body: {\n        while = {\n          inherit test;\n          body = clauseOf body;\n        };\n      };\n\n      try' = body: caught: let\n        catching = handler caught;\n      in {\n        try =\n          {body = block body;}\n          // (\n            if catching ? param\n            then {\n              param = binding catching.param;\n              handler = catching.body;\n            }\n            else {handler = catching;}\n          );\n      };\n\n      render = top: doc.render 80 (map (value: [(statement value) hardline]) (block top));\n    };\n\n  ts = let\n    inherit (doc) hardline nest;\n\n    nameNode = spelled: {name = spelled;};\n\n    see = value:\n      if builtins.isFunction value\n      then\n        boundBlock {\n          language = \"ts\";\n          name = nameNode;\n          declared = binds;\n        }\n        value\n      else if value ? infix\n      then infixNode value.infix\n      else value;\n\n    never = _: false;\n\n    items = value: value.rows or value;\n\n    patternForms = {\n      name = value: [value.name];\n      obj = value: lib.concatMap patternNames (items value.obj);\n      array = value: lib.concatMap patternNames (items value.array);\n      prop = value: patternNames value.prop.value;\n      spread = value: patternNames value.spread;\n      typed = value: patternNames value.typed.value;\n      opt = value: patternNames value.opt;\n      readonly = value: patternNames value.readonly;\n      binary = value: patternNames value.binary.left;\n    };\n\n    patternNames = value: let\n      seen = see value;\n    in\n      (patternForms.\${kindOf seen} or (_: [])) seen;\n\n    parameterForms = {\n      list = lib.concatMap patternNames;\n      rows = value: parameterNames value.rows;\n      typed = value: parameterNames value.typed.value;\n    };\n\n    parameterNames = value: (parameterForms.\${kindOf value} or patternNames) value;\n\n    headName = head: let\n      seen = see head;\n    in\n      if seen ? extends\n      then seen.extends.name.name\n      else seen.name;\n\n    importForms = {\n      list = lib.concatMap imported;\n      rows = value: imported value.rows;\n      typeOnly = value: imported value.typeOnly;\n      namespace = value: imported value.namespace;\n      name = value: [value.name];\n    };\n\n    imported = value: let\n      seen = see value;\n    in\n      importForms.\${kindOf seen} seen;\n\n    declarationForms = {\n      const = value: patternNames value.const.target;\n      \"let\" = value: patternNames value.\"let\".target;\n      fn = value: lib.optional (value.fn.name != null) value.fn.name.name;\n      async = value: declares value.async;\n      class = value: [(headName value.class.head)];\n      interface = value: [(headName value.interface.head)];\n      type = value: [value.type.name.name];\n      import = value: imported value.import.clause;\n      export = value: declares value.export;\n      default = value: declares value.default;\n    };\n\n    declares = value: let\n      seen = see value;\n    in\n      (declarationForms.\${kindOf seen} or (_: [])) seen;\n\n    statementsOf = body:\n      if builtins.isList body\n      then lib.concatMap declares body\n      else [];\n\n    loopBinds = loop: patternNames loop.target ++ statementsOf loop.body;\n\n    bindForms = {\n      list = lib.concatMap declares;\n      fn = value: parameterNames value.fn.parameters ++ statementsOf value.fn.body;\n      arrow = value: parameterNames value.arrow.parameters ++ statementsOf value.arrow.body;\n      method = value: parameterNames value.method.parameters ++ statementsOf value.method.body;\n      for = value: lib.optionals (value.for.init != null) (declares value.for.init) ++ statementsOf value.for.body;\n      forOf = value: loopBinds value.forOf;\n      forIn = value: loopBinds value.forIn;\n      forAwait = value: loopBinds value.forAwait;\n      catch = value: lib.optionals (value.catch.parameter != null) (patternNames value.catch.parameter) ++ statementsOf value.catch.body;\n      switch = value: lib.concatMap (arm: lib.optionals (arm ? case) (statementsOf arm.case.body)) value.switch.cases;\n    };\n\n    binds = value: (bindForms.\${kindOf value} or (_: throw \"ts: a lambda around a \${kindOf value}, which binds no names\")) value;\n\n    assignments = [\"=\" \"+=\" \"-=\" \"*=\" \"/=\" \"%=\" \"**=\" \"<<=\" \">>=\" \">>>=\" \"&=\" \"|=\" \"^=\" \"&&=\" \"||=\" \"??=\"];\n\n    precedence =\n      lib.genAttrs assignments (_: 1)\n      // {\n        \"??\" = 2;\n        \"||\" = 3;\n        \"&&\" = 4;\n        \"|\" = 5;\n        \"^\" = 6;\n        \"&\" = 7;\n        \"==\" = 8;\n        \"!=\" = 8;\n        \"===\" = 8;\n        \"!==\" = 8;\n        \"<\" = 9;\n        \">\" = 9;\n        \"<=\" = 9;\n        \">=\" = 9;\n        \"in\" = 9;\n        \"instanceof\" = 9;\n        \"as\" = 9;\n        \"satisfies\" = 9;\n        \"<<\" = 10;\n        \">>\" = 10;\n        \">>>\" = 10;\n        \"+\" = 11;\n        \"-\" = 11;\n        \"*\" = 12;\n        \"/\" = 12;\n        \"%\" = 12;\n        \"**\" = 13;\n      };\n\n    parse = infixTree {\n      language = \"ts\";\n      inherit precedence;\n      right = assignments ++ [\"**\"];\n      operand = item:\n        if builtins.isList item\n        then parse item\n        else if builtins.isString item\n        then throw \"ts: the bare string \\\"\${item}\\\" is not an operand; a name is a Nix variable, text is `str`\"\n        else if item ? infix\n        then throw \"ts: an infix inside an infix list is a nested list\"\n        else item;\n    };\n\n    infixNode = value: let\n      tree = parse (items value);\n    in\n      if value ? rows\n      then {binary = tree.binary // {broken = true;};}\n      else tree;\n\n    assignment = operator: precedence.\${operator} == 1;\n\n    cast = operator: operator == \"as\" || operator == \"satisfies\";\n\n    multiplicative = operator: builtins.elem operator [\"*\" \"/\" \"%\"];\n\n    bitshift = operator: builtins.elem operator [\"<<\" \">>\" \">>>\"];\n\n    bitwise = operator: bitshift operator || builtins.elem operator [\"|\" \"^\" \"&\"];\n\n    equality = operator: builtins.elem operator [\"==\" \"!=\" \"===\" \"!==\"];\n\n    logical = operator: builtins.elem operator [\"??\" \"||\" \"&&\"];\n\n    both = test: outer: inner: test outer && test inner;\n\n    unflattened = [\n      (outer: _: outer == \"**\")\n      (both equality)\n      (both bitshift)\n      (outer: inner: both multiplicative outer inner && (outer != inner || outer == \"%\"))\n    ];\n\n    flattens = outer: inner: precedence.\${outer} == precedence.\${inner} && !(builtins.any (rule: rule outer inner) unflattened);\n\n    mixed = outer: inner: both logical outer inner && (outer == \"??\") != (inner == \"??\") || outer == \"||\" && inner == \"&&\";\n\n    nestedRules = [\n      {\n        when = _: inner: _: cast inner;\n        wants = outer: _: side: !(cast outer) || side == \"right\";\n      }\n      {\n        when = outer: inner: _: assignment inner || cast outer || mixed outer inner;\n        wants = _: _: _: true;\n      }\n      {\n        when = outer: inner: _: precedence.\${outer} > precedence.\${inner};\n        wants = _: _: _: true;\n      }\n      {\n        when = outer: inner: _: precedence.\${outer} == precedence.\${inner};\n        wants = outer: inner: side: side == \"right\" || !(flattens outer inner);\n      }\n      {\n        when = _: inner: _: inner == \"%\";\n        wants = outer: _: _: outer == \"+\" || outer == \"-\";\n      }\n    ];\n\n    nested = outer: inner: side:\n      (lib.findFirst (rule: rule.when outer inner side) {wants = parent: _: _: bitwise parent;} nestedRules).wants outer inner side;\n\n    classForms = {\n      binary = _: \"binary\";\n      ternary = _: \"ternary\";\n      arrow = _: \"arrow\";\n      fn = _: \"function\";\n      async = value: classOf (see value.async);\n      await = _: \"await\";\n      not = _: \"unary\";\n      neg = _: \"unary\";\n      typeof = _: \"unary\";\n      delete = _: \"unary\";\n      int = signed;\n      float = signed;\n      obj = _: \"object\";\n      union = _: \"union\";\n      intersection = _: \"intersection\";\n    };\n\n    signed = value:\n      if value < 0\n      then \"negative\"\n      else \"atom\";\n\n    classOf = value: (classForms.\${kindOf value} or (_: \"atom\")) value;\n\n    listed = classes: value: builtins.elem (classOf value) classes;\n\n    binaryWith = test: value: classOf value == \"binary\" && test value.binary.operator;\n\n    slotWants = {\n      unary = listed [\"binary\" \"ternary\" \"arrow\" \"await\"];\n      spread = listed [\"binary\" \"ternary\" \"await\"];\n      member = listed [\"binary\" \"ternary\" \"arrow\" \"function\" \"await\" \"unary\" \"negative\"];\n      test = value: listed [\"ternary\" \"arrow\" \"await\"] value || binaryWith (operator: cast operator || assignment operator) value;\n      branch = binaryWith (operator: cast operator || operator == \"??\");\n      arrowBody = listed [\"ternary\" \"object\"];\n      statement = listed [\"object\" \"function\"];\n      arrayOf = listed [\"union\" \"intersection\" \"arrow\" \"unary\"];\n      union = listed [\"arrow\"];\n      intersection = listed [\"union\" \"arrow\"];\n    };\n\n    always = _: _: true;\n\n    powerLeft = slot: _: slot.operator == \"**\" && slot.side == \"left\";\n\n    operandWants = {\n      binary = slot: value: nested slot.operator value.binary.operator slot.side;\n      ternary = always;\n      arrow = always;\n      await = always;\n      unary = powerLeft;\n      negative = powerLeft;\n    };\n\n    binaryWants = slot: value:\n      if assignment slot.operator\n      then slot.side == \"left\" && binaryWith cast value\n      else (operandWants.\${classOf value} or (_: never)) slot value;\n\n    wants = slot: value:\n      if builtins.isAttrs slot\n      then binaryWants slot value\n      else (slotWants.\${slot} or never) value;\n\n    operand = slot: value: let\n      seen = see value;\n      printed = expr seen;\n    in\n      if wants slot seen\n      then [\"(\" printed \")\"]\n      else printed;\n\n    hangForms = {\n      arrow = value: see value.arrow.body ? below;\n      async = value: hangs value.async;\n    };\n\n    hangs = value: let\n      seen = see value;\n    in\n      (hangForms.\${kindOf seen} or never) seen;\n\n    entry = printer: mark: last: value:\n      if value ? blank\n      then hardline\n      else if value ? comment\n      then [hardline value.comment]\n      else [hardline (printer value) (lib.optionalString (!last) mark)];\n\n    broken = printer: open: close: mark: final: rows: let\n      count = builtins.length rows;\n    in [open (nest 1 (lib.imap1 (index: entry printer mark (index == count && final (lib.last rows))) rows)) hardline close];\n\n    flat = printer: open: close: mark: padded: values: let\n      pad = lib.optionalString padded \" \";\n      hug = !padded && mark == \",\" && hangs (lib.last values);\n    in [\n      open\n      pad\n      (lib.intersperse \"\${mark} \" (map printer values))\n      (\n        if hug\n        then [mark hardline]\n        else pad\n      )\n      close\n    ];\n\n    delimitedWith = printer: open: close: mark: padded: final: values:\n      if values ? rows\n      then broken printer open close mark final values.rows\n      else if values == []\n      then open + close\n      else flat printer open close mark padded values;\n\n    delimited = delimitedWith expr;\n\n    terminatedForms = {\n      async = value: terminated value.async;\n      readonly = value: terminated value.readonly;\n      method = value: value.method.body == null;\n      comment = never;\n    };\n\n    terminated = value: let\n      seen = see value;\n    in\n      (terminatedForms.\${kindOf seen} or (_: true)) seen;\n\n    rest = value: let\n      seen = see value;\n    in\n      seen ? spread || seen ? comment;\n\n    array = delimited \"[\" \"]\" \",\" false never;\n\n    argumentList = delimited \"(\" \")\" \",\" false never;\n\n    parameterListForms = {\n      list = delimited \"(\" \")\" \",\" false rest;\n      rows = delimited \"(\" \")\" \",\" false rest;\n      typed = value: [(parameterList value.typed.value) \": \" (expr value.typed.type)];\n    };\n\n    parameterList = value: (parameterListForms.\${kindOf value} or expr) value;\n\n    hang = slot: value: let\n      seen = see value;\n    in\n      if seen ? below\n      then nest 1 [hardline (operand slot seen.below)]\n      else [\" \" (operand slot seen)];\n\n    branch = mark: value: let\n      seen = see value;\n    in\n      if seen ? below\n      then nest 1 [hardline mark \" \" (nest 1 (operand \"branch\" seen.below))]\n      else [\" \" mark \" \" (operand \"branch\" seen)];\n\n    keyDoc = value:\n      if builtins.isString value\n      then value\n      else expr value;\n\n    block = value: let\n      values = see value;\n    in\n      if values == []\n      then \"{}\"\n      else [\"{\" (nest 1 (map (one: [hardline (line one)]) values)) hardline \"}\"];\n\n    line = value:\n      if value ? blank\n      then []\n      else statement value;\n\n    memberForms = {\n      string = lib.id;\n      typed = value: [(memberDoc value.typed.value) \": \" (expr value.typed.type)];\n      opt = value: [(memberDoc value.opt) \"?\"];\n      readonly = value: [\"readonly \" (memberDoc value.readonly)];\n      async = value: [\"async \" (memberDoc value.async)];\n      field = value: [(memberDoc value.field.key) \" =\" (hang \"value\" value.field.value)];\n    };\n\n    memberDoc = value: let\n      seen = see value;\n    in\n      (memberForms.\${kindOf seen} or expr) seen;\n\n    member = value: let\n      seen = see value;\n    in\n      if seen ? blank\n      then []\n      else if terminated seen\n      then [(memberDoc seen) \";\"]\n      else memberDoc seen;\n\n    memberBlock = values:\n      if values == []\n      then \"{}\"\n      else [\"{\" (nest 1 (map (value: [hardline (member value)]) values)) hardline \"}\"];\n\n    consequent = value:\n      if builtins.isList (see value)\n      then [\" \" (block value)]\n      else [\" \" (statement value)];\n\n    parenthesized = value: let\n      seen = see value;\n    in\n      if seen ? below\n      then [\"(\" (nest 1 [hardline (expr seen.below)]) hardline \")\"]\n      else [\"(\" (expr seen) \")\"];\n\n    binding = kind: value: [\n      kind\n      \" \"\n      (expr value.target)\n      (lib.optionals (value.value != null) [\" =\" (hang \"value\" value.value)])\n    ];\n\n    clauseDoc = value: let\n      seen = see value;\n    in\n      if builtins.isList seen || seen ? rows\n      then delimited \"{\" \"}\" \",\" true never seen\n      else expr seen;\n\n    alternative = value:\n      if builtins.isList (see value)\n      then [\"else \" (block value)]\n      else [\"else \" (statement value)];\n\n    loopDoc = word: op: value: [\"for\" word \" (const \" (expr value.target) \" \${op} \" (expr value.subject) \")\" (consequent value.body)];\n\n    label = test:\n      if test == null\n      then \"default:\"\n      else [\"case \" (expr test) \":\"];\n\n    clauseBody = body:\n      if body ? braces\n      then [\" \" (block body.braces)]\n      else nest 1 (map (one: [hardline (line one)]) body);\n\n    armForms = {\n      blank = _: [];\n      comment = value: value.comment;\n      case = value: [(label value.case.test) (clauseBody value.case.body)];\n    };\n\n    armDoc = value: armForms.\${kindOf value} value;\n\n    initForms = {\n      const = value: binding \"const\" value.const;\n      \"let\" = value: binding \"let\" value.\"let\";\n    };\n\n    initializer = value: let\n      seen = see value;\n    in\n      (initForms.\${kindOf seen} or expr) seen;\n\n    forClause = value: [\";\" (lib.optionals (value != null) [\" \" (expr value)])];\n\n    handler = value: let\n      seen = see value;\n    in\n      if seen ? finally\n      then [\" finally \" (block seen.finally)]\n      else [\" catch\" (lib.optionals (seen.catch.parameter != null) [\" (\" (expr seen.catch.parameter) \")\"]) \" \" (block seen.catch.body)];\n\n    statementForms = {\n      comment = value: value.comment;\n      const = value: [(binding \"const\" value.const) \";\"];\n      \"let\" = value: [(binding \"let\" value.\"let\") \";\"];\n      return = value:\n        if value.return == null\n        then \"return;\"\n        else if see value.return ? below\n        then [\"return \" (parenthesized value.return) \";\"]\n        else [\"return \" (expr value.return) \";\"];\n      throw = value: [\"throw \" (expr value.throw) \";\"];\n      break = _: \"break;\";\n      continue = _: \"continue;\";\n      \"if\" = value: let\n        test = value.\"if\";\n      in [\n        \"if \"\n        (parenthesized test.test)\n        (consequent test.body)\n        (lib.optionals (test ? otherwise) [\n          (\n            if builtins.isList (see test.body)\n            then \" \"\n            else hardline\n          )\n          (alternative test.otherwise)\n        ])\n      ];\n      for = value: [\n        \"for (\"\n        (lib.optional (value.for.init != null) (initializer value.for.init))\n        (forClause value.for.condition)\n        (forClause value.for.update)\n        \")\"\n        (consequent value.for.body)\n      ];\n      forOf = value: loopDoc \"\" \"of\" value.forOf;\n      forIn = value: loopDoc \"\" \"in\" value.forIn;\n      forAwait = value: loopDoc \" await\" \"of\" value.forAwait;\n      while = value: [\"while \" (parenthesized value.while.test) (consequent value.while.body)];\n      switch = value: [\"switch \" (parenthesized value.switch.subject) \" {\" (nest 1 (map (one: [hardline (armDoc one)]) value.switch.cases)) hardline \"}\"];\n      try = value: [\"try \" (block value.try.body) (map handler value.try.handlers)];\n      fn = expr;\n      class = expr;\n      interface = expr;\n      type = value: [\"type \" (expr value.type.name) \" = \" (expr value.type.value) \";\"];\n      import = value: [\"import \" (clauseDoc value.import.clause) \" from \" (expr value.import.source) \";\"];\n      async = value: [\"async \" (statement value.async)];\n      export = value: [\"export \" (statement value.export)];\n      default = value: [\"default \" (statement value.default)];\n    };\n\n    statement = value: let\n      seen = see value;\n    in\n      (statementForms.\${kindOf seen} or (one: [(operand \"statement\" one) \";\"])) seen;\n\n    continues = split: slot: left: split && left ? binary && precedence.\${left.binary.operator} == precedence.\${slot.operator} && !(wants slot left);\n\n    stacked = slot: value: [hardline (operand slot value)];\n\n    binaryDoc = value: let\n      operation = value.binary;\n      split = operation.broken or false;\n      left = see operation.left;\n      leftSlot = {\n        inherit (operation) operator;\n        side = \"left\";\n      };\n      rightSlot = {\n        inherit (operation) operator;\n        side = \"right\";\n      };\n    in [\n      (\n        if continues split leftSlot left\n        then binaryDoc {binary = left.binary // {broken = true;};}\n        else operand leftSlot left\n      )\n      \" \"\n      operation.operator\n      (\n        (\n          if split\n          then stacked\n          else hang\n        )\n        rightSlot\n        operation.right\n      )\n    ];\n\n    dotted = path:\n      if lib.hasPrefix \"?.\" path\n      then path\n      else \".\${path}\";\n\n    pathLinks = path: let\n      parts = builtins.split \"(\\\\?\\\\.|\\\\.)\" (dotted path);\n    in\n      lib.zipListsWith (mark: segment: {\n        kind = \"member\";\n        doc = \"\${mark}\${segment}\";\n      }) (map builtins.head (builtins.filter builtins.isList parts)) (builtins.tail (builtins.filter builtins.isString parts));\n\n    literalKinds = [\"int\" \"str\" \"sq\"];\n\n    called = callee: mark: arguments: let\n      seen = see callee;\n      generic = seen ? generic;\n    in {\n      base = seen.generic.callee or seen;\n      links = [\n        {\n          kind = \"call\";\n          doc = [\n            (lib.optionals generic (delimited \"<\" \">\" \",\" false never seen.generic.types))\n            mark\n            (argumentList arguments)\n          ];\n        }\n      ];\n    };\n\n    indexed = value: open: index: {\n      base = value;\n      links = [\n        {\n          kind =\n            if builtins.elem (kindOf (see index)) literalKinds\n            then \"literalIndex\"\n            else \"index\";\n          doc = [open (expr index) \"]\"];\n        }\n      ];\n    };\n\n    linkForms = {\n      dot = value: {\n        base = value.dot.value;\n        links = pathLinks value.dot.path;\n      };\n      call = value: called value.call.callee \"\" value.call.arguments;\n      optCall = value: called value.optCall.callee \"?.\" value.optCall.arguments;\n      idx = value: indexed value.idx.value \"[\" value.idx.index;\n      optIdx = value: indexed value.optIdx.value \"?.[\" value.optIdx.index;\n      nonNull = value: {\n        base = value.nonNull;\n        links = [\n          {\n            kind = \"nonNull\";\n            doc = \"!\";\n          }\n        ];\n      };\n    };\n\n    spine = value: let\n      seen = see value;\n      step = (linkForms.\${kindOf seen} or (_: null)) seen;\n      inner = spine step.base;\n    in\n      if step == null\n      then {\n        base = seen;\n        links = [];\n      }\n      else {\n        inherit (inner) base;\n        links = inner.links ++ step.links;\n      };\n\n    prefix = test: values:\n      if values != [] && test (builtins.head values)\n      then 1 + prefix test (builtins.tail values)\n      else 0;\n\n    kinds = names: link: builtins.elem link.kind names;\n\n    memberish = kinds [\"member\" \"index\" \"literalIndex\"];\n\n    opens = state: link: state.groups == [] || state.called && kinds [\"member\" \"literalIndex\"] link;\n\n    grouping = state: link: let\n      starts = opens state link;\n    in {\n      groups =\n        if starts\n        then state.groups ++ [[link]]\n        else lib.init state.groups ++ [(lib.last state.groups ++ [link])];\n      called = link.kind == \"call\" || !starts && state.called;\n    };\n\n    chainDoc = value: let\n      whole = spine value;\n      inherit (whole) links;\n      calls = prefix (kinds [\"call\" \"nonNull\" \"literalIndex\"]) links;\n      after = lib.drop calls links;\n      merged = prefix lib.id (lib.zipListsWith (one: next: memberish one && memberish next) after (lib.drop 1 after));\n      lead =\n        if links != [] && (builtins.head links).kind != \"call\"\n        then calls + merged\n        else calls;\n      inherit\n        (lib.foldl' grouping {\n          groups = [];\n          called = false;\n        } (lib.drop lead links))\n        groups\n        ;\n    in [\n      (operand \"member\" whole.base)\n      (map (link: link.doc) (lib.take lead links))\n      (map (group: nest 1 [hardline (map (link: link.doc) group)]) groups)\n    ];\n\n    forms = {\n      name = value: value.name;\n      int = toString;\n      float = builtins.toJSON;\n      bool = lib.boolToString;\n      num = value: value.num;\n      string = value: throw \"ts: the bare string \\\"\${value}\\\" where an expression is expected; a name is a Nix variable, text is `str`\";\n      list = _: throw \"ts: a list where an expression is expected; an array is `array [...]`, operators are `infix [...]`\";\n      array = value: array value.array;\n      str = value: \"\\\"\${value.str}\\\"\";\n      sq = value: \"'\${value.sq}'\";\n      tpl = value: let\n        tick = \"`\";\n      in [\n        tick\n        (map (part:\n          if builtins.isString part\n          then part\n          else [\"\\\${\" (expr part.sub) \"}\"])\n        value.tpl)\n        tick\n      ];\n      regex = value: \"/\${value.regex.pattern}/\${value.regex.flags}\";\n      obj = value: delimited \"{\" \"}\" \",\" true never value.obj;\n      shape = value: delimitedWith memberDoc \"{\" \"}\" \";\" true never value.shape;\n      prop = value: [(keyDoc value.prop.key) \":\" (hang \"value\" value.prop.value)];\n      typed = value: [(expr value.typed.value) \": \" (expr value.typed.type)];\n      opt = value: [(expr value.opt) \"?\"];\n      computed = value: [\"[\" (expr value.computed) \"]\"];\n      call = value: [(operand \"member\" value.call.callee) (argumentList value.call.arguments)];\n      optCall = value: [(operand \"member\" value.optCall.callee) \"?.\" (argumentList value.optCall.arguments)];\n      new = value: [\"new \" (operand \"member\" value.new.callee) (argumentList value.new.arguments)];\n      generic = value: [(operand \"member\" value.generic.callee) (delimited \"<\" \">\" \",\" false never value.generic.types)];\n      dot = value: [(operand \"member\" value.dot.value) (dotted value.dot.path)];\n      idx = value: [(operand \"member\" value.idx.value) \"[\" (expr value.idx.index) \"]\"];\n      optIdx = value: [(operand \"member\" value.optIdx.value) \"?.[\" (expr value.optIdx.index) \"]\"];\n      nonNull = value: [(operand \"member\" value.nonNull) \"!\"];\n      inc = value: [(operand \"member\" value.inc) \"++\"];\n      dec = value: [(operand \"member\" value.dec) \"--\"];\n      not = value: [\"!\" (operand \"unary\" value.not)];\n      neg = value: [\"-\" (operand \"unary\" value.neg)];\n      typeof = value: [\"typeof \" (operand \"unary\" value.typeof)];\n      delete = value: [\"delete \" (operand \"unary\" value.delete)];\n      await = value: [\"await \" (operand \"unary\" value.await)];\n      readonly = value: [\"readonly \" (expr value.readonly)];\n      spread = value: [\"...\" (operand \"spread\" value.spread)];\n      async = value: [\"async \" (expr value.async)];\n      typeOnly = value: [\"type \" (clauseDoc value.typeOnly)];\n      namespace = value: [\"* as \" (expr value.namespace)];\n      arrayOf = value: [(operand \"arrayOf\" value.arrayOf) \"[]\"];\n      union = value: lib.intersperse \" | \" (map (operand \"union\") value.union);\n      intersection = value: lib.intersperse \" & \" (map (operand \"intersection\") value.intersection);\n      is = value: [(expr value.is.name) \" is \" (expr value.is.type)];\n      extends = value: [(expr value.extends.name) \" extends \" (expr value.extends.base)];\n      binary = binaryDoc;\n      ternary = value: [(operand \"test\" value.ternary.test) (branch \"?\" value.ternary.yes) (branch \":\" value.ternary.no)];\n      arrow = value: [\n        (parameterList value.arrow.parameters)\n        \" =>\"\n        (\n          if builtins.isList (see value.arrow.body)\n          then [\" \" (block value.arrow.body)]\n          else if see value.arrow.body ? below\n          then hang \"value\" value.arrow.body\n          else hang \"arrowBody\" value.arrow.body\n        )\n      ];\n      fn = value: [\"function\" (lib.optionals (value.fn.name != null) [\" \" (expr value.fn.name)]) (lib.optionalString (value.fn.name == null) \" \") (parameterList value.fn.parameters) \" \" (block value.fn.body)];\n      method = value: [(memberDoc value.method.key) (parameterList value.method.parameters) (lib.optionals (value.method.body != null) [\" \" (block value.method.body)])];\n      chain = value: chainDoc value.chain;\n      class = value: [\"class \" (expr value.class.head) \" \" (memberBlock value.class.members)];\n      interface = value: [\"interface \" (expr value.interface.head) \" \" (memberBlock value.interface.members)];\n    };\n\n    expr = value: let\n      seen = see value;\n    in\n      (forms.\${kindOf seen} or (throw \"ts: no expression \${kindOf seen}\")) seen;\n\n    top = value:\n      if value ? blank\n      then hardline\n      else [(statement value) hardline];\n\n    globals =\n      lib.genAttrs [\n        \"Array\"\n        \"Awaited\"\n        \"Boolean\"\n        \"Buffer\"\n        \"Bun\"\n        \"Date\"\n        \"Error\"\n        \"Extract\"\n        \"Intl\"\n        \"JSON\"\n        \"Map\"\n        \"Math\"\n        \"NodeJS\"\n        \"Number\"\n        \"Object\"\n        \"Parameters\"\n        \"Partial\"\n        \"Promise\"\n        \"Readonly\"\n        \"ReadonlySet\"\n        \"Record\"\n        \"Response\"\n        \"ReturnType\"\n        \"Set\"\n        \"String\"\n        \"Symbol\"\n        \"WeakMap\"\n        \"WeakSet\"\n        \"any\"\n        \"boolean\"\n        \"console\"\n        \"globalThis\"\n        \"never\"\n        \"number\"\n        \"object\"\n        \"performance\"\n        \"process\"\n        \"string\"\n        \"super\"\n        \"this\"\n        \"undefined\"\n        \"unknown\"\n        \"void\"\n      ]\n      nameNode;\n  in\n    globals\n    // {\n      null' = nameNode \"null\";\n\n      const' = nameNode \"const\";\n\n      blank = {blank = true;};\n\n      comment = string: {comment = string;};\n\n      rows = values: {rows = values;};\n\n      below = value: {below = value;};\n\n      spaces = by: values: {spaces = {inherit by values;};};\n\n      str = string: {str = string;};\n\n      sq = string: {sq = string;};\n\n      num = text: {num = text;};\n\n      tpl = parts: {tpl = parts;};\n\n      sub = value: {sub = value;};\n\n      regex = pattern: flags: {regex = {inherit pattern flags;};};\n\n      array = values: {array = values;};\n\n      obj = members: {obj = members;};\n\n      shape = members: {shape = members;};\n\n      prop = key: value: {prop = {inherit key value;};};\n\n      field = key: value: {field = {inherit key value;};};\n\n      typed = value: type: {typed = {inherit value type;};};\n\n      opt = value: {opt = value;};\n\n      computed = value: {computed = value;};\n\n      call = callee: arguments: {call = {inherit callee arguments;};};\n\n      optCall = callee: arguments: {optCall = {inherit callee arguments;};};\n\n      new = callee: arguments: {new = {inherit callee arguments;};};\n\n      generic = callee: types: {generic = {inherit callee types;};};\n\n      dot = value: path: {dot = {inherit value path;};};\n\n      idx = value: index: {idx = {inherit value index;};};\n\n      optIdx = value: index: {optIdx = {inherit value index;};};\n\n      nonNull = value: {nonNull = value;};\n\n      inc = value: {inc = value;};\n\n      dec = value: {dec = value;};\n\n      not = value: {not = value;};\n\n      neg = value: {neg = value;};\n\n      typeof = value: {typeof = value;};\n\n      delete = value: {delete = value;};\n\n      await = value: {await = value;};\n\n      readonly = value: {readonly = value;};\n\n      spread = value: {spread = value;};\n\n      async = value: {async = value;};\n\n      export = value: {export = value;};\n\n      default = value: {default = value;};\n\n      typeOnly = value: {typeOnly = value;};\n\n      namespace = value: {namespace = value;};\n\n      arrayOf = value: {arrayOf = value;};\n\n      union = values: {union = values;};\n\n      intersection = values: {intersection = values;};\n\n      is = name: type: {is = {inherit name type;};};\n\n      extends = name: base: {extends = {inherit name base;};};\n\n      infix = values: {infix = values;};\n\n      ternary = test: yes: no: {ternary = {inherit test yes no;};};\n\n      arrow = parameters: body: {arrow = {inherit parameters body;};};\n\n      fn = name: parameters: body: {fn = {inherit name parameters body;};};\n\n      method = key: parameters: body: {method = {inherit key parameters body;};};\n\n      chain = value: {chain = value;};\n\n      class = head: members: {class = {inherit head members;};};\n\n      interface = head: members: {interface = {inherit head members;};};\n\n      type = name: value: {type = {inherit name value;};};\n\n      const = target: value: {const = {inherit target value;};};\n\n      let' = target: value: {\"let\" = {inherit target value;};};\n\n      return = value: {return = value;};\n\n      return' = {return = null;};\n\n      throw' = value: {throw = value;};\n\n      break = {break = true;};\n\n      continue = {continue = true;};\n\n      if' = test: body: {\"if\" = {inherit test body;};};\n\n      ifElse = test: body: otherwise: {\"if\" = {inherit test body otherwise;};};\n\n      for = init: condition: update: body: {for = {inherit init condition update body;};};\n\n      forOf = target: subject: body: {forOf = {inherit target subject body;};};\n\n      forIn = target: subject: body: {forIn = {inherit target subject body;};};\n\n      forAwait = target: subject: body: {forAwait = {inherit target subject body;};};\n\n      while = test: body: {while = {inherit test body;};};\n\n      switch = subject: cases: {switch = {inherit subject cases;};};\n\n      case = test: body: {case = {inherit test body;};};\n\n      braces = values: {braces = values;};\n\n      try = body: handlers: {try = {inherit body handlers;};};\n\n      catch = parameter: body: {catch = {inherit parameter body;};};\n\n      finally = values: {finally = values;};\n\n      import' = clause: source: {import = {inherit clause source;};};\n\n      render = file: let\n        spaced = (see file) ? spaces;\n        values =\n          if spaced\n          then file.spaces.values\n          else file;\n      in\n        doc.renderWith (\n          if spaced\n          then lib.strings.replicate file.spaces.by \" \"\n          else \"\\t\"\n        )\n        null (map top (see values));\n    };\n\n  sourceFile = name: text:\n    builtins.path {\n      path = builtins.toFile name text;\n      inherit name;\n    };\nin {\n  cssSource = list: \"\${nodes list}\\n\";\n\n  inherit doc glsl javascript lisp lua luau markdown patch python shell ts vbs;\n\n  inherit sourceFile;\n\n  sourceDir = pkgs: name: files: pkgs.runCommand name {} \"mkdir $out\\n\${lib.concatStrings (lib.mapAttrsToList (file: text: \"cp \${sourceFile file text} $out/\${file}\\n\") files)}\";\n\n  jsonSource = value: jsonValue \"\" value + \"\\n\";\n\n  tomlSource = groups: lib.concatMapStringsSep \"\\n\" (lib.concatMapStrings (item: \"\${tomlLine item}\\n\")) groups;\n\n  cargoLockSource = lock: \"# This file is automatically @generated by Cargo.\\n# It is not intended for manual editing.\\nversion = \${toString lock.version}\\n\${lib.concatMapStrings cargoPackage lock.package}\";\n\n  iniSource = lib.concatMapStringsSep \"\\n\" (section: \"[\${section.name}]\\n\${keyValueSource \"\" section.groups}\");\n\n  keyValueSource = keyValueSource \"\";\n\n  cmusThemeSource = keyValueSource \"set \";\n\n  xmlSource = root: \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n\${xmlElement \"\" root}\";\n\n  sshPublicKey = key: \"\${key.type} \${key.key} \${key.comment}\";\n\n  sshKeySource = key: \"\${key.type} \${key.key} \${key.comment}\\n\";\n\n  pemSource = pem: lib.concatMapStrings (block: \"-----BEGIN \${pem.label}-----\\n\${wrap pem.width block}-----END \${pem.label}-----\\n\") pem.blocks;\n\n  gitignoreSource = lib.concatMapStrings (pattern: \"\${pattern}\\n\");\n\n  pathSource = path: \"\${path}\\n\";\n}\n";
       };
       module_values = [
         {
