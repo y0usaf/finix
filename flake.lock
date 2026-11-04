@@ -997,18 +997,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1793797427,
-        "narHash": "sha256-L4WHkf00ym7I/Oxyjz9f+mGS2zJ9SVGKnbZUnfXi9yU=",
-        "ref": "refs/heads/main",
-        "rev": "0d71cc24fd1d463071a00edbde3c25d5158a2915",
-        "revCount": 2,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/nix-generators"
+        "lastModified": 1793800992,
+        "narHash": "sha256-EuOFm5eCctf3MAPm1mUakLBGrgGbMA1N5pcmjeT4JXw=",
+        "owner": "y0usaf",
+        "repo": "nix-generators",
+        "rev": "66690dca1e0bbceb0e7ae84b944a2eb726c37930",
+        "type": "github"
       },
       "original": {
-        "rev": "0d71cc24fd1d463071a00edbde3c25d5158a2915",
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/nix-generators"
+        "owner": "y0usaf",
+        "repo": "nix-generators",
+        "type": "github"
       }
     },
     "nix-on-droid": {

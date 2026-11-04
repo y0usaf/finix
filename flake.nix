@@ -84,7 +84,7 @@
     };
 
     nix-generators = {
-      url = "git+file:///home/y0usaf/dev/developing/nix-generators?rev=0d71cc24fd1d463071a00edbde3c25d5158a2915";
+      url = "github:y0usaf/nix-generators";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.iets.follows = "iets";
     };
