@@ -987,6 +987,27 @@
         "type": "github"
       }
     },
+    "nix-generators": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793796554,
+        "narHash": "sha256-AfBfjQ09dJI3COoLO3/rgkqo7MRSlTQYP2s8ZoGezW4=",
+        "ref": "refs/heads/main",
+        "rev": "6f9a519147c9b8211daddcb4c539bacd437cb1aa",
+        "revCount": 1,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/nix-generators"
+      },
+      "original": {
+        "rev": "6f9a519147c9b8211daddcb4c539bacd437cb1aa",
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/nix-generators"
+      }
+    },
     "nix-on-droid": {
       "inputs": {
         "home-manager": "home-manager_2",
@@ -1696,6 +1717,7 @@
         "monstar": "monstar",
         "nacre": "nacre",
         "nh": "nh",
+        "nix-generators": "nix-generators",
         "nix-on-droid": "nix-on-droid",
         "nixpkgs": "nixpkgs_7",
         "nixpkgs-discord-legacy": "nixpkgs-discord-legacy",
