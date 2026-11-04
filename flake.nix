@@ -27086,7 +27086,12 @@
     };
     secrets_secrets_data = ''
       import { readdirSync } from "node:fs";
-      import { current, dir, forget, label, list, meta, modified, NAME, names, request, reveal, ttl } from "./store";
+      import { col, Form, getKeybindings, node, Spacer, span, Text, TextFormField } from "@oh-my-pi/pi-tui";
+      import { boundKeys, editorKey, interruptKey, OverlayPanel } from "@oh-my-pi/pi-tui/chrome";
+      import { formTheme } from "@oh-my-pi/pi-tui/chrome/form-theme";
+      import { matchesAppInterrupt } from "@oh-my-pi/pi-tui/keybinding-matchers";
+      import { actionBar, actionButton } from "@oh-my-pi/pi-tui/native/overlay";
+      import { current, dir, forget, list, meta, modified, NAME, names, pending, request, reveal, store, ttl } from "./store";
 
       const WAIT_MS = Number(process.env.OMP_SECRET_WAIT_MS) || 600_000;
 
@@ -27096,6 +27101,63 @@
 
       function text(message: string) {
       	return { content: [{ type: "text", text: message }], details: {} };
+      }
+
+      class SecretEntry extends OverlayPanel {
+      	#field;
+      	#form;
+      	#title: string;
+      	#reason: string;
+      	#cancel: () => void;
+      	#native: { error: boolean; node: unknown } | undefined;
+
+      	constructor(title: string, reason: string, submit: (value: string) => Promise<void>, cancel: () => void, requestRender: () => void) {
+      		super(title, "omp.overlay.hook-input");
+      		this.#title = title;
+      		this.#reason = reason;
+      		this.#cancel = cancel;
+      		this.#field = new TextFormField({ theme: formTheme, secret: true, empty: "reject", emptyError: "Type the value, or cancel.", onSubmit: submit, onCancel: cancel, requestRender });
+      		this.#form = new Form({ fields: [this.#field], onCancel: cancel, isCancel: matchesAppInterrupt });
+      		this.addChild(new Text(formTheme.hint(reason), 0, 0));
+      		this.addChild(this.#form);
+      		this.addChild(new Text(formTheme.hint(`''${editorKey("tui.input.submit")} store  ''${interruptKey()} cancel`), 0, 0));
+      		this.addChild(new Spacer(1));
+      	}
+
+      	handleInput(data: string): void {
+      		this.#form.handleInput(data);
+      	}
+
+      	pasteText(text: string): void {
+      		this.#form.pasteText(text);
+      	}
+
+      	handleNativeEvent(event: { type: string; act?: string }): void {
+      		if (event.type !== "action") return;
+      		if (event.act === "submit") this.#field.submit();
+      		else if (event.act === "cancel") this.#cancel();
+      	}
+
+      	describe() {
+      		const error = this.#field.hasError;
+      		if (this.#native?.error === error) return this.#native.node;
+      		const submitKey = getKeybindings().getKeys("tui.input.submit")[0];
+      		const cancelKey = boundKeys("app.interrupt", ["escape"])[0];
+      		const head = [
+      			node("text", { spans: [span(this.#title)], role: "omp.hook-input.title", wrap: "word" }, undefined, "title"),
+      			node("text", { spans: [span(this.#reason)], role: "omp.hook-input.detail", wrap: "word" }, undefined, "detail"),
+      		];
+      		const root = col(
+      			[
+      				node("col", { role: "omp.hook-input.head", gap: "xs" }, head, "head"),
+      				node("col", { role: "omp.hook-input.field", ...(error ? { tone: "error" } : {}) }, [this.#form], "field"),
+      				actionBar([null, actionButton("Cancel", "cancel", cancelKey ? { keys: cancelKey } : {}), actionButton("Store", "submit", { tone: "accent", ...(submitKey ? { keys: submitKey } : {}) })]),
+      			],
+      			{ role: this.nativeRole },
+      		);
+      		this.#native = { error, node: root };
+      		return root;
+      	}
       }
 
       export default function secrets(pi) {
@@ -27152,6 +27214,35 @@
       		return value;
       	}
 
+      	async function enter(ctx, name: string, reason: string, expiry: string | undefined, signal?: AbortSignal): Promise<void> {
+      		if (signal?.aborted) return;
+      		const stop = new AbortController();
+      		const abort = () => stop.abort();
+      		signal?.addEventListener("abort", abort, { once: true });
+      		const watch = setInterval(() => meta(bot, name) && stop.abort(), 1000);
+      		const title = `Secret ''${name}''${bot ? ` for ''${bot}` : ""} (hidden)`;
+      		try {
+      			await ctx.ui.custom(
+      				(tui, _theme, _keys, done) =>
+      					new SecretEntry(
+      						title,
+      						reason,
+      						async value => {
+      							await store(bot, name, value, expiry, reason);
+      							done(undefined);
+      						},
+      						() => done(undefined),
+      						() => tui.requestRender(),
+      					),
+      				{ signal: stop.signal },
+      			);
+      		} catch {
+      		} finally {
+      			clearInterval(watch);
+      			signal?.removeEventListener("abort", abort);
+      		}
+      	}
+
       	pi.registerTool({
       		name: "secret",
       		label: "Secret",
@@ -27163,7 +27254,7 @@
       			reason: z.string().optional(),
       			ttl: z.string().optional(),
       		}),
-      		async execute(_toolCallId, params, signal, _onUpdate, ctx) {
+      		async execute(_toolCallId, params, signal, onUpdate, ctx) {
       			if (params.action === "list") {
       				const held = list(bot);
       				if (held.length === 0) return text("You hold no secrets.");
@@ -27181,7 +27272,12 @@
       				return text(error.message);
       			}
       			request(bot, name, reason, params.ttl);
-      			ctx?.ui?.notify?.(`''${label(bot)} asks for ''${name}: ''${reason}. Enter it with: omp-secret ''${name}`, "info");
+      			if (ctx?.mode === "tui") {
+      				await enter(ctx, name, reason, params.ttl, signal);
+      				if (meta(bot, name)) return text(`The user set ''${name}. Use $SECRET_''${name} in bash; you will never see its value.`);
+      				return text(`The user closed the box without entering ''${name}; the request stays open and they can still enter it with: omp-secret ''${name}. Don't ask again unless they say so.`);
+      			}
+      			onUpdate?.(text(`Waiting for the user to run: omp-secret ''${name}`));
       			const deadline = Date.now() + WAIT_MS;
       			while (Date.now() < deadline && !signal?.aborted) {
       				if (meta(bot, name)) return text(`The user set ''${name}. Use $SECRET_''${name} in bash; you will never see its value.`);
@@ -27189,6 +27285,13 @@
       			}
       			return text(`The user hasn't entered ''${name} yet; the request stays open. Tell them to run: omp-secret ''${name}`);
       		},
+      	});
+
+      	pi.on("session_start", (_event, ctx) => {
+      		if (!bot || ctx.mode !== "tui") return;
+      		void (async () => {
+      			for (const ask of pending()) if (ask.bot === bot && !meta(bot, ask.name)) await enter(ctx, ask.name, ask.reason, ask.ttl);
+      		})();
       	});
 
       	pi.on("tool_call", async event => {
