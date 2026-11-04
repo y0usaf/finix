@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=cadb928056ae58ef6faa417e882c4a667f51ac78";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=65e6622cec8c3ec772b213b7f9c05492a9485315";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -5519,6 +5519,24 @@
           foreground = "#292928";
         };
       };
+    };
+    modules_desktop_session_theme_ozette_data = {
+      abyss = "#100d17";
+      dusk = "#191321";
+      frost = "#dee6f4";
+      ink = "#1d1727";
+      lavender = "#c6a6f2";
+      lime = "#cde26a";
+      mint = "#8fe0d2";
+      mist = "#e1ebf7";
+      moss = "#1b322d";
+      mustard = "#ebc23a";
+      night = "#15111d";
+      periwinkle = "#9fb4ff";
+      pink = "#f29bcf";
+      plum = "#2c2140";
+      snow = "#f6f9fc";
+      white = "#ffffff";
     };
     modules_desktop_session_theme_templates_discord_colors_data = {
       generators,
@@ -11097,72 +11115,132 @@
       ])
     ];
     modules_desktop_session_tomoe_shaders_balatro_data = {
-      assign,
-      call,
+      abs,
+      atan2,
+      clamp,
+      cos,
+      float,
       fn,
       for,
+      iResolution,
+      iTime,
+      in',
       inc,
+      int,
+      length,
+      local,
       macro,
+      max,
+      min,
+      out,
+      set,
+      sin,
       update,
-      var,
       vec2,
       vec3,
       vec4,
+      void,
       ...
-    }: {
+    }: self: let
+      inherit (self) COLOR_1 COLOR_2 COLOR_3 CONTRAST HEX LIGHTING SPEED SPIN_AMOUNT SPIN_ROTATION;
+    in {
       defines = {
-        COLOR_1 = call "HEX" 14566459;
-        COLOR_2 = call "HEX" 27572;
-        COLOR_3 = call "HEX" 1450789;
+        COLOR_1 = HEX 14566459;
+        COLOR_2 = HEX 27572;
+        COLOR_3 = HEX 1450789;
         CONTRAST = 3.5;
-        HEX = macro ["c"] [(vec3 ["c" ">>" 16 "&" 255] ["c" ">>" 8 "&" 255] ["c" "&" 255]) "/" 255.0];
+        HEX = macro ({c}: [(vec3 [c ">>" 16 "&" 255] [c ">>" 8 "&" 255] [c "&" 255]) "/" 255.0]);
         LIGHTING = 0.4;
         SPEED = 7.0;
         SPIN_AMOUNT = 0.25;
         SPIN_ROTATION = -2.0;
       };
       fns = {
-        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
-          (var "float" "diagonal" (call "length" "iResolution.xy"))
-          (var "vec2" "uv" [["fragCoord" "-" 0.5 "*" "iResolution.xy"] "/" "diagonal"])
-          (var "float" "radius" (call "length" "uv"))
-          (var "float" "angle" [(call "atan" "uv.y" "uv.x") "+" 302.2 "+" 0.2 "*" "SPIN_ROTATION" "-" 20.0 "*" ["SPIN_AMOUNT" "*" "radius" "+" 1.0 "-" "SPIN_AMOUNT"]])
-          (assign "uv" ["radius" "*" (vec2 (call "cos" "angle") (call "sin" "angle")) "*" 30.0])
-          (var "float" "t" ["iTime" "*" "SPEED"])
-          (var "vec2" "uv2" (vec2 ["uv.x" "+" "uv.y"]))
-          (for (var "int" "i" 0) ["i" "<" 5] (inc "i") [
-            (update "+=" "uv2" [(call "sin" (call "max" "uv.x" "uv.y")) "+" "uv"])
-            (update "+=" "uv" [0.5 "*" (vec2 (call "cos" [5.1123314 "+" 0.353 "*" "uv2.y" "+" "t" "*" 0.131121]) (call "sin" ["uv2.x" "-" 0.113 "*" "t"]))])
-            (update "-=" "uv" [(call "cos" ["uv.x" "+" "uv.y"]) "-" (call "sin" ["uv.x" "*" 0.711 "-" "uv.y"])])
-          ])
-          (var "float" "contrast" [0.25 "*" "CONTRAST" "+" 0.5 "*" "SPIN_AMOUNT" "+" 1.2])
-          (var "float" "paint" (call "clamp" [(call "length" "uv") "*" 0.035 "*" "contrast"] 0.0 2.0))
-          (var "float" "c1" (call "max" 0.0 [1.0 "-" "contrast" "*" (call "abs" [1.0 "-" "paint"])]))
-          (var "float" "c2" (call "max" 0.0 [1.0 "-" "contrast" "*" (call "abs" "paint")]))
-          (var "float" "c3" [1.0 "-" (call "min" 1.0 ["c1" "+" "c2"])])
-          (var "float" "light" [["LIGHTING" "-" 0.2] "*" (call "max" ["c1" "*" 5.0 "-" 4.0] 0.0) "+" "LIGHTING" "*" (call "max" ["c2" "*" 5.0 "-" 4.0] 0.0)])
-          (var "vec3" "color" [0.3 "/" "CONTRAST" "*" "COLOR_1" "+" [1.0 "-" 0.3 "/" "CONTRAST"] "*" ["COLOR_1" "*" "c1" "+" "COLOR_2" "*" "c2" "+" "COLOR_3" "*" "c3"] "+" "light"])
-          (assign "fragColor" (vec4 "color" 1.0))
-        ];
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          diagonal,
+          uv,
+          radius,
+          angle,
+          t,
+          uv2,
+          contrast,
+          paint,
+          c1,
+          c2,
+          c3,
+          light,
+          color,
+        }: [
+          (local diagonal float (length iResolution.xy))
+          (local uv vec2 [[fragCoord "-" 0.5 "*" iResolution.xy] "/" diagonal])
+          (local radius float (length uv))
+          (local angle float [(atan2 uv.y uv.x) "+" 302.2 "+" 0.2 "*" SPIN_ROTATION "-" 20.0 "*" [SPIN_AMOUNT "*" radius "+" 1.0 "-" SPIN_AMOUNT]])
+          (set uv [radius "*" (vec2 (cos angle) (sin angle)) "*" 30.0])
+          (local t float [iTime "*" SPEED])
+          (local uv2 vec2 (vec2 [uv.x "+" uv.y]))
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 5];
+            step = inc i;
+            body = [
+              (update uv2 "+=" [(sin (max uv.x uv.y)) "+" uv])
+              (update uv "+=" [0.5 "*" (vec2 (cos [5.1123314 "+" 0.353 "*" uv2.y "+" t "*" 0.131121]) (sin [uv2.x "-" 0.113 "*" t]))])
+              (update uv "-=" [(cos [uv.x "+" uv.y]) "-" (sin [uv.x "*" 0.711 "-" uv.y])])
+            ];
+          }))
+          (local contrast float [0.25 "*" CONTRAST "+" 0.5 "*" SPIN_AMOUNT "+" 1.2])
+          (local paint float (clamp [(length uv) "*" 0.035 "*" contrast] 0.0 2.0))
+          (local c1 float (max 0.0 [1.0 "-" contrast "*" (abs [1.0 "-" paint])]))
+          (local c2 float (max 0.0 [1.0 "-" contrast "*" (abs paint)]))
+          (local c3 float [1.0 "-" (min 1.0 [c1 "+" c2])])
+          (local light float [[LIGHTING "-" 0.2] "*" (max [c1 "*" 5.0 "-" 4.0] 0.0) "+" LIGHTING "*" (max [c2 "*" 5.0 "-" 4.0] 0.0)])
+          (local color vec3 [0.3 "/" CONTRAST "*" COLOR_1 "+" [1.0 "-" 0.3 "/" CONTRAST] "*" [COLOR_1 "*" c1 "+" COLOR_2 "*" c2 "+" COLOR_3 "*" c3] "+" light])
+          (set fragColor (vec4 color 1.0))
+        ]);
       };
     };
     modules_desktop_session_tomoe_shaders_cassette_led_data = {
-      assign,
-      call,
+      abs,
+      clamp,
       cond,
+      cos,
+      dot,
+      exp,
       float,
+      floor,
       fn,
       for,
+      fract,
+      iResolution,
+      iTime,
+      in',
       inc,
+      int,
+      length,
+      local,
+      max,
+      mix,
+      mod,
       neg,
+      normalize,
+      out,
       return,
+      set,
+      sign,
+      sin,
+      smoothstep,
+      step,
       update,
-      var,
       vec2,
       vec3,
       vec4,
+      void,
       ...
-    }: {
+    }: self: let
+      inherit (self) AMBER BPM GRAPHITE LEVELS LIGHT ORANGE PUTTY RIPPLE RIPPLE_SPEED ROWS SHELL SPEED WAVE base hash led level ripples;
+    in {
       consts = {
         AMBER = vec3 0.96 0.66 0.2;
         BPM = 128.0;
@@ -11179,101 +11257,206 @@
         WAVE = 1.5;
       };
       fns = {
-        base = fn "float" [["vec2" "c"] ["float" "t"] ["float" "aspect"]] [
-          (var "float" "s" ["t" "*" 0.5])
-          (var "vec2" "a" (vec2 ["aspect" "*" [0.22 "+" 0.08 "*" (call "sin" ["s" "*" 0.37])]] [0.3 "+" 0.12 "*" (call "cos" ["s" "*" 0.41])]))
-          (var "vec2" "b" (vec2 ["aspect" "*" [0.78 "+" 0.08 "*" (call "cos" ["s" "*" 0.29])]] [0.7 "+" 0.1 "*" (call "sin" ["s" "*" 0.47])]))
-          (var "float" "wa" (call "sin" [(call "length" ["c" "-" "a"]) "*" 18.0 "-" "t" "*" "WAVE"]))
-          (var "float" "wb" (call "sin" [(call "length" ["c" "-" "b"]) "*" 14.0 "-" "t" "*" "WAVE" "*" 0.8]))
-          (return [0.5 "+" 0.25 "*" ["wa" "+" "wb"]])
-        ];
-        hash = fn "float" [["vec2" "p"]] [
-          (return (call "fract" [(call "sin" (call "dot" "p" (vec2 127.1 311.7))) "*" 43758.5453]))
-        ];
-        led = fn "vec3" [["float" "b"]] [
-          (return [(call "mix" "ORANGE" "AMBER" [0.55 "*" (call "smoothstep" 0.6 1.0 "b")]) "*" "b"])
-        ];
-        level = fn "float" [["vec2" "cell"] ["float" "pitch"] ["vec2" "off"] ["float" "t"] ["float" "aspect"]] [
-          (var "vec2" "p" [[["cell" "+" 0.5] "*" "pitch" "+" "off"] "/" "iResolution.y"])
-          (var "float" "b" (call "smoothstep" 0.4 0.98 [(call "base" "p" "t" "aspect") "*" 0.95]))
-          (var "float" "lift" (call "clamp" (call "ripples" "p" "t" "aspect") 0.0 1.0))
-          (assign "b" [1.0 "-" [1.0 "-" "b"] "*" [1.0 "-" "lift"]])
-          (return [(call "floor" ["b" "*" "b" "*" "LEVELS" "+" 0.5]) "/" "LEVELS"])
-        ];
-        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
-          (var "float" "t" ["iTime" "*" "SPEED"])
-          (var "float" "aspect" ["iResolution.x" "/" "iResolution.y"])
-          (var "float" "pitch" (call "floor" ["iResolution.y" "/" "ROWS"]))
-          (var "vec2" "off" [0.5 "*" (call "mod" "iResolution.xy" "pitch")])
-          (var "vec2" "cell" (call "floor" [["fragCoord" "-" "off"] "/" "pitch"]))
-          (var "vec2" "center" [["cell" "+" 0.5] "*" "pitch" "+" "off"])
-          (var "float" "b" (call "level" "cell" "pitch" "off" "t" "aspect"))
-          (var "float" "hs" [0.5 "*" (call "floor" ["pitch" "*" 0.62 "+" 0.5])])
-          (var "vec2" "q" ["fragCoord" "-" "center"])
-          (var "vec2" "aq" (call "abs" "q"))
-          (var "float" "dist" (call "max" "aq.x" "aq.y"))
-          (var "vec2" "dir" (cond ["aq.x" ">" "aq.y"] (vec2 (call "sign" "q.x") 0.0) (vec2 0.0 (call "sign" "q.y"))))
-          (var "vec2" "l" (call "normalize" "LIGHT"))
-          (var "vec2" "sv" ["fragCoord" "/" "iResolution.xy"])
-          (var "vec3" "panel" ["SHELL" "*" (call "mix" 0.94 1.02 [0.55 "*" "sv.y" "+" 0.45 "*" [1.0 "-" "sv.x"]])])
-          (var "float" "rim" [(call "smoothstep" ["hs" "+" 2.5] "hs" "dist") "*" (call "dot" "dir" (neg "l"))])
-          (update "*=" "panel" [1.0 "+" 0.1 "*" "rim"])
-          (var "float" "w" 0.0)
-          (for (var "int" "j" (-2)) ["j" "<=" 2] (inc "j") [
-            (for (var "int" "i" (-2)) ["i" "<=" 2] (inc "i") [
-              (var "vec2" "nc" ["cell" "+" (vec2 (float "i") (float "j"))])
-              (var "vec2" "d" [(call "abs" ["fragCoord" "-" [["nc" "+" 0.5] "*" "pitch" "+" "off"]]) "/" "pitch"])
-              (var "float" "e" (call "max" [(call "max" "d.x" "d.y") "-" 0.31] 0.0))
-              (update "+=" "w" [(call "level" "nc" "pitch" "off" "t" "aspect") "*" (call "exp" [(neg "e") "*" "e" "*" 9.0])])
-            ])
-          ])
-          (assign "panel" (call "mix" "panel" ["panel" "*" (vec3 1.03 0.8 0.62)] (call "clamp" ["w" "*" 0.28] 0.0 0.75)))
-          (var "float" "wall" (call "max" 1.0 ["hs" "*" 0.22]))
-          (var "float" "lit" (call "clamp" (call "dot" "dir" (neg "l")) 0.0 1.0))
-          (var "vec3" "side" [(call "mix" ["GRAPHITE" "*" 0.7] ["PUTTY" "*" 0.8] "lit") "+" (call "led" "b") "*" 0.35])
-          (var "vec3" "face" ["GRAPHITE" "*" 0.85 "+" (call "led" "b") "*" [1.0 "+" 0.12 "*" [1.0 "-" "dist" "/" ["hs" "-" "wall"]]]])
-          (var "vec3" "hole" (call "mix" "face" "side" [(call "step" ["hs" "-" "wall"] "dist") "*" [0.4 "+" 0.6 "*" "lit"]]))
-          (var "float" "inside" [1.0 "-" (call "step" "hs" "dist")])
-          (var "vec3" "color" (call "mix" "panel" "hole" "inside"))
-          (update "+=" "color" [[(call "hash" "fragCoord") "-" 0.5] "*" 0.012])
-          (assign "fragColor" (vec4 "color" 1.0))
-        ];
-        ripples = fn "float" [["vec2" "c"] ["float" "t"] ["float" "aspect"]] [
-          (var "float" "every" [120.0 "/" "BPM"])
-          (var "float" "life" [4.0 "*" "every"])
-          (var "float" "n" (call "floor" ["t" "/" "every"]))
-          (var "float" "age" ["t" "-" "n" "*" "every"])
-          (var "float" "r" 0.0)
-          (for (var "int" "k" 0) ["k" "<" 4] (inc "k") [
-            (var "float" "m" ["n" "-" (float "k")])
-            (var "float" "tm" ["age" "+" (float "k") "*" "every"])
-            (var "float" "x" ["tm" "/" "life"])
-            (var "vec2" "o" (vec2 [(call "hash" (vec2 "m" 3.7)) "*" "aspect"] (call "hash" (vec2 "m" 9.1))))
-            (var "float" "d" [(call "length" ["c" "-" "o"]) "-" "tm" "*" "RIPPLE_SPEED"])
-            (var "float" "env" [(call "smoothstep" 0.0 0.04 "x") "*" [1.0 "-" (call "smoothstep" 0.2 1.0 "x")]])
-            (update "+=" "r" [(cond [(call "mod" "m" 2.0) "<" 0.5] 1.0 0.7) "*" "env" "*" (call "exp" [(neg "d") "*" "d" "*" 120.0])])
-          ])
-          (return ["RIPPLE" "*" "r"])
-        ];
+        base = fn float [{c = vec2;} {t = float;} {aspect = float;}] ({
+          c,
+          t,
+          aspect,
+          s,
+          a,
+          b,
+          wa,
+          wb,
+        }: [
+          (local s float [t "*" 0.5])
+          (local a vec2 (vec2 [aspect "*" [0.22 "+" 0.08 "*" (sin [s "*" 0.37])]] [0.3 "+" 0.12 "*" (cos [s "*" 0.41])]))
+          (local b vec2 (vec2 [aspect "*" [0.78 "+" 0.08 "*" (cos [s "*" 0.29])]] [0.7 "+" 0.1 "*" (sin [s "*" 0.47])]))
+          (local wa float (sin [(length [c "-" a]) "*" 18.0 "-" t "*" WAVE]))
+          (local wb float (sin [(length [c "-" b]) "*" 14.0 "-" t "*" WAVE "*" 0.8]))
+          (return [0.5 "+" 0.25 "*" [wa "+" wb]])
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (return (fract [(sin (dot p (vec2 127.1 311.7))) "*" 43758.5453]))
+        ]);
+        led = fn vec3 [{b = float;}] ({b}: [
+          (return [(mix ORANGE AMBER [0.55 "*" (smoothstep 0.6 1.0 b)]) "*" b])
+        ]);
+        level = fn float [{cell = vec2;} {pitch = float;} {off = vec2;} {t = float;} {aspect = float;}] ({
+          cell,
+          pitch,
+          off,
+          t,
+          aspect,
+          p,
+          b,
+          lift,
+        }: [
+          (local p vec2 [[[cell "+" 0.5] "*" pitch "+" off] "/" iResolution.y])
+          (local b float (smoothstep 0.4 0.98 [(base p t aspect) "*" 0.95]))
+          (local lift float (clamp (ripples p t aspect) 0.0 1.0))
+          (set b [1.0 "-" [1.0 "-" b] "*" [1.0 "-" lift]])
+          (return [(floor [b "*" b "*" LEVELS "+" 0.5]) "/" LEVELS])
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          t,
+          aspect,
+          pitch,
+          off,
+          cell,
+          center,
+          b,
+          hs,
+          q,
+          aq,
+          dist,
+          dir,
+          l,
+          sv,
+          panel,
+          rim,
+          w,
+          wall,
+          lit,
+          side,
+          face,
+          hole,
+          inside,
+          color,
+        }: [
+          (local t float [iTime "*" SPEED])
+          (local aspect float [iResolution.x "/" iResolution.y])
+          (local pitch float (floor [iResolution.y "/" ROWS]))
+          (local off vec2 [0.5 "*" (mod iResolution.xy pitch)])
+          (local cell vec2 (floor [[fragCoord "-" off] "/" pitch]))
+          (local center vec2 [[cell "+" 0.5] "*" pitch "+" off])
+          (local b float (level cell pitch off t aspect))
+          (local hs float [0.5 "*" (floor [pitch "*" 0.62 "+" 0.5])])
+          (local q vec2 [fragCoord "-" center])
+          (local aq vec2 (abs q))
+          (local dist float (max aq.x aq.y))
+          (local dir vec2 (cond [aq.x ">" aq.y] (vec2 (sign q.x) 0.0) (vec2 0.0 (sign q.y))))
+          (local l vec2 (normalize LIGHT))
+          (local sv vec2 [fragCoord "/" iResolution.xy])
+          (local panel vec3 [SHELL "*" (mix 0.94 1.02 [0.55 "*" sv.y "+" 0.45 "*" [1.0 "-" sv.x]])])
+          (local rim float [(smoothstep [hs "+" 2.5] hs dist) "*" (dot dir (neg l))])
+          (update panel "*=" [1.0 "+" 0.1 "*" rim])
+          (local w float 0.0)
+          (for ({j}: {
+            init = local j int (-2);
+            test = [j "<=" 2];
+            step = inc j;
+            body = [
+              (for ({
+                i,
+                nc,
+                d,
+                e,
+              }: {
+                init = local i int (-2);
+                test = [i "<=" 2];
+                step = inc i;
+                body = [
+                  (local nc vec2 [cell "+" (vec2 (float i) (float j))])
+                  (local d vec2 [(abs [fragCoord "-" [[nc "+" 0.5] "*" pitch "+" off]]) "/" pitch])
+                  (local e float (max [(max d.x d.y) "-" 0.31] 0.0))
+                  (update w "+=" [(level nc pitch off t aspect) "*" (exp [(neg e) "*" e "*" 9.0])])
+                ];
+              }))
+            ];
+          }))
+          (set panel (mix panel [panel "*" (vec3 1.03 0.8 0.62)] (clamp [w "*" 0.28] 0.0 0.75)))
+          (local wall float (max 1.0 [hs "*" 0.22]))
+          (local lit float (clamp (dot dir (neg l)) 0.0 1.0))
+          (local side vec3 [(mix [GRAPHITE "*" 0.7] [PUTTY "*" 0.8] lit) "+" (led b) "*" 0.35])
+          (local face vec3 [GRAPHITE "*" 0.85 "+" (led b) "*" [1.0 "+" 0.12 "*" [1.0 "-" dist "/" [hs "-" wall]]]])
+          (local hole vec3 (mix face side [(step [hs "-" wall] dist) "*" [0.4 "+" 0.6 "*" lit]]))
+          (local inside float [1.0 "-" (step hs dist)])
+          (local color vec3 (mix panel hole inside))
+          (update color "+=" [[(hash fragCoord) "-" 0.5] "*" 0.012])
+          (set fragColor (vec4 color 1.0))
+        ]);
+        ripples = fn float [{c = vec2;} {t = float;} {aspect = float;}] ({
+          c,
+          t,
+          aspect,
+          every,
+          life,
+          n,
+          age,
+          r,
+        }: [
+          (local every float [120.0 "/" BPM])
+          (local life float [4.0 "*" every])
+          (local n float (floor [t "/" every]))
+          (local age float [t "-" n "*" every])
+          (local r float 0.0)
+          (for ({
+            k,
+            m,
+            tm,
+            x,
+            o,
+            d,
+            env,
+          }: {
+            init = local k int 0;
+            test = [k "<" 4];
+            step = inc k;
+            body = [
+              (local m float [n "-" (float k)])
+              (local tm float [age "+" (float k) "*" every])
+              (local x float [tm "/" life])
+              (local o vec2 (vec2 [(hash (vec2 m 3.7)) "*" aspect] (hash (vec2 m 9.1))))
+              (local d float [(length [c "-" o]) "-" tm "*" RIPPLE_SPEED])
+              (local env float [(smoothstep 0.0 0.04 x) "*" [1.0 "-" (smoothstep 0.2 1.0 x)]])
+              (update r "+=" [(cond [(mod m 2.0) "<" 0.5] 1.0 0.7) "*" env "*" (exp [(neg d) "*" d "*" 120.0])])
+            ];
+          }))
+          (return [RIPPLE "*" r])
+        ]);
       };
     };
     modules_desktop_session_tomoe_shaders_cassette_squares_data = {
-      assign,
-      call,
+      abs,
+      clamp,
       cond,
+      cos,
+      dot,
+      exp,
       float,
+      floor,
       fn,
       for,
+      fract,
+      iResolution,
+      iTime,
+      in',
       inc,
+      int,
+      length,
+      local,
+      max,
+      mix,
+      mod,
       neg,
+      normalize,
+      out,
       return,
+      set,
+      sign,
+      sin,
+      smoothstep,
+      step,
       update,
-      var,
       vec2,
       vec3,
       vec4,
+      void,
       ...
-    }: {
+    }: self: let
+      inherit (self) BPM GRAPHITE LIGHT ORANGE PUTTY RIPPLE RIPPLE_SPEED ROWS SHELL SPEED WAVE base hash ripples;
+    in {
       consts = {
         BPM = 128.0;
         GRAPHITE = vec3 0.16 0.16 0.155;
@@ -11288,88 +11471,165 @@
         WAVE = 1.5;
       };
       fns = {
-        base = fn "float" [["vec2" "c"] ["float" "t"] ["float" "aspect"]] [
-          (var "float" "s" ["t" "*" 0.5])
-          (var "vec2" "a" (vec2 ["aspect" "*" [0.22 "+" 0.08 "*" (call "sin" ["s" "*" 0.37])]] [0.3 "+" 0.12 "*" (call "cos" ["s" "*" 0.41])]))
-          (var "vec2" "b" (vec2 ["aspect" "*" [0.78 "+" 0.08 "*" (call "cos" ["s" "*" 0.29])]] [0.7 "+" 0.1 "*" (call "sin" ["s" "*" 0.47])]))
-          (var "float" "wa" (call "sin" [(call "length" ["c" "-" "a"]) "*" 18.0 "-" "t" "*" "WAVE"]))
-          (var "float" "wb" (call "sin" [(call "length" ["c" "-" "b"]) "*" 14.0 "-" "t" "*" "WAVE" "*" 0.8]))
-          (return [0.5 "+" 0.25 "*" ["wa" "+" "wb"]])
-        ];
-        hash = fn "float" [["vec2" "p"]] [
-          (return (call "fract" [(call "sin" (call "dot" "p" (vec2 127.1 311.7))) "*" 43758.5453]))
-        ];
-        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
-          (var "float" "t" ["iTime" "*" "SPEED"])
-          (var "float" "aspect" ["iResolution.x" "/" "iResolution.y"])
-          (var "float" "pitch" (call "floor" ["iResolution.y" "/" "ROWS"]))
-          (var "vec2" "off" [0.5 "*" (call "mod" "iResolution.xy" "pitch")])
-          (var "vec2" "cell" (call "floor" [["fragCoord" "-" "off"] "/" "pitch"]))
-          (var "vec2" "center" [["cell" "+" 0.5] "*" "pitch" "+" "off"])
-          (var "vec2" "p" ["center" "/" "iResolution.y"])
-          (var "float" "f" (call "clamp" [(call "base" "p" "t" "aspect") "*" 0.95 "+" (call "ripples" "p" "t" "aspect")] 0.0 1.0))
-          (var "float" "hs" [0.5 "*" (call "floor" ["pitch" "*" [0.12 "+" 0.6 "*" "f" "*" "f"] "+" 0.5])])
-          (var "vec2" "q" ["fragCoord" "-" "center"])
-          (var "vec2" "aq" (call "abs" "q"))
-          (var "float" "dist" (call "max" "aq.x" "aq.y"))
-          (var "vec2" "dir" (cond ["aq.x" ">" "aq.y"] (vec2 (call "sign" "q.x") 0.0) (vec2 0.0 (call "sign" "q.y"))))
-          (var "vec2" "l" (call "normalize" "LIGHT"))
-          (var "vec2" "sv" ["fragCoord" "/" "iResolution.xy"])
-          (var "vec3" "panel" ["SHELL" "*" (call "mix" 0.94 1.02 [0.55 "*" "sv.y" "+" 0.45 "*" [1.0 "-" "sv.x"]])])
-          (var "float" "rim" [(call "smoothstep" ["hs" "+" 2.5] "hs" "dist") "*" (call "dot" "dir" (neg "l"))])
-          (update "*=" "panel" [1.0 "+" 0.1 "*" "rim"])
-          (var "float" "glow" (call "smoothstep" 0.86 0.98 "f"))
-          (var "vec3" "backing" (call "mix" "GRAPHITE" "ORANGE" "glow"))
-          (var "float" "lit" (call "clamp" (call "dot" "dir" (neg "l")) 0.0 1.0))
-          (var "vec3" "wall" (call "mix" ["GRAPHITE" "*" 0.7] ["PUTTY" "*" 0.8] "lit"))
-          (var "vec3" "hole" (call "mix" "backing" "wall" [(call "step" ["hs" "-" (call "max" 1.0 ["hs" "*" 0.22])] "dist") "*" [0.4 "+" 0.6 "*" "lit"]]))
-          (var "float" "inside" [1.0 "-" (call "step" "hs" "dist")])
-          (var "vec3" "color" (call "mix" "panel" "hole" "inside"))
-          (update "+=" "color" [[(call "hash" "fragCoord") "-" 0.5] "*" 0.012])
-          (assign "fragColor" (vec4 "color" 1.0))
-        ];
-        ripples = fn "float" [["vec2" "c"] ["float" "t"] ["float" "aspect"]] [
-          (var "float" "every" [120.0 "/" "BPM"])
-          (var "float" "life" [4.0 "*" "every"])
-          (var "float" "n" (call "floor" ["t" "/" "every"]))
-          (var "float" "age" ["t" "-" "n" "*" "every"])
-          (var "float" "r" 0.0)
-          (for (var "int" "k" 0) ["k" "<" 4] (inc "k") [
-            (var "float" "m" ["n" "-" (float "k")])
-            (var "float" "tm" ["age" "+" (float "k") "*" "every"])
-            (var "float" "x" ["tm" "/" "life"])
-            (var "vec2" "o" (vec2 [(call "hash" (vec2 "m" 3.7)) "*" "aspect"] (call "hash" (vec2 "m" 9.1))))
-            (var "float" "d" [(call "length" ["c" "-" "o"]) "-" "tm" "*" "RIPPLE_SPEED"])
-            (var "float" "env" [(call "smoothstep" 0.0 0.04 "x") "*" [1.0 "-" (call "smoothstep" 0.2 1.0 "x")]])
-            (update "+=" "r" [(cond [(call "mod" "m" 2.0) "<" 0.5] 1.0 0.7) "*" "env" "*" (call "exp" [(neg "d") "*" "d" "*" 120.0])])
-          ])
-          (return ["RIPPLE" "*" "r"])
-        ];
+        base = fn float [{c = vec2;} {t = float;} {aspect = float;}] ({
+          c,
+          t,
+          aspect,
+          s,
+          a,
+          b,
+          wa,
+          wb,
+        }: [
+          (local s float [t "*" 0.5])
+          (local a vec2 (vec2 [aspect "*" [0.22 "+" 0.08 "*" (sin [s "*" 0.37])]] [0.3 "+" 0.12 "*" (cos [s "*" 0.41])]))
+          (local b vec2 (vec2 [aspect "*" [0.78 "+" 0.08 "*" (cos [s "*" 0.29])]] [0.7 "+" 0.1 "*" (sin [s "*" 0.47])]))
+          (local wa float (sin [(length [c "-" a]) "*" 18.0 "-" t "*" WAVE]))
+          (local wb float (sin [(length [c "-" b]) "*" 14.0 "-" t "*" WAVE "*" 0.8]))
+          (return [0.5 "+" 0.25 "*" [wa "+" wb]])
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (return (fract [(sin (dot p (vec2 127.1 311.7))) "*" 43758.5453]))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          t,
+          aspect,
+          pitch,
+          off,
+          cell,
+          center,
+          p,
+          f,
+          hs,
+          q,
+          aq,
+          dist,
+          dir,
+          l,
+          sv,
+          panel,
+          rim,
+          glow,
+          backing,
+          lit,
+          wall,
+          hole,
+          inside,
+          color,
+        }: [
+          (local t float [iTime "*" SPEED])
+          (local aspect float [iResolution.x "/" iResolution.y])
+          (local pitch float (floor [iResolution.y "/" ROWS]))
+          (local off vec2 [0.5 "*" (mod iResolution.xy pitch)])
+          (local cell vec2 (floor [[fragCoord "-" off] "/" pitch]))
+          (local center vec2 [[cell "+" 0.5] "*" pitch "+" off])
+          (local p vec2 [center "/" iResolution.y])
+          (local f float (clamp [(base p t aspect) "*" 0.95 "+" (ripples p t aspect)] 0.0 1.0))
+          (local hs float [0.5 "*" (floor [pitch "*" [0.12 "+" 0.6 "*" f "*" f] "+" 0.5])])
+          (local q vec2 [fragCoord "-" center])
+          (local aq vec2 (abs q))
+          (local dist float (max aq.x aq.y))
+          (local dir vec2 (cond [aq.x ">" aq.y] (vec2 (sign q.x) 0.0) (vec2 0.0 (sign q.y))))
+          (local l vec2 (normalize LIGHT))
+          (local sv vec2 [fragCoord "/" iResolution.xy])
+          (local panel vec3 [SHELL "*" (mix 0.94 1.02 [0.55 "*" sv.y "+" 0.45 "*" [1.0 "-" sv.x]])])
+          (local rim float [(smoothstep [hs "+" 2.5] hs dist) "*" (dot dir (neg l))])
+          (update panel "*=" [1.0 "+" 0.1 "*" rim])
+          (local glow float (smoothstep 0.86 0.98 f))
+          (local backing vec3 (mix GRAPHITE ORANGE glow))
+          (local lit float (clamp (dot dir (neg l)) 0.0 1.0))
+          (local wall vec3 (mix [GRAPHITE "*" 0.7] [PUTTY "*" 0.8] lit))
+          (local hole vec3 (mix backing wall [(step [hs "-" (max 1.0 [hs "*" 0.22])] dist) "*" [0.4 "+" 0.6 "*" lit]]))
+          (local inside float [1.0 "-" (step hs dist)])
+          (local color vec3 (mix panel hole inside))
+          (update color "+=" [[(hash fragCoord) "-" 0.5] "*" 0.012])
+          (set fragColor (vec4 color 1.0))
+        ]);
+        ripples = fn float [{c = vec2;} {t = float;} {aspect = float;}] ({
+          c,
+          t,
+          aspect,
+          every,
+          life,
+          n,
+          age,
+          r,
+        }: [
+          (local every float [120.0 "/" BPM])
+          (local life float [4.0 "*" every])
+          (local n float (floor [t "/" every]))
+          (local age float [t "-" n "*" every])
+          (local r float 0.0)
+          (for ({
+            k,
+            m,
+            tm,
+            x,
+            o,
+            d,
+            env,
+          }: {
+            init = local k int 0;
+            test = [k "<" 4];
+            step = inc k;
+            body = [
+              (local m float [n "-" (float k)])
+              (local tm float [age "+" (float k) "*" every])
+              (local x float [tm "/" life])
+              (local o vec2 (vec2 [(hash (vec2 m 3.7)) "*" aspect] (hash (vec2 m 9.1))))
+              (local d float [(length [c "-" o]) "-" tm "*" RIPPLE_SPEED])
+              (local env float [(smoothstep 0.0 0.04 x) "*" [1.0 "-" (smoothstep 0.2 1.0 x)]])
+              (update r "+=" [(cond [(mod m 2.0) "<" 0.5] 1.0 0.7) "*" env "*" (exp [(neg d) "*" d "*" 120.0])])
+            ];
+          }))
+          (return [RIPPLE "*" r])
+        ]);
       };
     };
     modules_desktop_session_tomoe_shaders_dot_corridor_data = {
-      assign,
-      call,
+      abs,
+      atan2,
+      clamp,
       cond,
       continue,
+      cos,
       dec,
+      exp,
       float,
+      floor,
       fn,
       for,
+      fract,
+      iResolution,
+      iTime,
       if',
+      in',
       inc,
       int,
       ivec2,
+      length,
+      local,
+      log,
+      max,
+      mix,
+      mod,
+      out,
       return,
+      set,
+      uint,
       unsigned,
       update,
       uvec2,
-      var,
       vec2,
       vec3,
       vec4,
+      void,
       ...
-    }: {
+    }: self: let
+      inherit (self) BAND DY FOCAL HUE_PERIOD LOOP LW RAD SIDES TAU WIDE YMAX ZOOM hash hsv pmod;
+    in {
       consts = {
         BAND = 5;
         DY = 0.41;
@@ -11385,94 +11645,176 @@
         ZOOM = 1.1;
       };
       fns = {
-        hash = fn "float" [["ivec2" "c"]] [
-          (var "uvec2" "v" [(uvec2 "c") "*" (uvec2 (unsigned 1597334673) (unsigned 3812015801))])
-          (var "uint" "n" [["v.x" "^" "v.y"] "*" (unsigned 1597334673)])
-          (update "^=" "n" ["n" ">>" 16])
-          (update "*=" "n" (unsigned 2246822519))
-          (update "^=" "n" ["n" ">>" 13])
-          (return [(float "n") "*" [1.0 "/" 4294967296.0]])
-        ];
-        hsv = fn "vec3" [["float" "h"] ["float" "s"] ["float" "v"]] [
-          (var "vec3" "k" (call "clamp" [(call "abs" [(call "fract" ["h" "+" (vec3 0.0 2.0 1.0) "/" 3.0]) "*" 6.0 "-" 3.0]) "-" 1.0] 0.0 1.0))
-          (return ["v" "*" (call "mix" (vec3 1.0) "k" "s")])
-        ];
-        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
-          (var "float" "px" [1.0 "/" (call "max" [0.5 "*" "iResolution.y" "*" "FOCAL"] [0.5 "*" "iResolution.x" "/" "WIDE"])])
-          (var "vec2" "s" (call "max" [(call "abs" ["fragCoord" "-" 0.5 "*" "iResolution.xy"]) "*" "px"] (vec2 1.0e-6 0.0)))
-          (var "vec3" "col" (vec3 0.0))
-          (var "float" "alpha" 0.0)
-          (var "float" "shift" (call "mod" ["iTime" "*" "ZOOM"] [(float "LOOP") "*" "LW"]))
-          (var "float" "spin" (call "fract" ["iTime" "/" "HUE_PERIOD"]))
-          (var "float" "w" [(call "log" "s.x") "-" "shift"])
-          (var "float" "u" ["s.y" "/" "s.x"])
-          (var "int" "c0" (int (call "floor" ["w" "/" "LW" "+" 0.5])))
-          (var "int" "imax" (int ["YMAX" "/" "DY"]))
-          (for (var "int" "dc" 2) ["dc" ">=" (-2)] (dec "dc") [
-            (var "int" "c" ["c0" "+" "dc"])
-            (var "int" "cc" (call "pmod" "c" "LOOP"))
-            (var "float" "lift" [0.5 "*" (float ["cc" "&" 1])])
-            (var "int" "i0" (int (call "floor" ["u" "/" "DY" "-" "lift" "+" 0.5])))
-            (for (var "int" "di" (-1)) ["di" "<=" 1] (inc "di") [
-              (var "int" "i" ["i0" "+" "di"])
-              (if' ["i" "<" 0 "||" "i" ">" "imax"] [
-                continue
-              ])
-              (var "ivec2" "id" (ivec2 "cc" "i"))
-              (var "float" "h0" (call "hash" "id"))
-              (var "float" "h1" (call "hash" ["id" "+" (ivec2 4099 17)]))
-              (var "float" "h2" (call "hash" ["id" "+" (ivec2 31 7919)]))
-              (var "float" "h3" (call "hash" ["id" "+" (ivec2 613 3)]))
-              (if' ["h2" ">" 0.9] [
-                continue
-              ])
-              (var "float" "sx" (call "exp" [[(float "c") "+" 0.3 "*" ["h3" "-" 0.5]] "*" "LW" "+" "shift"]))
-              (var "vec2" "centre" ["sx" "*" (vec2 1.0 [[(float "i") "+" "lift" "+" 0.3 "*" [(call "fract" ["h3" "*" 7.0]) "-" 0.5]] "*" "DY"])])
-              (var "float" "rho" (call "max" ["RAD" "*" [0.5 "+" 0.5 "*" "h1"] "*" "sx"] [0.6 "*" "px"]))
-              (var "vec2" "q" ["s" "-" "centre"])
-              (var "float" "len" (call "length" "q"))
-              (if' ["len" ">" "rho" "+" "px"] [
-                continue
-              ])
-              (var "float" "sector" ["TAU" "/" "SIDES"])
-              (var "float" "a" [(call "mod" [(call "atan" "q.y" "q.x") "+" "h0" "*" "TAU"] "sector") "-" 0.5 "*" "sector"])
-              (var "float" "dist" [["len" "*" (call "cos" "a") "-" "rho" "*" (call "cos" [0.5 "*" "sector"])] "/" "px"])
-              (var "float" "cover" (call "clamp" [0.5 "-" "dist"] 0.0 1.0))
-              (var "float" "sat" (cond ["h2" "<" 0.1] 0.0 (cond ["h2" "<" 0.2] 0.35 0.92)))
-              (var "float" "val" (cond ["h2" ">" 0.82] 0.55 1.0))
-              (var "float" "hue" (call "hash" (ivec2 ["cc" "/" "BAND"] [(int ["h0" "*" 4.0]) "+" 101])))
-              (update "+=" "col" [[1.0 "-" "alpha"] "*" "cover" "*" (call "hsv" ["hue" "+" "spin"] "sat" "val")])
-              (update "+=" "alpha" [[1.0 "-" "alpha"] "*" "cover"])
-            ])
-          ])
-          (assign "fragColor" (vec4 "col" 1.0))
-        ];
-        pmod = fn "int" [["int" "a"] ["int" "b"]] [
-          (return ["a" "-" "b" "*" (int (call "floor" [(float "a") "/" (float "b")]))])
-        ];
+        hash = fn float [{c = ivec2;}] ({
+          c,
+          v,
+          n,
+        }: [
+          (local v uvec2 [(uvec2 c) "*" (uvec2 (unsigned 1597334673) (unsigned 3812015801))])
+          (local n uint [[v.x "^" v.y] "*" (unsigned 1597334673)])
+          (update n "^=" [n ">>" 16])
+          (update n "*=" (unsigned 2246822519))
+          (update n "^=" [n ">>" 13])
+          (return [(float n) "*" [1.0 "/" 4294967296.0]])
+        ]);
+        hsv = fn vec3 [{h = float;} {s = float;} {v = float;}] ({
+          h,
+          s,
+          v,
+          k,
+        }: [
+          (local k vec3 (clamp [(abs [(fract [h "+" (vec3 0.0 2.0 1.0) "/" 3.0]) "*" 6.0 "-" 3.0]) "-" 1.0] 0.0 1.0))
+          (return [v "*" (mix (vec3 1.0) k s)])
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          px,
+          s,
+          col,
+          alpha,
+          shift,
+          spin,
+          w,
+          u,
+          c0,
+          imax,
+        }: [
+          (local px float [1.0 "/" (max [0.5 "*" iResolution.y "*" FOCAL] [0.5 "*" iResolution.x "/" WIDE])])
+          (local s vec2 (max [(abs [fragCoord "-" 0.5 "*" iResolution.xy]) "*" px] (vec2 1.0e-6 0.0)))
+          (local col vec3 (vec3 0.0))
+          (local alpha float 0.0)
+          (local shift float (mod [iTime "*" ZOOM] [(float LOOP) "*" LW]))
+          (local spin float (fract [iTime "/" HUE_PERIOD]))
+          (local w float [(log s.x) "-" shift])
+          (local u float [s.y "/" s.x])
+          (local c0 int (int (floor [w "/" LW "+" 0.5])))
+          (local imax int (int [YMAX "/" DY]))
+          (for ({
+            dc,
+            c,
+            cc,
+            lift,
+            i0,
+          }: {
+            init = local dc int 2;
+            test = [dc ">=" (-2)];
+            step = dec dc;
+            body = [
+              (local c int [c0 "+" dc])
+              (local cc int (pmod c LOOP))
+              (local lift float [0.5 "*" (float [cc "&" 1])])
+              (local i0 int (int (floor [u "/" DY "-" lift "+" 0.5])))
+              (for ({
+                di,
+                i,
+                id,
+                h0,
+                h1,
+                h2,
+                h3,
+                sx,
+                centre,
+                rho,
+                q,
+                len,
+                sector,
+                a,
+                dist,
+                cover,
+                sat,
+                val,
+                hue,
+              }: {
+                init = local di int (-1);
+                test = [di "<=" 1];
+                step = inc di;
+                body = [
+                  (local i int [i0 "+" di])
+                  (if' [i "<" 0 "||" i ">" imax] [
+                    continue
+                  ])
+                  (local id ivec2 (ivec2 cc i))
+                  (local h0 float (hash id))
+                  (local h1 float (hash [id "+" (ivec2 4099 17)]))
+                  (local h2 float (hash [id "+" (ivec2 31 7919)]))
+                  (local h3 float (hash [id "+" (ivec2 613 3)]))
+                  (if' [h2 ">" 0.9] [
+                    continue
+                  ])
+                  (local sx float (exp [[(float c) "+" 0.3 "*" [h3 "-" 0.5]] "*" LW "+" shift]))
+                  (local centre vec2 [sx "*" (vec2 1.0 [[(float i) "+" lift "+" 0.3 "*" [(fract [h3 "*" 7.0]) "-" 0.5]] "*" DY])])
+                  (local rho float (max [RAD "*" [0.5 "+" 0.5 "*" h1] "*" sx] [0.6 "*" px]))
+                  (local q vec2 [s "-" centre])
+                  (local len float (length q))
+                  (if' [len ">" rho "+" px] [
+                    continue
+                  ])
+                  (local sector float [TAU "/" SIDES])
+                  (local a float [(mod [(atan2 q.y q.x) "+" h0 "*" TAU] sector) "-" 0.5 "*" sector])
+                  (local dist float [[len "*" (cos a) "-" rho "*" (cos [0.5 "*" sector])] "/" px])
+                  (local cover float (clamp [0.5 "-" dist] 0.0 1.0))
+                  (local sat float (cond [h2 "<" 0.1] 0.0 (cond [h2 "<" 0.2] 0.35 0.92)))
+                  (local val float (cond [h2 ">" 0.82] 0.55 1.0))
+                  (local hue float (hash (ivec2 [cc "/" BAND] [(int [h0 "*" 4.0]) "+" 101])))
+                  (update col "+=" [[1.0 "-" alpha] "*" cover "*" (hsv [hue "+" spin] sat val)])
+                  (update alpha "+=" [[1.0 "-" alpha] "*" cover])
+                ];
+              }))
+            ];
+          }))
+          (set fragColor (vec4 col 1.0))
+        ]);
+        pmod = fn int [{a = int;} {b = int;}] ({
+          a,
+          b,
+        }: [
+          (return [a "-" b "*" (int (floor [(float a) "/" (float b)]))])
+        ]);
       };
     };
     modules_desktop_session_tomoe_shaders_glass_mound_data = {
-      assign,
+      atan2,
+      bool,
       break,
-      call,
+      cos,
+      cross,
+      dot,
+      exp,
       float,
       fn,
       for,
+      iResolution,
+      iTime,
       if',
       ifElse,
+      in',
       inc,
       index,
+      int,
+      length,
+      local,
       mat2,
+      max,
+      mix,
       neg,
+      normalize,
+      out,
+      pow,
+      reflect,
       return,
+      set,
+      sin,
+      smoothstep,
       update,
-      var,
       vec2,
       vec3,
       vec4,
+      void,
       ...
-    }: {
+    }: self: let
+      inherit (self) BEND FOG_BOTTOM FOG_TOP INK LILAC MIST PAPER RING SINK SLATE SOFT SPEED SPREAD SWAY TEAL TILT TUBE band env map normal rot shade;
+    in {
       consts = {
         BEND = 0.7;
         FOG_BOTTOM = -1.1;
@@ -11494,120 +11836,206 @@
         TUBE = 0.33;
       };
       fns = {
-        band = fn "float" [["float" "x"] ["float" "c"] ["float" "w"]] [
-          (var "float" "k" [["x" "-" "c"] "/" "w"])
-          (return (call "exp" [(neg "k") "*" "k"]))
-        ];
-        env = fn "vec3" [["vec3" "d"]] [
-          (var "vec3" "c" "PAPER")
-          (var "float" "x" ["d.x" "+" 0.5 "*" "d.z"])
-          (assign "c" (call "mix" "c" "LILAC" [0.9 "*" (call "band" "d.y" (-0.07) 0.06)]))
-          (assign "c" (call "mix" "c" "INK" [0.95 "*" (call "band" "d.y" 0.12 0.13)]))
-          (assign "c" (call "mix" "c" "TEAL" [(call "band" "d.y" 0.34 0.2) "*" (call "smoothstep" (-0.9) 0.1 "x")]))
-          (assign "c" (call "mix" "c" "SLATE" [0.7 "*" (call "band" "d.y" 0.3 0.14) "*" (call "smoothstep" 0.1 (-0.9) "x")]))
-          (assign "c" (call "mix" "c" "LILAC" [0.45 "*" (call "band" "d.y" 0.52 0.06)]))
-          (assign "c" (call "mix" "c" "PAPER" [0.85 "*" (call "band" "x" (-0.5) 0.12) "*" (call "smoothstep" 0.15 0.4 "d.y")]))
-          (return "c")
-        ];
-        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
-          (var "vec2" "uv" [["fragCoord" "-" 0.5 "*" "iResolution.xy"] "/" "iResolution.y"])
-          (var "float" "t" ["iTime" "*" "SPEED"])
-          (var "vec3" "ro" (vec3 0.0 0.5 6.0))
-          (var "vec3" "fw" (call "normalize" [(vec3 0.0 0.5 0.0) "-" "ro"]))
-          (var "vec3" "rt" (call "normalize" (call "cross" "fw" (vec3 0.0 1.0 0.0))))
-          (var "vec3" "up" (call "cross" "rt" "fw"))
-          (var "vec3" "rd" (call "normalize" ["uv.x" "*" "rt" "+" "uv.y" "*" "up" "+" 1.6 "*" "fw"]))
-          (var "float" "s" 0.0)
-          (var "float" "near" 1000000000.0)
-          (var "float" "at" 0.0)
-          (var "bool" "hit" false)
-          (for (var "int" "i" 0) ["i" "<" 110] (inc "i") [
-            (var "float" "d" (call "map" ["ro" "+" "rd" "*" "s"] "t"))
-            (if' ["d" "<" "near"] [
-              (assign "near" "d")
-              (assign "at" "s")
-            ])
-            (if' ["d" "<" 0.001] [
-              (assign "hit" true)
-              break
-            ])
-            (update "+=" "s" "d")
-            (if' ["s" ">" 12.0] [
-              break
-            ])
-          ])
-          (var "vec3" "col" "PAPER")
-          (ifElse "hit" [
-              (assign "col" (call "shade" ["ro" "+" "rd" "*" "s"] "rd" "t"))
-            ] (if' ["near" "<" "SOFT"] [
-              (var "float" "a" [1.0 "-" (call "smoothstep" 0.0 "SOFT" "near")])
-              (assign "col" (call "mix" "PAPER" (call "shade" ["ro" "+" "rd" "*" "at"] "rd" "t") [0.55 "*" "a" "*" "a"]))
-            ]))
-          (assign "col" (call "mix" "PAPER" "col" (call "smoothstep" 0.0 0.14 ["fragCoord.y" "/" "iResolution.y"])))
-          (assign "fragColor" (vec4 "col" 1.0))
-        ];
-        map = fn "float" [["vec3" "p"] ["float" "t"]] [
-          (var "vec3" "q" ["p" "-" (vec3 0.0 "SINK" 0.0)])
-          (update "*=" "q.xz" (call "rot" [0.35 "*" (call "sin" ["t" "*" 0.21])]))
-          (update "*=" "q.yz" (call "rot" ["TILT" "+" "SWAY" "*" (call "sin" ["t" "*" 0.17])]))
-          (update "*=" "q.xy" (call "rot" [0.12 "*" (call "sin" ["t" "*" 0.31])]))
-          (var "float" "a" (call "atan" "q.z" "q.x"))
-          (var "float" "tube" ["TUBE" "*" [1.0 "+" 0.28 "*" (call "sin" ["a" "*" 2.0 "+" "t" "*" 0.7]) "+" 0.12 "*" (call "sin" ["a" "*" 3.0 "-" "t" "*" 0.5])]])
-          (var "float" "ring" ["RING" "*" [1.0 "+" 0.08 "*" (call "sin" ["a" "*" 2.0 "-" "t" "*" 0.4])]])
-          (var "float" "d" [(call "length" (vec2 [(call "length" "q.xz") "-" "ring"] "q.y")) "-" "tube"])
-          (update "+=" "d" [0.04 "*" (call "sin" [2.1 "*" "p.x" "+" "t"]) "*" (call "sin" [1.7 "*" "p.y" "-" 0.8 "*" "t"]) "*" (call "sin" [1.9 "*" "p.z" "+" 1.1 "*" "t"])])
-          (return ["d" "*" 0.8])
-        ];
-        normal = fn "vec3" [["vec3" "p"] ["float" "t"]] [
-          (var "vec2" "e" (vec2 0.002 0.0))
-          (return (call "normalize" (vec3 [(call "map" ["p" "+" "e.xyy"] "t") "-" (call "map" ["p" "-" "e.xyy"] "t")] [(call "map" ["p" "+" "e.yxy"] "t") "-" (call "map" ["p" "-" "e.yxy"] "t")] [(call "map" ["p" "+" "e.yyx"] "t") "-" (call "map" ["p" "-" "e.yyx"] "t")])))
-        ];
-        rot = fn "mat2" [["float" "a"]] [
-          (var "float" "c" (call "cos" "a"))
-          (var "float" "s" (call "sin" "a"))
-          (return (mat2 "c" (neg "s") "s" "c"))
-        ];
-        shade = fn "vec3" [["vec3" "p"] ["vec3" "rd"] ["float" "t"]] [
-          (var "vec3" "n" (call "normal" "p" "t"))
-          (var "float" "c" (call "max" (call "dot" (neg "rd") "n") 0.0))
-          (var "float" "f" [0.25 "+" 0.75 "*" (call "pow" [1.0 "-" "c"] 2.0)])
-          (var "vec3" "through" null)
-          (for (var "int" "k" 0) ["k" "<" 3] (inc "k") [
-            (assign (index "through" "k") (index (call "env" (call "normalize" ["rd" "-" "n" "*" ["BEND" "+" [(float "k") "-" 1.0] "*" "SPREAD" "*" 1.5]])) "k"))
-          ])
-          (var "vec3" "col" (call "mix" "through" (call "env" (call "reflect" "rd" "n")) "f"))
-          (return (call "mix" "col" "MIST" (call "smoothstep" "FOG_TOP" "FOG_BOTTOM" "p.y")))
-        ];
+        band = fn float [{x = float;} {c = float;} {w = float;}] ({
+          x,
+          c,
+          w,
+          k,
+        }: [
+          (local k float [[x "-" c] "/" w])
+          (return (exp [(neg k) "*" k]))
+        ]);
+        env = fn vec3 [{d = vec3;}] ({
+          d,
+          c,
+          x,
+        }: [
+          (local c vec3 PAPER)
+          (local x float [d.x "+" 0.5 "*" d.z])
+          (set c (mix c LILAC [0.9 "*" (band d.y (-0.07) 0.06)]))
+          (set c (mix c INK [0.95 "*" (band d.y 0.12 0.13)]))
+          (set c (mix c TEAL [(band d.y 0.34 0.2) "*" (smoothstep (-0.9) 0.1 x)]))
+          (set c (mix c SLATE [0.7 "*" (band d.y 0.3 0.14) "*" (smoothstep 0.1 (-0.9) x)]))
+          (set c (mix c LILAC [0.45 "*" (band d.y 0.52 0.06)]))
+          (set c (mix c PAPER [0.85 "*" (band x (-0.5) 0.12) "*" (smoothstep 0.15 0.4 d.y)]))
+          (return c)
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          uv,
+          t,
+          ro,
+          fw,
+          rt,
+          up,
+          rd,
+          s,
+          near,
+          at,
+          hit,
+          col,
+        }: [
+          (local uv vec2 [[fragCoord "-" 0.5 "*" iResolution.xy] "/" iResolution.y])
+          (local t float [iTime "*" SPEED])
+          (local ro vec3 (vec3 0.0 0.5 6.0))
+          (local fw vec3 (normalize [(vec3 0.0 0.5 0.0) "-" ro]))
+          (local rt vec3 (normalize (cross fw (vec3 0.0 1.0 0.0))))
+          (local up vec3 (cross rt fw))
+          (local rd vec3 (normalize [uv.x "*" rt "+" uv.y "*" up "+" 1.6 "*" fw]))
+          (local s float 0.0)
+          (local near float 1000000000.0)
+          (local at float 0.0)
+          (local hit bool false)
+          (for ({
+            i,
+            d,
+          }: {
+            init = local i int 0;
+            test = [i "<" 110];
+            step = inc i;
+            body = [
+              (local d float (map [ro "+" rd "*" s] t))
+              (if' [d "<" near] [
+                (set near d)
+                (set at s)
+              ])
+              (if' [d "<" 0.001] [
+                (set hit true)
+                break
+              ])
+              (update s "+=" d)
+              (if' [s ">" 12.0] [
+                break
+              ])
+            ];
+          }))
+          (local col vec3 PAPER)
+          (ifElse hit [
+              (set col (shade [ro "+" rd "*" s] rd t))
+            ] (if' [near "<" SOFT] ({a}: [
+              (local a float [1.0 "-" (smoothstep 0.0 SOFT near)])
+              (set col (mix PAPER (shade [ro "+" rd "*" at] rd t) [0.55 "*" a "*" a]))
+            ])))
+          (set col (mix PAPER col (smoothstep 0.0 0.14 [fragCoord.y "/" iResolution.y])))
+          (set fragColor (vec4 col 1.0))
+        ]);
+        map = fn float [{p = vec3;} {t = float;}] ({
+          p,
+          t,
+          q,
+          a,
+          tube,
+          ring,
+          d,
+        }: [
+          (local q vec3 [p "-" (vec3 0.0 SINK 0.0)])
+          (update q.xz "*=" (rot [0.35 "*" (sin [t "*" 0.21])]))
+          (update q.yz "*=" (rot [TILT "+" SWAY "*" (sin [t "*" 0.17])]))
+          (update q.xy "*=" (rot [0.12 "*" (sin [t "*" 0.31])]))
+          (local a float (atan2 q.z q.x))
+          (local tube float [TUBE "*" [1.0 "+" 0.28 "*" (sin [a "*" 2.0 "+" t "*" 0.7]) "+" 0.12 "*" (sin [a "*" 3.0 "-" t "*" 0.5])]])
+          (local ring float [RING "*" [1.0 "+" 0.08 "*" (sin [a "*" 2.0 "-" t "*" 0.4])]])
+          (local d float [(length (vec2 [(length q.xz) "-" ring] q.y)) "-" tube])
+          (update d "+=" [0.04 "*" (sin [2.1 "*" p.x "+" t]) "*" (sin [1.7 "*" p.y "-" 0.8 "*" t]) "*" (sin [1.9 "*" p.z "+" 1.1 "*" t])])
+          (return [d "*" 0.8])
+        ]);
+        normal = fn vec3 [{p = vec3;} {t = float;}] ({
+          p,
+          t,
+          e,
+        }: [
+          (local e vec2 (vec2 0.002 0.0))
+          (return (normalize (vec3 [(map [p "+" e.xyy] t) "-" (map [p "-" e.xyy] t)] [(map [p "+" e.yxy] t) "-" (map [p "-" e.yxy] t)] [(map [p "+" e.yyx] t) "-" (map [p "-" e.yyx] t)])))
+        ]);
+        rot = fn mat2 [{a = float;}] ({
+          a,
+          c,
+          s,
+        }: [
+          (local c float (cos a))
+          (local s float (sin a))
+          (return (mat2 c (neg s) s c))
+        ]);
+        shade = fn vec3 [{p = vec3;} {rd = vec3;} {t = float;}] ({
+          p,
+          rd,
+          t,
+          n,
+          c,
+          f,
+          through,
+          col,
+        }: [
+          (local n vec3 (normal p t))
+          (local c float (max (dot (neg rd) n) 0.0))
+          (local f float [0.25 "+" 0.75 "*" (pow [1.0 "-" c] 2.0)])
+          (local through vec3 null)
+          (for ({k}: {
+            init = local k int 0;
+            test = [k "<" 3];
+            step = inc k;
+            body = [
+              (set (index through k) (index (env (normalize [rd "-" n "*" [BEND "+" [(float k) "-" 1.0] "*" SPREAD "*" 1.5]])) k))
+            ];
+          }))
+          (local col vec3 (mix through (env (reflect rd n)) f))
+          (return (mix col MIST (smoothstep FOG_TOP FOG_BOTTOM p.y)))
+        ]);
       };
     };
     modules_desktop_session_tomoe_shaders_hex_spiral_data = {
+      abs,
       array,
-      assign,
-      call,
+      atan2,
+      clamp,
       cond,
       continue,
+      cos,
       dec,
+      dot,
+      exp,
       float,
+      floor,
       fn,
       for,
+      fract,
+      iResolution,
+      iTime,
       if',
       ifElse,
+      in',
       inc,
       index,
       int,
       ivec2,
+      length,
+      local,
+      log,
+      math,
+      max,
+      mix,
+      mod,
       neg,
+      out,
       return,
+      set,
+      sin,
       sized,
+      smoothstep,
+      sqrt,
+      uint,
       unsigned,
       update,
       uvec2,
-      var,
       vec2,
       vec3,
       vec4,
+      void,
       ...
-    }: {
+    }: self: let
+      inherit (self) ARM CENTER CYCLE HEX_SPEED LOOP M N NEAR PAL PI S3 STREAK_K STREAK_LOOP STREAK_N STREAK_SPEED STREAK_STEP TAU cart cycle fdiv hash hexDist nearest pmod rot;
+    in {
       consts = {
         ARM = 4;
         CENTER = vec2 0.4 0.58;
@@ -11616,162 +12044,301 @@
         LOOP = 52;
         M = 29;
         N = 13;
-        NEAR = array "ivec2" [(ivec2 0 0) (ivec2 1 0) (ivec2 (-1) 0) (ivec2 0 1) (ivec2 0 (-1)) (ivec2 1 (-1)) (ivec2 (-1) 1)];
-        PAL = array "vec3" [(vec3 1.0 0.824 0.122) (vec3 1.0 0.604 0.122) (vec3 1.0 0.42 0.369) (vec3 1.0 0.361 0.784) (vec3 0.706 0.42 1.0) (vec3 0.184 0.42 1.0) (vec3 0.122 0.722 1.0) (vec3 0.122 0.839 0.706) (vec3 0.482 0.878 0.165) (vec3 0.957 0.957 0.957)];
-        PI = 3.14159265;
-        S3 = 0.8660254;
+        NEAR = array ivec2 [(ivec2 0 0) (ivec2 1 0) (ivec2 (-1) 0) (ivec2 0 1) (ivec2 0 (-1)) (ivec2 1 (-1)) (ivec2 (-1) 1)];
+        PAL = array vec3 [(vec3 1.0 0.824 0.122) (vec3 1.0 0.604 0.122) (vec3 1.0 0.42 0.369) (vec3 1.0 0.361 0.784) (vec3 0.706 0.42 1.0) (vec3 0.184 0.42 1.0) (vec3 0.122 0.722 1.0) (vec3 0.122 0.839 0.706) (vec3 0.482 0.878 0.165) (vec3 0.957 0.957 0.957)];
+        PI = math.round 8 math.pi;
+        S3 = math.round 8 (math.sqrt 3.0 / 2.0);
         STREAK_K = 176;
         STREAK_LOOP = 160;
         STREAK_N = 132;
         STREAK_SPEED = 0.32;
         STREAK_STEP = 0.057;
-        TAU = 6.28318531;
+        TAU = math.round 8 (2.0 * math.pi);
       };
       fns = {
-        cart = fn "vec2" [["ivec2" "a"]] [
-          (return (vec2 [(float "a.x") "+" 0.5 "*" (float "a.y")] ["S3" "*" (float "a.y")]))
-        ];
-        cycle = fn "vec3" [["float" "f"]] [
-          (var "int" "a" (call "pmod" (int (call "floor" "f")) 9))
-          (return (call "mix" (index "PAL" "a") (index "PAL" (call "pmod" ["a" "+" 1] 9)) (call "fract" "f")))
-        ];
-        fdiv = fn "int" [["int" "a"] ["int" "b"]] [
-          (return (int (call "floor" [(float "a") "/" (float "b")])))
-        ];
-        hash = fn "float" [["ivec2" "c"]] [
-          (var "uvec2" "v" [(uvec2 "c") "*" (uvec2 (unsigned 1597334673) (unsigned 3812015801))])
-          (var "uint" "n" [["v.x" "^" "v.y"] "*" (unsigned 1597334673)])
-          (update "^=" "n" ["n" ">>" 16])
-          (update "*=" "n" (unsigned 2246822519))
-          (update "^=" "n" ["n" ">>" 13])
-          (return [(float "n") "*" [1.0 "/" 4294967296.0]])
-        ];
-        hexDist = fn "float" [["vec2" "q"]] [
-          (return (call "max" (call "abs" "q.x") (call "max" (call "abs" [0.5 "*" "q.x" "+" "S3" "*" "q.y"]) (call "abs" [(-0.5) "*" "q.x" "+" "S3" "*" "q.y"]))))
-        ];
-        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
-          (var "float" "px" [1.0 "/" "iResolution.y"])
-          (var "vec2" "p" [["fragCoord" "-" "CENTER" "*" "iResolution.xy"] "*" "px"])
-          (var "float" "r" (call "max" (call "length" "p") 1.0e-5))
-          (var "vec2" "w" (vec2 (call "log" "r") (call "atan" "p.y" "p.x")))
-          (var "vec2" "vc" (call "cart" (ivec2 "M" "N")))
-          (var "float" "k" ["TAU" "/" (call "length" "vc")])
-          (var "float" "rho" [0.5 "*" "PI" "-" (call "atan" "vc.y" "vc.x")])
-          (var "vec2" "drift" (call "cart" (ivec2 1 (-1))))
-          (var "float" "tt" (call "mod" ["iTime" "*" "HEX_SPEED"] (float "LOOP")))
-          (var "vec2" "hw" [(call "rot" "w" (neg "rho")) "/" "k" "-" "tt" "*" "drift"])
-          (var "ivec2" "base" (call "nearest" "hw"))
-          (var "float" "jr" (call "mod" ["hw.y" "/" "S3" "+" 0.5] (float "N")))
-          (var "float" "band" [(call "smoothstep" [(float "ARM") "+" 1.5] [(float "ARM") "+" 4.0] "jr") "*" [1.0 "-" (call "smoothstep" [(float "N") "-" 1.2] (float "N") "jr")]])
-          (var "vec3" "col" (vec3 0.0))
-          (var "float" "phase" [(call "mod" "iTime" "CYCLE") "*" 9.0 "/" "CYCLE"])
-          (var "float" "c" [(float "STREAK_K") "*" "STREAK_STEP" "/" "TAU"])
-          (var "float" "ct" (call "sqrt" [1.0 "+" "c" "*" "c"]))
-          (var "float" "dth" ["TAU" "/" (float "STREAK_N")])
-          (var "float" "ts" (call "mod" ["iTime" "*" "STREAK_SPEED"] [(float "STREAK_LOOP") "*" "STREAK_STEP"]))
-          (var "float" "sig" ["w.x" "-" "ts" "-" "c" "*" "w.y"])
-          (var "int" "is0" (int (call "floor" ["sig" "/" "STREAK_STEP"])))
-          (var "int" "it0" (int (call "floor" ["w.y" "/" "dth"])))
-          (for (var "int" "o" 0) ["o" "<" 9] (inc "o") [
-            (var "int" "it" ["it0" "+" "o" "%" 3 "-" 1])
-            (var "int" "is" ["is0" "+" "o" "/" 3 "-" 1])
-            (var "int" "q" (call "fdiv" "it" "STREAK_N"))
-            (var "ivec2" "id" (ivec2 (call "pmod" ["is" "+" "STREAK_K" "*" "q"] "STREAK_LOOP") ["it" "-" "q" "*" "STREAK_N"]))
-            (var "float" "h0" (call "hash" "id"))
-            (var "float" "h1" (call "hash" ["id" "+" (ivec2 7 131)]))
-            (var "float" "h2" (call "hash" ["id" "+" (ivec2 53 17)]))
-            (if' ["h0" ">" 0.8] [
-              continue
-            ])
-            (var "float" "sm" [[(float "is") "+" 0.5 "+" 0.8 "*" ["h1" "-" 0.5]] "*" "STREAK_STEP"])
-            (var "vec2" "dir" (call "rot" [(vec2 "c" 1.0) "/" "ct"] [0.6 "*" ["h2" "-" 0.5]]))
-            (var "float" "tc" [[(float "it") "+" 0.5 "+" 0.6 "*" ["h2" "-" 0.5]] "*" "dth"])
-            (var "vec2" "d" (vec2 ["sig" "-" "sm" "+" "c" "*" ["w.y" "-" "tc"]] ["w.y" "-" "tc"]))
-            (var "float" "len" [[0.22 "+" 0.22 "*" "h1"] "*" "dth" "*" "ct"])
-            (var "float" "th" [[0.2 "+" 0.08 "*" "h2"] "*" "STREAK_STEP" "/" "ct"])
-            (var "float" "a" (call "clamp" (call "dot" "d" "dir") (neg "len") "len"))
-            (var "float" "dist" [[(call "length" ["d" "-" "dir" "*" "a"]) "-" "th"] "*" "r" "/" "px"])
-            (var "float" "cover" [(call "clamp" [0.5 "-" "dist"] 0.0 1.0) "*" (call "smoothstep" 0.6 2.0 ["th" "*" "r" "/" "px"])])
-            (var "int" "pick" [(int ["h0" "*" 16.0]) "%" 13])
-            (var "vec3" "sc" (cond ["pick" ">" 8] (index "PAL" 9) (call "cycle" [(float "pick") "-" "phase"])))
-            (assign "col" (call "mix" "col" ["sc" "*" [0.7 "+" 0.3 "*" "h2"]] ["cover" "*" "band"]))
-          ])
-          (var (sized "float" 7) "key" null)
-          (var (sized "int" 7) "ord" null)
-          (var "vec2" "outward" (call "rot" (vec2 1.0 0.0) (neg "rho")))
-          (for (var "int" "i" 0) ["i" "<" 7] (inc "i") [
-            (assign (index "key" "i") (call "dot" (call "cart" (index "NEAR" "i")) "outward"))
-            (assign (index "ord" "i") "i")
-          ])
-          (for (var "int" "i" 1) ["i" "<" 7] (inc "i") [
-            (for (var "int" "j" "i") ["j" ">" 0 "&&" (index "key" (index "ord" ["j" "-" 1])) ">" (index "key" (index "ord" "j"))] (dec "j") [
-              (var "int" "t" (index "ord" "j"))
-              (assign (index "ord" "j") (index "ord" ["j" "-" 1]))
-              (assign (index "ord" ["j" "-" 1]) "t")
-            ])
-          ])
-          (var "int" "wrap" [["M" "+" "N"] "*" "LOOP"])
-          (for (var "int" "i" 0) ["i" "<" 7] (inc "i") [
-            (var "ivec2" "cell" ["base" "+" (index "NEAR" (index "ord" "i"))])
-            (if' [(call "pmod" "cell.y" "N") ">=" "ARM"] [
-              continue
-            ])
-            (var "int" "id" (call "pmod" ["cell.x" "*" "N" "-" "cell.y" "*" "M"] "wrap"))
-            (var "float" "h0" (call "hash" (ivec2 "id" 911)))
-            (var "float" "h1" (call "hash" (ivec2 "id" 37)))
-            (var "vec2" "wc" [(call "rot" [(call "cart" "cell") "+" "tt" "*" "drift"] "rho") "*" "k"])
-            (var "float" "rc" (call "exp" "wc.x"))
-            (var "vec2" "sc" ["rc" "*" (vec2 (call "cos" "wc.y") (call "sin" "wc.y"))])
-            (var "float" "scale" ["k" "*" "rc"])
-            (var "vec2" "q" [(call "rot" ["p" "-" "sc"] (neg ["wc.y" "+" "rho"])) "/" "scale"])
-            (var "float" "size" [0.5 "*" [0.88 "+" 0.36 "*" "h1"]])
-            (var "float" "dist" [[(call "hexDist" "q") "-" "size"] "*" "scale" "/" "px"])
-            (var "float" "fade" (call "smoothstep" 3.0 9.0 ["size" "*" "scale" "/" "px"]))
-            (var "float" "cover" [(call "clamp" [0.5 "-" "dist"] 0.0 1.0) "*" "fade"])
-            (var "float" "rim" (call "clamp" [0.5 "-" "dist" "-" (call "max" 1.0 [0.03 "*" "size" "*" "scale" "/" "px"])] 0.0 1.0))
-            (var "vec3" "hc" (call "cycle" ["h0" "*" 9.0 "-" "phase"]))
-            (assign "col" (call "mix" "col" ["hc" "*" "rim"] "cover"))
-          ])
-          (assign "fragColor" (vec4 "col" 1.0))
-        ];
-        nearest = fn "ivec2" [["vec2" "h"]] [
-          (var "float" "y" ["h.y" "/" "S3"])
-          (var "vec3" "c" (vec3 ["h.x" "-" 0.5 "*" "y"] "y" [(neg "h.x") "-" 0.5 "*" "y"]))
-          (var "vec3" "r" (call "floor" ["c" "+" 0.5]))
-          (var "vec3" "d" (call "abs" ["r" "-" "c"]))
-          (ifElse ["d.x" ">" "d.y" "&&" "d.x" ">" "d.z"] [
-              (assign "r.x" [(neg "r.y") "-" "r.z"])
-            ] (if' ["d.y" ">" "d.z"] [
-              (assign "r.y" [(neg "r.x") "-" "r.z"])
+        cart = fn vec2 [{a = ivec2;}] ({a}: [
+          (return (vec2 [(float a.x) "+" 0.5 "*" (float a.y)] [S3 "*" (float a.y)]))
+        ]);
+        cycle = fn vec3 [{f = float;}] ({
+          f,
+          a,
+        }: [
+          (local a int (pmod (int (floor f)) 9))
+          (return (mix (index PAL a) (index PAL (pmod [a "+" 1] 9)) (fract f)))
+        ]);
+        fdiv = fn int [{a = int;} {b = int;}] ({
+          a,
+          b,
+        }: [
+          (return (int (floor [(float a) "/" (float b)])))
+        ]);
+        hash = fn float [{c = ivec2;}] ({
+          c,
+          v,
+          n,
+        }: [
+          (local v uvec2 [(uvec2 c) "*" (uvec2 (unsigned 1597334673) (unsigned 3812015801))])
+          (local n uint [[v.x "^" v.y] "*" (unsigned 1597334673)])
+          (update n "^=" [n ">>" 16])
+          (update n "*=" (unsigned 2246822519))
+          (update n "^=" [n ">>" 13])
+          (return [(float n) "*" [1.0 "/" 4294967296.0]])
+        ]);
+        hexDist = fn float [{q = vec2;}] ({q}: [
+          (return (max (abs q.x) (max (abs [0.5 "*" q.x "+" S3 "*" q.y]) (abs [(-0.5) "*" q.x "+" S3 "*" q.y]))))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          px,
+          p,
+          r,
+          w,
+          vc,
+          k,
+          rho,
+          drift,
+          tt,
+          hw,
+          base,
+          jr,
+          band,
+          col,
+          phase,
+          c,
+          ct,
+          dth,
+          ts,
+          sig,
+          is0,
+          it0,
+          key,
+          ord,
+          outward,
+          wrap,
+        }: [
+          (local px float [1.0 "/" iResolution.y])
+          (local p vec2 [[fragCoord "-" CENTER "*" iResolution.xy] "*" px])
+          (local r float (max (length p) 1.0e-5))
+          (local w vec2 (vec2 (log r) (atan2 p.y p.x)))
+          (local vc vec2 (cart (ivec2 M N)))
+          (local k float [TAU "/" (length vc)])
+          (local rho float [0.5 "*" PI "-" (atan2 vc.y vc.x)])
+          (local drift vec2 (cart (ivec2 1 (-1))))
+          (local tt float (mod [iTime "*" HEX_SPEED] (float LOOP)))
+          (local hw vec2 [(rot w (neg rho)) "/" k "-" tt "*" drift])
+          (local base ivec2 (nearest hw))
+          (local jr float (mod [hw.y "/" S3 "+" 0.5] (float N)))
+          (local band float [(smoothstep [(float ARM) "+" 1.5] [(float ARM) "+" 4.0] jr) "*" [1.0 "-" (smoothstep [(float N) "-" 1.2] (float N) jr)]])
+          (local col vec3 (vec3 0.0))
+          (local phase float [(mod iTime CYCLE) "*" 9.0 "/" CYCLE])
+          (local c float [(float STREAK_K) "*" STREAK_STEP "/" TAU])
+          (local ct float (sqrt [1.0 "+" c "*" c]))
+          (local dth float [TAU "/" (float STREAK_N)])
+          (local ts float (mod [iTime "*" STREAK_SPEED] [(float STREAK_LOOP) "*" STREAK_STEP]))
+          (local sig float [w.x "-" ts "-" c "*" w.y])
+          (local is0 int (int (floor [sig "/" STREAK_STEP])))
+          (local it0 int (int (floor [w.y "/" dth])))
+          (for ({
+            o,
+            it,
+            is,
+            q,
+            id,
+            h0,
+            h1,
+            h2,
+            sm,
+            dir,
+            tc,
+            d,
+            len,
+            th,
+            a,
+            dist,
+            cover,
+            pick,
+            sc,
+          }: {
+            init = local o int 0;
+            test = [o "<" 9];
+            step = inc o;
+            body = [
+              (local it int [it0 "+" o "%" 3 "-" 1])
+              (local is int [is0 "+" o "/" 3 "-" 1])
+              (local q int (fdiv it STREAK_N))
+              (local id ivec2 (ivec2 (pmod [is "+" STREAK_K "*" q] STREAK_LOOP) [it "-" q "*" STREAK_N]))
+              (local h0 float (hash id))
+              (local h1 float (hash [id "+" (ivec2 7 131)]))
+              (local h2 float (hash [id "+" (ivec2 53 17)]))
+              (if' [h0 ">" 0.8] [
+                continue
+              ])
+              (local sm float [[(float is) "+" 0.5 "+" 0.8 "*" [h1 "-" 0.5]] "*" STREAK_STEP])
+              (local dir vec2 (rot [(vec2 c 1.0) "/" ct] [0.6 "*" [h2 "-" 0.5]]))
+              (local tc float [[(float it) "+" 0.5 "+" 0.6 "*" [h2 "-" 0.5]] "*" dth])
+              (local d vec2 (vec2 [sig "-" sm "+" c "*" [w.y "-" tc]] [w.y "-" tc]))
+              (local len float [[0.22 "+" 0.22 "*" h1] "*" dth "*" ct])
+              (local th float [[0.2 "+" 0.08 "*" h2] "*" STREAK_STEP "/" ct])
+              (local a float (clamp (dot d dir) (neg len) len))
+              (local dist float [[(length [d "-" dir "*" a]) "-" th] "*" r "/" px])
+              (local cover float [(clamp [0.5 "-" dist] 0.0 1.0) "*" (smoothstep 0.6 2.0 [th "*" r "/" px])])
+              (local pick int [(int [h0 "*" 16.0]) "%" 13])
+              (local sc vec3 (cond [pick ">" 8] (index PAL 9) (cycle [(float pick) "-" phase])))
+              (set col (mix col [sc "*" [0.7 "+" 0.3 "*" h2]] [cover "*" band]))
+            ];
+          }))
+          (local key (sized float 7) null)
+          (local ord (sized int 7) null)
+          (local outward vec2 (rot (vec2 1.0 0.0) (neg rho)))
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 7];
+            step = inc i;
+            body = [
+              (set (index key i) (dot (cart (index NEAR i)) outward))
+              (set (index ord i) i)
+            ];
+          }))
+          (for ({i}: {
+            init = local i int 1;
+            test = [i "<" 7];
+            step = inc i;
+            body = [
+              (for ({
+                j,
+                t,
+              }: {
+                init = local j int i;
+                test = [j ">" 0 "&&" (index key (index ord [j "-" 1])) ">" (index key (index ord j))];
+                step = dec j;
+                body = [
+                  (local t int (index ord j))
+                  (set (index ord j) (index ord [j "-" 1]))
+                  (set (index ord [j "-" 1]) t)
+                ];
+              }))
+            ];
+          }))
+          (local wrap int [[M "+" N] "*" LOOP])
+          (for ({
+            i,
+            cell,
+            id,
+            h0,
+            h1,
+            wc,
+            rc,
+            sc,
+            scale,
+            q,
+            size,
+            dist,
+            fade,
+            cover,
+            rim,
+            hc,
+          }: {
+            init = local i int 0;
+            test = [i "<" 7];
+            step = inc i;
+            body = [
+              (local cell ivec2 [base "+" (index NEAR (index ord i))])
+              (if' [(pmod cell.y N) ">=" ARM] [
+                continue
+              ])
+              (local id int (pmod [cell.x "*" N "-" cell.y "*" M] wrap))
+              (local h0 float (hash (ivec2 id 911)))
+              (local h1 float (hash (ivec2 id 37)))
+              (local wc vec2 [(rot [(cart cell) "+" tt "*" drift] rho) "*" k])
+              (local rc float (exp wc.x))
+              (local sc vec2 [rc "*" (vec2 (cos wc.y) (sin wc.y))])
+              (local scale float [k "*" rc])
+              (local q vec2 [(rot [p "-" sc] (neg [wc.y "+" rho])) "/" scale])
+              (local size float [0.5 "*" [0.88 "+" 0.36 "*" h1]])
+              (local dist float [[(hexDist q) "-" size] "*" scale "/" px])
+              (local fade float (smoothstep 3.0 9.0 [size "*" scale "/" px]))
+              (local cover float [(clamp [0.5 "-" dist] 0.0 1.0) "*" fade])
+              (local rim float (clamp [0.5 "-" dist "-" (max 1.0 [0.03 "*" size "*" scale "/" px])] 0.0 1.0))
+              (local hc vec3 (cycle [h0 "*" 9.0 "-" phase]))
+              (set col (mix col [hc "*" rim] cover))
+            ];
+          }))
+          (set fragColor (vec4 col 1.0))
+        ]);
+        nearest = fn ivec2 [{h = vec2;}] ({
+          h,
+          y,
+          c,
+          r,
+          d,
+        }: [
+          (local y float [h.y "/" S3])
+          (local c vec3 (vec3 [h.x "-" 0.5 "*" y] y [(neg h.x) "-" 0.5 "*" y]))
+          (local r vec3 (floor [c "+" 0.5]))
+          (local d vec3 (abs [r "-" c]))
+          (ifElse [d.x ">" d.y "&&" d.x ">" d.z] [
+              (set r.x [(neg r.y) "-" r.z])
+            ] (if' [d.y ">" d.z] [
+              (set r.y [(neg r.x) "-" r.z])
             ]))
-          (return (ivec2 "r.xy"))
-        ];
-        pmod = fn "int" [["int" "a"] ["int" "b"]] [
-          (return ["a" "-" "b" "*" (call "fdiv" "a" "b")])
-        ];
-        rot = fn "vec2" [["vec2" "v"] ["float" "a"]] [
-          (var "float" "c" (call "cos" "a"))
-          (var "float" "s" (call "sin" "a"))
-          (return (vec2 ["c" "*" "v.x" "-" "s" "*" "v.y"] ["s" "*" "v.x" "+" "c" "*" "v.y"]))
-        ];
+          (return (ivec2 r.xy))
+        ]);
+        pmod = fn int [{a = int;} {b = int;}] ({
+          a,
+          b,
+        }: [
+          (return [a "-" b "*" (fdiv a b)])
+        ]);
+        rot = fn vec2 [{v = vec2;} {a = float;}] ({
+          v,
+          a,
+          c,
+          s,
+        }: [
+          (local c float (cos a))
+          (local s float (sin a))
+          (return (vec2 [c "*" v.x "-" s "*" v.y] [s "*" v.x "+" c "*" v.y]))
+        ]);
       };
     };
     modules_desktop_session_tomoe_shaders_su_ei_data = {
-      assign,
-      call,
+      abs,
+      atan2,
+      clamp,
+      dot,
+      exp,
       float,
+      floor,
       fn,
       for,
+      fract,
+      fwidth,
+      iResolution,
+      iTime,
+      in',
       inc,
+      int,
+      length,
+      local,
+      max,
+      mix,
       neg,
+      out,
+      pow,
       return,
+      set,
+      sin,
+      smoothstep,
       update,
-      var,
       vec2,
       vec3,
       vec4,
+      void,
       ...
-    }: {
+    }: self: let
+      inherit (self) BASE_A BASE_B DISPERSE DRIFT FLASH_PERIOD RIBS TAU TWIST_PERIOD WANDER flame shade;
+    in {
       consts = {
         BASE_A = vec3 0.6 0.68 0.73;
         BASE_B = vec3 0.69 0.66 0.7;
@@ -11784,53 +12351,1167 @@
         WANDER = 61.0;
       };
       fns = {
-        flame = fn "vec3" [["float" "k"]] [
-          (var "vec3" "cyan" (vec3 0.25 0.85 1.0))
-          (var "vec3" "blue" (vec3 0.35 0.45 1.0))
-          (var "vec3" "pink" (vec3 1.0 0.25 0.75))
-          (var "vec3" "orange" (vec3 1.0 0.62 0.25))
-          (var "vec3" "yellow" (vec3 1.0 0.93 0.45))
-          (var "vec3" "c" (call "mix" "cyan" "blue" (call "smoothstep" (-0.3) (-0.12) "k")))
-          (assign "c" (call "mix" "c" "pink" (call "smoothstep" (-0.12) (-0.02) "k")))
-          (assign "c" (call "mix" "c" "orange" (call "smoothstep" 0.0 0.1 "k")))
-          (return (call "mix" "c" "yellow" (call "smoothstep" 0.08 0.35 "k")))
-        ];
-        mainImage = fn "void" [["out" "vec4" "fragColor"] ["in" "vec2" "fragCoord"]] [
-          (var "float" "aspect" ["iResolution.x" "/" "iResolution.y"])
-          (var "vec2" "p" ["fragCoord" "/" "iResolution.y"])
-          (var "float" "t" "iTime")
-          (var "vec2" "c" (vec2 ["aspect" "+" 0.45 "+" 0.3 "*" (call "sin" ["TAU" "*" "t" "/" "WANDER"])] [0.3 "+" 0.9 "*" (call "sin" ["TAU" "*" "t" "/" ["WANDER" "*" 0.71]])]))
-          (var "vec2" "q" ["p" "-" "c"])
-          (var "float" "r" (call "length" "q"))
-          (var "float" "th" (call "atan" "q.y" (neg "q.x")))
-          (var "float" "twist" [0.35 "*" (call "sin" ["TAU" "*" "t" "/" "TWIST_PERIOD"])])
-          (var "float" "bend" [0.035 "*" (call "sin" [2.1 "*" "p.y" "+" 1.3 "*" "p.x" "+" 0.11 "*" "t"])])
-          (var "float" "u" ["RIBS" "*" ["r" "+" "twist" "*" "th" "/" "TAU" "+" "bend"] "-" "DRIFT" "*" "t"])
-          (var "float" "aa" (call "fwidth" "u"))
-          (var "vec3" "s" (vec3 (call "shade" ["u" "-" "DISPERSE"] "aa") (call "shade" "u" "aa") (call "shade" ["u" "+" "DISPERSE"] "aa")))
-          (var "vec3" "base" (call "mix" "BASE_A" "BASE_B" (call "smoothstep" (-0.2) 1.2 ["p.y" "+" 0.3 "*" (call "sin" ["p.x" "*" 0.9 "+" 0.07 "*" "t"])])))
-          (var "vec3" "col" ["base" "*" "s"])
-          (var "float" "rib" (call "floor" "u"))
-          (var "float" "d" (call "fract" "u"))
-          (var "float" "reach" [0.3 "+" 0.12 "*" (call "sin" ["rib" "*" 0.61 "+" "t" "*" 1.3]) "+" 0.08 "*" (call "sin" ["rib" "*" 1.7 "-" "t" "*" 0.7])])
-          (var "float" "tipY" ["reach" "*" [0.35 "+" 0.65 "*" (call "pow" [1.0 "-" (call "abs" [2.0 "*" "d" "-" 1.0])] 0.8)]])
-          (var "float" "k" ["p.y" "-" "tipY"])
-          (var "float" "sweep" [0.5 "+" 0.5 "*" (call "sin" ["TAU" "*" "t" "/" "FLASH_PERIOD" "-" 3.5 "*" "p.x" "/" (call "max" "aspect" 1.0) "+" 0.9 "*" "p.y"])])
-          (var "float" "flash" (call "smoothstep" 0.62 0.97 "sweep"))
-          (var "vec3" "hot" [(call "flame" "k") "*" [0.82 "+" 0.25 "*" "d"]])
-          (assign "col" (call "mix" "col" ["hot" "*" "s"] ["flash" "*" [0.65 "+" 0.35 "*" "d"]]))
-          (var "vec2" "v" ["fragCoord" "/" "iResolution.xy" "-" 0.5])
-          (update "*=" "col" [1.0 "-" 0.15 "*" (call "dot" "v" "v")])
-          (assign "fragColor" (vec4 (call "clamp" "col" 0.0 1.0) 1.0))
-        ];
-        shade = fn "float" [["float" "u"] ["float" "aa"]] [
-          (var "float" "acc" 0.0)
-          (for (var "int" "k" (-1)) ["k" "<=" 1] (inc "k") [
-            (var "float" "d" (call "fract" ["u" "+" (float "k") "*" "aa" "*" 0.35]))
-            (update "+=" "acc" [0.86 "+" 0.14 "*" (call "smoothstep" 0.0 1.0 "d") "+" 0.32 "*" (call "exp" [["d" "-" 1.0] "/" 0.05]) "-" 0.2 "*" (call "exp" [(neg "d") "/" 0.07])])
-          ])
-          (return ["acc" "/" 3.0])
-        ];
+        flame = fn vec3 [{k = float;}] ({
+          k,
+          cyan,
+          blue,
+          pink,
+          orange,
+          yellow,
+          c,
+        }: [
+          (local cyan vec3 (vec3 0.25 0.85 1.0))
+          (local blue vec3 (vec3 0.35 0.45 1.0))
+          (local pink vec3 (vec3 1.0 0.25 0.75))
+          (local orange vec3 (vec3 1.0 0.62 0.25))
+          (local yellow vec3 (vec3 1.0 0.93 0.45))
+          (local c vec3 (mix cyan blue (smoothstep (-0.3) (-0.12) k)))
+          (set c (mix c pink (smoothstep (-0.12) (-0.02) k)))
+          (set c (mix c orange (smoothstep 0.0 0.1 k)))
+          (return (mix c yellow (smoothstep 0.08 0.35 k)))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          aspect,
+          p,
+          t,
+          c,
+          q,
+          r,
+          th,
+          twist,
+          bend,
+          u,
+          aa,
+          s,
+          base,
+          col,
+          rib,
+          d,
+          reach,
+          tipY,
+          k,
+          sweep,
+          flash,
+          hot,
+          v,
+        }: [
+          (local aspect float [iResolution.x "/" iResolution.y])
+          (local p vec2 [fragCoord "/" iResolution.y])
+          (local t float iTime)
+          (local c vec2 (vec2 [aspect "+" 0.45 "+" 0.3 "*" (sin [TAU "*" t "/" WANDER])] [0.3 "+" 0.9 "*" (sin [TAU "*" t "/" [WANDER "*" 0.71]])]))
+          (local q vec2 [p "-" c])
+          (local r float (length q))
+          (local th float (atan2 q.y (neg q.x)))
+          (local twist float [0.35 "*" (sin [TAU "*" t "/" TWIST_PERIOD])])
+          (local bend float [0.035 "*" (sin [2.1 "*" p.y "+" 1.3 "*" p.x "+" 0.11 "*" t])])
+          (local u float [RIBS "*" [r "+" twist "*" th "/" TAU "+" bend] "-" DRIFT "*" t])
+          (local aa float (fwidth u))
+          (local s vec3 (vec3 (shade [u "-" DISPERSE] aa) (shade u aa) (shade [u "+" DISPERSE] aa)))
+          (local base vec3 (mix BASE_A BASE_B (smoothstep (-0.2) 1.2 [p.y "+" 0.3 "*" (sin [p.x "*" 0.9 "+" 0.07 "*" t])])))
+          (local col vec3 [base "*" s])
+          (local rib float (floor u))
+          (local d float (fract u))
+          (local reach float [0.3 "+" 0.12 "*" (sin [rib "*" 0.61 "+" t "*" 1.3]) "+" 0.08 "*" (sin [rib "*" 1.7 "-" t "*" 0.7])])
+          (local tipY float [reach "*" [0.35 "+" 0.65 "*" (pow [1.0 "-" (abs [2.0 "*" d "-" 1.0])] 0.8)]])
+          (local k float [p.y "-" tipY])
+          (local sweep float [0.5 "+" 0.5 "*" (sin [TAU "*" t "/" FLASH_PERIOD "-" 3.5 "*" p.x "/" (max aspect 1.0) "+" 0.9 "*" p.y])])
+          (local flash float (smoothstep 0.62 0.97 sweep))
+          (local hot vec3 [(flame k) "*" [0.82 "+" 0.25 "*" d]])
+          (set col (mix col [hot "*" s] [flash "*" [0.65 "+" 0.35 "*" d]]))
+          (local v vec2 [fragCoord "/" iResolution.xy "-" 0.5])
+          (update col "*=" [1.0 "-" 0.15 "*" (dot v v)])
+          (set fragColor (vec4 (clamp col 0.0 1.0) 1.0))
+        ]);
+        shade = fn float [{u = float;} {aa = float;}] ({
+          u,
+          aa,
+          acc,
+        }: [
+          (local acc float 0.0)
+          (for ({
+            k,
+            d,
+          }: {
+            init = local k int (-1);
+            test = [k "<=" 1];
+            step = inc k;
+            body = [
+              (local d float (fract [u "+" (float k) "*" aa "*" 0.35]))
+              (update acc "+=" [0.86 "+" 0.14 "*" (smoothstep 0.0 1.0 d) "+" 0.32 "*" (exp [[d "-" 1.0] "/" 0.05]) "-" 0.2 "*" (exp [(neg d) "/" 0.07])])
+            ];
+          }))
+          (return [acc "/" 3.0])
+        ]);
+      };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_dark_data = {
+      ozette,
+      array,
+      cos,
+      dot,
+      exp,
+      float,
+      floor,
+      fn,
+      for,
+      fract,
+      iResolution,
+      iTime,
+      in',
+      inc,
+      index,
+      int,
+      length,
+      local,
+      mat2,
+      mix,
+      mod,
+      neg,
+      out,
+      return,
+      set,
+      sin,
+      sized,
+      smoothstep,
+      update,
+      vec2,
+      vec3,
+      vec4,
+      void,
+      rgb,
+      ...
+    }: self: let
+      inherit (self) BASE_BOTTOM BASE_TOP DOT DOTW GRID HUE LAV LIME MUSTARD PINK PLUM PLUMW RING RIPPLE SPEED blob fbm hash noise;
+    in {
+      consts = {
+        BASE_BOTTOM = rgb ozette.abyss;
+        BASE_TOP = rgb ozette.dusk;
+        DOT = rgb ozette.lime;
+        DOTW = 0.08;
+        GRID = 44.0;
+        HUE = 0.13;
+        LAV = rgb ozette.lavender;
+        LIME = rgb ozette.lime;
+        MUSTARD = rgb ozette.mustard;
+        PINK = rgb ozette.pink;
+        PLUM = rgb ozette.plum;
+        PLUMW = 0.6;
+        RING = 0.004;
+        RIPPLE = 0.25;
+        SPEED = 0.02;
+      };
+      fns = {
+        blob = fn float [{uv = vec2;} {c = vec2;} {r = float;}] ({
+          uv,
+          c,
+          r,
+          d,
+        }: [
+          (local d vec2 [uv "-" c])
+          (return (exp [(neg (dot d d)) "/" [r "*" r]]))
+        ]);
+        fbm = fn float [{p = vec2;}] ({
+          p,
+          s,
+          a,
+        }: [
+          (local s float 0.0)
+          (local a float 0.5)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update s "+=" [a "*" (noise p)])
+              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
+              (update a "*=" 0.5)
+            ];
+          }))
+          (return s)
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (set p (fract [p "*" (vec2 123.34 456.21)]))
+          (update p "+=" (dot p [p "+" 45.32]))
+          (return (fract [p.x "*" p.y]))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          uv,
+          t,
+          w,
+          a,
+          col,
+          r,
+          cs,
+          g,
+          pip,
+        }: [
+          (local uv vec2 [fragCoord "/" iResolution.y])
+          (local t float [iTime "*" SPEED])
+          (local w vec2 [uv "+" 0.18 "*" (vec2 (fbm [uv "*" 1.3 "+" (vec2 t 0.0)]) (fbm [uv "*" 1.3 "+" (vec2 3.1 (neg t))])) "-" 0.09])
+          (local a float [iResolution.x "/" iResolution.y])
+          (local col vec3 (mix BASE_TOP BASE_BOTTOM (smoothstep 0.0 1.0 [1.0 "-" uv.y])))
+          (set col (mix col LAV [HUE "*" 1.0 "*" (blob w (vec2 [a "*" [0.22 "+" 0.04 "*" (sin [t "*" 0.7])]] 0.72) 0.55)]))
+          (set col (mix col PINK [HUE "*" 0.75 "*" (blob w (vec2 [a "*" [0.78 "+" 0.03 "*" (cos [t "*" 0.6])]] 0.78) 0.48)]))
+          (set col (mix col MUSTARD [HUE "*" 0.55 "*" (blob w (vec2 [a "*" [0.58 "+" 0.04 "*" (sin [t "*" 0.5 "+" 2.0])]] 0.08) 0.42)]))
+          (set col (mix col LIME [HUE "*" 0.6 "*" (blob w (vec2 [a "*" [0.92 "+" 0.02 "*" (sin [t "*" 0.8])]] 0.2) 0.4)]))
+          (set col (mix col PLUM [PLUMW "*" (blob w (vec2 [a "*" 0.45] [0.45 "+" 0.05 "*" (sin [t "*" 0.4])]) 0.6)]))
+          (local r float 0.0)
+          (local cs (sized vec2 3) (array vec2 [(vec2 [0.3 "*" a] 0.35) (vec2 [0.7 "*" a] 0.62) (vec2 [0.52 "*" a] 0.18)]))
+          (for ({
+            i,
+            d,
+          }: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (local d float (length [w "-" (index cs i)]))
+              (update r "+=" [(sin [d "*" 38.0 "-" iTime "*" RIPPLE "+" (float i) "*" 2.1]) "*" (exp [(neg d) "*" 2.2])])
+            ];
+          }))
+          (update col "+=" [RING "*" r])
+          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+          (local pip float [1.0 "-" (smoothstep 1.1 1.9 (length g))])
+          (set col (mix col DOT [DOTW "*" pip "*" [0.6 "+" 0.4 "*" (fbm [uv "*" 2.0 "-" t])]]))
+          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+          (set fragColor (vec4 col 1.0))
+        ]);
+        noise = fn float [{p = vec2;}] ({
+          p,
+          i,
+          f,
+          u,
+        }: [
+          (local i vec2 (floor p))
+          (local f vec2 (fract p))
+          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
+          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
+        ]);
+      };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_fields_dark_data = {
+      ozette,
+      cos,
+      dot,
+      float,
+      floor,
+      fn,
+      for,
+      fract,
+      iResolution,
+      iTime,
+      in',
+      inc,
+      int,
+      length,
+      local,
+      mat2,
+      mix,
+      mod,
+      neg,
+      out,
+      return,
+      set,
+      sin,
+      smoothstep,
+      update,
+      vec2,
+      vec3,
+      vec4,
+      void,
+      rgb,
+      ...
+    }: self: let
+      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAGE PAPER PINK SPEED STRENGTH fbm field hash noise;
+    in {
+      consts = {
+        DOT = rgb ozette.lime;
+        DOTW = 0.1;
+        GRID = 44.0;
+        LAV = rgb ozette.lavender;
+        LIME = rgb ozette.mint;
+        MUSTARD = rgb ozette.periwinkle;
+        PAGE = rgb ozette.night;
+        PAPER = rgb ozette.ink;
+        PINK = rgb ozette.pink;
+        SPEED = 0.02;
+        STRENGTH = 0.3;
+      };
+      fns = {
+        fbm = fn float [{p = vec2;}] ({
+          p,
+          s,
+          a,
+        }: [
+          (local s float 0.0)
+          (local a float 0.5)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update s "+=" [a "*" (noise p)])
+              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
+              (update a "*=" 0.5)
+            ];
+          }))
+          (return s)
+        ]);
+        field = fn float [{p = vec2;} {c = vec2;} {r = float;}] ({
+          p,
+          c,
+          r,
+        }: [
+          (return [1.0 "-" (smoothstep [r "*" 0.82] [r "*" 1.12] (length [p "-" c]))])
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (set p (fract [p "*" (vec2 123.34 456.21)]))
+          (update p "+=" (dot p [p "+" 45.32]))
+          (return (fract [p.x "*" p.y]))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          uv,
+          a,
+          t,
+          w,
+          col,
+          g,
+        }: [
+          (local uv vec2 [fragCoord "/" iResolution.y])
+          (local a float [iResolution.x "/" iResolution.y])
+          (local t float [iTime "*" SPEED])
+          (local w vec2 [uv "+" 0.22 "*" (vec2 (fbm [uv "*" 0.9 "+" (vec2 t 1.7)]) (fbm [uv "*" 0.9 "+" (vec2 5.2 (neg t))])) "-" 0.11])
+          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
+          (set col (mix col LAV [STRENGTH "*" (field w (vec2 [a "*" [0.2 "+" 0.05 "*" (sin [t "*" 2.1])]] 0.66) 0.62)]))
+          (set col (mix col MUSTARD [STRENGTH "*" (field w (vec2 [a "*" [0.5 "+" 0.04 "*" (cos [t "*" 1.7])]] 0.02) 0.5)]))
+          (set col (mix col PINK [STRENGTH "*" (field w (vec2 [a "*" [0.74 "+" 0.04 "*" (sin [t "*" 1.9 "+" 1.0])]] 0.86) 0.55)]))
+          (set col (mix col LIME [STRENGTH "*" (field w (vec2 [a "*" [0.96 "+" 0.03 "*" (cos [t "*" 2.3])]] 0.24) 0.48)]))
+          (set col (mix col LAV [STRENGTH "*" 0.7 "*" (field w (vec2 [a "*" [0.38 "+" 0.03 "*" (sin [t "*" 1.3])]] 1.08) 0.36)]))
+          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
+          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+          (set fragColor (vec4 col 1.0))
+        ]);
+        noise = fn float [{p = vec2;}] ({
+          p,
+          i,
+          f,
+          u,
+        }: [
+          (local i vec2 (floor p))
+          (local f vec2 (fract p))
+          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
+          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
+        ]);
+      };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_fields_light_data = {
+      ozette,
+      cos,
+      dot,
+      float,
+      floor,
+      fn,
+      for,
+      fract,
+      iResolution,
+      iTime,
+      in',
+      inc,
+      int,
+      length,
+      local,
+      mat2,
+      mix,
+      mod,
+      neg,
+      out,
+      return,
+      set,
+      sin,
+      smoothstep,
+      update,
+      vec2,
+      vec3,
+      vec4,
+      void,
+      rgb,
+      ...
+    }: self: let
+      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAGE PAPER PINK SPEED STRENGTH fbm field hash noise;
+    in {
+      consts = {
+        DOT = rgb ozette.moss;
+        DOTW = 0.1;
+        GRID = 44.0;
+        LAV = rgb ozette.lavender;
+        LIME = rgb ozette.lime;
+        MUSTARD = rgb ozette.mustard;
+        PAGE = rgb ozette.mist;
+        PAPER = rgb ozette.snow;
+        PINK = rgb ozette.pink;
+        SPEED = 0.02;
+        STRENGTH = 0.55;
+      };
+      fns = {
+        fbm = fn float [{p = vec2;}] ({
+          p,
+          s,
+          a,
+        }: [
+          (local s float 0.0)
+          (local a float 0.5)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update s "+=" [a "*" (noise p)])
+              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
+              (update a "*=" 0.5)
+            ];
+          }))
+          (return s)
+        ]);
+        field = fn float [{p = vec2;} {c = vec2;} {r = float;}] ({
+          p,
+          c,
+          r,
+        }: [
+          (return [1.0 "-" (smoothstep [r "*" 0.82] [r "*" 1.12] (length [p "-" c]))])
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (set p (fract [p "*" (vec2 123.34 456.21)]))
+          (update p "+=" (dot p [p "+" 45.32]))
+          (return (fract [p.x "*" p.y]))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          uv,
+          a,
+          t,
+          w,
+          col,
+          g,
+        }: [
+          (local uv vec2 [fragCoord "/" iResolution.y])
+          (local a float [iResolution.x "/" iResolution.y])
+          (local t float [iTime "*" SPEED])
+          (local w vec2 [uv "+" 0.22 "*" (vec2 (fbm [uv "*" 0.9 "+" (vec2 t 1.7)]) (fbm [uv "*" 0.9 "+" (vec2 5.2 (neg t))])) "-" 0.11])
+          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
+          (set col (mix col LAV [STRENGTH "*" (field w (vec2 [a "*" [0.2 "+" 0.05 "*" (sin [t "*" 2.1])]] 0.66) 0.62)]))
+          (set col (mix col MUSTARD [STRENGTH "*" (field w (vec2 [a "*" [0.5 "+" 0.04 "*" (cos [t "*" 1.7])]] 0.02) 0.5)]))
+          (set col (mix col PINK [STRENGTH "*" (field w (vec2 [a "*" [0.74 "+" 0.04 "*" (sin [t "*" 1.9 "+" 1.0])]] 0.86) 0.55)]))
+          (set col (mix col LIME [STRENGTH "*" (field w (vec2 [a "*" [0.96 "+" 0.03 "*" (cos [t "*" 2.3])]] 0.24) 0.48)]))
+          (set col (mix col LAV [STRENGTH "*" 0.7 "*" (field w (vec2 [a "*" [0.38 "+" 0.03 "*" (sin [t "*" 1.3])]] 1.08) 0.36)]))
+          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
+          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+          (set fragColor (vec4 col 1.0))
+        ]);
+        noise = fn float [{p = vec2;}] ({
+          p,
+          i,
+          f,
+          u,
+        }: [
+          (local i vec2 (floor p))
+          (local f vec2 (fract p))
+          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
+          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
+        ]);
+      };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_light_data = {
+      ozette,
+      array,
+      cos,
+      dot,
+      exp,
+      float,
+      floor,
+      fn,
+      for,
+      fract,
+      iResolution,
+      iTime,
+      in',
+      inc,
+      index,
+      int,
+      length,
+      local,
+      mat2,
+      mix,
+      mod,
+      neg,
+      out,
+      return,
+      set,
+      sin,
+      sized,
+      smoothstep,
+      update,
+      vec2,
+      vec3,
+      vec4,
+      void,
+      rgb,
+      ...
+    }: self: let
+      inherit (self) BASE_BOTTOM BASE_TOP DOT DOTW GRID HUE LAV LIME MUSTARD PINK PLUM PLUMW RING RIPPLE SPEED blob fbm hash noise;
+    in {
+      consts = {
+        BASE_BOTTOM = rgb ozette.mist;
+        BASE_TOP = rgb ozette.snow;
+        DOT = rgb ozette.moss;
+        DOTW = 0.07;
+        GRID = 44.0;
+        HUE = 0.32;
+        LAV = rgb ozette.lavender;
+        LIME = rgb ozette.lime;
+        MUSTARD = rgb ozette.mustard;
+        PINK = rgb ozette.pink;
+        PLUM = rgb ozette.frost;
+        PLUMW = 0.25;
+        RING = 0.006;
+        RIPPLE = 0.25;
+        SPEED = 0.02;
+      };
+      fns = {
+        blob = fn float [{uv = vec2;} {c = vec2;} {r = float;}] ({
+          uv,
+          c,
+          r,
+          d,
+        }: [
+          (local d vec2 [uv "-" c])
+          (return (exp [(neg (dot d d)) "/" [r "*" r]]))
+        ]);
+        fbm = fn float [{p = vec2;}] ({
+          p,
+          s,
+          a,
+        }: [
+          (local s float 0.0)
+          (local a float 0.5)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update s "+=" [a "*" (noise p)])
+              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
+              (update a "*=" 0.5)
+            ];
+          }))
+          (return s)
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (set p (fract [p "*" (vec2 123.34 456.21)]))
+          (update p "+=" (dot p [p "+" 45.32]))
+          (return (fract [p.x "*" p.y]))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          uv,
+          t,
+          w,
+          a,
+          col,
+          r,
+          cs,
+          g,
+          pip,
+        }: [
+          (local uv vec2 [fragCoord "/" iResolution.y])
+          (local t float [iTime "*" SPEED])
+          (local w vec2 [uv "+" 0.18 "*" (vec2 (fbm [uv "*" 1.3 "+" (vec2 t 0.0)]) (fbm [uv "*" 1.3 "+" (vec2 3.1 (neg t))])) "-" 0.09])
+          (local a float [iResolution.x "/" iResolution.y])
+          (local col vec3 (mix BASE_TOP BASE_BOTTOM (smoothstep 0.0 1.0 [1.0 "-" uv.y])))
+          (set col (mix col LAV [HUE "*" 1.0 "*" (blob w (vec2 [a "*" [0.22 "+" 0.04 "*" (sin [t "*" 0.7])]] 0.72) 0.55)]))
+          (set col (mix col PINK [HUE "*" 0.75 "*" (blob w (vec2 [a "*" [0.78 "+" 0.03 "*" (cos [t "*" 0.6])]] 0.78) 0.48)]))
+          (set col (mix col MUSTARD [HUE "*" 0.55 "*" (blob w (vec2 [a "*" [0.58 "+" 0.04 "*" (sin [t "*" 0.5 "+" 2.0])]] 0.08) 0.42)]))
+          (set col (mix col LIME [HUE "*" 0.6 "*" (blob w (vec2 [a "*" [0.92 "+" 0.02 "*" (sin [t "*" 0.8])]] 0.2) 0.4)]))
+          (set col (mix col PLUM [PLUMW "*" (blob w (vec2 [a "*" 0.45] [0.45 "+" 0.05 "*" (sin [t "*" 0.4])]) 0.6)]))
+          (local r float 0.0)
+          (local cs (sized vec2 3) (array vec2 [(vec2 [0.3 "*" a] 0.35) (vec2 [0.7 "*" a] 0.62) (vec2 [0.52 "*" a] 0.18)]))
+          (for ({
+            i,
+            d,
+          }: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (local d float (length [w "-" (index cs i)]))
+              (update r "+=" [(sin [d "*" 38.0 "-" iTime "*" RIPPLE "+" (float i) "*" 2.1]) "*" (exp [(neg d) "*" 2.2])])
+            ];
+          }))
+          (update col "+=" [RING "*" r])
+          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+          (local pip float [1.0 "-" (smoothstep 1.1 1.9 (length g))])
+          (set col (mix col DOT [DOTW "*" pip "*" [0.6 "+" 0.4 "*" (fbm [uv "*" 2.0 "-" t])]]))
+          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+          (set fragColor (vec4 col 1.0))
+        ]);
+        noise = fn float [{p = vec2;}] ({
+          p,
+          i,
+          f,
+          u,
+        }: [
+          (local i vec2 (floor p))
+          (local f vec2 (fract p))
+          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
+          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
+        ]);
+      };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_lilies_dark_data = {
+      ozette,
+      abs,
+      atan2,
+      cos,
+      dot,
+      float,
+      floor,
+      fn,
+      for,
+      fract,
+      iResolution,
+      iTime,
+      in',
+      inc,
+      int,
+      length,
+      local,
+      mat2,
+      mix,
+      mod,
+      out,
+      return,
+      set,
+      sin,
+      smoothstep,
+      update,
+      vec2,
+      vec3,
+      vec4,
+      void,
+      rgb,
+      ...
+    }: self: let
+      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAD PAGE PAPER PINK SPEED hash noise pad;
+    in {
+      consts = {
+        DOT = rgb ozette.lime;
+        DOTW = 0.16;
+        GRID = 44.0;
+        LAV = rgb ozette.lavender;
+        LIME = rgb ozette.mint;
+        MUSTARD = rgb ozette.periwinkle;
+        PAD = 0.3;
+        PAGE = rgb ozette.night;
+        PAPER = rgb ozette.ink;
+        PINK = rgb ozette.pink;
+        SPEED = 0.03;
+      };
+      fns = {
+        fbm = fn float [{p = vec2;}] ({
+          p,
+          s,
+          a,
+        }: [
+          (local s float 0.0)
+          (local a float 0.5)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update s "+=" [a "*" (noise p)])
+              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
+              (update a "*=" 0.5)
+            ];
+          }))
+          (return s)
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (set p (fract [p "*" (vec2 123.34 456.21)]))
+          (update p "+=" (dot p [p "+" 45.32]))
+          (return (fract [p.x "*" p.y]))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          uv,
+          a,
+          t,
+          col,
+          g,
+        }: [
+          (local uv vec2 [fragCoord "/" iResolution.y])
+          (local a float [iResolution.x "/" iResolution.y])
+          (local t float [iTime "*" SPEED])
+          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
+          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.2 2.0 (length g))]]))
+          (set col (pad col uv (vec2 [a "*" 0.12 "+" 0.03 "*" (sin [t "*" 1.3])] [0.78 "+" 0.03 "*" (cos [t "*" 1.1])]) 0.26 [0.6 "+" 0.2 "*" (sin t)] LAV))
+          (set col (pad col uv (vec2 [a "*" 0.36 "+" 0.04 "*" (cos [t "*" 0.9])] [0.12 "+" 0.03 "*" (sin [t "*" 1.4])]) 0.2 [2.2 "+" 0.2 "*" (cos [t "*" 0.8])] MUSTARD))
+          (set col (pad col uv (vec2 [a "*" 0.62 "+" 0.03 "*" (sin [t "*" 1.2 "+" 2.0])] [0.9 "+" 0.02 "*" (cos [t "*" 1.6])]) 0.17 [4.0 "+" 0.2 "*" (sin [t "*" 1.1])] LIME))
+          (set col (pad col uv (vec2 [a "*" 0.84 "+" 0.04 "*" (cos [t "*" 1.0 "+" 1.0])] [0.3 "+" 0.03 "*" (sin [t "*" 0.7])]) 0.3 [5.1 "+" 0.2 "*" (cos [t "*" 0.9])] PINK))
+          (set col (pad col uv (vec2 [a "*" 0.97 "+" 0.02 "*" (sin [t "*" 1.5])] [0.82 "+" 0.03 "*" (sin [t "*" 1.2])]) 0.12 [1.4 "+" 0.2 "*" (sin [t "*" 1.3])] LAV))
+          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+          (set fragColor (vec4 col 1.0))
+        ]);
+        noise = fn float [{p = vec2;}] ({
+          p,
+          i,
+          f,
+          u,
+        }: [
+          (local i vec2 (floor p))
+          (local f vec2 (fract p))
+          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
+          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
+        ]);
+        pad = fn vec3 [{col = vec3;} {p = vec2;} {c = vec2;} {r = float;} {turn = float;} {hue = vec3;}] ({
+          col,
+          p,
+          c,
+          r,
+          turn,
+          hue,
+          d,
+          ang,
+          notch,
+          px,
+          m,
+          c2,
+        }: [
+          (local d vec2 [p "-" c])
+          (local ang float [(atan2 d.y d.x) "-" turn])
+          (local notch float (smoothstep 0.1 0.13 (abs [(mod [ang "+" 3.14159] 6.28318) "-" 3.14159])))
+          (local px float [1.5 "/" iResolution.y])
+          (local m float [[1.0 "-" (smoothstep [r "-" px] [r "+" px] (length d))] "*" notch])
+          (local c2 vec3 (mix col hue PAD))
+          (return (mix col c2 m))
+        ]);
+      };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_lilies_light_data = {
+      ozette,
+      abs,
+      atan2,
+      cos,
+      dot,
+      float,
+      floor,
+      fn,
+      for,
+      fract,
+      iResolution,
+      iTime,
+      in',
+      inc,
+      int,
+      length,
+      local,
+      mat2,
+      mix,
+      mod,
+      out,
+      return,
+      set,
+      sin,
+      smoothstep,
+      update,
+      vec2,
+      vec3,
+      vec4,
+      void,
+      rgb,
+      ...
+    }: self: let
+      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAD PAGE PAPER PINK SPEED hash noise pad;
+    in {
+      consts = {
+        DOT = rgb ozette.moss;
+        DOTW = 0.16;
+        GRID = 44.0;
+        LAV = rgb ozette.lavender;
+        LIME = rgb ozette.lime;
+        MUSTARD = rgb ozette.mustard;
+        PAD = 0.55;
+        PAGE = rgb ozette.mist;
+        PAPER = rgb ozette.snow;
+        PINK = rgb ozette.pink;
+        SPEED = 0.03;
+      };
+      fns = {
+        fbm = fn float [{p = vec2;}] ({
+          p,
+          s,
+          a,
+        }: [
+          (local s float 0.0)
+          (local a float 0.5)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update s "+=" [a "*" (noise p)])
+              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
+              (update a "*=" 0.5)
+            ];
+          }))
+          (return s)
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (set p (fract [p "*" (vec2 123.34 456.21)]))
+          (update p "+=" (dot p [p "+" 45.32]))
+          (return (fract [p.x "*" p.y]))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          uv,
+          a,
+          t,
+          col,
+          g,
+        }: [
+          (local uv vec2 [fragCoord "/" iResolution.y])
+          (local a float [iResolution.x "/" iResolution.y])
+          (local t float [iTime "*" SPEED])
+          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
+          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.2 2.0 (length g))]]))
+          (set col (pad col uv (vec2 [a "*" 0.12 "+" 0.03 "*" (sin [t "*" 1.3])] [0.78 "+" 0.03 "*" (cos [t "*" 1.1])]) 0.26 [0.6 "+" 0.2 "*" (sin t)] LAV))
+          (set col (pad col uv (vec2 [a "*" 0.36 "+" 0.04 "*" (cos [t "*" 0.9])] [0.12 "+" 0.03 "*" (sin [t "*" 1.4])]) 0.2 [2.2 "+" 0.2 "*" (cos [t "*" 0.8])] MUSTARD))
+          (set col (pad col uv (vec2 [a "*" 0.62 "+" 0.03 "*" (sin [t "*" 1.2 "+" 2.0])] [0.9 "+" 0.02 "*" (cos [t "*" 1.6])]) 0.17 [4.0 "+" 0.2 "*" (sin [t "*" 1.1])] LIME))
+          (set col (pad col uv (vec2 [a "*" 0.84 "+" 0.04 "*" (cos [t "*" 1.0 "+" 1.0])] [0.3 "+" 0.03 "*" (sin [t "*" 0.7])]) 0.3 [5.1 "+" 0.2 "*" (cos [t "*" 0.9])] PINK))
+          (set col (pad col uv (vec2 [a "*" 0.97 "+" 0.02 "*" (sin [t "*" 1.5])] [0.82 "+" 0.03 "*" (sin [t "*" 1.2])]) 0.12 [1.4 "+" 0.2 "*" (sin [t "*" 1.3])] LAV))
+          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+          (set fragColor (vec4 col 1.0))
+        ]);
+        noise = fn float [{p = vec2;}] ({
+          p,
+          i,
+          f,
+          u,
+        }: [
+          (local i vec2 (floor p))
+          (local f vec2 (fract p))
+          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
+          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
+        ]);
+        pad = fn vec3 [{col = vec3;} {p = vec2;} {c = vec2;} {r = float;} {turn = float;} {hue = vec3;}] ({
+          col,
+          p,
+          c,
+          r,
+          turn,
+          hue,
+          d,
+          ang,
+          notch,
+          px,
+          m,
+          c2,
+        }: [
+          (local d vec2 [p "-" c])
+          (local ang float [(atan2 d.y d.x) "-" turn])
+          (local notch float (smoothstep 0.1 0.13 (abs [(mod [ang "+" 3.14159] 6.28318) "-" 3.14159])))
+          (local px float [1.5 "/" iResolution.y])
+          (local m float [[1.0 "-" (smoothstep [r "-" px] [r "+" px] (length d))] "*" notch])
+          (local c2 vec3 (mix col hue PAD))
+          (return (mix col c2 m))
+        ]);
+      };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_pond_dark_data = {
+      ozette,
+      abs,
+      clamp,
+      dot,
+      exp,
+      float,
+      floor,
+      fn,
+      for,
+      fract,
+      iResolution,
+      iTime,
+      in',
+      inc,
+      int,
+      length,
+      local,
+      mat2,
+      mix,
+      mod,
+      neg,
+      out,
+      return,
+      set,
+      sin,
+      smoothstep,
+      update,
+      vec2,
+      vec3,
+      vec4,
+      void,
+      rgb,
+      ...
+    }: self: let
+      inherit (self) BODY DOT DOTW GLINT GRID LAV LIME LINES MUSTARD PAGE PAPER PINK SCALE SPEED caustic fbm hash noise;
+    in {
+      consts = {
+        BODY = 0.14;
+        DOT = rgb ozette.lime;
+        DOTW = 0.08;
+        GLINT = rgb ozette.lavender;
+        GRID = 44.0;
+        LAV = rgb ozette.lavender;
+        LIME = rgb ozette.mint;
+        LINES = 0.3;
+        MUSTARD = rgb ozette.periwinkle;
+        PAGE = rgb ozette.night;
+        PAPER = rgb ozette.ink;
+        PINK = rgb ozette.pink;
+        SCALE = 4.5;
+        SPEED = 0.03;
+      };
+      fns = {
+        caustic = fn float [{p = vec2;} {t = float;}] ({
+          p,
+          t,
+          q,
+          f,
+        }: [
+          (local q vec2 p)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update q "+=" [0.6 "*" (vec2 (sin [q.y "*" 1.7 "+" t "+" (float i)]) (sin [q.x "*" 1.5 "-" t "*" 0.8 "-" (float i)]))])
+            ];
+          }))
+          (local f float [(sin [q.x "*" 2.0]) "+" (sin [q.y "*" 2.0])])
+          (return (exp [(neg (abs f)) "*" 5.0]))
+        ]);
+        fbm = fn float [{p = vec2;}] ({
+          p,
+          s,
+          a,
+        }: [
+          (local s float 0.0)
+          (local a float 0.5)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update s "+=" [a "*" (noise p)])
+              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
+              (update a "*=" 0.5)
+            ];
+          }))
+          (return s)
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (set p (fract [p "*" (vec2 123.34 456.21)]))
+          (update p "+=" (dot p [p "+" 45.32]))
+          (return (fract [p.x "*" p.y]))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          uv,
+          a,
+          t,
+          col,
+          h,
+          tint,
+          c,
+          g,
+        }: [
+          (local uv vec2 [fragCoord "/" iResolution.y])
+          (local a float [iResolution.x "/" iResolution.y])
+          (local t float [iTime "*" SPEED])
+          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
+          (local h float (fbm [uv "*" 0.8 "+" (vec2 [t "*" 0.05] [(neg t) "*" 0.03])]))
+          (local tint vec3 (mix LAV PINK (smoothstep 0.35 0.65 [h "+" 0.25 "*" (sin [uv.x "/" a "*" 3.0 "+" t "*" 0.1])])))
+          (set tint (mix tint LIME (smoothstep 0.55 0.75 (fbm [uv "*" 0.6 "-" (vec2 [t "*" 0.04] 2.0)]))))
+          (set tint (mix tint MUSTARD [0.6 "*" (smoothstep 0.6 0.8 (fbm [uv "*" 0.7 "+" (vec2 4.0 [t "*" 0.03])]))]))
+          (set col (mix col tint BODY))
+          (local c float (caustic [uv "*" SCALE "+" (vec2 0.0 7.0)] t))
+          (set col (mix col GLINT [(clamp c 0.0 1.0) "*" LINES]))
+          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
+          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+          (set fragColor (vec4 col 1.0))
+        ]);
+        noise = fn float [{p = vec2;}] ({
+          p,
+          i,
+          f,
+          u,
+        }: [
+          (local i vec2 (floor p))
+          (local f vec2 (fract p))
+          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
+          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
+        ]);
+      };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_pond_light_data = {
+      ozette,
+      abs,
+      clamp,
+      dot,
+      exp,
+      float,
+      floor,
+      fn,
+      for,
+      fract,
+      iResolution,
+      iTime,
+      in',
+      inc,
+      int,
+      length,
+      local,
+      mat2,
+      mix,
+      mod,
+      neg,
+      out,
+      return,
+      set,
+      sin,
+      smoothstep,
+      update,
+      vec2,
+      vec3,
+      vec4,
+      void,
+      rgb,
+      ...
+    }: self: let
+      inherit (self) BODY DOT DOTW GLINT GRID LAV LIME LINES MUSTARD PAGE PAPER PINK SCALE SPEED caustic fbm hash noise;
+    in {
+      consts = {
+        BODY = 0.3;
+        DOT = rgb ozette.moss;
+        DOTW = 0.08;
+        GLINT = rgb ozette.white;
+        GRID = 44.0;
+        LAV = rgb ozette.lavender;
+        LIME = rgb ozette.lime;
+        LINES = 0.75;
+        MUSTARD = rgb ozette.mustard;
+        PAGE = rgb ozette.mist;
+        PAPER = rgb ozette.snow;
+        PINK = rgb ozette.pink;
+        SCALE = 4.5;
+        SPEED = 0.03;
+      };
+      fns = {
+        caustic = fn float [{p = vec2;} {t = float;}] ({
+          p,
+          t,
+          q,
+          f,
+        }: [
+          (local q vec2 p)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update q "+=" [0.6 "*" (vec2 (sin [q.y "*" 1.7 "+" t "+" (float i)]) (sin [q.x "*" 1.5 "-" t "*" 0.8 "-" (float i)]))])
+            ];
+          }))
+          (local f float [(sin [q.x "*" 2.0]) "+" (sin [q.y "*" 2.0])])
+          (return (exp [(neg (abs f)) "*" 5.0]))
+        ]);
+        fbm = fn float [{p = vec2;}] ({
+          p,
+          s,
+          a,
+        }: [
+          (local s float 0.0)
+          (local a float 0.5)
+          (for ({i}: {
+            init = local i int 0;
+            test = [i "<" 3];
+            step = inc i;
+            body = [
+              (update s "+=" [a "*" (noise p)])
+              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
+              (update a "*=" 0.5)
+            ];
+          }))
+          (return s)
+        ]);
+        hash = fn float [{p = vec2;}] ({p}: [
+          (set p (fract [p "*" (vec2 123.34 456.21)]))
+          (update p "+=" (dot p [p "+" 45.32]))
+          (return (fract [p.x "*" p.y]))
+        ]);
+        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+          fragColor,
+          fragCoord,
+          uv,
+          a,
+          t,
+          col,
+          h,
+          tint,
+          c,
+          g,
+        }: [
+          (local uv vec2 [fragCoord "/" iResolution.y])
+          (local a float [iResolution.x "/" iResolution.y])
+          (local t float [iTime "*" SPEED])
+          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
+          (local h float (fbm [uv "*" 0.8 "+" (vec2 [t "*" 0.05] [(neg t) "*" 0.03])]))
+          (local tint vec3 (mix LAV PINK (smoothstep 0.35 0.65 [h "+" 0.25 "*" (sin [uv.x "/" a "*" 3.0 "+" t "*" 0.1])])))
+          (set tint (mix tint LIME (smoothstep 0.55 0.75 (fbm [uv "*" 0.6 "-" (vec2 [t "*" 0.04] 2.0)]))))
+          (set tint (mix tint MUSTARD [0.6 "*" (smoothstep 0.6 0.8 (fbm [uv "*" 0.7 "+" (vec2 4.0 [t "*" 0.03])]))]))
+          (set col (mix col tint BODY))
+          (local c float (caustic [uv "*" SCALE "+" (vec2 0.0 7.0)] t))
+          (set col (mix col GLINT [(clamp c 0.0 1.0) "*" LINES]))
+          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
+          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+          (set fragColor (vec4 col 1.0))
+        ]);
+        noise = fn float [{p = vec2;}] ({
+          p,
+          i,
+          f,
+          u,
+        }: [
+          (local i vec2 (floor p))
+          (local f vec2 (fract p))
+          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
+          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
+        ]);
       };
     };
     modules_desktop_session_wayland = {pkgs, ...}: {
@@ -30376,12 +32057,67 @@
           "||" = 2;
         };
 
+        scalars = ["bool" "int" "uint" "float"];
+
         types =
-          ["bool" "int" "uint" "float"]
-          ++ lib.concatMap (n: ["vec${n}" "ivec${n}" "uvec${n}" "bvec${n}" "mat${n}"] ++ map (m: "mat${n}x${m}") ["2" "3" "4"]) ["2" "3" "4"];
+          scalars
+          ++ lib.concatMap (n: ["vec${n}" "ivec${n}" "uvec${n}" "bvec${n}" "mat${n}"] ++ map (m: "mat${n}x${m}") ["2" "3" "4"]) ["2" "3" "4"]
+          ++ ["sampler2D" "void"];
+
+        builtinFunctions = {
+          same = {
+            "1" = ["abs" "sign" "floor" "ceil" "fract" "round" "trunc" "sin" "cos" "tan" "asin" "acos" "atan" "exp" "log" "exp2" "log2" "sqrt" "inversesqrt" "normalize" "radians" "degrees" "fwidth" "dFdx" "dFdy"];
+            "2" = ["min" "max" "mod" "pow" "reflect" "atan2"];
+            "3" = ["clamp" "mix"];
+          };
+          float = {
+            "1" = ["length"];
+            "2" = ["distance" "dot"];
+          };
+        };
+
+        prefixes = {
+          float = "";
+          int = "i";
+          uint = "u";
+          bool = "b";
+        };
+
+        components = ["x" "y" "z" "w"];
+
+        palettes = [components ["r" "g" "b" "a"] ["s" "t" "p" "q"]];
+
+        swizzles = let
+          grow = names: lib.concatMap (name: map (letter: name + letter) components) names;
+          lengths = builtins.genList (n: lib.foldl' (names: _: grow names) [""] (lib.range 1 (n + 1))) 4;
+        in
+          lib.concatLists lengths;
+
+        vectorParts = type: builtins.match "([biu]?)vec([234])" type;
+
+        dimension = type:
+          if builtins.elem type scalars
+          then 1
+          else if vectorParts type != null
+          then lib.toInt (builtins.elemAt (vectorParts type) 1)
+          else null;
+
+        scalarOf = type:
+          if builtins.elem type scalars
+          then type
+          else if vectorParts type != null
+          then lib.findFirst (scalar: prefixes.${scalar} == builtins.head (vectorParts type)) null scalars
+          else if builtins.match "mat.*" type != null
+          then "float"
+          else null;
+
+        vectorOf = scalar: size:
+          if size == 1
+          then scalar
+          else "${prefixes.${scalar}}vec${toString size}";
 
         identifier = value:
-          if builtins.match "[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*" value != null
+          if builtins.match "[A-Za-z_][A-Za-z0-9_]*" value != null
           then value
           else throw "glsl: `${value}` is not a name";
 
@@ -30398,36 +32134,255 @@
           then text
           else "${pointed (builtins.head parts)}e${builtins.elemAt parts 1}${builtins.elemAt parts 2}";
 
+        located = value: let
+          self = builtins.listToAttrs ([
+              {
+                name = "ast";
+                value = value.ast;
+              }
+              {
+                name = "type";
+                value = value.type;
+              }
+            ]
+            ++ map (name: {
+              inherit name;
+              value = swizzle self name;
+            })
+            swizzles);
+        in
+          self;
+
+        swizzle = value: name: let
+          letters = lib.stringToCharacters name;
+          table = lib.findFirst (letters': lib.all (letter: builtins.elem letter letters') letters) (throw "glsl: `.${name}` is not a swizzle") palettes;
+          size = dimension value.type;
+          reach = lib.foldl' lib.max 0 (map (letter: lib.lists.findFirstIndex (one: one == letter) 0 table) letters);
+        in
+          if value.type == null
+          then throw "glsl: `.${name}` of a value whose type is not known"
+          else if size == null || reach >= size
+          then throw "glsl: ${value.type} has no `.${name}`"
+          else
+            located {
+              ast.field = {
+                base = value.ast;
+                inherit name;
+              };
+              type = vectorOf (scalarOf value.type) (builtins.length letters);
+            };
+
+        comparisons = ["<" ">" "<=" ">=" "==" "!=" "&&" "||" "^^"];
+
+        matrix = type: builtins.match "mat([234])" type;
+
+        product = matrixType: vector: matrix matrixType != null && vector == "vec${builtins.head (matrix matrixType)}";
+
+        scalarWith = scalar: other: dimension scalar == 1 && scalarOf other == scalar;
+
+        combine = operator: left: right: let
+          known = left != null && right != null;
+          rules = [
+            {
+              when = builtins.elem operator comparisons;
+              type = "bool";
+            }
+            {
+              when = !known;
+              type = null;
+            }
+            {
+              when = left == right || builtins.elem operator ["<<" ">>"];
+              type = left;
+            }
+            {
+              when = scalarWith left right;
+              type = right;
+            }
+            {
+              when = scalarWith right left;
+              type = left;
+            }
+            {
+              when = operator == "*" && product left right;
+              type = right;
+            }
+            {
+              when = operator == "*" && product right left;
+              type = left;
+            }
+          ];
+        in
+          (lib.findFirst (rule: rule.when) {type = throw "glsl: ${left} ${operator} ${right} is not a GLSL operation";} rules).type;
+
+        typed' = type: value: {
+          ast = value;
+          inherit type;
+        };
+
+        termForms = {
+          int = typed' "int";
+          float = typed' "float";
+          bool = typed' "bool";
+          list = infix;
+          set = value:
+            if value ? ast
+            then value
+            else if value ? glslType
+            then throw "glsl: the type ${value.glslType.name} is not a value"
+            else throw "glsl: an attribute set that is not a GLSL value";
+        };
+
+        term = value: (termForms.${builtins.typeOf value} or (_: throw "glsl: ${builtins.typeOf value} `${toString value}` is not a GLSL value; a name is a bound value")) value;
+
+        ast = value: (term value).ast;
+
         infix = items: let
           count = builtins.length items;
           operators = lib.genList (index: builtins.elemAt items (2 * index + 1)) (count / 2);
-          precedences = map (operator: binary.${operator} or (throw "glsl: `${toString operator}` is not a binary operator")) operators;
+          precedences = map (symbol: binary.${symbol} or (throw "glsl: `${toString symbol}` is not a binary operator")) operators;
           lowest = lib.foldl' lib.min 99 precedences;
           at = lib.foldl' (found: index:
             if builtins.elemAt precedences index == lowest
             then index
             else found)
           0 (lib.range 0 (builtins.length operators - 1));
+          operator = builtins.elemAt operators at;
+          left = infix (lib.take (2 * at + 1) items);
+          right = infix (lib.drop (2 * at + 2) items);
         in
           if count == 1
-          then builtins.head items
+          then term (builtins.head items)
           else if lib.mod count 2 == 0
           then throw "glsl: an infix list alternates operands and operators and ends in an operand"
           else {
-            binary = {
-              operator = builtins.elemAt operators at;
-              left = infix (lib.take (2 * at + 1) items);
-              right = infix (lib.drop (2 * at + 2) items);
+            ast.binary = {
+              inherit operator;
+              left = left.ast;
+              right = right.ast;
             };
+            type = combine operator left.type right.type;
           };
 
-        kind = value:
-          if builtins.isAttrs value
-          then
-            if value ? call
-            then "call"
-            else builtins.head (builtins.attrNames value)
-          else builtins.typeOf value;
+        curried = count: finish: let
+          gather = collected:
+            if builtins.length collected == count
+            then finish collected
+            else argument: gather (collected ++ [argument]);
+        in
+          gather [];
+
+        invoke = function: type: arguments:
+          located {
+            ast.call = {
+              inherit function;
+              arguments = map ast arguments;
+            };
+            inherit type;
+          };
+
+        builtin = name: count: typing:
+          curried count (arguments:
+            invoke (
+              if name == "atan2"
+              then "atan"
+              else name
+            ) (typing arguments)
+            arguments);
+
+        construct = name: arguments: {
+          ast.call = {
+            function = name;
+            arguments = map ast arguments;
+          };
+          type = name;
+          __functor = _: argument: construct name (arguments ++ [argument]);
+        };
+
+        typeValue = name: {
+          glslType = {
+            inherit name;
+            qualifiers = [];
+            size = null;
+          };
+          __functor = _: argument: construct name [argument];
+        };
+
+        typeName = type:
+          if type.size == null
+          then type.name
+          else "${type.name}[${toString type.size}]";
+
+        element = type: let
+          sized = builtins.match "(.*)\\[[0-9]+]" type;
+        in
+          if type == null
+          then null
+          else if sized != null
+          then builtins.head sized
+          else if matrix type != null
+          then "vec${builtins.head (matrix type)}"
+          else scalarOf type;
+
+        reference = type: name: extra:
+          located {
+            ast.ref = {inherit name;} // extra;
+            inherit type;
+          };
+
+        qualified = qualifier: type:
+          type
+          // {
+            glslType = type.glslType // {qualifiers = [qualifier] ++ type.glslType.qualifiers;};
+          };
+
+        unary = operator: type: operand: {
+          ast.unary = {
+            inherit operator;
+            operand = ast operand;
+          };
+          type =
+            if type == null
+            then (term operand).type
+            else type;
+        };
+
+        postfix = operator: operand: {
+          ast.postfix = {
+            inherit operator;
+            operand = ast operand;
+          };
+          inherit (term operand) type;
+        };
+
+        declaredIn = lib.concatMap (one: lib.optional (builtins.isAttrs one && one ? var) one.var);
+
+        scoped = given: function: listed: let
+          names = builtins.attrNames (builtins.functionArgs function);
+          result = function (lib.genAttrs names (name: given.${name} or (reference (declared name) name {})));
+          declared = name: typeName (lib.findFirst (one: one.name == name) (throw "glsl: `${name}` is bound but not declared in its block") (declaredIn (listed result))).type;
+        in
+          result;
+
+        block = body:
+          if builtins.isFunction body
+          then scoped {} body lib.id
+          else body;
+
+        statementOf = one:
+          if one ? ast
+          then {expression = one.ast;}
+          else one;
+
+        statements = body: map statementOf (block body);
+
+        checked = target: value: let
+          wanted = (term target).type;
+          given = (term value).type;
+        in
+          if wanted != null && given != null && wanted != given
+          then throw "glsl: a ${given} value for a ${wanted}"
+          else ast value;
 
         atom = text: {
           precedence = 15;
@@ -30447,13 +32402,18 @@
           then ["(" printed.doc ")"]
           else printed.doc;
 
-        argumentList = scope: values: ["(" (lib.intersperse ", " (map (value: paren 1 (expression scope value)) values)) ")"];
+        kind = value:
+          if builtins.isAttrs value
+          then builtins.head (builtins.attrNames value)
+          else builtins.typeOf value;
 
-        rows = scope: values: ["(" (nest 4 (lib.intersperse "," (map (value: [hardline (paren 1 (expression scope value))]) values))) hardline ")"];
+        argumentList = values: ["(" (lib.intersperse ", " (map (value: paren 1 (expression value)) values)) ")"];
+
+        rows = values: ["(" (nest 4 (lib.intersperse "," (map (value: [hardline (paren 1 (expression value))]) values))) hardline ")"];
 
         negative = value: (builtins.isInt value || builtins.isFloat value) && value < 0 || kind value == "unary";
 
-        forms = scope: {
+        forms = {
           int = value: signed value (toString value);
           float = value: signed value (float value);
           bool = value:
@@ -30462,20 +32422,17 @@
               then "true"
               else "false"
             );
-          string = value: let
-            path = lib.splitString "." (identifier value);
-          in
+          ref = value:
             atom (
-              if builtins.elem (builtins.head path) scope
-              then lib.concatStringsSep "." (["(${builtins.head path})"] ++ builtins.tail path)
-              else value
+              if value.ref.macro or false
+              then "(${identifier value.ref.name})"
+              else identifier value.ref.name
             );
-          list = value: expression scope (infix value);
           binary = value: let
             precedence = binary.${value.binary.operator};
           in {
             inherit precedence;
-            doc = group [(paren precedence (expression scope value.binary.left)) (nest 4 [line value.binary.operator " " (paren (precedence + 1) (expression scope value.binary.right))])];
+            doc = group [(paren precedence (expression value.binary.left)) (nest 4 [line value.binary.operator " " (paren (precedence + 1) (expression value.binary.right))])];
           };
           unary = value: {
             precedence = 13;
@@ -30485,57 +32442,54 @@
                 if negative value.unary.operand
                 then 14
                 else 13
-              ) (expression scope value.unary.operand))
+              ) (expression value.unary.operand))
             ];
           };
           postfix = value: {
             precedence = 14;
-            doc = [(paren 14 (expression scope value.postfix.operand)) value.postfix.operator];
+            doc = [(paren 14 (expression value.postfix.operand)) value.postfix.operator];
           };
           call = value: {
             precedence = 14;
-            doc = [(identifier value.call.function) (argumentList scope value.call.arguments)];
+            doc = [(identifier value.call.function) (argumentList value.call.arguments)];
           };
           array = value: {
             precedence = 14;
-            doc = [(identifier value.array.type) "[${toString (builtins.length value.array.elements)}]" (rows scope value.array.elements)];
+            doc = [(identifier value.array.type) "[${toString (builtins.length value.array.elements)}]" (rows value.array.elements)];
           };
           index = value: {
             precedence = 14;
-            doc = [(paren 14 (expression scope value.index.base)) "[" (paren 0 (expression scope value.index.at)) "]"];
+            doc = [(paren 14 (expression value.index.base)) "[" (paren 0 (expression value.index.at)) "]"];
           };
           field = value: {
             precedence = 14;
-            doc = [(paren 14 (expression scope value.field.base)) "." (identifier value.field.name)];
+            doc = [(paren 14 (expression value.field.base)) "." value.field.name];
           };
           cond = value: {
             precedence = 1;
-            doc = [(paren 2 (expression scope value.cond.test)) " ? " (paren 1 (expression scope value.cond.yes)) " : " (paren 1 (expression scope value.cond.no))];
+            doc = [(paren 2 (expression value.cond.test)) " ? " (paren 1 (expression value.cond.yes)) " : " (paren 1 (expression value.cond.no))];
           };
           unsigned = value: atom "${toString value.unsigned}u";
         };
 
-        expression = scope: value: ((forms scope).${kind value} or (throw "glsl: no expression ${kind value}")) value;
+        expression = value: (forms.${kind value} or (throw "glsl: no expression ${kind value}")) value;
 
-        written = value: (expression [] value).doc;
+        written = value: (expression value).doc;
 
-        typeDoc = value:
-          if value ? sized
-          then typeDoc value.sized.type
-          else lib.concatStringsSep " " (map identifier (lib.toList value));
+        typeDoc = type: lib.concatStringsSep " " (type.qualifiers ++ [(identifier type.name)]);
 
-        declarator = type: target: [(typeDoc type) " " (identifier target) (lib.optional (type ? sized) "[${toString type.sized.size}]")];
+        declarator = type: target: [(typeDoc type) " " (identifier target) (lib.optionalString (type.size != null) "[${toString type.size}]")];
 
         simple = value: !builtins.elem (kind value) ["if" "for" "while" "comment"];
 
-        block = body: ["{" (nest 4 (map (one: [hardline (statement one)]) body)) hardline "}"];
+        braced = body: ["{" (nest 4 (map (one: [hardline (statement one)]) body)) hardline "}"];
 
         single = body: builtins.length body == 1 && simple (builtins.head body);
 
         clause = body:
           if single body
           then [" " (statement (builtins.head body))]
-          else [" " (block body)];
+          else [" " (braced body)];
 
         alternative = body: otherwise: [
           (
@@ -30556,45 +32510,49 @@
           then ""
           else if kind value == "var"
           then [(declarator value.var.type value.var.name) (lib.optionals (value.var.value != null) [" = " (written value.var.value)])]
-          else written value;
+          else statementBody value;
+
+        statementBody = value:
+          {
+            assign = [(written value.assign.target) " = " (written value.assign.value)];
+            update = [(written value.update.target) " ${value.update.operator} " (written value.update.value)];
+            expression = written value.expression;
+          }
+          .${
+            kind value
+          };
 
         statementForms = {
           comment = value: "// ${value.comment}";
           var = value: [(header value) ";"];
-          assign = value: [(written value.assign.target) " = " (written value.assign.value) ";"];
-          update = value: [(written value.update.target) " ${value.update.operator} " (written value.update.value) ";"];
           return = value:
             if value.return == null
             then "return;"
             else ["return " (written value.return) ";"];
           jump = value: "${value.jump};";
           "if" = value: ["if (" (written value."if".test) ")" (clause value."if".body) (lib.optional (value."if" ? otherwise) (alternative value."if".body value."if".otherwise))];
-          for = value: ["for (" (lib.intersperse "; " [(header value.for.init) (written value.for.test) (written value.for.step)]) ") " (block value.for.body)];
-          while = value: ["while (" (written value.while.test) ") " (block value.while.body)];
+          for = value: ["for (" (lib.intersperse "; " [(header value.for.init) (written value.for.test) (statementBody value.for.step)]) ") " (braced value.for.body)];
+          while = value: ["while (" (written value.while.test) ") " (braced value.while.body)];
         };
 
-        statement = value: (statementForms.${kind value} or (_: [(written value) ";"])) value;
+        statement = value: (statementForms.${kind value} or (one: [(statementBody one) ";"])) value;
 
         noted = value: print:
           if value ? commented
           then ["// ${value.commented.text}" hardline (print value.commented.declaration)]
           else print value;
 
-        names = value:
-          if builtins.isString value
-          then [(builtins.head (lib.splitString "." value))]
-          else if builtins.isList value
-          then lib.concatMap names value
-          else if builtins.isAttrs value
-          then lib.concatMap names (builtins.attrValues (removeAttrs value ["__functor"]))
-          else [];
+        bare = value:
+          if value ? commented
+          then bare value.commented.declaration
+          else value;
 
-        calls = value:
-          if builtins.isList value
-          then lib.concatMap calls value
-          else if builtins.isAttrs value
-          then lib.optional (value ? call) value.call.function ++ lib.concatMap calls (builtins.attrValues (removeAttrs value ["__functor"]))
-          else [];
+        globalForms = {
+          list = lib.concatMap globals;
+          set = value: lib.optional (value ? ref) value.ref.name ++ lib.optional (value ? call) value.call.function ++ lib.concatMap globals (builtins.attrValues value);
+        };
+
+        globals = value: (globalForms.${builtins.typeOf value} or (_: [])) value;
 
         ordered = dependencies: let
           go = done: let
@@ -30611,177 +32569,257 @@
 
         among = set: key: found: builtins.filter (one: one != key && set ? ${one}) (lib.unique found);
 
-        bare = value:
-          if value ? commented
-          then bare value.commented.declaration
-          else value;
+        constantValue = value: let
+          inner = bare value;
+        in
+          inner.typed.value or inner;
 
-        untyped = throw "glsl: a constant's type is its value's constructor; write `typed type value` for this one";
-
-        typeForms = {
-          float = _: "float";
-          int = _: "int";
-          bool = _: "bool";
-          unsigned = _: "uint";
-          array = value: {
-            sized = {
-              inherit (value.array) type;
-              size = builtins.length value.array.elements;
-            };
-          };
-          typed = value: value.typed.type;
-          call = value:
-            if builtins.elem value.call.function types
-            then value.call.function
-            else untyped;
+        parsedType = text: let
+          sized = builtins.match "(.*)\\[([0-9]+)]" text;
+        in {
+          name = builtins.head (lib.defaultTo [text] sized);
+          qualifiers = [];
+          size = lib.mapNullable (parts: lib.toInt (builtins.elemAt parts 1)) sized;
         };
 
-        inferred = value: (typeForms.${kind value} or (_: untyped)) value;
+        constantType = value: let
+          inner = bare value;
+          inferred = (term inner).type;
+        in
+          inner.typed.type.glslType or (parsedType (lib.throwIf (inferred == null) "glsl: a constant's type is its value's; write `typed type value` for this one" inferred));
 
-        constant = key: value: let
-          type = inferred value;
-          init =
-            if kind value == "typed"
-            then value.typed.value
-            else value;
-        in ["const " (declarator type key) " = " (written init) ";"];
+        constant = key: value: ["const " (declarator (constantType value) key) " = " (written (ast (constantValue value))) ";"];
 
-        number = value: builtins.elem (builtins.typeOf value) ["int" "float"];
+        macroBody = value:
+          if value ? macro
+          then value.macro.function (lib.genAttrs value.macro.params (name: reference null name {macro = true;}))
+          else value;
+
+        number = value: builtins.isInt value || builtins.isFloat value;
 
         define = key: value: let
-          macro =
-            value.macro or {
-              params = [];
-              body = value;
-            };
+          body = macroBody value;
         in [
           "#define ${identifier key}"
-          (lib.optionalString (value ? macro) "(${lib.concatMapStringsSep ", " identifier macro.params})")
+          (lib.optionalString (value ? macro) "(${lib.concatMapStringsSep ", " identifier value.macro.params})")
           " "
           (paren (
-            if number macro.body
+            if number body
             then 0
             else 14
-          ) (expression macro.params macro.body))
+          ) (expression (ast body)))
         ];
-
-        call = callee: let
-          applied = list: {
-            call = {
-              function = callee;
-              arguments = list;
-            };
-            __functor = _: argument: applied (list ++ [argument]);
-          };
-        in
-          applied [];
 
         definition = key: value: [
           (typeDoc value.fn.returns)
           " ${identifier key}("
-          (lib.intersperse ", " (map typeDoc value.fn.params))
+          (lib.intersperse ", " (map (param: [(typeDoc param.type) " " (identifier param.name)]) value.fn.params))
           ") "
-          (block value.fn.body)
+          (braced value.fn.body)
         ];
+
+        globalValue = key: value: let
+          inner = bare value;
+        in
+          if inner ? fn
+          then curried (builtins.length inner.fn.params) (invoke key (typeName inner.fn.returns))
+          else if inner ? macro
+          then curried (builtins.length inner.macro.params) (invoke key null)
+          else reference (typeName (constantType value)) key {};
+
+        defineValue = key: value:
+          if value ? macro
+          then curried (builtins.length value.macro.params) (invoke key null)
+          else reference (term value).type key {};
+
+        rgbPart = text: index: (lib.fromHexString (builtins.substring (1 + 2 * index) 2 text) * 2000 + 255) / 510 / 1000.0;
+
+        typeValues = lib.genAttrs types typeValue;
       in
-        lib.genAttrs types call
+        typeValues
+        // lib.concatMapAttrs (typing:
+          lib.concatMapAttrs (count: names:
+            lib.genAttrs names (name:
+              builtin name (lib.toInt count) (
+                if typing == "same"
+                then arguments: (term (builtins.head arguments)).type
+                else _: "float"
+              ))))
+        builtinFunctions
         // {
-          inherit call;
+          step = builtin "step" 2 (arguments: (term (builtins.elemAt arguments 1)).type);
+          smoothstep = builtin "smoothstep" 3 (arguments: (term (builtins.elemAt arguments 2)).type);
+          cross = builtin "cross" 2 (_: "vec3");
+          texture = builtin "texture" 2 (_: "vec4");
 
-          array = type: elements: {array = {inherit type elements;};};
+          iResolution = reference "vec3" "iResolution" {};
+          iTime = reference "float" "iTime" {};
+          iFrame = reference "int" "iFrame" {};
+          iMouse = reference "vec4" "iMouse" {};
+          iChannel0 = reference "sampler2D" "iChannel0" {};
 
-          index = base: at: {index = {inherit base at;};};
+          math = {
+            pi = 3.141592653589793;
 
-          field = base: member: {
-            field = {
-              inherit base;
-              name = member;
-            };
+            round = digits: value: let
+              scale = lib.foldl' (built: _: built * 10.0) 1.0 (lib.range 1 digits);
+            in
+              builtins.floor (value * scale + 0.5) / scale;
+
+            sqrt = value:
+              if value == 0
+              then 0.0
+              else lib.foldl' (guess: _: (guess + value / guess) / 2.0) (value * 1.0) (lib.range 1 64);
           };
 
-          neg = operand: {
-            unary = {
-              operator = "-";
-              inherit operand;
+          rgb = text: let
+            parts = map (rgbPart text) [0 1 2];
+          in
+            if lib.all (part: part == builtins.head parts) parts
+            then typeValues.vec3 (builtins.head parts)
+            else lib.foldl' lib.id typeValues.vec3 parts;
+
+          array = type: elements: {
+            ast.array = {
+              type = type.glslType.name;
+              elements = map ast elements;
             };
+            type = "${type.glslType.name}[${toString (builtins.length elements)}]";
           };
 
-          not = operand: {
-            unary = {
-              operator = "!";
-              inherit operand;
+          index = base: at:
+            located {
+              ast.index = {
+                base = ast base;
+                at = ast at;
+              };
+              type = element (term base).type;
             };
+
+          swizzle = value: swizzle (term value);
+
+          neg = unary "-" null;
+
+          not = unary "!" "bool";
+
+          bitNot = unary "~" null;
+
+          preInc = unary "++" null;
+
+          preDec = unary "--" null;
+
+          inc = postfix "++";
+
+          dec = postfix "--";
+
+          cond = test: yes: no: {
+            ast.cond = {
+              test = ast test;
+              yes = ast yes;
+              no = ast no;
+            };
+            inherit (term yes) type;
           };
 
-          bitNot = operand: {
-            unary = {
-              operator = "~";
-              inherit operand;
-            };
+          unsigned = value: {
+            ast.unsigned = value;
+            type = "uint";
           };
 
-          preInc = operand: {
-            unary = {
-              operator = "++";
-              inherit operand;
-            };
-          };
+          sized = type: size: type // {glslType = type.glslType // {inherit size;};};
 
-          preDec = operand: {
-            unary = {
-              operator = "--";
-              inherit operand;
-            };
-          };
+          out = qualified "out";
 
-          inc = operand: {
-            postfix = {
-              operator = "++";
-              inherit operand;
-            };
-          };
+          in' = qualified "in";
 
-          dec = operand: {
-            postfix = {
-              operator = "--";
-              inherit operand;
-            };
-          };
-
-          cond = test: yes: no: {cond = {inherit test yes no;};};
-
-          unsigned = value: {unsigned = value;};
-
-          sized = type: size: {sized = {inherit type size;};};
+          inout = qualified "inout";
 
           typed = type: value: {typed = {inherit type value;};};
 
-          macro = params: body: {macro = {inherit params body;};};
-
-          var = type: target: value: {
-            var = {
-              inherit type value;
-              name = target;
+          macro = function: {
+            macro = {
+              inherit function;
+              params = builtins.attrNames (builtins.functionArgs function);
             };
           };
 
-          assign = target: value: {assign = {inherit target value;};};
+          local = target: type: value: {
+            var = {
+              inherit (target.ast.ref) name;
+              type = type.glslType;
+              value =
+                if value == null
+                then null
+                else if (term value).type != null && (term value).type != typeName type.glslType
+                then throw "glsl: ${target.ast.ref.name} is a ${typeName type.glslType} but its value is a ${(term value).type}"
+                else ast value;
+            };
+          };
 
-          update = operator: target: value: {update = {inherit operator target value;};};
+          set = target: value: {
+            assign = {
+              target = ast target;
+              value = checked target value;
+            };
+          };
 
-          return = value: {return = value;};
+          update = target: operator: value: {
+            update = {
+              inherit operator;
+              target = ast target;
+              value = ast value;
+            };
+          };
+
+          return = value: {
+            return =
+              if value == null
+              then null
+              else ast value;
+          };
 
           break = {jump = "break";};
 
           continue = {jump = "continue";};
 
-          if' = test: body: {"if" = {inherit test body;};};
+          if' = test: body: {
+            "if" = {
+              test = ast test;
+              body = statements body;
+            };
+          };
 
-          ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+          ifElse = test: body: otherwise: {
+            "if" = {
+              test = ast test;
+              body = statements body;
+              otherwise =
+                if builtins.isAttrs otherwise
+                then otherwise
+                else statements otherwise;
+            };
+          };
 
-          for = init: test: step: body: {for = {inherit init test step body;};};
+          for = loop: let
+            spec =
+              if builtins.isFunction loop
+              then scoped {} loop (result: lib.optional (result.init != null) result.init ++ block result.body)
+              else loop;
+          in {
+            for = {
+              inherit (spec) init;
+              test = ast spec.test;
+              step = statementOf spec.step;
+              body = statements spec.body;
+            };
+          };
 
-          while = test: body: {while = {inherit test body;};};
+          while = test: body: {
+            while = {
+              test = ast test;
+              body = statements body;
+            };
+          };
 
           comment = text: {comment = text;};
 
@@ -30792,15 +32830,40 @@
             };
           };
 
-          fn = returns: params: body: {fn = {inherit returns params body;};};
+          fn = returns: params: body: let
+            named =
+              map (param: let
+                name = builtins.head (builtins.attrNames param);
+              in {
+                inherit name;
+                type = param.${name}.glslType;
+              })
+              params;
+            given = builtins.listToAttrs (map (param: {
+                inherit (param) name;
+                value = reference (typeName param.type) param.name {};
+              })
+              named);
+          in {
+            fn = {
+              returns = returns.glslType;
+              params = named;
+              body = map statementOf (
+                if builtins.isFunction body
+                then scoped given body lib.id
+                else body
+              );
+            };
+          };
 
-          render = {
-            defines ? {},
-            consts ? {},
-            fns ? {},
-          }: let
-            constOrder = ordered (builtins.mapAttrs (key: value: among consts key (names (bare value))) consts);
-            fnOrder = ordered (builtins.mapAttrs (key: value: among fns key (calls (bare value))) fns);
+          render = shader: let
+            result = shader self;
+            defines = result.defines or {};
+            consts = result.consts or {};
+            fns = result.fns or {};
+            self = builtins.mapAttrs defineValue defines // builtins.mapAttrs globalValue consts // builtins.mapAttrs globalValue fns;
+            constOrder = ordered (builtins.mapAttrs (key: value: among consts key (globals (ast (constantValue value)))) consts);
+            fnOrder = ordered (builtins.mapAttrs (key: value: among fns key (globals (bare value).fn.body)) fns);
             sections = builtins.filter (section: section != []) [
               (lib.optional (defines != {}) (lib.intersperse hardline (lib.mapAttrsToList (key: value: noted value (define key)) defines)))
               (lib.optional (consts != {}) (lib.intersperse hardline (map (key: noted consts.${key} (constant key)) constOrder)))
@@ -30809,7 +32872,6 @@
           in
             doc.render 100 [(lib.intersperse [hardline hardline] (lib.concatLists sections)) hardline];
         };
-
       lua = let
         inherit (doc) hardline nest;
 
@@ -34636,6 +36698,14 @@
           "dot-corridor.glsl" = modules_desktop_session_tomoe_shaders_dot_corridor_data;
           "glass-mound.glsl" = modules_desktop_session_tomoe_shaders_glass_mound_data;
           "hex-spiral.glsl" = modules_desktop_session_tomoe_shaders_hex_spiral_data;
+          "ozette-dark.glsl" = modules_desktop_session_tomoe_shaders_ozette_dark_data;
+          "ozette-fields-dark.glsl" = modules_desktop_session_tomoe_shaders_ozette_fields_dark_data;
+          "ozette-fields-light.glsl" = modules_desktop_session_tomoe_shaders_ozette_fields_light_data;
+          "ozette-light.glsl" = modules_desktop_session_tomoe_shaders_ozette_light_data;
+          "ozette-lilies-dark.glsl" = modules_desktop_session_tomoe_shaders_ozette_lilies_dark_data;
+          "ozette-lilies-light.glsl" = modules_desktop_session_tomoe_shaders_ozette_lilies_light_data;
+          "ozette-pond-dark.glsl" = modules_desktop_session_tomoe_shaders_ozette_pond_dark_data;
+          "ozette-pond-light.glsl" = modules_desktop_session_tomoe_shaders_ozette_pond_light_data;
           "su-ei.glsl" = modules_desktop_session_tomoe_shaders_su_ei_data;
         };
         luau = {
@@ -34699,7 +36769,7 @@
         }))
       modules_desktop_session_theme_colorschemes_data;
 
-      rendered = lib.recursiveUpdate (lib.mapAttrs (language: lib.mapAttrs (_: syntax: generators.${language}.render (syntax generators.${language}))) trees) {
+      rendered = lib.recursiveUpdate (lib.mapAttrs (language: lib.mapAttrs (_: syntax: generators.${language}.render (syntax (generators.${language} // lib.optionalAttrs (language == "glsl") {ozette = modules_desktop_session_theme_ozette_data;})))) trees) {
         shell = osc;
         python."wrapper.py" = builtins.replaceStrings ["@owners@"] ["{}"] (generators.python.render (trees.python."wrapper.py" generators.python));
       };
@@ -40891,6 +42961,7 @@
         modules_desktop_session_mimeapps = "modules/desktop/session/mimeapps.nix";
         modules_desktop_session_monstar = "modules/desktop/session/monstar.nix";
         modules_desktop_session_theme_colorschemes_data = "modules/desktop/session/theme/colorschemes.data.nix";
+        modules_desktop_session_theme_ozette_data = "modules/desktop/session/theme/ozette.data.nix";
         modules_desktop_session_theme_templates_discord_colors_data = "modules/desktop/session/theme/templates/discord-colors.data.nix";
         modules_desktop_session_theme_templates_foot_colors_data = "modules/desktop/session/theme/templates/foot-colors.data.nix";
         modules_desktop_session_theme_templates_gtk_colors_data = "modules/desktop/session/theme/templates/gtk-colors.data.nix";
@@ -40919,6 +42990,14 @@
         modules_desktop_session_tomoe_shaders_glass_mound_data = "modules/desktop/session/tomoe/shaders/glass-mound.data.nix";
         modules_desktop_session_tomoe_shaders_hex_spiral_data = "modules/desktop/session/tomoe/shaders/hex-spiral.data.nix";
         modules_desktop_session_tomoe_shaders_su_ei_data = "modules/desktop/session/tomoe/shaders/su-ei.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_dark_data = "modules/desktop/session/tomoe/shaders/ozette-dark.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_fields_dark_data = "modules/desktop/session/tomoe/shaders/ozette-fields-dark.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_fields_light_data = "modules/desktop/session/tomoe/shaders/ozette-fields-light.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_light_data = "modules/desktop/session/tomoe/shaders/ozette-light.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_lilies_dark_data = "modules/desktop/session/tomoe/shaders/ozette-lilies-dark.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_lilies_light_data = "modules/desktop/session/tomoe/shaders/ozette-lilies-light.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_pond_dark_data = "modules/desktop/session/tomoe/shaders/ozette-pond-dark.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_pond_light_data = "modules/desktop/session/tomoe/shaders/ozette-pond-light.data.nix";
         modules_desktop_session_wayland = "modules/desktop/session/wayland.nix";
         modules_desktop_session_xdg_portals = "modules/desktop/session/xdg-portals.nix";
         modules_dev_ai_agent_slack = "modules/dev/ai/agent-slack.nix";
