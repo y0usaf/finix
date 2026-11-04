@@ -582,34 +582,60 @@ or the author wrote only to break lines. From
 ])
 ```
 
-JavaScript (`generators.javascript`): a call is a Nix list, its callee
-first; an identifier, member path (`process.env.KEY`, `params?.name`) or
-number is a string (an integer may be a Nix integer); `str` is a string
-literal, `obj` an object whose entries are a shorthand name or a `[key value]`
-list, `array` an array, `op [a "+" b]` operands and the operators between
-them (assignment too), `paren`, `dot` (a property of something that is not a
-path), `not`, `typeof`, `await`, `new`, `async` and `arrow params body`. A
-statement is an expression, `const name value`, `let' name value` (`null`
-for none), `import' names source`, `function name params body`, `if'`,
-`ifElse`, `while`, `try' body param handler` (`null` for `catch {`),
-`return value` (`null` for `return;`), `throw'` or `continue`. A body is a
-list of statements in braces, one per line two spaces in, `inline [ ... ]`
-on one line, or a single statement that is not an expression, written
-without braces. `obj` and `array` are on one line unless `rows`, one entry
-per line; `op (rows ...)` breaks after each operator, two spaces in; an
-object on one line whose last value is broken closes without its space
-(`{ id, result: {` ... `}}`). From `dev/ai/jev-mcp.data.nix`, abridged:
+JavaScript (`generators.javascript`): a name is a Nix variable. A block
+that declares names (the file, a function, a braced body, a `catch`) is a
+lambda whose formals are exactly the names it declares, `({line, msg}: [
+... ])`; a function or arrow is a lambda of its parameters and its body's
+names returning `{params = [...]; body = ...;}` (a list, `inline`, or an
+expression for an arrow), a `catch (e)` one returning `{param = e; body =
+...;}`; one that declares nothing is the plain list or record. The generator
+calls each lambda with name nodes and throws when a formal is not declared in
+its block. Node's globals (`console`, `JSON`, `process`, `fetch`, `Error`,
+`Promise`, `URL`, `setTimeout`, `undefined`, ...) and `null'` (JavaScript's
+`null`) are attributes of the generator, taken as data-file formals, so a typo
+is a missing argument; a name that is a Nix keyword or an attribute of the
+generator is spelled with a trailing `'` (`obj'`), which the printer drops.
+Integers, floats spelled as Nix spells them, and booleans are Nix values,
+`number "0x1f"` any other spelling; strings appear only as literal contents
+(`str`), property paths (`dot process "env.KEY"`, `optional params "name"` for
+`params?.name`), object keys (`["key" value]`, or `[(str "q-r") value]` when
+quoted; a shorthand entry is a name) and operators. `call f [args]`, `new
+Error [args]`, `not`, `neg`, `typeof`, `await` and `async` are constructors;
+a list alternates operands and operators and is parsed by JavaScript's
+precedence and associativity, a nested list is a grouping precedence does not
+give, and the printer writes the parentheses the tree needs plus prettier's
+(`(a && b) || c`, `(a % b) + c`, `a | (b & c)`, `-(-a)`, `a ** (b ** c)`). A
+statement is an expression, `const target value` and `let' target value`
+(`null` for none; the target a name, or an `obj` or `array` of them),
+`import' [names] source`, `function name definition`, `if'`, `ifElse`,
+`while`, `try' body handler`, `return value` (`null` for `return;`), `throw'`
+or `continue`. A body is a list of statements in braces, one per line two
+spaces in, `inline [ ... ]` on one line, or a single statement that is not an
+operation, written without braces. `obj` and `array` are on one line unless
+`rows`, one entry per line; `rows [a "+" b]` breaks after each operator, two
+spaces in; an object on one line whose last value is broken closes without its
+space (`{ id, result: {` ... `}}`). From `dev/ai/jev-mcp.data.nix`, abridged:
 
 ```nix
-(const "API_KEY" ["resolveKey"])
-(async (function "callSystemOne" ["state" "questions"] [
-  (if' (not "API_KEY") (throw' (new ["Error" (str "TYPESAFE_API_KEY not set")])))
-  (const "res" (await ["fetch" "ENDPOINT" (obj (rows [
-    ["method" (str "POST")]
-    ["body" ["JSON.stringify" (obj [["model" "MODEL"] "state" "questions"])]]
-  ]))]))
-  (try' (inline [(op ["detail" "=" ["JSON.stringify" (op ["j.detail" "||" "j"])]])]) null (inline []))
-]))
+{Error, JSON, async, await, call, const, dot, fetch, function, if', inline, let', new, not, obj, rows, str, throw', try', ...}: ({ENDPOINT, MODEL, API_KEY, callSystemOne, ...}: [
+  (async (function callSystemOne ({state, questions, res, text}: {
+    params = [state questions];
+    body = [
+      (if' (not API_KEY) (throw' (new Error [(str "TYPESAFE_API_KEY not set")])))
+      (const res (await (call fetch [
+        ENDPOINT
+        (obj (rows [
+          ["method" (str "POST")]
+          ["body" (call (dot JSON "stringify") [(obj [["model" MODEL] state questions])])]
+        ]))
+      ])))
+      (if' (not (dot res "ok")) ({detail}: [
+        (let' detail text)
+        (try' ({j}: inline [(const j (call (dot JSON "parse") [text])) [detail "=" (call (dot JSON "stringify") [[(dot j "detail") "||" j]])]]) (inline []))
+      ]))
+    ];
+  })))
+])
 ```
 
 TypeScript (`generators.ts`) keeps prettier's layout and binds every name.
@@ -715,7 +741,7 @@ then runs each language's own check on every rendered tree, listed in its
 | GLSL (15 files) | `nix run .#glsl-gate -- ORIGINAL GENERATED ...`: both sides, canonicalized (top-level declarations sorted, every operator parenthesized, literals as their values, one declarator per declaration, every branch braced) and run through clang-format 21 with a pinned style, are equal; both pass glslangValidator; four 640×360 frames of each, rendered by llvmpipe into float32 targets, are bit-identical | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
 | Lua (3 files) | bytes, at conversion and again when names became Nix bindings (the bound trees render the word-list trees' bytes) | `luajit -bl` for Aniimo's two LuaJIT mods, `luac -p` (Lua 5.5, Hyprland's) for `hyprland.lua` |
 | Python (5 files) | bytes, again after re-import to bound typed trees | `python -m py_compile` (vercel's `wrapper.py` with `@owners@` filled); `ruff check` is not clean today (4 of 5 files fail its defaults) |
-| JavaScript (1 file) | bytes | `node --check` |
+| JavaScript (1 file) | bytes, every name a Nix binding of its block or a generator global | `node --check` |
 | TypeScript (10 files) | bytes, at conversion and again when re-imported with every name bound | `tsc --noEmit` (TypeScript 7) with an ambient stub of the omp, pi and Node modules they import; `work-fold.ts` and `compact-eval.ts`, untyped as written, get `--noCheck` (syntax and imports only) |
 
 ### GLSL before and after

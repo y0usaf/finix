@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=9c5e5d1f4eeee158c534c617ee8e9777e27fdae7";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=b55fc4d8cf7fcd55ed4efd09239dd77915e1df44";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -16729,15 +16729,19 @@
       };
     };
     modules_dev_ai_jev_mcp_data = {
+      Error,
+      JSON,
       array,
       arrow,
       async,
       await,
       blank,
+      call,
       comment,
       const,
       continue,
       dot,
+      fetch,
       function,
       if',
       import',
@@ -16745,9 +16749,10 @@
       let',
       new,
       not,
+      null',
       obj,
-      op,
-      paren,
+      optional,
+      process,
       return,
       rows,
       str,
@@ -16756,34 +16761,50 @@
       typeof,
       while,
       ...
+    }: ({
+      readFileSync,
+      homedir,
+      join,
+      ENDPOINT,
+      MODEL,
+      VERSION,
+      resolveKey,
+      API_KEY,
+      TOOL,
+      buf,
+      send,
+      callSystemOne,
+      handle,
     }: [
       (comment "#!/usr/bin/env node")
       blank
-      (import' ["readFileSync"] "node:fs")
-      (import' ["homedir"] "node:os")
-      (import' ["join"] "node:path")
+      (import' [readFileSync] "node:fs")
+      (import' [homedir] "node:os")
+      (import' [join] "node:path")
       blank
-      (const "ENDPOINT" (str "https://api.typesafe.ai/v1/systemone"))
-      (const "MODEL" (str "jev-latest"))
-      (const "VERSION" (str "2025-11-25"))
+      (const ENDPOINT (str "https://api.typesafe.ai/v1/systemone"))
+      (const MODEL (str "jev-latest"))
+      (const VERSION (str "2025-11-25"))
       blank
-      (function "resolveKey" [] [
-        (if' "process.env.TYPESAFE_API_KEY" (return ["process.env.TYPESAFE_API_KEY.trim"]))
-        (try' [
-            (return [(dot ["readFileSync" ["join" ["homedir"] (str "Tokens/TYPESAFE_API_KEY.txt")] (str "utf8")] "trim")])
-          ]
-          null [
-            (return "null")
-          ])
-      ])
+      (function resolveKey {
+        params = [];
+        body = [
+          (if' (dot process "env.TYPESAFE_API_KEY") (return (call (dot process "env.TYPESAFE_API_KEY.trim") [])))
+          (try' [
+              (return (call (dot (call readFileSync [(call join [(call homedir []) (str "Tokens/TYPESAFE_API_KEY.txt")]) (str "utf8")]) "trim") []))
+            ] [
+              (return null')
+            ])
+        ];
+      })
       blank
-      (const "API_KEY" ["resolveKey"])
+      (const API_KEY (call resolveKey []))
       blank
-      (const "TOOL" (obj (rows [
+      (const TOOL (obj (rows [
         ["name" (str "jev_decision")]
         [
           "description"
-          (op (rows [
+          (rows [
             (str "Make fast, type-safe structured decisions with TypeSafe Jev (System One). ")
             "+"
             (str "Given a state (text or JSON) and a map of questions, returns a typed answer per question with ")
@@ -16793,7 +16814,7 @@
             (str "choice (pick one of up to 255 options, with criteria map), score (rate along an ordered rubric ")
             "+"
             (str "list of 2-10 levels). All questions evaluate in parallel in one round trip.")
-          ]))
+          ])
         ]
         [
           "inputSchema"
@@ -16809,11 +16830,11 @@
                     ["type" (str "object")]
                     [
                       "description"
-                      (op (rows [
+                      (rows [
                         (str "Map of answer-key -> question spec. Each spec: {type: 'noul'|'choice'|'score', instructions: string, criteria?: object|string[]}. ")
                         "+"
                         (str "choice criteria is an object of option -> description; score criteria is an ordered array of level labels; noul criteria optional.")
-                      ]))
+                      ])
                     ]
                     [
                       "additionalProperties"
@@ -16839,113 +16860,142 @@
         ]
       ])))
       blank
-      (let' "buf" (str ""))
-      [
-        "process.stdin.on"
+      (let' buf (str ""))
+      (call (dot process "stdin.on") [
         (str "data")
-        (arrow ["chunk"] [
-          (op ["buf" "+=" ["chunk.toString"]])
-          (let' "idx" null)
-          (while (op [(paren (op ["idx" "=" ["buf.indexOf" (str "\\n")]])) ">=" 0]) [
-            (const "line" [(dot ["buf.slice" 0 "idx"] "trim")])
-            (op ["buf" "=" ["buf.slice" (op ["idx" "+" 1])]])
-            (if' (not "line") continue)
-            (let' "msg" null)
-            (try' (inline [(op ["msg" "=" ["JSON.parse" "line"]])]) null (inline [continue]))
-            ["handle" "msg"]
-          ])
-        ])
-      ]
+        (arrow ({
+          chunk,
+          idx,
+        }: {
+          params = [chunk];
+          body = [
+            [buf "+=" (call (dot chunk "toString") [])]
+            (let' idx null)
+            (while [[idx "=" (call (dot buf "indexOf") [(str "\\n")])] ">=" 0] ({
+              line,
+              msg,
+            }: [
+              (const line (call (dot (call (dot buf "slice") [0 idx]) "trim") []))
+              [buf "=" (call (dot buf "slice") [[idx "+" 1]])]
+              (if' (not line) continue)
+              (let' msg null)
+              (try' (inline [[msg "=" (call (dot JSON "parse") [line])]]) (inline [continue]))
+              (call handle [msg])
+            ]))
+          ];
+        }))
+      ])
       blank
-      (function "send" ["obj"] (inline [["process.stdout.write" (op [["JSON.stringify" "obj"] "+" (str "\\n")])]]))
+      (function send ({obj'}: {
+        params = [obj'];
+        body = inline [(call (dot process "stdout.write") [[(call (dot JSON "stringify") [obj']) "+" (str "\\n")]])];
+      }))
       blank
-      (async (function "callSystemOne" ["state" "questions"] [
-        (if' (not "API_KEY") (throw' (new ["Error" (str "TYPESAFE_API_KEY not set and ~/Tokens/TYPESAFE_API_KEY.txt unreadable")])))
-        (const "res" (await [
-          "fetch"
-          "ENDPOINT"
-          (obj (rows [
-            ["method" (str "POST")]
-            ["headers" (obj [[(str "Content-Type") (str "application/json")] [(str "Authorization") (op [(str "Bearer ") "+" "API_KEY"])]])]
-            ["body" ["JSON.stringify" (obj [["model" "MODEL"] "state" "questions"])]]
+      (async (function callSystemOne ({
+        state,
+        questions,
+        res,
+        text,
+      }: {
+        params = [state questions];
+        body = [
+          (if' (not API_KEY) (throw' (new Error [(str "TYPESAFE_API_KEY not set and ~/Tokens/TYPESAFE_API_KEY.txt unreadable")])))
+          (const res (await (call fetch [
+            ENDPOINT
+            (obj (rows [
+              ["method" (str "POST")]
+              ["headers" (obj [[(str "Content-Type") (str "application/json")] [(str "Authorization") [(str "Bearer ") "+" API_KEY]]])]
+              ["body" (call (dot JSON "stringify") [(obj [["model" MODEL] state questions])])]
+            ]))
+          ])))
+          (const text (await (call (dot res "text") [])))
+          (if' (not (dot res "ok")) ({detail}: [
+            (let' detail text)
+            (try' ({j}: inline [(const j (call (dot JSON "parse") [text])) [detail "=" (call (dot JSON "stringify") [[(dot j "detail") "||" j]])]]) (inline []))
+            (throw' (new Error [[(str "Jev API HTTP ") "+" (dot res "status") "+" (str ": ") "+" (call (dot detail "slice") [0 500])]]))
           ]))
-        ]))
-        (const "text" (await ["res.text"]))
-        (if' (not "res.ok") [
-          (let' "detail" "text")
-          (try' (inline [(const "j" ["JSON.parse" "text"]) (op ["detail" "=" ["JSON.stringify" (op ["j.detail" "||" "j"])]])]) null (inline []))
-          (throw' (new ["Error" (op [(str "Jev API HTTP ") "+" "res.status" "+" (str ": ") "+" ["detail.slice" 0 500]])]))
-        ])
-        (return ["JSON.parse" "text"])
-      ]))
+          (return (call (dot JSON "parse") [text]))
+        ];
+      })))
       blank
-      (async (function "handle" ["msg"] [
-        (const (obj ["id" "method" "params"]) "msg")
-        (if' (op ["method" "===" (str "initialize")]) [
-          (return [
-            "send"
-            (obj [
-              ["jsonrpc" (str "2.0")]
-              "id"
-              [
-                "result"
-                (obj (rows [
-                  ["protocolVersion" "VERSION"]
-                  ["capabilities" (obj [["tools" (obj [])]])]
-                  ["serverInfo" (obj [["name" (str "jev-mcp")] ["version" (str "0.1.0")]])]
-                ]))
-              ]
-            ])
+      (async (function handle ({
+        msg,
+        id,
+        method,
+        params,
+      }: {
+        params = [msg];
+        body = [
+          (const (obj [id method params]) msg)
+          (if' [method "===" (str "initialize")] [
+            (return (call send [
+              (obj [
+                ["jsonrpc" (str "2.0")]
+                id
+                [
+                  "result"
+                  (obj (rows [
+                    ["protocolVersion" VERSION]
+                    ["capabilities" (obj [["tools" (obj [])]])]
+                    ["serverInfo" (obj [["name" (str "jev-mcp")] ["version" (str "0.1.0")]])]
+                  ]))
+                ]
+              ])
+            ]))
           ])
-        ])
-        (if' (op ["method" "===" (str "ping")]) (return ["send" (obj [["jsonrpc" (str "2.0")] "id" ["result" (obj [])]])]))
-        (if' (op ["method" "===" (str "notifications/initialized")]) (return null))
-        (if' (op ["method" "===" (str "tools/list")]) [
-          (return ["send" (obj [["jsonrpc" (str "2.0")] "id" ["result" (obj [["tools" (array ["TOOL"])]])]])])
-        ])
-        (if' (op ["method" "===" (str "tools/call")]) [
-          (const "name" "params?.name")
-          (const "args" (op ["params?.arguments" "||" (obj [])]))
-          (try' [
-              (if' (op ["name" "!==" (str "jev_decision")]) (throw' (new ["Error" (op [(str "Unknown tool: ") "+" "name"])])))
-              (if' (op [(typeof "args.state") "!==" (str "string") "||" (not ["args.state.trim"])]) (throw' (new ["Error" (str "state is required and must be a string")])))
-              (if' (op [(not "args.questions") "||" (typeof "args.questions") "!==" (str "object")]) (throw' (new ["Error" (str "questions map is required")])))
-              (const "data" (await ["callSystemOne" "args.state" "args.questions"]))
-              (return [
-                "send"
-                (obj [
-                  ["jsonrpc" (str "2.0")]
-                  "id"
-                  [
-                    "result"
-                    (obj (rows [
-                      ["content" (array [(obj [["type" (str "text")] ["text" ["JSON.stringify" "data" "null" 2]]])])]
-                      ["structuredContent" "data"]
-                      ["isError" "false"]
-                    ]))
-                  ]
-                ])
-              ])
-            ] "e" [
-              (return [
-                "send"
-                (obj [
-                  ["jsonrpc" (str "2.0")]
-                  "id"
-                  [
-                    "result"
-                    (obj (rows [
-                      ["content" (array [(obj [["type" (str "text")] ["text" (op [(str "Error: ") "+" "e.message"])]])])]
-                      ["isError" "true"]
-                    ]))
-                  ]
-                ])
-              ])
-            ])
-        ])
-        ["send" (obj [["jsonrpc" (str "2.0")] "id" ["error" (obj [["code" (-32601)] ["message" (op [(str "Method not found: ") "+" "method"])]])]])]
-      ]))
-    ];
+          (if' [method "===" (str "ping")] (return (call send [(obj [["jsonrpc" (str "2.0")] id ["result" (obj [])]])])))
+          (if' [method "===" (str "notifications/initialized")] (return null))
+          (if' [method "===" (str "tools/list")] [
+            (return (call send [(obj [["jsonrpc" (str "2.0")] id ["result" (obj [["tools" (array [TOOL])]])]])]))
+          ])
+          (if' [method "===" (str "tools/call")] ({
+            name,
+            args,
+          }: [
+            (const name (optional params "name"))
+            (const args [(optional params "arguments") "||" (obj [])])
+            (try' ({data}: [
+                (if' [name "!==" (str "jev_decision")] (throw' (new Error [[(str "Unknown tool: ") "+" name]])))
+                (if' [(typeof (dot args "state")) "!==" (str "string") "||" (not (call (dot args "state.trim") []))] (throw' (new Error [(str "state is required and must be a string")])))
+                (if' [(not (dot args "questions")) "||" (typeof (dot args "questions")) "!==" (str "object")] (throw' (new Error [(str "questions map is required")])))
+                (const data (await (call callSystemOne [(dot args "state") (dot args "questions")])))
+                (return (call send [
+                  (obj [
+                    ["jsonrpc" (str "2.0")]
+                    id
+                    [
+                      "result"
+                      (obj (rows [
+                        ["content" (array [(obj [["type" (str "text")] ["text" (call (dot JSON "stringify") [data null' 2])]])])]
+                        ["structuredContent" data]
+                        ["isError" false]
+                      ]))
+                    ]
+                  ])
+                ]))
+              ]) ({e}: {
+                param = e;
+                body = [
+                  (return (call send [
+                    (obj [
+                      ["jsonrpc" (str "2.0")]
+                      id
+                      [
+                        "result"
+                        (obj (rows [
+                          ["content" (array [(obj [["type" (str "text")] ["text" [(str "Error: ") "+" (dot e "message")]]])])]
+                          ["isError" true]
+                        ]))
+                      ]
+                    ])
+                  ]))
+                ];
+              }))
+          ]))
+          (call send [(obj [["jsonrpc" (str "2.0")] id ["error" (obj [["code" (-32601)] ["message" [(str "Method not found: ") "+" method]]])]])])
+        ];
+      })))
+    ]);
     modules_dev_ai_nacre = {
       config,
       lib,
@@ -37806,7 +37856,131 @@
       javascript = let
         inherit (doc) hardline nest;
 
+        language = "javascript";
+
+        levels = [
+          ["=" "+=" "-=" "*=" "/=" "%=" "**=" "<<=" ">>=" ">>>=" "&=" "|=" "^=" "&&=" "||=" "??="]
+          ["??"]
+          ["||"]
+          ["&&"]
+          ["|"]
+          ["^"]
+          ["&"]
+          ["==" "!=" "===" "!=="]
+          ["<" ">" "<=" ">=" "in" "instanceof"]
+          ["<<" ">>" ">>>"]
+          ["+" "-"]
+          ["*" "/" "%"]
+          ["**"]
+        ];
+
+        binary = builtins.listToAttrs (lib.concatLists (lib.imap1 (level: map (operator: lib.nameValuePair operator level)) levels));
+
+        right = ["**"] ++ builtins.head levels;
+
+        logical = ["??" "||" "&&"];
+
+        bitwise = ["|" "^" "&" "<<" ">>" ">>>"];
+
+        flattens = parent: child: let
+          both = group: builtins.elem parent group && builtins.elem child group;
+        in
+          parent != "**" && !(both ["==" "!=" "===" "!=="]) && !(both ["*" "/" "%"] && parent != child) && !(both ["<<" ">>" ">>>"]);
+
+        mixed = parent: operator: builtins.elem parent logical && builtins.elem operator logical && parent != operator;
+
+        clarified = parent: operator: operator == "%" && builtins.elem parent ["+" "-"] || builtins.elem parent bitwise;
+
+        unaryBase = parent: side: child: parent == "**" && side == "left" && child.precedence < 15;
+
+        grouped = parent: side: child: let
+          level = binary.${parent};
+          operator = child.operator or null;
+          rules = [
+            {
+              when = child.precedence < level;
+              value = true;
+            }
+            {
+              when = operator == null;
+              value = unaryBase parent side child;
+            }
+            {
+              when = mixed parent operator;
+              value = true;
+            }
+            {
+              when = child.precedence > level;
+              value = clarified parent operator;
+            }
+            {
+              when = level == 1;
+              value = side == "left";
+            }
+          ];
+        in
+          (lib.findFirst (rule: rule.when) {value = side == "right" || !flattens parent operator;} rules).value;
+
+        parse = infixTree {
+          inherit language right;
+          precedence = binary;
+          operand = item: {operand = item;};
+        };
+
+        infix = split: items: let
+          walk = tree:
+            if tree ? binary
+            then let
+              inherit (tree.binary) operator;
+              side = which: let
+                child = walk tree.binary.${which};
+              in
+                if grouped operator which child
+                then ["(" child.doc ")"]
+                else child.doc;
+            in {
+              precedence = binary.${operator};
+              inherit operator;
+              doc =
+                if split
+                then [(side "left") (nest 2 [" " operator hardline (side "right")])]
+                else [(side "left") " ${operator} " (side "right")];
+            }
+            else expression tree.operand;
+        in
+          walk (parse items);
+
+        printed = precedence: shown: {
+          inherit precedence;
+          doc = shown;
+        };
+
+        wrapped = least: value: let
+          out = expression value;
+        in
+          if out.precedence < least
+          then ["(" out.doc ")"]
+          else out.doc;
+
+        negative = value: (builtins.isInt value || builtins.isFloat value) && value < 0 || value ? neg;
+
+        number = value:
+          printed (
+            if value < 0
+            then 14
+            else 15
+          ) (builtins.toJSON value);
+
+        identifier = "[A-Za-z_$][A-Za-z0-9_$]*";
+
+        property = path:
+          if builtins.match "${identifier}([.]${identifier})*" path != null
+          then path
+          else throw "javascript: `${path}` is not a property path";
+
         commas = lib.intersperse ", ";
+
+        entries = values: values.rows or values;
 
         broken = value: builtins.isAttrs value && (value.obj or value.array or null) ? rows;
 
@@ -37815,22 +37989,73 @@
           then [open (nest 2 (lib.imap1 (index: value: [hardline (item value) (lib.optional (index < builtins.length values.rows) ",")]) values.rows)) hardline close]
           else [open (commas (map item values)) close];
 
+        key = value:
+          if builtins.isString value
+          then property value
+          else if value ? str
+          then "\"${value.str}\""
+          else throw "javascript: an object key is a property name or a str";
+
         entry = value:
+          if builtins.isList value && builtins.length value == 2
+          then [(key (builtins.head value)) ": " (wrapped 1 (lib.last value))]
+          else value.name or (throw "javascript: an object entry is a name or a [key value] pair");
+
+        hugged = values: builtins.isList (lib.last values) && broken (lib.last (lib.last values));
+
+        braced = values:
+          if values ? rows || values == []
+          then layout "{" "}" entry values
+          else layout "{ " (lib.optionalString (!hugged values) " " + "}") entry values;
+
+        argumentList = values: ["(" (commas (map (wrapped 1) values)) ")"];
+
+        patterns = values: commas (map (value: (expression value).doc) values);
+
+        expressionForms = {
+          int = number;
+          float = number;
+          bool = value: printed 20 (lib.boolToString value);
+          name = value: printed 20 value.name;
+          keyword = value: printed 20 value.keyword;
+          string = value: throw "javascript: the string `${value}` where an expression is expected; a name is a Nix variable, a literal a str";
+          str = value: printed 20 "\"${value.str}\"";
+          number = value: printed 15 value.number;
+          list = infix false;
+          rows = value: infix true value.rows;
+          obj = value: printed 20 (braced value.obj);
+          array = value: printed 20 (layout "[" "]" (wrapped 1) value.array);
+          dot = value: printed 18 [(wrapped 18 value.dot.object) "." (property value.dot.path)];
+          optional = value: printed 18 [(wrapped 18 value.optional.object) "?." (property value.optional.path)];
+          call = value: printed 18 [(wrapped 18 value.call.callee) (argumentList value.call.arguments)];
+          new = value: printed 18 ["new " (expression value.new.callee).doc (argumentList value.new.arguments)];
+          not = value: printed 14 ["!" (wrapped 14 value.not)];
+          neg = value:
+            printed 14 [
+              "-"
+              (
+                if negative value.neg
+                then ["(" (expression value.neg).doc ")"]
+                else wrapped 14 value.neg
+              )
+            ];
+          typeof = value: printed 14 ["typeof " (wrapped 14 value.typeof)];
+          await = value: printed 14 ["await " (wrapped 14 value.await)];
+          async = value: let
+            inner = expression value.async;
+          in
+            inner // {doc = ["async " inner.doc];};
+          arrow = value: printed 1 ["(" (patterns value.arrow.params) ") => " (concise value.arrow.body)];
+        };
+
+        expression = value: (expressionForms.${kindOf value} or (throw "javascript: no expression ${kindOf value}")) value;
+
+        statements = value:
           if builtins.isList value
-          then [(expression (builtins.head value)) ": " (expression (lib.last value))]
-          else value;
+          then value
+          else value.inline or [];
 
-        hugged = entries: builtins.isList (lib.last entries) && broken (lib.last (lib.last entries));
-
-        braced = entries:
-          if entries ? rows || entries == []
-          then layout "{" "}" entry entries
-          else layout "{ " (lib.optionalString (!hugged entries) " " + "}") entry entries;
-
-        operation = parts:
-          if parts ? rows
-          then [(expression (builtins.head parts.rows)) (lib.genList (index: nest 2 [" " (builtins.elemAt parts.rows (2 * index + 1)) hardline (expression (builtins.elemAt parts.rows (2 * index + 2)))]) (builtins.length parts.rows / 2))]
-          else lib.intersperse " " (map expression parts);
+        blockLike = value: builtins.isList value || value ? inline;
 
         braces = value:
           if value ? inline
@@ -37841,113 +38066,210 @@
           else ["{" (nest 2 (map (one: [hardline (statement one)]) value)) hardline "}"];
 
         clause = value:
-          if builtins.isList value || value ? inline
+          if blockLike value
           then braces value
           else statement value;
 
         concise = value:
-          if builtins.isList value || value ? inline
+          if blockLike value
           then braces value
-          else expression value;
+          else if value ? obj
+          then ["(" (expression value).doc ")"]
+          else wrapped 1 value;
 
-        expressionForms = {
-          string = lib.id;
-          int = toString;
-          list = value: [(expression (builtins.head value)) "(" (commas (map expression (builtins.tail value))) ")"];
-          str = value: "\"${value.str}\"";
-          obj = value: braced value.obj;
-          array = value: layout "[" "]" expression value.array;
-          op = value: operation value.op;
-          paren = value: ["(" (expression value.paren) ")"];
-          dot = value: [(expression value.dot.object) "." value.dot.name];
-          not = value: ["!" (expression value.not)];
-          typeof = value: ["typeof " (expression value.typeof)];
-          await = value: ["await " (expression value.await)];
-          new = value: ["new " (expression value.new)];
-          async = value: ["async " (expression value.async)];
-          arrow = value: ["(" (commas value.arrow.params) ") => " (concise value.arrow.body)];
-          function = value: ["function " value.function.name "(" (commas value.function.params) ") " (braces value.function.body)];
-        };
-
-        expression = value: (expressionForms.${kindOf value} or (throw "javascript: no expression ${kindOf value}")) value;
+        function = value: ["function " value.function.name.name "(" (patterns value.function.params) ") " (braces value.function.body)];
 
         statementForms = {
           blank = _: "";
           comment = value: value.comment;
-          const = value: ["const " (expression value.const.name) " = " (expression value.const.value) ";"];
-          "let" = value: ["let " (expression value."let".name) (lib.optionals (value."let".value != null) [" = " (expression value."let".value)]) ";"];
-          import = value: ["import { " (commas value.import.names) " } from \"" value.import.source "\";"];
-          function = expression;
-          async = expression;
+          const = value: ["const " (expression value.const.target).doc " = " (wrapped 1 value.const.value) ";"];
+          "let" = value: ["let " (expression value."let".target).doc (lib.optionals (value."let".value != null) [" = " (wrapped 1 value."let".value)]) ";"];
+          import = value: ["import { " (commas (map (one: one.name) value.import.names)) " } from \"" value.import.source "\";"];
+          inherit function;
+          async = value:
+            if value.async ? function
+            then ["async " (function value.async)]
+            else [(expression value).doc ";"];
           return = value:
             if value.return == null
             then "return;"
-            else ["return " (expression value.return) ";"];
-          throw = value: ["throw " (expression value.throw) ";"];
+            else ["return " (wrapped 1 value.return) ";"];
+          throw = value: ["throw " (wrapped 1 value.throw) ";"];
           continue = _: "continue;";
-          "if" = value: ["if (" (expression value."if".test) ") " (clause value."if".body) (lib.optionals (value."if" ? otherwise) [" else " (clause value."if".otherwise)])];
-          while = value: ["while (" (expression value.while.test) ") " (clause value.while.body)];
-          try = value: ["try " (braces value.try.body) " catch " (lib.optional (value.try.param != null) "(${value.try.param}) ") (braces value.try.handler)];
+          "if" = value: ["if (" (wrapped 1 value."if".test) ") " (clause value."if".body) (lib.optionals (value."if" ? otherwise) [" else " (clause value."if".otherwise)])];
+          while = value: ["while (" (wrapped 1 value.while.test) ") " (clause value.while.body)];
+          try = value: ["try " (braces value.try.body) " catch " (lib.optionals (value.try ? param) ["(" (expression value.try.param).doc ") "]) (braces value.try.handler)];
         };
 
-        statement = value: (statementForms.${kindOf value} or (_: [(expression value) ";"])) value;
-      in {
-        blank = {blank = true;};
+        statement = value: (statementForms.${kindOf value} or (_: [(expression value).doc ";"])) value;
 
-        continue = {continue = true;};
+        name = spelled:
+          if builtins.match "[A-Za-z_][A-Za-z0-9_]*" spelled != null
+          then {name = spelled;}
+          else throw "javascript: `${spelled}` is not a name Nix can spell";
 
-        comment = string: {comment = string;};
+        patternForms = {
+          name = value: [value.name];
+          obj = value:
+            lib.concatMap (one:
+              patternNames (
+                if builtins.isList one
+                then lib.last one
+                else one
+              )) (entries value.obj);
+          array = value: lib.concatMap patternNames (entries value.array);
+        };
 
-        inline = values: {inline = values;};
+        patternNames = value: (patternForms.${kindOf value} or (throw "javascript: ${kindOf value} is not a binding pattern; a name is a Nix variable")) value;
 
-        rows = values: {rows = values;};
+        binding = target: lib.throwIf (patternNames target == []) "javascript: a binding pattern that declares no name" target;
 
-        str = string: {str = string;};
+        declaring = {
+          const = value: patternNames value.const.target;
+          "let" = value: patternNames value."let".target;
+          import = value: map (one: one.name) value.import.names;
+          function = value: [value.function.name.name];
+          async = value: declares value.async;
+        };
 
-        obj = entries: {obj = entries;};
+        declares = value: (declaring.${kindOf value} or (_: [])) value;
 
-        array = values: {array = values;};
+        declaredIn = value: lib.concatMap declares (statements value);
 
-        op = parts: {op = parts;};
+        scope = declared: boundBlock {inherit language name declared;};
 
-        paren = value: {paren = value;};
+        block = scope declaredIn;
 
-        dot = object: name: {dot = {inherit object name;};};
+        callable = definition: let
+          result = scope (scoped: lib.concatMap patternNames scoped.params ++ declaredIn scoped.body) definition;
+        in {
+          params = map binding result.params;
+          inherit (result) body;
+        };
 
-        not = value: {not = value;};
+        handler = scope (result:
+          if result ? param
+          then patternNames result.param ++ declaredIn result.body
+          else declaredIn result);
 
-        typeof = value: {typeof = value;};
+        clauseOf = value:
+          if builtins.isFunction value || blockLike value
+          then block value
+          else value;
 
-        await = value: {await = value;};
+        globals = ["AbortController" "Array" "Boolean" "Buffer" "Date" "Error" "JSON" "Map" "Math" "Number" "Object" "Promise" "RegExp" "Set" "String" "Symbol" "TypeError" "URL" "URLSearchParams" "clearInterval" "clearTimeout" "console" "fetch" "globalThis" "parseFloat" "parseInt" "process" "queueMicrotask" "setInterval" "setTimeout" "structuredClone" "undefined"];
+      in
+        lib.genAttrs globals name
+        // {
+          null' = {keyword = "null";};
 
-        new = value: {new = value;};
+          blank = {blank = true;};
 
-        async = value: {async = value;};
+          continue = {continue = true;};
 
-        arrow = params: body: {arrow = {inherit params body;};};
+          comment = string: {comment = string;};
 
-        function = name: params: body: {function = {inherit name params body;};};
+          inline = values: {inline = values;};
 
-        const = name: value: {const = {inherit name value;};};
+          rows = values: {rows = values;};
 
-        let' = name: value: {"let" = {inherit name value;};};
+          str = string: {str = string;};
 
-        import' = names: source: {import = {inherit names source;};};
+          number = written: {number = written;};
 
-        return = value: {return = value;};
+          obj = values: {obj = values;};
 
-        throw' = value: {throw = value;};
+          array = values: {array = values;};
 
-        if' = test: body: {"if" = {inherit test body;};};
+          dot = object: path: {dot = {inherit object path;};};
 
-        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+          optional = object: path: {optional = {inherit object path;};};
 
-        while = test: body: {while = {inherit test body;};};
+          call = callee: arguments: {call = {inherit callee arguments;};};
 
-        try' = body: param: handler: {try = {inherit body param handler;};};
+          new = callee: arguments:
+            if callee ? name || callee ? dot
+            then {new = {inherit callee arguments;};}
+            else throw "javascript: new takes a name or a dot path";
 
-        render = values: doc.render 80 (map (value: [(statement value) hardline]) values);
-      };
+          not = value: {not = value;};
+
+          neg = value: {neg = value;};
+
+          typeof = value: {typeof = value;};
+
+          await = value: {await = value;};
+
+          async = value: {async = value;};
+
+          arrow = definition: {arrow = callable definition;};
+
+          function = named: definition: {function = {name = named;} // callable definition;};
+
+          const = target: value: {
+            const = {
+              target = binding target;
+              inherit value;
+            };
+          };
+
+          let' = target: value: {
+            "let" = {
+              target = binding target;
+              inherit value;
+            };
+          };
+
+          import' = names: source: {
+            import = {
+              names = map (one: lib.throwIfNot (one ? name) "javascript: an import names Nix variables" one) names;
+              inherit source;
+            };
+          };
+
+          return = value: {return = value;};
+
+          throw' = value: {throw = value;};
+
+          if' = test: body: {
+            "if" = {
+              inherit test;
+              body = clauseOf body;
+            };
+          };
+
+          ifElse = test: body: otherwise: {
+            "if" = {
+              inherit test;
+              body = clauseOf body;
+              otherwise = clauseOf otherwise;
+            };
+          };
+
+          while = test: body: {
+            while = {
+              inherit test;
+              body = clauseOf body;
+            };
+          };
+
+          try' = body: caught: let
+            catching = handler caught;
+          in {
+            try =
+              {body = block body;}
+              // (
+                if catching ? param
+                then {
+                  param = binding catching.param;
+                  handler = catching.body;
+                }
+                else {handler = catching;}
+              );
+          };
+
+          render = top: doc.render 80 (map (value: [(statement value) hardline]) (block top));
+        };
 
       ts = let
         inherit (doc) hardline nest;
