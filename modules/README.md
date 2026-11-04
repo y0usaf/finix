@@ -427,28 +427,61 @@ in {
 }
 ```
 
-Lua (`generators.lua`): a call is a Nix list, its head first; a name, a
-dotted path (`pg.me:getPosition` as a call's head), a number or `...` is a
-string, an integer may be a Nix integer, and `null`, `true` and `false` are
-`nil`, `true` and `false`. `str` and `sq` are string literals, `table` a table
-of positional values, `field name value` and `key k v`, `fn params body` a
-function, `op [a "and" b]` a run of one binary operator, `not`, `neg`, `len`
-and `bnot` the unary ones, and `dot`, `method`, `index`, `paren` and `apply`
-(`f{...}`) the rest. A statement is a call, `"break"`, `";"`, `local names
-values`, `assign targets values`, `function` or `localFunction name params
-body`, `return values`, `if' test body`, `ifElse test body otherwise` (an
-`if` node as `otherwise` is `elseif`), `forIn`, `forNum`, `while`, `repeat` or
-`do`. A body is a list of statements, one per line two spaces in, or `inline [
-... ]` on the keyword's line; `rows` puts each row of a table's fields on its
-own line, and breaks an `op` before a row's first operator, two spaces in.
-From `aniimo/catch-lua.data.nix`, abridged:
+Lua (`generators.lua`) binds names as GLSL does and keeps layout as Luau
+does. A data file is a function of the constructors and of the Lua globals it
+uses, `{local, pcall, pg, table', ...}: ({INTERVAL, log, ...}: [ ... ])`:
+the generator's globals are a fixed list, Lua's standard ones with LuaJIT's
+`bit` and `jit`, Aniimo's `CS`, `pg` and `Vector3` and Hyprland's `hl`, so a
+misspelt global is a missing argument and a misspelt local an undefined
+variable at evaluation. A block that declares names (the chunk, a function
+body, a loop, a branch, `do`) is a lambda whose formals are exactly the names
+its `local` and `localFunction` statements, parameters or loop variables
+declare, and `render` throws on a formal its block does not declare; since a
+lambda's formals have no order, a function with parameters is `fn ({self,
+held}: {params = [self vararg]; body = [ ... ];})`, a generic loop `forIn
+({_, p}: {names = [_ p]; values = [[ipairs paths]]; body = ...;})` and a
+numeric one `forNum ({i}: {name = i; range = [1 n]; body = ...;})`. A name
+that is a Nix keyword, a constructor or a global is primed and printed without
+the prime: the global `table` is `table'`, `assert` is `assert'`, a local
+`field` is `field'`. The only strings are literal contents (`str`, `sq`),
+operators, field paths and table keys: `dot pg "me.space"` is `pg.me.space`,
+`[(method helper "canForceLock")]` a method call, `index t k` an index,
+`field "n" v` and `key k v` table fields, `apply f (table ...)` the call
+`f{...}`; a bare string where an expression belongs throws. A call is a Nix
+list, its function first; a list whose second item is a string is an infix
+expression, parsed by Lua's precedence with `..` and `^` to the right, nested
+exactly where the file writes parentheses, which the printer writes back
+(Aniimo's mods also group what precedence already groups, `(a and b) and c or
+d` and `x or (a .. b)`, so a nested list is always parenthesized). The printer
+adds the parentheses a unary operand, the unary base of `^` and a
+non-prefix expression before `.`, `:`, `[` or `(` need, and `paren` is only
+the parentheses that keep a call's or `...`'s first value (`return
+(tostring(v):gsub(...))`). `not`, `neg`, `len` and `bnot` are the unary
+operators, `nil`, `vararg`, `break` and `semicolon` values, and numbers and
+booleans Nix's own. The other statements are a call, `assign targets values`,
+`return values`, `if' test body`, `ifElse test body otherwise` (an `if` node
+as `otherwise` is `elseif`), `while test body` and `do body`. A body is a list
+of statements, one per line two spaces in, or `inline [ ... ]` on the
+keyword's line; `rows` puts each row of a table's fields on its own line and,
+as an expression, breaks an infix list before each later row's first
+operator, two spaces in. From `aniimo/catch-lua.data.nix`, abridged:
 
 ```nix
-(localFunction "safely" ["fn" "self"] [
-  (if' "off" (inline [(return [])]))
-  (local ["ok" "err"] [["pcall" "fn" "self"]])
-  (if' (not "ok") (inline [["disable" "err"]]))
-])
+(localFunction need ({owner, name}: {
+  params = [owner name];
+  body = [
+    [assert' [owner "and" [type (index owner name)] "==" (str "function")] [name ".." (str " missing")]]
+  ];
+}))
+blank
+(localFunction safely ({fn', self, ok, err}: {
+  params = [fn' self];
+  body = [
+    (if' off (inline [(return [])]))
+    (local [ok err] [[pcall fn' self]])
+    (if' (not ok) (inline [[disable err]]))
+  ];
+}))
 ```
 
 Python (`generators.python`): a statement is a Nix list of words (`["import"
@@ -627,7 +660,7 @@ then runs each language's own check on every rendered tree, listed in its
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
 | markdown (7 files) | bytes | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
 | GLSL (15 files) | `nix run .#glsl-gate -- ORIGINAL GENERATED ...`: both sides, canonicalized (top-level declarations sorted, every operator parenthesized, literals as their values, one declarator per declaration, every branch braced) and run through clang-format 21 with a pinned style, are equal; both pass glslangValidator; four 640×360 frames of each, rendered by llvmpipe into float32 targets, are bit-identical | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
-| Lua (3 files) | bytes | `luajit -bl` for Aniimo's two LuaJIT mods, `luac -p` (Lua 5.5, Hyprland's) for `hyprland.lua` |
+| Lua (3 files) | bytes, at conversion and again when names became Nix bindings (the bound trees render the word-list trees' bytes) | `luajit -bl` for Aniimo's two LuaJIT mods, `luac -p` (Lua 5.5, Hyprland's) for `hyprland.lua` |
 | Python (5 files) | bytes | `python -m py_compile` (vercel's `wrapper.py` with `@owners@` filled); `ruff check` is not clean today (4 of 5 files fail its defaults) |
 | JavaScript (1 file) | bytes | `node --check` |
 | TypeScript (10 files) | bytes, at conversion and again when re-imported with every name bound | `tsc --noEmit` (TypeScript 7) with an ambient stub of the omp, pi and Node modules they import; `work-fold.ts` and `compact-eval.ts`, untyped as written, get `--noCheck` (syntax and imports only) |
