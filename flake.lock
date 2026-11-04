@@ -989,21 +989,24 @@
     },
     "nix-generators": {
       "inputs": {
+        "iets": [
+          "iets"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1793796554,
-        "narHash": "sha256-AfBfjQ09dJI3COoLO3/rgkqo7MRSlTQYP2s8ZoGezW4=",
+        "lastModified": 1793797427,
+        "narHash": "sha256-L4WHkf00ym7I/Oxyjz9f+mGS2zJ9SVGKnbZUnfXi9yU=",
         "ref": "refs/heads/main",
-        "rev": "6f9a519147c9b8211daddcb4c539bacd437cb1aa",
-        "revCount": 1,
+        "rev": "0d71cc24fd1d463071a00edbde3c25d5158a2915",
+        "revCount": 2,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/nix-generators"
       },
       "original": {
-        "rev": "6f9a519147c9b8211daddcb4c539bacd437cb1aa",
+        "rev": "0d71cc24fd1d463071a00edbde3c25d5158a2915",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/nix-generators"
       }

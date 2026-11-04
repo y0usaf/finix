@@ -84,8 +84,9 @@
     };
 
     nix-generators = {
-      url = "git+file:///home/y0usaf/dev/developing/nix-generators?rev=6f9a519147c9b8211daddcb4c539bacd437cb1aa";
+      url = "git+file:///home/y0usaf/dev/developing/nix-generators?rev=0d71cc24fd1d463071a00edbde3c25d5158a2915";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.iets.follows = "iets";
     };
 
     fonts = {
