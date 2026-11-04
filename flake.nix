@@ -11471,12 +11471,14 @@
       Map,
       Math,
       Number,
+      Set,
       array,
       arrayOf,
       arrow,
       async,
       below,
       blank,
+      boolean,
       break,
       call,
       catch,
@@ -11980,6 +11982,7 @@
         readers,
         enabled,
         snap,
+        saved,
         active,
         result,
         which,
@@ -11987,6 +11990,7 @@
         reader,
         read,
         backfill,
+        stored,
         repin,
         window,
         frame,
@@ -11999,6 +12003,7 @@
         (const readers (new (generic Map [string Reader]) []))
         (let' enabled false)
         (let' (typed snap (union [Snapshot undefined])) null)
+        (const saved (new (generic Set [number]) []))
         blank
         (const active ({ctx}: (arrow [(typed ctx ExtensionContext)] (infix [enabled "&&" (dot ctx "agent?.kind") "===" (str "main")]))))
         (const result ({text}: (arrow [(typed text string)] (obj [(prop "content" (array [(obj [(prop "type" (infix [(str "text") "as" const'])) text])]))]))))
@@ -12130,12 +12135,22 @@
         ({
           ctx,
           file,
-          rows',
         }: (fn backfill (typed [(typed ctx ExtensionContext)] void) [
           (const file (call (dot path "join") [(dot STORE "log") (tpl [(sub (call (dot ctx "sessionManager.getSessionId") [])) ".jsonl"])]))
-          (if' (call (dot fs "existsSync") [file]) return')
-          (const rows' (chain (call (dot (call (dot ctx "sessionManager.getBranch") []) "flatMap") [({entry}: (arrow [entry] (ternary (infix [(dot entry "type") "===" (str "message")]) (call rowsOf [(infix [(dot entry "message") "as" Logged]) (infix [BOT "as" string])]) (array []))))])))
-          (call (dot fs "writeFileSync") [file (call (dot rows' "join") [(str "")])])
+          (if' (not (call (dot fs "existsSync") [file])) ({rows'}: [
+            (const rows' (chain (call (dot (call (dot ctx "sessionManager.getBranch") []) "flatMap") [({entry}: (arrow [entry] (ternary (infix [(dot entry "type") "===" (str "message")]) (call rowsOf [(infix [(dot entry "message") "as" Logged]) (infix [BOT "as" string])]) (array []))))])))
+            (call (dot fs "writeFileSync") [file (call (dot rows' "join") [(str "")])])
+          ]))
+          (call (dot saved "clear") [])
+          ({row}: (forOf row (call (dot (call (dot fs "readFileSync") [file (str "utf8")]) "split") [(str "\\n")]) [
+            (try [
+              (call (dot saved "add") [(dot (infix [(call (dot JSON "parse") [row]) "as" Entry]) "time")])
+            ] [(catch null [])])
+          ]))
+        ]))
+        blank
+        ({message}: (fn stored (typed [(typed message Logged)] boolean) [
+          (return (infix [(dot (call entriesOf [message]) "length") ">" 0 "&&" [(typeof (dot message "timestamp")) "!==" (str "number") "||" (call (dot saved "has") [(dot message "timestamp")])]]))
         ]))
         blank
         ({
@@ -12175,7 +12190,7 @@
           (const turn (call turnStart [messages]))
           ({k}: (for (let' k (infix [(dot messages "length") "-" 1])) (infix [k ">=" floor]) (dec k) [
             (infix [size "+=" (call sized [(idx messages k)])])
-            (if' (dot (call entriesOf [(idx messages k)]) "length") [
+            (if' (call stored [(idx messages k)]) [
               (dec need)
               (inc logged)
             ])
@@ -12348,7 +12363,10 @@
             (if' (not (call active [ctx])) return')
             (const session (call (dot ctx "sessionManager.getSessionId") []))
             (const rows' (call rowsOf [(infix [(dot event "message") "as" Logged]) (infix [BOT "??" (call chatName [(call (dot pi "getSessionName") []) session])])]))
-            (if' (dot rows' "length") (call (dot fs "appendFileSync") [(call (dot path "join") [(dot STORE "log") (tpl [(sub session) ".jsonl"])]) (call (dot rows' "join") [(str "")])]))
+            (if' (dot rows' "length") [
+              (call (dot fs "appendFileSync") [(call (dot path "join") [(dot STORE "log") (tpl [(sub session) ".jsonl"])]) (call (dot rows' "join") [(str "")])])
+              (call (dot saved "add") [(dot (infix [(dot event "message") "as" Logged]) "timestamp")])
+            ])
           ])))
         ])
         blank
