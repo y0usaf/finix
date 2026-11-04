@@ -51,6 +51,8 @@ the host's `config.nix` when only that host does.
 `judgeModel` for per-prompt effort selection. `dev/ai/omp/default.nix` applies these
 on the host, and `dev/ai/omp/box.nix` applies them in the microVM. Pi keeps
 its separate `defaultThinkingLevel = "xhigh"`; the advisor stays Sol at high.
+Boar (`dev/ai/boar.nix`) takes a gateway model's id, name, inputs, reasoning
+flag and cost from the catalog and sets its own context window and output limit.
 
 Each host directory under `modules/hosts/` holds what is true of that machine
 alone, in two files beside its keys and other data.
@@ -59,7 +61,9 @@ and mount options, boot, kernel and initrd modules, firmware, GPU and
 displays. `config.nix` holds the host's choices: hostname, open ports,
 host-only persisted paths, services, and where it departs from its role.
 `modules/hosts/shared.nix` holds the machinery the hosts share, a btrfs mount
-builder and the nftables ruleset, which each host calls with its own values;
+builder, the file systems every host has (a tmpfs root, the vfat ESP and, given
+its size, a tmpfs `/tmp`, around the host's own mounts) and the nftables
+ruleset, which each host calls with its own values;
 hosts import it, and no host list loads it. `modules/hosts/android-phone/` is
 the nix-on-droid phone.
 
@@ -72,7 +76,9 @@ here. `config.nix` holds the host's choices: the SSH keys, the storage pool's
 UUID, the project's optional WiVRn client and framecorder, Stremio in Steam's
 FHS environment, the Beat Saber mods, `tools/git.nix` and `tools/tmux.nix`,
 and files linked with manzil; `bolo.nix` runs bolo on the CPU and fetches its
-speech model at boot into the big home partition, out of the small root;
+speech model at boot into the big home partition, out of the small root (the
+model's address and file hashes and bolo's vocabulary are those of
+`desktop/apps/bolo.data.nix`, which the desktop module reads too);
 `mado.nix` runs mado-view whenever SteamVR runs, so the headset shows the PC's
 mado stream. `deploy.nix` builds `finix-frame-deploy`, which builds a NixOS
 system from the project's nixpkgs and module, manzil's NixOS module,
@@ -823,7 +829,16 @@ The seven tomoe shaders went from word lists, which kept every byte, to
 evaluated code, by `strictix import glsl` on each rendered file; the eight
 Ozette wallpapers (`~/dev/developing/ozette-shaders`, in `checks.codegen` and
 the gate, not in tomoe's rotation) were imported from their sources and their
-colour constants then read from the palette. The rendered text changes where
+colour constants then read from the palette. A shader file holds only what is
+its own: `ozette-prelude.data.nix` has the hash, noise and fbm functions, the
+grid and colours all eight wallpapers use and each theme's `paper` palette;
+each scene (`ozette.data.nix`, `ozette-fields`, `ozette-lilies` and
+`ozette-pond`) adds its functions and the constants its two themes share; a
+wallpaper's file (`ozette-pond-dark.data.nix`) merges its theme's constants
+on top. `cassette-led` and `cassette-squares` take their common constants and
+functions from `cassette.data.nix`. A file passes the file it imports the
+constructors and `self` it was given, so the merged attribute set renders the
+bytes the single file did. The rendered text changes where
 the tree no longer records it: declaration order (derived), blank lines,
 redundant parentheses (`(0.3 / CONTRAST) * COLOR_1` is `0.3 / CONTRAST *
 COLOR_1`), literal spelling (`1.000` is `1.0`, `0.86602540` is `0.8660254`,

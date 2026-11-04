@@ -528,29 +528,16 @@
       flakeInputs,
       ...
     }: let
-      hfBase = "https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/resolve/main";
-      models = {
-        "parakeet-v3-int8" = {
-          engine = "sherpa-onnx-transducer";
-          files = {
-            "encoder.int8.onnx" = pkgs.fetchurl {
-              url = "${hfBase}/encoder.int8.onnx";
-              hash = "sha256-rPwrRFY3fhXQTwJDr1QLf+fJkvjYmNdRzxNMOlX9Ikc=";
-            };
-            "decoder.int8.onnx" = pkgs.fetchurl {
-              url = "${hfBase}/decoder.int8.onnx";
-              hash = "sha256-F55QxD0aneeciiQUmi+brG61mBgj8qLtiNZVskJI204=";
-            };
-            "joiner.int8.onnx" = pkgs.fetchurl {
-              url = "${hfBase}/joiner.int8.onnx";
-              hash = "sha256-MWTBP8KCEAlEDSD8tf3Hi/8otNsvjQ8LMpEBcZwJSLM=";
-            };
-            "tokens.txt" = pkgs.fetchurl {
-              url = "${hfBase}/tokens.txt";
-              hash = "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=";
-            };
-          };
-        };
+      data = modules_desktop_apps_bolo_data;
+      inherit (data) model vocabulary;
+      models.${model.name} = {
+        inherit (model) engine;
+        files = lib.mapAttrs (file: hash:
+          pkgs.fetchurl {
+            url = "${model.url}/${file}";
+            inherit hash;
+          })
+        model.hashes;
       };
 
       modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
@@ -627,16 +614,7 @@
               tokens = "${modelDir name}/tokens.txt";
             })
           models;
-        vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) {
-          Hyprland = ["hyper land" "hipper land"];
-          niri = ["neary" "nyree"];
-          y0usaf = ["you sef" "yousef" "you saf"];
-          "sherpa-onnx" = ["sherpa onyx" "sherpa onix"];
-          tomoe = ["toe moe" "tomo eh"];
-          ekko = ["eck oh" "eh ko"];
-          moon = [];
-          finix = ["fee nix" "finnix" "fi nix"];
-        };
+        vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) vocabulary;
         vocab_fuzzy = 0.85;
         wake = {
           kws = {
@@ -794,6 +772,29 @@
                                   :background "#00000000"))))
                       nil)))
         '';
+      };
+    };
+    modules_desktop_apps_bolo_data = {
+      model = {
+        name = "parakeet-v3-int8";
+        engine = "sherpa-onnx-transducer";
+        url = "https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/resolve/main";
+        hashes = {
+          "encoder.int8.onnx" = "sha256-rPwrRFY3fhXQTwJDr1QLf+fJkvjYmNdRzxNMOlX9Ikc=";
+          "decoder.int8.onnx" = "sha256-F55QxD0aneeciiQUmi+brG61mBgj8qLtiNZVskJI204=";
+          "joiner.int8.onnx" = "sha256-MWTBP8KCEAlEDSD8tf3Hi/8otNsvjQ8LMpEBcZwJSLM=";
+          "tokens.txt" = "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=";
+        };
+      };
+      vocabulary = {
+        Hyprland = ["hyper land" "hipper land"];
+        niri = ["neary" "nyree"];
+        y0usaf = ["you sef" "yousef" "you saf"];
+        "sherpa-onnx" = ["sherpa onyx" "sherpa onix"];
+        tomoe = ["toe moe" "tomo eh"];
+        ekko = ["eck oh" "eh ko"];
+        moon = [];
+        finix = ["fee nix" "finnix" "fi nix"];
       };
     };
     modules_desktop_apps_browsers = {
@@ -13460,9 +13461,7 @@
         ]);
       };
     };
-    modules_desktop_session_tomoe_shaders_cassette_led_data = {
-      abs,
-      clamp,
+    modules_desktop_session_tomoe_shaders_cassette_data = {
       cond,
       cos,
       dot,
@@ -13472,39 +13471,25 @@
       fn,
       for,
       fract,
-      iResolution,
-      iTime,
-      in',
       inc,
       int,
       length,
       local,
-      max,
-      mix,
       mod,
       neg,
-      normalize,
-      out,
       return,
-      set,
-      sign,
       sin,
       smoothstep,
-      step,
       update,
       vec2,
       vec3,
-      vec4,
-      void,
       ...
     }: self: let
-      inherit (self) AMBER BPM GRAPHITE LEVELS LIGHT ORANGE PUTTY RIPPLE RIPPLE_SPEED ROWS SHELL SPEED WAVE base hash led level ripples;
+      inherit (self) BPM RIPPLE RIPPLE_SPEED WAVE hash;
     in {
       consts = {
-        AMBER = vec3 0.96 0.66 0.2;
         BPM = 128.0;
         GRAPHITE = vec3 0.16 0.16 0.155;
-        LEVELS = 8.0;
         LIGHT = vec2 (-0.6) 0.8;
         ORANGE = vec3 0.93 0.36 0.11;
         PUTTY = vec3 0.8 0.78 0.73;
@@ -13535,105 +13520,6 @@
         ]);
         hash = fn float [{p = vec2;}] ({p}: [
           (return (fract [(sin (dot p (vec2 127.1 311.7))) "*" 43758.5453]))
-        ]);
-        led = fn vec3 [{b = float;}] ({b}: [
-          (return [(mix ORANGE AMBER [0.55 "*" (smoothstep 0.6 1.0 b)]) "*" b])
-        ]);
-        level = fn float [{cell = vec2;} {pitch = float;} {off = vec2;} {t = float;} {aspect = float;}] ({
-          cell,
-          pitch,
-          off,
-          t,
-          aspect,
-          p,
-          b,
-          lift,
-        }: [
-          (local p vec2 [[[cell "+" 0.5] "*" pitch "+" off] "/" iResolution.y])
-          (local b float (smoothstep 0.4 0.98 [(base p t aspect) "*" 0.95]))
-          (local lift float (clamp (ripples p t aspect) 0.0 1.0))
-          (set b [1.0 "-" [1.0 "-" b] "*" [1.0 "-" lift]])
-          (return [(floor [b "*" b "*" LEVELS "+" 0.5]) "/" LEVELS])
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          t,
-          aspect,
-          pitch,
-          off,
-          cell,
-          center,
-          b,
-          hs,
-          q,
-          aq,
-          dist,
-          dir,
-          l,
-          sv,
-          panel,
-          rim,
-          w,
-          wall,
-          lit,
-          side,
-          face,
-          hole,
-          inside,
-          color,
-        }: [
-          (local t float [iTime "*" SPEED])
-          (local aspect float [iResolution.x "/" iResolution.y])
-          (local pitch float (floor [iResolution.y "/" ROWS]))
-          (local off vec2 [0.5 "*" (mod iResolution.xy pitch)])
-          (local cell vec2 (floor [[fragCoord "-" off] "/" pitch]))
-          (local center vec2 [[cell "+" 0.5] "*" pitch "+" off])
-          (local b float (level cell pitch off t aspect))
-          (local hs float [0.5 "*" (floor [pitch "*" 0.62 "+" 0.5])])
-          (local q vec2 [fragCoord "-" center])
-          (local aq vec2 (abs q))
-          (local dist float (max aq.x aq.y))
-          (local dir vec2 (cond [aq.x ">" aq.y] (vec2 (sign q.x) 0.0) (vec2 0.0 (sign q.y))))
-          (local l vec2 (normalize LIGHT))
-          (local sv vec2 [fragCoord "/" iResolution.xy])
-          (local panel vec3 [SHELL "*" (mix 0.94 1.02 [0.55 "*" sv.y "+" 0.45 "*" [1.0 "-" sv.x]])])
-          (local rim float [(smoothstep [hs "+" 2.5] hs dist) "*" (dot dir (neg l))])
-          (update panel "*=" [1.0 "+" 0.1 "*" rim])
-          (local w float 0.0)
-          (for ({j}: {
-            init = local j int (-2);
-            test = [j "<=" 2];
-            step = inc j;
-            body = [
-              (for ({
-                i,
-                nc,
-                d,
-                e,
-              }: {
-                init = local i int (-2);
-                test = [i "<=" 2];
-                step = inc i;
-                body = [
-                  (local nc vec2 [cell "+" (vec2 (float i) (float j))])
-                  (local d vec2 [(abs [fragCoord "-" [[nc "+" 0.5] "*" pitch "+" off]]) "/" pitch])
-                  (local e float (max [(max d.x d.y) "-" 0.31] 0.0))
-                  (update w "+=" [(level nc pitch off t aspect) "*" (exp [(neg e) "*" e "*" 9.0])])
-                ];
-              }))
-            ];
-          }))
-          (set panel (mix panel [panel "*" (vec3 1.03 0.8 0.62)] (clamp [w "*" 0.28] 0.0 0.75)))
-          (local wall float (max 1.0 [hs "*" 0.22]))
-          (local lit float (clamp (dot dir (neg l)) 0.0 1.0))
-          (local side vec3 [(mix [GRAPHITE "*" 0.7] [PUTTY "*" 0.8] lit) "+" (led b) "*" 0.35])
-          (local face vec3 [GRAPHITE "*" 0.85 "+" (led b) "*" [1.0 "+" 0.12 "*" [1.0 "-" dist "/" [hs "-" wall]]]])
-          (local hole vec3 (mix face side [(step [hs "-" wall] dist) "*" [0.4 "+" 0.6 "*" lit]]))
-          (local inside float [1.0 "-" (step hs dist)])
-          (local color vec3 (mix panel hole inside))
-          (update color "+=" [[(hash fragCoord) "-" 0.5] "*" 0.012])
-          (set fragColor (vec4 color 1.0))
         ]);
         ripples = fn float [{c = vec2;} {t = float;} {aspect = float;}] ({
           c,
@@ -13676,24 +13562,21 @@
         ]);
       };
     };
-    modules_desktop_session_tomoe_shaders_cassette_squares_data = {
+    modules_desktop_session_tomoe_shaders_cassette_led_data = {
       abs,
       clamp,
       cond,
-      cos,
       dot,
       exp,
       float,
       floor,
       fn,
       for,
-      fract,
       iResolution,
       iTime,
       in',
       inc,
       int,
-      length,
       local,
       max,
       mix,
@@ -13704,7 +13587,6 @@
       return,
       set,
       sign,
-      sin,
       smoothstep,
       step,
       update,
@@ -13713,139 +13595,213 @@
       vec4,
       void,
       ...
-    }: self: let
-      inherit (self) BPM GRAPHITE LIGHT ORANGE PUTTY RIPPLE RIPPLE_SPEED ROWS SHELL SPEED WAVE base hash ripples;
+    } @ glsl: self: let
+      inherit (self) AMBER GRAPHITE LEVELS LIGHT ORANGE PUTTY ROWS SHELL SPEED base hash led level ripples;
+      cassette = modules_desktop_session_tomoe_shaders_cassette_data glsl self;
     in {
-      consts = {
-        BPM = 128.0;
-        GRAPHITE = vec3 0.16 0.16 0.155;
-        LIGHT = vec2 (-0.6) 0.8;
-        ORANGE = vec3 0.93 0.36 0.11;
-        PUTTY = vec3 0.8 0.78 0.73;
-        RIPPLE = 0.7;
-        RIPPLE_SPEED = 0.7;
-        ROWS = 46.0;
-        SHELL = vec3 0.914 0.898 0.863;
-        SPEED = 1.0;
-        WAVE = 1.5;
-      };
-      fns = {
-        base = fn float [{c = vec2;} {t = float;} {aspect = float;}] ({
-          c,
-          t,
-          aspect,
-          s,
-          a,
-          b,
-          wa,
-          wb,
-        }: [
-          (local s float [t "*" 0.5])
-          (local a vec2 (vec2 [aspect "*" [0.22 "+" 0.08 "*" (sin [s "*" 0.37])]] [0.3 "+" 0.12 "*" (cos [s "*" 0.41])]))
-          (local b vec2 (vec2 [aspect "*" [0.78 "+" 0.08 "*" (cos [s "*" 0.29])]] [0.7 "+" 0.1 "*" (sin [s "*" 0.47])]))
-          (local wa float (sin [(length [c "-" a]) "*" 18.0 "-" t "*" WAVE]))
-          (local wb float (sin [(length [c "-" b]) "*" 14.0 "-" t "*" WAVE "*" 0.8]))
-          (return [0.5 "+" 0.25 "*" [wa "+" wb]])
-        ]);
-        hash = fn float [{p = vec2;}] ({p}: [
-          (return (fract [(sin (dot p (vec2 127.1 311.7))) "*" 43758.5453]))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          t,
-          aspect,
-          pitch,
-          off,
-          cell,
-          center,
-          p,
-          f,
-          hs,
-          q,
-          aq,
-          dist,
-          dir,
-          l,
-          sv,
-          panel,
-          rim,
-          glow,
-          backing,
-          lit,
-          wall,
-          hole,
-          inside,
-          color,
-        }: [
-          (local t float [iTime "*" SPEED])
-          (local aspect float [iResolution.x "/" iResolution.y])
-          (local pitch float (floor [iResolution.y "/" ROWS]))
-          (local off vec2 [0.5 "*" (mod iResolution.xy pitch)])
-          (local cell vec2 (floor [[fragCoord "-" off] "/" pitch]))
-          (local center vec2 [[cell "+" 0.5] "*" pitch "+" off])
-          (local p vec2 [center "/" iResolution.y])
-          (local f float (clamp [(base p t aspect) "*" 0.95 "+" (ripples p t aspect)] 0.0 1.0))
-          (local hs float [0.5 "*" (floor [pitch "*" [0.12 "+" 0.6 "*" f "*" f] "+" 0.5])])
-          (local q vec2 [fragCoord "-" center])
-          (local aq vec2 (abs q))
-          (local dist float (max aq.x aq.y))
-          (local dir vec2 (cond [aq.x ">" aq.y] (vec2 (sign q.x) 0.0) (vec2 0.0 (sign q.y))))
-          (local l vec2 (normalize LIGHT))
-          (local sv vec2 [fragCoord "/" iResolution.xy])
-          (local panel vec3 [SHELL "*" (mix 0.94 1.02 [0.55 "*" sv.y "+" 0.45 "*" [1.0 "-" sv.x]])])
-          (local rim float [(smoothstep [hs "+" 2.5] hs dist) "*" (dot dir (neg l))])
-          (update panel "*=" [1.0 "+" 0.1 "*" rim])
-          (local glow float (smoothstep 0.86 0.98 f))
-          (local backing vec3 (mix GRAPHITE ORANGE glow))
-          (local lit float (clamp (dot dir (neg l)) 0.0 1.0))
-          (local wall vec3 (mix [GRAPHITE "*" 0.7] [PUTTY "*" 0.8] lit))
-          (local hole vec3 (mix backing wall [(step [hs "-" (max 1.0 [hs "*" 0.22])] dist) "*" [0.4 "+" 0.6 "*" lit]]))
-          (local inside float [1.0 "-" (step hs dist)])
-          (local color vec3 (mix panel hole inside))
-          (update color "+=" [[(hash fragCoord) "-" 0.5] "*" 0.012])
-          (set fragColor (vec4 color 1.0))
-        ]);
-        ripples = fn float [{c = vec2;} {t = float;} {aspect = float;}] ({
-          c,
-          t,
-          aspect,
-          every,
-          life,
-          n,
-          age,
-          r,
-        }: [
-          (local every float [120.0 "/" BPM])
-          (local life float [4.0 "*" every])
-          (local n float (floor [t "/" every]))
-          (local age float [t "-" n "*" every])
-          (local r float 0.0)
-          (for ({
-            k,
-            m,
-            tm,
-            x,
-            o,
-            d,
-            env,
-          }: {
-            init = local k int 0;
-            test = [k "<" 4];
-            step = inc k;
-            body = [
-              (local m float [n "-" (float k)])
-              (local tm float [age "+" (float k) "*" every])
-              (local x float [tm "/" life])
-              (local o vec2 (vec2 [(hash (vec2 m 3.7)) "*" aspect] (hash (vec2 m 9.1))))
-              (local d float [(length [c "-" o]) "-" tm "*" RIPPLE_SPEED])
-              (local env float [(smoothstep 0.0 0.04 x) "*" [1.0 "-" (smoothstep 0.2 1.0 x)]])
-              (update r "+=" [(cond [(mod m 2.0) "<" 0.5] 1.0 0.7) "*" env "*" (exp [(neg d) "*" d "*" 120.0])])
-            ];
-          }))
-          (return [RIPPLE "*" r])
-        ]);
-      };
+      consts =
+        cassette.consts
+        // {
+          AMBER = vec3 0.96 0.66 0.2;
+          LEVELS = 8.0;
+        };
+      fns =
+        cassette.fns
+        // {
+          led = fn vec3 [{b = float;}] ({b}: [
+            (return [(mix ORANGE AMBER [0.55 "*" (smoothstep 0.6 1.0 b)]) "*" b])
+          ]);
+          level = fn float [{cell = vec2;} {pitch = float;} {off = vec2;} {t = float;} {aspect = float;}] ({
+            cell,
+            pitch,
+            off,
+            t,
+            aspect,
+            p,
+            b,
+            lift,
+          }: [
+            (local p vec2 [[[cell "+" 0.5] "*" pitch "+" off] "/" iResolution.y])
+            (local b float (smoothstep 0.4 0.98 [(base p t aspect) "*" 0.95]))
+            (local lift float (clamp (ripples p t aspect) 0.0 1.0))
+            (set b [1.0 "-" [1.0 "-" b] "*" [1.0 "-" lift]])
+            (return [(floor [b "*" b "*" LEVELS "+" 0.5]) "/" LEVELS])
+          ]);
+          mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+            fragColor,
+            fragCoord,
+            t,
+            aspect,
+            pitch,
+            off,
+            cell,
+            center,
+            b,
+            hs,
+            q,
+            aq,
+            dist,
+            dir,
+            l,
+            sv,
+            panel,
+            rim,
+            w,
+            wall,
+            lit,
+            side,
+            face,
+            hole,
+            inside,
+            color,
+          }: [
+            (local t float [iTime "*" SPEED])
+            (local aspect float [iResolution.x "/" iResolution.y])
+            (local pitch float (floor [iResolution.y "/" ROWS]))
+            (local off vec2 [0.5 "*" (mod iResolution.xy pitch)])
+            (local cell vec2 (floor [[fragCoord "-" off] "/" pitch]))
+            (local center vec2 [[cell "+" 0.5] "*" pitch "+" off])
+            (local b float (level cell pitch off t aspect))
+            (local hs float [0.5 "*" (floor [pitch "*" 0.62 "+" 0.5])])
+            (local q vec2 [fragCoord "-" center])
+            (local aq vec2 (abs q))
+            (local dist float (max aq.x aq.y))
+            (local dir vec2 (cond [aq.x ">" aq.y] (vec2 (sign q.x) 0.0) (vec2 0.0 (sign q.y))))
+            (local l vec2 (normalize LIGHT))
+            (local sv vec2 [fragCoord "/" iResolution.xy])
+            (local panel vec3 [SHELL "*" (mix 0.94 1.02 [0.55 "*" sv.y "+" 0.45 "*" [1.0 "-" sv.x]])])
+            (local rim float [(smoothstep [hs "+" 2.5] hs dist) "*" (dot dir (neg l))])
+            (update panel "*=" [1.0 "+" 0.1 "*" rim])
+            (local w float 0.0)
+            (for ({j}: {
+              init = local j int (-2);
+              test = [j "<=" 2];
+              step = inc j;
+              body = [
+                (for ({
+                  i,
+                  nc,
+                  d,
+                  e,
+                }: {
+                  init = local i int (-2);
+                  test = [i "<=" 2];
+                  step = inc i;
+                  body = [
+                    (local nc vec2 [cell "+" (vec2 (float i) (float j))])
+                    (local d vec2 [(abs [fragCoord "-" [[nc "+" 0.5] "*" pitch "+" off]]) "/" pitch])
+                    (local e float (max [(max d.x d.y) "-" 0.31] 0.0))
+                    (update w "+=" [(level nc pitch off t aspect) "*" (exp [(neg e) "*" e "*" 9.0])])
+                  ];
+                }))
+              ];
+            }))
+            (set panel (mix panel [panel "*" (vec3 1.03 0.8 0.62)] (clamp [w "*" 0.28] 0.0 0.75)))
+            (local wall float (max 1.0 [hs "*" 0.22]))
+            (local lit float (clamp (dot dir (neg l)) 0.0 1.0))
+            (local side vec3 [(mix [GRAPHITE "*" 0.7] [PUTTY "*" 0.8] lit) "+" (led b) "*" 0.35])
+            (local face vec3 [GRAPHITE "*" 0.85 "+" (led b) "*" [1.0 "+" 0.12 "*" [1.0 "-" dist "/" [hs "-" wall]]]])
+            (local hole vec3 (mix face side [(step [hs "-" wall] dist) "*" [0.4 "+" 0.6 "*" lit]]))
+            (local inside float [1.0 "-" (step hs dist)])
+            (local color vec3 (mix panel hole inside))
+            (update color "+=" [[(hash fragCoord) "-" 0.5] "*" 0.012])
+            (set fragColor (vec4 color 1.0))
+          ]);
+        };
+    };
+    modules_desktop_session_tomoe_shaders_cassette_squares_data = {
+      abs,
+      clamp,
+      cond,
+      dot,
+      float,
+      floor,
+      fn,
+      iResolution,
+      iTime,
+      in',
+      local,
+      max,
+      mix,
+      mod,
+      neg,
+      normalize,
+      out,
+      set,
+      sign,
+      smoothstep,
+      step,
+      update,
+      vec2,
+      vec3,
+      vec4,
+      void,
+      ...
+    } @ glsl: self: let
+      inherit (self) GRAPHITE LIGHT ORANGE PUTTY ROWS SHELL SPEED base hash ripples;
+      cassette = modules_desktop_session_tomoe_shaders_cassette_data glsl self;
+    in {
+      inherit (cassette) consts;
+      fns =
+        cassette.fns
+        // {
+          mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+            fragColor,
+            fragCoord,
+            t,
+            aspect,
+            pitch,
+            off,
+            cell,
+            center,
+            p,
+            f,
+            hs,
+            q,
+            aq,
+            dist,
+            dir,
+            l,
+            sv,
+            panel,
+            rim,
+            glow,
+            backing,
+            lit,
+            wall,
+            hole,
+            inside,
+            color,
+          }: [
+            (local t float [iTime "*" SPEED])
+            (local aspect float [iResolution.x "/" iResolution.y])
+            (local pitch float (floor [iResolution.y "/" ROWS]))
+            (local off vec2 [0.5 "*" (mod iResolution.xy pitch)])
+            (local cell vec2 (floor [[fragCoord "-" off] "/" pitch]))
+            (local center vec2 [[cell "+" 0.5] "*" pitch "+" off])
+            (local p vec2 [center "/" iResolution.y])
+            (local f float (clamp [(base p t aspect) "*" 0.95 "+" (ripples p t aspect)] 0.0 1.0))
+            (local hs float [0.5 "*" (floor [pitch "*" [0.12 "+" 0.6 "*" f "*" f] "+" 0.5])])
+            (local q vec2 [fragCoord "-" center])
+            (local aq vec2 (abs q))
+            (local dist float (max aq.x aq.y))
+            (local dir vec2 (cond [aq.x ">" aq.y] (vec2 (sign q.x) 0.0) (vec2 0.0 (sign q.y))))
+            (local l vec2 (normalize LIGHT))
+            (local sv vec2 [fragCoord "/" iResolution.xy])
+            (local panel vec3 [SHELL "*" (mix 0.94 1.02 [0.55 "*" sv.y "+" 0.45 "*" [1.0 "-" sv.x]])])
+            (local rim float [(smoothstep [hs "+" 2.5] hs dist) "*" (dot dir (neg l))])
+            (update panel "*=" [1.0 "+" 0.1 "*" rim])
+            (local glow float (smoothstep 0.86 0.98 f))
+            (local backing vec3 (mix GRAPHITE ORANGE glow))
+            (local lit float (clamp (dot dir (neg l)) 0.0 1.0))
+            (local wall vec3 (mix [GRAPHITE "*" 0.7] [PUTTY "*" 0.8] lit))
+            (local hole vec3 (mix backing wall [(step [hs "-" (max 1.0 [hs "*" 0.22])] dist) "*" [0.4 "+" 0.6 "*" lit]]))
+            (local inside float [1.0 "-" (step hs dist)])
+            (local color vec3 (mix panel hole inside))
+            (update color "+=" [[(hash fragCoord) "-" 0.5] "*" 0.012])
+            (set fragColor (vec4 color 1.0))
+          ]);
+        };
     };
     modules_desktop_session_tomoe_shaders_dot_corridor_data = {
       abs,
@@ -14563,12 +14519,32 @@
     };
     modules_desktop_session_tomoe_shaders_ozette_dark_data = {
       ozette,
+      rgb,
+      ...
+    } @ glsl: self: let
+      scene = modules_desktop_session_tomoe_shaders_ozette_data glsl self;
+    in {
+      inherit (scene) fns;
+      consts =
+        scene.consts
+        // {
+          BASE_BOTTOM = rgb ozette.abyss;
+          BASE_TOP = rgb ozette.dusk;
+          DOT = rgb ozette.lime;
+          DOTW = 0.08;
+          HUE = 0.13;
+          PLUM = rgb ozette.plum;
+          PLUMW = 0.6;
+          RING = 0.004;
+        };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_data = {
+      ozette,
       array,
       cos,
       dot,
       exp,
       float,
-      floor,
       fn,
       for,
       fract,
@@ -14580,7 +14556,6 @@
       int,
       length,
       local,
-      mat2,
       mix,
       mod,
       neg,
@@ -14597,134 +14572,97 @@
       void,
       rgb,
       ...
-    }: self: let
-      inherit (self) BASE_BOTTOM BASE_TOP DOT DOTW GRID HUE LAV LIME MUSTARD PINK PLUM PLUMW RING RIPPLE SPEED blob fbm hash noise;
+    } @ glsl: self: let
+      inherit (self) BASE_BOTTOM BASE_TOP DOT DOTW GRID HUE LAV LIME MUSTARD PINK PLUM PLUMW RING RIPPLE SPEED blob fbm hash;
+      prelude = modules_desktop_session_tomoe_shaders_ozette_prelude_data glsl self;
     in {
-      consts = {
-        BASE_BOTTOM = rgb ozette.abyss;
-        BASE_TOP = rgb ozette.dusk;
-        DOT = rgb ozette.lime;
-        DOTW = 0.08;
-        GRID = 44.0;
-        HUE = 0.13;
-        LAV = rgb ozette.lavender;
-        LIME = rgb ozette.lime;
-        MUSTARD = rgb ozette.mustard;
-        PINK = rgb ozette.pink;
-        PLUM = rgb ozette.plum;
-        PLUMW = 0.6;
-        RING = 0.004;
-        RIPPLE = 0.25;
-        SPEED = 0.02;
-      };
-      fns = {
-        blob = fn float [{uv = vec2;} {c = vec2;} {r = float;}] ({
-          uv,
-          c,
-          r,
-          d,
-        }: [
-          (local d vec2 [uv "-" c])
-          (return (exp [(neg (dot d d)) "/" [r "*" r]]))
-        ]);
-        fbm = fn float [{p = vec2;}] ({
-          p,
-          s,
-          a,
-        }: [
-          (local s float 0.0)
-          (local a float 0.5)
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (update s "+=" [a "*" (noise p)])
-              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
-              (update a "*=" 0.5)
-            ];
-          }))
-          (return s)
-        ]);
-        hash = fn float [{p = vec2;}] ({p}: [
-          (set p (fract [p "*" (vec2 123.34 456.21)]))
-          (update p "+=" (dot p [p "+" 45.32]))
-          (return (fract [p.x "*" p.y]))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          uv,
-          t,
-          w,
-          a,
-          col,
-          r,
-          cs,
-          g,
-          pip,
-        }: [
-          (local uv vec2 [fragCoord "/" iResolution.y])
-          (local t float [iTime "*" SPEED])
-          (local w vec2 [uv "+" 0.18 "*" (vec2 (fbm [uv "*" 1.3 "+" (vec2 t 0.0)]) (fbm [uv "*" 1.3 "+" (vec2 3.1 (neg t))])) "-" 0.09])
-          (local a float [iResolution.x "/" iResolution.y])
-          (local col vec3 (mix BASE_TOP BASE_BOTTOM (smoothstep 0.0 1.0 [1.0 "-" uv.y])))
-          (set col (mix col LAV [HUE "*" 1.0 "*" (blob w (vec2 [a "*" [0.22 "+" 0.04 "*" (sin [t "*" 0.7])]] 0.72) 0.55)]))
-          (set col (mix col PINK [HUE "*" 0.75 "*" (blob w (vec2 [a "*" [0.78 "+" 0.03 "*" (cos [t "*" 0.6])]] 0.78) 0.48)]))
-          (set col (mix col MUSTARD [HUE "*" 0.55 "*" (blob w (vec2 [a "*" [0.58 "+" 0.04 "*" (sin [t "*" 0.5 "+" 2.0])]] 0.08) 0.42)]))
-          (set col (mix col LIME [HUE "*" 0.6 "*" (blob w (vec2 [a "*" [0.92 "+" 0.02 "*" (sin [t "*" 0.8])]] 0.2) 0.4)]))
-          (set col (mix col PLUM [PLUMW "*" (blob w (vec2 [a "*" 0.45] [0.45 "+" 0.05 "*" (sin [t "*" 0.4])]) 0.6)]))
-          (local r float 0.0)
-          (local cs (sized vec2 3) (array vec2 [(vec2 [0.3 "*" a] 0.35) (vec2 [0.7 "*" a] 0.62) (vec2 [0.52 "*" a] 0.18)]))
-          (for ({
-            i,
+      consts =
+        prelude.consts
+        // {
+          LIME = rgb ozette.lime;
+          MUSTARD = rgb ozette.mustard;
+          RIPPLE = 0.25;
+          SPEED = 0.02;
+        };
+      fns =
+        prelude.fns
+        // {
+          blob = fn float [{uv = vec2;} {c = vec2;} {r = float;}] ({
+            uv,
+            c,
+            r,
             d,
-          }: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (local d float (length [w "-" (index cs i)]))
-              (update r "+=" [(sin [d "*" 38.0 "-" iTime "*" RIPPLE "+" (float i) "*" 2.1]) "*" (exp [(neg d) "*" 2.2])])
-            ];
-          }))
-          (update col "+=" [RING "*" r])
-          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
-          (local pip float [1.0 "-" (smoothstep 1.1 1.9 (length g))])
-          (set col (mix col DOT [DOTW "*" pip "*" [0.6 "+" 0.4 "*" (fbm [uv "*" 2.0 "-" t])]]))
-          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
-          (set fragColor (vec4 col 1.0))
-        ]);
-        noise = fn float [{p = vec2;}] ({
-          p,
-          i,
-          f,
-          u,
-        }: [
-          (local i vec2 (floor p))
-          (local f vec2 (fract p))
-          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
-          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
-        ]);
-      };
+          }: [
+            (local d vec2 [uv "-" c])
+            (return (exp [(neg (dot d d)) "/" [r "*" r]]))
+          ]);
+          mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+            fragColor,
+            fragCoord,
+            uv,
+            t,
+            w,
+            a,
+            col,
+            r,
+            cs,
+            g,
+            pip,
+          }: [
+            (local uv vec2 [fragCoord "/" iResolution.y])
+            (local t float [iTime "*" SPEED])
+            (local w vec2 [uv "+" 0.18 "*" (vec2 (fbm [uv "*" 1.3 "+" (vec2 t 0.0)]) (fbm [uv "*" 1.3 "+" (vec2 3.1 (neg t))])) "-" 0.09])
+            (local a float [iResolution.x "/" iResolution.y])
+            (local col vec3 (mix BASE_TOP BASE_BOTTOM (smoothstep 0.0 1.0 [1.0 "-" uv.y])))
+            (set col (mix col LAV [HUE "*" 1.0 "*" (blob w (vec2 [a "*" [0.22 "+" 0.04 "*" (sin [t "*" 0.7])]] 0.72) 0.55)]))
+            (set col (mix col PINK [HUE "*" 0.75 "*" (blob w (vec2 [a "*" [0.78 "+" 0.03 "*" (cos [t "*" 0.6])]] 0.78) 0.48)]))
+            (set col (mix col MUSTARD [HUE "*" 0.55 "*" (blob w (vec2 [a "*" [0.58 "+" 0.04 "*" (sin [t "*" 0.5 "+" 2.0])]] 0.08) 0.42)]))
+            (set col (mix col LIME [HUE "*" 0.6 "*" (blob w (vec2 [a "*" [0.92 "+" 0.02 "*" (sin [t "*" 0.8])]] 0.2) 0.4)]))
+            (set col (mix col PLUM [PLUMW "*" (blob w (vec2 [a "*" 0.45] [0.45 "+" 0.05 "*" (sin [t "*" 0.4])]) 0.6)]))
+            (local r float 0.0)
+            (local cs (sized vec2 3) (array vec2 [(vec2 [0.3 "*" a] 0.35) (vec2 [0.7 "*" a] 0.62) (vec2 [0.52 "*" a] 0.18)]))
+            (for ({
+              i,
+              d,
+            }: {
+              init = local i int 0;
+              test = [i "<" 3];
+              step = inc i;
+              body = [
+                (local d float (length [w "-" (index cs i)]))
+                (update r "+=" [(sin [d "*" 38.0 "-" iTime "*" RIPPLE "+" (float i) "*" 2.1]) "*" (exp [(neg d) "*" 2.2])])
+              ];
+            }))
+            (update col "+=" [RING "*" r])
+            (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+            (local pip float [1.0 "-" (smoothstep 1.1 1.9 (length g))])
+            (set col (mix col DOT [DOTW "*" pip "*" [0.6 "+" 0.4 "*" (fbm [uv "*" 2.0 "-" t])]]))
+            (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+            (set fragColor (vec4 col 1.0))
+          ]);
+        };
     };
-    modules_desktop_session_tomoe_shaders_ozette_fields_dark_data = {
-      ozette,
+    modules_desktop_session_tomoe_shaders_ozette_fields_dark_data = glsl: self: let
+      scene = modules_desktop_session_tomoe_shaders_ozette_fields_data glsl self;
+    in {
+      inherit (scene) fns;
+      consts =
+        scene.consts
+        // scene.paper.dark
+        // {
+          STRENGTH = 0.3;
+        };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_fields_data = {
       cos,
-      dot,
       float,
-      floor,
       fn,
-      for,
       fract,
       iResolution,
       iTime,
       in',
-      inc,
-      int,
       length,
       local,
-      mat2,
       mix,
       mod,
       neg,
@@ -14738,631 +14676,217 @@
       vec3,
       vec4,
       void,
-      rgb,
       ...
-    }: self: let
-      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAGE PAPER PINK SPEED STRENGTH fbm field hash noise;
+    } @ glsl: self: let
+      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAGE PAPER PINK SPEED STRENGTH fbm field hash;
+      prelude = modules_desktop_session_tomoe_shaders_ozette_prelude_data glsl self;
     in {
-      consts = {
-        DOT = rgb ozette.lime;
-        DOTW = 0.1;
-        GRID = 44.0;
-        LAV = rgb ozette.lavender;
-        LIME = rgb ozette.mint;
-        MUSTARD = rgb ozette.periwinkle;
-        PAGE = rgb ozette.night;
-        PAPER = rgb ozette.ink;
-        PINK = rgb ozette.pink;
-        SPEED = 0.02;
-        STRENGTH = 0.3;
-      };
-      fns = {
-        fbm = fn float [{p = vec2;}] ({
-          p,
-          s,
-          a,
-        }: [
-          (local s float 0.0)
-          (local a float 0.5)
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (update s "+=" [a "*" (noise p)])
-              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
-              (update a "*=" 0.5)
-            ];
-          }))
-          (return s)
-        ]);
-        field = fn float [{p = vec2;} {c = vec2;} {r = float;}] ({
-          p,
-          c,
-          r,
-        }: [
-          (return [1.0 "-" (smoothstep [r "*" 0.82] [r "*" 1.12] (length [p "-" c]))])
-        ]);
-        hash = fn float [{p = vec2;}] ({p}: [
-          (set p (fract [p "*" (vec2 123.34 456.21)]))
-          (update p "+=" (dot p [p "+" 45.32]))
-          (return (fract [p.x "*" p.y]))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          uv,
-          a,
-          t,
-          w,
-          col,
-          g,
-        }: [
-          (local uv vec2 [fragCoord "/" iResolution.y])
-          (local a float [iResolution.x "/" iResolution.y])
-          (local t float [iTime "*" SPEED])
-          (local w vec2 [uv "+" 0.22 "*" (vec2 (fbm [uv "*" 0.9 "+" (vec2 t 1.7)]) (fbm [uv "*" 0.9 "+" (vec2 5.2 (neg t))])) "-" 0.11])
-          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
-          (set col (mix col LAV [STRENGTH "*" (field w (vec2 [a "*" [0.2 "+" 0.05 "*" (sin [t "*" 2.1])]] 0.66) 0.62)]))
-          (set col (mix col MUSTARD [STRENGTH "*" (field w (vec2 [a "*" [0.5 "+" 0.04 "*" (cos [t "*" 1.7])]] 0.02) 0.5)]))
-          (set col (mix col PINK [STRENGTH "*" (field w (vec2 [a "*" [0.74 "+" 0.04 "*" (sin [t "*" 1.9 "+" 1.0])]] 0.86) 0.55)]))
-          (set col (mix col LIME [STRENGTH "*" (field w (vec2 [a "*" [0.96 "+" 0.03 "*" (cos [t "*" 2.3])]] 0.24) 0.48)]))
-          (set col (mix col LAV [STRENGTH "*" 0.7 "*" (field w (vec2 [a "*" [0.38 "+" 0.03 "*" (sin [t "*" 1.3])]] 1.08) 0.36)]))
-          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
-          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
-          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
-          (set fragColor (vec4 col 1.0))
-        ]);
-        noise = fn float [{p = vec2;}] ({
-          p,
-          i,
-          f,
-          u,
-        }: [
-          (local i vec2 (floor p))
-          (local f vec2 (fract p))
-          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
-          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
-        ]);
-      };
+      consts =
+        prelude.consts
+        // {
+          DOTW = 0.1;
+          SPEED = 0.02;
+        };
+      fns =
+        prelude.fns
+        // {
+          field = fn float [{p = vec2;} {c = vec2;} {r = float;}] ({
+            p,
+            c,
+            r,
+          }: [
+            (return [1.0 "-" (smoothstep [r "*" 0.82] [r "*" 1.12] (length [p "-" c]))])
+          ]);
+          mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+            fragColor,
+            fragCoord,
+            uv,
+            a,
+            t,
+            w,
+            col,
+            g,
+          }: [
+            (local uv vec2 [fragCoord "/" iResolution.y])
+            (local a float [iResolution.x "/" iResolution.y])
+            (local t float [iTime "*" SPEED])
+            (local w vec2 [uv "+" 0.22 "*" (vec2 (fbm [uv "*" 0.9 "+" (vec2 t 1.7)]) (fbm [uv "*" 0.9 "+" (vec2 5.2 (neg t))])) "-" 0.11])
+            (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
+            (set col (mix col LAV [STRENGTH "*" (field w (vec2 [a "*" [0.2 "+" 0.05 "*" (sin [t "*" 2.1])]] 0.66) 0.62)]))
+            (set col (mix col MUSTARD [STRENGTH "*" (field w (vec2 [a "*" [0.5 "+" 0.04 "*" (cos [t "*" 1.7])]] 0.02) 0.5)]))
+            (set col (mix col PINK [STRENGTH "*" (field w (vec2 [a "*" [0.74 "+" 0.04 "*" (sin [t "*" 1.9 "+" 1.0])]] 0.86) 0.55)]))
+            (set col (mix col LIME [STRENGTH "*" (field w (vec2 [a "*" [0.96 "+" 0.03 "*" (cos [t "*" 2.3])]] 0.24) 0.48)]))
+            (set col (mix col LAV [STRENGTH "*" 0.7 "*" (field w (vec2 [a "*" [0.38 "+" 0.03 "*" (sin [t "*" 1.3])]] 1.08) 0.36)]))
+            (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+            (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
+            (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+            (set fragColor (vec4 col 1.0))
+          ]);
+        };
+      inherit (prelude) paper;
     };
-    modules_desktop_session_tomoe_shaders_ozette_fields_light_data = {
-      ozette,
-      cos,
-      dot,
-      float,
-      floor,
-      fn,
-      for,
-      fract,
-      iResolution,
-      iTime,
-      in',
-      inc,
-      int,
-      length,
-      local,
-      mat2,
-      mix,
-      mod,
-      neg,
-      out,
-      return,
-      set,
-      sin,
-      smoothstep,
-      update,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      rgb,
-      ...
-    }: self: let
-      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAGE PAPER PINK SPEED STRENGTH fbm field hash noise;
+    modules_desktop_session_tomoe_shaders_ozette_fields_light_data = glsl: self: let
+      scene = modules_desktop_session_tomoe_shaders_ozette_fields_data glsl self;
     in {
-      consts = {
-        DOT = rgb ozette.moss;
-        DOTW = 0.1;
-        GRID = 44.0;
-        LAV = rgb ozette.lavender;
-        LIME = rgb ozette.lime;
-        MUSTARD = rgb ozette.mustard;
-        PAGE = rgb ozette.mist;
-        PAPER = rgb ozette.snow;
-        PINK = rgb ozette.pink;
-        SPEED = 0.02;
-        STRENGTH = 0.55;
-      };
-      fns = {
-        fbm = fn float [{p = vec2;}] ({
-          p,
-          s,
-          a,
-        }: [
-          (local s float 0.0)
-          (local a float 0.5)
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (update s "+=" [a "*" (noise p)])
-              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
-              (update a "*=" 0.5)
-            ];
-          }))
-          (return s)
-        ]);
-        field = fn float [{p = vec2;} {c = vec2;} {r = float;}] ({
-          p,
-          c,
-          r,
-        }: [
-          (return [1.0 "-" (smoothstep [r "*" 0.82] [r "*" 1.12] (length [p "-" c]))])
-        ]);
-        hash = fn float [{p = vec2;}] ({p}: [
-          (set p (fract [p "*" (vec2 123.34 456.21)]))
-          (update p "+=" (dot p [p "+" 45.32]))
-          (return (fract [p.x "*" p.y]))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          uv,
-          a,
-          t,
-          w,
-          col,
-          g,
-        }: [
-          (local uv vec2 [fragCoord "/" iResolution.y])
-          (local a float [iResolution.x "/" iResolution.y])
-          (local t float [iTime "*" SPEED])
-          (local w vec2 [uv "+" 0.22 "*" (vec2 (fbm [uv "*" 0.9 "+" (vec2 t 1.7)]) (fbm [uv "*" 0.9 "+" (vec2 5.2 (neg t))])) "-" 0.11])
-          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
-          (set col (mix col LAV [STRENGTH "*" (field w (vec2 [a "*" [0.2 "+" 0.05 "*" (sin [t "*" 2.1])]] 0.66) 0.62)]))
-          (set col (mix col MUSTARD [STRENGTH "*" (field w (vec2 [a "*" [0.5 "+" 0.04 "*" (cos [t "*" 1.7])]] 0.02) 0.5)]))
-          (set col (mix col PINK [STRENGTH "*" (field w (vec2 [a "*" [0.74 "+" 0.04 "*" (sin [t "*" 1.9 "+" 1.0])]] 0.86) 0.55)]))
-          (set col (mix col LIME [STRENGTH "*" (field w (vec2 [a "*" [0.96 "+" 0.03 "*" (cos [t "*" 2.3])]] 0.24) 0.48)]))
-          (set col (mix col LAV [STRENGTH "*" 0.7 "*" (field w (vec2 [a "*" [0.38 "+" 0.03 "*" (sin [t "*" 1.3])]] 1.08) 0.36)]))
-          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
-          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
-          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
-          (set fragColor (vec4 col 1.0))
-        ]);
-        noise = fn float [{p = vec2;}] ({
-          p,
-          i,
-          f,
-          u,
-        }: [
-          (local i vec2 (floor p))
-          (local f vec2 (fract p))
-          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
-          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
-        ]);
-      };
+      inherit (scene) fns;
+      consts =
+        scene.consts
+        // scene.paper.light
+        // {
+          STRENGTH = 0.55;
+        };
     };
     modules_desktop_session_tomoe_shaders_ozette_light_data = {
       ozette,
-      array,
+      rgb,
+      ...
+    } @ glsl: self: let
+      scene = modules_desktop_session_tomoe_shaders_ozette_data glsl self;
+    in {
+      inherit (scene) fns;
+      consts =
+        scene.consts
+        // {
+          BASE_BOTTOM = rgb ozette.mist;
+          BASE_TOP = rgb ozette.snow;
+          DOT = rgb ozette.moss;
+          DOTW = 0.07;
+          HUE = 0.32;
+          PLUM = rgb ozette.frost;
+          PLUMW = 0.25;
+          RING = 0.006;
+        };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_lilies_dark_data = glsl: self: let
+      scene = modules_desktop_session_tomoe_shaders_ozette_lilies_data glsl self;
+    in {
+      inherit (scene) fns;
+      consts =
+        scene.consts
+        // scene.paper.dark
+        // {
+          PAD = 0.3;
+        };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_lilies_data = {
+      abs,
+      atan2,
       cos,
-      dot,
-      exp,
       float,
-      floor,
       fn,
-      for,
       fract,
       iResolution,
       iTime,
       in',
-      inc,
-      index,
-      int,
       length,
       local,
-      mat2,
       mix,
       mod,
-      neg,
       out,
       return,
       set,
       sin,
-      sized,
       smoothstep,
       update,
       vec2,
       vec3,
       vec4,
       void,
-      rgb,
       ...
-    }: self: let
-      inherit (self) BASE_BOTTOM BASE_TOP DOT DOTW GRID HUE LAV LIME MUSTARD PINK PLUM PLUMW RING RIPPLE SPEED blob fbm hash noise;
+    } @ glsl: self: let
+      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAD PAGE PAPER PINK SPEED hash pad;
+      prelude = modules_desktop_session_tomoe_shaders_ozette_prelude_data glsl self;
     in {
-      consts = {
-        BASE_BOTTOM = rgb ozette.mist;
-        BASE_TOP = rgb ozette.snow;
-        DOT = rgb ozette.moss;
-        DOTW = 0.07;
-        GRID = 44.0;
-        HUE = 0.32;
-        LAV = rgb ozette.lavender;
-        LIME = rgb ozette.lime;
-        MUSTARD = rgb ozette.mustard;
-        PINK = rgb ozette.pink;
-        PLUM = rgb ozette.frost;
-        PLUMW = 0.25;
-        RING = 0.006;
-        RIPPLE = 0.25;
-        SPEED = 0.02;
-      };
-      fns = {
-        blob = fn float [{uv = vec2;} {c = vec2;} {r = float;}] ({
-          uv,
-          c,
-          r,
-          d,
-        }: [
-          (local d vec2 [uv "-" c])
-          (return (exp [(neg (dot d d)) "/" [r "*" r]]))
-        ]);
-        fbm = fn float [{p = vec2;}] ({
-          p,
-          s,
-          a,
-        }: [
-          (local s float 0.0)
-          (local a float 0.5)
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (update s "+=" [a "*" (noise p)])
-              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
-              (update a "*=" 0.5)
-            ];
-          }))
-          (return s)
-        ]);
-        hash = fn float [{p = vec2;}] ({p}: [
-          (set p (fract [p "*" (vec2 123.34 456.21)]))
-          (update p "+=" (dot p [p "+" 45.32]))
-          (return (fract [p.x "*" p.y]))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          uv,
-          t,
-          w,
-          a,
-          col,
-          r,
-          cs,
-          g,
-          pip,
-        }: [
-          (local uv vec2 [fragCoord "/" iResolution.y])
-          (local t float [iTime "*" SPEED])
-          (local w vec2 [uv "+" 0.18 "*" (vec2 (fbm [uv "*" 1.3 "+" (vec2 t 0.0)]) (fbm [uv "*" 1.3 "+" (vec2 3.1 (neg t))])) "-" 0.09])
-          (local a float [iResolution.x "/" iResolution.y])
-          (local col vec3 (mix BASE_TOP BASE_BOTTOM (smoothstep 0.0 1.0 [1.0 "-" uv.y])))
-          (set col (mix col LAV [HUE "*" 1.0 "*" (blob w (vec2 [a "*" [0.22 "+" 0.04 "*" (sin [t "*" 0.7])]] 0.72) 0.55)]))
-          (set col (mix col PINK [HUE "*" 0.75 "*" (blob w (vec2 [a "*" [0.78 "+" 0.03 "*" (cos [t "*" 0.6])]] 0.78) 0.48)]))
-          (set col (mix col MUSTARD [HUE "*" 0.55 "*" (blob w (vec2 [a "*" [0.58 "+" 0.04 "*" (sin [t "*" 0.5 "+" 2.0])]] 0.08) 0.42)]))
-          (set col (mix col LIME [HUE "*" 0.6 "*" (blob w (vec2 [a "*" [0.92 "+" 0.02 "*" (sin [t "*" 0.8])]] 0.2) 0.4)]))
-          (set col (mix col PLUM [PLUMW "*" (blob w (vec2 [a "*" 0.45] [0.45 "+" 0.05 "*" (sin [t "*" 0.4])]) 0.6)]))
-          (local r float 0.0)
-          (local cs (sized vec2 3) (array vec2 [(vec2 [0.3 "*" a] 0.35) (vec2 [0.7 "*" a] 0.62) (vec2 [0.52 "*" a] 0.18)]))
-          (for ({
-            i,
+      consts =
+        prelude.consts
+        // {
+          DOTW = 0.16;
+          SPEED = 0.03;
+        };
+      fns =
+        prelude.fns
+        // {
+          mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+            fragColor,
+            fragCoord,
+            uv,
+            a,
+            t,
+            col,
+            g,
+          }: [
+            (local uv vec2 [fragCoord "/" iResolution.y])
+            (local a float [iResolution.x "/" iResolution.y])
+            (local t float [iTime "*" SPEED])
+            (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
+            (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+            (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.2 2.0 (length g))]]))
+            (set col (pad col uv (vec2 [a "*" 0.12 "+" 0.03 "*" (sin [t "*" 1.3])] [0.78 "+" 0.03 "*" (cos [t "*" 1.1])]) 0.26 [0.6 "+" 0.2 "*" (sin t)] LAV))
+            (set col (pad col uv (vec2 [a "*" 0.36 "+" 0.04 "*" (cos [t "*" 0.9])] [0.12 "+" 0.03 "*" (sin [t "*" 1.4])]) 0.2 [2.2 "+" 0.2 "*" (cos [t "*" 0.8])] MUSTARD))
+            (set col (pad col uv (vec2 [a "*" 0.62 "+" 0.03 "*" (sin [t "*" 1.2 "+" 2.0])] [0.9 "+" 0.02 "*" (cos [t "*" 1.6])]) 0.17 [4.0 "+" 0.2 "*" (sin [t "*" 1.1])] LIME))
+            (set col (pad col uv (vec2 [a "*" 0.84 "+" 0.04 "*" (cos [t "*" 1.0 "+" 1.0])] [0.3 "+" 0.03 "*" (sin [t "*" 0.7])]) 0.3 [5.1 "+" 0.2 "*" (cos [t "*" 0.9])] PINK))
+            (set col (pad col uv (vec2 [a "*" 0.97 "+" 0.02 "*" (sin [t "*" 1.5])] [0.82 "+" 0.03 "*" (sin [t "*" 1.2])]) 0.12 [1.4 "+" 0.2 "*" (sin [t "*" 1.3])] LAV))
+            (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+            (set fragColor (vec4 col 1.0))
+          ]);
+          pad = fn vec3 [{col = vec3;} {p = vec2;} {c = vec2;} {r = float;} {turn = float;} {hue = vec3;}] ({
+            col,
+            p,
+            c,
+            r,
+            turn,
+            hue,
             d,
-          }: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (local d float (length [w "-" (index cs i)]))
-              (update r "+=" [(sin [d "*" 38.0 "-" iTime "*" RIPPLE "+" (float i) "*" 2.1]) "*" (exp [(neg d) "*" 2.2])])
-            ];
-          }))
-          (update col "+=" [RING "*" r])
-          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
-          (local pip float [1.0 "-" (smoothstep 1.1 1.9 (length g))])
-          (set col (mix col DOT [DOTW "*" pip "*" [0.6 "+" 0.4 "*" (fbm [uv "*" 2.0 "-" t])]]))
-          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
-          (set fragColor (vec4 col 1.0))
-        ]);
-        noise = fn float [{p = vec2;}] ({
-          p,
-          i,
-          f,
-          u,
-        }: [
-          (local i vec2 (floor p))
-          (local f vec2 (fract p))
-          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
-          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
-        ]);
-      };
+            ang,
+            notch,
+            px,
+            m,
+            c2,
+          }: [
+            (local d vec2 [p "-" c])
+            (local ang float [(atan2 d.y d.x) "-" turn])
+            (local notch float (smoothstep 0.1 0.13 (abs [(mod [ang "+" 3.14159] 6.28318) "-" 3.14159])))
+            (local px float [1.5 "/" iResolution.y])
+            (local m float [[1.0 "-" (smoothstep [r "-" px] [r "+" px] (length d))] "*" notch])
+            (local c2 vec3 (mix col hue PAD))
+            (return (mix col c2 m))
+          ]);
+        };
+      inherit (prelude) paper;
     };
-    modules_desktop_session_tomoe_shaders_ozette_lilies_dark_data = {
-      ozette,
-      abs,
-      atan2,
-      cos,
-      dot,
-      float,
-      floor,
-      fn,
-      for,
-      fract,
-      iResolution,
-      iTime,
-      in',
-      inc,
-      int,
-      length,
-      local,
-      mat2,
-      mix,
-      mod,
-      out,
-      return,
-      set,
-      sin,
-      smoothstep,
-      update,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      rgb,
-      ...
-    }: self: let
-      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAD PAGE PAPER PINK SPEED hash noise pad;
+    modules_desktop_session_tomoe_shaders_ozette_lilies_light_data = glsl: self: let
+      scene = modules_desktop_session_tomoe_shaders_ozette_lilies_data glsl self;
     in {
-      consts = {
-        DOT = rgb ozette.lime;
-        DOTW = 0.16;
-        GRID = 44.0;
-        LAV = rgb ozette.lavender;
-        LIME = rgb ozette.mint;
-        MUSTARD = rgb ozette.periwinkle;
-        PAD = 0.3;
-        PAGE = rgb ozette.night;
-        PAPER = rgb ozette.ink;
-        PINK = rgb ozette.pink;
-        SPEED = 0.03;
-      };
-      fns = {
-        fbm = fn float [{p = vec2;}] ({
-          p,
-          s,
-          a,
-        }: [
-          (local s float 0.0)
-          (local a float 0.5)
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (update s "+=" [a "*" (noise p)])
-              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
-              (update a "*=" 0.5)
-            ];
-          }))
-          (return s)
-        ]);
-        hash = fn float [{p = vec2;}] ({p}: [
-          (set p (fract [p "*" (vec2 123.34 456.21)]))
-          (update p "+=" (dot p [p "+" 45.32]))
-          (return (fract [p.x "*" p.y]))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          uv,
-          a,
-          t,
-          col,
-          g,
-        }: [
-          (local uv vec2 [fragCoord "/" iResolution.y])
-          (local a float [iResolution.x "/" iResolution.y])
-          (local t float [iTime "*" SPEED])
-          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
-          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
-          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.2 2.0 (length g))]]))
-          (set col (pad col uv (vec2 [a "*" 0.12 "+" 0.03 "*" (sin [t "*" 1.3])] [0.78 "+" 0.03 "*" (cos [t "*" 1.1])]) 0.26 [0.6 "+" 0.2 "*" (sin t)] LAV))
-          (set col (pad col uv (vec2 [a "*" 0.36 "+" 0.04 "*" (cos [t "*" 0.9])] [0.12 "+" 0.03 "*" (sin [t "*" 1.4])]) 0.2 [2.2 "+" 0.2 "*" (cos [t "*" 0.8])] MUSTARD))
-          (set col (pad col uv (vec2 [a "*" 0.62 "+" 0.03 "*" (sin [t "*" 1.2 "+" 2.0])] [0.9 "+" 0.02 "*" (cos [t "*" 1.6])]) 0.17 [4.0 "+" 0.2 "*" (sin [t "*" 1.1])] LIME))
-          (set col (pad col uv (vec2 [a "*" 0.84 "+" 0.04 "*" (cos [t "*" 1.0 "+" 1.0])] [0.3 "+" 0.03 "*" (sin [t "*" 0.7])]) 0.3 [5.1 "+" 0.2 "*" (cos [t "*" 0.9])] PINK))
-          (set col (pad col uv (vec2 [a "*" 0.97 "+" 0.02 "*" (sin [t "*" 1.5])] [0.82 "+" 0.03 "*" (sin [t "*" 1.2])]) 0.12 [1.4 "+" 0.2 "*" (sin [t "*" 1.3])] LAV))
-          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
-          (set fragColor (vec4 col 1.0))
-        ]);
-        noise = fn float [{p = vec2;}] ({
-          p,
-          i,
-          f,
-          u,
-        }: [
-          (local i vec2 (floor p))
-          (local f vec2 (fract p))
-          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
-          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
-        ]);
-        pad = fn vec3 [{col = vec3;} {p = vec2;} {c = vec2;} {r = float;} {turn = float;} {hue = vec3;}] ({
-          col,
-          p,
-          c,
-          r,
-          turn,
-          hue,
-          d,
-          ang,
-          notch,
-          px,
-          m,
-          c2,
-        }: [
-          (local d vec2 [p "-" c])
-          (local ang float [(atan2 d.y d.x) "-" turn])
-          (local notch float (smoothstep 0.1 0.13 (abs [(mod [ang "+" 3.14159] 6.28318) "-" 3.14159])))
-          (local px float [1.5 "/" iResolution.y])
-          (local m float [[1.0 "-" (smoothstep [r "-" px] [r "+" px] (length d))] "*" notch])
-          (local c2 vec3 (mix col hue PAD))
-          (return (mix col c2 m))
-        ]);
-      };
-    };
-    modules_desktop_session_tomoe_shaders_ozette_lilies_light_data = {
-      ozette,
-      abs,
-      atan2,
-      cos,
-      dot,
-      float,
-      floor,
-      fn,
-      for,
-      fract,
-      iResolution,
-      iTime,
-      in',
-      inc,
-      int,
-      length,
-      local,
-      mat2,
-      mix,
-      mod,
-      out,
-      return,
-      set,
-      sin,
-      smoothstep,
-      update,
-      vec2,
-      vec3,
-      vec4,
-      void,
-      rgb,
-      ...
-    }: self: let
-      inherit (self) DOT DOTW GRID LAV LIME MUSTARD PAD PAGE PAPER PINK SPEED hash noise pad;
-    in {
-      consts = {
-        DOT = rgb ozette.moss;
-        DOTW = 0.16;
-        GRID = 44.0;
-        LAV = rgb ozette.lavender;
-        LIME = rgb ozette.lime;
-        MUSTARD = rgb ozette.mustard;
-        PAD = 0.55;
-        PAGE = rgb ozette.mist;
-        PAPER = rgb ozette.snow;
-        PINK = rgb ozette.pink;
-        SPEED = 0.03;
-      };
-      fns = {
-        fbm = fn float [{p = vec2;}] ({
-          p,
-          s,
-          a,
-        }: [
-          (local s float 0.0)
-          (local a float 0.5)
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (update s "+=" [a "*" (noise p)])
-              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
-              (update a "*=" 0.5)
-            ];
-          }))
-          (return s)
-        ]);
-        hash = fn float [{p = vec2;}] ({p}: [
-          (set p (fract [p "*" (vec2 123.34 456.21)]))
-          (update p "+=" (dot p [p "+" 45.32]))
-          (return (fract [p.x "*" p.y]))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          uv,
-          a,
-          t,
-          col,
-          g,
-        }: [
-          (local uv vec2 [fragCoord "/" iResolution.y])
-          (local a float [iResolution.x "/" iResolution.y])
-          (local t float [iTime "*" SPEED])
-          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
-          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
-          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.2 2.0 (length g))]]))
-          (set col (pad col uv (vec2 [a "*" 0.12 "+" 0.03 "*" (sin [t "*" 1.3])] [0.78 "+" 0.03 "*" (cos [t "*" 1.1])]) 0.26 [0.6 "+" 0.2 "*" (sin t)] LAV))
-          (set col (pad col uv (vec2 [a "*" 0.36 "+" 0.04 "*" (cos [t "*" 0.9])] [0.12 "+" 0.03 "*" (sin [t "*" 1.4])]) 0.2 [2.2 "+" 0.2 "*" (cos [t "*" 0.8])] MUSTARD))
-          (set col (pad col uv (vec2 [a "*" 0.62 "+" 0.03 "*" (sin [t "*" 1.2 "+" 2.0])] [0.9 "+" 0.02 "*" (cos [t "*" 1.6])]) 0.17 [4.0 "+" 0.2 "*" (sin [t "*" 1.1])] LIME))
-          (set col (pad col uv (vec2 [a "*" 0.84 "+" 0.04 "*" (cos [t "*" 1.0 "+" 1.0])] [0.3 "+" 0.03 "*" (sin [t "*" 0.7])]) 0.3 [5.1 "+" 0.2 "*" (cos [t "*" 0.9])] PINK))
-          (set col (pad col uv (vec2 [a "*" 0.97 "+" 0.02 "*" (sin [t "*" 1.5])] [0.82 "+" 0.03 "*" (sin [t "*" 1.2])]) 0.12 [1.4 "+" 0.2 "*" (sin [t "*" 1.3])] LAV))
-          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
-          (set fragColor (vec4 col 1.0))
-        ]);
-        noise = fn float [{p = vec2;}] ({
-          p,
-          i,
-          f,
-          u,
-        }: [
-          (local i vec2 (floor p))
-          (local f vec2 (fract p))
-          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
-          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
-        ]);
-        pad = fn vec3 [{col = vec3;} {p = vec2;} {c = vec2;} {r = float;} {turn = float;} {hue = vec3;}] ({
-          col,
-          p,
-          c,
-          r,
-          turn,
-          hue,
-          d,
-          ang,
-          notch,
-          px,
-          m,
-          c2,
-        }: [
-          (local d vec2 [p "-" c])
-          (local ang float [(atan2 d.y d.x) "-" turn])
-          (local notch float (smoothstep 0.1 0.13 (abs [(mod [ang "+" 3.14159] 6.28318) "-" 3.14159])))
-          (local px float [1.5 "/" iResolution.y])
-          (local m float [[1.0 "-" (smoothstep [r "-" px] [r "+" px] (length d))] "*" notch])
-          (local c2 vec3 (mix col hue PAD))
-          (return (mix col c2 m))
-        ]);
-      };
+      inherit (scene) fns;
+      consts =
+        scene.consts
+        // scene.paper.light
+        // {
+          PAD = 0.55;
+        };
     };
     modules_desktop_session_tomoe_shaders_ozette_pond_dark_data = {
       ozette,
+      rgb,
+      ...
+    } @ glsl: self: let
+      scene = modules_desktop_session_tomoe_shaders_ozette_pond_data glsl self;
+    in {
+      inherit (scene) fns;
+      consts =
+        scene.consts
+        // scene.paper.dark
+        // {
+          BODY = 0.14;
+          GLINT = rgb ozette.lavender;
+          LINES = 0.3;
+        };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_pond_data = {
       abs,
       clamp,
-      dot,
       exp,
       float,
-      floor,
       fn,
       for,
       fract,
@@ -15373,7 +14897,6 @@
       int,
       length,
       local,
-      mat2,
       mix,
       mod,
       neg,
@@ -15387,183 +14910,115 @@
       vec3,
       vec4,
       void,
-      rgb,
       ...
-    }: self: let
-      inherit (self) BODY DOT DOTW GLINT GRID LAV LIME LINES MUSTARD PAGE PAPER PINK SCALE SPEED caustic fbm hash noise;
+    } @ glsl: self: let
+      inherit (self) BODY DOT DOTW GLINT GRID LAV LIME LINES MUSTARD PAGE PAPER PINK SCALE SPEED caustic fbm hash;
+      prelude = modules_desktop_session_tomoe_shaders_ozette_prelude_data glsl self;
     in {
-      consts = {
-        BODY = 0.14;
-        DOT = rgb ozette.lime;
-        DOTW = 0.08;
-        GLINT = rgb ozette.lavender;
-        GRID = 44.0;
-        LAV = rgb ozette.lavender;
-        LIME = rgb ozette.mint;
-        LINES = 0.3;
-        MUSTARD = rgb ozette.periwinkle;
-        PAGE = rgb ozette.night;
-        PAPER = rgb ozette.ink;
-        PINK = rgb ozette.pink;
-        SCALE = 4.5;
-        SPEED = 0.03;
-      };
-      fns = {
-        caustic = fn float [{p = vec2;} {t = float;}] ({
-          p,
-          t,
-          q,
-          f,
-        }: [
-          (local q vec2 p)
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (update q "+=" [0.6 "*" (vec2 (sin [q.y "*" 1.7 "+" t "+" (float i)]) (sin [q.x "*" 1.5 "-" t "*" 0.8 "-" (float i)]))])
-            ];
-          }))
-          (local f float [(sin [q.x "*" 2.0]) "+" (sin [q.y "*" 2.0])])
-          (return (exp [(neg (abs f)) "*" 5.0]))
-        ]);
-        fbm = fn float [{p = vec2;}] ({
-          p,
-          s,
-          a,
-        }: [
-          (local s float 0.0)
-          (local a float 0.5)
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (update s "+=" [a "*" (noise p)])
-              (set p [(mat2 1.6 1.2 (-1.2) 1.6) "*" p])
-              (update a "*=" 0.5)
-            ];
-          }))
-          (return s)
-        ]);
-        hash = fn float [{p = vec2;}] ({p}: [
-          (set p (fract [p "*" (vec2 123.34 456.21)]))
-          (update p "+=" (dot p [p "+" 45.32]))
-          (return (fract [p.x "*" p.y]))
-        ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          uv,
-          a,
-          t,
-          col,
-          h,
-          tint,
-          c,
-          g,
-        }: [
-          (local uv vec2 [fragCoord "/" iResolution.y])
-          (local a float [iResolution.x "/" iResolution.y])
-          (local t float [iTime "*" SPEED])
-          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
-          (local h float (fbm [uv "*" 0.8 "+" (vec2 [t "*" 0.05] [(neg t) "*" 0.03])]))
-          (local tint vec3 (mix LAV PINK (smoothstep 0.35 0.65 [h "+" 0.25 "*" (sin [uv.x "/" a "*" 3.0 "+" t "*" 0.1])])))
-          (set tint (mix tint LIME (smoothstep 0.55 0.75 (fbm [uv "*" 0.6 "-" (vec2 [t "*" 0.04] 2.0)]))))
-          (set tint (mix tint MUSTARD [0.6 "*" (smoothstep 0.6 0.8 (fbm [uv "*" 0.7 "+" (vec2 4.0 [t "*" 0.03])]))]))
-          (set col (mix col tint BODY))
-          (local c float (caustic [uv "*" SCALE "+" (vec2 0.0 7.0)] t))
-          (set col (mix col GLINT [(clamp c 0.0 1.0) "*" LINES]))
-          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
-          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
-          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
-          (set fragColor (vec4 col 1.0))
-        ]);
-        noise = fn float [{p = vec2;}] ({
-          p,
-          i,
-          f,
-          u,
-        }: [
-          (local i vec2 (floor p))
-          (local f vec2 (fract p))
-          (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
-          (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
-        ]);
-      };
+      consts =
+        prelude.consts
+        // {
+          DOTW = 0.08;
+          SCALE = 4.5;
+          SPEED = 0.03;
+        };
+      fns =
+        prelude.fns
+        // {
+          caustic = fn float [{p = vec2;} {t = float;}] ({
+            p,
+            t,
+            q,
+            f,
+          }: [
+            (local q vec2 p)
+            (for ({i}: {
+              init = local i int 0;
+              test = [i "<" 3];
+              step = inc i;
+              body = [
+                (update q "+=" [0.6 "*" (vec2 (sin [q.y "*" 1.7 "+" t "+" (float i)]) (sin [q.x "*" 1.5 "-" t "*" 0.8 "-" (float i)]))])
+              ];
+            }))
+            (local f float [(sin [q.x "*" 2.0]) "+" (sin [q.y "*" 2.0])])
+            (return (exp [(neg (abs f)) "*" 5.0]))
+          ]);
+          mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
+            fragColor,
+            fragCoord,
+            uv,
+            a,
+            t,
+            col,
+            h,
+            tint,
+            c,
+            g,
+          }: [
+            (local uv vec2 [fragCoord "/" iResolution.y])
+            (local a float [iResolution.x "/" iResolution.y])
+            (local t float [iTime "*" SPEED])
+            (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
+            (local h float (fbm [uv "*" 0.8 "+" (vec2 [t "*" 0.05] [(neg t) "*" 0.03])]))
+            (local tint vec3 (mix LAV PINK (smoothstep 0.35 0.65 [h "+" 0.25 "*" (sin [uv.x "/" a "*" 3.0 "+" t "*" 0.1])])))
+            (set tint (mix tint LIME (smoothstep 0.55 0.75 (fbm [uv "*" 0.6 "-" (vec2 [t "*" 0.04] 2.0)]))))
+            (set tint (mix tint MUSTARD [0.6 "*" (smoothstep 0.6 0.8 (fbm [uv "*" 0.7 "+" (vec2 4.0 [t "*" 0.03])]))]))
+            (set col (mix col tint BODY))
+            (local c float (caustic [uv "*" SCALE "+" (vec2 0.0 7.0)] t))
+            (set col (mix col GLINT [(clamp c 0.0 1.0) "*" LINES]))
+            (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
+            (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
+            (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
+            (set fragColor (vec4 col 1.0))
+          ]);
+        };
+      inherit (prelude) paper;
     };
     modules_desktop_session_tomoe_shaders_ozette_pond_light_data = {
       ozette,
-      abs,
-      clamp,
+      rgb,
+      ...
+    } @ glsl: self: let
+      scene = modules_desktop_session_tomoe_shaders_ozette_pond_data glsl self;
+    in {
+      inherit (scene) fns;
+      consts =
+        scene.consts
+        // scene.paper.light
+        // {
+          BODY = 0.3;
+          GLINT = rgb ozette.white;
+          LINES = 0.75;
+        };
+    };
+    modules_desktop_session_tomoe_shaders_ozette_prelude_data = {
+      ozette,
       dot,
-      exp,
       float,
       floor,
       fn,
       for,
       fract,
-      iResolution,
-      iTime,
-      in',
       inc,
       int,
-      length,
       local,
       mat2,
       mix,
-      mod,
-      neg,
-      out,
       return,
       set,
-      sin,
-      smoothstep,
       update,
       vec2,
-      vec3,
-      vec4,
-      void,
       rgb,
       ...
     }: self: let
-      inherit (self) BODY DOT DOTW GLINT GRID LAV LIME LINES MUSTARD PAGE PAPER PINK SCALE SPEED caustic fbm hash noise;
+      inherit (self) hash noise;
     in {
       consts = {
-        BODY = 0.3;
-        DOT = rgb ozette.moss;
-        DOTW = 0.08;
-        GLINT = rgb ozette.white;
         GRID = 44.0;
         LAV = rgb ozette.lavender;
-        LIME = rgb ozette.lime;
-        LINES = 0.75;
-        MUSTARD = rgb ozette.mustard;
-        PAGE = rgb ozette.mist;
-        PAPER = rgb ozette.snow;
         PINK = rgb ozette.pink;
-        SCALE = 4.5;
-        SPEED = 0.03;
       };
       fns = {
-        caustic = fn float [{p = vec2;} {t = float;}] ({
-          p,
-          t,
-          q,
-          f,
-        }: [
-          (local q vec2 p)
-          (for ({i}: {
-            init = local i int 0;
-            test = [i "<" 3];
-            step = inc i;
-            body = [
-              (update q "+=" [0.6 "*" (vec2 (sin [q.y "*" 1.7 "+" t "+" (float i)]) (sin [q.x "*" 1.5 "-" t "*" 0.8 "-" (float i)]))])
-            ];
-          }))
-          (local f float [(sin [q.x "*" 2.0]) "+" (sin [q.y "*" 2.0])])
-          (return (exp [(neg (abs f)) "*" 5.0]))
-        ]);
         fbm = fn float [{p = vec2;}] ({
           p,
           s,
@@ -15588,34 +15043,6 @@
           (update p "+=" (dot p [p "+" 45.32]))
           (return (fract [p.x "*" p.y]))
         ]);
-        mainImage = fn void [{fragColor = out vec4;} {fragCoord = in' vec2;}] ({
-          fragColor,
-          fragCoord,
-          uv,
-          a,
-          t,
-          col,
-          h,
-          tint,
-          c,
-          g,
-        }: [
-          (local uv vec2 [fragCoord "/" iResolution.y])
-          (local a float [iResolution.x "/" iResolution.y])
-          (local t float [iTime "*" SPEED])
-          (local col vec3 (mix PAPER PAGE [1.0 "-" uv.y]))
-          (local h float (fbm [uv "*" 0.8 "+" (vec2 [t "*" 0.05] [(neg t) "*" 0.03])]))
-          (local tint vec3 (mix LAV PINK (smoothstep 0.35 0.65 [h "+" 0.25 "*" (sin [uv.x "/" a "*" 3.0 "+" t "*" 0.1])])))
-          (set tint (mix tint LIME (smoothstep 0.55 0.75 (fbm [uv "*" 0.6 "-" (vec2 [t "*" 0.04] 2.0)]))))
-          (set tint (mix tint MUSTARD [0.6 "*" (smoothstep 0.6 0.8 (fbm [uv "*" 0.7 "+" (vec2 4.0 [t "*" 0.03])]))]))
-          (set col (mix col tint BODY))
-          (local c float (caustic [uv "*" SCALE "+" (vec2 0.0 7.0)] t))
-          (set col (mix col GLINT [(clamp c 0.0 1.0) "*" LINES]))
-          (local g vec2 [(mod fragCoord GRID) "-" 0.5 "*" GRID])
-          (set col (mix col DOT [DOTW "*" [1.0 "-" (smoothstep 1.1 1.9 (length g))]]))
-          (update col "+=" [[(hash [fragCoord "+" (fract iTime)]) "-" 0.5] "/" 255.0])
-          (set fragColor (vec4 col 1.0))
-        ]);
         noise = fn float [{p = vec2;}] ({
           p,
           i,
@@ -15627,6 +15054,22 @@
           (local u vec2 [f "*" f "*" [3.0 "-" 2.0 "*" f]])
           (return (mix (mix (hash i) (hash [i "+" (vec2 1.0 0.0)]) u.x) (mix (hash [i "+" (vec2 0.0 1.0)]) (hash [i "+" (vec2 1.0 1.0)]) u.x) u.y))
         ]);
+      };
+      paper = {
+        dark = {
+          DOT = rgb ozette.lime;
+          LIME = rgb ozette.mint;
+          MUSTARD = rgb ozette.periwinkle;
+          PAGE = rgb ozette.night;
+          PAPER = rgb ozette.ink;
+        };
+        light = {
+          DOT = rgb ozette.moss;
+          LIME = rgb ozette.lime;
+          MUSTARD = rgb ozette.mustard;
+          PAGE = rgb ozette.mist;
+          PAPER = rgb ozette.snow;
+        };
       };
     };
     modules_desktop_session_tomoe_shaders_su_ei_data = {
@@ -15912,6 +15355,7 @@
       generators,
       ...
     }: let
+      gatewayModel = id: lib.getAttrs ["id" "name" "input" "reasoning" "cost"] (lib.findFirst (model: model.id == id) null config.user.dev.modelCatalog.models.providers.vercel-ai-gateway.models);
       agentFiles = dir: {
         "${dir}/settings.json" = {
           generator = lib.generators.toJSON {};
@@ -15958,21 +15402,12 @@
           generator = lib.generators.toJSON {};
           value.providers.vercel-ai-gateway.apiKey = "!cat ${config.users.users.${config.user.name}.home}/Tokens/AI_GATEWAY_API_KEY.txt";
           value.providers.vercel-ai-gateway.models = [
-            {
-              id = "moonshotai/kimi-k3.1-pro";
-              name = "Kimi K3.1 Pro";
-              contextWindow = 1048576;
-              maxTokens = 1048576;
-              input = ["text" "image"];
-              reasoning = true;
-              compat.allowEmptySignature = true;
-              cost = {
-                input = 2;
-                output = 10;
-                cacheRead = 0.2;
-                cacheWrite = 0;
-              };
-            }
+            (gatewayModel "moonshotai/kimi-k3.1-pro"
+              // {
+                contextWindow = 1048576;
+                maxTokens = 1048576;
+                compat.allowEmptySignature = true;
+              })
             {
               id = "deepseek/deepseek-v4.1-flash-1017";
               name = "DeepSeek V4.1 Flash 1017";
@@ -15987,20 +15422,11 @@
                 cacheWrite = 0;
               };
             }
-            {
-              id = "deepseek/deepseek-v4.1-flash-1017-fast";
-              name = "DeepSeek V4.1 Flash 1017 Fast";
-              contextWindow = 1048576;
-              maxTokens = 32768;
-              input = ["text" "image"];
-              reasoning = true;
-              cost = {
-                input = 0.6;
-                output = 2.4;
-                cacheRead = 0.014;
-                cacheWrite = 0;
-              };
-            }
+            (gatewayModel "deepseek/deepseek-v4.1-flash-1017-fast"
+              // {
+                contextWindow = 1048576;
+                maxTokens = 32768;
+              })
           ];
           value.providers.openrouter.models = [
             {
@@ -42182,6 +41608,35 @@
         neededForBoot = true;
       };
 
+      fileSystems = {
+        rootSize,
+        tmpSize ? null,
+        boot,
+        mounts,
+      }:
+        {
+          "/" = {
+            device = "none";
+            fsType = "tmpfs";
+            options = ["mode=755" "size=${rootSize}"];
+          };
+          "/boot" = {
+            device = "/dev/disk/by-uuid/${boot.uuid}";
+            fsType = "vfat";
+            inherit (boot) options;
+            neededForBoot = true;
+          };
+        }
+        // lib.optionalAttrs (tmpSize != null) {
+          "/tmp" = {
+            device = "none";
+            fsType = "tmpfs";
+            options = ["mode=1777" "size=${tmpSize}" "nosuid" "nodev" "strictatime"];
+            neededForBoot = true;
+          };
+        }
+        // mounts;
+
       bashFiles = {interactive ? ""}: {
         ".bashrc".text =
           ''
@@ -43102,22 +42557,22 @@
       ...
     }: let
       user = config.user.name;
-      model = "parakeet-v3-int8";
-      modelDir = "/home/${user}/.local/share/bolo/models/${model}";
-      hfBase = "https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/resolve/main";
-      hashes = {
-        "decoder.int8.onnx" = "179e50c43d1a9de79c8a24149a2f9bac6eb5981823f2a2ed88d655b24248db4e";
-        "encoder.int8.onnx" = "acfc2b4456377e15d04f0243af540b7fe7c992f8d898d751cf134c3a55fd2247";
-        "joiner.int8.onnx" = "3164c13fc2821009440d20fcb5fdc78bff28b4db2f8d0f0b329101719c0948b3";
-        "tokens.txt" = "d58544679ea4bc6ac563d1f545eb7d474bd6cfa467f0a6e2c1dc1c7d37e3c35d";
-      };
+      data = modules_desktop_apps_bolo_data;
+      inherit (data) model vocabulary;
+      modelDir = "/home/${user}/.local/share/bolo/models/${model.name}";
+      hashes = builtins.mapAttrs (_: hash:
+        builtins.convertHash {
+          inherit hash;
+          toHashFormat = "base16";
+        })
+      model.hashes;
 
       fetchModel = pkgs.writeShellScript "bolo-fetch-model" ''
         set -eu
         mkdir -p ${modelDir}
         ${lib.concatStrings (lib.mapAttrsToList (file: hash: ''
             if [ ! -s ${modelDir}/${file} ]; then
-              ${pkgs.curl}/bin/curl -fL --retry 5 --retry-delay 10 --retry-connrefused -o ${modelDir}/${file}.part ${hfBase}/${file}
+              ${pkgs.curl}/bin/curl -fL --retry 5 --retry-delay 10 --retry-connrefused -o ${modelDir}/${file}.part ${model.url}/${file}
               echo "${hash}  ${modelDir}/${file}.part" | ${pkgs.coreutils}/bin/sha256sum -c --quiet
               mv ${modelDir}/${file}.part ${modelDir}/${file}
             fi
@@ -43171,33 +42626,21 @@
         generator = builtins.toJSON;
         value = {
           version = 1;
-          active = model;
+          active = model.name;
           language = "en";
           provider = "cpu";
           threads = null;
           pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | ${pkgs.dotool}/bin/dotool";
           models = [
             {
-              name = model;
-              engine = "sherpa-onnx-transducer";
+              inherit (model) name engine;
               encoder = "${modelDir}/encoder.int8.onnx";
               decoder = "${modelDir}/decoder.int8.onnx";
               joiner = "${modelDir}/joiner.int8.onnx";
               tokens = "${modelDir}/tokens.txt";
             }
           ];
-          vocabulary =
-            lib.mapAttrsToList (word: aliases: {inherit word aliases;})
-            {
-              Hyprland = ["hyper land" "hipper land"];
-              niri = ["neary" "nyree"];
-              y0usaf = ["you sef" "yousef" "you saf"];
-              "sherpa-onnx" = ["sherpa onyx" "sherpa onix"];
-              tomoe = ["toe moe" "tomo eh"];
-              ekko = ["eck oh" "eh ko"];
-              moon = [];
-              finix = ["fee nix" "finnix" "fi nix"];
-            };
+          vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) vocabulary;
           vocab_fuzzy = 0.85;
         };
       };
@@ -43836,7 +43279,8 @@
       ...
     }: let
       diskUuid = "32ad19b5-88df-4e63-92d2-d5a150ad65c5";
-      btrfs = (modules_hosts_shared {inherit lib pkgs;}).btrfs diskUuid ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
+      shared = modules_hosts_shared {inherit lib pkgs;};
+      btrfs = shared.btrfs diskUuid ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
       cfg = config.programs.limine;
     in {
       finix.diagnostics = {
@@ -43964,37 +43408,24 @@
         };
       };
 
-      fileSystems = {
-        "/" = {
-          device = "none";
-          fsType = "tmpfs";
-          options = ["mode=755" "size=4G"];
-        };
-
-        "/tmp" = {
-          device = "none";
-          fsType = "tmpfs";
-          options = ["mode=1777" "size=16G" "nosuid" "nodev" "strictatime"];
-          neededForBoot = true;
-        };
-
-        "/nix" = btrfs "subvol=@nix";
-        "/persist" = btrfs "subvol=@persist";
-        "/home" = btrfs "subvol=@home";
-        "/btrfs" = btrfs "subvolid=5";
-
-        "/boot" = {
-          device = "/dev/disk/by-uuid/31F2-1AE7";
-          fsType = "vfat";
+      fileSystems = shared.fileSystems {
+        rootSize = "4G";
+        tmpSize = "16G";
+        boot = {
+          uuid = "31F2-1AE7";
           options = ["fmask=0077" "dmask=0077" "noatime"];
-          neededForBoot = true;
         };
-
-        "/home/y0usaf/.local/share/Steam" = btrfs "subvol=@steam";
-        "/home/y0usaf/dev" = btrfs "subvol=@dev";
-        "/home/y0usaf/Pictures" = btrfs "subvol=@pictures";
-        "/home/y0usaf/DCIM" = btrfs "subvol=@dcim";
-        "/home/y0usaf/Music" = btrfs "subvol=@music";
+        mounts = {
+          "/nix" = btrfs "subvol=@nix";
+          "/persist" = btrfs "subvol=@persist";
+          "/home" = btrfs "subvol=@home";
+          "/btrfs" = btrfs "subvolid=5";
+          "/home/y0usaf/.local/share/Steam" = btrfs "subvol=@steam";
+          "/home/y0usaf/dev" = btrfs "subvol=@dev";
+          "/home/y0usaf/Pictures" = btrfs "subvol=@pictures";
+          "/home/y0usaf/DCIM" = btrfs "subvol=@dcim";
+          "/home/y0usaf/Music" = btrfs "subvol=@music";
+        };
       };
 
       user = {
@@ -44268,7 +43699,8 @@
       ...
     }: let
       diskUuid = "6ae685dc-540e-42f2-b30a-104a8aac0e27";
-      btrfs = (modules_hosts_shared {inherit lib pkgs;}).btrfs diskUuid ["relatime" "ssd" "discard=async" "space_cache=v2"];
+      shared = modules_hosts_shared {inherit lib pkgs;};
+      btrfs = shared.btrfs diskUuid ["relatime" "ssd" "discard=async" "space_cache=v2"];
     in {
       finix.diagnostics = {
         inherit diskUuid;
@@ -44298,30 +43730,21 @@
         ];
       };
 
-      fileSystems = {
-        "/" = {
-          device = "none";
-          fsType = "tmpfs";
-          options = ["mode=755" "size=4G"];
-        };
-        "/tmp" = {
-          device = "none";
-          fsType = "tmpfs";
-          options = ["mode=1777" "size=8G" "nosuid" "nodev" "strictatime"];
-          neededForBoot = true;
-        };
-        "/nix" = btrfs "subvol=@nix";
-        "/persist" = btrfs "subvol=@persist";
-        "/home" = btrfs "subvol=@home";
-        "/btrfs" = btrfs "subvolid=5";
-        "/boot" = {
-          device = "/dev/disk/by-uuid/6951-2BA6";
-          fsType = "vfat";
+      fileSystems = shared.fileSystems {
+        rootSize = "4G";
+        tmpSize = "8G";
+        boot = {
+          uuid = "6951-2BA6";
           options = ["fmask=0077" "dmask=0077"];
-          neededForBoot = true;
         };
-        "/home/${config.user.name}/.local/share/Steam" = btrfs "subvol=@steam";
-        "/home/${config.user.name}/dev" = btrfs "subvol=@dev";
+        mounts = {
+          "/nix" = btrfs "subvol=@nix";
+          "/persist" = btrfs "subvol=@persist";
+          "/home" = btrfs "subvol=@home";
+          "/btrfs" = btrfs "subvolid=5";
+          "/home/${config.user.name}/.local/share/Steam" = btrfs "subvol=@steam";
+          "/home/${config.user.name}/dev" = btrfs "subvol=@dev";
+        };
       };
 
       user.ui.tomoe.displays."eDP-1".scale = 1;
@@ -44515,7 +43938,8 @@
       ...
     }: let
       diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
-      btrfs = (modules_hosts_shared {inherit lib pkgs;}).btrfs diskUuid;
+      shared = modules_hosts_shared {inherit lib pkgs;};
+      btrfs = shared.btrfs diskUuid;
     in {
       finix.diagnostics = {
         inherit diskUuid;
@@ -44554,26 +43978,20 @@
         blacklist iTCO_vendor_support
       '';
 
-      fileSystems = {
-        "/" = {
-          device = "none";
-          fsType = "tmpfs";
-          options = ["mode=755" "size=2G"];
-        };
-
-        "/nix" = btrfs ["noatime"] "subvol=@nix";
-        "/persist" = btrfs ["compress=zstd" "noatime"] "subvol=@persist";
-        "/home" = btrfs ["compress=zstd" "noatime"] "subvol=@home";
-        "/home/y0usaf/Music" = btrfs [] "subvol=@music";
-        "/home/y0usaf/DCIM" = btrfs [] "subvol=@dcim";
-        "/home/y0usaf/Pictures" = btrfs [] "subvol=@pictures";
-        "/btrfs" = btrfs [] "subvolid=5";
-
-        "/boot" = {
-          device = "/dev/disk/by-uuid/41B0-E342";
-          fsType = "vfat";
+      fileSystems = shared.fileSystems {
+        rootSize = "2G";
+        boot = {
+          uuid = "41B0-E342";
           options = ["umask=0077" "noatime"];
-          neededForBoot = true;
+        };
+        mounts = {
+          "/nix" = btrfs ["noatime"] "subvol=@nix";
+          "/persist" = btrfs ["compress=zstd" "noatime"] "subvol=@persist";
+          "/home" = btrfs ["compress=zstd" "noatime"] "subvol=@home";
+          "/home/y0usaf/Music" = btrfs [] "subvol=@music";
+          "/home/y0usaf/DCIM" = btrfs [] "subvol=@dcim";
+          "/home/y0usaf/Pictures" = btrfs [] "subvol=@pictures";
+          "/btrfs" = btrfs [] "subvolid=5";
         };
       };
 
@@ -45116,12 +44534,18 @@
         codecs = lib.mapAttrs (_: c: {inherit (c) extensions;} // lib.optionalAttrs (c ? generator) {inherit (c) generator;}) codecs;
         lint = {
           schema = schema "finix" (lib.concatMap (host: lib.optionAttrSetToDocList host.options) (builtins.attrValues hosts));
-          enabled = ["unused-option" "never-enabled-option" "constant-option" "singleton-attrset" "singleton-list" "templated-bindings"];
-          generated = ["modules/hosts/steam-frame/beat-saber/beatmods.data.nix"];
+          enabled = ["unused-option" "never-enabled-option" "constant-option" "duplicate-definitions" "singleton-attrset" "singleton-list" "templated-bindings"];
+          generated =
+            map (tool: "modules/dev/ai/firstmate/${tool}-axi.package-lock.data.nix") ["chrome-devtools" "gh" "lavish" "quota" "tasks"]
+            ++ [
+              "modules/dev/work/vercel/package-lock.data.nix"
+              "modules/hosts/steam-frame/beat-saber/beatmods.data.nix"
+            ];
           constant-option = {
             readers = 3;
             defined = lib.unique (lib.concatMap (host: map (o: lib.showOption o.loc) (lib.filter (o: lib.any (file: lib.hasPrefix "${inputs.self}" (toString file)) o.declarations && lib.any (d: !(lib.elem d.file o.declarations)) o.definitionsWithLocations) (lib.collect lib.isOption host.options))) (builtins.attrValues hosts));
           };
+          duplicate-definitions.min-leaves = 6;
           singleton-attrset.exempt = ["flake.nix" ".data.nix"];
           singleton-list.exempt = ["flake.nix" ".data.nix"];
           templated-bindings.exempt = ["flake.nix" ".data.nix"];
@@ -52229,6 +51653,7 @@
         modules_core_xdg = "modules/core/xdg.nix";
         modules_desktop_apps_bluetooth = "modules/desktop/apps/bluetooth.nix";
         modules_desktop_apps_bolo = "modules/desktop/apps/bolo.nix";
+        modules_desktop_apps_bolo_data = "modules/desktop/apps/bolo.data.nix";
         modules_desktop_apps_browsers = "modules/desktop/apps/browsers/default.nix";
         modules_desktop_apps_browsers_userChrome_data = "modules/desktop/apps/browsers/userChrome.data.nix";
         modules_desktop_apps_btop = "modules/desktop/apps/btop.nix";
@@ -52285,19 +51710,25 @@
         modules_desktop_session_tomoe_lisp_theme_data = "modules/desktop/session/tomoe/lisp/theme.data.nix";
         modules_desktop_session_tomoe_lisp_user_data = "modules/desktop/session/tomoe/lisp/user.data.nix";
         modules_desktop_session_tomoe_shaders_balatro_data = "modules/desktop/session/tomoe/shaders/balatro.data.nix";
+        modules_desktop_session_tomoe_shaders_cassette_data = "modules/desktop/session/tomoe/shaders/cassette.data.nix";
         modules_desktop_session_tomoe_shaders_cassette_led_data = "modules/desktop/session/tomoe/shaders/cassette-led.data.nix";
         modules_desktop_session_tomoe_shaders_cassette_squares_data = "modules/desktop/session/tomoe/shaders/cassette-squares.data.nix";
         modules_desktop_session_tomoe_shaders_dot_corridor_data = "modules/desktop/session/tomoe/shaders/dot-corridor.data.nix";
         modules_desktop_session_tomoe_shaders_glass_mound_data = "modules/desktop/session/tomoe/shaders/glass-mound.data.nix";
         modules_desktop_session_tomoe_shaders_hex_spiral_data = "modules/desktop/session/tomoe/shaders/hex-spiral.data.nix";
         modules_desktop_session_tomoe_shaders_ozette_dark_data = "modules/desktop/session/tomoe/shaders/ozette-dark.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_data = "modules/desktop/session/tomoe/shaders/ozette.data.nix";
         modules_desktop_session_tomoe_shaders_ozette_fields_dark_data = "modules/desktop/session/tomoe/shaders/ozette-fields-dark.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_fields_data = "modules/desktop/session/tomoe/shaders/ozette-fields.data.nix";
         modules_desktop_session_tomoe_shaders_ozette_fields_light_data = "modules/desktop/session/tomoe/shaders/ozette-fields-light.data.nix";
         modules_desktop_session_tomoe_shaders_ozette_light_data = "modules/desktop/session/tomoe/shaders/ozette-light.data.nix";
         modules_desktop_session_tomoe_shaders_ozette_lilies_dark_data = "modules/desktop/session/tomoe/shaders/ozette-lilies-dark.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_lilies_data = "modules/desktop/session/tomoe/shaders/ozette-lilies.data.nix";
         modules_desktop_session_tomoe_shaders_ozette_lilies_light_data = "modules/desktop/session/tomoe/shaders/ozette-lilies-light.data.nix";
         modules_desktop_session_tomoe_shaders_ozette_pond_dark_data = "modules/desktop/session/tomoe/shaders/ozette-pond-dark.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_pond_data = "modules/desktop/session/tomoe/shaders/ozette-pond.data.nix";
         modules_desktop_session_tomoe_shaders_ozette_pond_light_data = "modules/desktop/session/tomoe/shaders/ozette-pond-light.data.nix";
+        modules_desktop_session_tomoe_shaders_ozette_prelude_data = "modules/desktop/session/tomoe/shaders/ozette-prelude.data.nix";
         modules_desktop_session_tomoe_shaders_su_ei_data = "modules/desktop/session/tomoe/shaders/su-ei.data.nix";
         modules_desktop_session_wayland = "modules/desktop/session/wayland.nix";
         modules_desktop_session_xdg_portals = "modules/desktop/session/xdg-portals.nix";
