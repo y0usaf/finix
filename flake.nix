@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=57c6b7b8efbdbc0354453fd713acf9c444d6e13c";
+      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=9c5e5d1f4eeee158c534c617ee8e9777e27fdae7";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -35519,18 +35519,151 @@
       vbs = let
         inherit (doc) hardline;
 
-        tabs = depth: lib.strings.replicate depth "\t";
-
-        listed = values: lib.intersperse ", " (map expression values);
-
-        expressionForms = {
-          string = lib.id;
-          list = value: [(expression (builtins.head value)) "(" (listed (builtins.tail value)) ")"];
-          str = value: "\"${lib.replaceStrings ["\""] ["\"\""] value.str}\"";
-          op = value: lib.intersperse " " (map expression value.op);
+        binary = {
+          Imp = 1;
+          Eqv = 2;
+          Xor = 3;
+          Or = 4;
+          And = 5;
+          "=" = 7;
+          "<>" = 7;
+          "<" = 7;
+          ">" = 7;
+          "<=" = 7;
+          ">=" = 7;
+          Is = 7;
+          "&" = 8;
+          "+" = 9;
+          "-" = 9;
+          Mod = 10;
+          "\\" = 11;
+          "*" = 12;
+          "/" = 12;
+          "^" = 14;
         };
 
-        expression = value: (expressionForms.${kindOf value} or (throw "vbs: no expression ${kindOf value}")) value;
+        globals = ["CBool" "CInt" "CLng" "CStr" "Chr" "CreateObject" "Empty" "Err" "GetObject" "InStr" "IsEmpty" "IsNull" "IsObject" "Join" "LCase" "Left" "Len" "Mid" "MsgBox" "Nothing" "Now" "Null" "Replace" "Right" "Split" "Trim" "UBound" "UCase" "WScript"];
+
+        nameNode = spelled: {name = spelled;};
+
+        identifier = text:
+          if builtins.match "[A-Za-z_][A-Za-z0-9_]*" text != null
+          then text
+          else throw "vbs: `${text}` is not a name";
+
+        memberPath = text:
+          if builtins.match "[A-Za-z_][A-Za-z0-9_]*([.][A-Za-z_][A-Za-z0-9_]*)*" text != null
+          then text
+          else throw "vbs: `${text}` is not a member path";
+
+        tabs = depth: lib.strings.replicate depth "\t";
+
+        atom = part: {
+          precedence = 15;
+          doc = part;
+        };
+
+        paren = least: printed:
+          if printed.precedence < least
+          then ["(" printed.doc ")"]
+          else printed.doc;
+
+        infix = infixTree {
+          language = "vbs";
+          precedence = binary;
+          operand = value:
+            if builtins.isList value
+            then infix value
+            else value;
+        };
+
+        argumentList = values: lib.intersperse ", " (map (value: paren 0 (expression value)) values);
+
+        forms = {
+          int = value:
+            if value < 0
+            then {
+              precedence = 13;
+              doc = toString value;
+            }
+            else atom (toString value);
+          bool = value:
+            atom (
+              if value
+              then "True"
+              else "False"
+            );
+          string = value: throw "vbs: the string `${value}` is not an expression: a name is a bound variable or a generator attribute, a literal is `str`";
+          list = value: expression (infix value);
+          name = value: atom (identifier value.name);
+          str = value: atom "\"${lib.replaceStrings ["\""] ["\"\""] value.str}\"";
+          dot = value: atom [(paren 15 (expression value.dot.base)) "." (memberPath value.dot.path)];
+          call = value: atom [(paren 15 (expression value.call.function)) "(" (argumentList value.call.arguments) ")"];
+          not = value: {
+            precedence = 6;
+            doc = ["Not " (paren 6 (expression value.not))];
+          };
+          neg = value: {
+            precedence = 13;
+            doc = ["-" (paren 13 (expression value.neg))];
+          };
+          binary = value: let
+            precedence = binary.${value.binary.operator};
+          in {
+            inherit precedence;
+            doc = [(paren precedence (expression value.binary.left)) " ${value.binary.operator} " (paren (precedence + 1) (expression value.binary.right))];
+          };
+        };
+
+        expression = value: (forms.${kindOf value} or (throw "vbs: no expression ${kindOf value}")) value;
+
+        written = value: paren 0 (expression value);
+
+        assignable = value:
+          if builtins.elem (kindOf value) ["name" "dot"]
+          then written value
+          else throw "vbs: an assignment's target is a name or a member, not ${kindOf value}";
+
+        declaredName = value:
+          if kindOf value == "name"
+          then identifier value.name
+          else throw "vbs: a declaration names a bound variable, not ${kindOf value}";
+
+        branch = body:
+          if builtins.isList body
+          then body
+          else throw "vbs: an If branch is a list of statements; a Dim in it declares a name of the script or procedure around it";
+
+        declaring = {
+          dim = value: map (one: one.name) value.dim;
+          sub = value: [value.sub.name.name];
+          function = value: [value.function.name.name];
+          "if" = value: declaredIn (branch value."if".body) ++ declaredIn (branch (value."if".otherwise or []));
+        };
+
+        declaredIn = lib.concatMap (value: (declaring.${kindOf value} or (_: [])) value);
+
+        scope = parameters:
+          boundBlock {
+            language = "vbs";
+            name = nameNode;
+            declared = result: parameters ++ declaredIn result;
+          };
+
+        modes = {
+          null = "";
+          byVal = "ByVal ";
+          byRef = "ByRef ";
+        };
+
+        parameterName = parameter: spelling (builtins.head (builtins.attrNames parameter));
+
+        parameterDoc = value: let
+          mode = value.${builtins.head (builtins.attrNames value)};
+        in
+          if builtins.length (builtins.attrNames value) != 1
+          then throw "vbs: a parameter is `{name = mode;}`"
+          else [(modes.${kindOf mode} or (throw "vbs: a parameter's mode is null, byVal or byRef")) (identifier (parameterName value))];
 
         block = depth: map (value: [hardline (entry depth value)]);
 
@@ -35539,54 +35672,90 @@
           then []
           else [(tabs depth) (statement depth value)];
 
+        procedure = keyword: depth: value: [
+          "${keyword} "
+          (declaredName value.name)
+          "("
+          (lib.intersperse ", " (map parameterDoc value.parameters))
+          ")"
+          (block (depth + 1) (scope (map parameterName value.parameters) value.body))
+          hardline
+          (tabs depth)
+          "End ${keyword}"
+        ];
+
         conditional = depth: value: [
           "If "
-          (expression value.test)
+          (written value.test)
           " Then"
-          (block (depth + 1) value.body)
-          (lib.optionals (value ? otherwise) [hardline (tabs depth) "Else" (block (depth + 1) value.otherwise)])
+          (block (depth + 1) (branch value.body))
+          (lib.optionals (value ? otherwise) [hardline (tabs depth) "Else" (block (depth + 1) (branch value.otherwise))])
           hardline
           (tabs depth)
           "End If"
         ];
 
         statementForms = {
-          list = _: value: [(expression (builtins.head value)) (lib.optionals (builtins.tail value != []) [" " (listed (builtins.tail value))])];
-          comment = _: value: value.comment;
-          option = _: value: "Option ${value.option}";
-          onError = _: value: "On Error ${value.onError}";
-          dim = _: value: ["Dim " (lib.intersperse ", " value.dim)];
-          assign = _: value: [value.assign.name " = " (expression value.assign.value)];
-          set = _: value: ["Set " value.set.name " = " (expression value.set.value)];
+          comment = _: value:
+            if value.comment == ""
+            then "'"
+            else "' ${value.comment}";
+          optionExplicit = _: _: "Option Explicit";
+          onErrorResumeNext = _: _: "On Error Resume Next";
+          onErrorGoTo0 = _: _: "On Error GoTo 0";
+          dim = _: value: ["Dim " (lib.intersperse ", " (map declaredName value.dim))];
+          assign = _: value: [(assignable value.assign.target) " = " (written value.assign.value)];
+          set = _: value: ["Set " (assignable value.set.target) " = " (written value.set.value)];
+          call = _: value: [(paren 15 (expression value.call.function)) (lib.optionals (value.call.arguments != []) [" " (argumentList value.call.arguments)])];
           "if" = depth: value: conditional depth value."if";
+          sub = depth: value: procedure "Sub" depth value.sub;
+          function = depth: value: procedure "Function" depth value.function;
         };
 
         statement = depth: value: (statementForms.${kindOf value} or (throw "vbs: no statement ${kindOf value}")) depth value;
-      in {
-        blank = {blank = true;};
+      in
+        lib.genAttrs globals nameNode
+        // {
+          blank = {blank = true;};
 
-        comment = string: {comment = string;};
+          comment = string: {comment = string;};
 
-        str = string: {str = string;};
+          optionExplicit = {optionExplicit = {};};
 
-        op = values: {op = values;};
+          onErrorResumeNext = {onErrorResumeNext = {};};
 
-        option = string: {option = string;};
+          onErrorGoTo0 = {onErrorGoTo0 = {};};
 
-        onError = string: {onError = string;};
+          str = string: {str = string;};
 
-        dim = names: {dim = names;};
+          dot = base: path: {dot = {inherit base path;};};
 
-        assign = name: value: {assign = {inherit name value;};};
+          call = function: arguments: {call = {inherit function arguments;};};
 
-        set = name: value: {set = {inherit name value;};};
+          not = value: {not = value;};
 
-        if' = test: body: {"if" = {inherit test body;};};
+          neg = value: {neg = value;};
 
-        ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+          dim = names: {dim = names;};
 
-        render = values: doc.render 80 (map (value: [(entry 0 value) hardline]) values);
-      };
+          assign = target: value: {assign = {inherit target value;};};
+
+          set = target: value: {set = {inherit target value;};};
+
+          if' = test: body: {"if" = {inherit test body;};};
+
+          ifElse = test: body: otherwise: {"if" = {inherit test body otherwise;};};
+
+          sub = name: parameters: body: {sub = {inherit name parameters body;};};
+
+          function = name: parameters: body: {function = {inherit name parameters body;};};
+
+          byVal = {byVal = {};};
+
+          byRef = {byRef = {};};
+
+          render = script: doc.render null (map (value: [(entry 0 value) hardline]) (scope [] script));
+        };
 
       patch = let
         inherit (doc) hardline;
@@ -45059,53 +45228,63 @@
     modules_tools_tern_config_plugins_tuturu_gitignore_data = ["tern.d.luau" ".DS_Store" "Thumbs.db"];
     modules_tools_tern_config_plugins_tuturu_plugin_data = [[["schema" 1] ["id" "tuturu"] ["name" "Tuturu"] ["version" "0.1.0"] ["description" "Plays a sound when a pane raises an unseen alert, an agent yields, or a long command finishes."] ["icon" "bell"] ["window" "src/window.luau"]]];
     modules_tools_tern_config_plugins_tuturu_scripts_play_data = {
+      CreateObject,
+      Err,
+      Replace,
+      WScript,
       assign,
       blank,
+      call,
       comment,
       dim,
+      dot,
       if',
-      onError,
-      op,
-      option,
+      onErrorResumeNext,
+      optionExplicit,
       set,
       str,
       ...
+    }: ({
+      sh,
+      wav,
+      cmd,
+      code,
     }: [
-      (comment "' Chime hidden player launcher (Windows).")
-      (comment "'")
-      (comment "' Run with wscript.exe (a GUI-subsystem host: no console window of its own).")
-      (comment "' It runs PowerShell hidden (window style 0 from creation, so not even a")
-      (comment "' flash) and waits for playback. PowerShell is a console-subsystem program,")
-      (comment "' so spawning it directly pops a console box on every chime; -WindowStyle")
-      (comment "' Hidden only hides it after it appears.")
-      (comment "'")
-      (comment "' Usage: wscript.exe //Nologo play.vbs <wav-file>")
-      (comment "' Exit code is PowerShell's; it never shows an error dialog.")
+      (comment "Chime hidden player launcher (Windows).")
+      (comment "")
+      (comment "Run with wscript.exe (a GUI-subsystem host: no console window of its own).")
+      (comment "It runs PowerShell hidden (window style 0 from creation, so not even a")
+      (comment "flash) and waits for playback. PowerShell is a console-subsystem program,")
+      (comment "so spawning it directly pops a console box on every chime; -WindowStyle")
+      (comment "Hidden only hides it after it appears.")
+      (comment "")
+      (comment "Usage: wscript.exe //Nologo play.vbs <wav-file>")
+      (comment "Exit code is PowerShell's; it never shows an error dialog.")
       blank
-      (option "Explicit")
-      (onError "Resume Next")
+      optionExplicit
+      onErrorResumeNext
       blank
-      (if' (op ["WScript.Arguments.Count" "=" "0"]) [
-        ["WScript.Quit" "1"]
+      (if' [(dot WScript "Arguments.Count") "=" 0] [
+        (call (dot WScript "Quit") [1])
       ])
       blank
-      (dim ["sh" "wav" "cmd"])
-      (set "sh" ["CreateObject" (str "WScript.Shell")])
-      (if' (op ["Err.Number" "<>" "0"]) [
-        ["WScript.Quit" "1"]
+      (dim [sh wav cmd])
+      (set sh (call CreateObject [(str "WScript.Shell")]))
+      (if' [(dot Err "Number") "<>" 0] [
+        (call (dot WScript "Quit") [1])
       ])
       blank
-      (assign "wav" ["WScript.Arguments" "0"])
-      (assign "wav" ["Replace" "wav" (str "'") (str "''")])
-      (assign "cmd" (op [(str "powershell -NoProfile -NonInteractive -WindowStyle Hidden -Command \"(New-Object Media.SoundPlayer '") "&" "wav" "&" (str "').PlaySync()\"")]))
+      (assign wav (call (dot WScript "Arguments") [0]))
+      (assign wav (call Replace [wav (str "'") (str "''")]))
+      (assign cmd [(str "powershell -NoProfile -NonInteractive -WindowStyle Hidden -Command \"(New-Object Media.SoundPlayer '") "&" wav "&" (str "').PlaySync()\"")])
       blank
-      (dim ["code"])
-      (assign "code" ["sh.Run" "cmd" "0" "True"])
-      (if' (op ["Err.Number" "<>" "0"]) [
-        ["WScript.Quit" "1"]
+      (dim [code])
+      (assign code (call (dot sh "Run") [cmd 0 true]))
+      (if' [(dot Err "Number") "<>" 0] [
+        (call (dot WScript "Quit") [1])
       ])
-      ["WScript.Quit" "code"]
-    ];
+      (call (dot WScript "Quit") [code])
+    ]);
     modules_tools_tern_config_plugins_tuturu_sounds_data = [[{comment = "The sounds are built by ~/finix/modules/tools/tern/default.nix and named in";} {comment = "<plugin data>/sounds.toml, which wins over this file. These stay empty so a";} {comment = "missing override is silent rather than playing something else.";} ["alert" ""] ["yield" ""] ["done" ""]] [{comment = "Chime only for panes you are not looking at. false chimes for the focused";} {comment = "pane too.";} ["only_unfocused" true]] [{comment = "Shell commands running at least this long chime the done sound when they";} {comment = "finish. 0 chimes every finished command.";} ["min_seconds" 30]]];
     modules_tools_tern_config_plugins_tuturu_src_window_data = {
       AgentBlock,

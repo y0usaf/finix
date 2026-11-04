@@ -311,13 +311,42 @@ the globals so the file renders as before. From
 ```
 
 
-VBScript (`generators.vbs`): a statement that is a Nix list is an invocation
-(`["WScript.Quit" "1"]`, `WScript.Quit 1`), and a list inside an expression a
-call (`["sh.Run" "cmd" "0" "True"]`); an identifier, number or member path is a
-string, `str` a string literal (its quotes doubled on output) and `op` operands
-and operators written spaced. Statements are `option`, `onError`, `dim names`,
-`assign name value`, `set name value`, `if' test body` and
-`ifElse test body otherwise`, bodies one tab in.
+VBScript (`generators.vbs`) is a function of the generator (its
+constructors and the VBScript and WScript globals the script uses,
+`CreateObject`, `Err`, `Replace`, `WScript`, `Nothing` and the rest of
+`globals`) whose names are Nix bindings: the script, and each `sub name
+parameters body` or `function name parameters body`, is a lambda whose formals
+are the names it declares (`dim [a b]` anywhere in it, an `If` branch
+included, since VBScript scopes a `Dim` to its script or procedure; its
+procedures; a procedure's parameters, listed in order as `[{who = null;} {n =
+byVal;}]`), and the generator throws when a formal is not declared. A name the
+generator or Nix already uses is spelled with a trailing `'` (`str'`), which
+the printer drops. A member is `dot base "Arguments.Count"`, a call `call
+function [arguments]`, written `f(a, b)` in an expression and `f a, b` as a
+statement; `str` is a string literal (its quotes doubled on output), integers
+and booleans are Nix values, `not` and `neg` the unary operators, and the
+binary ones an infix list parsed by VBScript's precedence (`^`, `*` `/`, `\`,
+`Mod`, `+` `-`, `&`, the comparisons, `And`, `Or`, `Xor`, `Eqv`, `Imp`, all
+left associative), so a nested list is a grouping the precedence does not give
+and the printer writes the parentheses it needs and no others. A string where
+an expression is expected throws. The statements are `optionExplicit`,
+`onErrorResumeNext`, `onErrorGoTo0`, `dim`, `assign target value`, `set target
+value`, a `call`, `if' test body` and `ifElse test body otherwise`, bodies one
+tab in; `comment "text"` is `' text`. From
+`tern/config/plugins/tuturu/scripts/play.data.nix`, abridged:
+
+```nix
+{CreateObject, Err, WScript, assign, call, dim, dot, if', set, str, ...}: ({sh, cmd, code}: [
+  (dim [sh cmd])
+  (set sh (call CreateObject [(str "WScript.Shell")]))
+  (if' [(dot Err "Number") "<>" 0] [
+    (call (dot WScript "Quit") [1])
+  ])
+  (dim [code])
+  (assign code (call (dot sh "Run") [cmd 0 true]))
+  (call (dot WScript "Quit") [code])
+])
+```
 
 Patches (`generators.patch`): a patch is a list of files, `file path hunks`
 (`--- a/path`, `+++ b/path`) or `git path index hunks`, which adds the
@@ -680,7 +709,7 @@ then runs each language's own check on every rendered tree, listed in its
 | Lisp (15 files) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes | `bash -n`, `shellcheck -S warning` |
 | Luau (8 files) | bytes, at conversion and again when its names became Nix bindings | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
-| VBScript (1 file) | bytes | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
+| VBScript (1 file) | bytes, again after its names became Nix bindings and its operators infix lists | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
 | markdown (7 files) | bytes, again after text became only literal and a table's header typed | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
 | GLSL (15 files) | `nix run .#glsl-gate -- ORIGINAL GENERATED ...`: both sides, canonicalized (top-level declarations sorted, every operator parenthesized, literals as their values, one declarator per declaration, every branch braced) and run through clang-format 21 with a pinned style, are equal; both pass glslangValidator; four 640×360 frames of each, rendered by llvmpipe into float32 targets, are bit-identical | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
