@@ -1874,16 +1874,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1793764043,
-        "narHash": "sha256-an58kccVIAAucUyZc5fyDSD6Fw1SbAbu4pu+8knl+kM=",
+        "lastModified": 1793770692,
+        "narHash": "sha256-MNVibHmCS4yo+xa34ZdAWw/UoQX3tTCSrxw7jI8tz2w=",
         "ref": "refs/heads/main",
-        "rev": "751ffb64b8e6b8da7c862d555fb6884cfb2dc600",
-        "revCount": 115,
+        "rev": "5a08985b4d88a0809b7a2e097a88244ff2d50b28",
+        "revCount": 126,
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/strictix"
       },
       "original": {
-        "rev": "751ffb64b8e6b8da7c862d555fb6884cfb2dc600",
+        "rev": "5a08985b4d88a0809b7a2e097a88244ff2d50b28",
         "type": "git",
         "url": "file:///home/y0usaf/dev/maintaining/strictix"
       }
