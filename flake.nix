@@ -20460,7 +20460,7 @@
 
       service = pkgs.writeShellApplication {
         name = "optchat";
-        runtimeInputs = [pkgs.coreutils pkgs.jq];
+        runtimeInputs = [pkgs.coreutils pkgs.jq pkgs.util-linux];
         text = ''
           mkdir -p ${dir}
           [ -p ${dir}/optchatd.fifo ] || mkfifo ${dir}/optchatd.fifo
@@ -20468,6 +20468,8 @@
             /run/current-system/sw/bin/omp-box add ${dir} || echo "optchat: the box cannot reach ${dir} yet" >&2
           fi
           cd ${dir}
+          exec 9>${dir}/optchatd.lock
+          flock -n 9 || { echo "optchat: already running (${dir}/optchatd.lock is held)" >&2; exit 1; }
           exec ${omp}/bin/omp --mode rpc --no-ui --no-session --no-extensions --no-tools --no-lsp --no-skills --no-rules --no-title \
             -e ${generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;})}/service.ts <>${dir}/optchatd.fifo >/dev/null
         '';
@@ -27560,7 +27562,6 @@
       describe,
       report,
       complete,
-      lock,
       Memory,
       optchatd,
     }: [
@@ -27656,24 +27657,6 @@
         (call (dot fs "truncateSync") [file (call (dot Buffer "byteLength") [kept])])
         (call report [(tpl [(sub file) ": dropped a partly written last line"])])
         (return kept)
-      ]))
-      blank
-      ({holder}: (fn lock (typed [] void) [
-        (let' holder 0)
-        (try [
-          (infix [holder "=" (call Number [(call (dot fs "readFileSync") [LOCK (str "utf8")])])])
-        ] [(catch null [])])
-        (if' (infix [holder ">" 0 "&&" holder "!==" (dot process "pid")]) [
-          (try [
-              (call (dot process "kill") [holder 0])
-              (throw' (new Error [(tpl ["already running as pid " (sub holder)])]))
-            ] [
-              ({error}: (catch error [
-                (if' (infix [(dot (infix [error "as" (dot NodeJS "ErrnoException")]) "code") "!==" (str "ESRCH")]) (throw' error))
-              ]))
-            ])
-        ])
-        (call (dot fs "writeFileSync") [LOCK (call String [(dot process "pid")])])
       ]))
       blank
       (class Memory [
@@ -28006,7 +27989,7 @@
             (if' (infix [(dot ctx "agent?.kind") "!==" (str "main")]) return')
             (try ({memory}: [
                 (call (dot fs "mkdirSync") [DIR (obj [(prop "recursive" true)])])
-                (call lock [])
+                (call (dot fs "writeFileSync") [LOCK (call String [(dot process "pid")])])
                 (const memory (new Memory []))
                 (call (dot memory "load") [])
                 (call (dot ctx "setInterval") [(arrow [] (call (dot memory "tick") [])) 1000])
