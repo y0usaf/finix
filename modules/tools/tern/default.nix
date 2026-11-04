@@ -190,10 +190,26 @@
     y0usaf-server = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINjN9qndKm1iN0ctrucDNRBkfcZqC7zbRKR8SCD9E7KW y0usaf@y0usaf-server";
   };
 
+  waitForMount = path: ''
+    for _ in $(seq 1 20); do
+      ${pkgs.util-linux}/bin/findmnt -n -o TARGET --mountpoint "${path}" >/dev/null 2>&1 && break
+      sleep 0.5
+    done
+  '';
+
+  remoteServe =
+    pkgs.writeShellScript "tern-remote-serve" ''
+      set -eu
+      export PATH=${lib.makeBinPath [pkgs.coreutils]}
+      ${waitForMount "${config.user.homeDirectory}/.config/tern"}
+      exec ${package}/bin/tern remote serve --user --state-dir ${config.user.homeDirectory}/.config/tern
+    '';
+
   seedAuthorizedKeys =
     pkgs.writeShellScript "tern-seed-authorized-keys" ''
       set -eu
       export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gawk]}
+      ${waitForMount "${config.user.homeDirectory}/.ssh"}
       dir="$HOME/.ssh"
       mkdir -p "$dir"
       chmod 0700 "$dir"
@@ -241,7 +257,7 @@ in {
         HOME = config.user.homeDirectory;
         XDG_RUNTIME_DIR = "/run/user/${toString config.users.users.${config.user.name}.uid}";
       };
-      command = "${package}/bin/tern remote serve --user --state-dir ${config.user.homeDirectory}/.config/tern";
+      command = remoteServe;
       conditions = ["net/lo/up" "task/tmpfiles-setup/success"];
       log = true;
     };
