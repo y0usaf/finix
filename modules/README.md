@@ -484,49 +484,70 @@ blank
 }))
 ```
 
-Python (`generators.python`): a statement is a Nix list of words (`["import"
-"os"]`, `["x" "=" y]`, `["return" a "if" b "else" c]`) or a string (`"pass"`),
-an expression on its own, or `def name params body`, `class name bases body`,
-`if' test body`, `ifElse test body otherwise` (`otherwise` a body for `else:`,
-or an `if` node for `elif`), `for target iter body`, `while test body`,
-`with' items body`, `try body [(except caught body) (finally body)]` and
-`async` around any of them; a body is a list of statements, four spaces in.
-A name, dotted name or number is a string (an integer may be a Nix integer);
-a list of words is an expression written with single spaces, its operators and
-keywords words of their own. The rest is constructors: `call f args`, `dot x
-name`, `index x key`, `slice lower upper` (spaced around `:` when a bound is not
-a name or number, as black does), `list`, `tuple`, `set`, `dict` with `pair k
-v`, `paren`, `commas` (a tuple without brackets), `kw name value`, `star`,
-`starstar`, `neg`, `invert`, `lambda params body` and `as value name`. String
-literals keep their source body: `str` (`"..."`), `sq` (`'...'`) and `triple`
-(`"""..."""`), with `raw` and `bytes` for the `r` and `b` prefixes; a body that
-is a list is an f-string of text, `field x` and `spec x "03d"`. Brackets lay
-out by their contents: a list of items on one line, `rows` hanging one row a
-line four spaces in with the closing bracket on its own line and a trailing
-comma when there are several rows (black's layout), `aligned` with the rows
-after the first under the first item; `hang x` is a parenthesis hanging its
-expression. An expression of words broken over lines is `rows` too: inside a
-bracket its lines align with the bracket's contents, at statement level they
-end in a backslash and continue four spaces in. `@name@` placeholders for
-`replaceVars` are names. From `codex/apply-reasoning-policy.data.nix`,
-abridged:
+Python (`generators.python`) is code Nix binds. A file is a function of the
+constructors it uses and of the Python builtins it names (`print`, `len`,
+`Exception`, `__name__`, `None`; a builtin spelled like a constructor takes a
+`'`: `str'`, `list'`, `set'`, `bytes'`), returning its module: a lambda whose
+formals are the names the module binds, `({os, Path, main}: [ ... ])`. Every
+scope Python has is such a lambda: a `def`'s is `({a, b, x}: {params = [a
+(default b None)]; body = [ ... ];})`, its parameters and the names its body
+binds; a `class` body, a `lambda` (`{params; body}` too) and a comprehension
+(`listComp ({k}: [(index x k) (compFor k keys) (compIf k)])`, also `setComp`,
+`dictComp` and `gen`, which is written bare as a call's only argument) are the
+others, and an `if`, `for`, `while`, `with` or `try` body is a plain list,
+since Python scopes nothing there. A name is bound where Python binds it
+(imports, assignment, `for`, `with ... as` and `except ... as` targets, `:=`
+in an `if` or `while` test, `def` and `class`), so every name in a tree is a
+Nix variable and a typo is an undefined variable; the generator throws when a
+formal is not bound in its scope. A name that is a Nix keyword, a constructor
+or a builtin takes a `'` (`index'`), dropped on output. Statements are
+`import' os`, `from "pathlib" [Path]`, `assign target value`, `augAssign
+target "+=" value`, `return` and `raise` (`null` for none), `pass`, `break`,
+`continue`, `del`, `global`, `nonlocal`, `assert'`, `def`, `class name bases
+body`, `if'`, `ifElse` (`otherwise` a body for `else:` or an `if` for
+`elif`), `for`, `while`, `with' items body`, `try body [(except caught body)
+(finally body)]`, `async` around any of them, `comment` and an expression.
+Expressions are `call f args`, `dot x "environ.get"` (an attribute path is a
+string: a property, not a binding), `index x key`, `slice lower upper`,
+`list`, `tuple`, `set`, `dict` of `pair k v`, `commas` (a tuple without
+brackets), `kw "flush" true` (a keyword argument), `star`, `starstar`, `not`,
+`neg`, `invert`, `await`, `ternary value test otherwise`, `walrus`, `lambda`
+and `as`; an operator chain is an infix list, `[a "+" b "*" c]` (with `in`,
+`not in`, `is`, `is not`, `and` and `or` among the operators), parsed by
+Python's precedence (`**` right associative, comparisons chained), so a nested
+list is a grouping the precedence does not give and the printer writes the
+parentheses it needs and no others. `true` and `false` are Nix booleans, an
+integer a Nix integer (`octal 448` is `0o700`), and `@name@` substitution
+placeholders are `placeholder "name"`. String literals keep their source body:
+`str` (`"..."`), `sq` (`'...'`) and `triple` (`"""..."""`), with `raw` and
+`bytes` for the `r` and `b` prefixes; a body that is a list is an f-string of
+text, `field x` and `spec x "03d"`, and `strings [a b]` is implicit
+concatenation. Layout is data: brackets hold a list of items on one line,
+`rows` hanging one row a line four spaces in with the closing bracket on its
+own line and a trailing comma when there are several rows (black's layout), or
+`aligned` with the rows after the first under the first item; `rows` of an
+infix list, of `strings` or of a comprehension's parts breaks it between rows,
+under its bracket or, at statement level, after a backslash four spaces in;
+`hang x` and `aligned [ ... ]` around an expression are the parentheses black
+or the author wrote only to break lines. From
+`codex/apply-reasoning-policy.data.nix`, abridged:
 
 ```nix
-{as, blank, call, commas, def, dot, if', index, kw, raw, slice, sq, triple, ...}: [
-  (triple "Reconcile only Codex's root reasoning setting, preserving other config.")
-  ["import" "os"]
-  ["from" "pathlib" "import" "Path"]
-  blank
-  (def "apply" ["path"] [
-    ["path" "=" (call (dot (call (dot (call "Path" ["path"]) "expanduser") []) "resolve") [])]
-    ["text" "=" (call "path.read_text" []) "if" (call "path.exists" []) "else" (sq "")]
-    ["header" "=" (call "re.search" [(raw (sq "^\\s*\\[")) "text" (kw "flags" "re.MULTILINE")])]
-    [(commas ["root" "rest"]) "=" (commas [(index "text" (slice null "end")) (index "text" (slice "end" null))])]
-    (if' ["not" "count"] [
-      ["root" "=" (sq "model_reasoning_effort = \"low\"\\n") "+" "root"]
-    ])
-  ])
-]
+{assign, call, commas, def, dot, if', import', index, kw, raw, return, slice, sq, ternary, ...}: ({re, apply}: [
+  (import' re)
+  (def apply ({path, text, header, end, root, rest, result}: {
+    params = [path];
+    body = [
+      (assign text (ternary (call (dot path "read_text") []) (call (dot path "exists") []) (sq "")))
+      (assign header (call (dot re "search") [(raw (sq "^\\s*\\[")) text (kw "flags" (dot re "MULTILINE"))]))
+      (assign (commas [root rest]) (commas [(index text (slice null end)) (index text (slice end null))]))
+      (assign result [root "+" rest])
+      (if' [result "==" text] [
+        (return null)
+      ])
+    ];
+  }))
+])
 ```
 
 JavaScript (`generators.javascript`): a call is a Nix list, its callee
@@ -661,7 +682,7 @@ then runs each language's own check on every rendered tree, listed in its
 | markdown (7 files) | bytes | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
 | GLSL (15 files) | `nix run .#glsl-gate -- ORIGINAL GENERATED ...`: both sides, canonicalized (top-level declarations sorted, every operator parenthesized, literals as their values, one declarator per declaration, every branch braced) and run through clang-format 21 with a pinned style, are equal; both pass glslangValidator; four 640×360 frames of each, rendered by llvmpipe into float32 targets, are bit-identical | `glslangValidator -S frag` on each shader inside tomoe's ES 3.00 prelude and `main` |
 | Lua (3 files) | bytes, at conversion and again when names became Nix bindings (the bound trees render the word-list trees' bytes) | `luajit -bl` for Aniimo's two LuaJIT mods, `luac -p` (Lua 5.5, Hyprland's) for `hyprland.lua` |
-| Python (5 files) | bytes | `python -m py_compile` (vercel's `wrapper.py` with `@owners@` filled); `ruff check` is not clean today (4 of 5 files fail its defaults) |
+| Python (5 files) | bytes, again after re-import to bound typed trees | `python -m py_compile` (vercel's `wrapper.py` with `@owners@` filled); `ruff check` is not clean today (4 of 5 files fail its defaults) |
 | JavaScript (1 file) | bytes | `node --check` |
 | TypeScript (10 files) | bytes, at conversion and again when re-imported with every name bound | `tsc --noEmit` (TypeScript 7) with an ambient stub of the omp, pi and Node modules they import; `work-fold.ts` and `compact-eval.ts`, untyped as written, get `--noCheck` (syntax and imports only) |
 
