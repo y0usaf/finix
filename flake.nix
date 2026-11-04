@@ -216,7 +216,7 @@
     };
 
     strictix = {
-      url = "git+file:///home/y0usaf/dev/maintaining/strictix?rev=5a08985b4d88a0809b7a2e097a88244ff2d50b28";
+      url = "github:y0usaf/strictix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -528,8 +528,7 @@
       flakeInputs,
       ...
     }: let
-      data = modules_desktop_apps_bolo_data;
-      inherit (data) model vocabulary;
+      inherit (modules_desktop_apps_bolo_data) model vocabulary;
       models.${model.name} = {
         inherit (model) engine;
         files = lib.mapAttrs (file: hash:
@@ -42557,8 +42556,7 @@
       ...
     }: let
       user = config.user.name;
-      data = modules_desktop_apps_bolo_data;
-      inherit (data) model vocabulary;
+      inherit (modules_desktop_apps_bolo_data) model vocabulary;
       modelDir = "/home/${user}/.local/share/bolo/models/${model.name}";
       hashes = builtins.mapAttrs (_: hash:
         builtins.convertHash {
@@ -44543,7 +44541,7 @@
             ];
           constant-option = {
             readers = 3;
-            defined = lib.unique (lib.concatMap (host: map (o: lib.showOption o.loc) (lib.filter (o: lib.any (file: lib.hasPrefix "${inputs.self}" (toString file)) o.declarations && lib.any (d: !(lib.elem d.file o.declarations)) o.definitionsWithLocations) (lib.collect lib.isOption host.options))) (builtins.attrValues hosts));
+            defined = lib.unique (lib.concatMap (host: map (o: lib.showOption o.loc) (lib.filter (o: lib.any (file: lib.hasPrefix "${inputs.self}" (toString file) || toString file == "<unknown-file>") o.declarations && o.definitionsWithLocations != []) (lib.collect lib.isOption host.options))) (builtins.attrValues hosts));
           };
           duplicate-definitions.min-leaves = 6;
           singleton-attrset.exempt = ["flake.nix" ".data.nix"];
