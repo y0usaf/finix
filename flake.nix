@@ -20517,6 +20517,9 @@
       };
       security.sudo.wheelNeedsPassword = false;
 
+      # Shares mount with sudo and would leave these root-owned, so the user's own programs couldn't write their caches and state beside them.
+      systemd.tmpfiles.rules = map (dir: "d ${home}/${dir} 0755 ${user} users -") [".cache" ".config" ".local" ".local/share" ".local/state"];
+
       fileSystems = {
         "${home}/.omp/run" = {
           device = "tmpfs";
