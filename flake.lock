@@ -1487,11 +1487,11 @@
     "omp-bot": {
       "flake": false,
       "locked": {
-        "lastModified": 1793827926,
-        "narHash": "sha256-hqRVrY0aU6lBN+NmS6UcOkirZYMZptgDUvwX/LLDeJc=",
+        "lastModified": 1793828589,
+        "narHash": "sha256-2D3f15foH9LsLiG1eTX5BKKrCkrkeqpLjjDzRb774A8=",
         "ref": "refs/heads/main",
-        "rev": "8eeb23f280a7c4dadfdf3b2cefbba5e7e76465ab",
-        "revCount": 61,
+        "rev": "9cc94096eeb51ffe2e35e44eb234ea86c02eee24",
+        "revCount": 64,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/omp-bot"
       },
