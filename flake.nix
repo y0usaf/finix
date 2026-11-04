@@ -18668,7 +18668,7 @@
           config = {
             allowUnfree = true;
             inherit cudaSupport;
-            permittedInsecurePackages = ["openclaw-2026.10.3"];
+            permittedInsecurePackages = ["openclaw-2026.10.5"];
           };
           overlays = [
             inputs.claude-code-nix.overlays.default
