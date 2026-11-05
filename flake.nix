@@ -1229,6 +1229,7 @@
             - "${generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts))}"
             - "${generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts))}"
             - "${generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;})}/extension.ts"
+            - "${flakeInputs.omp-bot}/omp/ompd.ts"
         '';
         appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n";
       };
@@ -1264,6 +1265,9 @@
           sharesDir = "${state}/shares";
           authDir = "${state}/auth";
           nativesDir = "${state}/natives";
+          # Box sessions' ompd jobs (omp-bot's omp/ompd.ts, which starts an ompd in the box), kept on the host so
+          # a job's record and log outlive a box restart and a cut-off job is reported instead of forgotten.
+          ompdJobsDir = "${state}/ompd-jobs";
           inherit (flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}) omp;
         };
         modules = [
@@ -1342,7 +1346,7 @@
           respawn = true;
           environment.HOME = home;
           command = "${pkgs.writeShellScript "omp-box-run" ''
-            mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${home}/.omp/natives
+            mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${state}/ompd-jobs ${home}/.omp/natives
             rm -f ${state}/id_ed25519
             [ -f ${state}/ssh-key ] || ${pkgs.openssh}/bin/ssh-keygen -q -t ed25519 -N "" -C omp-box -f ${state}/ssh-key
             cp ${state}/ssh-key.pub ${state}/auth/authorized_keys
@@ -20683,6 +20687,12 @@
               proto = "9p";
               readOnly = true;
             }
+            {
+              tag = "ompd-jobs";
+              source = ompBox.ompdJobsDir;
+              mountPoint = "${home}/.local/state/omp-bot/jobs";
+              proto = "9p";
+            }
           ];
         interfaces = [];
         qemu.extraArgs = [
@@ -20731,7 +20741,7 @@
       security.sudo.wheelNeedsPassword = false;
 
       # Shares mount with sudo and would leave these root-owned, so the user's own programs couldn't write their caches and state beside them.
-      systemd.tmpfiles.rules = map (dir: "d ${home}/${dir} 0755 ${user} users -") [".cache" ".config" ".local" ".local/share" ".local/state"];
+      systemd.tmpfiles.rules = map (dir: "d ${home}/${dir} 0755 ${user} users -") [".cache" ".config" ".local" ".local/share" ".local/state" ".local/state/omp-bot"];
 
       fileSystems = {
         "${home}/.omp/run" = {
