@@ -4244,7 +4244,7 @@
     in {
       user.persist.directories = [".local/state/wireplumber"];
       finix.persistence.homeServices = ["wireplumber"];
-      users.users.${userName}.extraGroups = ["audio"];
+      user.account.extraGroups = ["audio"];
 
       environment.etc."pipewire/pipewire.conf.d/99-input-denoising.conf".text = builtins.toJSON {
         "context.modules" = [
@@ -8923,6 +8923,12 @@
           description = "The user's entry in finix.persistence.allowlist.users: directories and files under home that survive the boot-time home reset.";
         };
 
+        account = lib.mkOption {
+          type = lib.types.deferredModule;
+          default = {};
+          description = "The user's entry in users.users.";
+        };
+
         files = lib.mkOption {
           type = lib.types.attrsOf lib.types.deferredModule;
           default = {};
@@ -8933,6 +8939,7 @@
       config = {
         finix.persistence.allowlist.users.${user} = lib.mkAliasDefinitions options.user.persist;
         manzil.users.${user}.files = lib.mkAliasDefinitions options.user.files;
+        users.users.${user} = lib.mkAliasDefinitions options.user.account;
         time.timeZone = "America/Toronto";
 
         environment.etc."profile.d/system-path.sh".text = ''
@@ -9039,7 +9046,7 @@
           ];
         };
 
-        users.users.y0usaf = {
+        user.account = {
           isNormalUser = true;
           inherit (config.user) uid;
           home = "/home/y0usaf";
@@ -15008,7 +15015,7 @@
         };
       };
 
-      users.users.${config.user.name}.extraGroups = ["networkmanager" "video" "render" "seat"];
+      user.account.extraGroups = ["networkmanager" "video" "render" "seat"];
 
       system.activation.scripts.networkManagerConnections = {
         deps = ["etc"];
@@ -22873,7 +22880,7 @@
         lp = {};
         dialout = {};
       };
-      users.users.${config.user.name}.extraGroups = ["gamemode" "input" "bluetooth" "lp" "dialout"];
+      user.account.extraGroups = ["gamemode" "input" "bluetooth" "lp" "dialout"];
     };
     patches_data = [
       {
@@ -38998,7 +39005,7 @@
         zzz.enable = true;
       };
 
-      users.users.${config.user.name}.extraGroups = ["docker"];
+      user.account.extraGroups = ["docker"];
 
       finit.tasks.framework-boot-health = {
         description = "record first-boot health after network and services settle";
@@ -39237,7 +39244,7 @@
         cron.enable = true;
       };
 
-      users.users.${config.user.name}.shell = lib.mkForce "${pkgs.bashInteractive}/bin/bash";
+      user.account.shell = lib.mkForce "${pkgs.bashInteractive}/bin/bash";
 
       finit.services.dhcpcd = {
         command = lib.mkForce (
