@@ -21728,14 +21728,15 @@
       };
     };
     omp_secret_data = ''
-      import { current, forget, label, list, meta, NAME, names, pending, reveal, scopes, store, type Request, type Scope } from "./store";
+      import { current, forget, held, label, list, meta, NAME, names, pending, reveal, scopes, share, store, type Request, type Scope } from "./store";
 
       const USAGE = `usage: omp-secret [COMMAND]
         (nothing)                              secrets omp chats and bots asked for and haven't got, and the ones set
-        NAME [--bot BOT | --user] [--ttl TTL]  enter NAME's value, masked, for the chat or bot that asked, else your own chats (TTL: 30m, 12h, 7d or never; default the ask's, else 24h)
+        NAME [--bot BOT | --user] [--ttl TTL]  enter NAME's value, masked, for the bot that asked, else shared (--user): every bot without its own NAME and your own chats read it (TTL: 30m, 12h, 7d or never; default the ask's, else 24h)
         list [--bot BOT | --user]              set secrets: scope, name, when set, when they expire; never values
         forget NAME [--bot BOT | --user]       delete a secret now
-        run                                    run the command on stdin with its $SECRET_ names set and their values redacted (omp's bash hook uses it)`;
+        sync [--bot BOT]                       copy the shared secrets into boxed bots' own stores (omp-bot-box runs it before a boxed bot starts)
+        run                                    run the command on stdin with its $SECRET_ names set (the bot's own, else the shared one) and their values redacted (omp's bash hook uses it)`;
 
       function fail(message: string): never {
       	console.error(`omp-secret: ''${message}`);
@@ -21885,7 +21886,8 @@
       	const env: Record<string, string | undefined> = { ...process.env };
       	const values: [string, Buffer][] = [];
       	for (const name of names(command)) {
-      		const value = await reveal(bot, name);
+      		const found = held(bot, name);
+      		const value = found && (await reveal(found.scope, name));
       		if (value === undefined) fail(`''${label(bot)} has no secret ''${name}, or it expired; ask for it with the secret tool`);
       		env[`SECRET_''${name}`] = value;
       		if (value.length > 0) values.push([name, Buffer.from(value)]);
@@ -21925,6 +21927,9 @@
       	}
       	case "run":
       		await run();
+      		break;
+      	case "sync":
+      		await share(opts.bot).catch(error => fail(error.message));
       		break;
       	case "-h":
       	case "--help":
@@ -28116,7 +28121,7 @@
       import { formTheme } from "@oh-my-pi/pi-tui/chrome/form-theme";
       import { matchesAppInterrupt } from "@oh-my-pi/pi-tui/keybinding-matchers";
       import { actionBar, actionButton } from "@oh-my-pi/pi-tui/native/overlay";
-      import { current, dir, forget, list, meta, modified, NAME, names, pending, request, reveal, store, ttl } from "./store";
+      import { current, dir, forget, held, label, list, meta, modified, NAME, names, pending, request, reveal, type Scope, store, ttl } from "./store";
 
       const WAIT_MS = Number(process.env.OMP_SECRET_WAIT_MS) || 600_000;
 
@@ -28191,22 +28196,28 @@
       	const z = pi.zod;
       	const known = new Map<string, { mtime: number; value: string }>();
       	const seen = new Map<string, string>();
+      	const showing = new Set<string>();
+      	const ADD = "add it from Tern's command palette: Secrets: Add";
 
       	pi.setLabel("Secrets");
 
+      	// Every value this session could hand a command, its own and the shared ones, so output naming one is scrubbed.
       	async function values(): Promise<[string, string][]> {
-      		let files: string[] = [];
-      		try {
-      			files = readdirSync(dir(bot)).filter(file => file.endsWith(".age"));
-      		} catch {}
-      		for (const file of files) {
-      			const name = file.slice(0, -4);
-      			const mtime = modified(bot, name);
-      			if (known.get(name)?.mtime === mtime) continue;
-      			const value = await reveal(bot, name).catch(() => undefined);
-      			if (value === undefined) continue;
-      			known.set(name, { mtime, value });
-      			if (value.length > 0) seen.set(value, name);
+      		for (const scope of bot ? [bot, undefined] : [undefined]) {
+      			let files: string[] = [];
+      			try {
+      				files = readdirSync(dir(scope)).filter(file => file.endsWith(".age"));
+      			} catch {}
+      			for (const file of files) {
+      				const name = file.slice(0, -4);
+      				const id = `''${label(scope)}/''${name}`;
+      				const mtime = modified(scope, name);
+      				if (known.get(id)?.mtime === mtime) continue;
+      				const value = await reveal(scope, name).catch(() => undefined);
+      				if (value === undefined) continue;
+      				known.set(id, { mtime, value });
+      				if (value.length > 0) seen.set(value, name);
+      			}
       		}
       		return [...seen].sort((a, b) => b[0].length - a[0].length);
       	}
@@ -28239,13 +28250,17 @@
       		return value;
       	}
 
-      	async function enter(ctx, name: string, reason: string, expiry: string | undefined, signal?: AbortSignal): Promise<void> {
-      		if (signal?.aborted) return;
+      	// The masked box: stores what the user types as scope's NAME. It closes by itself when NAME is set elsewhere.
+      	async function enter(ctx, scope: Scope, name: string, reason: string, expiry: string | undefined, signal?: AbortSignal): Promise<void> {
+      		const id = `''${label(scope)}/''${name}`;
+      		if (signal?.aborted || showing.has(id)) return;
+      		showing.add(id);
+      		const before = meta(scope, name)?.set;
       		const stop = new AbortController();
       		const abort = () => stop.abort();
       		signal?.addEventListener("abort", abort, { once: true });
-      		const watch = setInterval(() => meta(bot, name) && stop.abort(), 1000);
-      		const title = `Secret ''${name}''${bot ? ` for ''${bot}` : ""} (hidden)`;
+      		const watch = setInterval(() => meta(scope, name)?.set !== before && stop.abort(), 1000);
+      		const title = `Secret ''${name} for ''${scope ?? "all bots"} (hidden)`;
       		try {
       			await ctx.ui.custom(
       				(tui, _theme, _keys, done) =>
@@ -28253,7 +28268,7 @@
       						title,
       						reason,
       						async value => {
-      							await store(bot, name, value, expiry, reason);
+      							await store(scope, name, value, expiry, reason);
       							done(undefined);
       						},
       						() => done(undefined),
@@ -28265,6 +28280,7 @@
       		} finally {
       			clearInterval(watch);
       			signal?.removeEventListener("abort", abort);
+      			showing.delete(id);
       		}
       	}
 
@@ -28272,7 +28288,7 @@
       		name: "secret",
       		label: "Secret",
       		description:
-      			"Secrets (API keys, tokens) the user hands you without you ever seeing them. action request asks the user for secret name (capitals, digits and _, like GITHUB_TOKEN) with a one-line reason and an optional ttl (30m, 12h, 7d or never; default 24h) and waits for them to enter it; list shows the names you hold and when they expire; forget deletes one. Use a secret by writing $SECRET_NAME (e.g. $SECRET_GITHUB_TOKEN) in a bash command: it is set for that command only, and any output containing the value shows the name in brackets instead, like [SECRET_GITHUB_TOKEN]. Never ask for a secret in chat or try to read, print or decode its value.",
+      			"Secrets (API keys, tokens) the user hands you without you ever seeing them. action request asks the user for secret name (capitals, digits and _, like GITHUB_TOKEN) with a one-line reason and an optional ttl (30m, 12h, 7d or never; default 24h) and waits for them to enter it; list shows the names you hold, yours and the ones shared with all bots, and when they expire; forget deletes one of yours. Use a secret by writing $SECRET_NAME (e.g. $SECRET_GITHUB_TOKEN) in a bash command: it is set for that command only (your own copy if you hold one, else the shared one), and any output containing the value shows the name in brackets instead, like [SECRET_GITHUB_TOKEN]. Never ask for a secret in chat or try to read, print or decode its value.",
       		parameters: z.object({
       			action: z.enum(["request", "list", "forget"]),
       			name: z.string().optional(),
@@ -28281,14 +28297,20 @@
       		}),
       		async execute(_toolCallId, params, signal, onUpdate, ctx) {
       			if (params.action === "list") {
-      				const held = list(bot);
-      				if (held.length === 0) return text("You hold no secrets.");
-      				return text(held.map(found => `''${found.name} (as $SECRET_''${found.name}), expires ''${found.expires === null ? "never" : new Date(found.expires).toISOString()}`).join("\n"));
+      				const mine = list(bot);
+      				const shared = bot ? list(undefined).filter(found => !mine.some(own => own.name === found.name)) : [];
+      				if (mine.length + shared.length === 0) return text("You hold no secrets.");
+      				const line = (found, whose: string) => `''${found.name} (as $SECRET_''${found.name}), ''${whose}expires ''${found.expires === null ? "never" : new Date(found.expires).toISOString()}`;
+      				return text([...mine.map(found => line(found, "")), ...shared.map(found => line(found, "shared with all bots, "))].join("\n"));
       			}
       			const name = params.name ?? "";
       			if (!NAME.test(name)) return text(`''\'''${name}' is not a secret name: use capitals, digits and _, starting with a capital, like GITHUB_TOKEN.`);
-      			if (params.action === "forget") return text(forget(bot, name) ? `Forgot ''${name}.` : `You hold no secret ''${name}.`);
-      			if (meta(bot, name)) return text(`''${name} is already set; use $SECRET_''${name} in bash.`);
+      			if (params.action === "forget") {
+      				if (forget(bot, name)) return text(`Forgot ''${name}.`);
+      				if (bot && meta(undefined, name)) return text(`''${name} is shared with all bots by the user; only they can remove it.`);
+      				return text(`You hold no secret ''${name}.`);
+      			}
+      			if (held(bot, name)) return text(`''${name} is already set; use $SECRET_''${name} in bash.`);
       			const reason = (params.reason ?? "").trim();
       			if (!reason) return text("Give a one-line reason so the user knows what the secret is for.");
       			try {
@@ -28297,25 +28319,42 @@
       				return text(error.message);
       			}
       			request(bot, name, reason, params.ttl);
+      			const set = `The user set ''${name}. Use $SECRET_''${name} in bash; you will never see its value.`;
       			if (ctx?.mode === "tui") {
-      				await enter(ctx, name, reason, params.ttl, signal);
-      				if (meta(bot, name)) return text(`The user set ''${name}. Use $SECRET_''${name} in bash; you will never see its value.`);
-      				return text(`The user closed the box without entering ''${name}; the request stays open and they can still enter it with: omp-secret ''${name}. Don't ask again unless they say so.`);
+      				await enter(ctx, bot, name, reason, params.ttl, signal);
+      				if (held(bot, name)) return text(set);
+      				return text(`The user closed the box without entering ''${name}; the request stays open and they can still ''${ADD}. Don't ask again unless they say so.`);
       			}
-      			onUpdate?.(text(`Waiting for the user to run: omp-secret ''${name}`));
+      			onUpdate?.(text(`Waiting for the user to ''${ADD}`));
       			const deadline = Date.now() + WAIT_MS;
       			while (Date.now() < deadline && !signal?.aborted) {
-      				if (meta(bot, name)) return text(`The user set ''${name}. Use $SECRET_''${name} in bash; you will never see its value.`);
+      				if (held(bot, name)) return text(set);
       				await Bun.sleep(1000);
       			}
-      			return text(`The user hasn't entered ''${name} yet; the request stays open. Tell them to run: omp-secret ''${name}`);
+      			return text(`The user hasn't entered ''${name} yet; the request stays open. Tell them to ''${ADD}, naming it ''${name}.`);
       		},
       	});
 
       	pi.on("session_start", (_event, ctx) => {
-      		if (!bot || ctx.mode !== "tui") return;
+      		if (ctx.mode !== "tui") return;
+      		// Tern's "Secrets: Add" (omp-bot's bin/omp-bot-secret) opens a session only to show the box, for one bot or
+      		// (OMP_SECRET_FOR empty) every bot, and ends it when the box closes.
+      		const adding = process.env.OMP_SECRET_ADD;
+      		if (adding !== undefined) {
+      			const scope = process.env.OMP_SECRET_FOR || undefined;
+      			void (async () => {
+      				if (NAME.test(adding)) {
+      					const had = meta(scope, adding);
+      					const why = scope ? `Only ''${scope} reads it.` : `Every bot reads it, unless it holds its own ''${adding}.`;
+      					await enter(ctx, scope, adding, `''${why} It never expires.''${had ? ` Replaces the one set ''${new Date(had.set).toLocaleString()}.` : ""}`, "never");
+      				}
+      				ctx.shutdown();
+      			})();
+      			return;
+      		}
+      		if (!bot) return;
       		void (async () => {
-      			for (const ask of pending()) if (ask.bot === bot && !meta(bot, ask.name)) await enter(ctx, ask.name, ask.reason, ask.ttl);
+      			for (const ask of pending()) if (ask.bot === bot && !held(bot, ask.name)) await enter(ctx, bot, ask.name, ask.reason, ask.ttl);
       		})();
       	});
 
@@ -28326,7 +28365,7 @@
       		if (wanted.length === 0) return undefined;
       		if (!runner) return { block: true, reason: "omp-secret is not on PATH, so secrets can't be used here." };
       		if (command.startsWith(`''${quote(runner)} run <<`)) return undefined;
-      		const missing = wanted.filter(name => !meta(bot, name));
+      		const missing = wanted.filter(name => !held(bot, name));
       		if (missing.length > 0) {
       			return { block: true, reason: `No secret ''${missing.join(", ")} (never set, forgotten or expired). Ask the user for it with the secret tool.` };
       		}
@@ -28358,11 +28397,16 @@
 
       export const NAME = /^[A-Z][A-Z0-9_]{0,63}$/;
       export const REFERENCE = /\$\{?SECRET_([A-Z][A-Z0-9_]{0,63})/g;
-      // OMP_SECRETS_DIR moves the store: omp-bot points a boxed bot's at a folder of its own shared into the box.
-      export const ROOT = process.env.OMP_SECRETS_DIR || join(process.env.XDG_STATE_HOME || join(homedir(), ".local", "state"), "omp-secrets");
-      export const KEY = join(ROOT, "secrets.key");
+      const STATE = process.env.XDG_STATE_HOME || join(homedir(), ".local", "state");
+      // OMP_SECRETS_DIR moves the store: omp-bot points a boxed bot's at a folder of its own shared into the box, where
+      // the shared secrets are a copy the host keeps in step.
+      const BOXED = Boolean(process.env.OMP_SECRETS_DIR);
+      export const ROOT = process.env.OMP_SECRETS_DIR || join(STATE, "omp-secrets");
+      const BOTS = process.env.OMP_BOT_STATE || join(STATE, "omp-bot");
       const DEFAULT_TTL = "24h";
 
+      // A scope is one bot's secrets, or undefined: the shared ones, which every bot without its own copy reads and your
+      // own omp chats use.
       export type Scope = string | undefined;
       export type Meta = { name: string; reason?: string; set: number; expires: number | null };
       export type Request = { bot?: string; name: string; reason: string; ttl?: string; at: number };
@@ -28372,16 +28416,35 @@
       }
 
       export function label(bot: Scope): string {
-      	return bot ?? "user";
+      	return bot ?? "shared";
+      }
+
+      // The bots omp-bot runs in its box (bots.json "box": true); seen from the host only, since in a box the store is
+      // already that bot's own.
+      export function boxed(): string[] {
+      	if (BOXED) return [];
+      	const roster = readJson<{ name?: unknown; box?: unknown }[]>(join(BOTS, "bots.json"), []);
+      	return Array.isArray(roster) ? roster.filter(bot => bot?.box === true && typeof bot.name === "string").map(bot => bot.name as string) : [];
+      }
+
+      // The store a scope's secrets live in: a boxed bot's own folder, which its box shares, else this one.
+      function root(bot: Scope): string {
+      	return bot && boxed().includes(bot) ? join(BOTS, "bots", bot, "secrets") : ROOT;
+      }
+
+      function keyFile(base: string): string {
+      	return join(base, "secrets.key");
       }
 
       export function dir(bot: Scope): string {
-      	return bot ? join(ROOT, "bots", bot) : join(ROOT, "user");
+      	return bot ? join(root(bot), "bots", bot) : join(ROOT, "user");
       }
 
       export function scopes(): Scope[] {
       	const bots = join(ROOT, "bots");
-      	return [...(existsSync(dir(undefined)) ? [undefined] : []), ...(existsSync(bots) ? readdirSync(bots) : [])];
+      	const found = new Set<string>(existsSync(bots) ? readdirSync(bots) : []);
+      	for (const bot of boxed()) if (existsSync(dir(bot))) found.add(bot);
+      	return [...(existsSync(dir(undefined)) ? [undefined] : []), ...found];
       }
 
       export function names(command: string): string[] {
@@ -28415,11 +28478,16 @@
       	renameSync(tmp, path);
       }
 
-      export function forget(bot: Scope, name: string): boolean {
-      	const base = join(dir(bot), name);
+      function remove(base: string): boolean {
       	const had = existsSync(`''${base}.age`);
       	rmSync(`''${base}.age`, { force: true });
       	rmSync(`''${base}.json`, { force: true });
+      	return had;
+      }
+
+      export function forget(bot: Scope, name: string): boolean {
+      	const had = remove(join(dir(bot), name));
+      	if (!bot) for (const other of boxed()) remove(join(root(other), "user", name));
       	return had;
       }
 
@@ -28432,6 +28500,14 @@
       		return undefined;
       	}
       	return found;
+      }
+
+      // Where a bot finds a secret: its own copy wins, else the shared one.
+      export function held(bot: Scope, name: string): { scope: Scope; meta: Meta } | undefined {
+      	const mine = meta(bot, name);
+      	if (mine) return { scope: bot, meta: mine };
+      	const shared = bot ? meta(undefined, name) : undefined;
+      	return shared ? { scope: undefined, meta: shared } : undefined;
       }
 
       export function list(bot: Scope): Meta[] {
@@ -28449,18 +28525,18 @@
       	return stdout;
       }
 
-      async function key() {
-      	if (existsSync(KEY)) return;
-      	own(ROOT);
-      	const child = Bun.spawn(["age-keygen", "-o", KEY], { stdout: "ignore", stderr: "pipe" });
+      async function key(base: string) {
+      	if (existsSync(keyFile(base))) return;
+      	own(base);
+      	const child = Bun.spawn(["age-keygen", "-o", keyFile(base)], { stdout: "ignore", stderr: "pipe" });
       	const [stderr, code] = await Promise.all([new Response(child.stderr).text(), child.exited]);
       	if (code !== 0) throw new Error(`age-keygen: ''${stderr.trim()}`);
-      	chmodSync(KEY, 0o600);
+      	chmodSync(keyFile(base), 0o600);
       }
 
       export async function reveal(bot: Scope, name: string): Promise<string | undefined> {
       	if (!meta(bot, name)) return undefined;
-      	return age(["-d", "-i", KEY, join(dir(bot), `''${name}.age`)]);
+      	return age(["-d", "-i", keyFile(root(bot)), join(dir(bot), `''${name}.age`)]);
       }
 
       export function modified(bot: Scope, name: string): number {
@@ -28471,19 +28547,44 @@
       	}
       }
 
+      async function seal(base: string, folder: string, found: Meta, value: string) {
+      	await key(base);
+      	own(folder);
+      	const file = join(folder, found.name);
+      	const cipher = await age(["-e", "-a", "-i", keyFile(base)], value);
+      	writeFileSync(`''${file}.age.tmp`, cipher, { mode: 0o600 });
+      	renameSync(`''${file}.age.tmp`, `''${file}.age`);
+      	writeJson(`''${file}.json`, found);
+      }
+
       export async function store(bot: Scope, name: string, value: string, expiry: string | undefined, reason?: string): Promise<Meta> {
       	const life = ttl(expiry);
-      	await key();
-      	own(dir(bot));
-      	const base = join(dir(bot), name);
-      	const cipher = await age(["-e", "-a", "-i", KEY], value);
       	const now = Date.now();
       	const found: Meta = { name, reason, set: now, expires: life === null ? null : now + life };
-      	writeFileSync(`''${base}.age.tmp`, cipher, { mode: 0o600 });
-      	renameSync(`''${base}.age.tmp`, `''${base}.age`);
-      	writeJson(`''${base}.json`, found);
+      	await seal(root(bot), dir(bot), found, value);
       	settle(bot, name);
+      	if (!bot) await share();
       	return found;
+      }
+
+      // Copies the shared secrets into each boxed bot's store (or only BOT's), sealed with that store's own key, and drops
+      // copies no longer shared, so a bot in a box reads them without the host's key. Store and forget keep it in step;
+      // omp-bot-box runs it before a boxed bot starts.
+      export async function share(only?: string) {
+      	const shared = list(undefined);
+      	for (const bot of boxed()) {
+      		if (only !== undefined && bot !== only) continue;
+      		const base = root(bot);
+      		const folder = join(base, "user");
+      		const keep = new Set(shared.map(found => found.name));
+      		if (existsSync(folder)) for (const file of readdirSync(folder)) if (file.endsWith(".age") && !keep.has(file.slice(0, -4))) remove(join(folder, file.slice(0, -4)));
+      		for (const found of shared) {
+      			const copy = readJson<Meta | undefined>(join(folder, `''${found.name}.json`), undefined);
+      			if (copy?.set === found.set && existsSync(join(folder, `''${found.name}.age`))) continue;
+      			const value = await reveal(undefined, found.name);
+      			if (value !== undefined) await seal(base, folder, found, value);
+      		}
+      	}
       }
 
       function requestsFile(bot: Scope): string {
@@ -28491,7 +28592,6 @@
       }
 
       export function request(bot: Scope, name: string, reason: string, expiry?: string) {
-      	own(ROOT);
       	own(dir(bot));
       	const open = readJson<Request[]>(requestsFile(bot), []).filter(entry => entry.name !== name);
       	open.push({ bot, name, reason, ttl: expiry, at: Date.now() });
