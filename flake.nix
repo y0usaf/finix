@@ -670,7 +670,7 @@
         })
       ];
 
-      manzil.users.${config.user.name}.files.".config/autolith/init.lisp".text = ''
+      user.files.".config/autolith/init.lisp".text = ''
         (define-context-contributor shared-policy (request)
           "Deliver the instructions every harness shares with every provider request."
           (declare (ignore request))
@@ -681,14 +681,13 @@
            :class :mandatory))
       '';
 
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/autolith"
         ".local/share/autolith"
         ".local/state/autolith"
       ];
     };
     ai_chatgpt = {
-      config,
       lib,
       pkgs,
       ...
@@ -803,20 +802,19 @@
     in {
       environment.systemPackages = [chatgpt];
       system.build.chatgpt = chatgpt;
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/Codex"
         ".codex-workspaces"
       ];
     };
     ai_crest = {
-      config,
       pkgs,
       flakeInputs,
       ...
     }: let
       crest = flakeInputs.crest.packages.${pkgs.stdenv.hostPlatform.system};
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".local/state/ouro"
         ".local/state/guild"
         ".local/state/crest-auth"
@@ -841,18 +839,17 @@
       pkgs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/crush"
         ".crush"
         ".local/share/crush"
       ];
       environment.systemPackages = [pkgs.crush];
 
-      manzil.users.${config.user.name}.files.".config/crush/CRUSH.md".text =
+      user.files.".config/crush/CRUSH.md".text =
         config.user.dev.prompts.shared;
     };
     ai_donsetch = {
-      config,
       lib,
       pkgs,
       flakeInputs,
@@ -860,7 +857,7 @@
     }: let
       donsetch = flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.donsetch;
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".cache/donsetch"];
+      user.persist.directories = [".cache/donsetch"];
 
       environment.systemPackages = [
         (pkgs.writeShellScriptBin "donsetch-login" ''
@@ -882,13 +879,13 @@
       flakeInputs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".fx"
         ".omfx"
       ];
       environment.systemPackages = [flakeInputs.oh-my-fx.packages.${pkgs.stdenv.hostPlatform.system}.default];
 
-      manzil.users.${config.user.name}.files = {
+      user.files = {
         ".fx/AGENTS.md" = {
           type = "copy";
           clobber = true;
@@ -988,7 +985,7 @@
 
       config = lib.mkMerge [
         {
-          finix.persistence.allowlist.users.${userName}.directories = [
+          user.persist.directories = [
             ".config/nacre"
             ".local/state/nacre"
           ];
@@ -1081,7 +1078,7 @@
         '';
       };
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".omp"
         ".local/share/omp"
         ".local/state/omp-secrets"
@@ -1090,7 +1087,7 @@
       environment.systemPackages = [pkgs.jq pkgs.age ompSecret ompUntil];
       finit.services.omp-botd.path = [ompUntil];
 
-      manzil.users.${config.user.name}.files =
+      user.files =
         lib.mapAttrs' (name: source: lib.nameValuePair ".omp/agent/ext/${name}" {source = "${source}";}) extLinks
         // {
           ".omp/agent/config.yml" = {
@@ -1632,16 +1629,14 @@
       };
     in {
       config = {
-        finix.persistence = {
-          allowlist.users.${user}.directories = [".local/state/omp-box"];
-          homeServices = ["omp-box" "omp-box-grants" "omp-box-proxy" "omp-box-seed"];
-        };
+        user.persist.directories = [".local/state/omp-box"];
+        finix.persistence.homeServices = ["omp-box" "omp-box-grants" "omp-box-proxy" "omp-box-seed"];
         environment.systemPackages = [pkg];
         system.build.ompBoxRunner = box.runner;
         system.build.ompBoxSelftest = selftest;
         system.build.ompBox = pkg;
 
-        manzil.users.${user}.files.".config/omp-bot/box.env".text = ''
+        user.files.".config/omp-bot/box.env".text = ''
           export OMP_BOT_BOX_SSH_CONFIG=${sshConfig}
           export OMP_BOT_BOX_STATUS=${box.state}/status.json
           export OMP_BOT_BOX_EXT=${seedMount}/current/ext
@@ -1787,10 +1782,8 @@
       config = {
         environment.systemPackages = [flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default];
 
-        finix.persistence = {
-          homeServices = ["paseo"];
-          allowlist.users.${config.user.name}.directories = [".paseo"];
-        };
+        finix.persistence.homeServices = ["paseo"];
+        user.persist.directories = [".paseo"];
 
         finit.services.paseo = {
           description = "Paseo - self-hosted daemon for AI coding agents";
@@ -1828,7 +1821,7 @@
           log = true;
         };
 
-        manzil.users.${config.user.name}.files.".paseo/config.json" = {
+        user.files.".paseo/config.json" = {
           type = "merge";
           format = "json";
           value.agents.providers.fx = {
@@ -1841,12 +1834,11 @@
       };
     };
     ai_phi = {
-      config,
       pkgs,
       flakeInputs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/phi"
         ".local/share/phi"
         ".phi"
@@ -2010,7 +2002,7 @@
       };
 
       config = {
-        finix.persistence.allowlist.users.${config.user.name}.directories = [
+        user.persist.directories = [
           ".config/pi/agent"
           ".config/pi-harness"
           ".local/share/pi"
@@ -2019,7 +2011,7 @@
         ];
         environment.systemPackages = [flakeInputs.pi-harness.packages.${pkgs.stdenv.hostPlatform.system}.default];
         environment.variables.PI_SKIP_VERSION_CHECK = "1";
-        manzil.users.${config.user.name}.files = {
+        user.files = {
           ".pi/agent/settings.json" = {
             generator = toJSON;
             value = {
@@ -2071,23 +2063,18 @@
         };
       };
     };
-    ai_rtk = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".local/share/rtk"];
+    ai_rtk = {pkgs, ...}: {
+      user.persist.directories = [".local/share/rtk"];
       environment.systemPackages = [pkgs.rtk];
     };
     ai_silva = {
-      config,
       pkgs,
       flakeInputs,
       ...
     }: let
       silva = flakeInputs.silva.packages.${pkgs.stdenv.hostPlatform.system};
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/silva"
         ".local/share/silva"
         ".local/state/silva"
@@ -2098,12 +2085,8 @@
         silva.kitty
       ];
     };
-    amp = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+    amp = {pkgs, ...}: {
+      user.persist.directories = [
         ".config/amp"
         ".local/share/amp"
       ];
@@ -2233,12 +2216,8 @@
       key = "AAAAC3NzaC1lZDI1NTE5AAAAIInIo3JhZHnt9L/JFYBy6R8Ig059z/ueGUMuR9/HUefI";
       comment = "y0usaf@android-phone";
     };
-    android_tools = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name} = {
+    android_tools = {pkgs, ...}: {
+      user.persist = {
         directories = [
           ".local/share/android"
           ".local/share/android/.android"
@@ -2849,16 +2828,12 @@
         (call apply [(index (dot sys "argv") 1)])
       ])
     ]);
-    apps_bluetooth = {
-      config,
-      pkgs,
-      ...
-    }: {
+    apps_bluetooth = {pkgs, ...}: {
       environment.systemPackages = [
         pkgs.blueman
         pkgs.bluetuith
       ];
-      manzil.users.${config.user.name}.files.".config/autostart/blueman.desktop".source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
+      user.files.".config/autostart/blueman.desktop".source = "${pkgs.blueman}/etc/xdg/autostart/blueman.desktop";
     };
     apps_bolo = {
       config,
@@ -3024,7 +2999,7 @@
           })
         ];
 
-        manzil.users.${config.user.name}.files =
+        user.files =
           {
             ".config/bolo/manifest.json".source = manifestFile;
           }
@@ -3112,13 +3087,233 @@
         '';
       };
     };
-    apps_btop = {
+    apps_browsers = {
       config,
+      lib,
       pkgs,
+      flakeInputs,
+      generators,
       ...
-    }: {
+    }: let
+      userName = config.user.name;
+      librewolfPkgs = import flakeInputs.nixpkgs-librewolf {inherit (pkgs.stdenv.hostPlatform) system;};
+      uiFonts = config.user.ui.fonts;
+      fontList = lib.concatStringsSep ", " [
+        uiFonts.mainFontName
+        uiFonts.backup.name
+        "Symbols Nerd Font"
+        uiFonts.emoji.name
+      ];
+      policies = {
+        DisableTelemetry = true;
+        DisablePocket = true;
+        DisableFormHistory = true;
+        NoDefaultBookmarks = true;
+        NewTabPage = false;
+        FirefoxHome = {
+          Search = false;
+          TopSites = false;
+          Highlights = false;
+          Pocket = false;
+          Snippets = false;
+          Locked = true;
+        };
+        Homepage = {
+          URL = "about:blank";
+          Locked = true;
+          StartPage = "homepage";
+        };
+        EnableTrackingProtection = {
+          Value = true;
+          Locked = false;
+        };
+        SearchEngines = {
+          PreventInstalls = true;
+          Add = [
+            {
+              Name = "Google";
+              URLTemplate = "https://www.google.com/search?q={searchTerms}";
+            }
+          ];
+          Remove = [
+            "DuckDuckGo"
+            "Wikipedia (en)"
+            "Bing"
+          ];
+          Default = "Google";
+        };
+        SanitizeOnShutdown = {
+          History = true;
+          FormData = true;
+          Downloads = true;
+          Sessions = true;
+          Cookies = false;
+          Cache = true;
+          SiteSettings = false;
+          OfflineApps = true;
+        };
+        ExtensionSettings = {
+          "*" = {
+            installation_mode = "blocked";
+            allowed_types = ["extension" "theme"];
+          };
+          "uBlock0@raymondhill.net" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+            installation_mode = "force_installed";
+            allowed_in_private_browsing = true;
+          };
+          "jid1-QoFqdK4qzUfGWQ@jetpack".installation_mode = "blocked";
+          "vimium-c@gdh1995.cn" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/vimium-c/latest.xpi";
+            installation_mode = "force_installed";
+            allowed_in_private_browsing = true;
+          };
+          "{aecec67f-0d10-4fa7-b7c7-609a2db280cf}" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/violentmonkey/latest.xpi";
+            installation_mode = "force_installed";
+            allowed_in_private_browsing = true;
+          };
+          "twitch5@coolcmd" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/twitch_5/latest.xpi";
+            installation_mode = "force_installed";
+            allowed_in_private_browsing = true;
+          };
+          "sponsorBlocker@ajay.app" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
+            installation_mode = "force_installed";
+            allowed_in_private_browsing = true;
+          };
+          "conventional-comments-addon@pullpo.io" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/conventional-comments-pullpo/latest.xpi";
+            installation_mode = "force_installed";
+            allowed_in_private_browsing = true;
+          };
+        };
+      };
+
+      lockedPrefs = {
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+
+        "browser.theme.content-theme" = 2;
+        "browser.theme.toolbar-theme" = 2;
+        "layout.css.prefers-color-scheme.content-override" = 2;
+        "browser.uidensity" = 1;
+        "browser.nova.enabled" = true;
+
+        "extensions.webextensions.remote" = true;
+
+        "browser.tabs.inTitlebar" = 0;
+        "browser.toolbars.bookmarks.visibility" = "never";
+
+        "gfx.webrender.all" = true;
+        "media.hardware-video-decoding.enabled" = true;
+        "media.ffmpeg.vaapi.enabled" = false;
+        "layers.acceleration.disabled" = false;
+
+        "browser.sessionstore.interval" = 15000;
+        "network.http.max-persistent-connections-per-server" = 10;
+        "browser.cache.disk.enable" = false;
+        "browser.cache.memory.enable" = true;
+        "browser.cache.memory.capacity" = 1048576;
+        "browser.sessionhistory.max_entries" = 50;
+        "network.prefetch-next" = true;
+
+        "browser.theme.dark-private-windows" = false;
+
+        "dom.webcomponents.enabled" = true;
+        "layout.css.shadow-parts.enabled" = true;
+
+        "browser.ml.enable" = false;
+        "browser.ml.chat.enabled" = false;
+        "extensions.ml.enabled" = false;
+        "browser.ml.linkPreview.enabled" = false;
+        "browser.tabs.groups.smart.enabled" = false;
+        "browser.tabs.groups.smart.userEnabled" = false;
+
+        "privacy.resistFingerprinting" = false;
+
+        "font.name-list.monospace.x-unicode" = fontList;
+        "font.name-list.monospace.x-western" = fontList;
+        "font.name-list.sans-serif.x-unicode" = fontList;
+        "font.name-list.sans-serif.x-western" = fontList;
+        "font.name-list.serif.x-unicode" = fontList;
+        "font.name-list.serif.x-western" = fontList;
+
+        "media.getusermedia.audio.processing.aec" = 0;
+        "media.getusermedia.audio.processing.aec.enabled" = false;
+        "media.getusermedia.audio.processing.agc" = 0;
+        "media.getusermedia.audio.processing.agc.enabled" = false;
+        "media.getusermedia.audio.processing.agc2.forced" = false;
+        "media.getusermedia.audio.processing.noise" = 0;
+        "media.getusermedia.audio.processing.noise.enabled" = false;
+        "media.getusermedia.audio.processing.hpf.enabled" = false;
+      };
+    in {
+      user.persist.directories = [
+        ".config/glide"
+        ".cache/librewolf"
+        ".config/firefox"
+        ".config/librewolf"
+        ".librewolf"
+        ".mozilla"
+      ];
+      environment.systemPackages = [
+        (librewolfPkgs.librewolf-bin.override {
+          extraPrefs =
+            lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") lockedPrefs
+            + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
+          extraPolicies = policies // {DisableFirefoxAccounts = false;};
+        })
+        (pkgs.wrapFirefox (pkgs.callPackage "${flakeInputs.glide-browser}/package.nix" {}) {
+          pname = "glide-browser";
+          extraPrefs =
+            lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") (builtins.removeAttrs lockedPrefs ["browser.nova.enabled"])
+            + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
+          extraPolicies =
+            policies
+            // {
+              DisableFirefoxAccounts = false;
+              ExtensionSettings = builtins.removeAttrs policies.ExtensionSettings ["vimium-c@gdh1995.cn"];
+            };
+        })
+      ];
+      user.files = {
+        ".config/glide/glide/profiles.ini" = {
+          generator = lib.generators.toINI {};
+          value = {
+            Profile0 = {
+              Name = "default";
+              IsRelative = 1;
+              Path = userName;
+              Default = 1;
+            };
+            General = {
+              StartWithLastProfile = 1;
+              Version = 2;
+            };
+          };
+        };
+        ".librewolf/profiles.ini" = {
+          generator = lib.generators.toINI {};
+          value = {
+            Profile0 = {
+              Name = "default";
+              IsRelative = 1;
+              Path = userName;
+              Default = 1;
+            };
+            General = {
+              StartWithLastProfile = 1;
+              Version = 2;
+            };
+          };
+        };
+        ".librewolf/${userName}/chrome/userChrome.css".text = generators.cssSource userChrome_data;
+      };
+    };
+    apps_btop = {pkgs, ...}: {
       environment.systemPackages = [pkgs.btop];
-      manzil.users.${config.user.name}.files.".config/btop/btop.conf".text = ''
+      user.files.".config/btop/btop.conf".text = ''
         color_theme = "TTY"
         theme_background = False
       '';
@@ -3150,9 +3345,9 @@
         '';
       };
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/cmus"];
+      user.persist.directories = [".config/cmus"];
       environment.systemPackages = [cmus];
-      manzil.users.${config.user.name}.files = {
+      user.files = {
         ".config/cmus/rc".text = ''
           colorscheme palette
           set softvol=true
@@ -3208,7 +3403,7 @@
       inherit (config.user.ui) fonts;
       primaryFont = ''"${fonts.mainFontName}", "${fonts.backup.name}", "${fonts.emoji.name}"'';
     in {
-      finix.persistence.allowlist.users.${userName}.directories = [
+      user.persist.directories = [
         ".config/discord"
         ".config/discordcanary"
         ".config/Vencord"
@@ -3225,7 +3420,7 @@
         })
       ];
 
-      manzil.users.${userName}.files = {
+      user.files = {
         ".config/discord/settings.json" = {
           generator = lib.generators.toJSON {};
           value = {
@@ -3412,12 +3607,11 @@
       };
     };
     apps_leverage = {
-      config,
       pkgs,
       flakeInputs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/Leverage"
         ".config/leverage"
       ];
@@ -3453,12 +3647,11 @@
       };
     };
     apps_obs = {
-      config,
       pkgs,
       flakeInputs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/obs-studio"];
+      user.persist.directories = [".config/obs-studio"];
       environment.systemPackages = [
         (pkgs.symlinkJoin {
           name = "obs-studio-with-cuda";
@@ -3490,7 +3683,7 @@
       pkgs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/obsidian"
         ".obsidian"
       ];
@@ -3505,20 +3698,12 @@
         })
       ];
     };
-    apps_qbittorrent = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/qBittorrent"];
+    apps_qbittorrent = {pkgs, ...}: {
+      user.persist.directories = [".config/qBittorrent"];
       environment.systemPackages = [pkgs.qbittorrent];
     };
-    apps_slack = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name} = {
+    apps_slack = {pkgs, ...}: {
+      user.persist = {
         directories = [
           ".config/Slack"
           ".config/Slack/IndexedDB"
@@ -3608,7 +3793,7 @@
       iniDir = "${config.user.paths.steam}/steamapps/compatdata/1808500/pfx/drive_c/users/steamuser/AppData/Local/PioneerGame/Saved/Config/WindowsClient";
       unreal = unreal_data;
     in {
-      manzil.users.${config.user.name}.files = {
+      user.files = {
         "${iniDir}/Engine.ini" = {
           generator = lib.generators.toINI {};
           value = lib.recursiveUpdate unreal."Engine.ini" {
@@ -4057,7 +4242,7 @@
         exit 1
       '';
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".local/state/wireplumber"];
+      user.persist.directories = [".local/state/wireplumber"];
       finix.persistence.homeServices = ["wireplumber"];
       users.users.${userName}.extraGroups = ["audio"];
 
@@ -4140,12 +4325,8 @@
         };
       };
     };
-    aws_cli = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+    aws_cli = {pkgs, ...}: {
+      user.persist.directories = [
         ".aws"
         ".config/aws"
       ];
@@ -4195,7 +4376,7 @@
         };
       };
     in {
-      manzil.users.${config.user.name}.files =
+      user.files =
         lib.mapAttrs' (
           _: mod:
             lib.nameValuePair
@@ -6592,12 +6773,12 @@
         };
       };
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".local/state/boar"
         ".local/state/boar-rs"
       ];
       environment.systemPackages = [flakeInputs.boar-rs.packages.${pkgs.stdenv.hostPlatform.system}.default];
-      manzil.users.${config.user.name}.files =
+      user.files =
         agentFiles ".local/state/boar/agent"
         // agentFiles ".local/state/boar-rs/agent";
     };
@@ -6761,230 +6942,6 @@
         ])
       ]))))
     ]));
-    browsers = {
-      config,
-      lib,
-      pkgs,
-      flakeInputs,
-      generators,
-      ...
-    }: let
-      userName = config.user.name;
-      librewolfPkgs = import flakeInputs.nixpkgs-librewolf {inherit (pkgs.stdenv.hostPlatform) system;};
-      uiFonts = config.user.ui.fonts;
-      fontList = lib.concatStringsSep ", " [
-        uiFonts.mainFontName
-        uiFonts.backup.name
-        "Symbols Nerd Font"
-        uiFonts.emoji.name
-      ];
-      policies = {
-        DisableTelemetry = true;
-        DisablePocket = true;
-        DisableFormHistory = true;
-        NoDefaultBookmarks = true;
-        NewTabPage = false;
-        FirefoxHome = {
-          Search = false;
-          TopSites = false;
-          Highlights = false;
-          Pocket = false;
-          Snippets = false;
-          Locked = true;
-        };
-        Homepage = {
-          URL = "about:blank";
-          Locked = true;
-          StartPage = "homepage";
-        };
-        EnableTrackingProtection = {
-          Value = true;
-          Locked = false;
-        };
-        SearchEngines = {
-          PreventInstalls = true;
-          Add = [
-            {
-              Name = "Google";
-              URLTemplate = "https://www.google.com/search?q={searchTerms}";
-            }
-          ];
-          Remove = [
-            "DuckDuckGo"
-            "Wikipedia (en)"
-            "Bing"
-          ];
-          Default = "Google";
-        };
-        SanitizeOnShutdown = {
-          History = true;
-          FormData = true;
-          Downloads = true;
-          Sessions = true;
-          Cookies = false;
-          Cache = true;
-          SiteSettings = false;
-          OfflineApps = true;
-        };
-        ExtensionSettings = {
-          "*" = {
-            installation_mode = "blocked";
-            allowed_types = ["extension" "theme"];
-          };
-          "uBlock0@raymondhill.net" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
-            installation_mode = "force_installed";
-            allowed_in_private_browsing = true;
-          };
-          "jid1-QoFqdK4qzUfGWQ@jetpack".installation_mode = "blocked";
-          "vimium-c@gdh1995.cn" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/vimium-c/latest.xpi";
-            installation_mode = "force_installed";
-            allowed_in_private_browsing = true;
-          };
-          "{aecec67f-0d10-4fa7-b7c7-609a2db280cf}" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/violentmonkey/latest.xpi";
-            installation_mode = "force_installed";
-            allowed_in_private_browsing = true;
-          };
-          "twitch5@coolcmd" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/twitch_5/latest.xpi";
-            installation_mode = "force_installed";
-            allowed_in_private_browsing = true;
-          };
-          "sponsorBlocker@ajay.app" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
-            installation_mode = "force_installed";
-            allowed_in_private_browsing = true;
-          };
-          "conventional-comments-addon@pullpo.io" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/conventional-comments-pullpo/latest.xpi";
-            installation_mode = "force_installed";
-            allowed_in_private_browsing = true;
-          };
-        };
-      };
-
-      lockedPrefs = {
-        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-
-        "browser.theme.content-theme" = 2;
-        "browser.theme.toolbar-theme" = 2;
-        "layout.css.prefers-color-scheme.content-override" = 2;
-        "browser.uidensity" = 1;
-        "browser.nova.enabled" = true;
-
-        "extensions.webextensions.remote" = true;
-
-        "browser.tabs.inTitlebar" = 0;
-        "browser.toolbars.bookmarks.visibility" = "never";
-
-        "gfx.webrender.all" = true;
-        "media.hardware-video-decoding.enabled" = true;
-        "media.ffmpeg.vaapi.enabled" = false;
-        "layers.acceleration.disabled" = false;
-
-        "browser.sessionstore.interval" = 15000;
-        "network.http.max-persistent-connections-per-server" = 10;
-        "browser.cache.disk.enable" = false;
-        "browser.cache.memory.enable" = true;
-        "browser.cache.memory.capacity" = 1048576;
-        "browser.sessionhistory.max_entries" = 50;
-        "network.prefetch-next" = true;
-
-        "browser.theme.dark-private-windows" = false;
-
-        "dom.webcomponents.enabled" = true;
-        "layout.css.shadow-parts.enabled" = true;
-
-        "browser.ml.enable" = false;
-        "browser.ml.chat.enabled" = false;
-        "extensions.ml.enabled" = false;
-        "browser.ml.linkPreview.enabled" = false;
-        "browser.tabs.groups.smart.enabled" = false;
-        "browser.tabs.groups.smart.userEnabled" = false;
-
-        "privacy.resistFingerprinting" = false;
-
-        "font.name-list.monospace.x-unicode" = fontList;
-        "font.name-list.monospace.x-western" = fontList;
-        "font.name-list.sans-serif.x-unicode" = fontList;
-        "font.name-list.sans-serif.x-western" = fontList;
-        "font.name-list.serif.x-unicode" = fontList;
-        "font.name-list.serif.x-western" = fontList;
-
-        "media.getusermedia.audio.processing.aec" = 0;
-        "media.getusermedia.audio.processing.aec.enabled" = false;
-        "media.getusermedia.audio.processing.agc" = 0;
-        "media.getusermedia.audio.processing.agc.enabled" = false;
-        "media.getusermedia.audio.processing.agc2.forced" = false;
-        "media.getusermedia.audio.processing.noise" = 0;
-        "media.getusermedia.audio.processing.noise.enabled" = false;
-        "media.getusermedia.audio.processing.hpf.enabled" = false;
-      };
-    in {
-      finix.persistence.allowlist.users.${userName}.directories = [
-        ".config/glide"
-        ".cache/librewolf"
-        ".config/firefox"
-        ".config/librewolf"
-        ".librewolf"
-        ".mozilla"
-      ];
-      environment.systemPackages = [
-        (librewolfPkgs.librewolf-bin.override {
-          extraPrefs =
-            lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") lockedPrefs
-            + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
-          extraPolicies = policies // {DisableFirefoxAccounts = false;};
-        })
-        (pkgs.wrapFirefox (pkgs.callPackage "${flakeInputs.glide-browser}/package.nix" {}) {
-          pname = "glide-browser";
-          extraPrefs =
-            lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") (builtins.removeAttrs lockedPrefs ["browser.nova.enabled"])
-            + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
-          extraPolicies =
-            policies
-            // {
-              DisableFirefoxAccounts = false;
-              ExtensionSettings = builtins.removeAttrs policies.ExtensionSettings ["vimium-c@gdh1995.cn"];
-            };
-        })
-      ];
-      manzil.users.${userName}.files = {
-        ".config/glide/glide/profiles.ini" = {
-          generator = lib.generators.toINI {};
-          value = {
-            Profile0 = {
-              Name = "default";
-              IsRelative = 1;
-              Path = userName;
-              Default = 1;
-            };
-            General = {
-              StartWithLastProfile = 1;
-              Version = 2;
-            };
-          };
-        };
-        ".librewolf/profiles.ini" = {
-          generator = lib.generators.toINI {};
-          value = {
-            Profile0 = {
-              Name = "default";
-              IsRelative = 1;
-              Path = userName;
-              Default = 1;
-            };
-            General = {
-              StartWithLastProfile = 1;
-              Version = 2;
-            };
-          };
-        };
-        ".librewolf/${userName}/chrome/userChrome.css".text = generators.cssSource userChrome_data;
-      };
-    };
     cache_push = {pkgs, ...}: {
       services.nix-daemon.settings.post-build-hook = toString (pkgs.writeShellScript "attic-cache-push" ''
         set -u
@@ -8483,7 +8440,7 @@
         skipDangerousModePermissionPrompt = true;
       };
 
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/claude"];
+      user.persist.directories = [".config/claude"];
 
       environment.systemPackages = [
         (pkgs.writeShellScriptBin "claude" ''
@@ -8495,12 +8452,11 @@
       ];
     };
     claude_desktop = {
-      config,
       pkgs,
       flakeInputs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/Claude"];
+      user.persist.directories = [".config/Claude"];
       environment.systemPackages = [(pkgs.callPackage "${flakeInputs.claude-desktop-linux}/nix/claude-desktop.nix" {})];
     };
     code_mode_data = {
@@ -8856,7 +8812,7 @@
       generators,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/codex"
         ".local/state/codex"
       ];
@@ -8933,6 +8889,7 @@
     };
     common = {
       config,
+      options,
       generators,
       lib,
       pkgs,
@@ -8959,9 +8916,23 @@
           default = 1000;
           description = "Numeric uid of the primary user. The persisted home is owned by this number, so changing it renumbers every file under /persist/home.";
         };
+
+        persist = lib.mkOption {
+          type = lib.types.deferredModule;
+          default = {};
+          description = "The user's entry in finix.persistence.allowlist.users: directories and files under home that survive the boot-time home reset.";
+        };
+
+        files = lib.mkOption {
+          type = lib.types.attrsOf lib.types.deferredModule;
+          default = {};
+          description = "Files manzil manages in the user's home, by path relative to it: each definition is passed on to manzil.users.<name>.files as written.";
+        };
       };
 
       config = {
+        finix.persistence.allowlist.users.${user} = lib.mkAliasDefinitions options.user.persist;
+        manzil.users.${user}.files = lib.mkAliasDefinitions options.user.files;
         time.timeZone = "America/Toronto";
 
         environment.etc."profile.d/system-path.sh".text = ''
@@ -9476,7 +9447,7 @@
         KERAS_HOME = "${xdgState}/keras";
       };
 
-      manzil.users.${config.user.name}.files.".config/user-dirs.dirs".text = ''
+      user.files.".config/user-dirs.dirs".text = ''
         XDG_DESKTOP_DIR="${home}/Desktop"
         XDG_DOWNLOAD_DIR="${home}/Downloads"
         XDG_TEMPLATES_DIR="${home}/Templates"
@@ -9489,19 +9460,15 @@
         XDG_WALLPAPERS_DIR="${home}/Pictures/Wallpapers"
       '';
     };
-    creative = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/Pinta"];
+    creative = {pkgs, ...}: {
+      user.persist.directories = [".config/Pinta"];
       environment.systemPackages = [
         pkgs.pinta
         pkgs.gimp
       ];
     };
     cs2 = {config, ...}: {
-      manzil.users.${config.user.name}.files = {
+      user.files = {
         "${config.user.paths.steam}/steamapps/common/Counter-Strike Global Offensive/game/csgo/cfg/autoexec.cfg".text = ''
           alias +switchw "slot3; +lookatweapon"
           alias -switchw "-lookatweapon; lastinv"
@@ -11133,13 +11100,12 @@
       '';
     };
     dev_biome = {
-      config,
       lib,
       pkgs,
       ...
     }: {
       environment.systemPackages = [pkgs.biome];
-      manzil.users.${config.user.name}.files.".config/biome/biome.json" = {
+      user.files.".config/biome/biome.json" = {
         generator = lib.generators.toJSON {};
         value = {
           "$schema" = "https://biomejs.dev/schemas/2.5.5/schema.json";
@@ -11168,9 +11134,9 @@
       pkgs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".local/share/bun"];
+      user.persist.directories = [".local/share/bun"];
       environment.systemPackages = [pkgs.bun];
-      manzil.users.${config.user.name}.files.".config/bun/bunfig.toml" = {
+      user.files.".config/bun/bunfig.toml" = {
         generator = (pkgs.formats.toml {}).generate "nix-generated.toml";
         value.install = {
           cache_dir = "${config.user.homeDirectory}/.cache/bun";
@@ -11189,7 +11155,7 @@
         pkgs.docker-buildx
         pkgs.docker-credential-helpers
       ];
-      manzil.users.${config.user.name}.files.".config/docker/config.json" = {
+      user.files.".config/docker/config.json" = {
         generator = lib.generators.toJSON {};
         value = {
           credsStore = "pass";
@@ -11260,7 +11226,7 @@
           LD = "${pkgs.binutils}/bin/ld";
         };
       };
-      manzil.users.${config.user.name}.files.".config/python/pythonrc".text = ''
+      user.files.".config/python/pythonrc".text = ''
       '';
       environment.etc."profile.d/python-path.sh".text = ''
         case ":$PATH:" in
@@ -11308,7 +11274,7 @@
     }: {
       environment.systemPackages = [pkgs.devin-cli];
 
-      manzil.users.${config.user.name}.files = {
+      user.files = {
         ".config/devin/AGENTS.md".text =
           config.user.dev.prompts.shared;
         ".config/devin/config.json" = {
@@ -11566,37 +11532,40 @@
       }
     '';
     ekko_config = {
-      config,
       lib,
       pkgs,
       flakeInputs,
       generators,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
-        ".cache/ekko"
-        ".config/ekko"
-      ];
-      user.dev.prompts.host = ["`EKKO_INSTANCE` in your environment points at the ekko instance holding the live terminals."];
+      user = {
+        persist.directories = [
+          ".cache/ekko"
+          ".config/ekko"
+        ];
+
+        dev.prompts.host = ["`EKKO_INSTANCE` in your environment points at the ekko instance holding the live terminals."];
+
+        files.".config/ekko/init.lisp".text =
+          lib.removeSuffix "\n" (generators.lisp.render (init_data generators.lisp))
+          + "\n"
+          + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp"
+          + "\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\n";
+
+        shell.rcExtra = lib.mkOrder 1600 ''
+          if [ -z "''${EKKO_INSTANCE:-}" ] && [ -z "''${EKKO_SESSION_NAME:-}" ] &&
+             [ -z "''${SSH_CONNECTION:-}" ] && [ -z "''${TMUX:-}" ] &&
+             [ -z "''${STY:-}" ] && [ -z "''${TERN_PANE:-}" ] &&
+             [ "''${TERM:-}" != linux ] && [ -t 0 ] && [ -t 1 ]; then
+            case "$(${pkgs.coreutils}/bin/readlink /proc/self/fd/0)" in
+              /dev/tty[0-9]*) ;;
+              *) ${flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/ekko attach ;;
+            esac
+          fi
+        '';
+      };
 
       environment.systemPackages = [flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default];
-      manzil.users.${config.user.name}.files.".config/ekko/init.lisp".text =
-        lib.removeSuffix "\n" (generators.lisp.render (init_data generators.lisp))
-        + "\n"
-        + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp"
-        + "\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\n";
-
-      user.shell.rcExtra = lib.mkOrder 1600 ''
-        if [ -z "''${EKKO_INSTANCE:-}" ] && [ -z "''${EKKO_SESSION_NAME:-}" ] &&
-           [ -z "''${SSH_CONNECTION:-}" ] && [ -z "''${TMUX:-}" ] &&
-           [ -z "''${STY:-}" ] && [ -z "''${TERN_PANE:-}" ] &&
-           [ "''${TERM:-}" != linux ] && [ -t 0 ] && [ -t 1 ]; then
-          case "$(${pkgs.coreutils}/bin/readlink /proc/self/fd/0)" in
-            /dev/tty[0-9]*) ;;
-            *) ${flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/ekko attach ;;
-          esac
-        fi
-      '';
     };
     ekko_data = "/home/y0usaf/dev/developing/tern-ekko";
     elden_ring = {
@@ -11616,7 +11585,7 @@
       options.user.gaming.elden-ring.enable = lib.mkEnableOption "Elden Ring configuration";
 
       config = lib.mkIf user.gaming.elden-ring.enable {
-        manzil.users.${user.name}.files = {
+        user.files = {
           "${gameDir}/ersc_launcher.exe".source = "${seamlessCoop}/ersc_launcher.exe";
 
           "${gameDir}/SeamlessCoop/ersc.dll".source = "${seamlessCoop}/SeamlessCoop/ersc.dll";
@@ -11663,12 +11632,8 @@
     emudhra_distrust = {generators, ...}: {
       security.pki.certificateFiles = [(generators.sourceFile "emudhra-compromised-intermediates.pem" (generators.pemSource emudhra_compromised_intermediates_data))];
     };
-    emulation = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+    emulation = {pkgs, ...}: {
+      user.persist.directories = [
         ".config/Cemu"
         ".local/share/Cemu"
         ".local/share/dolphin-emu"
@@ -11694,7 +11659,7 @@
         stripRoot = false;
       };
     in {
-      manzil.users.${config.user.name}.files = {
+      user.files = {
         "${win64}/ClairObscurFix.asi".source = "${clairObscurFix}/ClairObscurFix.asi";
 
         "${win64}/dsound.dll".source = "${clairObscurFix}/dsound.dll";
@@ -13352,7 +13317,7 @@
     }: {
       options.user.gaming.aethermancer.enable = lib.mkEnableOption "Aethermancer configuration";
       config = lib.mkIf config.user.gaming.aethermancer.enable {
-        manzil.users.${config.user.name}.files.".config/unity3d/moi rai games/Aethermancer/prefs".text = ''
+        user.files.".config/unity3d/moi rai games/Aethermancer/prefs".text = ''
           <unity_prefs version_major="1" version_minor="1">
           	<pref name="Screen_VSync_Enabled" type="int">0</pref>
           	<pref name="stg_user_setting_ui" type="int">1</pref>
@@ -13434,12 +13399,8 @@
           ${pkgs.python3}/bin/python3 ${generators.sourceFile "apply.py" (generators.python.render (apply_data generators.python))} ${settings} || true
       '';
     };
-    gaming_core = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+    gaming_core = {pkgs, ...}: {
+      user.persist.directories = [
         ".barony"
         ".config/bolt-launcher"
         ".config/unity3d"
@@ -13601,7 +13562,7 @@
       pkgs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".SteamCloud"
         ".steam"
       ];
@@ -14789,12 +14750,8 @@
       blank
       (call (dot asyncio "run") [(call main [])])
     ]);
-    gcloud = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/gcloud"];
+    gcloud = {pkgs, ...}: {
+      user.persist.directories = [".config/gcloud"];
       environment.systemPackages = [pkgs.google-cloud-sdk];
     };
     gitignore_data = ["tern.d.luau" ".DS_Store" "Thumbs.db"];
@@ -15107,7 +15064,7 @@
       flakeInputs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/silvabot"
         ".grokbot"
         ".local/share/silvabot"
@@ -15120,7 +15077,6 @@
       ];
     };
     grok_bot_desktop = {
-      config,
       lib,
       pkgs,
       ...
@@ -15223,7 +15179,7 @@
     in {
       environment.systemPackages = [grok-bot-desktop];
       system.build.grok-bot-desktop = grok-bot-desktop;
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/Grok Bot"
         ".grokbot"
       ];
@@ -17849,7 +17805,6 @@
       })))
     ]);
     linear_cli = {
-      config,
       pkgs,
       flakeInputs,
       ...
@@ -17859,7 +17814,7 @@
         pkgs.libsecret
       ];
 
-      manzil.users.${config.user.name}.files.".config/linear/linear.toml".source = (pkgs.formats.toml {}).generate "linear-cli-config" {
+      user.files.".config/linear/linear.toml".source = (pkgs.formats.toml {}).generate "linear-cli-config" {
         workspace = "cook-unity";
       };
     };
@@ -19623,7 +19578,7 @@
         core_xdg
         apps_bluetooth
         apps_bolo
-        browsers
+        apps_browsers
         apps_btop
         claude_desktop
         apps_cmus
@@ -20165,12 +20120,8 @@
         '';
       };
     };
-    npm = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.files = [".npmrc"];
+    npm = {pkgs, ...}: {
+      user.persist.files = [".npmrc"];
       environment.systemPackages = [pkgs.nodejs];
     };
     ntn = {
@@ -20220,7 +20171,7 @@
       flakeInputs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".local/share/nvim"
         ".local/state/nvim"
       ];
@@ -20282,7 +20233,7 @@
         pkgs.jq
       ];
 
-      manzil.users.${config.user.name}.files.".config/nvim/init.lua".text = ''
+      user.files.".config/nvim/init.lua".text = ''
         vim.g.mapleader = " "
         vim.g.maplocalleader = "\\"
 
@@ -20881,17 +20832,15 @@
         exec ${src}/bin/ompd serve --wait >>"$logs/ompd.log" 2>&1
       '';
     in {
-      finix.persistence = {
-        allowlist.users.${userName} = {
-          directories = [".local/state/omp-bot"];
-          directorySources = [persistPaths];
-        };
-        homeServices = ["omp-botd" "ompd"];
+      user.persist = {
+        directories = [".local/state/omp-bot"];
+        directorySources = [persistPaths];
       };
+      finix.persistence.homeServices = ["omp-botd" "ompd"];
 
       environment.systemPackages = [(command "omp-bot") (command "omp-bot-ctl") pkgs.age pkgs.gnutar];
 
-      manzil.users.${userName}.files = {
+      user.files = {
         ".config/omp-bot/env".text = ''
           : "''${OMP_BIN:=${omp}/bin/omp}"
           : "''${OMP_BOT_EXTENSION:=${ext}/crest-auth.ts}"
@@ -21708,10 +21657,8 @@
         '';
       };
     in {
-      finix.persistence = {
-        allowlist.users.${user}.directories = [".local/state/optchat"];
-        homeServices = ["optchat"];
-      };
+      user.persist.directories = [".local/state/optchat"];
+      finix.persistence.homeServices = ["optchat"];
 
       environment.systemPackages = [spend];
 
@@ -24089,7 +24036,7 @@
         ])
     ]);
     principles = {config, ...}: {
-      manzil.users.${config.user.name}.files."AGENTS.md".text = ''
+      user.files."AGENTS.md".text = ''
         # Principles
 
         Build up from a floor that always works: small parts with one job each,
@@ -24945,14 +24892,13 @@
       ])))
     ]);
     ramp = {
-      config,
       lib,
       pkgs,
       ...
     }: let
       version = "0.2.27";
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/ramp"];
+      user.persist.directories = [".config/ramp"];
       environment.systemPackages = [
         (pkgs.stdenvNoCC.mkDerivation {
           pname = "ramp";
@@ -28099,12 +28045,8 @@
         ])
       ])
     ];
-    rust = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+    rust = {pkgs, ...}: {
+      user.persist.directories = [
         ".local/share/cargo"
         ".local/share/rustup"
       ];
@@ -29419,7 +29361,7 @@
       ...
     }: {
       imports = [flakeInputs.cudaterm.finixModules.default];
-      config.manzil.users.${config.user.name}.files.".config/cudaterm/config" = lib.mkIf config.hardware.nvidia.enable {
+      config.user.files.".config/cudaterm/config" = lib.mkIf config.hardware.nvidia.enable {
         text = ''
           background-opacity = ${toString config.user.appearance.glass.opacity}
         '';
@@ -29503,7 +29445,7 @@
           pkgs.ibm-plex
         ];
 
-        manzil.users.${config.user.name}.files.".config/fontconfig/fonts.conf".text = ''
+        user.files.".config/fontconfig/fonts.conf".text = ''
           <?xml version="1.0"?>
           <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
           <fontconfig>
@@ -29609,7 +29551,7 @@
       };
       config = {
         environment.systemPackages = [pkgs.foot];
-        manzil.users.${config.user.name}.files.".config/foot/foot.ini" = {
+        user.files.".config/foot/foot.ini" = {
           generator = lib.generators.toINI {};
           value = {
             main = {
@@ -29672,7 +29614,7 @@
       };
 
       config = {
-        finix.persistence.allowlist.users.${config.user.name}.directories = [
+        user.persist.directories = [
           ".config/dconf"
           ".local/share/applications"
           ".local/share/icons"
@@ -29685,7 +29627,7 @@
           ];
           variables.GDK_DPI_SCALE = toString config.user.ui.gtk.scale;
         };
-        manzil.users.${config.user.name}.files = {
+        user.files = {
           ".config/gtk-3.0/settings.ini" = {
             generator = lib.generators.toINI {};
             value.Settings = {
@@ -29775,7 +29717,7 @@
     }: {
       environment.systemPackages = [pkgs.monstar];
 
-      manzil.users.${config.user.name}.files.".config/monstar/config".text = ''
+      user.files.".config/monstar/config".text = ''
         font-size = ${toString config.user.appearance.termFontSize}
         background-opacity = ${toString config.user.appearance.glass.opacity}
         line-height = ${config.user.ui.foot.lineHeight}
@@ -30231,7 +30173,7 @@
         };
       };
 
-      config.manzil.users.${config.user.name}.files.".config/tomoe/init.lisp".text = lib.concatStringsSep "\n" [
+      config.user.files.".config/tomoe/init.lisp".text = lib.concatStringsSep "\n" [
         ''
           (in-package #:tomoe-user)
           (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ lib.concatLists (lib.mapAttrsToList (key: value: [(keyword key) value]) settings)) cfg.displays)})
@@ -31193,61 +31135,64 @@
           esac
         '';
 
-        user.shell.rcExtra = lib.mkBefore ''
-          temppkg() {
-            if [ -z "$1" ]; then
-              echo "Usage: temppkg package_name"
-              return 1
-            fi
-            nix-shell -p "$1" --run "exec $SHELL"
-          }
+        user = {
+          shell.rcExtra = lib.mkBefore ''
+            temppkg() {
+              if [ -z "$1" ]; then
+                echo "Usage: temppkg package_name"
+                return 1
+              fi
+              nix-shell -p "$1" --run "exec $SHELL"
+            }
 
-          temprun() {
-            if [ -z "$1" ]; then
-              echo "Usage: temprun <package-name> [args...]"
-              return 1
-            fi
-            local pkg=$1
-            shift
-            nix run "nixpkgs#$pkg" -- "$@"
-          }
-          export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR"/npm
-        '';
-
-        finix.persistence.allowlist.users.${config.user.name}.directories = [".local/state/rush"];
-        environment.systemPackages = [pkgs.bat];
-
-        manzil.users.${config.user.name}.files = {
-          ".config/rush/profile.rush".text = ''
-            . /etc/profile
-            [ -r "$HOME/.config/tokens.sh" ] && . "$HOME/.config/tokens.sh"
+            temprun() {
+              if [ -z "$1" ]; then
+                echo "Usage: temprun <package-name> [args...]"
+                return 1
+              fi
+              local pkg=$1
+              shift
+              nix run "nixpkgs#$pkg" -- "$@"
+            }
+            export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR"/npm
           '';
 
-          ".config/rush/config.rush".text = lib.mkMerge [
-            (lib.mkBefore ''
+          persist.directories = [".local/state/rush"];
 
-              rush_prompt() {
-                rush_prompt_status=$?
-                prompt segment --bold --fg green "$(prompt_pwd)"
-                if test "$rush_prompt_status" = 0; then
-                  prompt segment --fg cyan '>'
-                else
-                  prompt segment --fg red '>'
-                fi
-                prompt text ' '
-              }
+          files = {
+            ".config/rush/profile.rush".text = ''
+              . /etc/profile
+              [ -r "$HOME/.config/tokens.sh" ] && . "$HOME/.config/tokens.sh"
+            '';
 
-              rush_prompt_right() {
-                prompt segment --fg bright-blue "$(date +'%Y-%m-%d %H:%M')"
-              }
+            ".config/rush/config.rush".text = lib.mkMerge [
+              (lib.mkBefore ''
 
-              ${lib.concatStringsSep "\n" (lib.mapAttrsToList
-                (k: v: "alias ${lib.escapeShellArg k}=${lib.escapeShellArg v}")
-                aliases)}
-            '')
-            config.user.shell.rcExtra
-          ];
+                rush_prompt() {
+                  rush_prompt_status=$?
+                  prompt segment --bold --fg green "$(prompt_pwd)"
+                  if test "$rush_prompt_status" = 0; then
+                    prompt segment --fg cyan '>'
+                  else
+                    prompt segment --fg red '>'
+                  fi
+                  prompt text ' '
+                }
+
+                rush_prompt_right() {
+                  prompt segment --fg bright-blue "$(date +'%Y-%m-%d %H:%M')"
+                }
+
+                ${lib.concatStringsSep "\n" (lib.mapAttrsToList
+                  (k: v: "alias ${lib.escapeShellArg k}=${lib.escapeShellArg v}")
+                  aliases)}
+              '')
+              config.user.shell.rcExtra
+            ];
+          };
         };
+
+        environment.systemPackages = [pkgs.bat];
       };
     };
     shell_tokens = {config, ...}: let
@@ -31271,7 +31216,7 @@
         unset file_path var_name content
       '';
     in {
-      manzil.users.${config.user.name}.files = {
+      user.files = {
         ".config/tokens.sh".text = loader;
 
         ".profile".text = ''
@@ -31289,7 +31234,7 @@
       options.user.gaming.solo-leveling-arise.enable = lib.mkEnableOption "Solo Leveling: Arise configuration";
 
       config = lib.mkIf user.gaming.solo-leveling-arise.enable {
-        manzil.users.${user.name}.files."${user.paths.steam}/steamapps/compatdata/2373990/pfx/user.reg" = {
+        user.files."${user.paths.steam}/steamapps/compatdata/2373990/pfx/user.reg" = {
           type = "merge";
           format = "reg";
           clobber = true;
@@ -33419,21 +33364,16 @@
         };
       };
     };
-    stoat_desktop = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/stoat-desktop"];
+    stoat_desktop = {pkgs, ...}: {
+      user.persist.directories = [".config/stoat-desktop"];
       environment.systemPackages = [pkgs.stoat-desktop];
     };
     stremio = {
-      config,
       lib,
       pkgs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".local/share/stremio"
         ".local/share/stremio-linux-shell"
         ".stremio-server"
@@ -34453,7 +34393,7 @@
     system_prompts = {config, ...}: let
       body = "${config.user.dev.prompts.shared}\n";
     in {
-      manzil.users.${config.user.name}.files = {
+      user.files = {
         ".config/phi/APPEND_SYSTEM.md".text = body;
         ".local/state/boar/agent/APPEND_SYSTEM.md".text = body;
         ".local/state/boar-rs/agent/APPEND_SYSTEM.md".text = body;
@@ -35043,10 +34983,10 @@
       pkgs,
       ...
     }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/gh"];
+      user.persist.directories = [".config/gh"];
       environment.systemPackages = [pkgs.gh];
 
-      manzil.users.${config.user.name}.files.".config/gh/config.yml" = {
+      user.files.".config/gh/config.yml" = {
         generator = lib.generators.toYAML {};
         value = {
           version = "1";
@@ -35069,7 +35009,7 @@
         pkgs.openssh
         cleanker
       ];
-      manzil.users.${config.user.name}.files.".config/git/config" = {
+      user.files.".config/git/config" = {
         generator = lib.generators.toGitINI;
         value = {
           user = {
@@ -35387,13 +35327,13 @@
     in {
       environment.variables.GIO_EXTRA_MODULES = lib.mkDefault "${pkgs.glib-networking}/lib/gio/modules";
 
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".config/tern"
         ".local/state/tern"
         ".local/state/brain"
       ];
 
-      manzil.users.${config.user.name}.files = files // tuturu;
+      user.files = files // tuturu;
 
       finit = {
         tmpfiles.rules = ["d /run/user/${toString config.users.users.${config.user.name}.uid} 0700 ${config.user.name} users"];
@@ -35823,7 +35763,7 @@
       ]))
     ]);
     tui_launcher = {config, ...}: {
-      manzil.users.${config.user.name}.files.".config/scripts/tui-launcher.sh" = {
+      user.files.".config/scripts/tui-launcher.sh" = {
         executable = true;
         text = ''
           #!/usr/bin/env bash
@@ -37419,84 +37359,88 @@
       homeDir = config.user.homeDirectory;
       serverAddress = config.tailnet.addresses.y0usaf-server;
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".ssh"];
-      manzil.users.${userName}.files.".ssh/config".text = ''
-        AddKeysToAgent yes
-        ServerAliveInterval 60
-        ServerAliveCountMax 5
-        ControlMaster auto
-        ControlPath %d/.ssh/master-%r@%h:%p
-        ControlPersist 10m
-        SetEnv TERM=xterm-256color
-        Host server y0usaf-server
-            HostName y0usaf-server
-            Port 2200
-            User ${userName}
-            IdentityFile ${homeDir}/.ssh/id_ed25519
-            IdentitiesOnly yes
-            ForwardAgent yes
+      user = {
+        persist.directories = [".ssh"];
 
-        Host rescue server-ts
-            HostName ${serverAddress}
-            User ${userName}
-            IdentityFile ${homeDir}/.ssh/id_ed25519
-            StrictHostKeyChecking accept-new
-            UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
+        files.".ssh/config".text = ''
+          AddKeysToAgent yes
+          ServerAliveInterval 60
+          ServerAliveCountMax 5
+          ControlMaster auto
+          ControlPath %d/.ssh/master-%r@%h:%p
+          ControlPersist 10m
+          SetEnv TERM=xterm-256color
+          Host server y0usaf-server
+              HostName y0usaf-server
+              Port 2200
+              User ${userName}
+              IdentityFile ${homeDir}/.ssh/id_ed25519
+              IdentitiesOnly yes
+              ForwardAgent yes
 
-        Host rescue-root
-            HostName ${serverAddress}
-            User root
-            StrictHostKeyChecking accept-new
-            UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
+          Host rescue server-ts
+              HostName ${serverAddress}
+              User ${userName}
+              IdentityFile ${homeDir}/.ssh/id_ed25519
+              StrictHostKeyChecking accept-new
+              UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
 
-        Host desktop y0usaf-desktop
-            HostName y0usaf-desktop
-            Port 2222
-            User ${userName}
-            IdentityFile ${homeDir}/.ssh/id_ed25519
-            IdentitiesOnly yes
-            ForwardAgent yes
+          Host rescue-root
+              HostName ${serverAddress}
+              User root
+              StrictHostKeyChecking accept-new
+              UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
 
-        Host android-phone phone
-            HostName ${config.tailnet.addresses.y0usaf-phone}
-            Port 8022
-            User nix-on-droid
-            IdentityFile ${homeDir}/.ssh/id_ed25519
-            IdentitiesOnly yes
-            ForwardAgent yes
-            ProxyJump server
-            RequestTTY no
+          Host desktop y0usaf-desktop
+              HostName y0usaf-desktop
+              Port 2222
+              User ${userName}
+              IdentityFile ${homeDir}/.ssh/id_ed25519
+              IdentitiesOnly yes
+              ForwardAgent yes
 
-        Host phone
-            RemoteCommand exec $HOME/.nix-profile/bin/bash -i
+          Host android-phone phone
+              HostName ${config.tailnet.addresses.y0usaf-phone}
+              Port 8022
+              User nix-on-droid
+              IdentityFile ${homeDir}/.ssh/id_ed25519
+              IdentitiesOnly yes
+              ForwardAgent yes
+              ProxyJump server
+              RequestTTY no
 
-        Host steam-frame frame-nixos
-            HostName frame-nixos.home
-            User steamos
-            IdentityFile ${homeDir}/.ssh/id_rsa_frame
-            IdentitiesOnly yes
-            ControlMaster no
-            ControlPath none
-            StrictHostKeyChecking no
-            UserKnownHostsFile /dev/null
-            LogLevel error
+          Host phone
+              RemoteCommand exec $HOME/.nix-profile/bin/bash -i
 
-        Host github.com
-            HostName github.com
-            User git
-            IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
-            ForwardAgent yes
+          Host steam-frame frame-nixos
+              HostName frame-nixos.home
+              User steamos
+              IdentityFile ${homeDir}/.ssh/id_rsa_frame
+              IdentitiesOnly yes
+              ControlMaster no
+              ControlPath none
+              StrictHostKeyChecking no
+              UserKnownHostsFile /dev/null
+              LogLevel error
 
-        Host forgejo
-            HostName y0usaf-server
-            Port 2222
-            User forgejo
-            IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
-            IdentitiesOnly yes
-      '';
-      user.shell.rcExtra = lib.mkAfter ''
-        export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
-      '';
+          Host github.com
+              HostName github.com
+              User git
+              IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
+              ForwardAgent yes
+
+          Host forgejo
+              HostName y0usaf-server
+              Port 2222
+              User forgejo
+              IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
+              IdentitiesOnly yes
+        '';
+
+        shell.rcExtra = lib.mkAfter ''
+          export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
+        '';
+      };
     };
     user_services_syncthing = {
       config,
@@ -37713,7 +37657,7 @@
 
       config = {
         environment.systemPackages = [pkgs.syncthing];
-        finix.persistence.allowlist.users.${config.user.name}.directories = [
+        user.persist.directories = [
           ".config/syncthing"
           ".local/share/syncthing"
           ".local/state/syncthing"
@@ -37740,7 +37684,6 @@
       };
     };
     webapps = {
-      config,
       lib,
       pkgs,
       ...
@@ -37757,9 +37700,9 @@
         };
       };
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [".config/chromium"];
+      user.persist.directories = [".config/chromium"];
       environment.systemPackages = [pkgs.ungoogled-chromium];
-      manzil.users.${config.user.name}.files = {
+      user.files = {
         ".local/share/applications/gcp-console.desktop" = webapp "GCP Console" "https://console.cloud.google.com" "Development;Network;" "Google Cloud Platform Console";
         ".local/share/applications/google-meet.desktop" = webapp "Google Meet" "https://meet.google.com" "Network;VideoConference;Chat;" "Video conferencing by Google";
         ".local/share/applications/keybard.desktop" = webapp "Keybard" "https://captdeaf.github.io/keybard" "Utility;System;" "Keyboard testing utility";
@@ -38346,19 +38289,14 @@
         ])
       ]))))
     ]);
-    work_gws = {
-      config,
-      pkgs,
-      ...
-    }: {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+    work_gws = {pkgs, ...}: {
+      user.persist.directories = [
         ".config/gws"
         ".config/gws-inscend"
       ];
       environment.systemPackages = [pkgs.gws];
     };
     work_vercel = {
-      config,
       generators,
       lib,
       pkgs,
@@ -38392,7 +38330,7 @@
         };
       };
     in {
-      finix.persistence.allowlist.users.${config.user.name}.directories = [
+      user.persist.directories = [
         ".local/share/com.vercel.cli"
         ".local/share/com.vercel.token"
       ];
@@ -38567,7 +38505,7 @@
       lib,
       ...
     }: {
-      manzil.users.${config.user.name}.files."${config.user.paths.steam}/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini" = {
+      user.files."${config.user.paths.steam}/steamapps/compatdata/2358720/pfx/drive_c/users/steamuser/AppData/Local/b1/Saved/Config/Windows/Engine.ini" = {
         generator = lib.generators.toINI {};
         value = {
           "SystemSettings" = {
@@ -38603,12 +38541,8 @@
         };
       };
     };
-    xdg_portals = {
-      config,
-      lib,
-      ...
-    }: {
-      manzil.users.${config.user.name}.files = {
+    xdg_portals = {lib, ...}: {
+      user.files = {
         ".local/share/xdg-desktop-portal/portals/gnome.portal" = {
           generator = lib.generators.toINI {};
           value.portal = {
@@ -39506,6 +39440,7 @@
         apply_reasoning_policy_data = "modules/dev/ai/codex/apply-reasoning-policy.data.nix";
         apps_bluetooth = "modules/desktop/apps/bluetooth.nix";
         apps_bolo = "modules/desktop/apps/bolo.nix";
+        apps_browsers = "modules/desktop/apps/browsers/default.nix";
         apps_btop = "modules/desktop/apps/btop.nix";
         apps_cmus = "modules/desktop/apps/cmus.nix";
         apps_cmus_data = "modules/desktop/apps/cmus.data.nix";
@@ -39535,7 +39470,6 @@
         boar = "modules/dev/ai/boar.nix";
         bolo_data = "modules/desktop/apps/bolo.data.nix";
         box_commands_data = "modules/dev/ai/omp/box-commands.data.nix";
-        browsers = "modules/desktop/apps/browsers/default.nix";
         cache_push = "modules/hosts/y0usaf-desktop/cache-push.nix";
         cassette_data = "modules/desktop/session/tomoe/lisp/cassette.data.nix";
         cassette_led_data = "modules/desktop/session/tomoe/shaders/cassette-led.data.nix";
@@ -39911,6 +39845,27 @@
           before = "graphicalModules";
         }
       ];
+      verbatim = {
+        "modules/desktop/apps/bluetooth.nix" = "{\n  pkgs,\n  ...\n}: {\n  environment.systemPackages = [\n    pkgs.blueman\n    pkgs.bluetuith\n  ];\n  user.files.\".config/autostart/blueman.desktop\".source = \"\${pkgs.blueman}/etc/xdg/autostart/blueman.desktop\";\n}\n";
+        "modules/desktop/apps/btop.nix" = "{\n  pkgs,\n  ...\n}: {\n  environment.systemPackages = [pkgs.btop];\n  user.files.\".config/btop/btop.conf\".text = ''\n    color_theme = \"TTY\"\n    theme_background = False\n  '';\n}\n";
+        "modules/desktop/apps/creative.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/Pinta\"];\n  environment.systemPackages = [\n    pkgs.pinta\n    pkgs.gimp\n  ];\n}\n";
+        "modules/desktop/apps/qbittorrent.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/qBittorrent\"];\n  environment.systemPackages = [pkgs.qbittorrent];\n}\n";
+        "modules/desktop/apps/slack.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist = {\n    directories = [\n      \".config/Slack\"\n      \".config/Slack/IndexedDB\"\n      \".config/Slack/Local Storage\"\n      \".config/Slack/Session Storage\"\n      \".config/Slack/storage\"\n      \".slack\"\n    ];\n    files = [\n      \".config/Slack/Cookies\"\n      \".config/Slack/Cookies-journal\"\n      \".config/Slack/Local State\"\n      \".config/Slack/Network Persistent State\"\n      \".config/Slack/Preferences\"\n      \".config/Slack/TransportSecurity\"\n    ];\n  };\n  environment.systemPackages = [\n    (pkgs.slack.overrideAttrs (old: {\n      postFixup =\n        (old.postFixup or \"\")\n        + ''\n          wrapProgram $out/bin/slack --add-flags \"--disable-remote-fonts\"\n        '';\n    }))\n  ];\n}\n";
+        "modules/desktop/apps/stoat-desktop.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/stoat-desktop\"];\n  environment.systemPackages = [pkgs.stoat-desktop];\n}\n";
+        "modules/desktop/session/xdg-portals.nix" = "{\n  lib,\n  ...\n}: {\n  user.files = {\n    \".local/share/xdg-desktop-portal/portals/gnome.portal\" = {\n      generator = lib.generators.toINI {};\n      value.portal = {\n        DBusName = \"org.freedesktop.impl.portal.desktop.gnome\";\n        Interfaces = \"org.freedesktop.impl.portal.ScreenCast;org.freedesktop.impl.portal.Screenshot;org.freedesktop.impl.portal.RemoteDesktop;\";\n        UseIn = \"niri;gnome;\";\n      };\n    };\n\n    \".local/share/xdg-desktop-portal/portals/gtk.portal\" = {\n      generator = lib.generators.toINI {};\n      value.portal = {\n        DBusName = \"org.freedesktop.impl.portal.desktop.gtk\";\n        Interfaces = \"org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;org.freedesktop.impl.portal.Settings;\";\n        UseIn = \"niri;gtk;\";\n      };\n    };\n  };\n}\n";
+        "modules/dev/ai/amp.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/amp\"\n    \".local/share/amp\"\n  ];\n  environment.systemPackages = [pkgs.amp-cli];\n  environment.variables.AMP_REMOTE_CONTROL_TERMINAL = \"1\";\n}\n";
+        "modules/dev/ai/rtk.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".local/share/rtk\"];\n  environment.systemPackages = [pkgs.rtk];\n}\n";
+        "modules/dev/android-tools.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist = {\n    directories = [\n      \".local/share/android\"\n      \".local/share/android/.android\"\n    ];\n    files = [\n      \".local/share/android/adbkey\"\n      \".local/share/android/adbkey.pub\"\n    ];\n  };\n  environment.systemPackages = [pkgs.android-tools];\n}\n";
+        "modules/dev/gcloud.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/gcloud\"];\n  environment.systemPackages = [pkgs.google-cloud-sdk];\n}\n";
+        "modules/dev/npm.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.files = [\".npmrc\"];\n  environment.systemPackages = [pkgs.nodejs];\n}\n";
+        "modules/dev/rust.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".local/share/cargo\"\n    \".local/share/rustup\"\n  ];\n  environment.systemPackages = [\n    pkgs.crane\n    pkgs.rustup\n    pkgs.openssl\n  ];\n}\n";
+        "modules/dev/work/aws-cli.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".aws\"\n    \".config/aws\"\n  ];\n  environment.systemPackages = [pkgs.awscli2];\n}\n";
+        "modules/dev/work/gws.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/gws\"\n    \".config/gws-inscend\"\n  ];\n  environment.systemPackages = [pkgs.gws];\n}\n";
+        "modules/gaming/core.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".barony\"\n    \".config/bolt-launcher\"\n    \".config/unity3d\"\n    \".local/share/.Wurst encryption\"\n    \".local/share/.renpy\"\n    \".local/share/Baba_Is_You\"\n    \".local/share/Brotato\"\n    \".local/share/CassetteBeasts\"\n    \".local/share/Celeste\"\n    \".local/share/HallsOfTorment\"\n    \".local/share/Noobs Are Coming (Save)\"\n    \".local/share/PrismLauncher\"\n    \".local/share/Rocket League\"\n    \".local/share/SlayTheSpire2\"\n    \".local/share/Smart Code ltd\"\n    \".local/share/SteamWorld Heist\"\n    \".local/share/Ultrapool\"\n    \".local/share/YourOnlyMoveIsHUSTLE\"\n    \".local/share/aspyr-media\"\n    \".local/share/balatroai\"\n    \".local/share/binding of isaac rebirth\"\n    \".local/share/bolt-launcher\"\n    \".local/share/com.overboy.noobsarecoming\"\n    \".local/share/godot/app_userdata\"\n    \".local/share/hackerpg\"\n    \".local/share/lootplot\"\n    \".local/share/osu\"\n    \".local/share/shapez.io\"\n    \".local/share/shipofharkinian\"\n    \".local/share/skua-wine\"\n    \".local/share/wine\"\n  ];\n  environment.systemPackages = [\n    pkgs.prismlauncher\n    pkgs.gamescope\n    pkgs.gamemode\n    pkgs.protontricks\n    pkgs.dualsensectl\n  ];\n}\n";
+        "modules/gaming/emulation.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/Cemu\"\n    \".local/share/Cemu\"\n    \".local/share/dolphin-emu\"\n  ];\n  environment.systemPackages = [\n    pkgs.dolphin-emu\n    pkgs.cemu\n  ];\n}\n";
+        "modules/shell/ekko/config.nix" = "{\n  lib,\n  pkgs,\n  flakeInputs,\n  generators,\n  ...\n}: {\n  user = {\n    persist.directories = [\n      \".cache/ekko\"\n      \".config/ekko\"\n    ];\n\n    dev.prompts.host = [\"`EKKO_INSTANCE` in your environment points at the ekko instance holding the live terminals.\"];\n\n    files.\".config/ekko/init.lisp\".text =\n      lib.removeSuffix \"\\n\" (generators.lisp.render (import ./init.data.nix generators.lisp))\n      + \"\\n\"\n      + builtins.readFile \"\${flakeInputs.ekko}/examples/themes/xp.lisp\"\n      + \"\\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\\n\";\n\n    shell.rcExtra = lib.mkOrder 1600 ''\n      if [ -z \"''\${EKKO_INSTANCE:-}\" ] && [ -z \"''\${EKKO_SESSION_NAME:-}\" ] &&\n         [ -z \"''\${SSH_CONNECTION:-}\" ] && [ -z \"''\${TMUX:-}\" ] &&\n         [ -z \"''\${STY:-}\" ] && [ -z \"''\${TERN_PANE:-}\" ] &&\n         [ \"''\${TERM:-}\" != linux ] && [ -t 0 ] && [ -t 1 ]; then\n        case \"$(\${pkgs.coreutils}/bin/readlink /proc/self/fd/0)\" in\n          /dev/tty[0-9]*) ;;\n          *) \${flakeInputs.ekko.packages.\${pkgs.stdenv.hostPlatform.system}.default}/bin/ekko attach ;;\n        esac\n      fi\n    '';\n  };\n\n  environment.systemPackages = [flakeInputs.ekko.packages.\${pkgs.stdenv.hostPlatform.system}.default];\n\n}\n";
+        "modules/shell/rush.nix" = "{\n  config,\n  lib,\n  pkgs,\n  ...\n}: let\n  aliases =\n    {\n      wget = ''wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"'';\n      lintcheck = \"clear; statix check .; deadnix .\";\n      lintfix = \"clear; statix fix .; deadnix .\";\n      claude = \"claude --allow-dangerously-skip-permissions\";\n      buncodex = \"bunx --bun @openai/codex\";\n      gemini = \"bunx --bun @google/gemini-cli@preview\";\n      \"l.\" = ''lsd -A | grep -E \"^\\.\"'';\n      la = \"lsd -A --color=always --group-dirs=first --icon=always\";\n      ll = \"lsd -l --color=always --group-dirs=first --icon=always\";\n      ls = \"lsd -lA --color=always --group-dirs=first --icon=always\";\n      lt = \"lsd -A --tree --color=always --group-dirs=first --icon=always\";\n      grep = \"rg --color auto\";\n      dir = \"dir --color=auto\";\n      egrep = \"rg --color auto\";\n      fgrep = \"rg -F --color auto\";\n      adb = ''HOME=\"$XDG_DATA_HOME/android\" adb'';\n      pkgs = \"nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i\";\n      pkgcount = \"nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l\";\n      buildtime = ''time (nix build \"$NH_FLAKE#nixosConfigurations.$HOST.config.system.build.toplevel\" --option eval-cache false)'';\n      hmpull = \"git -C \${config.user.homeDirectory}/finix fetch origin && git -C \${config.user.homeDirectory}/finix reset --hard origin/main\";\n    }\n    // lib.optionalAttrs config.hardware.nvidia.enable {\n      nvidia-settings = ''nvidia-settings --config=\"$XDG_CONFIG_HOME/nvidia/settings\"'';\n      gpupower = \"sudo nvidia-smi -pl\";\n    };\nin {\n  options.user.shell.rcExtra = lib.mkOption {\n    type = lib.types.lines;\n    default = \"\";\n    description = ''\n      POSIX-compatible interactive rc fragments contributed by feature\n      modules (python, nh, yt-dlp, ekko, …). Appended after the active\n      shell's own base config.\n    '';\n  };\n\n  config = {\n    environment.etc.\"profile.d/local-bin.sh\".text = ''\n      case \":$PATH:\" in\n        *\":$HOME/.local/bin:\"*) ;;\n        *) export PATH=\"$HOME/.local/bin:$PATH\" ;;\n      esac\n    '';\n\n    user = {\n      shell.rcExtra = lib.mkBefore ''\n        temppkg() {\n          if [ -z \"$1\" ]; then\n            echo \"Usage: temppkg package_name\"\n            return 1\n          fi\n          nix-shell -p \"$1\" --run \"exec $SHELL\"\n        }\n\n        temprun() {\n          if [ -z \"$1\" ]; then\n            echo \"Usage: temprun <package-name> [args...]\"\n            return 1\n          fi\n          local pkg=$1\n          shift\n          nix run \"nixpkgs#$pkg\" -- \"$@\"\n        }\n        export NPM_CONFIG_TMP=\"$XDG_RUNTIME_DIR\"/npm\n      '';\n\n      persist.directories = [\".local/state/rush\"];\n\n      files = {\n        \".config/rush/profile.rush\".text = ''\n          . /etc/profile\n          [ -r \"$HOME/.config/tokens.sh\" ] && . \"$HOME/.config/tokens.sh\"\n        '';\n\n        \".config/rush/config.rush\".text = lib.mkMerge [\n          (lib.mkBefore ''\n\n            rush_prompt() {\n              rush_prompt_status=$?\n              prompt segment --bold --fg green \"$(prompt_pwd)\"\n              if test \"$rush_prompt_status\" = 0; then\n                prompt segment --fg cyan '>'\n              else\n                prompt segment --fg red '>'\n              fi\n              prompt text ' '\n            }\n\n            rush_prompt_right() {\n              prompt segment --fg bright-blue \"$(date +'%Y-%m-%d %H:%M')\"\n            }\n\n            \${lib.concatStringsSep \"\\n\" (lib.mapAttrsToList\n              (k: v: \"alias \${lib.escapeShellArg k}=\${lib.escapeShellArg v}\")\n              aliases)}\n          '')\n          config.user.shell.rcExtra\n        ];\n      };\n    };\n\n    environment.systemPackages = [pkgs.bat];\n\n  };\n}\n";
+      };
       module_values = [
         {
           file = "modules/outputs.nix";
