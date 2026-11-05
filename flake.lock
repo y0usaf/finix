@@ -2126,11 +2126,11 @@
     "tern-ozette": {
       "flake": false,
       "locked": {
-        "lastModified": 1793900258,
-        "narHash": "sha256-4DsK20020AZVfHnwwkx1aJb+MUEEN8IP7ajf6/GqMUQ=",
+        "lastModified": 1793902503,
+        "narHash": "sha256-HfIBtKpB59R0KGstC1dERovMp3ArQCBKh/H7WUnKZdk=",
         "ref": "refs/heads/main",
-        "rev": "22a1b4c37d4a8501c901e919f943658359841902",
-        "revCount": 46,
+        "rev": "e1863b0e461eb1c60b357e56e17183470f5bab64",
+        "revCount": 48,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       },
