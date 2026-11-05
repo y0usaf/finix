@@ -30294,7 +30294,7 @@
       material = "Glass";
       opacity = 0;
       blur = 0;
-      plugins_disabled = ["chime" "transparent"];
+      plugins_disabled = ["chime" "ozette" "transparent"];
       surface_fold = true;
       new_tabs = "Home";
       agent_placement = "new_tab";
@@ -35266,7 +35266,12 @@
         "plugins/ozette/plugin.toml" = "${flakeInputs.tern-ozette}/plugin.toml";
         "plugins/ozette/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
         "plugins/ozette/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
-        "plugins/ozette/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
+        "plugins/yorha/cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
+        "plugins/yorha/motion.css" = "${flakeInputs.tern-ozette}/motion.css";
+        "plugins/yorha/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
+        "plugins/yorha/plugin.toml" = "${flakeInputs.tern-ozette}/yorha/plugin.toml";
+        "plugins/yorha/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
+        "plugins/yorha/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
         "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tab_order_plugin_data);
         "plugins/tab-order/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (tab_order_window_data generators.luau));
         "plugins/transparent/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource transparent_plugin_data);
