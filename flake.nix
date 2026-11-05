@@ -18778,6 +18778,7 @@
         luau = {
           "tern-attention-window.luau" = attention_window_data;
           "tern-block-menu-window.luau" = block_menu_window_data;
+          "tern-steady-motion-window.luau" = steady_motion_window_data;
           "tern-tab-order-window.luau" = tab_order_window_data;
           "tern-transparent-window.luau" = transparent_window_data;
           "tern-tuturu-window.luau" = src_window_data;
@@ -24700,7 +24701,7 @@
             (field "id" (str "rail_status"))
             (field "label" (str "status rings and lines"))
             (field "group" (str "Rail"))
-            (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c {\n\tposition: relative;\n\toverflow: visible !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tcontent: \"\";\n\tposition: absolute;\n\tbox-sizing: border-box;\n\tborder-radius: 50%;\n\tpointer-events: none;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc])[title*=\"\\206A\"] .tn-dk-c::before {\n\tleft: -4px;\n\ttop: -4px;\n\twidth: calc(100% + 8px);\n\theight: calc(100% + 8px);\n\tborder: 2px dashed var(--pill);\n\tanimation: arc-spin 2.4s linear infinite;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tright: -3px;\n\tbottom: -3px;\n\twidth: 10px;\n\theight: 10px;\n\tbackground: var(--pill);\n\tbox-shadow: 0 0 0 2px var(--panel);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub {\n\tfont-size: 0 !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::before {\n\tfont-size: 12px;\n\tfont-weight: 500;\n\tfont-family: Geist, system-ui, sans-serif;\n\tcolor: var(--pill);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] {\n\t--pill: light-dark(#0f766e, #5eead4);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] .sub::before {\n\tcontent: \"Working\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] {\n\t--pill: light-dark(#b45309, #fbbf24);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] .sub::before {\n\tcontent: \"Awaiting input\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] {\n\t--pill: light-dark(#15803d, #4ade80);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] .sub::before {\n\tcontent: \"Done · unseen\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] {\n\t--pill: light-dark(#b91c1c, #f87171);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] .sub::before {\n\tcontent: \"Failed · unseen\";\n}\n\n@keyframes arc-spin {\n\tfrom {\n\t\ttransform: rotate(0deg);\n\t}\n\tto {\n\t\ttransform: rotate(360deg);\n\t}\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub > * {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::after {\n\tdisplay: none !important;\n}\n"))
+            (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c {\n\tposition: relative;\n\toverflow: visible !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tcontent: \"\";\n\tposition: absolute;\n\tbox-sizing: border-box;\n\tborder-radius: 50%;\n\tpointer-events: none;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc])[title*=\"\\206A\"] .tn-dk-c::before {\n\tleft: -4px;\n\ttop: -4px;\n\twidth: calc(100% + 8px);\n\theight: calc(100% + 8px);\n\tborder: 2px dashed var(--pill);\n\tanimation: arc-spin 2.4s steps(8) infinite;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tright: -3px;\n\tbottom: -3px;\n\twidth: 10px;\n\theight: 10px;\n\tbackground: var(--pill);\n\tbox-shadow: 0 0 0 2px var(--panel);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub {\n\tfont-size: 0 !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::before {\n\tfont-size: 12px;\n\tfont-weight: 500;\n\tfont-family: Geist, system-ui, sans-serif;\n\tcolor: var(--pill);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] {\n\t--pill: light-dark(#0f766e, #5eead4);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] .sub::before {\n\tcontent: \"Working\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] {\n\t--pill: light-dark(#b45309, #fbbf24);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] .sub::before {\n\tcontent: \"Awaiting input\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] {\n\t--pill: light-dark(#15803d, #4ade80);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] .sub::before {\n\tcontent: \"Done · unseen\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] {\n\t--pill: light-dark(#b91c1c, #f87171);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] .sub::before {\n\tcontent: \"Failed · unseen\";\n}\n\n@keyframes arc-spin {\n\tfrom {\n\t\ttransform: rotate(0deg);\n\t}\n\tto {\n\t\ttransform: rotate(360deg);\n\t}\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub > * {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::after {\n\tdisplay: none !important;\n}\n"))
             (field "apply" apply)
           ]))
           (rows (table [
@@ -32873,6 +32874,46 @@
         log = true;
       };
     };
+    steady_motion_data = [
+      {
+        select = ".sf-fx-shimmer";
+        set = [
+          ["animation-timing-function" "steps(4) !important"]
+        ];
+      }
+      {
+        select = ".tt.working .nm, .tn-vt .nav-row.working .lbl";
+        set = [
+          ["animation-timing-function" "steps(4)"]
+        ];
+      }
+      {
+        select = ".tn-dk-c[data-st=\"working\"]::before";
+        set = [
+          ["animation" "none !important"]
+        ];
+      }
+      {
+        select = ".tn-dk-c[data-st=\"working\"]::after, .tn-face[data-st=\"working\"], .pk-c.working .pk-suit, .sf-fx-pulse";
+        set = [
+          ["animation-timing-function" "steps(2) !important"]
+        ];
+      }
+      {
+        select = ".tn-glow-ring, .tn-glow-band";
+        set = [
+          ["animation-timing-function" "steps(8) !important"]
+        ];
+      }
+      {
+        select = "html.inactive :is(.sf-fx-shimmer, .sf-fx-pulse, .tn-face, .pk-suit, .tn-glow-ring, .tn-glow-band, .tt .nm, .nav-row .lbl), html.inactive .tn-dk-c::after";
+        set = [
+          ["animation-play-state" "paused !important"]
+        ];
+      }
+    ];
+    steady_motion_plugin_data = [[["schema" 1] ["id" "steady-motion"] ["name" "Steady motion"] ["version" "0.1.0"] ["description" "Steps Tern's endless working animations (agent shimmer, tab status dot, pane glow) to a few frames a second, drops the tab tile gloss and freezes them while the window is inactive, so a busy agent stops repainting the whole window every frame."] ["window" "window.luau"] ["styles" ["steady-motion.css"]]]];
+    steady_motion_window_data = {blank, ...}: [blank];
     steam_frame_bolo = {
       config,
       lib,
@@ -35094,6 +35135,9 @@
         "plugins/yorha-pixel/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
         "plugins/yorha-pixel/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
         "plugins/yorha-pixel/yorha-pixel.css" = "${flakeInputs.tern-ozette}/yorha-pixel.css";
+        "plugins/steady-motion/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource steady_motion_plugin_data);
+        "plugins/steady-motion/steady-motion.css" = stylesheet "steady-motion.css" steady_motion_data;
+        "plugins/steady-motion/window.luau" = generators.sourceFile "window.luau" (lib.removeSuffix "\n" (generators.luau.render (steady_motion_window_data generators.luau)));
         "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tab_order_plugin_data);
         "plugins/tab-order/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (tab_order_window_data generators.luau));
         "plugins/transparent/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource transparent_plugin_data);
@@ -39421,6 +39465,9 @@
         spine_data = "modules/desktop/session/tomoe/lisp/spine.data.nix";
         src_window_data = "modules/tools/tern/config/plugins/tuturu/src/window.data.nix";
         static_net = "modules/finix/static-net.nix";
+        steady_motion_data = "modules/tools/tern/config/plugins/steady-motion/steady-motion.data.nix";
+        steady_motion_plugin_data = "modules/tools/tern/config/plugins/steady-motion/plugin.data.nix";
+        steady_motion_window_data = "modules/tools/tern/config/plugins/steady-motion/window.data.nix";
         steam_frame_bolo = "modules/hosts/steam-frame/bolo.nix";
         steam_frame_config = "modules/hosts/steam-frame/config.nix";
         steam_frame_mado = "modules/hosts/steam-frame/mado.nix";
