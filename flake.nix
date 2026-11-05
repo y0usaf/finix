@@ -83,11 +83,6 @@
       flake = false;
     };
 
-    tern-themes = {
-      url = "git+file:///home/y0usaf/dev/developing/tern-themes";
-      flake = false;
-    };
-
     nix-generators = {
       url = "github:y0usaf/nix-generators";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -9662,7 +9657,20 @@
     ];
     user_frost_data = [
       {
-        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
+        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body";
+        set = [
+          ["background" "var(--modal-bg)"]
+          ["-webkit-backdrop-filter" "var(--frost)"]
+          ["backdrop-filter" "var(--frost)"]
+          ["box-shadow" "var(--frost-edge)"]
+          ["--t1" "var(--frost-ink)"]
+          ["color" "var(--frost-ink)"]
+        ];
+      }
+    ];
+    composer_frost_data = [
+      {
+        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
         set = [
           ["background" "var(--modal-bg)"]
           ["-webkit-backdrop-filter" "var(--frost)"]
@@ -32102,10 +32110,8 @@
       };
     };
     settings_data = {
-      __keys = ["theme" "theme_dark" "theme_light" "copy_on_select" "cursor" "link_target" "contrast" "layout" "font_size" "padding_x" "padding_y" "system_title_bar" "status_bar" "material" "opacity" "blur" "plugins_disabled" "surface_fold" "new_tabs" "agent_placement" "snap_text" "frames_queued" "renderer" "carly" "keybinds"];
+      __keys = ["theme" "copy_on_select" "cursor" "link_target" "contrast" "layout" "font_size" "padding_x" "padding_y" "system_title_bar" "status_bar" "material" "opacity" "blur" "plugins_disabled" "surface_fold" "new_tabs" "agent_placement" "snap_text" "frames_queued" "renderer" "carly" "keybinds"];
       theme = "System";
-      theme_dark = "ozette-night";
-      theme_light = "ozette";
       copy_on_select = true;
       cursor = {
         programs = true;
@@ -37227,6 +37233,7 @@
         "plugins/ui-menu/snippets/transparent.css" = stylesheet "transparent.css" transparent_data;
         "plugins/ui-menu/snippets/turn-stats.css" = stylesheet "turn-stats.css" turn_stats_data;
         "plugins/ui-menu/snippets/user-frost.css" = stylesheet "user-frost.css" user_frost_data;
+        "plugins/ui-menu/snippets/composer-frost.css" = stylesheet "composer-frost.css" composer_frost_data;
         "plugins/ui-menu/snippets/width.css" = stylesheet "width.css" width_data;
         "plugins/ui-menu/snippets/work-rail.css" = stylesheet "work-rail.css" work_rail_data;
         "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
@@ -37236,8 +37243,6 @@
         "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
         "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
         "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource settings_data);
-        "themes/ozette-night.css" = "${flakeInputs.tern-themes}/ozette-night.css";
-        "themes/ozette.css" = "${flakeInputs.tern-themes}/ozette.css";
       };
 
       devTree = "${config.user.homeDirectory}/dev";
@@ -37354,6 +37359,7 @@
           ["--tv-bg" "transparent"]
           ["--modal-filter" "none"]
           ["--modal-dim-filter" "none"]
+          ["background" "transparent !important"]
         ];
       }
       {
@@ -38169,6 +38175,13 @@
           (field "requires" (table [(str "frost")]))
         ]))
         (rows (table [
+          (field "id" (str "composer-frost"))
+          (field "label" (str "frosted composer"))
+          (field "group" (str "Glass"))
+          (field "parent" (str "frost"))
+          (field "requires" (table [(str "frost")]))
+        ]))
+        (rows (table [
           (field "id" (str "bot-you-frost"))
           (field "requires" (table [(str "user-frost") (str "bot-you")]))
         ]))
@@ -38786,10 +38799,10 @@
             ])
           ]))
           (ifElse need [
-            [add (table [(field "label" label) (field "group" group) (field "tweak" (dot t "id")) (field "need" need) (field "detail" (infix [(str "needs ") ".." need]))])]
-          ] [
-            [add (table [(field "label" label) (field "group" group) (field "tweak" (dot t "id"))]) (idx on (dot t "id"))]
-          ])
+              [add (table [(field "label" label) (field "group" group) (field "tweak" (dot t "id")) (field "need" need) (field "detail" (infix [(str "needs ") ".." need]))])]
+            ] [
+              [add (table [(field "label" label) (field "group" group) (field "tweak" (dot t "id"))]) (idx on (dot t "id"))]
+            ])
           (for [{_ = null;} {c = null;}] [ipairs (infix [(idx children (dot t "id")) "or" (table [])])] ({
             _,
             c,
@@ -41830,6 +41843,7 @@
         catch_lua_data = "modules/gaming/aniimo/catch-lua.data.nix";
         centering_data = "modules/tools/tern/config/plugins/ui-menu/snippets/centering.data.nix";
         user_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/user-frost.data.nix";
+        composer_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/composer-frost.data.nix";
         chat_look_data = "modules/dev/ai/omp/chat-look.data.nix";
         chat_still_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-still.data.nix";
         claude_code = "modules/dev/ai/claude-code.nix";
