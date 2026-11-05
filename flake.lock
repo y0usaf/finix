@@ -1818,6 +1818,7 @@
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
         "tern-ozette": "tern-ozette",
+        "tern-scratch": "tern-scratch",
         "tern-themes": "tern-themes",
         "tomoe": "tomoe"
       }
@@ -2125,17 +2126,33 @@
     "tern-ozette": {
       "flake": false,
       "locked": {
-        "lastModified": 1793894970,
-        "narHash": "sha256-5O2k8WY/6SaZQiNOC1KEx4p9f7qb3sAJC1gbGEteAqE=",
+        "lastModified": 1793895374,
+        "narHash": "sha256-2QY0N+79OQVXruTK5bUttSbTiKxQR/rNavjSKgPNqto=",
         "ref": "refs/heads/main",
-        "rev": "d00ba9cce4694fbc7da8074bc504c0f968d929c2",
-        "revCount": 43,
+        "rev": "46e17da2f735914ade5078a02454a46449cf5c45",
+        "revCount": 44,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       },
       "original": {
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
+      }
+    },
+    "tern-scratch": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793734476,
+        "narHash": "sha256-4u46vtSbYMBD6ZJwt6S/uejjzCokcGp08MrrpnEf8NI=",
+        "ref": "refs/heads/main",
+        "rev": "c6fb304cdcc66705da0734d75ca304064cba3d85",
+        "revCount": 16,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-scratch"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-scratch"
       }
     },
     "tern-themes": {

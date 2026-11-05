@@ -78,6 +78,11 @@
       flake = false;
     };
 
+    tern-scratch = {
+      url = "git+file:///home/y0usaf/dev/developing/tern-scratch";
+      flake = false;
+    };
+
     tern-themes = {
       url = "git+file:///home/y0usaf/dev/developing/tern-themes";
       flake = false;
@@ -30101,7 +30106,7 @@
       material = "Glass";
       opacity = 0;
       blur = 0;
-      plugins_disabled = ["chime" "ozette" "transparent"];
+      plugins_disabled = ["chime" "ozette" "scratch" "transparent" "yorha"];
       surface_fold = true;
       new_tabs = "Home";
       agent_placement = "new_tab";
@@ -35073,6 +35078,9 @@
         "plugins/ozette/plugin.toml" = "${flakeInputs.tern-ozette}/plugin.toml";
         "plugins/ozette/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
         "plugins/ozette/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
+        "plugins/scratch/min.css" = "${flakeInputs.tern-scratch}/min.css";
+        "plugins/scratch/plugin.toml" = "${flakeInputs.tern-scratch}/plugin.toml";
+        "plugins/scratch/window.luau" = "${flakeInputs.tern-scratch}/window.luau";
         "plugins/yorha/cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
         "plugins/yorha/motion.css" = "${flakeInputs.tern-ozette}/motion.css";
         "plugins/yorha/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
@@ -36152,7 +36160,7 @@
         [paint t]
       ]))
       blank
-      (local LOOKS (table [(table [(field "id" (str "ozette")) (field "label" (str "Ozette"))]) (table [(field "id" (str "yorha")) (field "label" (str "YoRHa"))]) (table [(field "id" (str "yorha-pixel")) (field "label" (str "YoRHa Pixel"))])]))
+      (local LOOKS (table [(table [(field "id" (str "ozette")) (field "label" (str "Ozette"))]) (table [(field "id" (str "yorha")) (field "label" (str "YoRHa"))]) (table [(field "id" (str "yorha-pixel")) (field "label" (str "YoRHa Pixel"))]) (table [(field "id" (str "scratch")) (field "label" (str "Unset all"))])]))
       blank
       (localFunction plugins (typed [] (table [(pair string string)])) ({
         root,
@@ -36257,7 +36265,7 @@
         [add (table [(field "label" (str "None")) (field "group" (str "Look")) (field "icon" (str "palette")) (field "look" (str "")) (field "current" (infix [look "==" (str "")]))])]
         (local ids (table []))
         (for [{id = null;}] installed ({id}: [
-          (if' (infix [id "~=" (dot tern "plugin.id") "and" id "~=" (str "ozette") "and" id "~=" (str "yorha") "and" id "~=" (str "yorha-pixel")]) [
+          (if' (infix [id "~=" (dot tern "plugin.id") "and" id "~=" (str "ozette") "and" id "~=" (str "yorha") "and" id "~=" (str "yorha-pixel") "and" id "~=" (str "scratch")]) [
             (assign (idx ids (infix [(len ids) "+" 1])) id)
           ])
         ]))
