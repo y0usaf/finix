@@ -7421,21 +7421,6 @@
         ];
       }
     ];
-    bot_chat_look_data = [
-      {
-        select = ":root:not(#b0) [data-role='omp.bot.reply'] [data-role^='omp.thinking']";
-        set = [
-          ["display" "none !important"]
-        ];
-      }
-      {
-        select = ":root:not(#b0) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md";
-        set = [
-          ["font-size" "15px"]
-          ["line-height" "22px"]
-        ];
-      }
-    ];
     bot_chat_still_data = [
       {
         select = ":root:not(#b0) [data-role='omp.bot.reply'] .md.streaming";
@@ -33096,63 +33081,6 @@
         ];
       }
     ];
-    snippets_chat_look_data = [
-      {
-        select = ":root:not(#s0) [data-role='omp.chat.msg'] [data-role^='omp.thinking'], :root:not(#s0) [data-role='omp.chat.dock'] :is([data-role='omp.composer.usage'], [data-role='omp.composer.extras'])";
-        set = [
-          ["display" "none !important"]
-        ];
-      }
-      {
-        select = ":root:not(#s0) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body";
-        set = [
-          ["max-width" "min(80%, 560px)"]
-        ];
-      }
-      {
-        select = ":root:not(#s0) [data-role='omp.chat.msg'] .md";
-        set = [
-          ["font-size" "15px"]
-          ["line-height" "22px"]
-        ];
-      }
-      {
-        select = ":root:not(#s0) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor']";
-        set = [
-          ["padding" "0"]
-          ["border" "0"]
-          ["background" "none"]
-          ["box-shadow" "none"]
-        ];
-      }
-      {
-        select = ":root:not(#s0) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-head";
-        set = [
-          ["display" "none"]
-        ];
-      }
-      {
-        select = ":root:not(#s0) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-body";
-        set = [
-          ["padding" "0"]
-        ];
-      }
-      {
-        select = ":root:not(#s0) [data-role='omp.chat.advice'] [data-role='omp.advisor.note']";
-        set = [
-          ["color" "var(--ink3, var(--t4))"]
-          ["white-space" "nowrap"]
-          ["overflow" "hidden"]
-          ["text-overflow" "ellipsis"]
-        ];
-      }
-      {
-        select = ":root:not(#s0) [data-role='omp.chat.advice'] [data-role='omp.advisor.note']::before";
-        set = [
-          ["content" "\"Advisor · \""]
-        ];
-      }
-    ];
     solo_leveling_arise = {
       config,
       lib,
@@ -37184,7 +37112,6 @@
         "plugins/ui-menu/snippets/bot-cards.css" = stylesheet "bot-cards.css" bot_cards_data;
         "plugins/ui-menu/snippets/bot-chao-motion.css" = stylesheet "bot-chao-motion.css" bot_chao_motion_data;
         "plugins/ui-menu/snippets/bot-chao.css" = stylesheet "bot-chao.css" bot_chao_data;
-        "plugins/ui-menu/snippets/bot-chat-look.css" = stylesheet "bot-chat-look.css" bot_chat_look_data;
         "plugins/ui-menu/snippets/bot-chat-still.css" = stylesheet "bot-chat-still.css" bot_chat_still_data;
         "plugins/ui-menu/snippets/bot-dock.css" = stylesheet "bot-dock.css" bot_dock_data;
         "plugins/ui-menu/snippets/bot-events.css" = stylesheet "bot-events.css" bot_events_data;
@@ -37206,7 +37133,6 @@
         "plugins/ui-menu/snippets/bottom.css" = stylesheet "bottom.css" bottom_data;
         "plugins/ui-menu/snippets/buttons.css" = stylesheet "buttons.css" buttons_data;
         "plugins/ui-menu/snippets/centering.css" = stylesheet "centering.css" centering_data;
-        "plugins/ui-menu/snippets/chat-look.css" = stylesheet "chat-look.css" snippets_chat_look_data;
         "plugins/ui-menu/snippets/chat-still.css" = stylesheet "chat-still.css" chat_still_data;
         "plugins/ui-menu/snippets/dividers.css" = stylesheet "dividers.css" dividers_data;
         "plugins/ui-menu/snippets/files.css" = stylesheet "files.css" files_data;
@@ -37239,7 +37165,6 @@
         "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
         "plugins/ui-menu/snippets/yorha-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-bot-answer-bubbles.css";
         "plugins/ui-menu/snippets/yorha-bot-you.css" = "${flakeInputs.tern-ozette}/yorha-bot-you.css";
-        "plugins/ui-menu/snippets/yorha-pixel.css" = "${flakeInputs.tern-ozette}/yorha-pixel.css";
         "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
         "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
         "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource settings_data);
@@ -37988,7 +37913,7 @@
     ];
     tuturu_plugin_data = [[["schema" 1] ["id" "tuturu"] ["name" "Tuturu"] ["version" "0.1.0"] ["description" "Plays a sound when a pane raises an unseen alert, an agent yields, or a long command finishes."] ["icon" "bell"] ["window" "src/window.luau"]]];
     tuturu_sounds_data = [[{comment = "The sounds are built by ~/finix/modules/tools/tern/default.nix and named in";} {comment = "<plugin data>/sounds.toml, which wins over this file. These stay empty so a";} {comment = "missing override is silent rather than playing something else.";} ["alert" ""] ["yield" ""] ["done" ""]] [{comment = "Chime only for panes you are not looking at. false chimes for the focused";} {comment = "pane too.";} ["only_unfocused" true]] [{comment = "Shell commands running at least this long chime the done sound when they";} {comment = "finish. 0 chimes every finished command.";} ["min_seconds" 30]]];
-    ui_menu_plugin_data = [[["schema" 1] ["id" "ui-menu"] ["name" "UI Menu"] ["version" "0.2.0"] ["description" "Settings menu (Ctrl+Alt+,): every CSS snippet on or off (one .css file each in snippets/), the look as a stack of them (Ozette, YoRHa, YoRHa Pixel, Unset all or none), every installed plugin on or off, and this config's UI tweaks."] ["window" "window.luau"]]];
+    ui_menu_plugin_data = [[["schema" 1] ["id" "ui-menu"] ["name" "UI Menu"] ["version" "0.2.0"] ["description" "Settings menu (Ctrl+Alt+,): independent look layers, shared message and Glass options, installed plugins and UI tweaks."] ["window" "window.luau"]]];
     ui_menu_window_data = {
       assign,
       blank,
@@ -38089,14 +38014,6 @@
           (field "group" (str "Look layers"))
           (field "default" false)
           (field "layer" true)
-        ]))
-        (rows (table [
-          (field "id" (str "yorha-pixel"))
-          (field "label" (str "YoRHa Pixel"))
-          (field "parent" (str "yorha"))
-          (field "default" false)
-          (field "layer" true)
-          (field "requires" (table [(str "yorha")]))
         ]))
         (rows (table [
           (field "id" (str "bot-yorha-labels"))
@@ -38233,7 +38150,6 @@
           (field "id" (str "answer-bubbles"))
           (field "label" (str "answer bubbles"))
           (field "group" (str "omp"))
-          (field "excludes" (table [(str "chat-look")]))
         ]))
         (rows (table [
           (field "id" (str "work-rail"))
@@ -38249,12 +38165,6 @@
           (field "id" (str "turn-stats"))
           (field "label" (str "hide turn stats"))
           (field "group" (str "omp"))
-        ]))
-        (rows (table [
-          (field "id" (str "chat-look"))
-          (field "label" (str "Grok chat"))
-          (field "group" (str "omp"))
-          (field "excludes" (table [(str "answer-bubbles")]))
         ]))
         (rows (table [
           (field "id" (str "chat-still"))
@@ -38274,11 +38184,6 @@
         (rows (table [
           (field "id" (str "bot-turn-stats"))
           (field "label" (str "hide turn stats"))
-          (field "group" (str "omp bots"))
-        ]))
-        (rows (table [
-          (field "id" (str "bot-chat-look"))
-          (field "label" (str "Grok chat"))
           (field "group" (str "omp bots"))
         ]))
         (rows (table [
@@ -38600,7 +38505,6 @@
       (local LOOKS (rows (table [
         (table [(field "label" (str "Ozette")) (field "layers" (table [(str "ozette") (str "ozette-motion") (str "ozette-cmus")]))])
         (table [(field "label" (str "YoRHa")) (field "layers" (table [(str "yorha")]))])
-        (table [(field "label" (str "YoRHa Pixel")) (field "layers" (table [(str "yorha") (str "yorha-pixel")]))])
         (table [(field "label" (str "Unset all")) (field "layers" (table [(str "scratch")]))])
         (table [(field "label" (str "None")) (field "layers" (table []))])
       ])))
@@ -41812,7 +41716,6 @@
         bot_cards_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-cards.data.nix";
         bot_chao_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chao.data.nix";
         bot_chao_motion_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chao-motion.data.nix";
-        bot_chat_look_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chat-look.data.nix";
         bot_chat_still_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chat-still.data.nix";
         bot_dock_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-dock.data.nix";
         bot_events_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-events.data.nix";
@@ -42020,7 +41923,6 @@
         shell_rush = "modules/shell/rush.nix";
         shell_tokens = "modules/shell/tokens.nix";
         single_data = "modules/tools/tern/config/plugins/ui-menu/snippets/single.data.nix";
-        snippets_chat_look_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-look.data.nix";
         solo_leveling_arise = "modules/gaming/solo-leveling-arise.nix";
         spine_data = "modules/desktop/session/tomoe/lisp/spine.data.nix";
         src_window_data = "modules/tools/tern/config/plugins/tuturu/src/window.data.nix";
