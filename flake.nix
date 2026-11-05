@@ -1346,6 +1346,7 @@
           respawn = true;
           environment.HOME = home;
           command = "${pkgs.writeShellScript "omp-box-run" ''
+            export PATH=${pkgs.lib.makeBinPath [pkgs.coreutils pkgs.gnugrep]}
             mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${state}/ompd-jobs ${home}/.omp/natives
             rm -f ${state}/id_ed25519
             [ -f ${state}/ssh-key ] || ${pkgs.openssh}/bin/ssh-keygen -q -t ed25519 -N "" -C omp-box -f ${state}/ssh-key
@@ -17713,20 +17714,20 @@
       }
     '';
     llama_herd_night_data = ''
-      const vec3 SKY = vec3(0.106, 0.118, 0.231);
-      const vec3 SKY_LOW = vec3(0.208, 0.196, 0.369);
+      const vec3 SKY = vec3(0.035, 0.039, 0.086);
+      const vec3 SKY_LOW = vec3(0.075, 0.071, 0.145);
       const vec3 STAR = vec3(0.973, 0.949, 0.851);
-      const vec3 MOUNTAIN = vec3(0.243, 0.227, 0.384);
-      const vec3 HILL = vec3(0.180, 0.169, 0.302);
+      const vec3 MOUNTAIN = vec3(0.110, 0.102, 0.180);
+      const vec3 HILL = vec3(0.071, 0.067, 0.125);
       const vec3 SUN = vec3(0.976, 0.953, 0.847);
-      const vec3 CLOUD = vec3(0.302, 0.294, 0.455);
-      const vec3 GROUND = vec3(0.431, 0.373, 0.400);
-      const vec3 EDGE = vec3(0.345, 0.290, 0.333);
-      const vec3 PEBBLE = vec3(0.380, 0.325, 0.361);
-      const vec3 BODY = vec3(0.851, 0.737, 0.580);
+      const vec3 CLOUD = vec3(0.129, 0.125, 0.208);
+      const vec3 GROUND = vec3(0.180, 0.153, 0.176);
+      const vec3 EDGE = vec3(0.129, 0.106, 0.137);
+      const vec3 PEBBLE = vec3(0.220, 0.188, 0.212);
+      const vec3 BODY = vec3(0.776, 0.671, 0.529);
       const vec3 TIP = vec3(0.478, 0.337, 0.220);
       const vec3 EYE = vec3(0.180, 0.125, 0.094);
-      const vec3 CACTUS = vec3(0.298, 0.447, 0.341);
+      const vec3 CACTUS = vec3(0.165, 0.267, 0.196);
       const vec3 BANG = vec3(0.910, 0.408, 0.290);
       const vec3 PACK = vec3(0.435, 0.455, 0.502);
       const vec3 PACK_LIGHT = vec3(0.663, 0.686, 0.729);
@@ -17734,7 +17735,7 @@
       const vec3 FLAME_HOT = vec3(0.969, 0.843, 0.455);
       const vec3 FLAME = vec3(0.949, 0.639, 0.227);
       const vec3 FLAME_TIP = vec3(0.910, 0.408, 0.290);
-      const vec3 SMOKE = vec3(0.400, 0.388, 0.537);
+      const vec3 SMOKE = vec3(0.200, 0.192, 0.290);
 
       const float SPEED = 40.0;
       const float JET_ON = 1.0;
