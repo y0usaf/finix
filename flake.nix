@@ -37167,6 +37167,18 @@
         "plugins/ui-menu/snippets/yorha-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-bot-answer-bubbles.css";
         "plugins/ui-menu/snippets/yorha-bot-you.css" = "${flakeInputs.tern-ozette}/yorha-bot-you.css";
         "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
+        "plugins/ui-menu/snippets/grok.css" = "${flakeInputs.tern-ozette}/grok.css";
+        "plugins/ui-menu/snippets/grok-avatars.css" = "${flakeInputs.tern-ozette}/grok-avatars.css";
+        "plugins/ui-menu/grok-bots/lloyd.png" = "${flakeInputs.tern-ozette}/grok-bots/lloyd.png";
+        "plugins/ui-menu/grok-bots/sol.png" = "${flakeInputs.tern-ozette}/grok-bots/sol.png";
+        "plugins/ui-menu/grok-bots/random.png" = "${flakeInputs.tern-ozette}/grok-bots/random.png";
+        "plugins/ui-menu/grok-bots/cu.png" = "${flakeInputs.tern-ozette}/grok-bots/cu.png";
+        "plugins/ui-menu/grok-bots/bao.png" = "${flakeInputs.tern-ozette}/grok-bots/bao.png";
+        "plugins/ui-menu/grok-bots/regal.png" = "${flakeInputs.tern-ozette}/grok-bots/regal.png";
+        "plugins/ui-menu/snippets/grok-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-answer-bubbles.css";
+        "plugins/ui-menu/snippets/grok-user-bubbles.css" = "${flakeInputs.tern-ozette}/grok-user-bubbles.css";
+        "plugins/ui-menu/snippets/grok-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-bot-answer-bubbles.css";
+        "plugins/ui-menu/snippets/grok-bot-you.css" = "${flakeInputs.tern-ozette}/grok-bot-you.css";
         "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
         "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource settings_data);
       };
@@ -38033,6 +38045,19 @@
           (field "requires" (table [(str "yorha")]))
         ]))
         (rows (table [
+          (field "id" (str "grok"))
+          (field "label" (str "Grok"))
+          (field "group" (str "Look layers"))
+          (field "default" false)
+          (field "layer" true)
+        ]))
+        (rows (table [
+          (field "id" (str "grok-avatars"))
+          (field "label" (str "Grok bot avatars"))
+          (field "parent" (str "grok"))
+          (field "requires" (table [(str "grok") (str "bot-layout")]))
+        ]))
+        (rows (table [
           (field "id" (str "scratch"))
           (field "label" (str "Unset all"))
           (field "group" (str "Look layers"))
@@ -38298,6 +38323,22 @@
         (rows (table [
           (field "id" (str "yorha-bot-you"))
           (field "requires" (table [(str "yorha") (str "bot-you")]))
+        ]))
+        (rows (table [
+          (field "id" (str "grok-answer-bubbles"))
+          (field "requires" (table [(str "grok") (str "answer-bubbles")]))
+        ]))
+        (rows (table [
+          (field "id" (str "grok-user-bubbles"))
+          (field "requires" (table [(str "grok") (str "answer-bubbles")]))
+        ]))
+        (rows (table [
+          (field "id" (str "grok-bot-answer-bubbles"))
+          (field "requires" (table [(str "grok") (str "bot-answer-bubbles")]))
+        ]))
+        (rows (table [
+          (field "id" (str "grok-bot-you"))
+          (field "requires" (table [(str "grok") (str "bot-you")]))
         ]))
       ])))
       blank
@@ -38595,6 +38636,7 @@
         (table [(field "label" (str "Mini")) (field "layers" (table [(str "mini")]))])
         (table [(field "label" (str "Ozette")) (field "layers" (table [(str "ozette") (str "ozette-motion") (str "ozette-cmus")]))])
         (table [(field "label" (str "YoRHa")) (field "layers" (table [(str "yorha")]))])
+        (table [(field "label" (str "Grok")) (field "layers" (table [(str "grok")]))])
         (table [(field "label" (str "Unset all")) (field "layers" (table [(str "scratch")]))])
         (table [(field "label" (str "None")) (field "layers" (table []))])
       ])))
