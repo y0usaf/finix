@@ -1060,27 +1060,6 @@
       ompSecret = pkgs.writeShellScriptBin "omp-secret" ''
         PATH=${lib.makeBinPath [pkgs.age]}:$PATH exec ${pkgs.bun}/bin/bun ${secrets}/omp-secret.ts "$@"
       '';
-      ompUntil = pkgs.writeShellApplication {
-        name = "omp-until";
-        runtimeInputs = [pkgs.coreutils];
-        text = ''
-          [ $# -ge 2 ] || { echo "usage: omp-until DIR OMP [ARGS...]" >&2; exit 2; }
-          dir=$1
-          shift
-          now=$(date +%s)
-          until=
-          for overlay in "$dir"/config.until-*.yml; do
-            [ -f "$overlay" ] || continue
-            stamp=''${overlay##*/config.until-}
-            end=$(date -d "''${stamp%.yml}" +%s) || { echo "omp-until: $overlay: not a date after config.until-" >&2; exit 2; }
-            [ "$end" -gt "$now" ] || continue
-            set -- "$@" --config "$overlay"
-            if [ -z "$until" ] || [ "$end" -lt "$until" ]; then until=$end; fi
-          done
-          export OMP_UNTIL="''${until:+''${until}000}"
-          exec "$@"
-        '';
-      };
     in {
       user.persist.directories = [
         ".omp"
@@ -1088,8 +1067,7 @@
         ".local/state/omp-secrets"
       ];
 
-      environment.systemPackages = [pkgs.jq pkgs.age ompSecret ompUntil];
-      finit.services.omp-botd.path = [ompUntil];
+      environment.systemPackages = [pkgs.jq pkgs.age ompSecret];
 
       user.files =
         lib.mapAttrs' (name: source: lib.nameValuePair ".omp/agent/ext/${name}" {source = "${source}";}) extLinks
@@ -6850,7 +6828,7 @@
     };
     bot_answer_bubbles_data = [
       {
-        select = ":root:not(#ob) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#ob) [data-role='omp.bot.xmsg']";
+        select = ":root:not(#ob) [data-role='omp.bot.reply'] > [data-role^='omp.assistant']";
         set = [
           ["align-self" "flex-start"]
           ["max-width" "min(80%, 560px)"]
@@ -6865,7 +6843,7 @@
 
     bot_answer_frost_data = [
       {
-        select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#s0):not(#s1) [data-role='omp.bot.xmsg']";
+        select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > [data-role^='omp.assistant']";
         set = [
           ["background" "var(--modal-bg)"]
           ["-webkit-backdrop-filter" "var(--frost)"]
@@ -6897,86 +6875,6 @@
         select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options']";
         set = [
           ["margin-top" "8px"]
-          ["--ask-mark" "20px"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item::before";
-        set = [
-          ["display" "grid"]
-          ["place-items" "center"]
-          ["left" "12px"]
-          ["font" "600 11.5px/1 var(--mono, ui-monospace, monospace)"]
-          ["color" "var(--t2)"]
-          ["background" "none"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:is([data-tone='accent'], [data-tone='success'])::before";
-        set = [
-          ["color" "light-dark(#fff, #0b0b0c)"]
-          ["background" "var(--t1)"]
-          ["box-shadow" "none"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item .sf-item-ic";
-        set = [
-          ["display" "none"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(1)::before";
-        set = [
-          ["content" "'1'"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(2)::before";
-        set = [
-          ["content" "'2'"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(3)::before";
-        set = [
-          ["content" "'3'"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(4)::before";
-        set = [
-          ["content" "'4'"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(5)::before";
-        set = [
-          ["content" "'5'"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(6)::before";
-        set = [
-          ["content" "'6'"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(7)::before";
-        set = [
-          ["content" "'7'"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(8)::before";
-        set = [
-          ["content" "'8'"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(9)::before";
-        set = [
-          ["content" "'9'"]
         ];
       }
     ];
@@ -7473,7 +7371,7 @@
         ];
       }
       {
-        select = "[data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']";
+        select = "[data-role='omp.bot.event.avatar']";
         set = [
           ["--p" "1px"]
           ["flex" "none"]
@@ -7486,19 +7384,19 @@
         ];
       }
       {
-        select = ":is([data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']) *";
+        select = ":is([data-role='omp.bot.event.avatar']) *";
         set = [
           ["pointer-events" "none"]
         ];
       }
       {
-        select = ":is([data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']) :is([data-role='omp.bot.emote'], [data-role='omp.bot.chao.idle'] > [data-role='omp.bot.line']:empty)";
+        select = ":is([data-role='omp.bot.event.avatar']) :is([data-role='omp.bot.emote'], [data-role='omp.bot.chao.idle'] > [data-role='omp.bot.line']:empty)";
         set = [
           ["display" "none !important"]
         ];
       }
       {
-        select = ":is([data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']) :is([data-role^='omp.bot.glyph.'], [data-role='omp.bot.blink'] [data-role^='omp.bot.px.'], [data-role^='omp.bot.chao.'])";
+        select = ":is([data-role='omp.bot.event.avatar']) :is([data-role^='omp.bot.glyph.'], [data-role='omp.bot.blink'] [data-role^='omp.bot.px.'], [data-role^='omp.bot.chao.'])";
         set = [
           ["animation" "none !important"]
         ];
@@ -7575,7 +7473,7 @@
         ];
       }
       {
-        select = "[data-role='omp.bot.role'], [data-role='omp.bot.say'], [data-role='omp.bot.steps']";
+        select = "[data-role='omp.bot.say'], [data-role='omp.bot.steps']";
         set = [
           ["position" "relative"]
           ["opacity" "0.58"]
@@ -7594,115 +7492,6 @@
           ["font-size" "1.5em"]
           ["line-height" "1.3"]
           ["font-weight" "600"]
-        ];
-      }
-    ];
-    bot_pages_data = [
-      {
-        select = "[data-role='omp.bot.xpage']";
-        set = [
-          ["width" "min(100%, 960px)"]
-          ["margin" "0 auto"]
-          ["padding" "0 16px 24px"]
-          ["font-family" "var(--sans)"]
-        ];
-      }
-      {
-        select = "[data-role='omp.bot.xtop']";
-        set = [
-          ["padding" "10px 0 4px"]
-        ];
-      }
-      {
-        select = "[data-role='omp.bot.xhead']";
-        set = [
-          ["padding" "7.5px 13.5px 7.5px 7.5px"]
-          ["border-radius" "calc(var(--r-chip, 6px) * 999)"]
-          ["background" "var(--raise, var(--card))"]
-          ["box-shadow" "0 0 0 0.5px var(--l2), 0 4px 12px -1px rgb(0 0 0 / 8%)"]
-          ["font-size" "14px"]
-          ["font-weight" "500"]
-          ["color" "var(--t1)"]
-        ];
-      }
-      {
-        select = "[data-role='omp.bot.xarrow']";
-        set = [
-          ["margin" "0 0 0 4px"]
-          ["color" "var(--t4)"]
-        ];
-      }
-      {
-        select = "[data-role='omp.bot.xwho']";
-        set = [
-          ["max-width" "22ch"]
-        ];
-      }
-      {
-        select = "[data-role^='omp.bot.xrun.']";
-        set = [
-          ["align-self" "stretch"]
-          ["margin-top" "12px"]
-        ];
-      }
-      {
-        select = "[data-role='omp.bot.xavatar']";
-        set = [
-          ["margin-bottom" "4px"]
-        ];
-      }
-      {
-        select = "[data-role='omp.bot.xcol']";
-        set = [
-          ["flex" "1"]
-          ["min-width" "0"]
-          ["align-items" "flex-start"]
-        ];
-      }
-      {
-        select = "[data-role='omp.bot.xname']";
-        set = [
-          ["max-width" "100%"]
-          ["margin" "0 0 4px 12px"]
-          ["font-size" "13px"]
-          ["line-height" "18px"]
-          ["color" "light-dark(color-mix(in oklab, var(--t) 72%, #000), color-mix(in oklab, var(--t) 85%, #fff))"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.xmsg'] + [data-role='omp.bot.xmsg']";
-        set = [
-          ["margin-top" "4px"]
-        ];
-      }
-      {
-        select = "[data-role='omp.bot.xfoot']";
-        set = [
-          ["align-self" "stretch"]
-          ["width" "100%"]
-          ["padding" "12px 0"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.xclose']";
-        set = [
-          ["align-self" "center"]
-          ["height" "auto"]
-          ["margin" "0 auto"]
-          ["padding" "8px 16px"]
-          ["border-radius" "calc(var(--r-chip, 6px) * 999)"]
-          ["background" "rgb(from var(--t1) r g b / 6%)"]
-          ["box-shadow" "none"]
-          ["color" "var(--t1)"]
-          ["font-size" "14px"]
-          ["line-height" "20px"]
-          ["transition" "background-color 0.12s ease-out"]
-        ];
-      }
-      {
-        select = ":root:not(#ob) [data-role='omp.bot.xclose']:hover";
-        set = [
-          ["background" "rgb(from var(--t1) r g b / 10%)"]
         ];
       }
     ];
@@ -7915,19 +7704,19 @@
     ];
     bot_text_data = [
       {
-        select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'], [data-role='omp.bot.xmsg']) .md";
+        select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md";
         set = [
           ["line-height" "1.45"]
         ];
       }
       {
-        select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'], [data-role='omp.bot.xmsg']) .md > :first-child";
+        select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md > :first-child";
         set = [
           ["margin-top" "0"]
         ];
       }
       {
-        select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'], [data-role='omp.bot.xmsg']) .md > :last-child";
+        select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md > :last-child";
         set = [
           ["margin-bottom" "0"]
         ];
@@ -7935,7 +7724,7 @@
     ];
     bot_time_data = [
       {
-        select = "[data-role='omp.bot.time'], [data-role='omp.bot.xtime']";
+        select = "[data-role='omp.bot.time']";
         set = [
           ["align-self" "stretch"]
           ["margin" "-2px 0 -8px"]
@@ -7944,12 +7733,6 @@
           ["line-height" "16px"]
           ["color" "var(--t2)"]
           ["font-family" "var(--sans)"]
-        ];
-      }
-      {
-        select = "[data-role='omp.bot.xtime']";
-        set = [
-          ["margin" "14px 0 -4px"]
         ];
       }
       {
@@ -7962,7 +7745,7 @@
     ];
     bot_tints_data = [
       {
-        select = "[data-role^='omp.bot.chat.'], [data-role^='omp.bot.hero.'], [data-role^='omp.bot.top.'], [data-role^='omp.bot.eventbox.'], [data-role^='omp.bot.xrun.'], [data-role^='omp.bot.xface.']";
+        select = "[data-role^='omp.bot.chat.'], [data-role^='omp.bot.hero.'], [data-role^='omp.bot.top.'], [data-role^='omp.bot.eventbox.']";
         set = [
           ["--t" "#8f6bff"]
           ["--p" "2px"]
@@ -8080,16 +7863,6 @@
           ["letter-spacing" "2.5px"]
           ["text-transform" "uppercase"]
           ["color" "var(--ink)"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) [data-role^='omp.bot.top.'] [data-role='omp.bot.role']";
-        set = [
-          ["font" "400 11px/16px var(--sans)"]
-          ["letter-spacing" "1.5px"]
-          ["text-transform" "uppercase"]
-          ["opacity" "1"]
-          ["color" "var(--t3)"]
         ];
       }
       {
@@ -37117,7 +36890,6 @@
         "plugins/ui-menu/snippets/bot-jobs.css" = stylesheet "bot-jobs.css" bot_jobs_data;
         "plugins/ui-menu/snippets/bot-layout.css" = stylesheet "bot-layout.css" bot_layout_data;
         "plugins/ui-menu/snippets/bot-names.css" = stylesheet "bot-names.css" bot_names_data;
-        "plugins/ui-menu/snippets/bot-pages.css" = stylesheet "bot-pages.css" bot_pages_data;
         "plugins/ui-menu/snippets/bot-rail.css" = stylesheet "bot-rail.css" bot_rail_data;
         "plugins/ui-menu/snippets/bot-spacing.css" = stylesheet "bot-spacing.css" bot_spacing_data;
         "plugins/ui-menu/snippets/bot-stop.css" = stylesheet "bot-stop.css" bot_stop_data;
@@ -38270,13 +38042,8 @@
           (field "group" (str "omp bots"))
         ]))
         (rows (table [
-          (field "id" (str "bot-pages"))
-          (field "label" (str "bot exchange pages"))
-          (field "group" (str "omp bots"))
-        ]))
-        (rows (table [
           (field "id" (str "bot-ask"))
-          (field "label" (str "numbered question answers"))
+          (field "label" (str "question cards"))
           (field "group" (str "omp bots"))
         ]))
         (rows (table [
@@ -41853,7 +41620,6 @@
         bot_jobs_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-jobs.data.nix";
         bot_layout_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-layout.data.nix";
         bot_names_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-names.data.nix";
-        bot_pages_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-pages.data.nix";
         bot_rail_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-rail.data.nix";
         bot_spacing_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-spacing.data.nix";
         bot_stop_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-stop.data.nix";
