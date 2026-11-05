@@ -31372,6 +31372,31 @@
                     <string>${fonts.emoji.name}</string>
                   </patelt>
                 </pattern>
+                <pattern>
+                  <patelt name="family">
+                    <string>Quaver Mono</string>
+                  </patelt>
+                </pattern>
+                <pattern>
+                  <patelt name="family">
+                    <string>Quaver Mono Condensed</string>
+                  </patelt>
+                </pattern>
+                <pattern>
+                  <patelt name="family">
+                    <string>m5x7 Mono</string>
+                  </patelt>
+                </pattern>
+                <pattern>
+                  <patelt name="family">
+                    <string>m5x7 Mono Condensed</string>
+                  </patelt>
+                </pattern>
+                <pattern>
+                  <patelt name="family">
+                    <string>Nib</string>
+                  </patelt>
+                </pattern>
               </acceptfont>
             </selectfont>
             <!-- Set main font as default -->
