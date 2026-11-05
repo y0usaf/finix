@@ -655,18 +655,18 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       environment.systemPackages = [
         (pkgs.symlinkJoin {
           name = "autolith-full-access";
-          paths = [flakeInputs.autolith.packages.${pkgs.stdenv.hostPlatform.system}.default];
+          paths = [inputPackages.autolith.default];
           nativeBuildInputs = [pkgs.makeWrapper];
           postBuild = ''
             wrapProgram "$out/bin/autolith" --add-flags "--permissions full"
           '';
-          meta = flakeInputs.autolith.packages.${pkgs.stdenv.hostPlatform.system}.default.meta // {mainProgram = "autolith";};
+          meta = inputPackages.autolith.default.meta // {mainProgram = "autolith";};
         })
       ];
 
@@ -807,12 +807,8 @@
         ".codex-workspaces"
       ];
     };
-    ai_crest = {
-      pkgs,
-      flakeInputs,
-      ...
-    }: let
-      crest = flakeInputs.crest.packages.${pkgs.stdenv.hostPlatform.system};
+    ai_crest = {inputPackages, ...}: let
+      crest = inputPackages.crest;
     in {
       user.persist.directories = [
         ".local/state/ouro"
@@ -852,10 +848,10 @@
     ai_donsetch = {
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: let
-      donsetch = flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.donsetch;
+      donsetch = inputPackages.pi-donsetch.donsetch;
     in {
       user.persist.directories = [".cache/donsetch"];
 
@@ -875,15 +871,14 @@
     };
     ai_fx = {
       config,
-      pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       user.persist.directories = [
         ".fx"
         ".omfx"
       ];
-      environment.systemPackages = [flakeInputs.oh-my-fx.packages.${pkgs.stdenv.hostPlatform.system}.default];
+      environment.systemPackages = [inputPackages.oh-my-fx.default];
 
       user.files = {
         ".fx/AGENTS.md" = {
@@ -937,11 +932,11 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: let
       cfg = config.user.dev.nacre;
-      nacre = flakeInputs.nacre.packages.${pkgs.stdenv.hostPlatform.system};
+      nacre = inputPackages.nacre;
       userName = config.user.name;
       user = config.users.users.${userName};
       runtimeDir = "/run/user/${toString user.uid}";
@@ -1029,6 +1024,7 @@
       lib,
       pkgs,
       flakeInputs,
+      inputPackages,
       generators,
       ...
     }: let
@@ -1042,7 +1038,7 @@
       extLinks =
         lib.genAttrs ["pi-chronobreak" "pi-recap" "omp-bot"] (name: "${flakeInputs.${name}}")
         // {
-          pi-donsetch = "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}";
+          pi-donsetch = "${inputPackages.pi-donsetch.default}";
           "code-mode.ts" = generators.sourceFile "code-mode.ts" (generators.ts.render (code_mode_data generators.ts));
           "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts));
           "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
@@ -1192,6 +1188,7 @@
       lib,
       pkgs,
       flakeInputs,
+      inputPackages,
       generators,
       ...
     }: let
@@ -1333,7 +1330,7 @@
             # Box sessions' ompd jobs (omp-bot's omp/ompd.ts, which starts an ompd in the box), kept on the host so
             # a job's record and log outlive a box restart and a cut-off job is reported instead of forgotten.
             ompdJobsDir = "${state}/ompd-jobs";
-            inherit (flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}) omp;
+            inherit (inputPackages.oh-my-pi) omp;
           };
           modules = [
             {nixpkgs.pkgs = pkgs;}
@@ -1486,7 +1483,7 @@
         inherit user;
         inherit shares;
         inherit generators;
-        omp = flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
+        omp = inputPackages.oh-my-pi.omp;
       };
 
       selftestBox = mkBox {
@@ -1722,7 +1719,7 @@
           log = true;
           environment = {
             GATEWAY_KEY_FILE = "${home}/Tokens/AI_GATEWAY_API_KEY.txt";
-            CREST_AUTH = "${flakeInputs.crest.packages.${pkgs.stdenv.hostPlatform.system}.crest-auth}/bin/crest-auth";
+            CREST_AUTH = "${inputPackages.crest.crest-auth}/bin/crest-auth";
             HOME = home;
           };
           command = "${proxy}/bin/omp-gateway-proxy";
@@ -1744,7 +1741,7 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: let
       cfg = config.user.dev.paseo;
@@ -1780,7 +1777,7 @@
       };
 
       config = {
-        environment.systemPackages = [flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default];
+        environment.systemPackages = [inputPackages.paseo.default];
 
         finix.persistence.homeServices = ["paseo"];
         user.persist.directories = [".paseo"];
@@ -1805,7 +1802,7 @@
               name=$(printf '%s' "$name" | tr '[:lower:]' '[:upper:]' | tr -c 'A-Z0-9_' '_')
               export "$name"="$(cat "$f")"
             done
-            exec ${flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/paseo-server ${lib.optionalString (!cfg.relay.enable) "--no-relay"}
+            exec ${inputPackages.paseo.default}/bin/paseo-server ${lib.optionalString (!cfg.relay.enable) "--no-relay"}
           ''}";
           environment =
             {
@@ -1833,23 +1830,19 @@
         };
       };
     };
-    ai_phi = {
-      pkgs,
-      flakeInputs,
-      ...
-    }: {
+    ai_phi = {inputPackages, ...}: {
       user.persist.directories = [
         ".config/phi"
         ".local/share/phi"
         ".phi"
       ];
-      environment.systemPackages = [flakeInputs.phi.packages.${pkgs.stdenv.hostPlatform.system}.default];
+      environment.systemPackages = [inputPackages.phi.default];
     };
     ai_pi = {
       config,
       lib,
-      pkgs,
       flakeInputs,
+      inputPackages,
       generators,
       ...
     }: let
@@ -2009,7 +2002,7 @@
           ".local/state/pi-harness"
           ".pi"
         ];
-        environment.systemPackages = [flakeInputs.pi-harness.packages.${pkgs.stdenv.hostPlatform.system}.default];
+        environment.systemPackages = [inputPackages.pi-harness.default];
         environment.variables.PI_SKIP_VERSION_CHECK = "1";
         user.files = {
           ".pi/agent/settings.json" = {
@@ -2021,7 +2014,7 @@
                 "${flakeInputs.pi-rlm}"
                 "${flakeInputs.pi-recap}"
                 "${flakeInputs.pi-ampersand}"
-                "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}"
+                "${inputPackages.pi-donsetch.default}"
               ];
               extensions = ["${generators.sourceFile "crest-auth.ts" (generators.ts.render (pi_crest_auth_data generators.ts))}"];
               enableInstallTelemetry = false;
@@ -2067,12 +2060,8 @@
       user.persist.directories = [".local/share/rtk"];
       environment.systemPackages = [pkgs.rtk];
     };
-    ai_silva = {
-      pkgs,
-      flakeInputs,
-      ...
-    }: let
-      silva = flakeInputs.silva.packages.${pkgs.stdenv.hostPlatform.system};
+    ai_silva = {inputPackages, ...}: let
+      silva = inputPackages.silva;
     in {
       user.persist.directories = [
         ".config/silva"
@@ -2839,7 +2828,7 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: let
       inherit (bolo_data) model vocabulary;
@@ -2970,12 +2959,12 @@
         '';
       };
 
-      inherit (flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system}) bolo;
+      inherit (inputPackages.bolo) bolo;
 
       bolod = pkgs.symlinkJoin {
         name = "bolod-wrapped";
         paths = [
-          (flakeInputs.bolo.packages.${pkgs.stdenv.hostPlatform.system}.bolod.override {
+          (inputPackages.bolo.bolod.override {
             sherpa-onnx = sherpaOnnxGpu;
           })
         ];
@@ -3606,27 +3595,23 @@
         };
       };
     };
-    apps_leverage = {
-      pkgs,
-      flakeInputs,
-      ...
-    }: {
+    apps_leverage = {inputPackages, ...}: {
       user.persist.directories = [
         ".config/Leverage"
         ".config/leverage"
       ];
-      environment.systemPackages = [flakeInputs.leverage.packages.${pkgs.stdenv.hostPlatform.system}.default];
+      environment.systemPackages = [inputPackages.leverage.default];
     };
     apps_mado = {
       config,
       lib,
-      pkgs,
       flakeInputs,
+      inputPackages,
       ...
     }: {
       config = lib.mkIf config.hardware.nvidia.enable {
         environment.systemPackages = let
-          mado = flakeInputs.mado.packages.${pkgs.stdenv.hostPlatform.system};
+          mado = inputPackages.mado;
         in [mado.mado-send mado.mado-timing];
         user.ui.tomoe.extraConfig =
           flakeInputs.mado.lib.tomoe
@@ -3648,7 +3633,7 @@
     };
     apps_obs = {
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       user.persist.directories = [".config/obs-studio"];
@@ -3663,8 +3648,8 @@
                 pkgs.obs-studio-plugins.obs-aitum-multistream
                 pkgs.obs-studio-plugins.obs-vertical-canvas
                 pkgs.obs-studio-plugins.obs-scale-to-sound
-                flakeInputs.obs-image-reaction.outputs.packages.${pkgs.stdenv.hostPlatform.system}.default
-                flakeInputs.obs-twitch-tts.outputs.packages.${pkgs.stdenv.hostPlatform.system}.default
+                inputPackages.obs-image-reaction.default
+                inputPackages.obs-twitch-tts.default
               ];
             })
           ];
@@ -6623,7 +6608,7 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       generators,
       ...
     }: let
@@ -6763,7 +6748,7 @@
         "${dir}/mcp.json" = {
           generator = lib.generators.toJSON {};
           value.mcpServers.donsetch = {
-            command = lib.getExe flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.donsetch;
+            command = lib.getExe inputPackages.pi-donsetch.donsetch;
             args = ["mcp"];
           };
           value.mcpServers.jev = {
@@ -6777,7 +6762,7 @@
         ".local/state/boar"
         ".local/state/boar-rs"
       ];
-      environment.systemPackages = [flakeInputs.boar-rs.packages.${pkgs.stdenv.hostPlatform.system}.default];
+      environment.systemPackages = [inputPackages.boar-rs.default];
       user.files =
         agentFiles ".local/state/boar/agent"
         // agentFiles ".local/state/boar-rs/agent";
@@ -8808,7 +8793,7 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       generators,
       ...
     }: {
@@ -8828,7 +8813,7 @@
       };
       environment.systemPackages = [
         (pkgs.writeShellScriptBin "codex" ''
-          exec ${lib.getExe flakeInputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default} \
+          exec ${lib.getExe inputPackages.codex-cli-nix.default} \
             --dangerously-bypass-approvals-and-sandbox \
             --config ${lib.escapeShellArg "developer_instructions=${builtins.toJSON config.user.dev.prompts.shared}"} \
             "$@"
@@ -9322,7 +9307,7 @@
     };
     core_packages = {
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       environment.systemPackages = [
@@ -9335,7 +9320,7 @@
         pkgs.lm_sensors
         pkgs.fzf
         pkgs.ripgrep
-        flakeInputs.strictix.packages.${pkgs.stdenv.hostPlatform.system}.default
+        inputPackages.strictix.default
         pkgs.alejandra
         pkgs.statix
         pkgs.deadnix
@@ -10992,7 +10977,7 @@
       '';
     desktop_packages = {
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       environment.systemPackages = [
@@ -11007,19 +10992,19 @@
         pkgs.ffmpeg
         pkgs.vlc
         pkgs.imv
-        flakeInputs.emeraldian.packages.${pkgs.stdenv.hostPlatform.system}.default
+        inputPackages.emeraldian.default
       ];
     };
     desktop_session = {
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: let
       userName = config.user.name;
 
-      tomoePkg = flakeInputs.tomoe.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      tomoePkg = inputPackages.tomoe.default;
     in {
       finit.services.seatd.runlevels = lib.mkForce "234";
 
@@ -11173,16 +11158,16 @@
     };
     dev_packages = {
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       environment.systemPackages = [
-        (pkgs.lib.hiPrio flakeInputs.pi.packages.${pkgs.stdenv.hostPlatform.system}.default)
-        flakeInputs.durapi.packages.${pkgs.stdenv.hostPlatform.system}.default
+        (pkgs.lib.hiPrio inputPackages.pi.default)
+        inputPackages.durapi.default
         pkgs.texliveFull
         pkgs.texstudio
         pkgs.tectonic
-        flakeInputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.desktop
+        inputPackages.paseo.desktop
       ];
     };
     dev_python = {
@@ -11542,6 +11527,7 @@
       lib,
       pkgs,
       flakeInputs,
+      inputPackages,
       generators,
       ...
     }: {
@@ -11566,13 +11552,13 @@
              [ "''${TERM:-}" != linux ] && [ -t 0 ] && [ -t 1 ]; then
             case "$(${pkgs.coreutils}/bin/readlink /proc/self/fd/0)" in
               /dev/tty[0-9]*) ;;
-              *) ${flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/ekko attach ;;
+              *) ${inputPackages.ekko.default}/bin/ekko attach ;;
             esac
           fi
         '';
       };
 
-      environment.systemPackages = [flakeInputs.ekko.packages.${pkgs.stdenv.hostPlatform.system}.default];
+      environment.systemPackages = [inputPackages.ekko.default];
     };
     ekko_data = "/home/y0usaf/dev/developing/tern-ekko";
     elden_ring = {
@@ -15067,8 +15053,7 @@
     };
     grok_bot = {
       config,
-      pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       user.persist.directories = [
@@ -15078,7 +15063,7 @@
         ".local/state/silvabot"
       ];
       environment.systemPackages = [
-        (flakeInputs.grok-bot.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+        (inputPackages.grok-bot.default.override {
           commandLineArgs = ["--force-device-scale-factor=${builtins.toString config.user.ui.gtk.scale}"];
         })
       ];
@@ -17813,11 +17798,11 @@
     ]);
     linear_cli = {
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       environment.systemPackages = [
-        flakeInputs.linear-cli.packages.${pkgs.stdenv.hostPlatform.system}.linear
+        inputPackages.linear-cli.linear
         pkgs.libsecret
       ];
 
@@ -18835,13 +18820,14 @@
       '';
     modules_lint = {
       inputs,
+      inputPackages,
       lib,
       pkgs,
       hosts,
       droid,
       generators,
     }: let
-      strictix = lib.getExe' inputs.strictix.packages.${pkgs.stdenv.hostPlatform.system}.default "strictix";
+      strictix = lib.getExe' inputPackages.strictix.default "strictix";
 
       schema = name: docs:
         pkgs.writeText "${name}-options.json" (builtins.toJSON {
@@ -19012,7 +18998,7 @@
       patched = {
         "luajit-opcodes.patch" = pkgs.fetchFromGitHub luajit_data;
         "aquamarine-gamescope.patch" = inputs.steam-frame-nixos.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.aquamarine.src;
-        "rush-login-command.patch" = inputs.rush.packages.${pkgs.stdenv.hostPlatform.system}.default.src;
+        "rush-login-command.patch" = inputPackages.rush.default.src;
       };
 
       osc = lib.mapAttrs' (name: scheme:
@@ -19355,7 +19341,7 @@
           singleton-attrset.exempt = ["flake.nix" ".data.nix"];
           singleton-list.exempt = ["flake.nix" ".data.nix"];
           templated-bindings.exempt = ["flake.nix" ".data.nix"];
-          unformatted-file.command = "${lib.getExe inputs.alejandra.packages.${pkgs.stdenv.hostPlatform.system}.default} --quiet -";
+          unformatted-file.command = "${lib.getExe inputPackages.alejandra.default} --quiet -";
         };
         schemas = {
           "modules/hosts/android-phone" = schema "droid" (lib.optionAttrSetToDocList droid.options);
@@ -19505,6 +19491,7 @@
     modules_outputs = inputs: let
       system = "x86_64-linux";
       inherit (pkgs) lib;
+      inputPackages = builtins.mapAttrs (_: input: input.packages.${system} or {}) inputs;
 
       mkPkgs = cudaSupport:
         import (toString inputs.nixpkgs) {
@@ -19517,11 +19504,11 @@
           overlays = [
             inputs.claude-code-nix.overlays.default
             (_: _: {
-              rush = inputs.rush.packages.${system}.default.overrideAttrs (old: {
+              rush = inputPackages.rush.default.overrideAttrs (old: {
                 patches = (old.patches or []) ++ [(generators.sourceFile "rush-login-command.patch" (generators.patch.render (rush_login_command_data generators.patch)))];
               });
-              monstar = inputs.monstar.packages.${system}.default;
-              ash = inputs.ash.packages.${system}.default;
+              monstar = inputPackages.monstar.default;
+              ash = inputPackages.ash.default;
             })
             (_: prev: {
               obs-studio-plugins =
@@ -19550,6 +19537,7 @@
           inherit lib;
           specialArgs = {
             flakeInputs = inputs;
+            inherit inputPackages;
             inherit generators;
           };
           modules =
@@ -19857,7 +19845,7 @@
         modules = [nix_on_droid];
       };
 
-      lint = modules_lint {inherit inputs lib pkgs hosts droid generators;};
+      lint = modules_lint {inherit inputs inputPackages lib pkgs hosts droid generators;};
     in {
       nixosConfigurations = hosts // {y0usaf-server-finix = hosts.y0usaf-server;};
 
@@ -19905,7 +19893,7 @@
         drift = modules_drift {inherit lib pkgs hosts;};
         inherit (hosts.y0usaf-desktop.config.system.build) chatgpt p4g-setup;
         omp-box-selftest = hosts.y0usaf-desktop.config.system.build.ompBoxSelftest;
-        tomoe = inputs.tomoe.packages.${system}.default;
+        tomoe = inputPackages.tomoe.default;
         glsl-gate = lint.glslGate;
       };
 
@@ -19916,7 +19904,7 @@
           inherit (lint) codegen;
         };
 
-      formatter.${system} = inputs.alejandra.packages.${system}.default;
+      formatter.${system} = inputPackages.alejandra.default;
     };
     modules_tailnet = {
       addresses = {
@@ -20175,7 +20163,7 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       user.persist.directories = [
@@ -20218,7 +20206,7 @@
                 pkgs.vimPlugins.lualine-nvim
                 pkgs.vimPlugins.cyberdream-nvim
                 pkgs.vimPlugins.toggleterm-nvim
-                flakeInputs.crest.packages.${pkgs.stdenv.hostPlatform.system}.crest-nvim
+                inputPackages.crest.crest-nvim
               ];
               opt = [];
             };
@@ -20753,12 +20741,13 @@
       lib,
       pkgs,
       flakeInputs,
+      inputPackages,
       ...
     }: let
       userName = config.user.name;
       user = config.users.users.${userName};
       runtimeDir = "/run/user/${toString user.uid}";
-      omp = flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
+      omp = inputPackages.oh-my-pi.omp;
       src = flakeInputs.omp-bot;
       tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
       persistentHome = "/persist/home/${userName}";
@@ -21619,14 +21608,14 @@
     omp_optchat = {
       config,
       pkgs,
-      flakeInputs,
+      inputPackages,
       generators,
       ...
     }: let
       user = config.user.name;
       home = config.users.users.${user}.home;
       dir = "${home}/.local/state/optchat";
-      omp = flakeInputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.omp;
+      omp = inputPackages.oh-my-pi.omp;
 
       service = pkgs.writeShellApplication {
         name = "optchat";
@@ -29363,8 +29352,8 @@
     session_cudaterm = {
       config,
       lib,
-      pkgs,
       flakeInputs,
+      inputPackages,
       ...
     }: {
       imports = [flakeInputs.cudaterm.finixModules.default];
@@ -29376,7 +29365,7 @@
       config.user.ui.cudaterm = {
         inherit (config.hardware.nvidia) enable;
         package = lib.mkIf config.hardware.nvidia.enable (flakeInputs.cudaterm.lib.mkFinixPackage {
-          fontFile = "${flakeInputs.fonts.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/fonts/truetype/DepartureMonoUltraCondensedCompact-Regular.ttf";
+          fontFile = "${inputPackages.fonts.default}/share/fonts/truetype/DepartureMonoUltraCondensedCompact-Regular.ttf";
           fontSize = let
             pixels = config.user.appearance.termFontSize * 96.0 / 72.0;
             grid = 22 * lib.max 1 (builtins.floor (pixels / 22 + 0.5));
@@ -29394,12 +29383,11 @@
     session_cursor = {
       config,
       lib,
-      pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: let
       xcursorSize = 18;
-      cursorPackage = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}.deepin-dark;
+      cursorPackage = inputPackages.cursors.deepin-dark;
     in {
       options.user.appearance.hyprcursorSize = lib.mkOption {
         type = lib.types.int;
@@ -29419,7 +29407,7 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: let
       inherit (config.user.ui) fonts;
@@ -29444,7 +29432,7 @@
 
       config = {
         fonts.packages = [
-          flakeInputs.fonts.packages.${pkgs.stdenv.hostPlatform.system}.default
+          inputPackages.fonts.default
           pkgs.noto-fonts-cjk-sans
           pkgs.noto-fonts-color-emoji
           pkgs.nerd-fonts.symbols-only
@@ -29605,7 +29593,7 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: let
       inherit (config.user.ui.fonts) mainFontName;
@@ -29638,7 +29626,7 @@
           ".config/gtk-3.0/settings.ini" = {
             generator = lib.generators.toINI {};
             value.Settings = {
-              gtk-cursor-theme-name = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}.deepin-dark.xcursorThemeName;
+              gtk-cursor-theme-name = inputPackages.cursors.deepin-dark.xcursorThemeName;
               gtk-cursor-theme-size = "18";
               gtk-font-name = "${mainFontName} 12";
               gtk-xft-antialias = 1;
@@ -29709,7 +29697,7 @@
           ".config/gtk-4.0/settings.ini" = {
             generator = lib.generators.toINI {};
             value.Settings = {
-              gtk-cursor-theme-name = flakeInputs.cursors.packages.${pkgs.stdenv.hostPlatform.system}.deepin-dark.xcursorThemeName;
+              gtk-cursor-theme-name = inputPackages.cursors.deepin-dark.xcursorThemeName;
               gtk-cursor-theme-size = "18";
               gtk-font-name = "${mainFontName} 12";
             };
@@ -29735,7 +29723,7 @@
       config,
       lib,
       pkgs,
-      flakeInputs,
+      inputPackages,
       generators,
       ...
     }: let
@@ -30048,7 +30036,7 @@
         shadow = "#29292859";
       };
 
-      shaderDir = "${flakeInputs.tomoe.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/tomoe/examples/shaders";
+      shaderDir = "${inputPackages.tomoe.default}/share/tomoe/examples/shaders";
 
       shaderWallpaperParameters = {
         shaders = map (entry: lib.take 2 entry ++ [(config.user.theme.apply (lib.last entry))]) [
@@ -35004,12 +34992,12 @@
     };
     tools_git = {
       config,
-      flakeInputs,
+      inputPackages,
       lib,
       pkgs,
       ...
     }: let
-      cleanker = flakeInputs.cleanker.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      cleanker = inputPackages.cleanker.default;
     in {
       environment.systemPackages = [
         pkgs.git
@@ -35037,22 +35025,17 @@
         };
       };
     };
-    tools_iets = {
-      pkgs,
-      flakeInputs,
-      ...
-    }: {
-      environment.systemPackages = [flakeInputs.iets.packages.${pkgs.stdenv.hostPlatform.system}.default];
+    tools_iets = {inputPackages, ...}: {
+      environment.systemPackages = [inputPackages.iets.default];
     };
     tools_nh = {
       config,
       lib,
-      pkgs,
-      flakeInputs,
+      inputPackages,
       ...
     }: {
       environment = {
-        systemPackages = [flakeInputs.nh.packages.${pkgs.stdenv.hostPlatform.system}.default];
+        systemPackages = [inputPackages.nh.default];
         variables.NH_FLAKE = "${config.user.homeDirectory}/finix";
       };
       user.shell.rcExtra = lib.mkAfter ''
@@ -39856,12 +39839,16 @@
         "modules/desktop/apps/bluetooth.nix" = "{\n  pkgs,\n  ...\n}: {\n  environment.systemPackages = [\n    pkgs.blueman\n    pkgs.bluetuith\n  ];\n  user.files.\".config/autostart/blueman.desktop\".source = \"\${pkgs.blueman}/etc/xdg/autostart/blueman.desktop\";\n}\n";
         "modules/desktop/apps/btop.nix" = "{\n  pkgs,\n  ...\n}: {\n  environment.systemPackages = [pkgs.btop];\n  user.files.\".config/btop/btop.conf\".text = ''\n    color_theme = \"TTY\"\n    theme_background = False\n  '';\n}\n";
         "modules/desktop/apps/creative.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/Pinta\"];\n  environment.systemPackages = [\n    pkgs.pinta\n    pkgs.gimp\n  ];\n}\n";
+        "modules/desktop/apps/leverage.nix" = "{\n  inputPackages,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/Leverage\"\n    \".config/leverage\"\n  ];\n  environment.systemPackages = [inputPackages.leverage.default];\n}\n";
         "modules/desktop/apps/qbittorrent.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/qBittorrent\"];\n  environment.systemPackages = [pkgs.qbittorrent];\n}\n";
         "modules/desktop/apps/slack.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist = {\n    directories = [\n      \".config/Slack\"\n      \".config/Slack/IndexedDB\"\n      \".config/Slack/Local Storage\"\n      \".config/Slack/Session Storage\"\n      \".config/Slack/storage\"\n      \".slack\"\n    ];\n    files = [\n      \".config/Slack/Cookies\"\n      \".config/Slack/Cookies-journal\"\n      \".config/Slack/Local State\"\n      \".config/Slack/Network Persistent State\"\n      \".config/Slack/Preferences\"\n      \".config/Slack/TransportSecurity\"\n    ];\n  };\n  environment.systemPackages = [\n    (pkgs.slack.overrideAttrs (old: {\n      postFixup =\n        (old.postFixup or \"\")\n        + ''\n          wrapProgram $out/bin/slack --add-flags \"--disable-remote-fonts\"\n        '';\n    }))\n  ];\n}\n";
         "modules/desktop/apps/stoat-desktop.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/stoat-desktop\"];\n  environment.systemPackages = [pkgs.stoat-desktop];\n}\n";
         "modules/desktop/session/xdg-portals.nix" = "{\n  lib,\n  ...\n}: {\n  user.files = {\n    \".local/share/xdg-desktop-portal/portals/gnome.portal\" = {\n      generator = lib.generators.toINI {};\n      value.portal = {\n        DBusName = \"org.freedesktop.impl.portal.desktop.gnome\";\n        Interfaces = \"org.freedesktop.impl.portal.ScreenCast;org.freedesktop.impl.portal.Screenshot;org.freedesktop.impl.portal.RemoteDesktop;\";\n        UseIn = \"niri;gnome;\";\n      };\n    };\n\n    \".local/share/xdg-desktop-portal/portals/gtk.portal\" = {\n      generator = lib.generators.toINI {};\n      value.portal = {\n        DBusName = \"org.freedesktop.impl.portal.desktop.gtk\";\n        Interfaces = \"org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;org.freedesktop.impl.portal.Settings;\";\n        UseIn = \"niri;gtk;\";\n      };\n    };\n  };\n}\n";
         "modules/dev/ai/amp.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/amp\"\n    \".local/share/amp\"\n  ];\n  environment.systemPackages = [pkgs.amp-cli];\n  environment.variables.AMP_REMOTE_CONTROL_TERMINAL = \"1\";\n}\n";
+        "modules/dev/ai/crest.nix" = "{\n  inputPackages,\n  ...\n}: let\n  crest = inputPackages.crest;\nin {\n  user.persist.directories = [\n    \".local/state/ouro\"\n    \".local/state/guild\"\n    \".local/state/crest-auth\"\n  ];\n  environment.systemPackages = [\n    crest.crest-cli\n    crest.crest-auth\n    crest.crest-web\n    crest.crest-agent\n    crest.crest-cell\n    crest.crest-map\n    crest.crest-mcp\n    crest.crest-mux\n    crest.muntin\n    crest.guild\n    crest.ouro\n    crest.jev-review\n  ];\n}\n";
+        "modules/dev/ai/phi.nix" = "{\n  inputPackages,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/phi\"\n    \".local/share/phi\"\n    \".phi\"\n  ];\n  environment.systemPackages = [inputPackages.phi.default];\n}\n";
         "modules/dev/ai/rtk.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".local/share/rtk\"];\n  environment.systemPackages = [pkgs.rtk];\n}\n";
+        "modules/dev/ai/silva.nix" = "{\n  inputPackages,\n  ...\n}: let\n  silva = inputPackages.silva;\nin {\n  user.persist.directories = [\n    \".config/silva\"\n    \".local/share/silva\"\n    \".local/state/silva\"\n  ];\n  environment.systemPackages = [\n    silva.silva-up\n    silva.tui\n    silva.kitty\n  ];\n}\n";
         "modules/dev/android-tools.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist = {\n    directories = [\n      \".local/share/android\"\n      \".local/share/android/.android\"\n    ];\n    files = [\n      \".local/share/android/adbkey\"\n      \".local/share/android/adbkey.pub\"\n    ];\n  };\n  environment.systemPackages = [pkgs.android-tools];\n}\n";
         "modules/dev/gcloud.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/gcloud\"];\n  environment.systemPackages = [pkgs.google-cloud-sdk];\n}\n";
         "modules/dev/npm.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.files = [\".npmrc\"];\n  environment.systemPackages = [pkgs.nodejs];\n}\n";
@@ -39870,8 +39857,9 @@
         "modules/dev/work/gws.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/gws\"\n    \".config/gws-inscend\"\n  ];\n  environment.systemPackages = [pkgs.gws];\n}\n";
         "modules/gaming/core.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".barony\"\n    \".config/bolt-launcher\"\n    \".config/unity3d\"\n    \".local/share/.Wurst encryption\"\n    \".local/share/.renpy\"\n    \".local/share/Baba_Is_You\"\n    \".local/share/Brotato\"\n    \".local/share/CassetteBeasts\"\n    \".local/share/Celeste\"\n    \".local/share/HallsOfTorment\"\n    \".local/share/Noobs Are Coming (Save)\"\n    \".local/share/PrismLauncher\"\n    \".local/share/Rocket League\"\n    \".local/share/SlayTheSpire2\"\n    \".local/share/Smart Code ltd\"\n    \".local/share/SteamWorld Heist\"\n    \".local/share/Ultrapool\"\n    \".local/share/YourOnlyMoveIsHUSTLE\"\n    \".local/share/aspyr-media\"\n    \".local/share/balatroai\"\n    \".local/share/binding of isaac rebirth\"\n    \".local/share/bolt-launcher\"\n    \".local/share/com.overboy.noobsarecoming\"\n    \".local/share/godot/app_userdata\"\n    \".local/share/hackerpg\"\n    \".local/share/lootplot\"\n    \".local/share/osu\"\n    \".local/share/shapez.io\"\n    \".local/share/shipofharkinian\"\n    \".local/share/skua-wine\"\n    \".local/share/wine\"\n  ];\n  environment.systemPackages = [\n    pkgs.prismlauncher\n    pkgs.gamescope\n    pkgs.gamemode\n    pkgs.protontricks\n    pkgs.dualsensectl\n  ];\n}\n";
         "modules/gaming/emulation.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/Cemu\"\n    \".local/share/Cemu\"\n    \".local/share/dolphin-emu\"\n  ];\n  environment.systemPackages = [\n    pkgs.dolphin-emu\n    pkgs.cemu\n  ];\n}\n";
-        "modules/shell/ekko/config.nix" = "{\n  lib,\n  pkgs,\n  flakeInputs,\n  generators,\n  ...\n}: {\n  user = {\n    persist.directories = [\n      \".cache/ekko\"\n      \".config/ekko\"\n    ];\n\n    dev.prompts.host = [\"`EKKO_INSTANCE` in your environment points at the ekko instance holding the live terminals.\"];\n\n    files.\".config/ekko/init.lisp\".text =\n      lib.removeSuffix \"\\n\" (generators.lisp.render (import ./init.data.nix generators.lisp))\n      + \"\\n\"\n      + builtins.readFile \"\${flakeInputs.ekko}/examples/themes/xp.lisp\"\n      + \"\\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\\n\";\n\n    shell.rcExtra = lib.mkOrder 1600 ''\n      if [ -z \"''\${EKKO_INSTANCE:-}\" ] && [ -z \"''\${EKKO_SESSION_NAME:-}\" ] &&\n         [ -z \"''\${SSH_CONNECTION:-}\" ] && [ -z \"''\${TMUX:-}\" ] &&\n         [ -z \"''\${STY:-}\" ] && [ -z \"''\${TERN_PANE:-}\" ] &&\n         [ \"''\${TERM:-}\" != linux ] && [ -t 0 ] && [ -t 1 ]; then\n        case \"$(\${pkgs.coreutils}/bin/readlink /proc/self/fd/0)\" in\n          /dev/tty[0-9]*) ;;\n          *) \${flakeInputs.ekko.packages.\${pkgs.stdenv.hostPlatform.system}.default}/bin/ekko attach ;;\n        esac\n      fi\n    '';\n  };\n\n  environment.systemPackages = [flakeInputs.ekko.packages.\${pkgs.stdenv.hostPlatform.system}.default];\n\n}\n";
+        "modules/shell/ekko/config.nix" = "{\n  lib,\n  pkgs,\n  flakeInputs,\n  inputPackages,\n  generators,\n  ...\n}: {\n  user = {\n    persist.directories = [\n      \".cache/ekko\"\n      \".config/ekko\"\n    ];\n\n    dev.prompts.host = [\"`EKKO_INSTANCE` in your environment points at the ekko instance holding the live terminals.\"];\n\n    files.\".config/ekko/init.lisp\".text =\n      lib.removeSuffix \"\\n\" (generators.lisp.render (import ./init.data.nix generators.lisp))\n      + \"\\n\"\n      + builtins.readFile \"\${flakeInputs.ekko}/examples/themes/xp.lisp\"\n      + \"\\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\\n\";\n\n    shell.rcExtra = lib.mkOrder 1600 ''\n      if [ -z \"''\${EKKO_INSTANCE:-}\" ] && [ -z \"''\${EKKO_SESSION_NAME:-}\" ] &&\n         [ -z \"''\${SSH_CONNECTION:-}\" ] && [ -z \"''\${TMUX:-}\" ] &&\n         [ -z \"''\${STY:-}\" ] && [ -z \"''\${TERN_PANE:-}\" ] &&\n         [ \"''\${TERM:-}\" != linux ] && [ -t 0 ] && [ -t 1 ]; then\n        case \"$(\${pkgs.coreutils}/bin/readlink /proc/self/fd/0)\" in\n          /dev/tty[0-9]*) ;;\n          *) \${inputPackages.ekko.default}/bin/ekko attach ;;\n        esac\n      fi\n    '';\n  };\n\n  environment.systemPackages = [inputPackages.ekko.default];\n\n}\n";
         "modules/shell/rush.nix" = "{\n  config,\n  lib,\n  pkgs,\n  ...\n}: let\n  aliases =\n    {\n      wget = ''wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"'';\n      lintcheck = \"clear; statix check .; deadnix .\";\n      lintfix = \"clear; statix fix .; deadnix .\";\n      claude = \"claude --allow-dangerously-skip-permissions\";\n      buncodex = \"bunx --bun @openai/codex\";\n      gemini = \"bunx --bun @google/gemini-cli@preview\";\n      \"l.\" = ''lsd -A | grep -E \"^\\.\"'';\n      la = \"lsd -A --color=always --group-dirs=first --icon=always\";\n      ll = \"lsd -l --color=always --group-dirs=first --icon=always\";\n      ls = \"lsd -lA --color=always --group-dirs=first --icon=always\";\n      lt = \"lsd -A --tree --color=always --group-dirs=first --icon=always\";\n      grep = \"rg --color auto\";\n      dir = \"dir --color=auto\";\n      egrep = \"rg --color auto\";\n      fgrep = \"rg -F --color auto\";\n      adb = ''HOME=\"$XDG_DATA_HOME/android\" adb'';\n      pkgs = \"nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i\";\n      pkgcount = \"nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l\";\n      buildtime = ''time (nix build \"$NH_FLAKE#nixosConfigurations.$HOST.config.system.build.toplevel\" --option eval-cache false)'';\n      hmpull = \"git -C \${config.user.homeDirectory}/finix fetch origin && git -C \${config.user.homeDirectory}/finix reset --hard origin/main\";\n    }\n    // lib.optionalAttrs config.hardware.nvidia.enable {\n      nvidia-settings = ''nvidia-settings --config=\"$XDG_CONFIG_HOME/nvidia/settings\"'';\n      gpupower = \"sudo nvidia-smi -pl\";\n    };\nin {\n  options.user.shell.rcExtra = lib.mkOption {\n    type = lib.types.lines;\n    default = \"\";\n    description = ''\n      POSIX-compatible interactive rc fragments contributed by feature\n      modules (python, nh, yt-dlp, ekko, …). Appended after the active\n      shell's own base config.\n    '';\n  };\n\n  config = {\n    environment.etc.\"profile.d/local-bin.sh\".text = ''\n      case \":$PATH:\" in\n        *\":$HOME/.local/bin:\"*) ;;\n        *) export PATH=\"$HOME/.local/bin:$PATH\" ;;\n      esac\n    '';\n\n    user = {\n      shell.rcExtra = lib.mkBefore ''\n        temppkg() {\n          if [ -z \"$1\" ]; then\n            echo \"Usage: temppkg package_name\"\n            return 1\n          fi\n          nix-shell -p \"$1\" --run \"exec $SHELL\"\n        }\n\n        temprun() {\n          if [ -z \"$1\" ]; then\n            echo \"Usage: temprun <package-name> [args...]\"\n            return 1\n          fi\n          local pkg=$1\n          shift\n          nix run \"nixpkgs#$pkg\" -- \"$@\"\n        }\n        export NPM_CONFIG_TMP=\"$XDG_RUNTIME_DIR\"/npm\n      '';\n\n      persist.directories = [\".local/state/rush\"];\n\n      files = {\n        \".config/rush/profile.rush\".text = ''\n          . /etc/profile\n          [ -r \"$HOME/.config/tokens.sh\" ] && . \"$HOME/.config/tokens.sh\"\n        '';\n\n        \".config/rush/config.rush\".text = lib.mkMerge [\n          (lib.mkBefore ''\n\n            rush_prompt() {\n              rush_prompt_status=$?\n              prompt segment --bold --fg green \"$(prompt_pwd)\"\n              if test \"$rush_prompt_status\" = 0; then\n                prompt segment --fg cyan '>'\n              else\n                prompt segment --fg red '>'\n              fi\n              prompt text ' '\n            }\n\n            rush_prompt_right() {\n              prompt segment --fg bright-blue \"$(date +'%Y-%m-%d %H:%M')\"\n            }\n\n            \${lib.concatStringsSep \"\\n\" (lib.mapAttrsToList\n              (k: v: \"alias \${lib.escapeShellArg k}=\${lib.escapeShellArg v}\")\n              aliases)}\n          '')\n          config.user.shell.rcExtra\n        ];\n      };\n    };\n\n    environment.systemPackages = [pkgs.bat];\n\n  };\n}\n";
+        "modules/tools/iets.nix" = "{\n  inputPackages,\n  ...\n}: {\n  environment.systemPackages = [inputPackages.iets.default];\n}\n";
       };
       module_values = [
         {
