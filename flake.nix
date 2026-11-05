@@ -19316,7 +19316,7 @@
         codecs = lib.mapAttrs (_: c: {inherit (c) extensions;} // lib.optionalAttrs (c ? generator) {inherit (c) generator;}) codecs;
         lint = {
           schema = schema "finix" (lib.concatMap (host: lib.optionAttrSetToDocList host.options) (builtins.attrValues hosts));
-          enabled = ["unused-option" "never-enabled-option" "constant-option" "duplicate-definitions" "singleton-attrset" "singleton-list" "templated-bindings" "scattered-documentation" "unformatted-file" "wrapped-prose"];
+          enabled = ["unused-option" "never-enabled-option" "constant-option" "duplicate-definitions" "singleton-attrset" "singleton-list" "templated-bindings" "scattered-documentation" "unformatted-file" "wrapped-prose" "repeated-dynamic-path" "per-system-input-lookup"];
           generated = ["modules/hosts/steam-frame/beat-saber/beatmods.data.nix"];
           constant-option = {
             readers = 3;
@@ -19338,6 +19338,7 @@
             "nixpkgs-librewolf"
           ];
           machine-local-default.allow = ["/home/steamos"];
+          per-system-input-lookup.argument = "inputPackages";
           singleton-attrset.exempt = ["flake.nix" ".data.nix"];
           singleton-list.exempt = ["flake.nix" ".data.nix"];
           templated-bindings.exempt = ["flake.nix" ".data.nix"];
@@ -19491,7 +19492,7 @@
     modules_outputs = inputs: let
       system = "x86_64-linux";
       inherit (pkgs) lib;
-      packagesFor = system: builtins.mapAttrs (_: input: input.packages.${system} or {}) inputs;
+      packagesFor = platform: builtins.mapAttrs (_: input: input.packages.${platform} or {}) inputs;
       inputPackages = packagesFor system;
 
       mkPkgs = cudaSupport:
