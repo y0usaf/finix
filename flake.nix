@@ -28197,7 +28197,9 @@
       	const known = new Map<string, { mtime: number; value: string }>();
       	const seen = new Map<string, string>();
       	const showing = new Set<string>();
-      	const ADD = "add it from Tern's command palette: Secrets: Add";
+      	// In a box the store is the bot's own folder: the shared secrets there are a copy the host keeps, so a boxed bot
+      	// can't add one.
+      	const boxed = Boolean(process.env.OMP_SECRETS_DIR);
 
       	pi.setLabel("Secrets");
 
@@ -28288,12 +28290,13 @@
       		name: "secret",
       		label: "Secret",
       		description:
-      			"Secrets (API keys, tokens) the user hands you without you ever seeing them. action request asks the user for secret name (capitals, digits and _, like GITHUB_TOKEN) with a one-line reason and an optional ttl (30m, 12h, 7d or never; default 24h) and waits for them to enter it; list shows the names you hold, yours and the ones shared with all bots, and when they expire; forget deletes one of yours. Use a secret by writing $SECRET_NAME (e.g. $SECRET_GITHUB_TOKEN) in a bash command: it is set for that command only (your own copy if you hold one, else the shared one), and any output containing the value shows the name in brackets instead, like [SECRET_GITHUB_TOKEN]. Never ask for a secret in chat or try to read, print or decode its value.",
+      			"Secrets (API keys, tokens) the user hands you without you ever seeing them. action request asks the user for secret name (capitals, digits and _, like GITHUB_TOKEN) with a one-line reason and an optional ttl (30m, 12h, 7d or never; default 24h), opening a masked box in this chat where they type it, and waits for it; shared true stores it for every bot instead of only you, when the user asks for that; list shows the names you hold, yours and the ones shared with all bots, and when they expire; forget deletes one of yours. Use a secret by writing $SECRET_NAME (e.g. $SECRET_GITHUB_TOKEN) in a bash command: it is set for that command only (your own copy if you hold one, else the shared one), and any output containing the value shows the name in brackets instead, like [SECRET_GITHUB_TOKEN]. Never ask for a secret in chat or try to read, print or decode its value.",
       		parameters: z.object({
       			action: z.enum(["request", "list", "forget"]),
       			name: z.string().optional(),
       			reason: z.string().optional(),
       			ttl: z.string().optional(),
+      			shared: z.boolean().optional(),
       		}),
       		async execute(_toolCallId, params, signal, onUpdate, ctx) {
       			if (params.action === "list") {
@@ -28310,7 +28313,9 @@
       				if (bot && meta(undefined, name)) return text(`''${name} is shared with all bots by the user; only they can remove it.`);
       				return text(`You hold no secret ''${name}.`);
       			}
-      			if (held(bot, name)) return text(`''${name} is already set; use $SECRET_''${name} in bash.`);
+      			const scope = params.shared ? undefined : bot;
+      			if (scope === undefined && bot && boxed) return text("A bot in a box can't add a shared secret; ask for your own with shared left out, or the user can ask a bot outside a box to add the shared one.");
+      			if (scope === undefined ? meta(undefined, name) : held(bot, name)) return text(`''${name} is already set; use $SECRET_''${name} in bash.`);
       			const reason = (params.reason ?? "").trim();
       			if (!reason) return text("Give a one-line reason so the user knows what the secret is for.");
       			try {
@@ -28318,41 +28323,25 @@
       			} catch (error) {
       				return text(error.message);
       			}
-      			request(bot, name, reason, params.ttl);
+      			request(scope, name, reason, params.ttl);
       			const set = `The user set ''${name}. Use $SECRET_''${name} in bash; you will never see its value.`;
       			if (ctx?.mode === "tui") {
-      				await enter(ctx, bot, name, reason, params.ttl, signal);
+      				await enter(ctx, scope, name, reason, params.ttl, signal);
       				if (held(bot, name)) return text(set);
-      				return text(`The user closed the box without entering ''${name}; the request stays open and they can still ''${ADD}. Don't ask again unless they say so.`);
+      				return text(`The user closed the box without entering ''${name}; the request stays open and the box opens again when this chat restarts. Don't ask again unless they say so.`);
       			}
-      			onUpdate?.(text(`Waiting for the user to ''${ADD}`));
+      			onUpdate?.(text(`Waiting for the user to enter ''${name} in the masked box, which opens when this chat is open in a terminal`));
       			const deadline = Date.now() + WAIT_MS;
       			while (Date.now() < deadline && !signal?.aborted) {
       				if (held(bot, name)) return text(set);
       				await Bun.sleep(1000);
       			}
-      			return text(`The user hasn't entered ''${name} yet; the request stays open. Tell them to ''${ADD}, naming it ''${name}.`);
+      			return text(`The user hasn't entered ''${name} yet; the request stays open, and the masked box opens when they open this chat in a terminal. Tell them so.`);
       		},
       	});
 
       	pi.on("session_start", (_event, ctx) => {
-      		if (ctx.mode !== "tui") return;
-      		// Tern's "Secrets: Add" (omp-bot's bin/omp-bot-secret) opens a session only to show the box, for one bot or
-      		// (OMP_SECRET_FOR empty) every bot, and ends it when the box closes.
-      		const adding = process.env.OMP_SECRET_ADD;
-      		if (adding !== undefined) {
-      			const scope = process.env.OMP_SECRET_FOR || undefined;
-      			void (async () => {
-      				if (NAME.test(adding)) {
-      					const had = meta(scope, adding);
-      					const why = scope ? `Only ''${scope} reads it.` : `Every bot reads it, unless it holds its own ''${adding}.`;
-      					await enter(ctx, scope, adding, `''${why} It never expires.''${had ? ` Replaces the one set ''${new Date(had.set).toLocaleString()}.` : ""}`, "never");
-      				}
-      				ctx.shutdown();
-      			})();
-      			return;
-      		}
-      		if (!bot) return;
+      		if (!bot || ctx.mode !== "tui") return;
       		void (async () => {
       			for (const ask of pending()) if (ask.bot === bot && !held(bot, ask.name)) await enter(ctx, bot, ask.name, ask.reason, ask.ttl);
       		})();
