@@ -19943,7 +19943,7 @@
       tokensKey = "${homeDir}/Tokens/id_rsa_${gitName}";
       manzil = inputPackages.manzil.default;
       tailnet = modules_tailnet;
-      bashFiles = (hosts_shared {inherit lib pkgs;}).bashFiles {
+      bashFiles = (hosts_shared {inherit lib;}).bashFiles {
         interactive = ''
           export EDITOR=vim
           export VISUAL=vim
@@ -33199,7 +33199,7 @@
 
         manzil = {
           clobberByDefault = true;
-          users.${config.user.name}.files = (hosts_shared {inherit lib pkgs;}).bashFiles {};
+          users.${config.user.name}.files = (hosts_shared {inherit lib;}).bashFiles {};
         };
       };
     };
@@ -38663,7 +38663,7 @@
           nixos-fw.enable = false;
           filter = {
             family = "inet";
-            content = (hosts_shared {inherit lib pkgs;}).filterTable {
+            content = (hosts_shared {inherit lib;}).filterTable {
               tailscaleComment = "tailnet peers are authenticated; primary sshd:2222 path";
               input = ''
                 udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
@@ -38738,7 +38738,7 @@
       ...
     }: let
       diskUuid = "32ad19b5-88df-4e63-92d2-d5a150ad65c5";
-      shared = hosts_shared {inherit lib pkgs;};
+      shared = hosts_shared {inherit lib;};
       btrfs = shared.btrfs diskUuid ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
       cfg = config.programs.limine;
     in {
@@ -38994,7 +38994,7 @@
           nixos-fw.enable = false;
           filter = {
             family = "inet";
-            content = (hosts_shared {inherit lib pkgs;}).filterTable {
+            content = (hosts_shared {inherit lib;}).filterTable {
               input = ''
                 udp sport 67 udp dport 68 accept comment "DHCPv4 client"
                 udp sport 547 udp dport 546 accept comment "DHCPv6 client"
@@ -39056,7 +39056,7 @@
       ...
     }: let
       diskUuid = "6ae685dc-540e-42f2-b30a-104a8aac0e27";
-      shared = hosts_shared {inherit lib pkgs;};
+      shared = hosts_shared {inherit lib;};
       btrfs = shared.btrfs diskUuid ["relatime" "ssd" "discard=async" "space_cache=v2"];
     in {
       finix.diagnostics = {
@@ -39231,7 +39231,7 @@
             nixos-fw.enable = false;
             filter = {
               family = "inet";
-              content = (hosts_shared {inherit lib pkgs;}).filterTable {
+              content = (hosts_shared {inherit lib;}).filterTable {
                 tailscaleComment = "tailnet peers are authenticated";
                 input = ''
                   udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
@@ -39296,7 +39296,7 @@
       ...
     }: let
       diskUuid = "9dfc38c4-5c75-471d-9106-80ff9175ab92";
-      shared = hosts_shared {inherit lib pkgs;};
+      shared = hosts_shared {inherit lib;};
       btrfs = shared.btrfs diskUuid;
     in {
       finix.diagnostics = {
@@ -39864,30 +39864,6 @@
           before = "graphicalModules";
         }
       ];
-      verbatim = {
-        "modules/desktop/apps/bluetooth.nix" = "{\n  pkgs,\n  ...\n}: {\n  environment.systemPackages = [\n    pkgs.blueman\n    pkgs.bluetuith\n  ];\n  user.files.\".config/autostart/blueman.desktop\".source = \"\${pkgs.blueman}/etc/xdg/autostart/blueman.desktop\";\n}\n";
-        "modules/desktop/apps/btop.nix" = "{\n  pkgs,\n  ...\n}: {\n  environment.systemPackages = [pkgs.btop];\n  user.files.\".config/btop/btop.conf\".text = ''\n    color_theme = \"TTY\"\n    theme_background = False\n  '';\n}\n";
-        "modules/desktop/apps/creative.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/Pinta\"];\n  environment.systemPackages = [\n    pkgs.pinta\n    pkgs.gimp\n  ];\n}\n";
-        "modules/desktop/apps/leverage.nix" = "{\n  inputPackages,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/Leverage\"\n    \".config/leverage\"\n  ];\n  environment.systemPackages = [inputPackages.leverage.default];\n}\n";
-        "modules/desktop/apps/qbittorrent.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/qBittorrent\"];\n  environment.systemPackages = [pkgs.qbittorrent];\n}\n";
-        "modules/desktop/apps/slack.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist = {\n    directories = [\n      \".config/Slack\"\n      \".config/Slack/IndexedDB\"\n      \".config/Slack/Local Storage\"\n      \".config/Slack/Session Storage\"\n      \".config/Slack/storage\"\n      \".slack\"\n    ];\n    files = [\n      \".config/Slack/Cookies\"\n      \".config/Slack/Cookies-journal\"\n      \".config/Slack/Local State\"\n      \".config/Slack/Network Persistent State\"\n      \".config/Slack/Preferences\"\n      \".config/Slack/TransportSecurity\"\n    ];\n  };\n  environment.systemPackages = [\n    (pkgs.slack.overrideAttrs (old: {\n      postFixup =\n        (old.postFixup or \"\")\n        + ''\n          wrapProgram $out/bin/slack --add-flags \"--disable-remote-fonts\"\n        '';\n    }))\n  ];\n}\n";
-        "modules/desktop/apps/stoat-desktop.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/stoat-desktop\"];\n  environment.systemPackages = [pkgs.stoat-desktop];\n}\n";
-        "modules/desktop/session/xdg-portals.nix" = "{\n  lib,\n  ...\n}: {\n  user.files = {\n    \".local/share/xdg-desktop-portal/portals/gnome.portal\" = {\n      generator = lib.generators.toINI {};\n      value.portal = {\n        DBusName = \"org.freedesktop.impl.portal.desktop.gnome\";\n        Interfaces = \"org.freedesktop.impl.portal.ScreenCast;org.freedesktop.impl.portal.Screenshot;org.freedesktop.impl.portal.RemoteDesktop;\";\n        UseIn = \"niri;gnome;\";\n      };\n    };\n\n    \".local/share/xdg-desktop-portal/portals/gtk.portal\" = {\n      generator = lib.generators.toINI {};\n      value.portal = {\n        DBusName = \"org.freedesktop.impl.portal.desktop.gtk\";\n        Interfaces = \"org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;org.freedesktop.impl.portal.Settings;\";\n        UseIn = \"niri;gtk;\";\n      };\n    };\n  };\n}\n";
-        "modules/dev/ai/amp.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/amp\"\n    \".local/share/amp\"\n  ];\n  environment.systemPackages = [pkgs.amp-cli];\n  environment.variables.AMP_REMOTE_CONTROL_TERMINAL = \"1\";\n}\n";
-        "modules/dev/ai/phi.nix" = "{\n  inputPackages,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/phi\"\n    \".local/share/phi\"\n    \".phi\"\n  ];\n  environment.systemPackages = [inputPackages.phi.default];\n}\n";
-        "modules/dev/ai/rtk.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".local/share/rtk\"];\n  environment.systemPackages = [pkgs.rtk];\n}\n";
-        "modules/dev/android-tools.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist = {\n    directories = [\n      \".local/share/android\"\n      \".local/share/android/.android\"\n    ];\n    files = [\n      \".local/share/android/adbkey\"\n      \".local/share/android/adbkey.pub\"\n    ];\n  };\n  environment.systemPackages = [pkgs.android-tools];\n}\n";
-        "modules/dev/gcloud.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/gcloud\"];\n  environment.systemPackages = [pkgs.google-cloud-sdk];\n}\n";
-        "modules/dev/npm.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.files = [\".npmrc\"];\n  environment.systemPackages = [pkgs.nodejs];\n}\n";
-        "modules/dev/rust.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".local/share/cargo\"\n    \".local/share/rustup\"\n  ];\n  environment.systemPackages = [\n    pkgs.crane\n    pkgs.rustup\n    pkgs.openssl\n  ];\n}\n";
-        "modules/dev/work/aws-cli.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".aws\"\n    \".config/aws\"\n  ];\n  environment.systemPackages = [pkgs.awscli2];\n}\n";
-        "modules/dev/work/gws.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/gws\"\n    \".config/gws-inscend\"\n  ];\n  environment.systemPackages = [pkgs.gws];\n}\n";
-        "modules/gaming/core.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".barony\"\n    \".config/bolt-launcher\"\n    \".config/unity3d\"\n    \".local/share/.Wurst encryption\"\n    \".local/share/.renpy\"\n    \".local/share/Baba_Is_You\"\n    \".local/share/Brotato\"\n    \".local/share/CassetteBeasts\"\n    \".local/share/Celeste\"\n    \".local/share/HallsOfTorment\"\n    \".local/share/Noobs Are Coming (Save)\"\n    \".local/share/PrismLauncher\"\n    \".local/share/Rocket League\"\n    \".local/share/SlayTheSpire2\"\n    \".local/share/Smart Code ltd\"\n    \".local/share/SteamWorld Heist\"\n    \".local/share/Ultrapool\"\n    \".local/share/YourOnlyMoveIsHUSTLE\"\n    \".local/share/aspyr-media\"\n    \".local/share/balatroai\"\n    \".local/share/binding of isaac rebirth\"\n    \".local/share/bolt-launcher\"\n    \".local/share/com.overboy.noobsarecoming\"\n    \".local/share/godot/app_userdata\"\n    \".local/share/hackerpg\"\n    \".local/share/lootplot\"\n    \".local/share/osu\"\n    \".local/share/shapez.io\"\n    \".local/share/shipofharkinian\"\n    \".local/share/skua-wine\"\n    \".local/share/wine\"\n  ];\n  environment.systemPackages = [\n    pkgs.prismlauncher\n    pkgs.gamescope\n    pkgs.gamemode\n    pkgs.protontricks\n    pkgs.dualsensectl\n  ];\n}\n";
-        "modules/gaming/emulation.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/Cemu\"\n    \".local/share/Cemu\"\n    \".local/share/dolphin-emu\"\n  ];\n  environment.systemPackages = [\n    pkgs.dolphin-emu\n    pkgs.cemu\n  ];\n}\n";
-        "modules/shell/ekko/config.nix" = "{\n  lib,\n  pkgs,\n  flakeInputs,\n  inputPackages,\n  generators,\n  ...\n}: {\n  user = {\n    persist.directories = [\n      \".cache/ekko\"\n      \".config/ekko\"\n    ];\n\n    dev.prompts.host = [\"`EKKO_INSTANCE` in your environment points at the ekko instance holding the live terminals.\"];\n\n    files.\".config/ekko/init.lisp\".text =\n      lib.removeSuffix \"\\n\" (generators.lisp.render (import ./init.data.nix generators.lisp))\n      + \"\\n\"\n      + builtins.readFile \"\${flakeInputs.ekko}/examples/themes/xp.lisp\"\n      + \"\\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\\n\";\n\n    shell.rcExtra = lib.mkOrder 1600 ''\n      if [ -z \"''\${EKKO_INSTANCE:-}\" ] && [ -z \"''\${EKKO_SESSION_NAME:-}\" ] &&\n         [ -z \"''\${SSH_CONNECTION:-}\" ] && [ -z \"''\${TMUX:-}\" ] &&\n         [ -z \"''\${STY:-}\" ] && [ -z \"''\${TERN_PANE:-}\" ] &&\n         [ \"''\${TERM:-}\" != linux ] && [ -t 0 ] && [ -t 1 ]; then\n        case \"$(\${pkgs.coreutils}/bin/readlink /proc/self/fd/0)\" in\n          /dev/tty[0-9]*) ;;\n          *) \${inputPackages.ekko.default}/bin/ekko attach ;;\n        esac\n      fi\n    '';\n  };\n\n  environment.systemPackages = [inputPackages.ekko.default];\n\n}\n";
-        "modules/shell/rush.nix" = "{\n  config,\n  lib,\n  pkgs,\n  ...\n}: let\n  aliases =\n    {\n      wget = ''wget --hsts-file=\"$XDG_DATA_HOME/wget-hsts\"'';\n      lintcheck = \"clear; statix check .; deadnix .\";\n      lintfix = \"clear; statix fix .; deadnix .\";\n      claude = \"claude --allow-dangerously-skip-permissions\";\n      buncodex = \"bunx --bun @openai/codex\";\n      gemini = \"bunx --bun @google/gemini-cli@preview\";\n      \"l.\" = ''lsd -A | grep -E \"^\\.\"'';\n      la = \"lsd -A --color=always --group-dirs=first --icon=always\";\n      ll = \"lsd -l --color=always --group-dirs=first --icon=always\";\n      ls = \"lsd -lA --color=always --group-dirs=first --icon=always\";\n      lt = \"lsd -A --tree --color=always --group-dirs=first --icon=always\";\n      grep = \"rg --color auto\";\n      dir = \"dir --color=auto\";\n      egrep = \"rg --color auto\";\n      fgrep = \"rg -F --color auto\";\n      adb = ''HOME=\"$XDG_DATA_HOME/android\" adb'';\n      pkgs = \"nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i\";\n      pkgcount = \"nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l\";\n      buildtime = ''time (nix build \"$NH_FLAKE#nixosConfigurations.$HOST.config.system.build.toplevel\" --option eval-cache false)'';\n      hmpull = \"git -C \${config.user.homeDirectory}/finix fetch origin && git -C \${config.user.homeDirectory}/finix reset --hard origin/main\";\n    }\n    // lib.optionalAttrs config.hardware.nvidia.enable {\n      nvidia-settings = ''nvidia-settings --config=\"$XDG_CONFIG_HOME/nvidia/settings\"'';\n      gpupower = \"sudo nvidia-smi -pl\";\n    };\nin {\n  options.user.shell.rcExtra = lib.mkOption {\n    type = lib.types.lines;\n    default = \"\";\n    description = ''\n      POSIX-compatible interactive rc fragments contributed by feature\n      modules (python, nh, yt-dlp, ekko, …). Appended after the active\n      shell's own base config.\n    '';\n  };\n\n  config = {\n    environment.etc.\"profile.d/local-bin.sh\".text = ''\n      case \":$PATH:\" in\n        *\":$HOME/.local/bin:\"*) ;;\n        *) export PATH=\"$HOME/.local/bin:$PATH\" ;;\n      esac\n    '';\n\n    user = {\n      shell.rcExtra = lib.mkBefore ''\n        temppkg() {\n          if [ -z \"$1\" ]; then\n            echo \"Usage: temppkg package_name\"\n            return 1\n          fi\n          nix-shell -p \"$1\" --run \"exec $SHELL\"\n        }\n\n        temprun() {\n          if [ -z \"$1\" ]; then\n            echo \"Usage: temprun <package-name> [args...]\"\n            return 1\n          fi\n          local pkg=$1\n          shift\n          nix run \"nixpkgs#$pkg\" -- \"$@\"\n        }\n        export NPM_CONFIG_TMP=\"$XDG_RUNTIME_DIR\"/npm\n      '';\n\n      persist.directories = [\".local/state/rush\"];\n\n      files = {\n        \".config/rush/profile.rush\".text = ''\n          . /etc/profile\n          [ -r \"$HOME/.config/tokens.sh\" ] && . \"$HOME/.config/tokens.sh\"\n        '';\n\n        \".config/rush/config.rush\".text = lib.mkMerge [\n          (lib.mkBefore ''\n\n            rush_prompt() {\n              rush_prompt_status=$?\n              prompt segment --bold --fg green \"$(prompt_pwd)\"\n              if test \"$rush_prompt_status\" = 0; then\n                prompt segment --fg cyan '>'\n              else\n                prompt segment --fg red '>'\n              fi\n              prompt text ' '\n            }\n\n            rush_prompt_right() {\n              prompt segment --fg bright-blue \"$(date +'%Y-%m-%d %H:%M')\"\n            }\n\n            \${lib.concatStringsSep \"\\n\" (lib.mapAttrsToList\n              (k: v: \"alias \${lib.escapeShellArg k}=\${lib.escapeShellArg v}\")\n              aliases)}\n          '')\n          config.user.shell.rcExtra\n        ];\n      };\n    };\n\n    environment.systemPackages = [pkgs.bat];\n\n  };\n}\n";
-        "modules/tools/iets.nix" = "{\n  inputPackages,\n  ...\n}: {\n  environment.systemPackages = [inputPackages.iets.default];\n}\n";
-      };
       module_values = [
         {
           file = "modules/outputs.nix";
