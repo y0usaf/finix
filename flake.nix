@@ -30192,7 +30192,7 @@
       };
     };
     settings_data = {
-      __keys = ["theme" "theme_dark" "theme_light" "copy_on_select" "cursor" "link_target" "contrast" "layout" "font_size" "padding_x" "padding_y" "system_title_bar" "status_bar" "material" "opacity" "blur" "plugins_disabled" "surface_fold" "new_tabs" "agent_placement" "snap_text" "msaa" "renderer" "carly" "keybinds"];
+      __keys = ["theme" "theme_dark" "theme_light" "copy_on_select" "cursor" "link_target" "contrast" "layout" "font_size" "padding_x" "padding_y" "system_title_bar" "status_bar" "material" "opacity" "blur" "plugins_disabled" "surface_fold" "new_tabs" "agent_placement" "snap_text" "msaa" "frames_queued" "renderer" "carly" "keybinds"];
       theme = "System";
       theme_dark = "ozette-night";
       theme_light = "ozette";
@@ -30236,6 +30236,9 @@
     setup_data = {
       FileNotFoundError,
       None,
+      # Tern presents on the display's refresh (sync_to_display, on by default), so it already runs at the G9's 240 Hz;
+      # its default of 3 frames queued ahead of the display adds latency, so keep one.
+      frames_queued = 1;
       OSError,
       PermissionError,
       ProcessLookupError,
