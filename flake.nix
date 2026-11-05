@@ -30218,6 +30218,9 @@
       agent_placement = "new_tab";
       snap_text = true;
       msaa = "8x";
+      # Tern presents on the display's refresh (sync_to_display, on by default), so it already runs at the G9's 240 Hz;
+      # its default of 3 frames queued ahead of the display adds latency, so keep one.
+      frames_queued = 1;
       renderer = "gpu";
       carly = {
         model = "openai-codex/gpt-6.1-terra:high";
@@ -30236,9 +30239,6 @@
     setup_data = {
       FileNotFoundError,
       None,
-      # Tern presents on the display's refresh (sync_to_display, on by default), so it already runs at the G9's 240 Hz;
-      # its default of 3 frames queued ahead of the display adds latency, so keep one.
-      frames_queued = 1;
       OSError,
       PermissionError,
       ProcessLookupError,
