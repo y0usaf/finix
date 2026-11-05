@@ -37943,6 +37943,7 @@
       require,
       return,
       rows,
+      tostring,
       str,
       string,
       table,
@@ -37961,6 +37962,8 @@
       by_id,
       rail,
       single,
+      pinned,
+      folding,
       guard,
       paint,
       LOOKS,
@@ -38372,17 +38375,95 @@
       blank
       [(dot Rail "bind") on]
       blank
-      (localFunction single [{cx = null;}] ({cx}: [
-        (if' (dot on "single") [
-          [
-            pcall
-            (fn [] [
-              (if' (not (dot [(dot cx "sessions:current")] "locked")) [
-                [(dot cx "sessions:lock")]
-              ])
-            ])
-          ]
+      (local pinned nil)
+      (local folding false)
+      (localFunction single [{cx = null;}] ({cx, key, pins, ok, err}: [
+        (local key [(dot cx ":window_key")])
+        (local pins (infix [[(dot tern "kv.get") (str "single-pins")] "or" (table [])]))
+        (if' (not (dot on "single")) [
+          (assign pinned nil)
+          (if' (infix [(idx pins key) "~=" nil]) [
+            (assign (idx pins key) nil)
+            [(dot tern "kv.set") (str "single-pins") pins]
+          ])
+          return
         ])
+        (if' folding [return])
+        (assign folding true)
+        (local [ok err] [pcall (fn [] ({sessions, anchor, sources, sourceTabs, count, panes, groups, parked, hostPanes, result, reason}: [
+          (local sessions [(dot cx "sessions:list")])
+          (local anchor nil)
+          (local [result reason] (tuple [nil nil]))
+          (assign pinned (infix [pinned "or" (idx pins key)]))
+          (for [{_ = null;} {session = null;}] [ipairs sessions] ({_, session}: [
+            (if' (infix [(dot session "id") "==" pinned]) [(assign anchor session)])
+          ]))
+          (if' (not anchor) [
+            (assign anchor [(dot cx "sessions:current")])
+            (assign pinned (dot anchor "id"))
+            (assign (idx pins key) pinned)
+            [(dot tern "kv.set") (str "single-pins") pins]
+          ])
+          (if' (infix [(dot [(dot cx "sessions:current")] "id") "~=" pinned]) [[(dot cx "sessions:switch") pinned]])
+          (local sources (table []))
+          (local sourceTabs (table []))
+          (local count 0)
+          (for [{_ = null;} {session = null;}] [ipairs sessions] ({_, session}: [
+            (if' (infix [(dot session "id") "~=" pinned "and" (dot session "host") "==" (dot anchor "host")]) [
+              (assign (idx sources (dot session "id")) true)
+              (assign count (infix [count "+" 1]))
+            ])
+          ]))
+          (if' (infix [count "==" 0]) [return])
+          (for [{_ = null;} {session = null;}] [ipairs [(dot cx "session:sessions")]] ({_, session}: [
+            (if' (idx sources (dot session "id")) [
+              (for [{_ = null;} {tab = null;}] [ipairs (dot session "tabs")] ({_, tab}: [(assign (idx sourceTabs tab) true)]))
+            ])
+          ]))
+          (local panes [(dot cx "session:panes")])
+          (local groups (table []))
+          (for [{_ = null;} {tab = null;}] [ipairs [(dot cx "session:tabs")]] ({_, tab, blocks}: [
+            (local blocks (table []))
+            (if' (infix [(dot tab "session") "==" pinned]) [
+              [(dot table' "insert") groups (table [(field "tab" (dot tab "id")) (field "blocks" (table []))])]
+            ])
+            (if' (idx sourceTabs (dot tab "id")) [
+              (for [{_ = null;} {pane = null;}] [ipairs panes] ({_, pane}: [
+                (if' (infix [(dot pane "tab") "==" (dot tab "id")]) [[(dot table' "insert") blocks (dot pane "pane")]])
+              ]))
+              (if' (infix [(len blocks) ">" 0]) [[(dot table' "insert") groups (table [(field "name" (dot tab "name")) (field "color" (dot tab "color")) (field "blocks" blocks)])]])
+            ])
+          ]))
+          (local parked (table []))
+          (local hostPanes (table []))
+          (for [{_ = null;} {host = null;}] [ipairs [(dot cx "hosts:list")]] ({_, host}: [
+            (if' (infix [(dot host "id") "==" (dot anchor "host")]) [
+              (for [{_ = null;} {pane = null;}] [ipairs (dot host "panes")] ({_, pane}: [(assign (idx hostPanes pane) true)]))
+            ])
+          ]))
+          (for [{_ = null;} {pane = null;}] [ipairs panes] ({_, pane}: [
+            (if' (infix [(dot pane "parked") "and" (idx hostPanes (dot pane "pane"))]) [
+              [(dot table' "insert") parked (dot pane "pane")]
+              [(dot table' "insert") groups (table [(field "blocks" (table [(dot pane "pane")]))])]
+            ])
+          ]))
+          (if' (infix [(len groups) ">" 0]) [
+            (assign [result reason] [(dot cx "layout:arrange") (table [(field "session" pinned) (field "tabs" groups)])])
+            (if' (not result) [[error reason]])
+            (for [{_ = null;} {pane = null;}] [ipairs parked] ({_, pane}: [[(dot cx "layout:park") pane]]))
+          ])
+          (for [{_ = null;} {session = null;}] [ipairs sessions] ({_, session}: [
+            (if' (idx sources (dot session "id")) [[(dot cx "sessions:close") (dot session "id")]])
+          ]))
+        ]))])
+        (assign folding false)
+        (if' (not ok) [
+          [(dot tern "log.error") (infix [(str "Single session: ") ".." [tostring err]])]
+          [(dot cx ":toast") (str "error") (infix [(str "Single session: ") ".." [tostring err]])]
+        ])
+      ]))
+      (for [{_ = null;} {event = null;}] [ipairs (table [(str "focus") (str "pane_created") (str "tab_created") (str "session_ended")])] ({_, event}: [
+        [(dot tern "on") event (fn [{ev = null;} {cx = null;}] ({ev, cx}: [[single cx]]))]
       ]))
       blank
       (localFunction rail [{cx = null;}] ({cx}: [
@@ -38431,7 +38512,7 @@
       [guard (table [(str "layout:float") (str "layout:tiles") (str "layout:studio") (str "next_layout") (str "toggle_tab_orientation") (str "tabs:vertical")]) (str "lock") (str "The rail is locked")]
       [guard (table [(str "pane_headers:never") (str "pane_headers:split") (str "pane_headers:always") (str "status_bar") (str "interface_style")]) nil (str "This config fixes the chrome")]
       [guard (table [(str "files") (str "focus_files") (str "reveal_active_file")]) (str "files") (str "Files are off")]
-      [guard (table [(str "new_session") (str "new_session_on_host") (str "switch_session") (str "rename_session") (str "close_session") (str "lock_session") (str "move_session_up") (str "move_session_down") (str "move_pane_to_session") (str "collapse_all_sessions") (str "expand_all_sessions")]) (str "single") (str "Tabs only: one locked session")]
+      [guard (table [(str "new_session") (str "new_session_on_host") (str "switch_session") (str "rename_session") (str "close_session") (str "lock_session") (str "move_session_up") (str "move_session_down") (str "move_pane_to_session") (str "collapse_all_sessions") (str "expand_all_sessions")]) (str "single") (str "Tabs only: one pinned session")]
       blank
       [
         (dot tern "on")
@@ -38460,7 +38541,7 @@
         ]))
       ]
       blank
-      (for [{_ = null;} {ms = null;}] [ipairs (table [300 1200])] ({
+      (for [{_ = null;} {ms = null;}] [ipairs (table [0 300 1200])] ({
         _,
         ms,
       }: [
