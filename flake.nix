@@ -1041,6 +1041,25 @@
       catalog = config.user.dev.modelCatalog;
       toJSON = lib.generators.toJSON {};
       secrets = generators.sourceDir pkgs "secrets" omp_secrets_data;
+      # omp loads its extensions through these links, not their store paths, so a switch that rebuilds one leaves
+      # config.yml's paths alone and running sessions see no "newly enabled" extension to restart for. omp-bot's
+      # env (the omp_bot module) names its extensions by the same links, so a bot loads each once.
+      extDir = "${config.users.users.${config.user.name}.home}/.omp/agent/ext";
+      extLinks = {
+        pi-chronobreak = "${flakeInputs.pi-chronobreak}";
+        pi-recap = "${flakeInputs.pi-recap}";
+        pi-donsetch = "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}";
+        "code-mode.ts" = generators.sourceFile "code-mode.ts" (generators.ts.render (code_mode_data generators.ts));
+        "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts));
+        "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
+        "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (chat_look_data generators.ts));
+        "box-commands.ts" = generators.sourceFile "box-commands.ts" (generators.ts.render (box_commands_data generators.ts));
+        "cwd.ts" = generators.sourceFile "cwd.ts" (generators.ts.render (cwd_data generators.ts));
+        secrets = "${secrets}";
+        "crest-auth.ts" = generators.sourceFile "crest-auth.ts" (generators.ts.render (omp_crest_auth_data generators.ts));
+        optchat = generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;});
+        omp-bot = "${flakeInputs.omp-bot}";
+      };
       ompSecret = pkgs.writeShellScriptBin "omp-secret" ''
         PATH=${lib.makeBinPath [pkgs.age]}:$PATH exec ${pkgs.bun}/bin/bun ${secrets}/omp-secret.ts "$@"
       '';
@@ -1074,7 +1093,7 @@
 
       environment.systemPackages = [pkgs.jq pkgs.age ompSecret ompUntil];
 
-      manzil.users.${config.user.name}.files = {
+      manzil.users.${config.user.name}.files = lib.mapAttrs' (name: source: lib.nameValuePair ".omp/agent/ext/${name}" {source = "${source}";}) extLinks // {
         ".omp/agent/config.yml" = {
           generator = lib.generators.toYAML {};
           value = {
@@ -1120,20 +1139,20 @@
               judge = catalog.judgeModel;
             };
             retry.fallbackChains = catalog.fallbackChains;
-            extensions = [
-              "${flakeInputs.pi-chronobreak}"
-              "${flakeInputs.pi-recap}"
-              "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}"
-              "${generators.sourceFile "code-mode.ts" (generators.ts.render (code_mode_data generators.ts))}"
-              "${generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts))}"
-              "${generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts))}"
-              "${generators.sourceFile "chat-look.ts" (generators.ts.render (chat_look_data generators.ts))}"
-              "${generators.sourceFile "box-commands.ts" (generators.ts.render (box_commands_data generators.ts))}"
-              "${generators.sourceFile "cwd.ts" (generators.ts.render (cwd_data generators.ts))}"
-              "${secrets}/secrets.ts"
-              "${generators.sourceFile "crest-auth.ts" (generators.ts.render (omp_crest_auth_data generators.ts))}"
-              "${generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;})}/extension.ts"
-              "${flakeInputs.omp-bot}/omp/ompd.ts"
+            extensions = map (path: "${extDir}/${path}") [
+              "pi-chronobreak"
+              "pi-recap"
+              "pi-donsetch"
+              "code-mode.ts"
+              "compact-eval.ts"
+              "work-fold.ts"
+              "chat-look.ts"
+              "box-commands.ts"
+              "cwd.ts"
+              "secrets/secrets.ts"
+              "crest-auth.ts"
+              "optchat/extension.ts"
+              "omp-bot/omp/ompd.ts"
             ];
           };
         };
@@ -20407,7 +20426,6 @@
       config,
       pkgs,
       flakeInputs,
-      generators,
       ...
     }: let
       userName = config.user.name;
@@ -20417,6 +20435,9 @@
       src = flakeInputs.omp-bot;
       tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
       persistentHome = "/persist/home/${userName}";
+      # The links to omp's extensions the ai_omp module keeps, named the same as in its config.yml, so a bot with
+      # "extensions": true loads each once and a switch shows a running bot no new extension path.
+      ext = "${user.home}/.omp/agent/ext";
       # Prints the persist paths of every bot on the persisted roster, relative to home, for persist-user-binds.
       persistPaths = pkgs.writeShellScript "omp-bot-persist-paths" ''
         roster=${persistentHome}/.local/state/omp-bot/bots.json
@@ -20501,12 +20522,13 @@
       manzil.users.${userName}.files = {
         ".config/omp-bot/env".text = ''
           : "''${OMP_BIN:=${omp}/bin/omp}"
-          : "''${OMP_BOT_EXTENSION:=${generators.sourceFile "crest-auth.ts" (generators.ts.render (omp_crest_auth_data generators.ts))}}"
-          : "''${OMP_BOT_CWD_EXTENSION:=${generators.sourceFile "cwd.ts" (generators.ts.render (cwd_data generators.ts))}}"
-          : "''${OMP_BOT_SECRETS_EXTENSION:=${generators.sourceDir pkgs "secrets" omp_secrets_data}/secrets.ts}"
-          : "''${OMP_BOT_WORK_FOLD_EXTENSION:=${generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts))}}"
-          : "''${OMP_BOT_CHAT_LOOK_EXTENSION:=${generators.sourceFile "chat-look.ts" (generators.ts.render (chat_look_data generators.ts))}}"
-          : "''${OMP_BOT_OPTCHAT:=${generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;})}}"
+          : "''${OMP_BOT_EXTENSION:=${ext}/crest-auth.ts}"
+          : "''${OMP_BOT_CWD_EXTENSION:=${ext}/cwd.ts}"
+          : "''${OMP_BOT_SECRETS_EXTENSION:=${ext}/secrets/secrets.ts}"
+          : "''${OMP_BOT_WORK_FOLD_EXTENSION:=${ext}/work-fold.ts}"
+          : "''${OMP_BOT_CHAT_LOOK_EXTENSION:=${ext}/chat-look.ts}"
+          : "''${OMP_BOT_OMPD_EXTENSION:=${ext}/omp-bot/omp/ompd.ts}"
+          : "''${OMP_BOT_OPTCHAT:=${ext}/optchat}"
           export OMPD_SERVICE="''${OMPD_SERVICE-1}"
           : "''${OMP_BOT_PERSIST:=${persist}}"
         '';
