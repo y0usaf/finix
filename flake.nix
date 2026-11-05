@@ -15691,193 +15691,6 @@
         };
       };
     };
-    host_data = {
-      any,
-      assign,
-      blank,
-      boolean,
-      dot,
-      field,
-      fn,
-      for,
-      idx,
-      if',
-      infix,
-      ipairs,
-      len,
-      local,
-      localFunction,
-      nil,
-      not,
-      pair,
-      pairs,
-      return,
-      rows,
-      str,
-      string,
-      table,
-      tern,
-      tostring,
-      type',
-      typed,
-      ...
-    }: ({
-      model,
-      state,
-      snapshot,
-      same,
-      watch,
-    }: [
-      (localFunction model (typed [] (table [any])) ({saved}: [
-        (local saved [(dot tern "kv.get") (str "menu")])
-        (if' (infix [[type' saved] "~=" (str "table")]) [
-          (return (table []))
-        ])
-        (return saved)
-      ]))
-      blank
-      (localFunction state (typed [] (table [(pair string boolean)])) ({
-        saved,
-        out,
-      }: [
-        (local saved [(dot tern "kv.get") (str "on")])
-        (local out (table []))
-        (if' (infix [[type' saved] "==" (str "table")]) [
-          (for [{k = null;} {v = null;}] [pairs saved] ({
-            k,
-            v,
-          }: [
-            (if' (infix [[type' k] "==" (str "string")]) [
-              (assign (idx out k) (infix [v "==" true]))
-            ])
-          ]))
-        ])
-        (return out)
-      ]))
-      blank
-      (localFunction snapshot (typed [] (table [(pair string boolean)])) ({out}: [
-        (local out (table []))
-        (for [{_ = null;} {row = null;}] [ipairs [model]] ({
-          _,
-          row,
-        }: [
-          (if' (infix [[type' row] "==" (str "table") "and" [type' (dot row "id")] "==" (str "string")]) [
-            (assign (idx out (dot row "id")) (infix [(idx [state] (dot row "id")) "==" true]))
-          ])
-        ]))
-        (return out)
-      ]))
-      blank
-      (localFunction same (typed [{a = null;} {b = null;}] boolean) ({
-        a,
-        b,
-      }: [
-        (for [{k = null;} {v = null;}] [pairs b] ({
-          k,
-          v,
-        }: [
-          (if' (infix [(idx a k) "~=" v]) [
-            (return false)
-          ])
-        ]))
-        (for [{k = null;}] [pairs a] ({k}: [
-          (if' (infix [(idx b k) "==" nil]) [
-            (return false)
-          ])
-        ]))
-        (return true)
-      ]))
-      blank
-      (localFunction watch [{cx = null;} {state_now = null;}] ({
-        cx,
-        state_now,
-      }: [
-        [
-          (dot tern "timer")
-          250
-          (fn [] ({next_now}: [
-            (if' (not cx) [
-              return
-            ])
-            (local next_now [snapshot])
-            (if' (not [same state_now next_now]) [
-              (for [{k = null;} {v = null;}] [pairs next_now] ({
-                k,
-                v,
-              }: [
-                (assign (idx state_now k) v)
-              ]))
-              [(dot cx ":render")]
-            ])
-            [watch cx state_now]
-          ]))
-        ]
-      ]))
-      blank
-      [
-        (dot tern "block.define")
-        (str "options")
-        (rows (table [
-          (field "init" (fn [{cx = null;} {_args = null;} {_saved = null;}] ({
-            cx,
-            _args,
-            _saved,
-            now,
-          }: [
-            (local now [snapshot])
-            [watch cx now]
-            (return now)
-          ])))
-          (field "title" (fn [] [
-            (return (str "UI options"))
-          ]))
-          (field "view" (fn [{_state_now = null;} {_cx = null;}] ({
-            _state_now,
-            _cx,
-            on,
-            nodes,
-            group,
-          }: [
-            (local on [state])
-            (local nodes (table []))
-            (local group nil)
-            (for [{_ = null;} {row = null;}] [ipairs [model]] ({
-              _,
-              row,
-            }: [
-              (if' (infix [[type' row] "==" (str "table") "and" [type' (dot row "id")] "==" (str "string")]) ({g}: [
-                (local g [tostring (infix [(dot row "group") "or" (str "Tweaks")])])
-                (if' (infix [g "~=" group]) [
-                  (assign group g)
-                  (assign (idx nodes (infix [(len nodes) "+" 1])) [(dot tern "ui.el") (str "div") (table [(field "class" (str "uo-group")) (field "text" g)])])
-                ])
-                (assign (idx nodes (infix [(len nodes) "+" 1])) [
-                  (dot tern "ui.el")
-                  (str "label")
-                  (table [(field "class" (str "uo-row"))])
-                  (rows (table [
-                    [(dot tern "ui.el") (str "input") (table [(field "type" (str "checkbox")) (field "name" (dot row "id")) (field "checked" (infix [(idx on (dot row "id")) "==" true]))])]
-                    [(dot tern "ui.el") (str "span") (table [(field "class" (str "uo-name")) (field "text" [tostring (infix [(dot row "label") "or" (dot row "id")])])])]
-                  ]))
-                ])
-              ]))
-            ]))
-            (return (table [(field "main" [(dot tern "ui.col") (table [[(dot tern "ui.el") (str "div") (table [(field "class" (str "uo-list"))]) nodes]])])]))
-          ])))
-          (field "event" (fn [{_state_now = null;} {ev = null;} {_cx = null;}] ({
-            _state_now,
-            ev,
-            _cx,
-          }: [
-            (if' (infix [(dot ev "ev") "==" (str "change") "and" [type' (dot ev "name")] "==" (str "string")]) ({next_on}: [
-              (local next_on [state])
-              (assign (idx next_on (dot ev "name")) (infix [(dot ev "checked") "==" true]))
-              [(dot tern "kv.set") (str "on") next_on]
-            ]))
-          ])))
-        ]))
-      ]
-    ]);
     hosts_shared = {lib, ...}: let
       indent = rules: lib.concatMapStringsSep "\n" (line: lib.optionalString (line != "") "    ${line}") (lib.splitString "\n" rules);
     in {
@@ -18963,7 +18776,6 @@
           "tern-tab-order-window.luau" = tab_order_window_data;
           "tern-transparent-window.luau" = transparent_window_data;
           "tern-tuturu-window.luau" = src_window_data;
-          "tern-ui-menu-host.luau" = host_data;
           "tern-ui-menu-rail.luau" = rail_data;
           "tern-ui-menu-window.luau" = ui_menu_window_data;
         };
@@ -24330,7 +24142,6 @@
       (local AGE_BASE (hex 917760))
       (local AGE_TICK_MS 30000)
       blank
-      blank
       (local color_at 0)
       (local (typed agent_state (table [(pair number string)])) (table []))
       (local (typed unseen (table [(pair number string)])) (table []))
@@ -24870,7 +24681,6 @@
       [(dot tern "bind") (str "ctrl+alt+p") (str "plugin.ui-menu.pin")]
       [(dot tern "bind") (str "ctrl+alt+j") (str "next_tab")]
       [(dot tern "bind") (str "ctrl+alt+k") (str "previous_tab")]
-      [(dot tern "bind") (str "ctrl+alt+f") (str "focus_tabs")]
       blank
       (return (rows (table [
         (field "tweaks" (rows (table [
@@ -24880,7 +24690,6 @@
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt {\n\tposition: relative;\n\toverflow: visible !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"],\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"],\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"],\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"] {\n\tmargin-top: 34px !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"]::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"]::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"]::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"]::after {\n\tdisplay: block !important;\n\tposition: absolute;\n\tleft: 10px;\n\ttop: -26px;\n\twidth: auto;\n\theight: auto;\n\tbackground: none;\n\tbox-shadow: none;\n\tfont-size: 11px;\n\tfont-weight: 600;\n\tletter-spacing: 0.06em;\n\ttext-transform: uppercase;\n\tcolor: var(--t4);\n\tpointer-events: none;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"]::after {\n\tcontent: \"Pinned\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"]::after {\n\tcontent: \"Needs you\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"]::after {\n\tcontent: \"Working\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"]::after {\n\tcontent: \"Idle\";\n}\n"))
             (field "apply" apply)
-            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_status"))
@@ -24888,7 +24697,6 @@
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c {\n\tposition: relative;\n\toverflow: visible !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tcontent: \"\";\n\tposition: absolute;\n\tbox-sizing: border-box;\n\tborder-radius: 50%;\n\tpointer-events: none;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc])[title*=\"\\206A\"] .tn-dk-c::before {\n\tleft: -4px;\n\ttop: -4px;\n\twidth: calc(100% + 8px);\n\theight: calc(100% + 8px);\n\tborder: 2px dashed var(--pill);\n\tanimation: arc-spin 2.4s linear infinite;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tright: -3px;\n\tbottom: -3px;\n\twidth: 10px;\n\theight: 10px;\n\tbackground: var(--pill);\n\tbox-shadow: 0 0 0 2px var(--panel);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub {\n\tfont-size: 0 !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::before {\n\tfont-size: 12px;\n\tfont-weight: 500;\n\tfont-family: Geist, system-ui, sans-serif;\n\tcolor: var(--pill);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] {\n\t--pill: light-dark(#0f766e, #5eead4);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] .sub::before {\n\tcontent: \"Working\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] {\n\t--pill: light-dark(#b45309, #fbbf24);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] .sub::before {\n\tcontent: \"Awaiting input\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] {\n\t--pill: light-dark(#15803d, #4ade80);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] .sub::before {\n\tcontent: \"Done · unseen\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] {\n\t--pill: light-dark(#b91c1c, #f87171);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] .sub::before {\n\tcontent: \"Failed · unseen\";\n}\n\n@keyframes arc-spin {\n\tfrom {\n\t\ttransform: rotate(0deg);\n\t}\n\tto {\n\t\ttransform: rotate(360deg);\n\t}\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub > * {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::after {\n\tdisplay: none !important;\n}\n"))
             (field "apply" apply)
-            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_ages"))
@@ -24896,7 +24704,6 @@
             (field "group" (str "Rail"))
             (field "css" (infix [(long "\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk .hint {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk {\n\tflex: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk::before {\n\tfont-size: 11px;\n\tcolor: var(--t4);\n\tfont-family: Geist, system-ui, sans-serif;\n}\n") ".." (str "\n") ".." [age_css]]))
             (field "apply" apply)
-            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_compact"))
@@ -24904,21 +24711,18 @@
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt {\n\theight: 38px !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206E\"]:not([data-tc]) {\n\theight: 20px !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206E\"]:not([data-tc]) .sub {\n\tdisplay: none !important;\n}\n"))
             (field "apply" apply)
-            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_card"))
             (field "label" (str "selected tab card"))
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt {\n\tborder-radius: 8px !important;\n\tbox-shadow: none !important;\n\tcolor: var(--t3) !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:hover {\n\tbackground: color-mix(in srgb, var(--t1) 6%, transparent) !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt.on {\n\tbackground: var(--panel) !important;\n\tbox-shadow: inset 0 0 0 1px var(--l2) !important;\n\tcolor: var(--t1) !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt.on .nm {\n\tfont-weight: 600;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt.on::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt.on::after {\n\tdisplay: none !important;\n}\n"))
-            (field "on" true)
           ]))
           (rows (table [
             (field "id" (str "rail_header"))
             (field "label" (str "+ and bell in the header"))
             (field "group" (str "Rail"))
             (field "css" (long "\nhtml.lay-rail.tabs-h #tabbar .tb-in {\n\tposition: relative !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tb-add,\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge {\n\tposition: absolute !important;\n\ttop: 4px !important;\n\twidth: 28px !important;\n\theight: 26px !important;\n\tmargin: 0 !important;\n\tpadding: 0 !important;\n\tjustify-content: center !important;\n\tgap: 0 !important;\n\tborder-radius: 7px !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tb-add {\n\tright: 40px !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge {\n\tright: 8px !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > :is(.tb-add, .tn-ib-badge) :is(.lbl, .kbds) {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge .tn-ib-pip {\n\tposition: absolute !important;\n\ttop: 1px !important;\n\tright: 1px !important;\n\tmargin: 0 !important;\n\ttransform: scale(0.8);\n}\n"))
-            (field "on" true)
           ]))
         ])))
         (field "bind" (fn [{state = table [(pair string boolean)];}] ({state}: [
@@ -35286,10 +35090,8 @@
         "plugins/tuturu/scripts/play.vbs" = generators.sourceFile "play.vbs" (generators.vbs.render (play_data generators.vbs));
         "plugins/tuturu/sounds.toml" = generators.sourceFile "sounds.toml" (generators.tomlSource tuturu_sounds_data);
         "plugins/tuturu/src/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (src_window_data generators.luau));
-        "plugins/ui-menu/host.luau" = generators.sourceFile "host.luau" (generators.luau.render (host_data generators.luau));
         "plugins/ui-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource ui_menu_plugin_data);
         "plugins/ui-menu/rail.luau" = generators.sourceFile "rail.luau" (generators.luau.render (rail_data generators.luau));
-        "plugins/ui-menu/ui-menu.css" = stylesheet "ui-menu.css" ui_menu_data;
         "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
         "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource settings_data);
         "themes/ozette-night.css" = "${flakeInputs.tern-themes}/ozette-night.css";
@@ -36032,69 +35834,18 @@
     };
     tuturu_plugin_data = [[["schema" 1] ["id" "tuturu"] ["name" "Tuturu"] ["version" "0.1.0"] ["description" "Plays a sound when a pane raises an unseen alert, an agent yields, or a long command finishes."] ["icon" "bell"] ["window" "src/window.luau"]]];
     tuturu_sounds_data = [[{comment = "The sounds are built by ~/finix/modules/tools/tern/default.nix and named in";} {comment = "<plugin data>/sounds.toml, which wins over this file. These stay empty so a";} {comment = "missing override is silent rather than playing something else.";} ["alert" ""] ["yield" ""] ["done" ""]] [{comment = "Chime only for panes you are not looking at. false chimes for the focused";} {comment = "pane too.";} ["only_unfocused" true]] [{comment = "Shell commands running at least this long chime the done sound when they";} {comment = "finish. 0 chimes every finished command.";} ["min_seconds" 30]]];
-    ui_menu_data = [
-      {
-        select = ".uo-list";
-        set = [
-          ["display" "flex"]
-          ["flex-direction" "column"]
-          ["gap" "1px"]
-          ["padding" "8px 10px"]
-          ["max-width" "520px"]
-        ];
-      }
-      {
-        select = ".uo-group";
-        set = [
-          ["margin" "14px 0 4px"]
-          ["font" "10px/14px var(--mono)"]
-          ["letter-spacing" "0.08em"]
-          ["text-transform" "uppercase"]
-          ["color" "var(--t4)"]
-        ];
-      }
-      {
-        select = ".uo-row";
-        set = [
-          ["display" "flex"]
-          ["align-items" "center"]
-          ["gap" "10px"]
-          ["padding" "6px 8px"]
-          ["border-radius" "8px"]
-          ["cursor" "pointer"]
-        ];
-      }
-      {
-        select = ".uo-row:hover";
-        set = [
-          ["background" "var(--l1)"]
-        ];
-      }
-      {
-        select = ".uo-row input";
-        set = [
-          ["width" "15px"]
-          ["height" "15px"]
-          ["margin" "0"]
-        ];
-      }
-      {
-        select = ".uo-name";
-        set = [
-          ["color" "var(--t1)"]
-        ];
-      }
-    ];
-    ui_menu_plugin_data = [[["schema" 1] ["id" "ui-menu"] ["name" "UI Menu"] ["version" "0.1.0"] ["description" "Every UI tweak this config layers on Tern: a checklist block, palette toggles, and the rail lock."] ["host" "host.luau"] ["window" "window.luau"] ["styles" ["ui-menu.css"]]] [{arrayTable = "blocks";} ["id" "options"] ["title" "UI options"] ["icon" "sliders"] ["palette" true]]];
+    ui_menu_plugin_data = [[["schema" 1] ["id" "ui-menu"] ["name" "UI Menu"] ["version" "0.2.0"] ["description" "Settings menu (Ctrl+Alt+,): the look (Ozette, YoRHa or none), every installed plugin on or off, and this config's UI tweaks."] ["window" "window.luau"]]];
     ui_menu_window_data = {
       assign,
       blank,
+      boolean,
       dot,
       field,
       fn,
       for,
       idx,
       if',
+      ifElse,
       ifExpr,
       infix,
       ipairs,
@@ -36102,240 +35853,156 @@
       local,
       localFunction,
       long,
+      nil,
       not,
+      opt,
+      os,
+      pair,
+      paren,
       pcall,
       require,
       return,
       rows,
       str,
+      string,
       table,
       table',
       tern,
+      tuple,
       type',
+      typed,
       ...
     }: ({
       Rail,
       TWEAKS,
+      saved,
       on,
       by_id,
-      saved,
-      model,
-      LOCKED,
       rail,
-      FIXED,
-      FILES,
-      PINNED,
+      guard,
       paint,
-      save,
-      paint_all,
+      LOOKS,
+      plugins,
       toggle,
-      watch,
+      menu,
     }: [
       (local Rail [require (str "./rail")])
       blank
       (local TWEAKS (rows (table [
         (rows (table [
           (field "id" (str "sessions"))
-          (field "label" (str "sessions"))
+          (field "label" (str "hide session tabs"))
           (field "group" (str "Chrome"))
           (field "css" (long ".tn-session-tab{display:none !important}"))
-          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "account"))
-          (field "label" (str "account"))
+          (field "label" (str "hide account and peers"))
           (field "group" (str "Chrome"))
           (field "css" (long ".tn-peers{display:none !important}"))
-          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "files"))
-          (field "label" (str "files"))
+          (field "label" (str "hide files"))
           (field "group" (str "Chrome"))
           (field "css" (long "html.tn-themed .tb-files {\n\tdisplay: none !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "roomy"))
           (field "label" (str "tall pickers"))
           (field "group" (str "Chrome"))
           (field "css" (long "html.tn-themed #pick .cmdk.tn-pk {\n\tdisplay: flex;\n\tflex-direction: column;\n\tmax-height: calc(87vh - 24px) !important;\n}\nhtml.tn-themed #pick .cmdk.tn-pk > .ck-top,\nhtml.tn-themed #pick .cmdk.tn-pk > .ck-foot {\n\tflex: none;\n}\nhtml.tn-themed #pick .cmdk.tn-pk .ck-list {\n\tmax-height: none !important;\n\tmin-height: 0;\n\tflex: 1 1 auto;\n}"))
-          (field "on" true)
-          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "inbox"))
           (field "label" (str "centred inbox"))
           (field "group" (str "Chrome"))
           (field "css" (long "html.tn-themed #inbox {\n\tleft: 50% !important;\n\ttop: 50% !important;\n\ttransform: translate(-50%, -50%) !important;\n\ttransform-origin: 50% 50% !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "frost"))
           (field "label" (str "modal frost"))
           (field "group" (str "Glass"))
           (field "css" (long "html.tn-themed .cmdk,\nhtml.tn-themed .dlg-card,\nhtml.tn-themed .mdl,\nhtml.tn-themed .pk-sheet,\nhtml.tn-themed .sf-overlay.modal > .sf-ov-card,\nhtml.tn-themed .sf-prefs .pf-editor > .sf-col,\nhtml.tn-themed .tn-hd,\nhtml.tn-themed .tn-sc {\n\t-webkit-backdrop-filter: blur(40px) saturate(190%) !important;\n\tbackdrop-filter: blur(40px) saturate(190%) !important;\n}"))
-          (field "on" true)
         ]))
-        blank
-        blank
         (rows (table [
           (field "id" (str "width"))
           (field "label" (str "rail width"))
           (field "group" (str "Rail"))
-          (field "css" (long "html.tabs-v {\n\t--vt-w: 252px;\n}\nhtml.lay-rail.tabs-h #tabbar {\n\twidth: 236px !important;\n}\nhtml.lay-rail.tabs-h #panel {\n\tleft: calc(236px * var(--tn-zoom, 1)) !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
-        ]))
-        (rows (table [
-          (field "id" (str "spacing"))
-          (field "label" (str "rail spacing"))
-          (field "group" (str "Rail"))
-          (field "css" (long "html.tabs-v #sidebar {\n\tpadding: 54px 8px 12px 10px !important;\n\tgap: 1px !important;\n}\nhtml.tabs-v #sidebar .nav-group {\n\tgap: 1px !important;\n\tmargin-bottom: 10px !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
-        ]))
-        (rows (table [
-          (field "id" (str "heads"))
-          (field "label" (str "section heads"))
-          (field "group" (str "Rail"))
-          (field "css" (long "html.tabs-v #sidebar .nav-head {\n\theight: 24px !important;\n\tpadding: 0 8px !important;\n\tfont-size: 11px !important;\n\tfont-weight: 600 !important;\n\tletter-spacing: 0.03em !important;\n\ttext-transform: uppercase !important;\n\tcolor: var(--t4) !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
-        ]))
-        (rows (table [
-          (field "id" (str "rows"))
-          (field "label" (str "rail rows"))
-          (field "group" (str "Rail"))
-          (field "css" (long "html.tabs-v #sidebar .nav-row {\n\theight: 34px !important;\n\tpadding: 0 8px !important;\n\tgap: 9px !important;\n\tborder-radius: 9px !important;\n\tfont-size: 13px !important;\n\tcolor: var(--t2) !important;\n\ttransition:\n\t\tbackground-color 0.13s var(--ease),\n\t\tcolor 0.13s var(--ease),\n\t\tbox-shadow 0.13s var(--ease) !important;\n}\nhtml.tabs-v #sidebar .nav-row:hover {\n\tbackground: rgb(from var(--t1) r g b / 6%) !important;\n\tcolor: var(--t1) !important;\n}\nhtml.tabs-v #sidebar .nav-row.on,\nhtml.tabs-v #sidebar .nav-row.sel,\nhtml.tabs-v #sidebar .nav-row.focused {\n\tbackground: rgb(from var(--accent) r g b / 13%) !important;\n\tcolor: var(--t1) !important;\n\tbox-shadow: inset 2px 0 0 var(--accent) !important;\n}\nhtml.tabs-v #sidebar .nav-row .ico {\n\tcolor: inherit !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
-        ]))
-        (rows (table [
-          (field "id" (str "keys"))
-          (field "label" (str "key hints"))
-          (field "group" (str "Rail"))
-          (field "css" (long "html.tabs-v #sidebar .nav-row .meta.keys {\n\topacity: 0 !important;\n\ttransition: opacity 0.13s var(--ease) !important;\n}\nhtml.tabs-v #sidebar .nav-row:hover .meta.keys {\n\topacity: 1 !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
-        ]))
-        (rows (table [
-          (field "id" (str "colours"))
-          (field "label" (str "tab colours"))
-          (field "group" (str "Rail"))
-          (field "css" (long "html.tabs-v #sidebar .nav-row[data-tc] .tn-tc {\n\twidth: 8px !important;\n\theight: 8px !important;\n}\nhtml.tabs-v #sidebar .nav-row[data-tc] .lbl {\n\tfont-weight: 550 !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
-        ]))
-        (rows (table [
-          (field "id" (str "find"))
-          (field "label" (str "rail find"))
-          (field "group" (str "Rail"))
-          (field "css" (long "html.tabs-v .tn-vt-find {\n\theight: 30px !important;\n\tmargin: 0 2px 8px !important;\n\tborder-radius: 9px !important;\n\tbackground: var(--l1) !important;\n\tbox-shadow: inset 0 0 0 1px var(--l2) !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
-        ]))
-        (rows (table [
-          (field "id" (str "chips"))
-          (field "label" (str "session chips"))
-          (field "group" (str "Rail"))
-          (field "css" (long "html.tabs-v #tabbar .tn-session-tab {\n\theight: 26px !important;\n\tpadding: 0 9px !important;\n\tborder-radius: 8px !important;\n\tfont-size: 12px !important;\n\tcolor: var(--t2) !important;\n\ttransition: background-color 0.13s var(--ease), color 0.13s var(--ease) !important;\n}\nhtml.tabs-v #tabbar .tn-session-tab:hover {\n\tbackground: var(--l1) !important;\n\tcolor: var(--t1) !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
+          (field "css" (long "html.lay-rail.tabs-h #tabbar {\n\twidth: 236px !important;\n}\nhtml.lay-rail.tabs-h #panel {\n\tleft: calc(236px * var(--tn-zoom, 1)) !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "tabs"))
           (field "label" (str "tab rows"))
           (field "group" (str "Rail"))
           (field "css" (long "html.lay-rail.tabs-h .tt {\n\theight: 38px !important;\n\tmargin: 0 4px !important;\n\tpadding: 0 10px !important;\n\tborder-radius: 10px !important;\n\ttransition: background-color 0.13s var(--ease), color 0.13s var(--ease) !important;\n}\nhtml.lay-rail.tabs-h .tt:hover {\n\tbackground: var(--l1) !important;\n}\nhtml.lay-rail.tabs-h .tt.on {\n\tbackground: var(--panel) !important;\n\tbox-shadow: inset 2px 0 0 var(--accent) !important;\n}\nhtml.lay-rail.tabs-h .tt.on::before,\nhtml.lay-rail.tabs-h .tt.on::after {\n\tdisplay: none !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "buttons"))
           (field "label" (str "rail buttons"))
           (field "group" (str "Rail"))
           (field "css" (long "html.lay-rail.tabs-h .tb-row {\n\theight: 28px !important;\n\tmargin: 2px 6px 0 !important;\n\tpadding: 0 10px !important;\n\tborder-radius: 9px !important;\n}\nhtml.lay-rail.tabs-h .tb-add {\n\tmargin: 4px 6px 0 !important;\n\tborder-radius: 9px !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "centering"))
           (field "label" (str "rail centering"))
           (field "group" (str "Rail"))
-          (field "css" (long "html.tabs-v #sidebar > nav.tn-vt {\n\tdisplay: flex !important;\n\tflex-direction: column !important;\n\tjustify-content: center !important;\n\talign-items: stretch !important;\n}\nhtml.tabs-v #sidebar > nav.tn-vt > .nav-group:first-child {\n\tmargin-top: auto !important;\n}\nhtml.tabs-v #sidebar > nav.tn-vt > .nav-group:last-child {\n\tmargin-bottom: auto !important;\n}\nhtml.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs {\n\tmargin-top: auto !important;\n\tmargin-bottom: auto !important;\n}\nhtml.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {\n\tmargin-top: 0 !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
+          (field "css" (long "html.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs {\n\tmargin-top: auto !important;\n\tmargin-bottom: auto !important;\n}\nhtml.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {\n\tmargin-top: 0 !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bottom"))
           (field "label" (str "rail bottom"))
           (field "group" (str "Rail"))
           (field "css" (long "html.lay-rail.tabs-h #tabbar > .tb-in > .tn-peers {\n\torder: 1 !important;\n\tmargin-top: 0 !important;\n}\nhtml.lay-rail.tabs-h #tabbar {\n\toverflow-y: auto !important;\n}\nhtml.lay-rail.tabs-h #tabbar > .tb-in {\n\tflex: none !important;\n\tmin-height: 100% !important;\n}\nhtml.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs {\n\tflex: none !important;\n\tmargin: 0 !important;\n\toverflow: visible !important;\n}\nhtml.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {\n\tmargin-top: auto !important;\n}"))
-          (field "on" true)
-          (field "quiet" true)
         ]))
         (rows (table [
           (field "id" (str "lock"))
-          (field "label" (str "rail lock"))
+          (field "label" (str "lock the rail layout"))
           (field "group" (str "Layout"))
-          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "answer-bubbles"))
           (field "label" (str "answer bubbles"))
           (field "group" (str "omp"))
           (field "css" (long ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md,\n.sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md {\n\talign-self: flex-start;\n\tmax-width: 82%;\n\tpadding: 10px 16px;\n\tborder-radius: 18px 18px 18px 6px;\n\tbackground: var(--l1);\n\tbox-shadow:\n\t\t0 0 0 1px var(--l1),\n\t\t0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)),\n\t\tinset 0 1px 0 var(--glass-hi);\n}\n\n.sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body {\n\tbox-shadow:\n\t\t0 0 0 1px var(--l1),\n\t\t0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)),\n\t\tinset 0 1px 0 var(--glass-hi);\n}\n\n.sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md .md > :last-child,\n.sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md .md > :last-child {\n\tmargin-bottom: 0;\n}"))
-          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "work-rail"))
           (field "label" (str "work steps on a rail"))
           (field "group" (str "omp"))
           (field "css" (long ".sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md {\n\tfont-size: 13px;\n\tcolor: var(--t2);\n}\n\n.sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md > :last-child {\n\tmargin-bottom: 0;\n}\n\n.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head {\n\tfont-size: 13px;\n\tcolor: var(--t2);\n}\n\n.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head .sf-t-dim {\n\tcolor: var(--t4);\n}\n\n.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-body {\n\tmargin-left: 7px;\n\tpadding-left: 15px;\n\tbox-shadow: inset 1px 0 0 var(--l2);\n}"))
-          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "row-keys"))
           (field "label" (str "hide rail row shortcuts"))
           (field "group" (str "Rail"))
           (field "css" (long "html.tn-themed #tabbar .tb-row .kbds {\n\tdisplay: none !important;\n}"))
-          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "turn-stats"))
           (field "label" (str "hide turn stats"))
           (field "group" (str "omp"))
           (field "css" (long "html.tn-themed [data-role='omp.turn.usage'] {\n\tdisplay: none !important;\n}"))
-          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "chat-look"))
           (field "label" (str "Grok chat"))
           (field "group" (str "omp chat"))
           (field "css" (long ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] [data-role^='omp.thinking'],\n:root:not(#s0):not(#s1) [data-role='omp.chat.dock'] :is([data-role='omp.composer.usage'], [data-role='omp.composer.extras']) {\n\tdisplay: none !important;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body {\n\tmax-width: min(80%, 560px);\n}\n\n:root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md {\n\talign-self: auto;\n\tmax-width: none;\n\tpadding: 0;\n\tborder-radius: 0;\n\tbackground: none;\n\tbox-shadow: none;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .md {\n\tfont-size: 15px;\n\tline-height: 22px;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] {\n\tpadding: 0;\n\tborder: 0;\n\tbackground: none;\n\tbox-shadow: none;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-head {\n\tdisplay: none;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-body {\n\tpadding: 0;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] [data-role='omp.advisor.note'] {\n\tcolor: var(--ink3, var(--t4));\n\twhite-space: nowrap;\n\toverflow: hidden;\n\ttext-overflow: ellipsis;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] [data-role='omp.advisor.note']::before {\n\tcontent: \"Advisor · \";\n}"))
-          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "chat-frost"))
           (field "label" (str "frosted bubbles"))
           (field "group" (str "omp chat"))
           (field "css" (long ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body,\n:root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'] {\n\tbackground: var(--frost, light-dark(var(--pop-bg), var(--raise)));\n\tbackdrop-filter: blur(18px) saturate(130%);\n\tbox-shadow: 0 0 0 1px var(--line, var(--l2));\n}"))
-          (field "on" true)
         ]))
         (rows (table [
           (field "id" (str "chat-still"))
           (field "label" (str "no streaming"))
           (field "group" (str "omp chat"))
           (field "css" (long ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .md.streaming {\n\tdisplay: none;\n}"))
-          (field "on" true)
         ]))
       ])))
-      blank
-      (local on (table []))
-      (local by_id (table []))
       blank
       (for [{_ = null;} {t = null;}] [ipairs (dot Rail "tweaks")] ({
         _,
@@ -36344,45 +36011,19 @@
         [(dot table' "insert") TWEAKS t]
       ]))
       blank
+      (local saved [(dot tern "kv.get") (str "on")])
+      (local on (table []))
+      (local by_id (table []))
       (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
         _,
         t,
       }: [
-        (assign (idx on (dot t "id")) (dot t "on"))
+        (assign (idx on (dot t "id")) (infix [[type' saved] "~=" (str "table") "or" (idx saved (dot t "id")) "~=" false]))
         (assign (idx by_id (dot t "id")) t)
       ]))
-      blank
-      (local saved [(dot tern "kv.get") (str "on")])
-      (if' (infix [[type' saved] "==" (str "table")]) [
-        (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
-          _,
-          t,
-        }: [
-          (if' (infix [[type' (idx saved (dot t "id"))] "==" (str "boolean")]) [
-            (assign (idx on (dot t "id")) (idx saved (dot t "id")))
-          ])
-        ]))
-      ])
+      [(dot tern "kv.set") (str "menu") nil]
       blank
       [(dot Rail "bind") on]
-      blank
-      (local model (table []))
-      (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
-        _,
-        t,
-      }: [
-        (assign (idx model (infix [(len model) "+" 1])) (table [(field "id" (dot t "id")) (field "label" (dot t "label")) (field "group" (dot t "group"))]))
-      ]))
-      [(dot tern "kv.set") (str "menu") model]
-      blank
-      (local LOCKED (rows (table [
-        (str "layout:float")
-        (str "layout:tiles")
-        (str "layout:studio")
-        (str "next_layout")
-        (str "toggle_tab_orientation")
-        (str "tabs:vertical")
-      ])))
       blank
       (localFunction rail [{cx = null;}] ({cx}: [
         [
@@ -36399,87 +36040,37 @@
         ]
       ]))
       blank
-      (for [{_ = null;} {id = null;}] [ipairs LOCKED] ({
-        _,
+      (localFunction guard [{ids = null;} {id = null;} {message = null;}] ({
+        ids,
         id,
+        message,
       }: [
-        [
-          pcall
-          (fn [] [
-            [
-              (dot tern "override")
-              id
-              (fn [{cx = null;}] ({cx}: [
-                (if' (not (dot on "lock")) [
-                  (return false)
-                ])
-                [(dot cx ":toast") (str "info") (str "The rail is locked")]
-                (return true)
-              ]))
-            ]
-          ])
-        ]
+        (for [{_ = null;} {command = null;}] [ipairs ids] ({
+          _,
+          command,
+        }: [
+          [
+            pcall
+            (fn [] [
+              [
+                (dot tern "override")
+                command
+                (fn [{cx = null;}] ({cx}: [
+                  (if' (infix [id "and" (not (idx on id))]) [
+                    (return false)
+                  ])
+                  [(dot cx ":toast") (str "info") message]
+                  (return true)
+                ]))
+              ]
+            ])
+          ]
+        ]))
       ]))
       blank
-      (local FIXED (rows (table [
-        (str "pane_headers:never")
-        (str "pane_headers:split")
-        (str "pane_headers:always")
-        (str "status_bar")
-        (str "interface_style")
-      ])))
-      blank
-      (for [{_ = null;} {id = null;}] [ipairs FIXED] ({
-        _,
-        id,
-      }: [
-        [
-          pcall
-          (fn [] [
-            [
-              (dot tern "override")
-              id
-              (fn [{cx = null;}] ({cx}: [
-                [(dot cx ":toast") (str "info") (str "This config fixes the chrome")]
-                (return true)
-              ]))
-            ]
-          ])
-        ]
-      ]))
-      blank
-      (local FILES (table [(str "files") (str "focus_files") (str "reveal_active_file")]))
-      blank
-      (for [{_ = null;} {id = null;}] [ipairs FILES] ({
-        _,
-        id,
-      }: [
-        [
-          pcall
-          (fn [] [
-            [
-              (dot tern "override")
-              id
-              (fn [{cx = null;}] ({cx}: [
-                (if' (not (dot on "files")) [
-                  (return false)
-                ])
-                [(dot cx ":toast") (str "info") (str "Files are off")]
-                (return true)
-              ]))
-            ]
-          ])
-        ]
-      ]))
-      blank
-      (local PINNED (rows (table [
-        (field "layout" (str "Rail"))
-        (field "tabs" (str "Horizontal"))
-        (field "pane_headers" (str "Never"))
-        (field "density" (str "Compact"))
-        (field "status_bar" true)
-        (field "material" (str "Glass"))
-      ])))
+      [guard (table [(str "layout:float") (str "layout:tiles") (str "layout:studio") (str "next_layout") (str "toggle_tab_orientation") (str "tabs:vertical")]) (str "lock") (str "The rail is locked")]
+      [guard (table [(str "pane_headers:never") (str "pane_headers:split") (str "pane_headers:always") (str "status_bar") (str "interface_style")]) nil (str "This config fixes the chrome")]
+      [guard (table [(str "files") (str "focus_files") (str "reveal_active_file")]) (str "files") (str "Files are off")]
       blank
       [
         (dot tern "on")
@@ -36488,7 +36079,17 @@
           [
             pcall
             (fn [] [
-              [(dot cx "settings:set_many") PINNED]
+              [
+                (dot cx "settings:set_many")
+                (rows (table [
+                  (field "layout" (str "Rail"))
+                  (field "tabs" (str "Horizontal"))
+                  (field "pane_headers" (str "Never"))
+                  (field "density" (str "Compact"))
+                  (field "status_bar" true)
+                  (field "material" (str "Glass"))
+                ]))
+              ]
             ])
           ]
           (if' (dot on "lock") [
@@ -36518,129 +36119,230 @@
         ])
       ]))
       blank
-      (localFunction save [{id = null;}] ({
-        id,
-        saved,
-        out,
-      }: [
-        (local saved [(dot tern "kv.get") (str "on")])
-        (local out (ifExpr [(infix [[type' saved] "==" (str "table")]) saved (table [])]))
-        (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
-          _,
-          t,
-        }: [
-          (if' (infix [[type' (idx out (dot t "id"))] "~=" (str "boolean")]) [
-            (assign (idx out (dot t "id")) (idx on (dot t "id")))
-          ])
-        ]))
-        (if' id [
-          (assign (idx out id) (idx on id))
-        ])
-        [(dot tern "kv.set") (str "on") out]
-      ]))
-      blank
-      (localFunction paint_all [] [
-        (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
-          _,
-          t,
-        }: [
-          [paint t]
-        ]))
-      ])
-      blank
-      (localFunction toggle [{cx = null;} {id = null;}] ({
-        cx,
-        id,
+      (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+        _,
         t,
       }: [
-        (local t (idx by_id id))
-        (if' (not t) [
-          return
-        ])
-        (assign (idx on id) (not (idx on id)))
         [paint t]
-        [save id]
+      ]))
+      blank
+      (local LOOKS (table [(table [(field "id" (str "ozette")) (field "label" (str "Ozette"))]) (table [(field "id" (str "yorha")) (field "label" (str "YoRHa"))])]))
+      blank
+      (localFunction plugins (typed [] (table [(pair string string)])) ({
+        root,
+        found,
+      }: [
+        (local root (infix [(dot tern "plugin.dir") ".." (str "/..")]))
+        (local found (table []))
+        (for [{_ = null;} {entry = null;}] [ipairs [(dot tern "fs.list") root]] ({
+          _,
+          entry,
+          dir,
+          ok,
+          manifest,
+        }: [
+          (local dir (infix [root ".." (str "/") ".." entry]))
+          (if' [(dot entry ":match") (str "%.path$")] [
+            (assign dir (paren [(dot [(dot tern "fs.read") dir] ":gsub") (str "%s+$") (str "")]))
+          ])
+          (local [ok manifest] [pcall (dot tern "fs.read") (infix [dir ".." (str "/plugin.toml")])])
+          (if' ok ({
+            id,
+            name,
+          }: [
+            (assign manifest (infix [(str "\n") ".." manifest]))
+            (local [id name] (tuple [[(dot manifest ":match") (str "\nid%s*=%s*\"([^\"]+)\"")] [(dot manifest ":match") (str "\nname%s*=%s*\"([^\"]+)\"")]]))
+            (if' id [
+              (assign (idx found id) (infix [name "or" id]))
+            ])
+          ]))
+        ]))
+        (return found)
+      ]))
+      blank
+      (localFunction toggle [{cx = null;} {t = null;}] ({
+        cx,
+        t,
+      }: [
+        (assign (idx on (dot t "id")) (not (idx on (dot t "id"))))
+        [(dot tern "kv.set") (str "on") on]
+        [paint t]
         (if' (dot t "apply") [
           [(dot t "apply") cx]
         ])
-        (if' (infix [id "==" (str "lock") "and" (dot on "lock")]) [
+        (if' (infix [(dot t "id") "==" (str "lock") "and" (dot on "lock")]) [
           [rail cx]
         ])
         [(dot tern "chrome.refresh")]
       ]))
       blank
-      (localFunction watch [] [
+      (localFunction menu [{cx = null;}] ({
+        cx,
+        disabled,
+        off,
+        installed,
+        items,
+        add,
+        look,
+        ids,
+        groups,
+      }: [
+        (local disabled (infix [[(dot cx "settings:get") (str "plugins_disabled")] "or" (table [])]))
+        [(dot table' "sort") disabled]
+        (local off (table []))
+        (for [{_ = null;} {id = null;}] [ipairs disabled] ({
+          _,
+          id,
+        }: [
+          (assign (idx off id) true)
+        ]))
+        (local installed [plugins])
+        (local items (table []))
+        (localFunction add [{item = null;} {state = opt boolean;}] ({
+          item,
+          state,
+        }: [
+          (if' (infix [state "~=" nil]) [
+            (assign (dot item "detail") (ifExpr [state (str "on") (str "off")]))
+            (assign (dot item "current") state)
+          ])
+          (assign (idx items (infix [(len items) "+" 1])) item)
+        ]))
+        (local look (str ""))
+        (for [{_ = null;} {l = null;}] [ipairs LOOKS] ({
+          _,
+          l,
+        }: [
+          (if' (infix [(idx installed (dot l "id")) "and" (not (idx off (dot l "id")))]) [
+            (assign look (dot l "id"))
+          ])
+        ]))
+        (for [{_ = null;} {l = null;}] [ipairs LOOKS] ({
+          _,
+          l,
+        }: [
+          (if' (idx installed (dot l "id")) [
+            [add (table [(field "label" (dot l "label")) (field "group" (str "Look")) (field "icon" (str "palette")) (field "look" (dot l "id")) (field "current" (infix [look "==" (dot l "id")]))])]
+          ])
+        ]))
+        [add (table [(field "label" (str "None")) (field "group" (str "Look")) (field "icon" (str "palette")) (field "look" (str "")) (field "current" (infix [look "==" (str "")]))])]
+        (local ids (table []))
+        (for [{id = null;}] installed ({id}: [
+          (if' (infix [id "~=" (dot tern "plugin.id") "and" id "~=" (str "ozette") "and" id "~=" (str "yorha")]) [
+            (assign (idx ids (infix [(len ids) "+" 1])) id)
+          ])
+        ]))
         [
-          (dot tern "timer")
-          250
-          (fn [{cx = null;}] ({
-            cx,
-            saved,
-            changed,
+          (dot table' "sort")
+          ids
+          (fn [{a = null;} {b = null;}] ({
+            a,
+            b,
           }: [
-            (local saved [(dot tern "kv.get") (str "on")])
-            (local changed false)
-            (if' (infix [[type' saved] "==" (str "table")]) [
-              (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
-                _,
-                t,
-                want,
-              }: [
-                (local want (idx saved (dot t "id")))
-                (if' (infix [[type' want] "==" (str "boolean") "and" want "~=" (idx on (dot t "id"))]) [
-                  (assign (idx on (dot t "id")) want)
-                  [paint t]
-                  (if' (infix [(dot t "apply") "and" cx]) [
-                    [(dot t "apply") cx]
-                  ])
-                  (if' (infix [(dot t "id") "==" (str "lock") "and" want]) [
-                    [rail cx]
-                  ])
-                  (assign changed true)
-                ])
-              ]))
-            ])
-            (if' changed [
-              [(dot tern "chrome.refresh")]
-            ])
-            [watch]
+            (return (infix [[(dot (idx installed a) ":lower")] "<" [(dot (idx installed b) ":lower")]]))
           ]))
         ]
-      ])
-      blank
-      [
-        (dot tern "command")
-        (rows (table [
-          (field "id" (str "options"))
-          (field "title" (str "UI: options…"))
-          (field "icon" (str "sliders"))
-          (field "group" (str "UI"))
-          (field "run" (fn [{cx = null;}] ({cx}: [
-            [(dot cx ":new_block") (str "ui-menu.options")]
-          ])))
+        (for [{_ = null;} {id = null;}] [ipairs ids] ({
+          _,
+          id,
+        }: [
+          [add (table [(field "label" (idx installed id)) (field "group" (str "Plugins")) (field "icon" (str "puzzle")) (field "plugin" id)]) (not (idx off id))]
         ]))
-      ]
-      blank
-      (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
-        _,
-        t,
-      }: [
+        (local groups (table []))
+        (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+          _,
+          t,
+        }: [
+          (if' (not (idx groups (dot t "group"))) [
+            (assign (idx groups (dot t "group")) (table []))
+            (assign (idx groups (infix [(len groups) "+" 1])) (dot t "group"))
+          ])
+          [(dot table' "insert") (idx groups (dot t "group")) t]
+        ]))
+        (for [{_ = null;} {group = null;}] [ipairs groups] ({
+          _,
+          group,
+        }: [
+          (for [{_ = null;} {t = null;}] [ipairs (idx groups group)] ({
+            _,
+            t,
+          }: [
+            [add (table [(field "label" (dot t "label")) (field "group" group) (field "tweak" (dot t "id"))]) (idx on (dot t "id"))]
+          ]))
+        ]))
         [
-          (dot tern "command")
-          (rows (table [
-            (field "id" (infix [(str "toggle-") ".." (dot t "id")]))
-            (field "group" (str "UI"))
-            (field "title" (infix [(str "UI: show or hide the ") ".." (dot t "label")]))
-            (field "run" (fn [{cx = null;}] ({cx}: [
-              [toggle cx (dot t "id")]
-            ])))
+          (dot [(dot cx ":pick") (table [(field "items" items) (field "placeholder" (str "Settings")) (field "icon" (str "sliders")) (field "action" (str "toggle"))])] ":next")
+          (fn [{item = null;} {_ = null;} {again = null;}] ({
+            item,
+            _,
+            again,
+            list,
+          }: [
+            (if' (infix [(not item) "or" (not again)]) [
+              return
+            ])
+            (if' (dot item "tweak") [
+              [toggle again (idx by_id (dot item "tweak"))]
+              (return [menu again])
+            ])
+            (ifElse (dot item "plugin") [
+                (assign (idx off (dot item "plugin")) (not (idx off (dot item "plugin"))))
+              ] [
+                (for [{_ = null;} {l = null;}] [ipairs LOOKS] ({
+                  _,
+                  l,
+                }: [
+                  (assign (idx off (dot l "id")) (infix [(dot l "id") "~=" (dot item "look")]))
+                ]))
+              ])
+            (local list (table []))
+            (for [{id = null;} {yes = null;}] off ({
+              id,
+              yes,
+            }: [
+              (if' (infix [yes "and" id "~=" (dot tern "plugin.id")]) [
+                (assign (idx list (infix [(len list) "+" 1])) id)
+              ])
+            ]))
+            [(dot table' "sort") list]
+            (if' (infix [[(dot table' "concat") list (str " ")] "==" [(dot table' "concat") disabled (str " ")]]) [
+              (return [menu again])
+            ])
+            [(dot tern "kv.set") (str "reopen") (table [(field "at" [(dot os "time")]) (field "window" [(dot again ":window_key")])])]
+            [(dot again "settings:set") (str "plugins_disabled") [(dot tern "json.array") list]]
           ]))
         ]
       ]))
       blank
-      [paint_all]
-      [save]
-      [watch]
+      [
+        (dot tern "command")
+        (rows (table [
+          (field "id" (str "menu"))
+          (field "title" (str "Settings menu: look, plugins and UI tweaks"))
+          (field "icon" (str "sliders"))
+          (field "keys" (table [(str "ctrl+alt+,")]))
+          (field "run" (fn [{cx = null;}] ({cx}: [
+            [menu cx]
+          ])))
+        ]))
+      ]
+      blank
+      [
+        (dot tern "timer")
+        0
+        (fn [{cx = null;}] ({
+          cx,
+          asked,
+        }: [
+          (local asked [(dot tern "kv.get") (str "reopen")])
+          (if' (infix [cx "and" [type' asked] "==" (str "table") "and" (dot asked "window") "==" [(dot cx ":window_key")]]) [
+            [(dot tern "kv.set") (str "reopen") nil]
+            (if' (infix [[(dot os "time")] "-" (dot asked "at") "<=" 5]) [
+              [menu cx]
+            ])
+          ])
+        ]))
+      ]
     ]);
     unreal_data = {
       "Engine.ini" = {
@@ -39578,7 +39280,6 @@
         gtk_colors_data = "modules/desktop/session/theme/templates/gtk-colors.data.nix";
         hex_spiral_data = "modules/desktop/session/tomoe/shaders/hex-spiral.data.nix";
         home_reset = "modules/finix/desktop/home-reset.nix";
-        host_data = "modules/tools/tern/config/plugins/ui-menu/host.data.nix";
         hosts_shared = "modules/hosts/shared.nix";
         hosts_wireguard = "modules/hosts/wireguard.nix";
         hud_data = "modules/desktop/session/tomoe/lisp/hud.data.nix";
@@ -39704,7 +39405,6 @@
         tui_launcher = "modules/desktop/apps/tui-launcher.nix";
         tuturu_plugin_data = "modules/tools/tern/config/plugins/tuturu/plugin.data.nix";
         tuturu_sounds_data = "modules/tools/tern/config/plugins/tuturu/sounds.data.nix";
-        ui_menu_data = "modules/tools/tern/config/plugins/ui-menu/ui-menu.data.nix";
         ui_menu_plugin_data = "modules/tools/tern/config/plugins/ui-menu/plugin.data.nix";
         ui_menu_window_data = "modules/tools/tern/config/plugins/ui-menu/window.data.nix";
         unreal_data = "modules/gaming/unreal.data.nix";

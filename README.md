@@ -280,7 +280,7 @@ Every converted file passed its gate. A language whose printer can reproduce its
 | --- | --- | --- |
 | Lisp (15 files; tomoe's probe and sounds forms, rendered inline, gated on bytes too) | bytes | SBCL's reader, the one tomoe and ekko run |
 | shell (3 files) | bytes; binding names as Nix variables changed no rendered byte (`beat-saber-lock`, `omp-box` and both colour schemes' `osc.sh`) | `bash -n`, `shellcheck -S warning` |
-| Luau (8 files; Agent Tabs' `window.luau` is text, checked the same way) | bytes, at conversion and again when its names became Nix bindings | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
+| Luau (7 files; Agent Tabs' `window.luau` is text, checked the same way) | bytes, at conversion and again when its names became Nix bindings | `luau-analyze` reports no syntax error (its type errors need Tern's `tern.d.luau` definitions, which the repo does not hold) |
 | VBScript (1 file) | bytes, again after its names became Nix bindings and its operators infix lists | `strictix import vbs`, a parse by tree-sitter-VB6-VBA-VBS (no VBScript checker runs on Linux) |
 | patches (3 files) | bytes | `git apply --check` against the source each patches |
 | markdown (7 files) | bytes, again after text became only literal and a table's header typed | comrak (CommonMark and GFM tables): the rendered file's AST equals the AST of comrak's own CommonMark rendering of it |
@@ -1021,8 +1021,8 @@ In Tern, omp's transcript gives each thing one level of attention:
 
 - **The answer** that ends a turn sits in a bubble on the left, opposite your messages on the right.
 - **Work** folds into one row per stretch of steps. A row leads with the sentence the model wrote before those steps, then the step count and time; a row with no such sentence reads **Worked for …**. It stays open while it runs and folds when the next sentence or the answer arrives. Folded, the sentence is cut to one line; open, it wraps in full with its links. Open the row for the model's reasoning, any further paragraphs and each step; open a step for its code and output.
-- **Turn stats** (time, tokens, cost under each answer) are hidden by **hide turn stats** in Tern's UI options block; untick it to bring them back.
-- **Chat looks** are three ticks in the **omp chat** group of Tern's UI options: **Grok chat** (unboxed 15/22 px answers, your message capped at 560 px, thinking and the composer's usage hidden, advisor notes as one dim "Advisor · …" line), **frosted bubbles** (your message and the composer frosted with a hairline) and **no streaming** (an answer shows once it is written). They style the `omp.chat.msg`, `omp.chat.dock` and `omp.chat.advice` blocks from [chat-look.ts](modules/dev/ai/omp/chat-look.ts), so they reach every omp chat, bots included. They inherit the rest from the Tern base sheet (`min.css` in tern-scratch): its tokens, column, fonts and hairlines, with Tern's own variables as the fallback without it.
+- **Turn stats** (time, tokens, cost under each answer) are hidden by **hide turn stats** in Tern's settings menu (Ctrl+Alt+,, the UI Menu plugin); toggle it off to bring them back.
+- **Chat looks** are three toggles in the **omp chat** group of Tern's settings menu: **Grok chat** (unboxed 15/22 px answers, your message capped at 560 px, thinking and the composer's usage hidden, advisor notes as one dim "Advisor · …" line), **frosted bubbles** (your message and the composer frosted with a hairline) and **no streaming** (an answer shows once it is written). They style the `omp.chat.msg`, `omp.chat.dock` and `omp.chat.advice` blocks from [chat-look.ts](modules/dev/ai/omp/chat-look.ts), so they reach every omp chat, bots included. They inherit the rest from the Tern base sheet (`min.css` in tern-scratch): its tokens, column, fonts and hairlines, with Tern's own variables as the fallback without it.
 - **Failures** show as a red count on their row. A failed step stays listed under the folded row only when the turn ended on it.
 - **Notices** from omp and extensions keep their own small rows, inside a work row when they land mid-work.
 
@@ -1032,7 +1032,7 @@ The pieces:
 - [compact-eval.ts](modules/dev/ai/omp/compact-eval.ts) folds eval steps to their title, drops language badges, and names untitled steps after the tool they call or their first line.
 - [work-fold.ts](modules/dev/ai/omp/work-fold.ts) builds the rows. Your messages, skill and collab prompts, `!`/`$` commands and compaction markers start a new stretch.
 - [chat-look.ts](modules/dev/ai/omp/chat-look.ts) wraps each of your messages and the model's in an `omp.chat.msg` block, advisor notes in `omp.chat.advice` and the composer area in `omp.chat.dock`, for the chat looks to style. With tool activity hidden it tells the model so, to say in words what it found and ran. omp-bot loads it and `work-fold.ts` into every bot.
-- The answer bubble, the quieter sentences, the rail under an open row and the chat looks are tweaks in the [UI Menu](modules/tools/tern/config/plugins/ui-menu/window.luau) Tern plugin.
+- The answer bubble, the quieter sentences, the rail under an open row and the chat looks are tweaks in the [UI Menu](modules/tools/tern/config/plugins/ui-menu/window.luau) Tern plugin, whose settings menu (Ctrl+Alt+, or the palette's **Settings menu**) also picks the look (Ozette, YoRHa or none) and turns each installed plugin on or off.
 
 omp is pinned by Nix, so its startup update check is off.
 
