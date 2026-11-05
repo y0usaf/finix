@@ -1258,8 +1258,8 @@
           # Headless Chromium the box keeps running, each with its DevTools on 127.0.0.1:PORT inside the box
           # for a boxed bot's browser.cdpUrl. A profile lives on a share (a bot's persist path), and its browser
           # waits until that share is mounted.
-          browsers.baobao = {
-            profile = "${home}/.local/state/baobao/chromium";
+          browsers.baobot = {
+            profile = "${home}/.local/state/baobot/chromium";
             port = 9222;
           };
           sharesDir = "${state}/shares";
