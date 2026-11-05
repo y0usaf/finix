@@ -25662,19 +25662,19 @@
           set = [
             ["font-size" "11px"]
             ["color" "var(--t4)"]
-            ["font-family" "Geist, system-ui, sans-serif"]
+            ["font-family" "var(--sans)"]
           ];
         }
       ]
       ++ lib.concatLists (lib.imap0 (i: label: [
           {
-            select = "${row}[title*=\"\\206A\"]${mark i} .sub::before";
+            select = "${row}.working${mark i} .sub::before";
             set = [
               ["content" "\"Working · ${label}\" !important"]
             ];
           }
           {
-            select = "${row}:not([title*=\"\\206A\"])${mark i} .mk::before";
+            select = "${row}:not(.working)${mark i} .mk::before";
             set = [
               ["content" "\"${label}\" !important"]
             ];
@@ -25834,7 +25834,7 @@
       (local SECTIONS (table [(str "pinned") (str "needs") (str "working") (str "idle")]))
       (local SECTION_MARK (table [(field "pinned" (str [(unicode "2061")])) (field "needs" (str [(unicode "2062")])) (field "working" (str [(unicode "2063")])) (field "idle" (str [(unicode "2064")]))]))
       (local STATUS_MARK (rows (table [
-        (field "working" (str [(unicode "206A")]))
+        (field "working" (str ""))
         (field "input" (str [(unicode "206B")]))
         (field "completed" (str [(unicode "206C")]))
         (field "failed" (str [(unicode "206D")]))
@@ -26520,29 +26520,22 @@
         ];
       }
       {
-        select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before";
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c[data-st='working']::before";
         set = [
-          ["content" "\"\""]
-          ["position" "absolute"]
+          ["inset" "-4px"]
           ["box-sizing" "border-box"]
-          ["border-radius" "50%"]
-          ["pointer-events" "none"]
-        ];
-      }
-      {
-        select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc])[title*=\"\\206A\"] .tn-dk-c::before";
-        set = [
-          ["left" "-4px"]
-          ["top" "-4px"]
-          ["width" "calc(100% + 8px)"]
-          ["height" "calc(100% + 8px)"]
           ["border" "2px dashed var(--pill)"]
+          ["border-radius" "50%"]
           ["animation" "arc-spin 2.4s linear infinite"]
         ];
       }
       {
         select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before";
         set = [
+          ["content" "\"\""]
+          ["position" "absolute"]
+          ["border-radius" "50%"]
+          ["pointer-events" "none"]
           ["right" "-3px"]
           ["bottom" "-3px"]
           ["width" "10px"]
@@ -26552,28 +26545,28 @@
         ];
       }
       {
-        select = "html.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub";
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:is(.working, [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub";
         set = [
           ["font-size" "0 !important"]
         ];
       }
       {
-        select = "html.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::before";
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:is(.working, [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::before";
         set = [
           ["font-size" "12px"]
           ["font-weight" "500"]
-          ["font-family" "Geist, system-ui, sans-serif"]
+          ["font-family" "var(--sans)"]
           ["color" "var(--pill)"]
         ];
       }
       {
-        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"]";
+        select = "html.lay-rail.tabs-h .tb-tabs .tt.working";
         set = [
           ["--pill" "light-dark(#0f766e, #5eead4)"]
         ];
       }
       {
-        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] .sub::before";
+        select = "html.lay-rail.tabs-h .tb-tabs .tt.working .sub::before";
         set = [
           ["content" "\"Working\""]
         ];
@@ -26638,13 +26631,13 @@
         ];
       }
       {
-        select = "html.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub > *";
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:is(.working, [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub > *";
         set = [
           ["display" "none !important"]
         ];
       }
       {
-        select = "html.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::after";
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:is(.working, [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::after";
         set = [
           ["display" "none !important"]
         ];
@@ -37296,7 +37289,6 @@
         set = [
           ["--page" "transparent"]
           ["--panel" "transparent"]
-          ["--topbar-bg" "transparent"]
           ["--tn-page-a" "0"]
           ["--tn-panel-a" "0"]
           ["--tv-bg" "transparent"]
