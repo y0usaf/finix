@@ -368,6 +368,14 @@
         "Plays with terminal UI for its own sake (deck layouts, sidebar chrome, status-line stats), so small reversible experiments are welcome."
       ])
     ];
+    account_data = [
+      {
+        select = ".tn-peers";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
     agent_slack = {
       lib,
       pkgs,
@@ -2226,6 +2234,31 @@
       };
       environment.systemPackages = [pkgs.android-tools];
     };
+    answer_bubbles_data = [
+      {
+        select = ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
+        set = [
+          ["align-self" "flex-start"]
+          ["max-width" "82%"]
+          ["padding" "10px 16px"]
+          ["border-radius" "18px 18px 18px 6px"]
+          ["background" "var(--l1)"]
+          ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
+        ];
+      }
+      {
+        select = ".sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body";
+        set = [
+          ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
+        ];
+      }
+      {
+        select = ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md .md > :last-child, .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md .md > :last-child";
+        set = [
+          ["margin-bottom" "0"]
+        ];
+      }
+    ];
     apply_data = {
       None,
       OSError,
@@ -4136,8 +4169,6 @@
         ];
       }
     ];
-    attention_plugin_data = [[["schema" 1] ["id" "attention"] ["name" "Attention"] ["version" "0.1.0"] ["description" "Colours the pane status dot: violet when a notification lands, orange when an agent waits on you."] ["window" "window.luau"] ["styles" ["attention.css"]]]];
-    attention_window_data = {blank, ...}: [blank];
     attic = {
       lib,
       pkgs,
@@ -6798,6 +6829,1459 @@
         finix = ["fee nix" "finnix" "fi nix"];
       };
     };
+    bot_answer_bubbles_data = [
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#ob) [data-role='omp.bot.xmsg']";
+        set = [
+          ["align-self" "flex-start"]
+          ["max-width" "min(80%, 560px)"]
+          ["margin" "0"]
+          ["padding" "7px 12px"]
+          ["border-radius" "var(--r-card)"]
+          ["background" "rgb(from var(--t1) r g b / 6%)"]
+          ["box-shadow" "none"]
+        ];
+      }
+    ];
+    bot_ask_data = [
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.editor.ask']";
+        set = [
+          ["width" "min(100%, 720px)"]
+          ["margin" "8px auto"]
+          ["padding" "16px"]
+          ["border-radius" "var(--r-card)"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.question']";
+        set = [
+          ["font-weight" "600"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options']";
+        set = [
+          ["margin-top" "8px"]
+          ["--ask-mark" "20px"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item::before";
+        set = [
+          ["display" "grid"]
+          ["place-items" "center"]
+          ["left" "12px"]
+          ["font" "600 11.5px/1 var(--mono, ui-monospace, monospace)"]
+          ["color" "var(--t2)"]
+          ["background" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:is([data-tone='accent'], [data-tone='success'])::before";
+        set = [
+          ["color" "light-dark(#fff, #0b0b0c)"]
+          ["background" "var(--t1)"]
+          ["box-shadow" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item .sf-item-ic";
+        set = [
+          ["display" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(1)::before";
+        set = [
+          ["content" "'1'"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(2)::before";
+        set = [
+          ["content" "'2'"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(3)::before";
+        set = [
+          ["content" "'3'"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(4)::before";
+        set = [
+          ["content" "'4'"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(5)::before";
+        set = [
+          ["content" "'5'"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(6)::before";
+        set = [
+          ["content" "'6'"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(7)::before";
+        set = [
+          ["content" "'7'"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(8)::before";
+        set = [
+          ["content" "'8'"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options'] .sf-item:nth-child(9)::before";
+        set = [
+          ["content" "'9'"]
+        ];
+      }
+    ];
+    bot_chao_data = [
+      {
+        select = "[data-role^='omp.bot.tempo.'], [data-role^='omp.bot.type.']";
+        set = [
+          ["position" "relative"]
+          ["flex" "none"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.type.neutral']";
+        set = [
+          ["--xb" "color-mix(in srgb, var(--t) 35%, #fff)"]
+          ["--xm" "color-mix(in srgb, var(--t) 50%, #fff)"]
+          ["--xs" "color-mix(in srgb, var(--t) 70%, #fff)"]
+          ["--xc" "color-mix(in srgb, var(--t) 82%, #000)"]
+          ["--xe" "color-mix(in srgb, var(--t) 55%, #000)"]
+          ["--xw" "#f8f8f8"]
+          ["--xa" "#f8f820"]
+          ["--xi" "#d8d868"]
+          ["--xd" "#c0b830"]
+          ["--xn" "#88a850"]
+          ["--xj" "#d8f8b0"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.type.hero']";
+        set = [
+          ["--xb" "#f8f8f8"]
+          ["--xs" "#bec2bf"]
+          ["--xc" "#647c9a"]
+          ["--xe" "#647c9a"]
+          ["--xw" "#f8f8f8"]
+          ["--xj" "#c8ebf1"]
+          ["--xa" "#89a8dd"]
+          ["--xi" "#c8ebf1"]
+          ["--xd" "#647c9a"]
+          ["--xy" "#f7df56"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.type.dark']";
+        set = [
+          ["--xb" "color-mix(in srgb, var(--t) 22%, #152745)"]
+          ["--xe" "#1c63a1"]
+          ["--xw" "#f8f8f8"]
+          ["--xa" "#d52b38"]
+          ["--xi" "#d52b38"]
+          ["--xd" "#a71a30"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.chao.']";
+        set = [
+          ["position" "relative"]
+          ["flex" "none"]
+          ["align-items" "flex-start"]
+          ["cursor" "pointer"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.emote']";
+        set = [
+          ["flex" "none"]
+          ["align-items" "flex-end"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.body']";
+        set = [
+          ["position" "relative"]
+          ["align-items" "center"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.line']";
+        set = [
+          ["flex" "none"]
+          ["height" "var(--p)"]
+          ["justify-content" "center"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.px.']";
+        set = [
+          ["flex" "none"]
+          ["width" "var(--p)"]
+          ["height" "var(--p)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.o']";
+        set = [
+          ["background" "light-dark(#000, #44485e)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.r']";
+        set = [
+          ["background" "#ff4f7b"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.b']";
+        set = [
+          ["background" "var(--xb)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.m']";
+        set = [
+          ["background" "var(--xm)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.s']";
+        set = [
+          ["background" "var(--xs)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.c']";
+        set = [
+          ["background" "var(--xc)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.e']";
+        set = [
+          ["background" "var(--xe)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.a']";
+        set = [
+          ["background" "var(--xa)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.i']";
+        set = [
+          ["background" "var(--xi)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.d']";
+        set = [
+          ["background" "var(--xd)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.n']";
+        set = [
+          ["background" "var(--xn)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.j']";
+        set = [
+          ["background" "var(--xj)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.w']";
+        set = [
+          ["background" "var(--xw)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.px.y']";
+        set = [
+          ["background" "var(--xy)"]
+        ];
+      }
+    ];
+    bot_chao_motion_data = [
+      {
+        select = "[data-role='omp.bot.blink']";
+        set = [
+          ["position" "absolute"]
+          ["inset" "0"]
+          ["align-items" "center"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.blink'] [data-role^='omp.bot.px.']";
+        set = [
+          ["opacity" "0"]
+          ["animation" "chaoBlink 5.2s steps(1) infinite"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.glyph.']";
+        set = [
+          ["animation" "chaoBob 1.8s steps(1) infinite"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.glyph.swirl']";
+        set = [
+          ["animation" "chaoSpin 0.8s steps(4) infinite"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.glyph.ask']";
+        set = [
+          ["animation" "chaoSway 1.2s steps(1) infinite"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.glyph.bang']";
+        set = [
+          ["animation-duration" "0.5s"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.glyph.heart']";
+        set = [
+          ["animation" "chaoRise 1s steps(5) 1 both"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.glyph.droop']";
+        set = [
+          ["transform" "translateY(calc(2 * var(--p)))"]
+          ["animation" "none"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.glyph.z']";
+        set = [
+          ["animation" "chaoZ 2.4s steps(6) infinite"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.chao.drowsy'] [data-role^='omp.bot.glyph.']";
+        set = [
+          ["animation-duration" "4s"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.tempo.calm'] [data-role^='omp.bot.glyph.']";
+        set = [
+          ["animation-duration" "2.6s"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.tempo.brisk'] [data-role^='omp.bot.glyph.']";
+        set = [
+          ["animation-duration" "1.2s"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.tempo.calm'] [data-role='omp.bot.blink'] [data-role^='omp.bot.px.']";
+        set = [
+          ["animation-duration" "7s"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.tempo.brisk'] [data-role='omp.bot.blink'] [data-role^='omp.bot.px.']";
+        set = [
+          ["animation-duration" "3.6s"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.chao.happy'], [data-role='omp.bot.chao.boop'], [data-role='omp.bot.chao.listen'], [data-role^='omp.bot.chao.']:hover";
+        set = [
+          ["animation" "chaoHop 0.6s cubic-bezier(0.3, 0.7, 0.4, 1) 1"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.chao.sleep']:hover";
+        set = [
+          ["animation" "none"]
+        ];
+      }
+      {
+        at = "@keyframes chaoBlink";
+        rules = [
+          {
+            select = "0%, 100%";
+            set = [
+              ["opacity" "0"]
+            ];
+          }
+          {
+            select = "92%, 96%";
+            set = [
+              ["opacity" "1"]
+            ];
+          }
+        ];
+      }
+      {
+        at = "@keyframes chaoBob";
+        rules = [
+          {
+            select = "0%, 100%";
+            set = [
+              ["transform" "translateY(0)"]
+            ];
+          }
+          {
+            select = "50%";
+            set = [
+              ["transform" "translateY(calc(-1 * var(--p)))"]
+            ];
+          }
+        ];
+      }
+      {
+        at = "@keyframes chaoSpin";
+        rules = [
+          {
+            select = "from";
+            set = [
+              ["transform" "rotate(0deg)"]
+            ];
+          }
+          {
+            select = "to";
+            set = [
+              ["transform" "rotate(360deg)"]
+            ];
+          }
+        ];
+      }
+      {
+        at = "@keyframes chaoSway";
+        rules = [
+          {
+            select = "0%, 100%";
+            set = [
+              ["transform" "translateX(0)"]
+            ];
+          }
+          {
+            select = "50%";
+            set = [
+              ["transform" "translateX(var(--p))"]
+            ];
+          }
+        ];
+      }
+      {
+        at = "@keyframes chaoRise";
+        rules = [
+          {
+            select = "from";
+            set = [
+              ["transform" "translateY(calc(3 * var(--p)))"]
+            ];
+          }
+          {
+            select = "to";
+            set = [
+              ["transform" "translateY(0)"]
+            ];
+          }
+        ];
+      }
+      {
+        at = "@keyframes chaoZ";
+        rules = [
+          {
+            select = "from";
+            set = [
+              ["opacity" "1"]
+              ["transform" "translate(0, 0)"]
+            ];
+          }
+          {
+            select = "to";
+            set = [
+              ["opacity" "0"]
+              ["transform" "translate(calc(3 * var(--p)), calc(-4 * var(--p)))"]
+            ];
+          }
+        ];
+      }
+      {
+        at = "@keyframes chaoHop";
+        rules = [
+          {
+            select = "0%, 100%";
+            set = [
+              ["transform" "translateY(0)"]
+            ];
+          }
+          {
+            select = "40%";
+            set = [
+              ["transform" "translateY(calc(-5 * var(--p)))"]
+            ];
+          }
+          {
+            select = "70%";
+            set = [
+              ["transform" "translateY(0)"]
+            ];
+          }
+        ];
+      }
+      {
+        at = "@media (prefers-reduced-motion: reduce)";
+        rules = [
+          {
+            select = "[data-role^='omp.bot.chao.'], [data-role^='omp.bot.chao.'] *";
+            set = [
+              ["animation" "none !important"]
+            ];
+          }
+        ];
+      }
+    ];
+    bot_chat_frost_data = [
+      {
+        select = ":root:not(#b0) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md, :root:not(#b0) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
+        set = [
+          ["background" "light-dark(var(--pop-bg), var(--raise))"]
+          ["backdrop-filter" "blur(18px) saturate(130%)"]
+          ["box-shadow" "0 0 0 1px var(--l2)"]
+        ];
+      }
+    ];
+    bot_chat_look_data = [
+      {
+        select = ":root:not(#b0) [data-role='omp.bot.reply'] [data-role^='omp.thinking']";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = ":root:not(#b0) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md";
+        set = [
+          ["font-size" "15px"]
+          ["line-height" "22px"]
+        ];
+      }
+    ];
+    bot_chat_still_data = [
+      {
+        select = ":root:not(#b0) [data-role='omp.bot.reply'] .md.streaming";
+        set = [
+          ["display" "none"]
+        ];
+      }
+    ];
+    bot_dock_data = [
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.dock'] :is([data-role='omp.composer.context'], [data-role='omp.composer.usage'], [data-role='omp.composer.extras'])";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
+    bot_events_data = [
+      {
+        select = "[data-role='omp.bot.event.row']";
+        set = [
+          ["align-self" "center"]
+          ["max-width" "100%"]
+          ["min-height" "24px"]
+          ["margin-top" "2px"]
+          ["padding" "2px 6px"]
+          ["color" "var(--t3)"]
+          ["font-size" "12px"]
+          ["cursor" "pointer"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.event.row']:hover";
+        set = [
+          ["color" "var(--t2)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.event.action'], [data-role='omp.bot.event.more']";
+        set = [
+          ["flex" "none"]
+          ["color" "var(--t3)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.event.name']";
+        set = [
+          ["max-width" "min(60vw, 360px)"]
+          ["color" "var(--t2)"]
+          ["font-weight" "500"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']";
+        set = [
+          ["--p" "1px"]
+          ["flex" "none"]
+          ["width" "32px"]
+          ["height" "26px"]
+          ["overflow" "hidden"]
+          ["align-items" "center"]
+          ["justify-content" "center"]
+          ["pointer-events" "none"]
+        ];
+      }
+      {
+        select = ":is([data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']) *";
+        set = [
+          ["pointer-events" "none"]
+        ];
+      }
+      {
+        select = ":is([data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']) :is([data-role='omp.bot.emote'], [data-role='omp.bot.chao.idle'] > [data-role='omp.bot.line']:empty)";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = ":is([data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']) :is([data-role^='omp.bot.glyph.'], [data-role='omp.bot.blink'] [data-role^='omp.bot.px.'], [data-role^='omp.bot.chao.'])";
+        set = [
+          ["animation" "none !important"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.event.detail']";
+        set = [
+          ["align-self" "center"]
+          ["width" "min(100%, 720px)"]
+          ["margin" "4px auto 10px"]
+        ];
+      }
+    ];
+    bot_jobs_data = [
+      {
+        select = "[data-role='omp.bot.notice']";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
+    bot_layout_data = [
+      {
+        select = "[data-role^='omp.bot.chat.']";
+        set = [
+          ["padding" "2px 4px 10px 6px"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.hero.']";
+        set = [
+          ["--p" "5px"]
+          ["padding" "48px 0 20px 0"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.top.']";
+        set = [
+          ["--p" "1px"]
+          ["padding" "2px 4px 10px 2px"]
+          ["box-shadow" "0 1px 0 var(--l1)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.floor']";
+        set = [
+          ["height" "34vh"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.'].sf-void";
+        set = [
+          ["display" "flex !important"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.none'], [data-role='omp.bot.none'].sf-void, [data-role='omp.bot.more'], [data-role='omp.bot.more'].sf-void";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
+    bot_names_data = [
+      {
+        select = "[data-role='omp.bot.words']";
+        set = [
+          ["min-width" "0"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.name']";
+        set = [
+          ["font-weight" "600"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.role'], [data-role='omp.bot.say'], [data-role='omp.bot.steps']";
+        set = [
+          ["position" "relative"]
+          ["opacity" "0.58"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.top.'] [data-role='omp.bot.name']";
+        set = [
+          ["margin-left" "2px"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.hello']";
+        set = [
+          ["margin-top" "14px"]
+          ["font-size" "1.5em"]
+          ["line-height" "1.3"]
+          ["font-weight" "600"]
+        ];
+      }
+    ];
+    bot_pages_data = [
+      {
+        select = "[data-role='omp.bot.xpage']";
+        set = [
+          ["width" "min(100%, 960px)"]
+          ["margin" "0 auto"]
+          ["padding" "0 16px 24px"]
+          ["font-family" "var(--sans)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.xtop']";
+        set = [
+          ["padding" "10px 0 4px"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.xhead']";
+        set = [
+          ["padding" "7.5px 13.5px 7.5px 7.5px"]
+          ["border-radius" "calc(var(--r-chip, 6px) * 999)"]
+          ["background" "var(--raise, var(--card))"]
+          ["box-shadow" "0 0 0 0.5px var(--l2), 0 4px 12px -1px rgb(0 0 0 / 8%)"]
+          ["font-size" "14px"]
+          ["font-weight" "500"]
+          ["color" "var(--t1)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.xarrow']";
+        set = [
+          ["margin" "0 0 0 4px"]
+          ["color" "var(--t4)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.xwho']";
+        set = [
+          ["max-width" "22ch"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.xrun.']";
+        set = [
+          ["align-self" "stretch"]
+          ["margin-top" "12px"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.xavatar']";
+        set = [
+          ["margin-bottom" "4px"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.xcol']";
+        set = [
+          ["flex" "1"]
+          ["min-width" "0"]
+          ["align-items" "flex-start"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.xname']";
+        set = [
+          ["max-width" "100%"]
+          ["margin" "0 0 4px 12px"]
+          ["font-size" "13px"]
+          ["line-height" "18px"]
+          ["color" "light-dark(color-mix(in oklab, var(--t) 72%, #000), color-mix(in oklab, var(--t) 85%, #fff))"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.xmsg'] + [data-role='omp.bot.xmsg']";
+        set = [
+          ["margin-top" "4px"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.xfoot']";
+        set = [
+          ["align-self" "stretch"]
+          ["width" "100%"]
+          ["padding" "12px 0"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.xclose']";
+        set = [
+          ["align-self" "center"]
+          ["height" "auto"]
+          ["margin" "0 auto"]
+          ["padding" "8px 16px"]
+          ["border-radius" "calc(var(--r-chip, 6px) * 999)"]
+          ["background" "rgb(from var(--t1) r g b / 6%)"]
+          ["box-shadow" "none"]
+          ["color" "var(--t1)"]
+          ["font-size" "14px"]
+          ["line-height" "20px"]
+          ["transition" "background-color 0.12s ease-out"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.xclose']:hover";
+        set = [
+          ["background" "rgb(from var(--t1) r g b / 10%)"]
+        ];
+      }
+    ];
+    bot_rail_data = [
+      {
+        select = "#tabbar .tt[data-tc='red']";
+        set = [
+          ["--bot" "#ff4d5e"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc='orange']";
+        set = [
+          ["--bot" "#ff8a3d"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc='yellow']";
+        set = [
+          ["--bot" "#f2b705"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc='green']";
+        set = [
+          ["--bot" "#2fbf71"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc='teal']";
+        set = [
+          ["--bot" "#19b8c4"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc='blue']";
+        set = [
+          ["--bot" "#3d7bff"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc='purple']";
+        set = [
+          ["--bot" "#8f6bff"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc='pink']";
+        set = [
+          ["--bot" "#ff5fa8"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc]";
+        set = [
+          ["border" "none"]
+          ["box-shadow" "none"]
+          ["border-radius" "10px"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc].on";
+        set = [
+          ["background" "light-dark(#ececee, #2a2a2d) !important"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .mk.keys, #tabbar .tt[data-tc] .kbd, #tabbar .tt[data-tc] .tn-tc";
+        set = [
+          ["display" "none"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .nm";
+        set = [
+          ["color" "light-dark(#18181b, #f2f2f3)"]
+          ["font-weight" "500"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .sub";
+        set = [
+          ["opacity" "0.55"]
+          ["font-size" "11px"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .sub::after";
+        set = [
+          ["font-family" "var(--sans)"]
+          ["font-size" "11.5px"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .tn-dk-c";
+        set = [
+          ["position" "relative"]
+          ["width" "18px"]
+          ["height" "18px"]
+          ["color" "transparent"]
+          ["background" "none"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .tn-dk-c *";
+        set = [
+          ["opacity" "0"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .tn-dk-c::after";
+        set = [
+          ["content" "''"]
+          ["position" "absolute"]
+          ["left" "-30px"]
+          ["top" "-30px"]
+          ["width" "1px"]
+          ["height" "1px"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .tn-dk-c[data-st='waiting']::before, #tabbar .tt[data-tc] .tn-dk-c[data-st='failed']::before";
+        set = [
+          ["content" "''"]
+          ["position" "absolute"]
+          ["z-index" "1"]
+          ["right" "-4px"]
+          ["top" "-6px"]
+          ["width" "4px"]
+          ["height" "4px"]
+          ["background" "#f0a020"]
+          ["box-shadow" "0 0 0 1px #000"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .tn-dk-c[data-st='working']";
+        set = [
+          ["animation" "railChaoBob 0.8s steps(1) infinite"]
+        ];
+      }
+      {
+        select = "#tabbar .tt[data-tc] .tn-dk-c[data-st='failed']::before";
+        set = [
+          ["background" "#e5484d"]
+        ];
+      }
+      {
+        at = "@keyframes railChaoBob";
+        rules = [
+          {
+            select = "0%, 100%";
+            set = [
+              ["transform" "translateY(0)"]
+            ];
+          }
+          {
+            select = "50%";
+            set = [
+              ["transform" "translateY(-1px)"]
+            ];
+          }
+        ];
+      }
+      {
+        at = "@media (prefers-reduced-motion: reduce)";
+        rules = [
+          {
+            select = "#tabbar .tt[data-tc] .tn-dk-c[data-st='working']";
+            set = [
+              ["animation" "none"]
+            ];
+          }
+        ];
+      }
+    ];
+    bot_spacing_data = [
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.reply'], :root:not(#ob) [data-role='omp.bot.you'], :root:not(#ob) [data-role^='omp.bot.eventbox.']";
+        set = [
+          ["margin" "-4px 0"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.more'] + [data-role='omp.bot.reply']";
+        set = [
+          ["margin-top" "-12px"]
+        ];
+      }
+    ];
+    bot_stop_data = [
+      {
+        select = "[data-role='omp.bot.stop']";
+        set = [
+          ["margin-left" "auto"]
+          ["padding" "2px 8px"]
+          ["border-radius" "9px"]
+          ["font-size" "0.85em"]
+          ["box-shadow" "0 0 0 1px var(--l2)"]
+          ["opacity" "0.75"]
+          ["cursor" "pointer"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.stop']:hover";
+        set = [
+          ["opacity" "1"]
+          ["background" "var(--l1)"]
+        ];
+      }
+    ];
+    bot_text_data = [
+      {
+        select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'], [data-role='omp.bot.xmsg']) .md";
+        set = [
+          ["line-height" "1.45"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'], [data-role='omp.bot.xmsg']) .md > :first-child";
+        set = [
+          ["margin-top" "0"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'], [data-role='omp.bot.xmsg']) .md > :last-child";
+        set = [
+          ["margin-bottom" "0"]
+        ];
+      }
+    ];
+    bot_time_data = [
+      {
+        select = "[data-role='omp.bot.time'], [data-role='omp.bot.xtime']";
+        set = [
+          ["align-self" "stretch"]
+          ["margin" "-2px 0 -8px"]
+          ["text-align" "center"]
+          ["font-size" "12px"]
+          ["line-height" "16px"]
+          ["color" "var(--t2)"]
+          ["font-family" "var(--sans)"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.xtime']";
+        set = [
+          ["margin" "14px 0 -4px"]
+        ];
+      }
+      {
+        select = "[data-role='omp.bot.took']";
+        set = [
+          ["opacity" "0.45"]
+          ["font-size" "0.85em"]
+        ];
+      }
+    ];
+    bot_tints_data = [
+      {
+        select = "[data-role^='omp.bot.chat.'], [data-role^='omp.bot.hero.'], [data-role^='omp.bot.top.'], [data-role^='omp.bot.eventbox.'], [data-role^='omp.bot.xrun.'], [data-role^='omp.bot.xface.']";
+        set = [
+          ["--t" "#8f6bff"]
+          ["--p" "2px"]
+          ["position" "relative"]
+          ["font-family" "var(--sans)"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.'][data-role$='.red']";
+        set = [
+          ["--t" "#ff4d5e"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.'][data-role$='.orange']";
+        set = [
+          ["--t" "#ff8a3d"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.'][data-role$='.yellow']";
+        set = [
+          ["--t" "#f2b705"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.'][data-role$='.green']";
+        set = [
+          ["--t" "#2fbf71"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.'][data-role$='.teal']";
+        set = [
+          ["--t" "#19b8c4"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.'][data-role$='.blue']";
+        set = [
+          ["--t" "#3d7bff"]
+        ];
+      }
+      {
+        select = "[data-role^='omp.bot.'][data-role$='.pink']";
+        set = [
+          ["--t" "#ff5fa8"]
+        ];
+      }
+    ];
+    bot_turn_stats_data = [
+      {
+        select = ":root:not(#b0) [data-role='omp.bot.reply'] [data-role='omp.turn.usage'], :root:not(#b0) [data-role='omp.bot.took']";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
+    bot_work_rail_data = [
+      {
+        select = ":root:not(#b0) [data-role='omp.bot.reply'] [data-role='omp.assistant.note'] .md";
+        set = [
+          ["font-size" "13px"]
+          ["color" "var(--t2)"]
+        ];
+      }
+      {
+        select = ":root:not(#b0) [data-role='omp.bot.reply'] [data-role='omp.assistant.note'] .md > :last-child";
+        set = [
+          ["margin-bottom" "0"]
+        ];
+      }
+      {
+        select = ":root:not(#b0) [data-role='omp.bot.reply'] .sf-section[data-role='omp.notice.work'] > .sf-section-head";
+        set = [
+          ["font-size" "13px"]
+          ["color" "var(--t2)"]
+        ];
+      }
+      {
+        select = ":root:not(#b0) [data-role='omp.bot.reply'] .sf-section[data-role='omp.notice.work'] > .sf-section-head .sf-t-dim";
+        set = [
+          ["color" "var(--t4)"]
+        ];
+      }
+      {
+        select = ":root:not(#b0) [data-role='omp.bot.reply'] .sf-section[data-role='omp.notice.work'] > .sf-section-body";
+        set = [
+          ["margin-left" "7px"]
+          ["padding-left" "15px"]
+          ["box-shadow" "inset 1px 0 0 var(--l2)"]
+        ];
+      }
+    ];
+    bot_yorha_bubbles_data = [
+      {
+        select = ":root:not(#oz) .sf-region.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'])";
+        set = [
+          ["animation" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.reply'] > [data-role^='omp.assistant']";
+        set = [
+          ["position" "relative"]
+          ["overflow" "visible"]
+          ["max-width" "min(92%, 760px)"]
+          ["padding" "20px 18px 14px"]
+          ["background" "var(--yh-paper)"]
+          ["box-shadow" "0 0 0 1px var(--yh-ink)"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.reply']:last-child > [data-role^='omp.assistant']";
+        set = [
+          ["animation" "yh-scan-in calc(120ms * var(--yh-t)) var(--yh-snap) backwards"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.reply'] > [data-role^='omp.assistant']::before";
+        set = [
+          ["content" "\"\""]
+          ["position" "absolute"]
+          ["top" "0"]
+          ["left" "0"]
+          ["right" "0"]
+          ["height" "6px"]
+          ["background" "var(--yh-ink)"]
+          ["transform-origin" "0 0"]
+          ["pointer-events" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.reply']:last-child > [data-role^='omp.assistant']::before";
+        set = [
+          ["animation" "yh-rules calc(100ms * var(--yh-t)) var(--yh-snap) both"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.reply']:last-child > [data-role^='omp.assistant'] .md.streaming > :last-child::after";
+        set = [
+          ["content" "\"\""]
+          ["display" "inline-block"]
+          ["width" "0.5em"]
+          ["height" "1em"]
+          ["margin-left" "3px"]
+          ["vertical-align" "-0.12em"]
+          ["background" "var(--yh-ink)"]
+          ["animation" "yh-blink calc(700ms * var(--yh-t)) steps(1, end) infinite"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
+        set = [
+          ["position" "relative"]
+          ["padding" "20px 18px 14px 34px"]
+          ["background" "var(--yh-ink)"]
+          ["color" "var(--yh-ground)"]
+          ["box-shadow" "0 0 0 1px var(--yh-ink)"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md::after";
+        set = [
+          ["content" "\"\""]
+          ["position" "absolute"]
+          ["top" "0"]
+          ["left" "0"]
+          ["right" "0"]
+          ["height" "6px"]
+          ["background" "#000000"]
+          ["box-shadow" "0 1px 0 var(--yh-ground)"]
+          ["transform-origin" "100% 0"]
+          ["pointer-events" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.you']:last-child .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
+        set = [
+          ["animation" "yh-scan-in calc(120ms * var(--yh-t)) var(--yh-snap) backwards"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.you']:last-child .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md::after";
+        set = [
+          ["animation" "yh-rules calc(100ms * var(--yh-t)) var(--yh-snap) both"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md::before";
+        set = [
+          ["content" "\"\""]
+          ["position" "absolute"]
+          ["left" "12px"]
+          ["top" "28px"]
+          ["width" "7px"]
+          ["height" "7px"]
+          ["background" "var(--yh-ground)"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body, :root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body .md";
+        set = [
+          ["--t1" "var(--yh-ground)"]
+          ["--tv-fg" "var(--yh-ground)"]
+          ["color" "var(--yh-ground)"]
+          ["font" "400 16.5px/24px var(--yh-label)"]
+        ];
+      }
+    ];
+    bot_yorha_labels_data = [
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.time']";
+        set = [
+          ["font" "400 11px/1 var(--yh-label)"]
+          ["letter-spacing" "1.5px"]
+          ["text-transform" "uppercase"]
+          ["color" "var(--yh-i50)"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role^='omp.bot.top.']";
+        set = [
+          ["box-shadow" "0 1px 0 var(--yh-i25)"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role^='omp.bot.top.'] [data-role='omp.bot.name']";
+        set = [
+          ["font" "400 16.5px/24px var(--yh-label)"]
+          ["letter-spacing" "2.5px"]
+          ["text-transform" "uppercase"]
+          ["color" "var(--yh-ink)"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role^='omp.bot.top.'] [data-role='omp.bot.role']";
+        set = [
+          ["font" "400 11px/16px var(--yh-label)"]
+          ["letter-spacing" "1.5px"]
+          ["text-transform" "uppercase"]
+          ["opacity" "1"]
+          ["color" "var(--yh-i50)"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.event.row']";
+        set = [
+          ["font" "400 11px/16px var(--yh-label)"]
+          ["letter-spacing" "1.5px"]
+          ["text-transform" "uppercase"]
+          ["color" "var(--yh-i50)"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.event.name']";
+        set = [
+          ["font" "inherit"]
+          ["color" "var(--yh-ink)"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.hello']";
+        set = [
+          ["font" "400 22px/30px var(--yh-label)"]
+          ["letter-spacing" "2.5px"]
+          ["text-transform" "uppercase"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.say']";
+        set = [
+          ["font" "400 11px/16px var(--yh-label)"]
+          ["letter-spacing" "0"]
+          ["color" "var(--yh-i70)"]
+          ["opacity" "1"]
+        ];
+      }
+      {
+        select = ":root:not(#oz) [data-role='omp.bot.say']::after";
+        set = [
+          ["content" "\"\""]
+          ["display" "inline-block"]
+          ["width" "7px"]
+          ["height" "12px"]
+          ["margin-left" "6px"]
+          ["vertical-align" "-2px"]
+          ["background" "var(--yh-ink)"]
+          ["animation" "yh-blink calc(1000ms * var(--yh-t)) steps(1, end) 4"]
+        ];
+      }
+    ];
+    bot_you_data = [
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user']";
+        set = [
+          ["align-self" "flex-end"]
+          ["max-width" "min(80%, 560px)"]
+          ["margin" "0 0 0 auto"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body";
+        set = [
+          ["align-items" "flex-end"]
+          ["padding" "0"]
+          ["background" "none"]
+          ["box-shadow" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
+        set = [
+          ["padding" "7px 12px"]
+          ["border-radius" "var(--r-card)"]
+          ["background" "var(--oz-pink, var(--l2))"]
+        ];
+      }
+    ];
+    bottom_data = [
+      {
+        select = "html.lay-rail.tabs-h #tabbar > .tb-in > .tn-peers";
+        set = [
+          ["order" "1 !important"]
+          ["margin-top" "0 !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #tabbar";
+        set = [
+          ["overflow-y" "auto !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #tabbar > .tb-in";
+        set = [
+          ["flex" "none !important"]
+          ["min-height" "100% !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs";
+        set = [
+          ["flex" "none !important"]
+          ["margin" "0 !important"]
+          ["overflow" "visible !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #tabbar > .tb-in > .tb-add";
+        set = [
+          ["margin-top" "auto !important"]
+        ];
+      }
+    ];
     box_commands_data = {
       Boolean,
       Bun,
@@ -6935,6 +8419,24 @@
         ])
       ]))))
     ]));
+    buttons_data = [
+      {
+        select = "html.lay-rail.tabs-h .tb-row";
+        set = [
+          ["height" "28px !important"]
+          ["margin" "2px 6px 0 !important"]
+          ["padding" "0 10px !important"]
+          ["border-radius" "9px !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-add";
+        set = [
+          ["margin" "4px 6px 0 !important"]
+          ["border-radius" "9px !important"]
+        ];
+      }
+    ];
     cache_push = {pkgs, ...}: {
       services.nix-daemon.settings.post-build-hook = toString (pkgs.writeShellScript "attic-cache-push" ''
         set -u
@@ -8191,6 +9693,31 @@
       (if' (not ok) (inline [[disable err]]))
       (return [[unpack ret 1 (dot ret "n")]])
     ]);
+    centering_data = [
+      {
+        select = "html.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs";
+        set = [
+          ["margin-top" "auto !important"]
+          ["margin-bottom" "auto !important"]
+        ];
+      }
+      {
+        select = "html.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-add";
+        set = [
+          ["margin-top" "0 !important"]
+        ];
+      }
+    ];
+    chat_frost_data = [
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor']";
+        set = [
+          ["background" "light-dark(var(--pop-bg), var(--raise))"]
+          ["backdrop-filter" "blur(18px) saturate(130%)"]
+          ["box-shadow" "0 0 0 1px var(--l2)"]
+        ];
+      }
+    ];
     chat_look_data = {
       Array,
       Symbol,
@@ -8421,6 +9948,14 @@
         ])
       ]))))
     ]);
+    chat_still_data = [
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.msg'] .md.streaming";
+        set = [
+          ["display" "none"]
+        ];
+      }
+    ];
     claude_code = {
       config,
       lib,
@@ -11458,6 +12993,14 @@
           ];
         }
       ];
+    dividers_data = [
+      {
+        select = ".tn-div.row, .tn-div.col";
+        set = [
+          ["background" "transparent"]
+        ];
+      }
+    ];
     dot_corridor_data = ''
       const float TAU = 6.28318531;
       const float FOCAL = 0.92;
@@ -12804,6 +14347,14 @@
         ])
       ]))))
     ]);
+    files_data = [
+      {
+        select = "html.tn-themed .tb-files";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
     finix_chrony = {pkgs, ...}: {
       services.chrony = {
         enable = true;
@@ -13318,6 +14869,25 @@
           groups = [[["foreground" "${filters.strip values.foreground}"] ["background" "${filters.strip values.background}"] ["selection-foreground" "${filters.strip values.background}"] ["selection-background" "${filters.strip values.foreground}"] ["urls" "${filters.strip values.color6}"]] [["regular0" "${filters.strip values.color0}"] ["regular1" "${filters.strip values.color1}"] ["regular2" "${filters.strip values.color2}"] ["regular3" "${filters.strip values.color3}"] ["regular4" "${filters.strip values.color4}"] ["regular5" "${filters.strip values.color5}"] ["regular6" "${filters.strip values.color6}"] ["regular7" "${filters.strip values.color7}"]] [["bright0" "${filters.strip values.color8}"] ["bright1" "${filters.strip values.color9}"] ["bright2" "${filters.strip values.color10}"] ["bright3" "${filters.strip values.color11}"] ["bright4" "${filters.strip values.color12}"] ["bright5" "${filters.strip values.color13}"] ["bright6" "${filters.strip values.color14}"] ["bright7" "${filters.strip values.color15}"]]];
         }
       ];
+    frost_data = [
+      {
+        select = "html.tn-themed, html.tn-themed[data-theme='dark']";
+        set = [
+          ["--modal-filter" "blur(40px) saturate(190%)"]
+        ];
+      }
+      {
+        at = "@media (prefers-contrast: more)";
+        rules = [
+          {
+            select = "html.tn-themed, html.tn-themed[data-theme='dark']";
+            set = [
+              ["--modal-filter" "none"]
+            ];
+          }
+        ];
+      }
+    ];
     gaming_aethermancer = {
       config,
       lib,
@@ -15066,6 +16636,14 @@
         clobberByDefault = true;
       };
     };
+    grips_data = [
+      {
+        select = "div.csd-ctl, button.tn-grip";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
     grok_bot = {
       config,
       inputPackages,
@@ -16148,6 +17726,17 @@
           [(dot hl "exec_cmd") (str "omarchy-launch-shell")]
         ])
       ]
+    ];
+    inbox_data = [
+      {
+        select = "html.tn-themed #inbox";
+        set = [
+          ["left" "50% !important"]
+          ["top" "50% !important"]
+          ["translate" "-50% -50% !important"]
+          ["transform-origin" "50% 50% !important"]
+        ];
+      }
     ];
     init_data = {
       action,
@@ -18776,10 +20365,8 @@
           "ozette-pond-light.glsl" = ozette_pond_light_data;
         };
         luau = {
-          "tern-attention-window.luau" = attention_window_data;
           "tern-block-menu-window.luau" = block_menu_window_data;
           "tern-tab-order-window.luau" = tab_order_window_data;
-          "tern-transparent-window.luau" = transparent_window_data;
           "tern-tuturu-window.luau" = src_window_data;
           "tern-ui-menu-rail.luau" = rail_data;
           "tern-ui-menu-window.luau" = ui_menu_window_data;
@@ -22648,6 +24235,22 @@
         "@vercel/vc-native-linux-x64" = "59.5.0";
       };
     };
+    pane_borders_data = [
+      {
+        select = "section.tn-pane";
+        set = [
+          ["border" "1px solid var(--l2, rgba(127, 127, 127, 0.2))"]
+          ["transition" "border-color 220ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 0.61, 0.36, 1)"]
+        ];
+      }
+      {
+        select = "section.tn-pane.on";
+        set = [
+          ["border-color" "var(--accent-ink, rgba(98, 168, 255, 0.85))"]
+          ["box-shadow" "0 0 0 1px rgba(98, 168, 255, 0.25)"]
+        ];
+      }
+    ];
     parity = {
       config,
       lib,
@@ -24036,6 +25639,104 @@
       ])
       ({gpu}: [defun probe--gpu-p' [gpu] [and [getf gpu (kw "percent")] ["<" [getf gpu (kw "failures") 0] 3]]])
     ]);
+    rail_ages_data = lib: let
+      row = "html.lay-rail.tabs-h .tb-tabs .tt";
+      labels = ["now"] ++ map (m: "${toString m}m") (lib.range 1 59) ++ map (h: "${toString h}h") (lib.range 1 23) ++ map (d: "${toString d}d") (lib.range 1 30);
+      mark = i: "[title*=\"\\${lib.toHexString (917760 + i)}\"]";
+    in
+      [
+        {
+          select = "html.lay-rail.tabs-h .tb-tabs .tt .mk .hint";
+          set = [
+            ["display" "none !important"]
+          ];
+        }
+        {
+          select = "html.lay-rail.tabs-h .tb-tabs .tt .mk";
+          set = [
+            ["flex" "none !important"]
+          ];
+        }
+        {
+          select = "html.lay-rail.tabs-h .tb-tabs .tt .mk::before";
+          set = [
+            ["font-size" "11px"]
+            ["color" "var(--t4)"]
+            ["font-family" "Geist, system-ui, sans-serif"]
+          ];
+        }
+      ]
+      ++ lib.concatLists (lib.imap0 (i: label: [
+          {
+            select = "${row}[title*=\"\\206A\"]${mark i} .sub::before";
+            set = [
+              ["content" "\"Working · ${label}\" !important"]
+            ];
+          }
+          {
+            select = "${row}:not([title*=\"\\206A\"])${mark i} .mk::before";
+            set = [
+              ["content" "\"${label}\" !important"]
+            ];
+          }
+        ])
+        labels);
+    rail_card_data = [
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt";
+        set = [
+          ["border-radius" "8px !important"]
+          ["box-shadow" "none !important"]
+          ["color" "var(--t3) !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:hover";
+        set = [
+          ["background" "color-mix(in srgb, var(--t1) 6%, transparent) !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt.on";
+        set = [
+          ["background" "var(--panel) !important"]
+          ["box-shadow" "inset 0 0 0 1px var(--l2) !important"]
+          ["color" "var(--t1) !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt.on .nm";
+        set = [
+          ["font-weight" "600"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt.on::before, html.lay-rail.tabs-h .tb-tabs .tt.on::after";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
+    rail_compact_data = [
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt";
+        set = [
+          ["height" "38px !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206E\"]:not([data-tc])";
+        set = [
+          ["height" "20px !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206E\"]:not([data-tc]) .sub";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
     rail_data = {
       AgentFinishedEvent,
       AgentStateEvent,
@@ -24048,7 +25749,6 @@
       field,
       fn,
       for,
-      forRange,
       hex,
       idx,
       if',
@@ -24059,7 +25759,6 @@
       len,
       local,
       localFunction,
-      long,
       math,
       nil,
       not,
@@ -24100,10 +25799,7 @@
       unseen,
       since,
       marks,
-      age_slots,
-      AGES,
       age_index,
-      age_css,
       id_list,
       toggle,
       save_map,
@@ -24153,22 +25849,6 @@
       (local (typed since (table [(pair number number)])) (table []))
       (local (typed marks (table [(pair number string)])) (table []))
       blank
-      (localFunction age_slots (typed [] (table [string])) ({labels}: [
-        (local labels (table [(str "now")]))
-        (forRange {m = null;} (tuple [1 59]) ({m}: [
-          (assign (idx labels (infix [(len labels) "+" 1])) (infix [m ".." (str "m")]))
-        ]))
-        (forRange {h = null;} (tuple [1 23]) ({h}: [
-          (assign (idx labels (infix [(len labels) "+" 1])) (infix [h ".." (str "h")]))
-        ]))
-        (forRange {d = null;} (tuple [1 30]) ({d}: [
-          (assign (idx labels (infix [(len labels) "+" 1])) (infix [d ".." (str "d")]))
-        ]))
-        (return labels)
-      ]))
-      blank
-      (local AGES [age_slots])
-      blank
       (localFunction age_index (typed [{seconds = number;}] number) ({
         seconds,
         minutes,
@@ -24183,24 +25863,6 @@
           (return (infix [59 "+" hours]))
         ])
         (return (infix [82 "+" [(dot math "min") [(dot math "floor") (infix [hours "/" 24])] 30]]))
-      ]))
-      blank
-      (localFunction age_css (typed [] string) ({
-        rules,
-        row,
-      }: [
-        (local rules (table []))
-        (local row (str "html.lay-rail.tabs-h .tb-tabs .tt"))
-        (for [{i = null;} {label = null;}] [ipairs AGES] ({
-          i,
-          label,
-          mark,
-        }: [
-          (local mark (infix [(str "[title*=\"\\") ".." [(dot string "format") (str "%X") (infix [AGE_BASE "+" i "-" 1])] ".." (str "\"]")]))
-          (assign (idx rules (infix [(len rules) "+" 1])) (infix [row ".." (str "[title*=\"\\206A\"]") ".." mark ".." (str " .sub::before { content: \"Working · ") ".." label ".." (str "\" !important; }")]))
-          (assign (idx rules (infix [(len rules) "+" 1])) (infix [row ".." (str ":not([title*=\"\\206A\"])") ".." mark ".." (str " .mk::before { content: \"") ".." label ".." (str "\" !important; }")]))
-        ]))
-        (return [(dot table' "concat") rules (str "\n")])
       ]))
       blank
       (localFunction id_list (typed [{key = string;}] (table [number])) ({
@@ -24693,41 +26355,35 @@
             (field "id" (str "rail_sections"))
             (field "label" (str "sections: pinned, needs you, working, idle"))
             (field "group" (str "Rail"))
-            (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt {\n\tposition: relative;\n\toverflow: visible !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"],\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"],\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"],\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"] {\n\tmargin-top: 34px !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"]::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"]::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"]::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"]::after {\n\tdisplay: block !important;\n\tposition: absolute;\n\tleft: 10px;\n\ttop: -26px;\n\twidth: auto;\n\theight: auto;\n\tbackground: none;\n\tbox-shadow: none;\n\tfont-size: 11px;\n\tfont-weight: 600;\n\tletter-spacing: 0.06em;\n\ttext-transform: uppercase;\n\tcolor: var(--t4);\n\tpointer-events: none;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"]::after {\n\tcontent: \"Pinned\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"]::after {\n\tcontent: \"Needs you\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"]::after {\n\tcontent: \"Working\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child::after,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"]::after {\n\tcontent: \"Idle\";\n}\n"))
             (field "apply" apply)
           ]))
           (rows (table [
             (field "id" (str "rail_status"))
             (field "label" (str "status rings and lines"))
             (field "group" (str "Rail"))
-            (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c {\n\tposition: relative;\n\toverflow: visible !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tcontent: \"\";\n\tposition: absolute;\n\tbox-sizing: border-box;\n\tborder-radius: 50%;\n\tpointer-events: none;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc])[title*=\"\\206A\"] .tn-dk-c::before {\n\tleft: -4px;\n\ttop: -4px;\n\twidth: calc(100% + 8px);\n\theight: calc(100% + 8px);\n\tborder: 2px dashed var(--pill);\n\tanimation: arc-spin 2.4s linear infinite;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before {\n\tright: -3px;\n\tbottom: -3px;\n\twidth: 10px;\n\theight: 10px;\n\tbackground: var(--pill);\n\tbox-shadow: 0 0 0 2px var(--panel);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub {\n\tfont-size: 0 !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::before {\n\tfont-size: 12px;\n\tfont-weight: 500;\n\tfont-family: Geist, system-ui, sans-serif;\n\tcolor: var(--pill);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] {\n\t--pill: light-dark(#0f766e, #5eead4);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] .sub::before {\n\tcontent: \"Working\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] {\n\t--pill: light-dark(#b45309, #fbbf24);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] .sub::before {\n\tcontent: \"Awaiting input\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] {\n\t--pill: light-dark(#15803d, #4ade80);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] .sub::before {\n\tcontent: \"Done · unseen\";\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] {\n\t--pill: light-dark(#b91c1c, #f87171);\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] .sub::before {\n\tcontent: \"Failed · unseen\";\n}\n\n@keyframes arc-spin {\n\tfrom {\n\t\ttransform: rotate(0deg);\n\t}\n\tto {\n\t\ttransform: rotate(360deg);\n\t}\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c::after {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub > * {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::after {\n\tdisplay: none !important;\n}\n"))
             (field "apply" apply)
           ]))
           (rows (table [
             (field "id" (str "rail_ages"))
             (field "label" (str "ages"))
             (field "group" (str "Rail"))
-            (field "css" (infix [(long "\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk .hint {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk {\n\tflex: none !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt .mk::before {\n\tfont-size: 11px;\n\tcolor: var(--t4);\n\tfont-family: Geist, system-ui, sans-serif;\n}\n") ".." (str "\n") ".." [age_css]]))
             (field "apply" apply)
           ]))
           (rows (table [
             (field "id" (str "rail_compact"))
             (field "label" (str "one-line idle rows"))
             (field "group" (str "Rail"))
-            (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt {\n\theight: 38px !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206E\"]:not([data-tc]) {\n\theight: 20px !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206E\"]:not([data-tc]) .sub {\n\tdisplay: none !important;\n}\n"))
             (field "apply" apply)
           ]))
           (rows (table [
             (field "id" (str "rail_card"))
             (field "label" (str "selected tab card"))
             (field "group" (str "Rail"))
-            (field "css" (long "\nhtml.lay-rail.tabs-h .tb-tabs .tt {\n\tborder-radius: 8px !important;\n\tbox-shadow: none !important;\n\tcolor: var(--t3) !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt:hover {\n\tbackground: color-mix(in srgb, var(--t1) 6%, transparent) !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt.on {\n\tbackground: var(--panel) !important;\n\tbox-shadow: inset 0 0 0 1px var(--l2) !important;\n\tcolor: var(--t1) !important;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt.on .nm {\n\tfont-weight: 600;\n}\n\nhtml.lay-rail.tabs-h .tb-tabs .tt.on::before,\nhtml.lay-rail.tabs-h .tb-tabs .tt.on::after {\n\tdisplay: none !important;\n}\n"))
           ]))
           (rows (table [
             (field "id" (str "rail_header"))
             (field "label" (str "+ and bell in the header"))
             (field "group" (str "Rail"))
-            (field "css" (long "\nhtml.lay-rail.tabs-h #tabbar .tb-in {\n\tposition: relative !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tb-add,\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge {\n\tposition: absolute !important;\n\ttop: 4px !important;\n\twidth: 28px !important;\n\theight: 26px !important;\n\tmargin: 0 !important;\n\tpadding: 0 !important;\n\tjustify-content: center !important;\n\tgap: 0 !important;\n\tborder-radius: 7px !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tb-add {\n\tright: 40px !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge {\n\tright: 8px !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > :is(.tb-add, .tn-ib-badge) :is(.lbl, .kbds) {\n\tdisplay: none !important;\n}\n\nhtml.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge .tn-ib-pip {\n\tposition: absolute !important;\n\ttop: 1px !important;\n\tright: 1px !important;\n\tmargin: 0 !important;\n\ttransform: scale(0.8);\n}\n"))
           ]))
         ])))
         (field "bind" (fn [{state = table [(pair string boolean)];}] ({state}: [
@@ -24735,6 +26391,265 @@
         ])))
       ])))
     ]);
+    rail_header_data = [
+      {
+        select = "html.lay-rail.tabs-h #tabbar .tb-in";
+        set = [
+          ["position" "relative !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #tabbar .tb-in > .tb-add, html.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge";
+        set = [
+          ["position" "absolute !important"]
+          ["top" "4px !important"]
+          ["width" "28px !important"]
+          ["height" "26px !important"]
+          ["margin" "0 !important"]
+          ["padding" "0 !important"]
+          ["justify-content" "center !important"]
+          ["gap" "0 !important"]
+          ["border-radius" "7px !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #tabbar .tb-in > .tb-add";
+        set = [
+          ["right" "40px !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge";
+        set = [
+          ["right" "8px !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #tabbar .tb-in > :is(.tb-add, .tn-ib-badge) :is(.lbl, .kbds)";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #tabbar .tb-in > .tn-ib-badge .tn-ib-pip";
+        set = [
+          ["position" "absolute !important"]
+          ["top" "1px !important"]
+          ["right" "1px !important"]
+          ["margin" "0 !important"]
+          ["transform" "scale(0.8)"]
+        ];
+      }
+    ];
+    rail_sections_data = [
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt";
+        set = [
+          ["position" "relative"]
+          ["overflow" "visible !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt::before, html.lay-rail.tabs-h .tb-tabs .tt::after";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"], html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"], html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"], html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"]";
+        set = [
+          ["margin-top" "34px !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child::after, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"]::after, html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child::after, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"]::after, html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child::after, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"]::after, html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child::after, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"]::after";
+        set = [
+          ["display" "block !important"]
+          ["position" "absolute"]
+          ["left" "10px"]
+          ["top" "-26px"]
+          ["width" "auto"]
+          ["height" "auto"]
+          ["background" "none"]
+          ["box-shadow" "none"]
+          ["font-size" "11px"]
+          ["font-weight" "600"]
+          ["letter-spacing" "0.06em"]
+          ["text-transform" "uppercase"]
+          ["color" "var(--t4)"]
+          ["pointer-events" "none"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2061\"]:first-child::after, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2061\"]) + .tt[title^=\"\\2061\"]::after";
+        set = [
+          ["content" "\"Pinned\""]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2062\"]:first-child::after, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2062\"]) + .tt[title^=\"\\2062\"]::after";
+        set = [
+          ["content" "\"Needs you\""]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2063\"]:first-child::after, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2063\"]) + .tt[title^=\"\\2063\"]::after";
+        set = [
+          ["content" "\"Working\""]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title^=\"\\2064\"]:first-child::after, html.lay-rail.tabs-h .tb-tabs .tt:not([title^=\"\\2064\"]) + .tt[title^=\"\\2064\"]::after";
+        set = [
+          ["content" "\"Idle\""]
+        ];
+      }
+    ];
+    rail_status_data = [
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::before, html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::after";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c";
+        set = [
+          ["position" "relative"]
+          ["overflow" "visible !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before";
+        set = [
+          ["content" "\"\""]
+          ["position" "absolute"]
+          ["box-sizing" "border-box"]
+          ["border-radius" "50%"]
+          ["pointer-events" "none"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc])[title*=\"\\206A\"] .tn-dk-c::before";
+        set = [
+          ["left" "-4px"]
+          ["top" "-4px"]
+          ["width" "calc(100% + 8px)"]
+          ["height" "calc(100% + 8px)"]
+          ["border" "2px dashed var(--pill)"]
+          ["animation" "arc-spin 2.4s linear infinite"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .tn-dk-c::before";
+        set = [
+          ["right" "-3px"]
+          ["bottom" "-3px"]
+          ["width" "10px"]
+          ["height" "10px"]
+          ["background" "var(--pill)"]
+          ["box-shadow" "0 0 0 2px var(--panel)"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub";
+        set = [
+          ["font-size" "0 !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::before";
+        set = [
+          ["font-size" "12px"]
+          ["font-weight" "500"]
+          ["font-family" "Geist, system-ui, sans-serif"]
+          ["color" "var(--pill)"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"]";
+        set = [
+          ["--pill" "light-dark(#0f766e, #5eead4)"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206A\"] .sub::before";
+        set = [
+          ["content" "\"Working\""]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"]";
+        set = [
+          ["--pill" "light-dark(#b45309, #fbbf24)"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206B\"] .sub::before";
+        set = [
+          ["content" "\"Awaiting input\""]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"]";
+        set = [
+          ["--pill" "light-dark(#15803d, #4ade80)"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206C\"] .sub::before";
+        set = [
+          ["content" "\"Done · unseen\""]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"]";
+        set = [
+          ["--pill" "light-dark(#b91c1c, #f87171)"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt[title*=\"\\206D\"] .sub::before";
+        set = [
+          ["content" "\"Failed · unseen\""]
+        ];
+      }
+      {
+        at = "@keyframes arc-spin";
+        rules = [
+          {
+            select = "from";
+            set = [
+              ["transform" "rotate(0deg)"]
+            ];
+          }
+          {
+            select = "to";
+            set = [
+              ["transform" "rotate(360deg)"]
+            ];
+          }
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c::after";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub > *";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h .tb-tabs .tt:is([title*=\"\\206A\"], [title*=\"\\206B\"], [title*=\"\\206C\"], [title*=\"\\206D\"]) .sub::after";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
     ramp = {
       lib,
       pkgs,
@@ -24776,6 +26691,17 @@
         })
       ];
     };
+    reply_frost_data = [
+      {
+        select = ":root:not(#g0) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md, :root:not(#g0) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#g0) [data-role='omp.bot.xmsg']";
+        set = [
+          ["background" "color-mix(in srgb, var(--panel, var(--l1)) 45%, transparent) !important"]
+          ["-webkit-backdrop-filter" "blur(40px) saturate(190%) !important"]
+          ["backdrop-filter" "blur(40px) saturate(190%) !important"]
+          ["box-shadow" "0 0 0 1px var(--l2), 0 10px 26px -16px rgba(0, 0, 0, 0.5) !important"]
+        ];
+      }
+    ];
     rewards_data = {
       entry = "xfs/luascripts/Entities/SpaceEntities/ClientMainPlayer.lua";
       entryMD5 = "d1278a28054813e09ca01faccafb6d64";
@@ -27828,6 +29754,38 @@
       (if' (not ok) (inline [[log (str "hook") (str "install") [tostring err]]]))
       (return [[unpack ret 1 (dot ret "n")]])
     ]);
+    roomy_data = [
+      {
+        select = "html.tn-themed #pick .cmdk.tn-pk";
+        set = [
+          ["display" "flex"]
+          ["flex-direction" "column"]
+          ["max-height" "calc(87vh - 24px) !important"]
+        ];
+      }
+      {
+        select = "html.tn-themed #pick .cmdk.tn-pk > .ck-top, html.tn-themed #pick .cmdk.tn-pk > .ck-foot";
+        set = [
+          ["flex" "none"]
+        ];
+      }
+      {
+        select = "html.tn-themed #pick .cmdk.tn-pk .ck-list";
+        set = [
+          ["max-height" "none !important"]
+          ["min-height" "0"]
+          ["flex" "1 1 auto"]
+        ];
+      }
+    ];
+    row_keys_data = [
+      {
+        select = "html.lay-rail #tabbar .tb-row .kbds";
+        set = [
+          ["display" "none"]
+        ];
+      }
+    ];
     rush_login_command_data = {
       add,
       del,
@@ -30106,7 +32064,7 @@
       material = "Glass";
       opacity = 0;
       blur = 0;
-      plugins_disabled = ["chime" "ozette" "scratch" "transparent" "yorha"];
+      plugins_disabled = ["chime"];
       surface_fold = true;
       new_tabs = "Home";
       agent_placement = "new_tab";
@@ -31066,6 +33024,82 @@
         '';
       };
     };
+    single_data = [
+      {
+        select = ".tn-session-tab, .tn-vt > .nav-group:is(.g-sp, .g-sp-cur) > .nav-head, .tn-pl-scope[title^='Sessions']";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
+    snippets_chat_look_data = [
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.msg'] [data-role^='omp.thinking'], :root:not(#s0) [data-role='omp.chat.dock'] :is([data-role='omp.composer.usage'], [data-role='omp.composer.extras'])";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body";
+        set = [
+          ["max-width" "min(80%, 560px)"]
+        ];
+      }
+      {
+        select = ":root:not(#s0) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
+        set = [
+          ["align-self" "auto"]
+          ["max-width" "none"]
+          ["padding" "0"]
+          ["border-radius" "0"]
+          ["background" "none"]
+          ["box-shadow" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.msg'] .md";
+        set = [
+          ["font-size" "15px"]
+          ["line-height" "22px"]
+        ];
+      }
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor']";
+        set = [
+          ["padding" "0"]
+          ["border" "0"]
+          ["background" "none"]
+          ["box-shadow" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-head";
+        set = [
+          ["display" "none"]
+        ];
+      }
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-body";
+        set = [
+          ["padding" "0"]
+        ];
+      }
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.advice'] [data-role='omp.advisor.note']";
+        set = [
+          ["color" "var(--ink3, var(--t4))"]
+          ["white-space" "nowrap"]
+          ["overflow" "hidden"]
+          ["text-overflow" "ellipsis"]
+        ];
+      }
+      {
+        select = ":root:not(#s0) [data-role='omp.chat.advice'] [data-role='omp.advisor.note']::before";
+        set = [
+          ["content" "\"Advisor · \""]
+        ];
+      }
+    ];
     solo_leveling_arise = {
       config,
       lib,
@@ -34371,6 +36405,14 @@
         ]))
       ]
     ]);
+    tabs_data = [
+      {
+        select = "html.lay-rail.tabs-h .tt.on";
+        set = [
+          ["box-shadow" "inset 2px 0 0 var(--accent) !important"]
+        ];
+      }
+    ];
     theme_data = {
       and,
       append,
@@ -35064,40 +37106,13 @@
         "carly/memory/2026-10-30.md" = generators.sourceFile "2026-10-30.md" (generators.markdown.render (memory_2026_10_30_data generators.markdown));
         "plugins/agent-tabs/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource agent_tabs_plugin_data);
         "plugins/agent-tabs/window.luau" = generators.sourceFile "window.luau" agent_tabs_window_data;
-        "plugins/attention/attention.css" = stylesheet "attention.css" attention_data;
-        "plugins/attention/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource attention_plugin_data);
-        "plugins/attention/window.luau" = generators.sourceFile "window.luau" (lib.removeSuffix "\n" (generators.luau.render (attention_window_data generators.luau)));
         "plugins/block-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource block_menu_plugin_data);
         "plugins/block-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (block_menu_window_data generators.luau));
         "plugins/cmus.path" = generators.sourceFile "cmus.path" (generators.pathSource plugins_cmus_data);
         "plugins/ekko.path" = generators.sourceFile "ekko.path" (generators.pathSource ekko_data);
         "plugins/nix-fail.path" = generators.sourceFile "nix-fail.path" (generators.pathSource nix_fail_data);
-        "plugins/ozette/cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
-        "plugins/ozette/motion.css" = "${flakeInputs.tern-ozette}/motion.css";
-        "plugins/ozette/plugin.toml" = "${flakeInputs.tern-ozette}/plugin.toml";
-        "plugins/ozette/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
-        "plugins/ozette/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
-        "plugins/scratch/min.css" = "${flakeInputs.tern-scratch}/min.css";
-        "plugins/scratch/plugin.toml" = "${flakeInputs.tern-scratch}/plugin.toml";
-        "plugins/scratch/window.luau" = "${flakeInputs.tern-scratch}/window.luau";
-        "plugins/yorha/cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
-        "plugins/yorha/motion.css" = "${flakeInputs.tern-ozette}/motion.css";
-        "plugins/yorha/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
-        "plugins/yorha/plugin.toml" = "${flakeInputs.tern-ozette}/yorha/plugin.toml";
-        "plugins/yorha/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
-        "plugins/yorha/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
-        "plugins/yorha-pixel/cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
-        "plugins/yorha-pixel/motion.css" = "${flakeInputs.tern-ozette}/motion.css";
-        "plugins/yorha-pixel/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
-        "plugins/yorha-pixel/plugin.toml" = "${flakeInputs.tern-ozette}/yorha-pixel/plugin.toml";
-        "plugins/yorha-pixel/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
-        "plugins/yorha-pixel/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
-        "plugins/yorha-pixel/yorha-pixel.css" = "${flakeInputs.tern-ozette}/yorha-pixel.css";
         "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tab_order_plugin_data);
         "plugins/tab-order/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (tab_order_window_data generators.luau));
-        "plugins/transparent/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource transparent_plugin_data);
-        "plugins/transparent/transparent.css" = stylesheet "transparent.css" transparent_data;
-        "plugins/transparent/window.luau" = generators.sourceFile "window.luau" (lib.removeSuffix "\n" (generators.luau.render (transparent_window_data generators.luau)));
         "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource gitignore_data);
         "plugins/tuturu/README.md" = generators.sourceFile "README.md" (generators.markdown.render (README_data generators.markdown));
         "plugins/tuturu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tuturu_plugin_data);
@@ -35106,6 +37121,67 @@
         "plugins/tuturu/src/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (src_window_data generators.luau));
         "plugins/ui-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource ui_menu_plugin_data);
         "plugins/ui-menu/rail.luau" = generators.sourceFile "rail.luau" (generators.luau.render (rail_data generators.luau));
+        "plugins/ui-menu/snippets/account.css" = stylesheet "account.css" account_data;
+        "plugins/ui-menu/snippets/answer-bubbles.css" = stylesheet "answer-bubbles.css" answer_bubbles_data;
+        "plugins/ui-menu/snippets/attention.css" = stylesheet "attention.css" attention_data;
+        "plugins/ui-menu/snippets/bot-answer-bubbles.css" = stylesheet "bot-answer-bubbles.css" bot_answer_bubbles_data;
+        "plugins/ui-menu/snippets/bot-ask.css" = stylesheet "bot-ask.css" bot_ask_data;
+        "plugins/ui-menu/snippets/bot-chao-motion.css" = stylesheet "bot-chao-motion.css" bot_chao_motion_data;
+        "plugins/ui-menu/snippets/bot-chao.css" = stylesheet "bot-chao.css" bot_chao_data;
+        "plugins/ui-menu/snippets/bot-chat-frost.css" = stylesheet "bot-chat-frost.css" bot_chat_frost_data;
+        "plugins/ui-menu/snippets/bot-chat-look.css" = stylesheet "bot-chat-look.css" bot_chat_look_data;
+        "plugins/ui-menu/snippets/bot-chat-still.css" = stylesheet "bot-chat-still.css" bot_chat_still_data;
+        "plugins/ui-menu/snippets/bot-dock.css" = stylesheet "bot-dock.css" bot_dock_data;
+        "plugins/ui-menu/snippets/bot-events.css" = stylesheet "bot-events.css" bot_events_data;
+        "plugins/ui-menu/snippets/bot-jobs.css" = stylesheet "bot-jobs.css" bot_jobs_data;
+        "plugins/ui-menu/snippets/bot-layout.css" = stylesheet "bot-layout.css" bot_layout_data;
+        "plugins/ui-menu/snippets/bot-names.css" = stylesheet "bot-names.css" bot_names_data;
+        "plugins/ui-menu/snippets/bot-pages.css" = stylesheet "bot-pages.css" bot_pages_data;
+        "plugins/ui-menu/snippets/bot-rail.css" = stylesheet "bot-rail.css" bot_rail_data;
+        "plugins/ui-menu/snippets/bot-spacing.css" = stylesheet "bot-spacing.css" bot_spacing_data;
+        "plugins/ui-menu/snippets/bot-stop.css" = stylesheet "bot-stop.css" bot_stop_data;
+        "plugins/ui-menu/snippets/bot-text.css" = stylesheet "bot-text.css" bot_text_data;
+        "plugins/ui-menu/snippets/bot-time.css" = stylesheet "bot-time.css" bot_time_data;
+        "plugins/ui-menu/snippets/bot-tints.css" = stylesheet "bot-tints.css" bot_tints_data;
+        "plugins/ui-menu/snippets/bot-turn-stats.css" = stylesheet "bot-turn-stats.css" bot_turn_stats_data;
+        "plugins/ui-menu/snippets/bot-work-rail.css" = stylesheet "bot-work-rail.css" bot_work_rail_data;
+        "plugins/ui-menu/snippets/bot-yorha-bubbles.css" = stylesheet "bot-yorha-bubbles.css" bot_yorha_bubbles_data;
+        "plugins/ui-menu/snippets/bot-yorha-labels.css" = stylesheet "bot-yorha-labels.css" bot_yorha_labels_data;
+        "plugins/ui-menu/snippets/bot-you.css" = stylesheet "bot-you.css" bot_you_data;
+        "plugins/ui-menu/snippets/bottom.css" = stylesheet "bottom.css" bottom_data;
+        "plugins/ui-menu/snippets/buttons.css" = stylesheet "buttons.css" buttons_data;
+        "plugins/ui-menu/snippets/centering.css" = stylesheet "centering.css" centering_data;
+        "plugins/ui-menu/snippets/chat-frost.css" = stylesheet "chat-frost.css" chat_frost_data;
+        "plugins/ui-menu/snippets/chat-look.css" = stylesheet "chat-look.css" snippets_chat_look_data;
+        "plugins/ui-menu/snippets/chat-still.css" = stylesheet "chat-still.css" chat_still_data;
+        "plugins/ui-menu/snippets/dividers.css" = stylesheet "dividers.css" dividers_data;
+        "plugins/ui-menu/snippets/files.css" = stylesheet "files.css" files_data;
+        "plugins/ui-menu/snippets/frost.css" = stylesheet "frost.css" frost_data;
+        "plugins/ui-menu/snippets/grips.css" = stylesheet "grips.css" grips_data;
+        "plugins/ui-menu/snippets/inbox.css" = stylesheet "inbox.css" inbox_data;
+        "plugins/ui-menu/snippets/ozette-cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
+        "plugins/ui-menu/snippets/ozette-motion.css" = "${flakeInputs.tern-ozette}/motion.css";
+        "plugins/ui-menu/snippets/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
+        "plugins/ui-menu/snippets/pane-borders.css" = stylesheet "pane-borders.css" pane_borders_data;
+        "plugins/ui-menu/snippets/rail_ages.css" = stylesheet "rail_ages.css" (rail_ages_data lib);
+        "plugins/ui-menu/snippets/rail_card.css" = stylesheet "rail_card.css" rail_card_data;
+        "plugins/ui-menu/snippets/rail_compact.css" = stylesheet "rail_compact.css" rail_compact_data;
+        "plugins/ui-menu/snippets/rail_header.css" = stylesheet "rail_header.css" rail_header_data;
+        "plugins/ui-menu/snippets/rail_sections.css" = stylesheet "rail_sections.css" rail_sections_data;
+        "plugins/ui-menu/snippets/rail_status.css" = stylesheet "rail_status.css" rail_status_data;
+        "plugins/ui-menu/snippets/reply-frost.css" = stylesheet "reply-frost.css" reply_frost_data;
+        "plugins/ui-menu/snippets/roomy.css" = stylesheet "roomy.css" roomy_data;
+        "plugins/ui-menu/snippets/row-keys.css" = stylesheet "row-keys.css" row_keys_data;
+        "plugins/ui-menu/snippets/scratch.css" = "${flakeInputs.tern-scratch}/min.css";
+        "plugins/ui-menu/snippets/single.css" = stylesheet "single.css" single_data;
+        "plugins/ui-menu/snippets/tabs.css" = stylesheet "tabs.css" tabs_data;
+        "plugins/ui-menu/snippets/transparent.css" = stylesheet "transparent.css" transparent_data;
+        "plugins/ui-menu/snippets/turn-stats.css" = stylesheet "turn-stats.css" turn_stats_data;
+        "plugins/ui-menu/snippets/user-frost.css" = stylesheet "user-frost.css" user_frost_data;
+        "plugins/ui-menu/snippets/width.css" = stylesheet "width.css" width_data;
+        "plugins/ui-menu/snippets/work-rail.css" = stylesheet "work-rail.css" work_rail_data;
+        "plugins/ui-menu/snippets/yorha-pixel.css" = "${flakeInputs.tern-ozette}/yorha-pixel.css";
+        "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
         "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
         "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource settings_data);
         "themes/ozette-night.css" = "${flakeInputs.tern-themes}/ozette-night.css";
@@ -35242,8 +37318,6 @@
         ];
       }
     ];
-    transparent_plugin_data = [[["schema" 1] ["id" "transparent"] ["name" "Transparent"] ["version" "0.1.0"] ["description" "Clears every surface and backdrop blur, so the wallpaper shows through untouched."] ["window" "window.luau"] ["styles" ["transparent.css"]]]];
-    transparent_window_data = {blank, ...}: [blank];
     tree_data = {
       Buffer,
       Error,
@@ -35846,9 +37920,17 @@
         '';
       };
     };
+    turn_stats_data = [
+      {
+        select = "html.tn-themed [data-role='omp.turn.usage']";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+    ];
     tuturu_plugin_data = [[["schema" 1] ["id" "tuturu"] ["name" "Tuturu"] ["version" "0.1.0"] ["description" "Plays a sound when a pane raises an unseen alert, an agent yields, or a long command finishes."] ["icon" "bell"] ["window" "src/window.luau"]]];
     tuturu_sounds_data = [[{comment = "The sounds are built by ~/finix/modules/tools/tern/default.nix and named in";} {comment = "<plugin data>/sounds.toml, which wins over this file. These stay empty so a";} {comment = "missing override is silent rather than playing something else.";} ["alert" ""] ["yield" ""] ["done" ""]] [{comment = "Chime only for panes you are not looking at. false chimes for the focused";} {comment = "pane too.";} ["only_unfocused" true]] [{comment = "Shell commands running at least this long chime the done sound when they";} {comment = "finish. 0 chimes every finished command.";} ["min_seconds" 30]]];
-    ui_menu_plugin_data = [[["schema" 1] ["id" "ui-menu"] ["name" "UI Menu"] ["version" "0.2.0"] ["description" "Settings menu (Ctrl+Alt+,): the look (Ozette, YoRHa or none), every installed plugin on or off, and this config's UI tweaks."] ["window" "window.luau"]]];
+    ui_menu_plugin_data = [[["schema" 1] ["id" "ui-menu"] ["name" "UI Menu"] ["version" "0.2.0"] ["description" "Settings menu (Ctrl+Alt+,): every CSS snippet on or off (one .css file each in snippets/), the look as a stack of them (Ozette, YoRHa, YoRHa Pixel, Unset all or none), every installed plugin on or off, and this config's UI tweaks."] ["window" "window.luau"]]];
     ui_menu_window_data = {
       assign,
       blank,
@@ -35866,7 +37948,6 @@
       len,
       local,
       localFunction,
-      long,
       nil,
       not,
       opt,
@@ -35900,99 +37981,150 @@
       plugins,
       toggle,
       menu,
-      active,
       fits,
-      looks,
+      regate,
+      want,
+      wears,
+      pick,
     }: [
       (local Rail [require (str "./rail")])
       blank
       (local TWEAKS (rows (table [
         (rows (table [
+          (field "id" (str "ozette"))
+          (field "label" (str "Ozette"))
+          (field "group" (str "Look layers"))
+          (field "default" false)
+          (field "layer" true)
+        ]))
+        (rows (table [
+          (field "id" (str "ozette-motion"))
+          (field "label" (str "Ozette motion"))
+          (field "group" (str "Look layers"))
+          (field "default" false)
+          (field "layer" true)
+        ]))
+        (rows (table [
+          (field "id" (str "ozette-cmus"))
+          (field "label" (str "Ozette cmus player"))
+          (field "group" (str "Look layers"))
+          (field "default" false)
+          (field "layer" true)
+        ]))
+        (rows (table [
+          (field "id" (str "yorha"))
+          (field "label" (str "YoRHa"))
+          (field "group" (str "Look layers"))
+          (field "default" false)
+          (field "layer" true)
+        ]))
+        (rows (table [
+          (field "id" (str "yorha-pixel"))
+          (field "label" (str "YoRHa Pixel"))
+          (field "group" (str "Look layers"))
+          (field "default" false)
+          (field "layer" true)
+        ]))
+        (rows (table [
+          (field "id" (str "scratch"))
+          (field "label" (str "Unset all"))
+          (field "group" (str "Look layers"))
+          (field "default" false)
+          (field "layer" true)
+        ]))
+        (rows (table [
+          (field "id" (str "attention"))
+          (field "label" (str "status dot attention colours"))
+          (field "group" (str "Chrome"))
+        ]))
+        (rows (table [
+          (field "id" (str "grips"))
+          (field "label" (str "hide window buttons and pane grips"))
+          (field "group" (str "Chrome"))
+        ]))
+        (rows (table [
+          (field "id" (str "dividers"))
+          (field "label" (str "invisible pane dividers"))
+          (field "group" (str "Chrome"))
+        ]))
+        (rows (table [
+          (field "id" (str "transparent"))
+          (field "label" (str "transparent window"))
+          (field "group" (str "Glass"))
+          (field "default" false)
+        ]))
+        (rows (table [
           (field "id" (str "single"))
           (field "label" (str "Single session"))
           (field "group" (str "Chrome"))
-          (field "css" (long ".tn-session-tab,\n.tn-vt > .nav-group:is(.g-sp, .g-sp-cur) > .nav-head,\n.tn-pl-scope[title^='Sessions'] {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "account"))
           (field "label" (str "hide account and peers"))
           (field "group" (str "Chrome"))
-          (field "css" (long ".tn-peers{display:none !important}"))
         ]))
         (rows (table [
           (field "id" (str "files"))
           (field "label" (str "hide files"))
           (field "group" (str "Chrome"))
-          (field "css" (long "html.tn-themed .tb-files {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "roomy"))
           (field "label" (str "tall pickers"))
           (field "group" (str "Chrome"))
-          (field "css" (long "html.tn-themed #pick .cmdk.tn-pk {\n\tdisplay: flex;\n\tflex-direction: column;\n\tmax-height: calc(87vh - 24px) !important;\n}\nhtml.tn-themed #pick .cmdk.tn-pk > .ck-top,\nhtml.tn-themed #pick .cmdk.tn-pk > .ck-foot {\n\tflex: none;\n}\nhtml.tn-themed #pick .cmdk.tn-pk .ck-list {\n\tmax-height: none !important;\n\tmin-height: 0;\n\tflex: 1 1 auto;\n}"))
         ]))
         (rows (table [
           (field "id" (str "inbox"))
           (field "label" (str "centred inbox"))
           (field "group" (str "Chrome"))
-          (field "css" (long "html.tn-themed #inbox {\n\tleft: 50% !important;\n\ttop: 50% !important;\n\ttransform: translate(-50%, -50%) !important;\n\ttransform-origin: 50% 50% !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "pane-borders"))
           (field "label" (str "Ekko pane borders"))
           (field "group" (str "Chrome"))
           (field "default" false)
-          (field "css" (long "section.tn-pane {\n\tborder: 1px solid var(--l2, rgba(127, 127, 127, 0.2));\n\ttransition: border-color 220ms cubic-bezier(0.22, 0.61, 0.36, 1),\n\t\tbox-shadow 220ms cubic-bezier(0.22, 0.61, 0.36, 1);\n}\n\nsection.tn-pane.on {\n\tborder-color: var(--accent-ink, rgba(98, 168, 255, 0.85));\n\tbox-shadow: 0 0 0 1px rgba(98, 168, 255, 0.25);\n}"))
         ]))
         (rows (table [
           (field "id" (str "frost"))
           (field "label" (str "modal frost"))
           (field "group" (str "Glass"))
-          (field "css" (long "html.tn-themed .cmdk,\nhtml.tn-themed .dlg-card,\nhtml.tn-themed .mdl,\nhtml.tn-themed .pk-sheet,\nhtml.tn-themed .sf-overlay.modal > .sf-ov-card,\nhtml.tn-themed .sf-prefs .pf-editor > .sf-col,\nhtml.tn-themed .tn-hd,\nhtml.tn-themed .tn-sc {\n\t-webkit-backdrop-filter: blur(40px) saturate(190%) !important;\n\tbackdrop-filter: blur(40px) saturate(190%) !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "user-frost"))
           (field "label" (str "User bubble frost"))
           (field "group" (str "Glass"))
           (field "default" false)
-          (field "css" (long ":root:not(#g0):not(#g1):not(#g2):not(#g3) .sf-card[data-role^='omp.user'] > .sf-card-body,\n:root:not(#g0):not(#g1):not(#g2):not(#g3) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md {\n\tbackground: color-mix(in srgb, var(--panel, var(--l1)) 45%, transparent) !important;\n\t-webkit-backdrop-filter: blur(40px) saturate(190%) !important;\n\tbackdrop-filter: blur(40px) saturate(190%) !important;\n\tbox-shadow: 0 0 0 1px var(--l2), 0 10px 26px -16px rgba(0, 0, 0, 0.5) !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "reply-frost"))
           (field "label" (str "Bot reply frost"))
           (field "group" (str "Glass"))
           (field "default" false)
-          (field "css" (long ":root:not(#g0):not(#g1):not(#g2):not(#g3) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md,\n:root:not(#g0):not(#g1):not(#g2):not(#g3) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'],\n:root:not(#g0):not(#g1):not(#g2):not(#g3) [data-role='omp.bot.xmsg'] {\n\tbackground: color-mix(in srgb, var(--panel, var(--l1)) 45%, transparent) !important;\n\t-webkit-backdrop-filter: blur(40px) saturate(190%) !important;\n\tbackdrop-filter: blur(40px) saturate(190%) !important;\n\tbox-shadow: 0 0 0 1px var(--l2), 0 10px 26px -16px rgba(0, 0, 0, 0.5) !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "width"))
           (field "label" (str "rail width"))
           (field "group" (str "Rail"))
-          (field "css" (long "html.lay-rail.tabs-h #tabbar {\n\twidth: 236px !important;\n}\nhtml.lay-rail.tabs-h #panel {\n\tleft: calc(236px * var(--tn-zoom, 1)) !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "tabs"))
           (field "label" (str "tab rows"))
           (field "group" (str "Rail"))
-          (field "css" (long "html.lay-rail.tabs-h .tt {\n\theight: 38px !important;\n\tmargin: 0 4px !important;\n\tpadding: 0 10px !important;\n\tborder-radius: 10px !important;\n\ttransition: background-color 0.13s var(--ease), color 0.13s var(--ease) !important;\n}\nhtml.lay-rail.tabs-h .tt:hover {\n\tbackground: var(--l1) !important;\n}\nhtml.lay-rail.tabs-h .tt.on {\n\tbackground: var(--panel) !important;\n\tbox-shadow: inset 2px 0 0 var(--accent) !important;\n}\nhtml.lay-rail.tabs-h .tt.on::before,\nhtml.lay-rail.tabs-h .tt.on::after {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "buttons"))
           (field "label" (str "rail buttons"))
           (field "group" (str "Rail"))
-          (field "css" (long "html.lay-rail.tabs-h .tb-row {\n\theight: 28px !important;\n\tmargin: 2px 6px 0 !important;\n\tpadding: 0 10px !important;\n\tborder-radius: 9px !important;\n}\nhtml.lay-rail.tabs-h .tb-add {\n\tmargin: 4px 6px 0 !important;\n\tborder-radius: 9px !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "centering"))
           (field "label" (str "rail centering"))
           (field "group" (str "Rail"))
-          (field "css" (long "html.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs {\n\tmargin-top: auto !important;\n\tmargin-bottom: auto !important;\n}\nhtml.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {\n\tmargin-top: 0 !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bottom"))
           (field "label" (str "rail bottom"))
           (field "group" (str "Rail"))
-          (field "css" (long "html.lay-rail.tabs-h #tabbar > .tb-in > .tn-peers {\n\torder: 1 !important;\n\tmargin-top: 0 !important;\n}\nhtml.lay-rail.tabs-h #tabbar {\n\toverflow-y: auto !important;\n}\nhtml.lay-rail.tabs-h #tabbar > .tb-in {\n\tflex: none !important;\n\tmin-height: 100% !important;\n}\nhtml.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs {\n\tflex: none !important;\n\tmargin: 0 !important;\n\toverflow: visible !important;\n}\nhtml.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {\n\tmargin-top: auto !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "lock"))
@@ -36003,189 +38135,160 @@
           (field "id" (str "answer-bubbles"))
           (field "label" (str "answer bubbles"))
           (field "group" (str "omp"))
-          (field "css" (long ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md,\n.sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md {\n\talign-self: flex-start;\n\tmax-width: 82%;\n\tpadding: 10px 16px;\n\tborder-radius: 18px 18px 18px 6px;\n\tbackground: var(--l1);\n\tbox-shadow:\n\t\t0 0 0 1px var(--l1),\n\t\t0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)),\n\t\tinset 0 1px 0 var(--glass-hi);\n}\n\n.sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body {\n\tbox-shadow:\n\t\t0 0 0 1px var(--l1),\n\t\t0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)),\n\t\tinset 0 1px 0 var(--glass-hi);\n}\n\n.sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md .md > :last-child,\n.sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md .md > :last-child {\n\tmargin-bottom: 0;\n}"))
+          (field "excludes" (table [(str "chat-look")]))
         ]))
         (rows (table [
           (field "id" (str "work-rail"))
           (field "label" (str "work steps on a rail"))
           (field "group" (str "omp"))
-          (field "css" (long ".sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md {\n\tfont-size: 13px;\n\tcolor: var(--t2);\n}\n\n.sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md > :last-child {\n\tmargin-bottom: 0;\n}\n\n.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head {\n\tfont-size: 13px;\n\tcolor: var(--t2);\n}\n\n.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head .sf-t-dim {\n\tcolor: var(--t4);\n}\n\n.sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-body {\n\tmargin-left: 7px;\n\tpadding-left: 15px;\n\tbox-shadow: inset 1px 0 0 var(--l2);\n}"))
         ]))
         (rows (table [
           (field "id" (str "row-keys"))
           (field "label" (str "hide rail row shortcuts"))
           (field "group" (str "Rail"))
-          (field "css" (long "html.tn-themed #tabbar .tb-row .kbds {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "turn-stats"))
           (field "label" (str "hide turn stats"))
           (field "group" (str "omp"))
-          (field "css" (long "html.tn-themed [data-role='omp.turn.usage'] {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "chat-look"))
           (field "label" (str "Grok chat"))
           (field "group" (str "omp"))
-          (field "css" (long ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] [data-role^='omp.thinking'],\n:root:not(#s0):not(#s1) [data-role='omp.chat.dock'] :is([data-role='omp.composer.usage'], [data-role='omp.composer.extras']) {\n\tdisplay: none !important;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body {\n\tmax-width: min(80%, 560px);\n}\n\n:root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md {\n\talign-self: auto;\n\tmax-width: none;\n\tpadding: 0;\n\tborder-radius: 0;\n\tbackground: none;\n\tbox-shadow: none;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .md {\n\tfont-size: 15px;\n\tline-height: 22px;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] {\n\tpadding: 0;\n\tborder: 0;\n\tbackground: none;\n\tbox-shadow: none;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-head {\n\tdisplay: none;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] .sf-card[data-role='omp.advisor'] > .sf-card-body {\n\tpadding: 0;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] [data-role='omp.advisor.note'] {\n\tcolor: var(--ink3, var(--t4));\n\twhite-space: nowrap;\n\toverflow: hidden;\n\ttext-overflow: ellipsis;\n}\n\n:root:not(#s0):not(#s1) [data-role='omp.chat.advice'] [data-role='omp.advisor.note']::before {\n\tcontent: \"Advisor · \";\n}"))
+          (field "excludes" (table [(str "answer-bubbles")]))
         ]))
         (rows (table [
           (field "id" (str "chat-frost"))
           (field "label" (str "frosted bubbles"))
           (field "group" (str "omp"))
-          (field "css" (long ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body,\n:root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'] {\n\tbackground: var(--frost, light-dark(var(--pop-bg), var(--raise)));\n\tbackdrop-filter: blur(18px) saturate(130%);\n\tbox-shadow: 0 0 0 1px var(--line, var(--l2));\n}"))
         ]))
         (rows (table [
           (field "id" (str "chat-still"))
           (field "label" (str "no streaming"))
           (field "group" (str "omp"))
-          (field "css" (long ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .md.streaming {\n\tdisplay: none;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-answer-bubbles"))
           (field "label" (str "answer bubbles"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#ob):not(#oc) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'],\n:root:not(#ob):not(#oc) [data-role='omp.bot.xmsg'] {\n\talign-self: flex-start;\n\tmax-width: min(80%, 560px);\n\tmargin: 0;\n\tpadding: 7px 12px;\n\tborder-radius: var(--r-card);\n\tbackground: rgb(from var(--t1) r g b / 6%);\n\tbox-shadow: none;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-work-rail"))
           (field "label" (str "work steps on a rail"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.reply'] [data-role='omp.assistant.note'] .md {\n\tfont-size: 13px;\n\tcolor: var(--t2);\n}\n\n:root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.reply'] [data-role='omp.assistant.note'] .md > :last-child {\n\tmargin-bottom: 0;\n}\n\n:root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.reply'] .sf-section[data-role='omp.notice.work'] > .sf-section-head {\n\tfont-size: 13px;\n\tcolor: var(--t2);\n}\n\n:root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.reply'] .sf-section[data-role='omp.notice.work'] > .sf-section-head .sf-t-dim {\n\tcolor: var(--t4);\n}\n\n:root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.reply'] .sf-section[data-role='omp.notice.work'] > .sf-section-body {\n\tmargin-left: 7px;\n\tpadding-left: 15px;\n\tbox-shadow: inset 1px 0 0 var(--l2);\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-turn-stats"))
           (field "label" (str "hide turn stats"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.reply'] [data-role='omp.turn.usage'],\n:root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.took'] {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-chat-look"))
           (field "label" (str "Grok chat"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.reply'] [data-role^='omp.thinking'],\n:root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.dock'] :is([data-role='omp.composer.usage'], [data-role='omp.composer.extras']) {\n\tdisplay: none !important;\n}\n\n:root:not(#b0):not(#b1):not(#b2) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md {\n\tfont-size: 15px;\n\tline-height: 22px;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-chat-frost"))
           (field "label" (str "frosted bubbles"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md,\n:root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor'] {\n\tbackground: var(--frost, light-dark(var(--pop-bg), var(--raise)));\n\tbackdrop-filter: blur(18px) saturate(130%);\n\tbox-shadow: 0 0 0 1px var(--line, var(--l2));\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-chat-still"))
           (field "label" (str "no streaming"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.reply'] .md.streaming {\n\tdisplay: none;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-tints"))
           (field "label" (str "tint colours and font"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role^='omp.bot.chat.'],\n[data-role^='omp.bot.hero.'],\n[data-role^='omp.bot.top.'],\n[data-role^='omp.bot.eventbox.'],\n[data-role^='omp.bot.xrun.'],\n[data-role^='omp.bot.xface.'] {\n\t--t: #8f6bff;\n\t--p: 2px;\n\tposition: relative;\n\tfont-family: Geist, system-ui, \"SF Pro Text\", sans-serif;\n}\n\n[data-role^='omp.bot.'][data-role$='.red'] { --t: #ff4d5e; }\n[data-role^='omp.bot.'][data-role$='.orange'] { --t: #ff8a3d; }\n[data-role^='omp.bot.'][data-role$='.yellow'] { --t: #f2b705; }\n[data-role^='omp.bot.'][data-role$='.green'] { --t: #2fbf71; }\n[data-role^='omp.bot.'][data-role$='.teal'] { --t: #19b8c4; }\n[data-role^='omp.bot.'][data-role$='.blue'] { --t: #3d7bff; }\n[data-role^='omp.bot.'][data-role$='.pink'] { --t: #ff5fa8; }"))
         ]))
         (rows (table [
           (field "id" (str "bot-layout"))
           (field "label" (str "header, hero and placeholders"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role^='omp.bot.chat.'] {\n\tpadding: 2px 4px 10px 6px;\n}\n\n[data-role^='omp.bot.hero.'] {\n\t--p: 5px;\n\tpadding: 48px 0 20px 0;\n}\n\n[data-role^='omp.bot.top.'] {\n\t--p: 1px;\n\tpadding: 2px 4px 10px 2px;\n\tbox-shadow: 0 1px 0 var(--l1);\n}\n\n[data-role='omp.bot.floor'] {\n\theight: 34vh;\n}\n\n[data-role^='omp.bot.'].sf-void {\n\tdisplay: flex !important;\n}\n\n[data-role='omp.bot.none'],\n[data-role='omp.bot.none'].sf-void,\n[data-role='omp.bot.more'],\n[data-role='omp.bot.more'].sf-void {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-spacing"))
           (field "label" (str "tight message spacing"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#ob):not(#oc) [data-role='omp.bot.reply'],\n:root:not(#ob):not(#oc) [data-role='omp.bot.you'],\n:root:not(#ob):not(#oc) [data-role^='omp.bot.eventbox.'] {\n\tmargin: -4px 0;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.bot.more'] + [data-role='omp.bot.reply'] {\n\tmargin-top: -12px;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-you"))
           (field "label" (str "your message bubbles"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#ob):not(#oc) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] {\n\talign-self: flex-end;\n\tmax-width: min(80%, 560px);\n\tmargin: 0 0 0 auto;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body {\n\talign-items: flex-end;\n\tpadding: 0;\n\tbackground: none;\n\tbox-shadow: none;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md {\n\tpadding: 7px 12px;\n\tborder-radius: var(--r-card);\n\tbackground: var(--oz-pink, var(--l2));\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-text"))
           (field "label" (str "message text spacing"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#ob):not(#oc) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'], [data-role='omp.bot.xmsg']) .md {\n\tline-height: 1.45;\n}\n\n:root:not(#ob):not(#oc) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'], [data-role='omp.bot.xmsg']) .md > :first-child {\n\tmargin-top: 0;\n}\n\n:root:not(#ob):not(#oc) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'], [data-role='omp.bot.xmsg']) .md > :last-child {\n\tmargin-bottom: 0;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-dock"))
           (field "label" (str "hide composer meters"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#ob):not(#oc) [data-role='omp.bot.dock'] :is([data-role='omp.composer.context'], [data-role='omp.composer.usage'], [data-role='omp.composer.extras']) {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-time"))
           (field "label" (str "timestamps"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role='omp.bot.time'],\n[data-role='omp.bot.xtime'] {\n\talign-self: stretch;\n\tmargin: -2px 0 -8px;\n\ttext-align: center;\n\tfont-size: 12px;\n\tline-height: 16px;\n\tcolor: var(--t2);\n\tfont-family: Geist, system-ui, \"SF Pro Text\", sans-serif;\n}\n\n[data-role='omp.bot.xtime'] {\n\tmargin: 14px 0 -4px;\n}\n\n[data-role='omp.bot.took'] {\n\topacity: 0.45;\n\tfont-size: 0.85em;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-events"))
           (field "label" (str "event rows"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role='omp.bot.event.row'] {\n\talign-self: center;\n\tmax-width: 100%;\n\tmin-height: 24px;\n\tmargin-top: 2px;\n\tpadding: 2px 6px;\n\tcolor: var(--t3);\n\tfont-size: 12px;\n\tcursor: pointer;\n}\n\n[data-role='omp.bot.event.row']:hover {\n\tcolor: var(--t2);\n}\n\n[data-role='omp.bot.event.action'],\n[data-role='omp.bot.event.more'] {\n\tflex: none;\n\tcolor: var(--t3);\n}\n\n[data-role='omp.bot.event.name'] {\n\tmax-width: min(60vw, 360px);\n\tcolor: var(--t2);\n\tfont-weight: 500;\n}\n\n[data-role='omp.bot.event.avatar'],\n[data-role^='omp.bot.xface.'],\n[data-role='omp.bot.xavatar'] {\n\t--p: 1px;\n\tflex: none;\n\twidth: 32px;\n\theight: 26px;\n\toverflow: hidden;\n\talign-items: center;\n\tjustify-content: center;\n\tpointer-events: none;\n}\n\n:is([data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']) * {\n\tpointer-events: none;\n}\n\n:is([data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']) :is([data-role='omp.bot.emote'], [data-role='omp.bot.chao.idle'] > [data-role='omp.bot.line']:empty) {\n\tdisplay: none !important;\n}\n\n:is([data-role='omp.bot.event.avatar'], [data-role^='omp.bot.xface.'], [data-role='omp.bot.xavatar']) :is([data-role^='omp.bot.glyph.'], [data-role='omp.bot.blink'] [data-role^='omp.bot.px.'], [data-role^='omp.bot.chao.']) {\n\tanimation: none !important;\n}\n\n[data-role='omp.bot.event.detail'] {\n\talign-self: center;\n\twidth: min(100%, 720px);\n\tmargin: 4px auto 10px;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-pages"))
           (field "label" (str "bot exchange pages"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role='omp.bot.xpage'] {\n\twidth: min(100%, 960px);\n\tmargin: 0 auto;\n\tpadding: 0 16px 24px;\n\tfont-family: Geist, system-ui, \"SF Pro Text\", sans-serif;\n}\n\n[data-role='omp.bot.xtop'] {\n\tpadding: 10px 0 4px;\n}\n\n[data-role='omp.bot.xhead'] {\n\tpadding: 7.5px 13.5px 7.5px 7.5px;\n\tborder-radius: calc(var(--r-chip, 6px) * 999);\n\tbackground: var(--raise, var(--card));\n\tbox-shadow: 0 0 0 0.5px var(--l2), 0 4px 12px -1px rgb(0 0 0 / 8%);\n\tfont-size: 14px;\n\tfont-weight: 500;\n\tcolor: var(--t1);\n}\n\n[data-role='omp.bot.xarrow'] {\n\tmargin: 0 0 0 4px;\n\tcolor: var(--t4);\n}\n\n[data-role='omp.bot.xwho'] {\n\tmax-width: 22ch;\n}\n\n[data-role^='omp.bot.xrun.'] {\n\talign-self: stretch;\n\tmargin-top: 12px;\n}\n\n[data-role='omp.bot.xavatar'] {\n\tmargin-bottom: 4px;\n}\n\n[data-role='omp.bot.xcol'] {\n\tflex: 1;\n\tmin-width: 0;\n\talign-items: flex-start;\n}\n\n[data-role='omp.bot.xname'] {\n\tmax-width: 100%;\n\tmargin: 0 0 4px 12px;\n\tfont-size: 13px;\n\tline-height: 18px;\n\tcolor: light-dark(color-mix(in oklab, var(--t) 72%, #000), color-mix(in oklab, var(--t) 85%, #fff));\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.bot.xmsg'] + [data-role='omp.bot.xmsg'] {\n\tmargin-top: 4px;\n}\n\n[data-role='omp.bot.xfoot'] {\n\talign-self: stretch;\n\twidth: 100%;\n\tpadding: 12px 0;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.bot.xclose'] {\n\talign-self: center;\n\theight: auto;\n\tmargin: 0 auto;\n\tpadding: 8px 16px;\n\tborder-radius: calc(var(--r-chip, 6px) * 999);\n\tbackground: rgb(from var(--t1) r g b / 6%);\n\tbox-shadow: none;\n\tcolor: var(--t1);\n\tfont-size: 14px;\n\tline-height: 20px;\n\ttransition: background-color 0.12s ease-out;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.bot.xclose']:hover {\n\tbackground: rgb(from var(--t1) r g b / 10%);\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-ask"))
           (field "label" (str "numbered question answers"))
           (field "group" (str "omp bots"))
-          (field "css" (long ":root:not(#ob):not(#oc) [data-role='omp.editor.ask'] {\n\twidth: min(100%, 720px);\n\tmargin: 8px auto;\n\tpadding: 16px;\n\tborder-radius: var(--r-card);\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.question'] {\n\tfont-weight: 600;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] {\n\tmargin-top: 8px;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item::before {\n\tdisplay: grid;\n\tplace-items: center;\n\twidth: 20px;\n\theight: 20px;\n\ttop: var(--ask-row-y);\n\tleft: 12px;\n\tborder-radius: 6px;\n\tfont: 600 11.5px/1 var(--mono, ui-monospace, monospace);\n\tcolor: var(--t2);\n\tbackground: none;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:is([data-tone='accent'], [data-tone='success'])::before {\n\tcolor: light-dark(#fff, #0b0b0c);\n\tbackground: var(--t1);\n\tbox-shadow: none;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item .sf-item-ic {\n\tdisplay: none;\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:nth-child(1)::before {\n\tcontent: '1';\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:nth-child(2)::before {\n\tcontent: '2';\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:nth-child(3)::before {\n\tcontent: '3';\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:nth-child(4)::before {\n\tcontent: '4';\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:nth-child(5)::before {\n\tcontent: '5';\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:nth-child(6)::before {\n\tcontent: '6';\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:nth-child(7)::before {\n\tcontent: '7';\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:nth-child(8)::before {\n\tcontent: '8';\n}\n\n:root:not(#ob):not(#oc) [data-role='omp.ask.options'] .sf-item:nth-child(9)::before {\n\tcontent: '9';\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-chao"))
           (field "label" (str "Chao avatars"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role^='omp.bot.tempo.'],\n[data-role^='omp.bot.type.'] {\n\tposition: relative;\n\tflex: none;\n}\n\n[data-role='omp.bot.type.neutral'] {\n\t--xb: color-mix(in srgb, var(--t) 35%, #fff);\n\t--xm: color-mix(in srgb, var(--t) 50%, #fff);\n\t--xs: color-mix(in srgb, var(--t) 70%, #fff);\n\t--xc: color-mix(in srgb, var(--t) 82%, #000);\n\t--xe: color-mix(in srgb, var(--t) 55%, #000);\n\t--xw: #f8f8f8;\n\t--xa: #f8f820;\n\t--xi: #d8d868;\n\t--xd: #c0b830;\n\t--xn: #88a850;\n\t--xj: #d8f8b0;\n}\n[data-role='omp.bot.type.hero'] {\n\t--xb: #f8f8f8;\n\t--xs: #bec2bf;\n\t--xc: #647c9a;\n\t--xe: #647c9a;\n\t--xw: #f8f8f8;\n\t--xj: #c8ebf1;\n\t--xa: #89a8dd;\n\t--xi: #c8ebf1;\n\t--xd: #647c9a;\n\t--xy: #f7df56;\n}\n[data-role='omp.bot.type.dark'] {\n\t--xb: color-mix(in srgb, var(--t) 22%, #152745);\n\t--xe: #1c63a1;\n\t--xw: #f8f8f8;\n\t--xa: #d52b38;\n\t--xi: #d52b38;\n\t--xd: #a71a30;\n}\n\n[data-role^='omp.bot.chao.'] {\n\tposition: relative;\n\tflex: none;\n\talign-items: flex-start;\n\tcursor: pointer;\n}\n\n[data-role='omp.bot.emote'] {\n\tflex: none;\n\talign-items: flex-end;\n}\n\n[data-role='omp.bot.body'] {\n\tposition: relative;\n\talign-items: center;\n}\n\n[data-role='omp.bot.line'] {\n\tflex: none;\n\theight: var(--p);\n\tjustify-content: center;\n}\n\n[data-role^='omp.bot.px.'] {\n\tflex: none;\n\twidth: var(--p);\n\theight: var(--p);\n}\n[data-role='omp.bot.px.o'] { background: light-dark(#000, #44485e); }\n[data-role='omp.bot.px.r'] { background: #ff4f7b; }\n[data-role='omp.bot.px.b'] { background: var(--xb); }\n[data-role='omp.bot.px.m'] { background: var(--xm); }\n[data-role='omp.bot.px.s'] { background: var(--xs); }\n[data-role='omp.bot.px.c'] { background: var(--xc); }\n[data-role='omp.bot.px.e'] { background: var(--xe); }\n[data-role='omp.bot.px.a'] { background: var(--xa); }\n[data-role='omp.bot.px.i'] { background: var(--xi); }\n[data-role='omp.bot.px.d'] { background: var(--xd); }\n[data-role='omp.bot.px.n'] { background: var(--xn); }\n[data-role='omp.bot.px.j'] { background: var(--xj); }\n[data-role='omp.bot.px.w'] { background: var(--xw); }\n[data-role='omp.bot.px.y'] { background: var(--xy); }"))
         ]))
         (rows (table [
           (field "id" (str "bot-chao-motion"))
           (field "label" (str "Chao animation"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role='omp.bot.blink'] {\n\tposition: absolute;\n\tinset: 0;\n\talign-items: center;\n}\n[data-role='omp.bot.blink'] [data-role^='omp.bot.px.'] {\n\topacity: 0;\n\tanimation: chaoBlink 5.2s steps(1) infinite;\n}\n\n[data-role^='omp.bot.glyph.'] {\n\tanimation: chaoBob 1.8s steps(1) infinite;\n}\n[data-role='omp.bot.glyph.swirl'] { animation: chaoSpin 0.8s steps(4) infinite; }\n[data-role='omp.bot.glyph.ask'] { animation: chaoSway 1.2s steps(1) infinite; }\n[data-role='omp.bot.glyph.bang'] { animation-duration: 0.5s; }\n[data-role='omp.bot.glyph.heart'] { animation: chaoRise 1s steps(5) 1 both; }\n[data-role='omp.bot.glyph.droop'] { transform: translateY(calc(2 * var(--p))); animation: none; }\n[data-role='omp.bot.glyph.z'] { animation: chaoZ 2.4s steps(6) infinite; }\n[data-role='omp.bot.chao.drowsy'] [data-role^='omp.bot.glyph.'] { animation-duration: 4s; }\n\n[data-role='omp.bot.tempo.calm'] [data-role^='omp.bot.glyph.'] { animation-duration: 2.6s; }\n[data-role='omp.bot.tempo.brisk'] [data-role^='omp.bot.glyph.'] { animation-duration: 1.2s; }\n[data-role='omp.bot.tempo.calm'] [data-role='omp.bot.blink'] [data-role^='omp.bot.px.'] { animation-duration: 7s; }\n[data-role='omp.bot.tempo.brisk'] [data-role='omp.bot.blink'] [data-role^='omp.bot.px.'] { animation-duration: 3.6s; }\n\n[data-role='omp.bot.chao.happy'],\n[data-role='omp.bot.chao.boop'],\n[data-role='omp.bot.chao.listen'],\n[data-role^='omp.bot.chao.']:hover {\n\tanimation: chaoHop 0.6s cubic-bezier(0.3, 0.7, 0.4, 1) 1;\n}\n[data-role='omp.bot.chao.sleep']:hover {\n\tanimation: none;\n}\n\n@keyframes chaoBlink {\n\t0%, 100% { opacity: 0; }\n\t92%, 96% { opacity: 1; }\n}\n\n@keyframes chaoBob {\n\t0%, 100% { transform: translateY(0); }\n\t50% { transform: translateY(calc(-1 * var(--p))); }\n}\n\n@keyframes chaoSpin {\n\tfrom { transform: rotate(0deg); }\n\tto { transform: rotate(360deg); }\n}\n\n@keyframes chaoSway {\n\t0%, 100% { transform: translateX(0); }\n\t50% { transform: translateX(var(--p)); }\n}\n\n@keyframes chaoRise {\n\tfrom { transform: translateY(calc(3 * var(--p))); }\n\tto { transform: translateY(0); }\n}\n\n@keyframes chaoZ {\n\tfrom { opacity: 1; transform: translate(0, 0); }\n\tto { opacity: 0; transform: translate(calc(3 * var(--p)), calc(-4 * var(--p))); }\n}\n\n@keyframes chaoHop {\n\t0%, 100% { transform: translateY(0); }\n\t40% { transform: translateY(calc(-5 * var(--p))); }\n\t70% { transform: translateY(0); }\n}\n\n@media (prefers-reduced-motion: reduce) {\n\t[data-role^='omp.bot.chao.'],\n\t[data-role^='omp.bot.chao.'] * {\n\t\tanimation: none !important;\n\t}\n}\n"))
         ]))
         (rows (table [
           (field "id" (str "bot-names"))
           (field "label" (str "names and status line"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role='omp.bot.words'] {\n\tmin-width: 0;\n}\n\n[data-role='omp.bot.name'] {\n\tfont-weight: 600;\n}\n\n[data-role='omp.bot.role'],\n[data-role='omp.bot.say'],\n[data-role='omp.bot.steps'] {\n\tposition: relative;\n\topacity: 0.58;\n}\n\n[data-role^='omp.bot.top.'] [data-role='omp.bot.name'] {\n\tmargin-left: 2px;\n}\n\n[data-role='omp.bot.hello'] {\n\tmargin-top: 14px;\n\tfont-size: 1.5em;\n\tline-height: 1.3;\n\tfont-weight: 600;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-stop"))
           (field "label" (str "stop button"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role='omp.bot.stop'] {\n\tmargin-left: auto;\n\tpadding: 2px 8px;\n\tborder-radius: 9px;\n\tfont-size: 0.85em;\n\tbox-shadow: 0 0 0 1px var(--l2);\n\topacity: 0.75;\n\tcursor: pointer;\n}\n[data-role='omp.bot.stop']:hover {\n\topacity: 1;\n\tbackground: var(--l1);\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-rail"))
           (field "label" (str "roster tabs in the rail"))
           (field "group" (str "omp bots"))
-          (field "css" (long "#tabbar .tt[data-tc='red'] { --bot: #ff4d5e; }\n#tabbar .tt[data-tc='orange'] { --bot: #ff8a3d; }\n#tabbar .tt[data-tc='yellow'] { --bot: #f2b705; }\n#tabbar .tt[data-tc='green'] { --bot: #2fbf71; }\n#tabbar .tt[data-tc='teal'] { --bot: #19b8c4; }\n#tabbar .tt[data-tc='blue'] { --bot: #3d7bff; }\n#tabbar .tt[data-tc='purple'] { --bot: #8f6bff; }\n#tabbar .tt[data-tc='pink'] { --bot: #ff5fa8; }\n\n#tabbar .tt[data-tc] {\n\tborder: none;\n\tbox-shadow: none;\n\tborder-radius: 10px;\n}\n\n#tabbar .tt[data-tc].on {\n\tbackground: light-dark(#ececee, #2a2a2d) !important;\n}\n\n#tabbar .tt[data-tc] .mk.keys,\n#tabbar .tt[data-tc] .kbd,\n#tabbar .tt[data-tc] .tn-tc {\n\tdisplay: none;\n}\n\n#tabbar .tt[data-tc] .nm {\n\tcolor: light-dark(#18181b, #f2f2f3);\n\tfont-weight: 500;\n}\n\n#tabbar .tt[data-tc] .sub {\n\topacity: 0.55;\n\tfont-size: 11px;\n}\n\n#tabbar .tt[data-tc] .sub::after {\n\tfont-family: Geist, system-ui, sans-serif;\n\tfont-size: 11.5px;\n}\n\n#tabbar .tt[data-tc] .tn-dk-c {\n\tposition: relative;\n\twidth: 18px;\n\theight: 18px;\n\tcolor: transparent;\n\tbackground: none;\n}\n\n#tabbar .tt[data-tc] .tn-dk-c * {\n\topacity: 0;\n}\n\n#tabbar .tt[data-tc] .tn-dk-c::after {\n\tcontent: '';\n\tposition: absolute;\n\tleft: -30px;\n\ttop: -30px;\n\twidth: 1px;\n\theight: 1px;\n}\n\n#tabbar .tt[data-tc] .tn-dk-c[data-st='waiting']::before,\n#tabbar .tt[data-tc] .tn-dk-c[data-st='failed']::before {\n\tcontent: '';\n\tposition: absolute;\n\tz-index: 1;\n\tright: -4px;\n\ttop: -6px;\n\twidth: 4px;\n\theight: 4px;\n\tbackground: #f0a020;\n\tbox-shadow: 0 0 0 1px #000;\n}\n\n#tabbar .tt[data-tc] .tn-dk-c[data-st='working'] {\n\tanimation: railChaoBob 0.8s steps(1) infinite;\n}\n\n#tabbar .tt[data-tc] .tn-dk-c[data-st='failed']::before {\n\tbackground: #e5484d;\n}\n\n@keyframes railChaoBob {\n\t0%, 100% { transform: translateY(0); }\n\t50% { transform: translateY(-1px); }\n}\n\n@media (prefers-reduced-motion: reduce) {\n\t#tabbar .tt[data-tc] .tn-dk-c[data-st='working'] {\n\t\tanimation: none;\n\t}\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-jobs"))
           (field "label" (str "hide job notices"))
           (field "group" (str "omp bots"))
-          (field "css" (long "[data-role='omp.bot.notice'] {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-yorha-bubbles"))
           (field "label" (str "YoRHa bubbles"))
           (field "group" (str "omp bots"))
           (field "looks" (table [(str "yorha") (str "yorha-pixel")]))
-          (field "css" (long ":root:not(#oz):not(#yh):not(#yr) .sf-region.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) {\n\tanimation: none;\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'] {\n\tposition: relative;\n\toverflow: visible;\n\tmax-width: min(92%, 760px);\n\tpadding: 20px 18px 14px;\n\tbackground: var(--yh-paper);\n\tbox-shadow: 0 0 0 1px var(--yh-ink);\n}\n:root:not(#oz):not(#yh):not(#yr) .sf-main > [data-role='omp.bot.reply']:last-child > [data-role^='omp.assistant'] {\n\tanimation: yh-scan-in calc(120ms * var(--yh-t)) var(--yh-snap) backwards;\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.reply'] > [data-role^='omp.assistant']::before {\n\tcontent: \"\";\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\tright: 0;\n\theight: 6px;\n\tbackground: var(--yh-ink);\n\ttransform-origin: 0 0;\n\tpointer-events: none;\n}\n:root:not(#oz):not(#yh):not(#yr) .sf-main > [data-role='omp.bot.reply']:last-child > [data-role^='omp.assistant']::before {\n\tanimation: yh-rules calc(100ms * var(--yh-t)) var(--yh-snap) both;\n}\n:root:not(#oz):not(#yh):not(#yr) .sf-main > [data-role='omp.bot.reply']:last-child > [data-role^='omp.assistant'] .md.streaming > :last-child::after {\n\tcontent: \"\";\n\tdisplay: inline-block;\n\twidth: 0.5em;\n\theight: 1em;\n\tmargin-left: 3px;\n\tvertical-align: -0.12em;\n\tbackground: var(--yh-ink);\n\tanimation: yh-blink calc(700ms * var(--yh-t)) steps(1, end) infinite;\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md {\n\tposition: relative;\n\tpadding: 20px 18px 14px 34px;\n\tbackground: var(--yh-ink);\n\tcolor: var(--yh-ground);\n\tbox-shadow: 0 0 0 1px var(--yh-ink);\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md::after {\n\tcontent: \"\";\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\tright: 0;\n\theight: 6px;\n\tbackground: #000000;\n\tbox-shadow: 0 1px 0 var(--yh-ground);\n\ttransform-origin: 100% 0;\n\tpointer-events: none;\n}\n:root:not(#oz):not(#yh):not(#yr) .sf-main > [data-role='omp.bot.you']:last-child .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md {\n\tanimation: yh-scan-in calc(120ms * var(--yh-t)) var(--yh-snap) backwards;\n}\n:root:not(#oz):not(#yh):not(#yr) .sf-main > [data-role='omp.bot.you']:last-child .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md::after {\n\tanimation: yh-rules calc(100ms * var(--yh-t)) var(--yh-snap) both;\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md::before {\n\tcontent: \"\";\n\tposition: absolute;\n\tleft: 12px;\n\ttop: 28px;\n\twidth: 7px;\n\theight: 7px;\n\tbackground: var(--yh-ground);\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body,\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body .md {\n\t--t1: var(--yh-ground);\n\t--tv-fg: var(--yh-ground);\n\tcolor: var(--yh-ground);\n\tfont: 400 16.5px/24px var(--yh-label);\n}"))
         ]))
         (rows (table [
           (field "id" (str "bot-yorha-labels"))
           (field "label" (str "YoRHa labels"))
           (field "group" (str "omp bots"))
           (field "looks" (table [(str "yorha") (str "yorha-pixel")]))
-          (field "css" (long ":root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.time'] {\n\tfont: 400 11px/1 var(--yh-label);\n\tletter-spacing: 1.5px;\n\ttext-transform: uppercase;\n\tcolor: var(--yh-i50);\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role^='omp.bot.top.'] {\n\tbox-shadow: 0 1px 0 var(--yh-i25);\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role^='omp.bot.top.'] [data-role='omp.bot.name'] {\n\tfont: 400 16.5px/24px var(--yh-label);\n\tletter-spacing: 2.5px;\n\ttext-transform: uppercase;\n\tcolor: var(--yh-ink);\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role^='omp.bot.top.'] [data-role='omp.bot.role'] {\n\tfont: 400 11px/16px var(--yh-label);\n\tletter-spacing: 1.5px;\n\ttext-transform: uppercase;\n\topacity: 1;\n\tcolor: var(--yh-i50);\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.event.row'] {\n\tfont: 400 11px/16px var(--yh-label);\n\tletter-spacing: 1.5px;\n\ttext-transform: uppercase;\n\tcolor: var(--yh-i50);\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.event.name'] {\n\tfont: inherit;\n\tcolor: var(--yh-ink);\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.hello'] {\n\tfont: 400 22px/30px var(--yh-label);\n\tletter-spacing: 2.5px;\n\ttext-transform: uppercase;\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.say'] {\n\tfont: 400 11px/16px var(--yh-label);\n\tletter-spacing: 0;\n\tcolor: var(--yh-i70);\n\topacity: 1;\n}\n:root:not(#oz):not(#yh):not(#yr) [data-role='omp.bot.say']::after {\n\tcontent: \"\";\n\tdisplay: inline-block;\n\twidth: 7px;\n\theight: 12px;\n\tmargin-left: 6px;\n\tvertical-align: -2px;\n\tbackground: var(--yh-ink);\n\tanimation: yh-blink calc(1000ms * var(--yh-t)) steps(1, end) 4;\n}"))
         ]))
       ])))
       blank
@@ -36202,7 +38305,13 @@
       (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
         _,
         t,
+        ok,
+        css,
       }: [
+        (local [ok css] [pcall (dot tern "fs.read") (infix [(dot tern "plugin.dir") ".." (str "/snippets/") ".." (dot t "id") ".." (str ".css")])])
+        (if' ok [
+          (assign (dot t "css") css)
+        ])
         (assign (idx on (dot t "id")) (ifExpr [(infix [[type' saved] "==" (str "table") "and" (idx saved (dot t "id")) "~=" nil]) (infix [(idx saved (dot t "id")) "==" true]) (infix [(dot t "default") "~=" false])]))
         (assign (idx by_id (dot t "id")) t)
       ]))
@@ -36316,8 +38425,6 @@
         ]
       ]))
       blank
-      (local active (table []))
-      blank
       (localFunction fits [{t = null;}] ({t}: [
         (if' (not (dot t "looks")) [
           (return true)
@@ -36326,7 +38433,7 @@
           _,
           id,
         }: [
-          (if' (idx active id) [
+          (if' (idx on id) [
             (return true)
           ])
         ]))
@@ -36346,7 +38453,24 @@
         [paint t]
       ]))
       blank
-      (local LOOKS (table [(table [(field "id" (str "ozette")) (field "label" (str "Ozette"))]) (table [(field "id" (str "yorha")) (field "label" (str "YoRHa"))]) (table [(field "id" (str "yorha-pixel")) (field "label" (str "YoRHa Pixel"))]) (table [(field "id" (str "scratch")) (field "label" (str "Unset all"))])]))
+      (localFunction regate [] [
+        (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+          _,
+          t,
+        }: [
+          (if' (dot t "looks") [
+            [paint t]
+          ])
+        ]))
+      ])
+      blank
+      (local LOOKS (rows (table [
+        (table [(field "label" (str "Ozette")) (field "layers" (table [(str "ozette") (str "ozette-motion") (str "ozette-cmus")]))])
+        (table [(field "label" (str "YoRHa")) (field "layers" (table [(str "yorha")]))])
+        (table [(field "label" (str "YoRHa Pixel")) (field "layers" (table [(str "yorha") (str "yorha-pixel")]))])
+        (table [(field "label" (str "Unset all")) (field "layers" (table [(str "scratch")]))])
+        (table [(field "label" (str "None")) (field "layers" (table []))])
+      ])))
       blank
       (localFunction plugins (typed [] (table [(pair string string)])) ({
         root,
@@ -36380,60 +38504,71 @@
         (return found)
       ]))
       blank
-      (localFunction looks [{cx = null;}] ({
-        cx,
-        off,
-        installed,
+      (localFunction want [{layers = null;}] ({
+        layers,
+        set,
       }: [
-        (local off (table []))
-        (for [{_ = null;} {id = null;}] [ipairs (infix [[(dot cx "settings:get") (str "plugins_disabled")] "or" (table [])])] ({
-          _,
-          id,
-        }: [
-          (assign (idx off id) true)
-        ]))
-        (local installed [plugins])
-        (for [{_ = null;} {l = null;}] [ipairs LOOKS] ({
-          _,
-          l,
-        }: [
-          (assign (idx active (dot l "id")) (infix [(idx installed (dot l "id")) "~=" nil "and" (not (idx off (dot l "id")))]))
-        ]))
+        (local set (table []))
         (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
           _,
           t,
         }: [
-          (if' (dot t "looks") [
-            [paint t]
+          (if' (dot t "layer") [
+            (assign (idx set (dot t "id")) false)
           ])
         ]))
+        (for [{_ = null;} {id = null;}] [ipairs layers] ({
+          _,
+          id,
+        }: [
+          (assign (idx set id) true)
+        ]))
+        (return set)
       ]))
       blank
-      [
-        (dot tern "on")
-        (str "window_start")
-        (fn [{cx = null;}] ({cx}: [
-          [looks cx]
-        ]))
-      ]
-      blank
-      [
-        (dot tern "timer")
-        0
-        (fn [{cx = null;}] ({cx}: [
-          (if' cx [
-            [looks cx]
+      (localFunction wears [{layers = null;}] ({layers}: [
+        (for [{id = null;} {yes = null;}] [want layers] ({
+          id,
+          yes,
+        }: [
+          (if' (infix [(idx on id) "~=" yes]) [
+            (return false)
           ])
         ]))
-      ]
+        (return true)
+      ]))
+      blank
+      (localFunction pick [{layers = null;}] ({layers}: [
+        (for [{id = null;} {yes = null;}] [want layers] ({
+          id,
+          yes,
+        }: [
+          (assign (idx on id) yes)
+          [paint (idx by_id id)]
+        ]))
+        [(dot tern "kv.set") (str "on") on]
+        [regate]
+      ]))
       blank
       (localFunction toggle [{cx = null;} {t = null;}] ({
         cx,
         t,
       }: [
         (assign (idx on (dot t "id")) (not (idx on (dot t "id"))))
+        (if' (infix [(idx on (dot t "id")) "and" (dot t "excludes")]) [
+          (for [{_ = null;} {id = null;}] [ipairs (dot t "excludes")] ({
+            _,
+            id,
+          }: [
+            (assign (idx on id) false)
+            [paint (idx by_id id)]
+          ]))
+        ])
         [(dot tern "kv.set") (str "on") on]
         [paint t]
+        (if' (dot t "layer") [
+          [regate]
+        ])
         (if' (dot t "apply") [
           [(dot t "apply") cx]
         ])
@@ -36453,12 +38588,10 @@
         installed,
         items,
         add,
-        look,
         ids,
         groups,
       }: [
         (local disabled (infix [[(dot cx "settings:get") (str "plugins_disabled")] "or" (table [])]))
-        [(dot table' "sort") disabled]
         (local off (table []))
         (for [{_ = null;} {id = null;}] [ipairs disabled] ({
           _,
@@ -36478,27 +38611,15 @@
           ])
           (assign (idx items (infix [(len items) "+" 1])) item)
         ]))
-        (local look (str ""))
-        (for [{_ = null;} {l = null;}] [ipairs LOOKS] ({
-          _,
+        (for [{i = null;} {l = null;}] [ipairs LOOKS] ({
+          i,
           l,
         }: [
-          (if' (infix [(idx installed (dot l "id")) "and" (not (idx off (dot l "id")))]) [
-            (assign look (dot l "id"))
-          ])
+          [add (table [(field "label" (dot l "label")) (field "group" (str "Look")) (field "icon" (str "palette")) (field "look" i) (field "current" [wears (dot l "layers")])])]
         ]))
-        (for [{_ = null;} {l = null;}] [ipairs LOOKS] ({
-          _,
-          l,
-        }: [
-          (if' (idx installed (dot l "id")) [
-            [add (table [(field "label" (dot l "label")) (field "group" (str "Look")) (field "icon" (str "palette")) (field "look" (dot l "id")) (field "current" (infix [look "==" (dot l "id")]))])]
-          ])
-        ]))
-        [add (table [(field "label" (str "None")) (field "group" (str "Look")) (field "icon" (str "palette")) (field "look" (str "")) (field "current" (infix [look "==" (str "")]))])]
         (local ids (table []))
         (for [{id = null;}] installed ({id}: [
-          (if' (infix [id "~=" (dot tern "plugin.id") "and" id "~=" (str "ozette") "and" id "~=" (str "yorha") "and" id "~=" (str "yorha-pixel") "and" id "~=" (str "scratch")]) [
+          (if' (infix [id "~=" (dot tern "plugin.id")]) [
             (assign (idx ids (infix [(len ids) "+" 1])) id)
           ])
         ]))
@@ -36555,16 +38676,11 @@
               [toggle again (idx by_id (dot item "tweak"))]
               (return [menu again])
             ])
-            (ifElse (dot item "plugin") [
-                (assign (idx off (dot item "plugin")) (not (idx off (dot item "plugin"))))
-              ] [
-                (for [{_ = null;} {l = null;}] [ipairs LOOKS] ({
-                  _,
-                  l,
-                }: [
-                  (assign (idx off (dot l "id")) (infix [(dot l "id") "~=" (dot item "look")]))
-                ]))
-              ])
+            (if' (dot item "look") [
+              [pick (dot (idx LOOKS (dot item "look")) "layers")]
+              (return [menu again])
+            ])
+            (assign (idx off (dot item "plugin")) (not (idx off (dot item "plugin"))))
             (local list (table []))
             (for [{id = null;} {yes = null;}] off ({
               id,
@@ -36575,9 +38691,6 @@
               ])
             ]))
             [(dot table' "sort") list]
-            (if' (infix [[(dot table' "concat") list (str " ")] "==" [(dot table' "concat") disabled (str " ")]]) [
-              (return [menu again])
-            ])
             [(dot tern "kv.set") (str "reopen") (table [(field "at" [(dot os "time")]) (field "window" [(dot again ":window_key")])])]
             [(dot again "settings:set") (str "plugins_disabled") [(dot tern "json.array") list]]
           ]))
@@ -37357,6 +39470,17 @@
             ])
         ])
     ];
+    user_frost_data = [
+      {
+        select = ":root:not(#g0) .sf-card[data-role^='omp.user'] > .sf-card-body, :root:not(#g0) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
+        set = [
+          ["background" "color-mix(in srgb, var(--panel, var(--l1)) 45%, transparent) !important"]
+          ["-webkit-backdrop-filter" "blur(40px) saturate(190%) !important"]
+          ["backdrop-filter" "blur(40px) saturate(190%) !important"]
+          ["box-shadow" "0 0 0 1px var(--l2), 0 10px 26px -16px rgba(0, 0, 0, 0.5) !important"]
+        ];
+      }
+    ];
     user_services_ssh = {
       config,
       lib,
@@ -37716,6 +39840,20 @@
         ".local/share/applications/linear.desktop" = webapp "Linear" "https://linear.app" "Development;ProjectManagement;" "Linear issue tracking and project management";
       };
     };
+    width_data = [
+      {
+        select = "html.lay-rail.tabs-h #tabbar";
+        set = [
+          ["width" "236px !important"]
+        ];
+      }
+      {
+        select = "html.lay-rail.tabs-h #panel";
+        set = [
+          ["left" "calc(236px * var(--tn-zoom, 1)) !important"]
+        ];
+      }
+    ];
     work_fold_data = {
       Math,
       String,
@@ -38303,6 +40441,42 @@
       ];
       environment.systemPackages = [pkgs.gws];
     };
+    work_rail_data = [
+      {
+        select = ".sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md";
+        set = [
+          ["font-size" "13px"]
+          ["color" "var(--t2)"]
+        ];
+      }
+      {
+        select = ".sf-chat-reader [data-role='omp.assistant.note'] > .sf-md .md > :last-child";
+        set = [
+          ["margin-bottom" "0"]
+        ];
+      }
+      {
+        select = ".sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head";
+        set = [
+          ["font-size" "13px"]
+          ["color" "var(--t2)"]
+        ];
+      }
+      {
+        select = ".sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-head .sf-t-dim";
+        set = [
+          ["color" "var(--t4)"]
+        ];
+      }
+      {
+        select = ".sf-chat-reader .sf-section[data-role='omp.notice.work'] > .sf-section-body";
+        set = [
+          ["margin-left" "7px"]
+          ["padding-left" "15px"]
+          ["box-shadow" "inset 1px 0 0 var(--l2)"]
+        ];
+      }
+    ];
     work_vercel = {
       generators,
       lib,
@@ -39421,6 +41595,7 @@
         README_data = "modules/tools/tern/config/plugins/tuturu/README.data.nix";
         SOUL_data = "modules/tools/tern/config/carly/SOUL.data.nix";
         USER_data = "modules/tools/tern/config/carly/USER.data.nix";
+        account_data = "modules/tools/tern/config/plugins/ui-menu/snippets/account.data.nix";
         agent_slack = "modules/dev/ai/agent-slack.nix";
         agent_tabs_plugin_data = "modules/tools/tern/config/plugins/agent-tabs/plugin.data.nix";
         agent_tabs_window_data = "modules/tools/tern/config/plugins/agent-tabs/window.data.nix";
@@ -39443,6 +41618,7 @@
         android_phone_host_ssh_ed25519_data = "modules/hosts/android-phone/host-ssh-ed25519.data.nix";
         android_phone_user_ssh_data = "modules/hosts/android-phone/user-ssh.data.nix";
         android_tools = "modules/dev/android-tools.nix";
+        answer_bubbles_data = "modules/tools/tern/config/plugins/ui-menu/snippets/answer-bubbles.data.nix";
         apply_data = "modules/gaming/aniimo/apply.data.nix";
         apply_reasoning_policy_data = "modules/dev/ai/codex/apply-reasoning-policy.data.nix";
         apps_bluetooth = "modules/desktop/apps/bluetooth.nix";
@@ -39461,9 +41637,7 @@
         apps_slack = "modules/desktop/apps/slack.nix";
         aquamarine_gamescope_data = "modules/hosts/steam-frame/omarchy/aquamarine-gamescope.data.nix";
         arc_raiders = "modules/gaming/arc-raiders.nix";
-        attention_data = "modules/tools/tern/config/plugins/attention/attention.data.nix";
-        attention_plugin_data = "modules/tools/tern/config/plugins/attention/plugin.data.nix";
-        attention_window_data = "modules/tools/tern/config/plugins/attention/window.data.nix";
+        attention_data = "modules/tools/tern/config/plugins/ui-menu/snippets/attention.data.nix";
         attic = "modules/server/attic.nix";
         audio = "modules/finix/desktop/audio.nix";
         aws_cli = "modules/dev/work/aws-cli.nix";
@@ -39476,7 +41650,33 @@
         block_menu_window_data = "modules/tools/tern/config/plugins/block-menu/window.data.nix";
         boar = "modules/dev/ai/boar.nix";
         bolo_data = "modules/desktop/apps/bolo.data.nix";
+        bot_answer_bubbles_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-answer-bubbles.data.nix";
+        bot_ask_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-ask.data.nix";
+        bot_chao_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chao.data.nix";
+        bot_chao_motion_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chao-motion.data.nix";
+        bot_chat_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chat-frost.data.nix";
+        bot_chat_look_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chat-look.data.nix";
+        bot_chat_still_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chat-still.data.nix";
+        bot_dock_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-dock.data.nix";
+        bot_events_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-events.data.nix";
+        bot_jobs_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-jobs.data.nix";
+        bot_layout_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-layout.data.nix";
+        bot_names_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-names.data.nix";
+        bot_pages_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-pages.data.nix";
+        bot_rail_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-rail.data.nix";
+        bot_spacing_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-spacing.data.nix";
+        bot_stop_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-stop.data.nix";
+        bot_text_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-text.data.nix";
+        bot_time_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-time.data.nix";
+        bot_tints_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-tints.data.nix";
+        bot_turn_stats_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-turn-stats.data.nix";
+        bot_work_rail_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-work-rail.data.nix";
+        bot_yorha_bubbles_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-yorha-bubbles.data.nix";
+        bot_yorha_labels_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-yorha-labels.data.nix";
+        bot_you_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-you.data.nix";
+        bottom_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bottom.data.nix";
         box_commands_data = "modules/dev/ai/omp/box-commands.data.nix";
+        buttons_data = "modules/tools/tern/config/plugins/ui-menu/snippets/buttons.data.nix";
         cache_push = "modules/hosts/y0usaf-desktop/cache-push.nix";
         cassette_data = "modules/desktop/session/tomoe/lisp/cassette.data.nix";
         cassette_led_data = "modules/desktop/session/tomoe/shaders/cassette-led.data.nix";
@@ -39484,7 +41684,10 @@
         cat_fetch = "modules/shell/cat-fetch.nix";
         catch_data = "modules/gaming/aniimo/catch.data.nix";
         catch_lua_data = "modules/gaming/aniimo/catch-lua.data.nix";
+        centering_data = "modules/tools/tern/config/plugins/ui-menu/snippets/centering.data.nix";
+        chat_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-frost.data.nix";
         chat_look_data = "modules/dev/ai/omp/chat-look.data.nix";
+        chat_still_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-still.data.nix";
         claude_code = "modules/dev/ai/claude-code.nix";
         claude_desktop = "modules/desktop/apps/claude-desktop.nix";
         code_mode_data = "modules/dev/ai/omp/code-mode.data.nix";
@@ -39513,6 +41716,7 @@
         dev_python = "modules/dev/python.nix";
         devin = "modules/dev/ai/devin.nix";
         discord_colors_data = "modules/desktop/session/theme/templates/discord-colors.data.nix";
+        dividers_data = "modules/tools/tern/config/plugins/ui-menu/snippets/dividers.data.nix";
         dot_corridor_data = "modules/desktop/session/tomoe/shaders/dot-corridor.data.nix";
         ekko_config = "modules/shell/ekko/config.nix";
         ekko_data = "modules/tools/tern/config/plugins/ekko.data.nix";
@@ -39522,6 +41726,7 @@
         emulation = "modules/gaming/emulation.nix";
         expedition33 = "modules/gaming/expedition33.nix";
         extension_data = "modules/dev/ai/omp/optchat/extension.data.nix";
+        files_data = "modules/tools/tern/config/plugins/ui-menu/snippets/files.data.nix";
         finix_chrony = "modules/finix/chrony.nix";
         finix_desktop = "modules/finix/desktop/default.nix";
         finix_diagnostics = "modules/finix/diagnostics.nix";
@@ -39530,6 +41735,7 @@
         finix_tailscale = "modules/finix/tailscale.nix";
         firstmate = "modules/dev/ai/firstmate/default.nix";
         foot_colors_data = "modules/desktop/session/theme/templates/foot-colors.data.nix";
+        frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/frost.data.nix";
         gaming_aethermancer = "modules/gaming/aethermancer.nix";
         gaming_aniimo = "modules/gaming/aniimo/default.nix";
         gaming_core = "modules/gaming/core.nix";
@@ -39545,6 +41751,7 @@
         glass_mound_data = "modules/desktop/session/tomoe/shaders/glass-mound.data.nix";
         goal_loop_data = "modules/dev/ai/pi/goal-loop.data.nix";
         graphical = "modules/hosts/common/graphical.nix";
+        grips_data = "modules/tools/tern/config/plugins/ui-menu/snippets/grips.data.nix";
         grok_bot = "modules/desktop/apps/grok-bot.nix";
         grok_bot_desktop = "modules/desktop/apps/grok-bot-desktop.nix";
         gtk_colors_data = "modules/desktop/session/theme/templates/gtk-colors.data.nix";
@@ -39554,6 +41761,7 @@
         hosts_wireguard = "modules/hosts/wireguard.nix";
         hud_data = "modules/desktop/session/tomoe/lisp/hud.data.nix";
         hyprland_data = "modules/hosts/steam-frame/omarchy/hyprland.data.nix";
+        inbox_data = "modules/tools/tern/config/plugins/ui-menu/snippets/inbox.data.nix";
         init_data = "modules/shell/ekko/init.data.nix";
         jev_mcp_data = "modules/dev/ai/jev-mcp.data.nix";
         linear_cli = "modules/dev/work/linear-cli.nix";
@@ -39602,6 +41810,7 @@
         ozette_pond_light_data = "modules/desktop/session/tomoe/shaders/ozette-pond-light.data.nix";
         ozette_prelude_data = "modules/desktop/session/tomoe/shaders/ozette-prelude.data.nix";
         package_data = "modules/dev/work/vercel/package.data.nix";
+        pane_borders_data = "modules/tools/tern/config/plugins/ui-menu/snippets/pane-borders.data.nix";
         parity = "modules/finix/desktop/parity.nix";
         patches_data = "modules/gaming/aniimo/patches.data.nix";
         peek_data = "modules/desktop/session/tomoe/lisp/peek.data.nix";
@@ -39615,10 +41824,19 @@
         policy_data = "modules/desktop/session/tomoe/lisp/policy.data.nix";
         principles = "modules/dev/ai/prompts/principles.nix";
         probe_data = "modules/desktop/session/tomoe/lisp/probe.data.nix";
+        rail_ages_data = "modules/tools/tern/config/plugins/ui-menu/snippets/rail_ages.data.nix";
+        rail_card_data = "modules/tools/tern/config/plugins/ui-menu/snippets/rail_card.data.nix";
+        rail_compact_data = "modules/tools/tern/config/plugins/ui-menu/snippets/rail_compact.data.nix";
         rail_data = "modules/tools/tern/config/plugins/ui-menu/rail.data.nix";
+        rail_header_data = "modules/tools/tern/config/plugins/ui-menu/snippets/rail_header.data.nix";
+        rail_sections_data = "modules/tools/tern/config/plugins/ui-menu/snippets/rail_sections.data.nix";
+        rail_status_data = "modules/tools/tern/config/plugins/ui-menu/snippets/rail_status.data.nix";
         ramp = "modules/dev/work/ramp.nix";
+        reply_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/reply-frost.data.nix";
         rewards_data = "modules/gaming/aniimo/rewards.data.nix";
         rewards_lua_data = "modules/gaming/aniimo/rewards-lua.data.nix";
+        roomy_data = "modules/tools/tern/config/plugins/ui-menu/snippets/roomy.data.nix";
+        row_keys_data = "modules/tools/tern/config/plugins/ui-menu/snippets/row-keys.data.nix";
         rush_login_command_data = "modules/shell/rush-login-command.data.nix";
         rust = "modules/dev/rust.nix";
         secrets_secrets_data = "modules/dev/ai/omp/secrets/secrets.data.nix";
@@ -39643,6 +41861,8 @@
         shaders_ozette_data = "modules/desktop/session/tomoe/shaders/ozette.data.nix";
         shell_rush = "modules/shell/rush.nix";
         shell_tokens = "modules/shell/tokens.nix";
+        single_data = "modules/tools/tern/config/plugins/ui-menu/snippets/single.data.nix";
+        snippets_chat_look_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-look.data.nix";
         solo_leveling_arise = "modules/gaming/solo-leveling-arise.nix";
         spine_data = "modules/desktop/session/tomoe/lisp/spine.data.nix";
         src_window_data = "modules/tools/tern/config/plugins/tuturu/src/window.data.nix";
@@ -39658,6 +41878,7 @@
         system_prompts = "modules/dev/ai/prompts/system_prompts.nix";
         tab_order_plugin_data = "modules/tools/tern/config/plugins/tab-order/plugin.data.nix";
         tab_order_window_data = "modules/tools/tern/config/plugins/tab-order/window.data.nix";
+        tabs_data = "modules/tools/tern/config/plugins/ui-menu/snippets/tabs.data.nix";
         theme_data = "modules/desktop/session/tomoe/lisp/theme.data.nix";
         theme_ozette_data = "modules/desktop/session/theme/ozette.data.nix";
         theme_theme = "modules/desktop/session/theme/theme.nix";
@@ -39668,11 +41889,10 @@
         tools_packages = "modules/tools/packages.nix";
         tools_tern = "modules/tools/tern/default.nix";
         tools_tmux = "modules/tools/tmux.nix";
-        transparent_data = "modules/tools/tern/config/plugins/transparent/transparent.data.nix";
-        transparent_plugin_data = "modules/tools/tern/config/plugins/transparent/plugin.data.nix";
-        transparent_window_data = "modules/tools/tern/config/plugins/transparent/window.data.nix";
+        transparent_data = "modules/tools/tern/config/plugins/ui-menu/snippets/transparent.data.nix";
         tree_data = "modules/dev/ai/omp/optchat/tree.data.nix";
         tui_launcher = "modules/desktop/apps/tui-launcher.nix";
+        turn_stats_data = "modules/tools/tern/config/plugins/ui-menu/snippets/turn-stats.data.nix";
         tuturu_plugin_data = "modules/tools/tern/config/plugins/tuturu/plugin.data.nix";
         tuturu_sounds_data = "modules/tools/tern/config/plugins/tuturu/sounds.data.nix";
         ui_menu_plugin_data = "modules/tools/tern/config/plugins/ui-menu/plugin.data.nix";
@@ -39682,11 +41902,14 @@
         userChrome_data = "modules/desktop/apps/browsers/userChrome.data.nix";
         user_daemons = "modules/finix/desktop/user-daemons.nix";
         user_data = "modules/desktop/session/tomoe/lisp/user.data.nix";
+        user_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/user-frost.data.nix";
         user_services_ssh = "modules/user-services/ssh.nix";
         user_services_syncthing = "modules/user-services/syncthing.nix";
         webapps = "modules/desktop/apps/webapps.nix";
+        width_data = "modules/tools/tern/config/plugins/ui-menu/snippets/width.data.nix";
         work_fold_data = "modules/dev/ai/omp/work-fold.data.nix";
         work_gws = "modules/dev/work/gws.nix";
+        work_rail_data = "modules/tools/tern/config/plugins/ui-menu/snippets/work-rail.data.nix";
         work_vercel = "modules/dev/work/vercel/default.nix";
         wrapper_data = "modules/dev/work/vercel/wrapper.data.nix";
         wukong = "modules/gaming/wukong.nix";
