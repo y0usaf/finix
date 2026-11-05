@@ -9698,9 +9698,19 @@
         ];
       }
     ];
-    chat_frost_data = [
+    user_frost_data = [
       {
-        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md, :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) .sf-chat-reader.sf-main [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#s0):not(#s1) [data-role='omp.bot.xmsg']";
+        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md, :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
+        set = [
+          ["background" "light-dark(var(--pop-bg), var(--raise))"]
+          ["backdrop-filter" "blur(18px) saturate(130%)"]
+          ["box-shadow" "0 0 0 1px var(--l2)"]
+        ];
+      }
+    ];
+    reply_frost_data = [
+      {
+        select = ":root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#s0):not(#s1) [data-role='omp.bot.xmsg']";
         set = [
           ["background" "light-dark(var(--pop-bg), var(--raise))"]
           ["backdrop-filter" "blur(18px) saturate(130%)"]
@@ -37124,7 +37134,8 @@
         "plugins/ui-menu/snippets/bottom.css" = stylesheet "bottom.css" bottom_data;
         "plugins/ui-menu/snippets/buttons.css" = stylesheet "buttons.css" buttons_data;
         "plugins/ui-menu/snippets/centering.css" = stylesheet "centering.css" centering_data;
-        "plugins/ui-menu/snippets/chat-frost.css" = stylesheet "chat-frost.css" chat_frost_data;
+        "plugins/ui-menu/snippets/user-frost.css" = stylesheet "user-frost.css" user_frost_data;
+        "plugins/ui-menu/snippets/reply-frost.css" = stylesheet "reply-frost.css" reply_frost_data;
         "plugins/ui-menu/snippets/chat-look.css" = stylesheet "chat-look.css" snippets_chat_look_data;
         "plugins/ui-menu/snippets/chat-still.css" = stylesheet "chat-still.css" chat_still_data;
         "plugins/ui-menu/snippets/dividers.css" = stylesheet "dividers.css" dividers_data;
@@ -38117,8 +38128,13 @@
           (field "excludes" (table [(str "answer-bubbles")]))
         ]))
         (rows (table [
-          (field "id" (str "chat-frost"))
-          (field "label" (str "frosted bubbles"))
+          (field "id" (str "user-frost"))
+          (field "label" (str "frosted your messages"))
+          (field "group" (str "Glass"))
+        ]))
+        (rows (table [
+          (field "id" (str "reply-frost"))
+          (field "label" (str "frosted replies"))
           (field "group" (str "Glass"))
         ]))
         (rows (table [
@@ -41626,7 +41642,8 @@
         catch_data = "modules/gaming/aniimo/catch.data.nix";
         catch_lua_data = "modules/gaming/aniimo/catch-lua.data.nix";
         centering_data = "modules/tools/tern/config/plugins/ui-menu/snippets/centering.data.nix";
-        chat_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-frost.data.nix";
+        user_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/user-frost.data.nix";
+        reply_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/reply-frost.data.nix";
         chat_look_data = "modules/dev/ai/omp/chat-look.data.nix";
         chat_still_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-still.data.nix";
         claude_code = "modules/dev/ai/claude-code.nix";
