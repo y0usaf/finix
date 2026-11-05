@@ -35936,6 +35936,13 @@
           (field "css" (long "html.tn-themed #inbox {\n\tleft: 50% !important;\n\ttop: 50% !important;\n\ttransform: translate(-50%, -50%) !important;\n\ttransform-origin: 50% 50% !important;\n}"))
         ]))
         (rows (table [
+          (field "id" (str "pane-borders"))
+          (field "label" (str "Ekko pane borders"))
+          (field "group" (str "Chrome"))
+          (field "default" false)
+          (field "css" (long "section.tn-pane {\n\tborder: 1px solid var(--l2, rgba(127, 127, 127, 0.2));\n\ttransition: border-color 220ms cubic-bezier(0.22, 0.61, 0.36, 1),\n\t\tbox-shadow 220ms cubic-bezier(0.22, 0.61, 0.36, 1);\n}\n\nsection.tn-pane.on {\n\tborder-color: var(--accent-ink, rgba(98, 168, 255, 0.85));\n\tbox-shadow: 0 0 0 1px rgba(98, 168, 255, 0.25);\n}"))
+        ]))
+        (rows (table [
           (field "id" (str "frost"))
           (field "label" (str "modal frost"))
           (field "group" (str "Glass"))
@@ -36034,7 +36041,7 @@
         _,
         t,
       }: [
-        (assign (idx on (dot t "id")) (infix [[type' saved] "~=" (str "table") "or" (idx saved (dot t "id")) "~=" false]))
+        (assign (idx on (dot t "id")) (ifExpr [(infix [[type' saved] "==" (str "table") "and" (idx saved (dot t "id")) "~=" nil]) (infix [(idx saved (dot t "id")) "==" true]) (infix [(dot t "default") "~=" false])]))
         (assign (idx by_id (dot t "id")) t)
       ]))
       [(dot tern "kv.set") (str "menu") nil]
