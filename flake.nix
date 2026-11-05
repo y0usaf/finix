@@ -7360,16 +7360,6 @@
         ];
       }
     ];
-    bot_chat_frost_data = [
-      {
-        select = ":root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md, :root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
-        set = [
-          ["background" "light-dark(var(--pop-bg), var(--raise))"]
-          ["backdrop-filter" "blur(18px) saturate(130%)"]
-          ["box-shadow" "0 0 0 1px var(--l2)"]
-        ];
-      }
-    ];
     bot_chat_look_data = [
       {
         select = ":root:not(#b0) [data-role='omp.bot.reply'] [data-role^='omp.thinking']";
@@ -9710,7 +9700,7 @@
     ];
     chat_frost_data = [
       {
-        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor']";
+        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md, :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) .sf-chat-reader.sf-main [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#s0):not(#s1) [data-role='omp.bot.xmsg']";
         set = [
           ["background" "light-dark(var(--pop-bg), var(--raise))"]
           ["backdrop-filter" "blur(18px) saturate(130%)"]
@@ -26686,17 +26676,6 @@
         })
       ];
     };
-    reply_frost_data = [
-      {
-        select = ":root:not(#g0):not(#g1):not(#g2):not(#g3) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md, :root:not(#g0):not(#g1):not(#g2):not(#g3) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#g0):not(#g1):not(#g2):not(#g3) [data-role='omp.bot.xmsg']";
-        set = [
-          ["background" "color-mix(in srgb, var(--panel, var(--l1)) 45%, transparent) !important"]
-          ["-webkit-backdrop-filter" "blur(40px) saturate(190%) !important"]
-          ["backdrop-filter" "blur(40px) saturate(190%) !important"]
-          ["box-shadow" "0 0 0 1px var(--l2), 0 10px 26px -16px rgba(0, 0, 0, 0.5) !important"]
-        ];
-      }
-    ];
     rewards_data = {
       entry = "xfs/luascripts/Entities/SpaceEntities/ClientMainPlayer.lua";
       entryMD5 = "d1278a28054813e09ca01faccafb6d64";
@@ -37123,7 +37102,6 @@
         "plugins/ui-menu/snippets/bot-ask.css" = stylesheet "bot-ask.css" bot_ask_data;
         "plugins/ui-menu/snippets/bot-chao-motion.css" = stylesheet "bot-chao-motion.css" bot_chao_motion_data;
         "plugins/ui-menu/snippets/bot-chao.css" = stylesheet "bot-chao.css" bot_chao_data;
-        "plugins/ui-menu/snippets/bot-chat-frost.css" = stylesheet "bot-chat-frost.css" bot_chat_frost_data;
         "plugins/ui-menu/snippets/bot-chat-look.css" = stylesheet "bot-chat-look.css" bot_chat_look_data;
         "plugins/ui-menu/snippets/bot-chat-still.css" = stylesheet "bot-chat-still.css" bot_chat_still_data;
         "plugins/ui-menu/snippets/bot-dock.css" = stylesheet "bot-dock.css" bot_dock_data;
@@ -37164,7 +37142,6 @@
         "plugins/ui-menu/snippets/rail_header.css" = stylesheet "rail_header.css" rail_header_data;
         "plugins/ui-menu/snippets/rail_sections.css" = stylesheet "rail_sections.css" rail_sections_data;
         "plugins/ui-menu/snippets/rail_status.css" = stylesheet "rail_status.css" rail_status_data;
-        "plugins/ui-menu/snippets/reply-frost.css" = stylesheet "reply-frost.css" reply_frost_data;
         "plugins/ui-menu/snippets/roomy.css" = stylesheet "roomy.css" roomy_data;
         "plugins/ui-menu/snippets/row-keys.css" = stylesheet "row-keys.css" row_keys_data;
         "plugins/ui-menu/snippets/scratch.css" = "${flakeInputs.tern-scratch}/min.css";
@@ -37172,7 +37149,6 @@
         "plugins/ui-menu/snippets/tabs.css" = stylesheet "tabs.css" tabs_data;
         "plugins/ui-menu/snippets/transparent.css" = stylesheet "transparent.css" transparent_data;
         "plugins/ui-menu/snippets/turn-stats.css" = stylesheet "turn-stats.css" turn_stats_data;
-        "plugins/ui-menu/snippets/user-frost.css" = stylesheet "user-frost.css" user_frost_data;
         "plugins/ui-menu/snippets/width.css" = stylesheet "width.css" width_data;
         "plugins/ui-menu/snippets/work-rail.css" = stylesheet "work-rail.css" work_rail_data;
         "plugins/ui-menu/snippets/yorha-pixel.css" = "${flakeInputs.tern-ozette}/yorha-pixel.css";
@@ -38084,18 +38060,6 @@
           (field "group" (str "Glass"))
         ]))
         (rows (table [
-          (field "id" (str "user-frost"))
-          (field "label" (str "User bubble frost"))
-          (field "group" (str "Glass"))
-          (field "default" false)
-        ]))
-        (rows (table [
-          (field "id" (str "reply-frost"))
-          (field "label" (str "Bot reply frost"))
-          (field "group" (str "Glass"))
-          (field "default" false)
-        ]))
-        (rows (table [
           (field "id" (str "width"))
           (field "label" (str "rail width"))
           (field "group" (str "Rail"))
@@ -38155,7 +38119,7 @@
         (rows (table [
           (field "id" (str "chat-frost"))
           (field "label" (str "frosted bubbles"))
-          (field "group" (str "omp"))
+          (field "group" (str "Glass"))
         ]))
         (rows (table [
           (field "id" (str "chat-still"))
@@ -38180,11 +38144,6 @@
         (rows (table [
           (field "id" (str "bot-chat-look"))
           (field "label" (str "Grok chat"))
-          (field "group" (str "omp bots"))
-        ]))
-        (rows (table [
-          (field "id" (str "bot-chat-frost"))
-          (field "label" (str "frosted bubbles"))
           (field "group" (str "omp bots"))
         ]))
         (rows (table [
@@ -39463,17 +39422,6 @@
               ])
             ])
         ])
-    ];
-    user_frost_data = [
-      {
-        select = ":root:not(#g0):not(#g1):not(#g2):not(#g3) .sf-card[data-role^='omp.user'] > .sf-card-body, :root:not(#g0):not(#g1):not(#g2):not(#g3) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
-        set = [
-          ["background" "color-mix(in srgb, var(--panel, var(--l1)) 45%, transparent) !important"]
-          ["-webkit-backdrop-filter" "blur(40px) saturate(190%) !important"]
-          ["backdrop-filter" "blur(40px) saturate(190%) !important"]
-          ["box-shadow" "0 0 0 1px var(--l2), 0 10px 26px -16px rgba(0, 0, 0, 0.5) !important"]
-        ];
-      }
     ];
     user_services_ssh = {
       config,
@@ -41648,7 +41596,6 @@
         bot_ask_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-ask.data.nix";
         bot_chao_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chao.data.nix";
         bot_chao_motion_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chao-motion.data.nix";
-        bot_chat_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chat-frost.data.nix";
         bot_chat_look_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chat-look.data.nix";
         bot_chat_still_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chat-still.data.nix";
         bot_dock_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-dock.data.nix";
@@ -41826,7 +41773,6 @@
         rail_sections_data = "modules/tools/tern/config/plugins/ui-menu/snippets/rail_sections.data.nix";
         rail_status_data = "modules/tools/tern/config/plugins/ui-menu/snippets/rail_status.data.nix";
         ramp = "modules/dev/work/ramp.nix";
-        reply_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/reply-frost.data.nix";
         rewards_data = "modules/gaming/aniimo/rewards.data.nix";
         rewards_lua_data = "modules/gaming/aniimo/rewards-lua.data.nix";
         roomy_data = "modules/tools/tern/config/plugins/ui-menu/snippets/roomy.data.nix";
@@ -41896,7 +41842,6 @@
         userChrome_data = "modules/desktop/apps/browsers/userChrome.data.nix";
         user_daemons = "modules/finix/desktop/user-daemons.nix";
         user_data = "modules/desktop/session/tomoe/lisp/user.data.nix";
-        user_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/user-frost.data.nix";
         user_services_ssh = "modules/user-services/ssh.nix";
         user_services_syncthing = "modules/user-services/syncthing.nix";
         webapps = "modules/desktop/apps/webapps.nix";
