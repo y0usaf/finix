@@ -35079,6 +35079,13 @@
         "plugins/yorha/plugin.toml" = "${flakeInputs.tern-ozette}/yorha/plugin.toml";
         "plugins/yorha/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
         "plugins/yorha/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
+        "plugins/yorha-pixel/cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
+        "plugins/yorha-pixel/motion.css" = "${flakeInputs.tern-ozette}/motion.css";
+        "plugins/yorha-pixel/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
+        "plugins/yorha-pixel/plugin.toml" = "${flakeInputs.tern-ozette}/yorha-pixel/plugin.toml";
+        "plugins/yorha-pixel/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
+        "plugins/yorha-pixel/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
+        "plugins/yorha-pixel/yorha-pixel.css" = "${flakeInputs.tern-ozette}/yorha-pixel.css";
         "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tab_order_plugin_data);
         "plugins/tab-order/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (tab_order_window_data generators.luau));
         "plugins/transparent/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource transparent_plugin_data);
