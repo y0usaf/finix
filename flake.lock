@@ -1034,11 +1034,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793800992,
-        "narHash": "sha256-EuOFm5eCctf3MAPm1mUakLBGrgGbMA1N5pcmjeT4JXw=",
+        "lastModified": 1793910462,
+        "narHash": "sha256-pxMN9xgTMDYmg6+OVW7MWTO8HJq9VXHCDVLN1so/mSA=",
         "owner": "y0usaf",
         "repo": "nix-generators",
-        "rev": "66690dca1e0bbceb0e7ae84b944a2eb726c37930",
+        "rev": "7f090f4205cf9a88af0402265d996e982526b990",
         "type": "github"
       },
       "original": {
@@ -2126,11 +2126,11 @@
     "tern-ozette": {
       "flake": false,
       "locked": {
-        "lastModified": 1793902503,
-        "narHash": "sha256-HfIBtKpB59R0KGstC1dERovMp3ArQCBKh/H7WUnKZdk=",
+        "lastModified": 1793910457,
+        "narHash": "sha256-+Y08p4AM/H/IWevtULnSZmc+wjI+SYdHfUX08/tmQNw=",
         "ref": "refs/heads/main",
-        "rev": "e1863b0e461eb1c60b357e56e17183470f5bab64",
-        "revCount": 48,
+        "rev": "381992b8a15bf1d08c9f1a128552de4580d6d046",
+        "revCount": 59,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       },

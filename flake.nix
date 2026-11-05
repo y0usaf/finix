@@ -2267,6 +2267,21 @@
         ];
       }
     ];
+
+    answer_frost_data = [
+      {
+        select = ":root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
+        set = [
+          ["background" "var(--modal-bg)"]
+          ["-webkit-backdrop-filter" "var(--frost)"]
+          ["backdrop-filter" "var(--frost)"]
+          ["box-shadow" "var(--frost-edge)"]
+          ["--t1" "var(--frost-ink)"]
+          ["color" "var(--frost-ink)"]
+        ];
+      }
+    ];
+
     apply_data = {
       None,
       OSError,
@@ -6456,6 +6471,7 @@
       blank,
       comment,
       dot,
+      error,
       field,
       fn,
       for,
@@ -6851,6 +6867,21 @@
         ];
       }
     ];
+
+    bot_answer_frost_data = [
+      {
+        select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#s0):not(#s1) [data-role='omp.bot.xmsg']";
+        set = [
+          ["background" "var(--modal-bg)"]
+          ["-webkit-backdrop-filter" "var(--frost)"]
+          ["backdrop-filter" "var(--frost)"]
+          ["box-shadow" "var(--frost-edge)"]
+          ["--t1" "var(--frost-ink)"]
+          ["color" "var(--frost-ink)"]
+        ];
+      }
+    ];
+
     bot_ask_data = [
       {
         select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.editor.ask']";
@@ -6954,6 +6985,33 @@
         ];
       }
     ];
+
+    bot_cards_data = [
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user']";
+        set = [
+          ["align-self" "stretch"]
+          ["width" "auto"]
+          ["max-width" "none"]
+          ["margin" "0"]
+        ];
+      }
+      {
+        select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body";
+        set = [
+          ["align-self" "stretch"]
+          ["width" "auto"]
+          ["max-width" "none"]
+          ["margin" "0"]
+          ["padding" "0"]
+          ["border" "0"]
+          ["border-radius" "0"]
+          ["background" "none"]
+          ["box-shadow" "none"]
+        ];
+      }
+    ];
+
     bot_chao_data = [
       {
         select = "[data-role^='omp.bot.tempo.'], [data-role^='omp.bot.type.']";
@@ -8019,122 +8077,6 @@
         ];
       }
     ];
-    bot_yorha_bubbles_data = [
-      {
-        select = ":root:not(#oz) .sf-region.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.bot.you'])";
-        set = [
-          ["animation" "none"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) [data-role='omp.bot.reply'] > [data-role^='omp.assistant']";
-        set = [
-          ["position" "relative"]
-          ["overflow" "visible"]
-          ["max-width" "min(92%, 760px)"]
-          ["padding" "20px 18px 14px"]
-          ["background" "var(--yh-paper)"]
-          ["box-shadow" "0 0 0 1px var(--yh-ink)"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.reply']:last-child > [data-role^='omp.assistant']";
-        set = [
-          ["animation" "yh-scan-in calc(120ms * var(--yh-t)) var(--yh-snap) backwards"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) [data-role='omp.bot.reply'] > [data-role^='omp.assistant']::before";
-        set = [
-          ["content" "\"\""]
-          ["position" "absolute"]
-          ["top" "0"]
-          ["left" "0"]
-          ["right" "0"]
-          ["height" "6px"]
-          ["background" "var(--yh-ink)"]
-          ["transform-origin" "0 0"]
-          ["pointer-events" "none"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.reply']:last-child > [data-role^='omp.assistant']::before";
-        set = [
-          ["animation" "yh-rules calc(100ms * var(--yh-t)) var(--yh-snap) both"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.reply']:last-child > [data-role^='omp.assistant'] .md.streaming > :last-child::after";
-        set = [
-          ["content" "\"\""]
-          ["display" "inline-block"]
-          ["width" "0.5em"]
-          ["height" "1em"]
-          ["margin-left" "3px"]
-          ["vertical-align" "-0.12em"]
-          ["background" "var(--yh-ink)"]
-          ["animation" "yh-blink calc(700ms * var(--yh-t)) steps(1, end) infinite"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
-        set = [
-          ["position" "relative"]
-          ["padding" "20px 18px 14px 34px"]
-          ["background" "var(--yh-ink)"]
-          ["color" "var(--yh-ground)"]
-          ["box-shadow" "0 0 0 1px var(--yh-ink)"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md::after";
-        set = [
-          ["content" "\"\""]
-          ["position" "absolute"]
-          ["top" "0"]
-          ["left" "0"]
-          ["right" "0"]
-          ["height" "6px"]
-          ["background" "#000000"]
-          ["box-shadow" "0 1px 0 var(--yh-ground)"]
-          ["transform-origin" "100% 0"]
-          ["pointer-events" "none"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.you']:last-child .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
-        set = [
-          ["animation" "yh-scan-in calc(120ms * var(--yh-t)) var(--yh-snap) backwards"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) .sf-main > [data-role='omp.bot.you']:last-child .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md::after";
-        set = [
-          ["animation" "yh-rules calc(100ms * var(--yh-t)) var(--yh-snap) both"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md::before";
-        set = [
-          ["content" "\"\""]
-          ["position" "absolute"]
-          ["left" "12px"]
-          ["top" "28px"]
-          ["width" "7px"]
-          ["height" "7px"]
-          ["background" "var(--yh-ground)"]
-        ];
-      }
-      {
-        select = ":root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body, :root:not(#oz) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body .md";
-        set = [
-          ["--t1" "var(--yh-ground)"]
-          ["--tv-fg" "var(--yh-ground)"]
-          ["color" "var(--yh-ground)"]
-          ["font" "400 16.5px/24px var(--yh-label)"]
-        ];
-      }
-    ];
     bot_yorha_labels_data = [
       {
         select = ":root:not(#oz) [data-role='omp.bot.time']";
@@ -8230,9 +8172,6 @@
         select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body";
         set = [
           ["align-items" "flex-end"]
-          ["padding" "0"]
-          ["background" "none"]
-          ["box-shadow" "none"]
         ];
       }
       {
@@ -8244,6 +8183,21 @@
         ];
       }
     ];
+
+    bot_you_frost_data = [
+      {
+        select = ":root:not(#s0):not(#s1) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
+        set = [
+          ["background" "var(--modal-bg)"]
+          ["-webkit-backdrop-filter" "var(--frost)"]
+          ["backdrop-filter" "var(--frost)"]
+          ["box-shadow" "var(--frost-edge)"]
+          ["--t1" "var(--frost-ink)"]
+          ["color" "var(--frost-ink)"]
+        ];
+      }
+    ];
+
     bottom_data = [
       {
         select = "html.lay-rail.tabs-h #tabbar > .tb-in > .tn-peers";
@@ -9708,21 +9662,14 @@
     ];
     user_frost_data = [
       {
-        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md, :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
+        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
         set = [
-          ["background" "light-dark(var(--pop-bg), var(--raise))"]
-          ["backdrop-filter" "blur(18px) saturate(130%)"]
-          ["box-shadow" "0 0 0 1px var(--l2)"]
-        ];
-      }
-    ];
-    reply_frost_data = [
-      {
-        select = ":root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#s0):not(#s1) [data-role='omp.bot.xmsg']";
-        set = [
-          ["background" "light-dark(var(--pop-bg), var(--raise))"]
-          ["backdrop-filter" "blur(18px) saturate(130%)"]
-          ["box-shadow" "0 0 0 1px var(--l2)"]
+          ["background" "var(--modal-bg)"]
+          ["-webkit-backdrop-filter" "var(--frost)"]
+          ["backdrop-filter" "var(--frost)"]
+          ["box-shadow" "var(--frost-edge)"]
+          ["--t1" "var(--frost-ink)"]
+          ["color" "var(--frost-ink)"]
         ];
       }
     ];
@@ -14893,20 +14840,27 @@
       ];
     frost_data = [
       {
+        select = "html.tn-themed";
+        set = [
+          ["--frost" "blur(40px) saturate(190%)"]
+          ["--frost-edge" "0 0 0 1px light-dark(var(--l2), var(--l3)), inset 0 1px 0 var(--glass-hi)"]
+          ["--frost-ink" "var(--t1)"]
+        ];
+      }
+      {
         select = "html.tn-themed .cmdk, html.tn-themed .dlg-card, html.tn-themed .mdl, html.tn-themed .pk-sheet, html.tn-themed .sf-overlay.modal > .sf-ov-card, html.tn-themed .sf-prefs .pf-editor > .sf-col, html.tn-themed .tn-hd, html.tn-themed .tn-sc";
         set = [
-          ["-webkit-backdrop-filter" "blur(40px) saturate(190%) !important"]
-          ["backdrop-filter" "blur(40px) saturate(190%) !important"]
+          ["-webkit-backdrop-filter" "var(--frost) !important"]
+          ["backdrop-filter" "var(--frost) !important"]
         ];
       }
       {
         at = "@media (prefers-contrast: more)";
         rules = [
           {
-            select = "html.tn-themed .cmdk, html.tn-themed .dlg-card, html.tn-themed .mdl, html.tn-themed .pk-sheet, html.tn-themed .sf-overlay.modal > .sf-ov-card, html.tn-themed .sf-prefs .pf-editor > .sf-col, html.tn-themed .tn-hd, html.tn-themed .tn-sc";
+            select = "html.tn-themed";
             set = [
-              ["-webkit-backdrop-filter" "none !important"]
-              ["backdrop-filter" "none !important"]
+              ["--frost" "none"]
             ];
           }
         ];
@@ -33150,17 +33104,6 @@
         ];
       }
       {
-        select = ":root:not(#s0) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
-        set = [
-          ["align-self" "auto"]
-          ["max-width" "none"]
-          ["padding" "0"]
-          ["border-radius" "0"]
-          ["background" "none"]
-          ["box-shadow" "none"]
-        ];
-      }
-      {
         select = ":root:not(#s0) [data-role='omp.chat.msg'] .md";
         set = [
           ["font-size" "15px"]
@@ -37227,9 +37170,12 @@
         "plugins/ui-menu/rail.luau" = generators.sourceFile "rail.luau" (generators.luau.render (rail_data generators.luau));
         "plugins/ui-menu/snippets/account.css" = stylesheet "account.css" account_data;
         "plugins/ui-menu/snippets/answer-bubbles.css" = stylesheet "answer-bubbles.css" answer_bubbles_data;
+        "plugins/ui-menu/snippets/answer-frost.css" = stylesheet "answer-frost.css" answer_frost_data;
         "plugins/ui-menu/snippets/attention.css" = stylesheet "attention.css" attention_data;
         "plugins/ui-menu/snippets/bot-answer-bubbles.css" = stylesheet "bot-answer-bubbles.css" bot_answer_bubbles_data;
+        "plugins/ui-menu/snippets/bot-answer-frost.css" = stylesheet "bot-answer-frost.css" bot_answer_frost_data;
         "plugins/ui-menu/snippets/bot-ask.css" = stylesheet "bot-ask.css" bot_ask_data;
+        "plugins/ui-menu/snippets/bot-cards.css" = stylesheet "bot-cards.css" bot_cards_data;
         "plugins/ui-menu/snippets/bot-chao-motion.css" = stylesheet "bot-chao-motion.css" bot_chao_motion_data;
         "plugins/ui-menu/snippets/bot-chao.css" = stylesheet "bot-chao.css" bot_chao_data;
         "plugins/ui-menu/snippets/bot-chat-look.css" = stylesheet "bot-chat-look.css" bot_chat_look_data;
@@ -37248,14 +37194,12 @@
         "plugins/ui-menu/snippets/bot-tints.css" = stylesheet "bot-tints.css" bot_tints_data;
         "plugins/ui-menu/snippets/bot-turn-stats.css" = stylesheet "bot-turn-stats.css" bot_turn_stats_data;
         "plugins/ui-menu/snippets/bot-work-rail.css" = stylesheet "bot-work-rail.css" bot_work_rail_data;
-        "plugins/ui-menu/snippets/bot-yorha-bubbles.css" = stylesheet "bot-yorha-bubbles.css" bot_yorha_bubbles_data;
         "plugins/ui-menu/snippets/bot-yorha-labels.css" = stylesheet "bot-yorha-labels.css" bot_yorha_labels_data;
+        "plugins/ui-menu/snippets/bot-you-frost.css" = stylesheet "bot-you-frost.css" bot_you_frost_data;
         "plugins/ui-menu/snippets/bot-you.css" = stylesheet "bot-you.css" bot_you_data;
         "plugins/ui-menu/snippets/bottom.css" = stylesheet "bottom.css" bottom_data;
         "plugins/ui-menu/snippets/buttons.css" = stylesheet "buttons.css" buttons_data;
         "plugins/ui-menu/snippets/centering.css" = stylesheet "centering.css" centering_data;
-        "plugins/ui-menu/snippets/user-frost.css" = stylesheet "user-frost.css" user_frost_data;
-        "plugins/ui-menu/snippets/reply-frost.css" = stylesheet "reply-frost.css" reply_frost_data;
         "plugins/ui-menu/snippets/chat-look.css" = stylesheet "chat-look.css" snippets_chat_look_data;
         "plugins/ui-menu/snippets/chat-still.css" = stylesheet "chat-still.css" chat_still_data;
         "plugins/ui-menu/snippets/dividers.css" = stylesheet "dividers.css" dividers_data;
@@ -37263,6 +37207,8 @@
         "plugins/ui-menu/snippets/frost.css" = stylesheet "frost.css" frost_data;
         "plugins/ui-menu/snippets/grips.css" = stylesheet "grips.css" grips_data;
         "plugins/ui-menu/snippets/inbox.css" = stylesheet "inbox.css" inbox_data;
+        "plugins/ui-menu/snippets/ozette-answer-bubbles.css" = "${flakeInputs.tern-ozette}/ozette-answer-bubbles.css";
+        "plugins/ui-menu/snippets/ozette-bot-you.css" = "${flakeInputs.tern-ozette}/ozette-bot-you.css";
         "plugins/ui-menu/snippets/ozette-cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
         "plugins/ui-menu/snippets/ozette-motion.css" = "${flakeInputs.tern-ozette}/motion.css";
         "plugins/ui-menu/snippets/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
@@ -37280,8 +37226,12 @@
         "plugins/ui-menu/snippets/tabs.css" = stylesheet "tabs.css" tabs_data;
         "plugins/ui-menu/snippets/transparent.css" = stylesheet "transparent.css" transparent_data;
         "plugins/ui-menu/snippets/turn-stats.css" = stylesheet "turn-stats.css" turn_stats_data;
+        "plugins/ui-menu/snippets/user-frost.css" = stylesheet "user-frost.css" user_frost_data;
         "plugins/ui-menu/snippets/width.css" = stylesheet "width.css" width_data;
         "plugins/ui-menu/snippets/work-rail.css" = stylesheet "work-rail.css" work_rail_data;
+        "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
+        "plugins/ui-menu/snippets/yorha-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-bot-answer-bubbles.css";
+        "plugins/ui-menu/snippets/yorha-bot-you.css" = "${flakeInputs.tern-ozette}/yorha-bot-you.css";
         "plugins/ui-menu/snippets/yorha-pixel.css" = "${flakeInputs.tern-ozette}/yorha-pixel.css";
         "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
         "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
@@ -37400,6 +37350,7 @@
           ["--panel" "transparent"]
           ["--tn-page-a" "0"]
           ["--tn-panel-a" "0"]
+          ["--surface-a" "0"]
           ["--tv-bg" "transparent"]
           ["--modal-filter" "none"]
           ["--modal-dim-filter" "none"]
@@ -38037,6 +37988,7 @@
       blank,
       boolean,
       dot,
+      error,
       field,
       fn,
       for,
@@ -38067,6 +38019,7 @@
       tuple,
       type',
       typed,
+      unicode,
       ...
     }: ({
       Rail,
@@ -38082,8 +38035,10 @@
       plugins,
       toggle,
       menu,
-      fits,
-      regate,
+      children,
+      walk,
+      live,
+      shown,
       want,
       wears,
       pick,
@@ -38101,16 +38056,26 @@
         (rows (table [
           (field "id" (str "ozette-motion"))
           (field "label" (str "Ozette motion"))
-          (field "group" (str "Look layers"))
+          (field "parent" (str "ozette"))
           (field "default" false)
           (field "layer" true)
+          (field "requires" (table [(str "ozette")]))
         ]))
         (rows (table [
           (field "id" (str "ozette-cmus"))
           (field "label" (str "Ozette cmus player"))
-          (field "group" (str "Look layers"))
+          (field "parent" (str "ozette"))
           (field "default" false)
           (field "layer" true)
+          (field "requires" (table [(str "ozette")]))
+        ]))
+        (rows (table [
+          (field "id" (str "ozette-answer-bubbles"))
+          (field "requires" (table [(str "ozette") (str "answer-bubbles")]))
+        ]))
+        (rows (table [
+          (field "id" (str "ozette-bot-you"))
+          (field "requires" (table [(str "ozette") (str "bot-you")]))
         ]))
         (rows (table [
           (field "id" (str "yorha"))
@@ -38122,9 +38087,16 @@
         (rows (table [
           (field "id" (str "yorha-pixel"))
           (field "label" (str "YoRHa Pixel"))
-          (field "group" (str "Look layers"))
+          (field "parent" (str "yorha"))
           (field "default" false)
           (field "layer" true)
+          (field "requires" (table [(str "yorha")]))
+        ]))
+        (rows (table [
+          (field "id" (str "bot-yorha-labels"))
+          (field "label" (str "YoRHa labels"))
+          (field "parent" (str "yorha"))
+          (field "requires" (table [(str "yorha")]))
         ]))
         (rows (table [
           (field "id" (str "scratch"))
@@ -38191,6 +38163,30 @@
           (field "group" (str "Glass"))
         ]))
         (rows (table [
+          (field "id" (str "user-frost"))
+          (field "label" (str "frosted your messages"))
+          (field "parent" (str "frost"))
+          (field "requires" (table [(str "frost")]))
+        ]))
+        (rows (table [
+          (field "id" (str "bot-you-frost"))
+          (field "requires" (table [(str "user-frost") (str "bot-you")]))
+        ]))
+        (rows (table [
+          (field "id" (str "reply-frost"))
+          (field "label" (str "frosted replies"))
+          (field "parent" (str "frost"))
+          (field "requires" (table [(str "frost")]))
+        ]))
+        (rows (table [
+          (field "id" (str "answer-frost"))
+          (field "requires" (table [(str "reply-frost") (str "answer-bubbles")]))
+        ]))
+        (rows (table [
+          (field "id" (str "bot-answer-frost"))
+          (field "requires" (table [(str "reply-frost") (str "bot-answer-bubbles")]))
+        ]))
+        (rows (table [
           (field "id" (str "width"))
           (field "label" (str "rail width"))
           (field "group" (str "Rail"))
@@ -38248,16 +38244,6 @@
           (field "excludes" (table [(str "answer-bubbles")]))
         ]))
         (rows (table [
-          (field "id" (str "user-frost"))
-          (field "label" (str "frosted your messages"))
-          (field "group" (str "Glass"))
-        ]))
-        (rows (table [
-          (field "id" (str "reply-frost"))
-          (field "label" (str "frosted replies"))
-          (field "group" (str "Glass"))
-        ]))
-        (rows (table [
           (field "id" (str "chat-still"))
           (field "label" (str "no streaming"))
           (field "group" (str "omp"))
@@ -38303,6 +38289,9 @@
           (field "group" (str "omp bots"))
         ]))
         (rows (table [
+          (field "id" (str "bot-cards"))
+        ]))
+        (rows (table [
           (field "id" (str "bot-you"))
           (field "label" (str "your message bubbles"))
           (field "group" (str "omp bots"))
@@ -38340,12 +38329,14 @@
         (rows (table [
           (field "id" (str "bot-chao"))
           (field "label" (str "Chao avatars"))
-          (field "group" (str "omp bots"))
+          (field "parent" (str "bot-tints"))
+          (field "requires" (table [(str "bot-tints")]))
         ]))
         (rows (table [
           (field "id" (str "bot-chao-motion"))
           (field "label" (str "Chao animation"))
-          (field "group" (str "omp bots"))
+          (field "parent" (str "bot-chao"))
+          (field "requires" (table [(str "bot-chao")]))
         ]))
         (rows (table [
           (field "id" (str "bot-names"))
@@ -38368,16 +38359,16 @@
           (field "group" (str "omp bots"))
         ]))
         (rows (table [
-          (field "id" (str "bot-yorha-bubbles"))
-          (field "label" (str "YoRHa bubbles"))
-          (field "group" (str "omp bots"))
-          (field "looks" (table [(str "yorha") (str "yorha-pixel")]))
+          (field "id" (str "yorha-answer-bubbles"))
+          (field "requires" (table [(str "yorha") (str "answer-bubbles")]))
         ]))
         (rows (table [
-          (field "id" (str "bot-yorha-labels"))
-          (field "label" (str "YoRHa labels"))
-          (field "group" (str "omp bots"))
-          (field "looks" (table [(str "yorha") (str "yorha-pixel")]))
+          (field "id" (str "yorha-bot-answer-bubbles"))
+          (field "requires" (table [(str "yorha") (str "bot-answer-bubbles")]))
+        ]))
+        (rows (table [
+          (field "id" (str "yorha-bot-you"))
+          (field "requires" (table [(str "yorha") (str "bot-you")]))
         ]))
       ])))
       blank
@@ -38403,6 +38394,53 @@
         ])
         (assign (idx on (dot t "id")) (ifExpr [(infix [[type' saved] "==" (str "table") "and" (idx saved (dot t "id")) "~=" nil]) (infix [(idx saved (dot t "id")) "==" true]) (infix [(dot t "default") "~=" false])]))
         (assign (idx by_id (dot t "id")) t)
+      ]))
+      (local children (table []))
+      (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+        _,
+        t,
+      }: [
+        (for [{_ = null;} {id = null;}] [ipairs (infix [(dot t "requires") "or" (table [])])] ({
+          _,
+          id,
+        }: [
+          (if' (not (idx by_id id)) [
+            [error (infix [(str "ui-menu: ") ".." (dot t "id") ".." (str " requires unknown option ") ".." id])]
+          ])
+        ]))
+        (if' (dot t "parent") [
+          (if' (not (idx by_id (dot t "parent"))) [
+            [error (infix [(str "ui-menu: ") ".." (dot t "id") ".." (str " has unknown parent ") ".." (dot t "parent")])]
+          ])
+          (if' (not (idx children (dot t "parent"))) [
+            (assign (idx children (dot t "parent")) (table []))
+          ])
+          [(dot table' "insert") (idx children (dot t "parent")) t]
+        ])
+      ]))
+      blank
+      (localFunction walk [{t = null;} {path = null;}] ({
+        t,
+        path,
+      }: [
+        (if' (idx path (dot t "id")) [
+          [error (infix [(str "ui-menu: requirement cycle through ") ".." (dot t "id")])]
+        ])
+        (assign (idx path (dot t "id")) true)
+        (for [{_ = null;} {id = null;}] [ipairs (infix [(dot t "requires") "or" (table [])])] ({
+          _,
+          id,
+        }: [
+          [walk (idx by_id id) path]
+        ]))
+        (assign (idx path (dot t "id")) nil)
+      ]))
+      blank
+      (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+        _,
+        t,
+      }: [
+        [walk t (table [])]
       ]))
       [(dot tern "kv.set") (str "menu") nil]
       blank
@@ -38514,44 +38552,37 @@
         ]
       ]))
       blank
-      (localFunction fits [{t = null;}] ({t}: [
-        (if' (not (dot t "looks")) [
-          (return true)
+      (localFunction live [{t = null;}] ({t}: [
+        (if' (not (idx on (dot t "id"))) [
+          (return false)
         ])
-        (for [{_ = null;} {id = null;}] [ipairs (dot t "looks")] ({
+        (for [{_ = null;} {id = null;}] [ipairs (infix [(dot t "requires") "or" (table [])])] ({
           _,
           id,
         }: [
-          (if' (idx on id) [
-            (return true)
+          (if' (not [live (idx by_id id)]) [
+            (return false)
           ])
         ]))
-        (return false)
+        (return true)
       ]))
       blank
-      (localFunction paint [{t = null;}] ({t}: [
-        (if' (dot t "css") [
-          [(dot tern "css") (infix [(str "ui-menu-") ".." (dot t "id")]) (infix [(idx on (dot t "id")) "and" [fits t] "and" (dot t "css") "or" (str "")])]
-        ])
-      ]))
-      blank
-      (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
-        _,
-        t,
-      }: [
-        [paint t]
-      ]))
-      blank
-      (localFunction regate [] [
+      (local shown (table []))
+      (localFunction paint [] [
         (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
           _,
           t,
+          yes,
         }: [
-          (if' (dot t "looks") [
-            [paint t]
+          (local yes [live t])
+          (if' (infix [(dot t "css") "and" (idx shown (dot t "id")) "~=" yes]) [
+            (assign (idx shown (dot t "id")) yes)
+            [(dot tern "css") (infix [(str "ui-menu-") ".." (dot t "id")]) (ifExpr [yes (dot t "css") (str "")])]
           ])
         ]))
       ])
+      blank
+      [paint]
       blank
       (local LOOKS (rows (table [
         (table [(field "label" (str "Ozette")) (field "layers" (table [(str "ozette") (str "ozette-motion") (str "ozette-cmus")]))])
@@ -38633,10 +38664,9 @@
           yes,
         }: [
           (assign (idx on id) yes)
-          [paint (idx by_id id)]
         ]))
         [(dot tern "kv.set") (str "on") on]
-        [regate]
+        [paint]
       ]))
       blank
       (localFunction toggle [{cx = null;} {t = null;}] ({
@@ -38650,14 +38680,10 @@
             id,
           }: [
             (assign (idx on id) false)
-            [paint (idx by_id id)]
           ]))
         ])
         [(dot tern "kv.set") (str "on") on]
-        [paint t]
-        (if' (dot t "layer") [
-          [regate]
-        ])
+        [paint]
         (if' (dot t "apply") [
           [(dot t "apply") cx]
         ])
@@ -38679,6 +38705,7 @@
         add,
         ids,
         groups,
+        row,
       }: [
         (local disabled (infix [[(dot cx "settings:get") (str "plugins_disabled")] "or" (table [])]))
         (local off (table []))
@@ -38733,11 +38760,44 @@
           _,
           t,
         }: [
-          (if' (not (idx groups (dot t "group"))) [
-            (assign (idx groups (dot t "group")) (table []))
-            (assign (idx groups (infix [(len groups) "+" 1])) (dot t "group"))
+          (if' (infix [(dot t "label") "and" (not (dot t "parent"))]) [
+            (if' (not (idx groups (dot t "group"))) [
+              (assign (idx groups (dot t "group")) (table []))
+              (assign (idx groups (infix [(len groups) "+" 1])) (dot t "group"))
+            ])
+            [(dot table' "insert") (idx groups (dot t "group")) t]
           ])
-          [(dot table' "insert") (idx groups (dot t "group")) t]
+        ]))
+        (localFunction row [{t = null;} {group = null;} {depth = null;}] ({
+          t,
+          group,
+          depth,
+          label,
+          need,
+        }: [
+          (local label (infix [[(dot string "rep") (str [(unicode "2003")]) depth] ".." (dot t "label")]))
+          (local need nil)
+          (for [{_ = null;} {id = null;}] [ipairs (infix [(dot t "requires") "or" (table [])])] ({
+            _,
+            id,
+          }: [
+            (if' (infix [(not need) "and" (not [live (idx by_id id)])]) [
+              (assign need (infix [(dot (idx by_id id) "label") "or" id]))
+            ])
+          ]))
+          (ifElse need [
+            [add (table [(field "label" label) (field "group" group) (field "tweak" (dot t "id")) (field "need" need) (field "detail" (infix [(str "needs ") ".." need]))])]
+          ] [
+            [add (table [(field "label" label) (field "group" group) (field "tweak" (dot t "id"))]) (idx on (dot t "id"))]
+          ])
+          (for [{_ = null;} {c = null;}] [ipairs (infix [(idx children (dot t "id")) "or" (table [])])] ({
+            _,
+            c,
+          }: [
+            (if' (dot c "label") [
+              [row c group (infix [depth "+" 1])]
+            ])
+          ]))
         ]))
         (for [{_ = null;} {group = null;}] [ipairs groups] ({
           _,
@@ -38747,7 +38807,7 @@
             _,
             t,
           }: [
-            [add (table [(field "label" (dot t "label")) (field "group" group) (field "tweak" (dot t "id"))]) (idx on (dot t "id"))]
+            [row t group 0]
           ]))
         ]))
         [
@@ -38760,6 +38820,10 @@
           }: [
             (if' (infix [(not item) "or" (not again)]) [
               return
+            ])
+            (if' (dot item "need") [
+              [(dot again ":toast") (str "info") (infix [(str "Turn on ") ".." (dot item "need") ".." (str " first")])]
+              (return [menu again])
             ])
             (if' (dot item "tweak") [
               [toggle again (idx by_id (dot item "tweak"))]
@@ -41697,6 +41761,7 @@
         android_phone_user_ssh_data = "modules/hosts/android-phone/user-ssh.data.nix";
         android_tools = "modules/dev/android-tools.nix";
         answer_bubbles_data = "modules/tools/tern/config/plugins/ui-menu/snippets/answer-bubbles.data.nix";
+        answer_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/answer-frost.data.nix";
         apply_data = "modules/gaming/aniimo/apply.data.nix";
         apply_reasoning_policy_data = "modules/dev/ai/codex/apply-reasoning-policy.data.nix";
         apps_bluetooth = "modules/desktop/apps/bluetooth.nix";
@@ -41729,7 +41794,9 @@
         boar = "modules/dev/ai/boar.nix";
         bolo_data = "modules/desktop/apps/bolo.data.nix";
         bot_answer_bubbles_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-answer-bubbles.data.nix";
+        bot_answer_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-answer-frost.data.nix";
         bot_ask_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-ask.data.nix";
+        bot_cards_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-cards.data.nix";
         bot_chao_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chao.data.nix";
         bot_chao_motion_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chao-motion.data.nix";
         bot_chat_look_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-chat-look.data.nix";
@@ -41748,9 +41815,9 @@
         bot_tints_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-tints.data.nix";
         bot_turn_stats_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-turn-stats.data.nix";
         bot_work_rail_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-work-rail.data.nix";
-        bot_yorha_bubbles_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-yorha-bubbles.data.nix";
         bot_yorha_labels_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-yorha-labels.data.nix";
         bot_you_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-you.data.nix";
+        bot_you_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bot-you-frost.data.nix";
         bottom_data = "modules/tools/tern/config/plugins/ui-menu/snippets/bottom.data.nix";
         box_commands_data = "modules/dev/ai/omp/box-commands.data.nix";
         buttons_data = "modules/tools/tern/config/plugins/ui-menu/snippets/buttons.data.nix";
@@ -41763,7 +41830,6 @@
         catch_lua_data = "modules/gaming/aniimo/catch-lua.data.nix";
         centering_data = "modules/tools/tern/config/plugins/ui-menu/snippets/centering.data.nix";
         user_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/user-frost.data.nix";
-        reply_frost_data = "modules/tools/tern/config/plugins/ui-menu/snippets/reply-frost.data.nix";
         chat_look_data = "modules/dev/ai/omp/chat-look.data.nix";
         chat_still_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-still.data.nix";
         claude_code = "modules/dev/ai/claude-code.nix";
