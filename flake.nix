@@ -37139,6 +37139,7 @@
         "plugins/ui-menu/snippets/frost.css" = stylesheet "frost.css" frost_data;
         "plugins/ui-menu/snippets/grips.css" = stylesheet "grips.css" grips_data;
         "plugins/ui-menu/snippets/inbox.css" = stylesheet "inbox.css" inbox_data;
+        "plugins/ui-menu/snippets/mini.css" = "${flakeInputs.tern-ozette}/mini.css";
         "plugins/ui-menu/snippets/ozette-answer-bubbles.css" = "${flakeInputs.tern-ozette}/ozette-answer-bubbles.css";
         "plugins/ui-menu/snippets/ozette-bot-you.css" = "${flakeInputs.tern-ozette}/ozette-bot-you.css";
         "plugins/ui-menu/snippets/ozette-cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
@@ -37978,6 +37979,13 @@
       blank
       (local TWEAKS (rows (table [
         (rows (table [
+          (field "id" (str "mini"))
+          (field "label" (str "Mini"))
+          (field "group" (str "Look layers"))
+          (field "default" false)
+          (field "layer" true)
+        ]))
+        (rows (table [
           (field "id" (str "ozette"))
           (field "label" (str "Ozette"))
           (field "group" (str "Look layers"))
@@ -38503,6 +38511,7 @@
       [paint]
       blank
       (local LOOKS (rows (table [
+        (table [(field "label" (str "Mini")) (field "layers" (table [(str "mini")]))])
         (table [(field "label" (str "Ozette")) (field "layers" (table [(str "ozette") (str "ozette-motion") (str "ozette-cmus")]))])
         (table [(field "label" (str "YoRHa")) (field "layers" (table [(str "yorha")]))])
         (table [(field "label" (str "Unset all")) (field "layers" (table [(str "scratch")]))])
