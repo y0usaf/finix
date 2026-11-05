@@ -31300,7 +31300,7 @@
       options.user.ui.fonts = {
         mainFontName = lib.mkOption {
           type = lib.types.str;
-          default = "Departure Mono Semi Condensed";
+          default = "Nib";
           description = "Main font family name";
         };
         backup.name = lib.mkOption {
@@ -31828,7 +31828,7 @@
 
       gapParameters = {
         inherit (barParameters) modules center-between edges inset time date hot media-width;
-        font = "Departure Mono";
+        font = config.user.ui.fonts.mainFontName;
         inherit (bar) scale;
         sample = 1000;
       };
