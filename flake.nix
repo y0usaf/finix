@@ -1104,6 +1104,7 @@
             value = {
               defaultThinkingLevel = catalog.ompThinkingLevel;
               advisor.enabled = true;
+              advisor.reviewMode = "agent-end";
               startup.checkUpdate = false;
               setupVersion = 2;
               symbolPreset = "unicode";
@@ -1142,6 +1143,7 @@
                 advisor = catalog.advisorModel;
                 smol = catalog.smolModel;
                 judge = catalog.judgeModel;
+                task = catalog.taskModel;
               };
               retry.fallbackChains = catalog.fallbackChains;
               extensions = map (path: "${extDir}/${path}") [
@@ -1193,7 +1195,7 @@
             generator = toJSON;
             value = catalog.models;
           };
-          ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.shared}\n";
+          ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.shared}\n\n${catalog.taskNote}\n";
         };
     };
     ai_omp_box = {
@@ -1270,8 +1272,10 @@
             default: ${catalog.defaultProvider}/${catalog.defaultModel}
             smol: ${catalog.smolModel}
             judge: ${catalog.judgeModel}
+            task: ${catalog.taskModel}
           advisor:
             enabled: true
+            reviewMode: agent-end
           retry:
             fallbackChains: ${builtins.toJSON catalog.fallbackChains}
           extensions:
@@ -1281,7 +1285,7 @@
             - "${inBox "optchat"}/extension.ts"
             - "${inBox "omp-bot"}/omp/ompd.ts"
         '';
-        appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n";
+        appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n\n${catalog.taskNote}\n";
       };
       seed = pkgs.runCommand "omp-box-seed" {} ''
         mkdir -p $out/store $out/ext $out/bin
@@ -1863,21 +1867,25 @@
       toJSON = lib.generators.toJSON {};
       flash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
       cheapDeepseek.compat.vercelGatewayRouting.order = ["wafer" "morph" "runware"];
+      defaultProvider = "anthropic";
+      defaultModel = "claude-opus-5-5";
+      taskModel = "openai-codex/gpt-6.1-sol";
     in {
       options.user.dev.modelCatalog = lib.mkOption {
         type = lib.types.attrsOf lib.types.anything;
         description = "Shared coding-agent provider and model catalog.";
         default = {
-          defaultProvider = "anthropic";
-          defaultModel = "claude-opus-5-5";
+          inherit defaultProvider defaultModel taskModel;
           defaultThinkingLevel = "xhigh";
           ompThinkingLevel = "auto";
           advisorModel = "openai-codex/gpt-6.1-sol:high";
+          taskNote = "omp task workers run on ${taskModel} unless the task names a model; give Lean proofs and compiler work `model: \"${defaultProvider}/${defaultModel}\"`.";
           smolModel = flash;
           judgeModel = flash;
           fallbackChains = {
             default = ["openai-codex/gpt-6.1-sol:xhigh" flash];
             advisor = [flash];
+            task = [flash];
           };
 
           enabledModels = [
@@ -12730,7 +12738,7 @@
     in {
       environment = {
         systemPackages = [
-          pkgs.python3
+          (pkgs.python3.withPackages (ps: [ps.pillow]))
           pkgs.uv
           pkgs.ninja
           pkgs.meson
@@ -13526,6 +13534,7 @@
       sized,
       blocks,
       turnStart,
+      turnMark,
       tokensOf,
       Reader,
       optchat,
@@ -13644,6 +13653,7 @@
       blank
       (interface (extends Snapshot Pin) [
         (typed "anchor" number)
+        (typed "turn" number)
       ])
       blank
       (interface Block [
@@ -13821,6 +13831,14 @@
       (const blocks ({content}: (arrow [(typed content unknown)] (ternary (infix [(typeof content) "===" (str "string")]) (array [(obj [(prop "type" (str "text")) (prop "text" content)])]) (infix [content "as" (arrayOf Block)])))))
       blank
       (const turnStart ({messages}: (arrow [(typed messages (arrayOf Logged))] (call (dot messages "findLastIndex") [({message}: (arrow [message] (infix [(dot message "role") "===" (str "user")])))]))))
+      blank
+      ({
+        messages,
+        turn,
+      }: (fn turnMark (typed [(typed messages (arrayOf Logged))] number) [
+        (const turn (call turnStart [messages]))
+        (return (ternary (infix [turn "<" 0]) 0 (infix [(dot (idx messages turn) "timestamp") "??" 0])))
+      ]))
       blank
       (const tokensOf ({message}: (arrow [(typed message unknown)] (call (dot Math "ceil") [(infix [(call sized [message]) "/" 4])]))))
       blank
@@ -14147,24 +14165,28 @@
               (return (infix [at "===" null' "||" (call Number [(idx at 1)]) "<" cut]))
             ]))
           ]))
-          (infix [snap "=" (obj [(prop "view" (call (dot kept "join") [(str "\\n")])) upto (prop "time" (call (dot Date "now") [])) (prop "anchor" (ternary (infix [pick "<" 0]) 0 (infix [(dot (idx messages pick) "timestamp") "??" 0])))])])
+          (infix [snap "=" (obj [(prop "view" (call (dot kept "join") [(str "\\n")])) upto (prop "time" (call (dot Date "now") [])) (prop "anchor" (ternary (infix [pick "<" 0]) 0 (infix [(dot (idx messages pick) "timestamp") "??" 0]))) (prop "turn" (call turnMark [messages]))])])
           (return (ternary (infix [pick "<" 0]) 0 pick))
         ]))
         blank
         ({
           messages,
           at,
-          size,
+          mark,
         }: (fn window (typed [(typed messages (arrayOf Logged))] number) [
           (if' (infix [snap "===" undefined]) (return (-1)))
           (let' at (dot messages "length"))
           (while (infix [at ">" 0 "&&" [(dot (idx messages (infix [at "-" 1])) "timestamp") "??" 0] ">=" (dot snap "anchor")]) (dec at))
           (while (infix [at "<" (dot messages "length") "&&" (dot (idx messages at) "role") "===" (str "toolResult")]) (inc at))
           (if' (infix [at "===" (dot messages "length")]) (return (-1)))
-          (if' (infix [at ">=" (call turnStart [messages])]) (return at))
-          (let' size 0)
-          ({k}: (for (let' k at) (infix [k "<" (dot messages "length")]) (inc k) (infix [size "+=" (call sized [(idx messages k)])])))
-          (return (ternary (infix [size ">" RAW]) (-1) at))
+          (const mark (call turnMark [messages]))
+          (if' (infix [mark "!==" (dot snap "turn") "&&" at "<" (call turnStart [messages])]) ({size}: [
+            (let' size 0)
+            ({k}: (for (let' k at) (infix [k "<" (dot messages "length")]) (inc k) (infix [size "+=" (call sized [(idx messages k)])])))
+            (if' (infix [size ">" RAW]) (return (-1)))
+          ]))
+          (infix [(dot snap "turn") "=" mark])
+          (return at)
         ]))
         blank
         ({
@@ -15911,6 +15933,7 @@
       json,
       os,
       ssl,
+      time,
       GATEWAY,
       KEY_FILE,
       CREST_AUTH,
@@ -15920,11 +15943,16 @@
       ACCOUNT,
       RESIDENCY,
       DROP,
+      MARGIN,
+      HELD,
+      WORK,
+      WORK_BOT,
       CrestError,
       header_name,
       read_key,
       crest_auth,
       crest_token,
+      held,
       successor,
       residency,
       credentials,
@@ -15942,6 +15970,7 @@
       (import' json)
       (import' os)
       (import' ssl)
+      (import' time)
       blank
       (assign GATEWAY (str "ai-gateway.vercel.sh"))
       (assign KEY_FILE (index (dot os "environ") (str "GATEWAY_KEY_FILE")))
@@ -15952,6 +15981,10 @@
       (assign ACCOUNT (str "chatgpt-account-id"))
       (assign RESIDENCY (str "x-openai-internal-codex-residency"))
       (assign DROP (set (rows [(str "host") (str "authorization") (str "x-api-key") (str "cf-aig-authorization") (str "connection") (str "proxy-connection") (str "accept-encoding")])))
+      (assign MARGIN 300000)
+      (assign HELD (dict []))
+      (assign WORK (str crest_work_data.login))
+      (assign WORK_BOT (str crest_work_data.bot))
       blank
       blank
       (class CrestError [Exception] [
@@ -16005,10 +16038,30 @@
       })))
       blank
       blank
+      (async (def held ({
+        provider,
+        token,
+      }: {
+        params = [provider];
+        body = [
+          (assign token (call (dot HELD "get") [provider]))
+          (if' [token "is" None "or" [(call (dot token "get") [(str "expires") 0]) "-" MARGIN] "<=" (call (dot time "time") []) "*" 1000] [
+            (assign token (await (call crest_token [provider])))
+            (if' [(call (dot token "get") [(str "login")]) "==" WORK] [
+              (raise (call CrestError [(str ["only " (field WORK) " is ready, and it is " (field WORK_BOT) "'s"])]))
+            ])
+            (assign (index HELD provider) token)
+          ])
+          (return token)
+        ];
+      })))
+      blank
+      blank
       (async (def successor ({
         provider,
         tried,
         token,
+        login,
       }: {
         params = [provider tried];
         body = [
@@ -16019,7 +16072,8 @@
                 (return None)
               ])
             ])
-          (return (ternary token [(call (dot token "get") [(str "login")]) "not in" tried] None))
+          (assign login (call (dot token "get") [(str "login")]))
+          (return (ternary token [login "not in" tried "and" login "!=" WORK] None))
         ];
       })))
       blank
@@ -16266,7 +16320,7 @@
           (assign answered false)
           (try [
               (assign body (await (call read_body [reader kept])))
-              (assign token (ternary (await (call crest_token [provider])) provider None))
+              (assign token (ternary (await (call held [provider])) provider None))
               (assign tried (call set' []))
               (while true [
                 (assign outgoing (list (rows [(str [(field method) " " (field target) " HTTP/1.1"]) (str ["Host: " (field host)]) (star (call credentials [provider token names])) (star kept) (ternary (str "Connection: Upgrade") upgrade (str "Connection: close")) (str "") (str "")])))
@@ -16279,6 +16333,7 @@
                   (if' following [
                     (call (dot upstream "close") [])
                     (assign token following)
+                    (assign (index HELD provider) following)
                     continue
                   ])
                 ])
@@ -22434,9 +22489,10 @@
             usage: omp-box <command>
 
               list [--json]        granted folders
-              add PATH [--copy] [--name NAME]
+              add PATH [--copy | --ro] [--name NAME]
                                    share PATH into the box at the same path, as grant NAME
-                                   (default: PATH's folder name)
+                                   (default: PATH's folder name); --copy shares a copy,
+                                   --ro shares it read-only
               rm NAME              revoke a grant
               reconcile            re-apply every grant (after a box restart)
               retry                start the box again after omp-box-run gave up on it
@@ -22482,7 +22538,15 @@
       }: [
         ["local" (assign name (var 1)) (assign path (var 2)) (assign mode (var 3))]
         ["mkdir" "-p" (dq [(var shares) "/" (var name)])]
-        (case (var mode) [(arm "copy" (inline [["cp" "-au" (dq [(var path) "/."]) (dq [(var shares) "/" (var name) "/"])]])) (arm "bind" (inline [(chain [["findmnt" "-n" "-o" "TARGET" (dq [(var shares) "/" (var name)]) (redir ">" "/dev/null") (redir "2>&" 1)] "||" ["/run/wrappers/bin/sudo" "-n" "mount" "--bind" (dq (var path)) (dq [(var shares) "/" (var name)])]])]))])
+        (let
+          share = dq [(var shares) "/" (var name)];
+          bind = chain [["findmnt" "-n" "-o" "TARGET" share (redir ">" "/dev/null") (redir "2>&" 1)] "||" ["/run/wrappers/bin/sudo" "-n" "mount" "--bind" (dq (var path)) share]];
+        in
+          case (var mode) [
+            (arm "copy" (inline [["cp" "-au" (dq [(var path) "/."]) (dq [(var shares) "/" (var name) "/"])]]))
+            (arm "bind" (inline [bind]))
+            (arm "ro" (inline [bind (if' ["test" "-w" share] (inline [["/run/wrappers/bin/sudo" "-n" "mount" "-o" "remount,bind,ro" share]]))]))
+          ])
       ]))
       blank
       (fn drop_host ({
@@ -22490,7 +22554,7 @@
         mode,
       }: [
         ["local" (assign name (var 1)) (assign mode (var 2))]
-        (if' (test [(dq (var mode)) "=" "bind"]) [
+        (if' (test [(dq (var mode)) "!=" "copy"]) [
           (if' ["findmnt" "-n" "-o" "TARGET" (dq [(var shares) "/" (var name)]) (redir ">" "/dev/null") (redir "2>&" 1)] (inline [(chain [["/run/wrappers/bin/sudo" "-n" "umount" (dq [(var shares) "/" (var name)])] "||" [fail (dq ["could not unmount " (var shares) "/" (var name) ", so the grant stays"])]])]))
         ])
         (chain [["findmnt" "-n" "-o" "TARGET" (dq [(var shares) "/" (var name)]) (redir ">" "/dev/null") (redir "2>&" 1)] "||" ["rm" "-rf" (dq [(required shares "") "/" (required name "")])]])
@@ -22503,7 +22567,7 @@
       }: [
         ["local" (assign path (dq "")) (assign mode "bind") (assign name (dq ""))]
         (while (test [(var argCount) "-gt" 0]) [
-          (case (var 1) [(arm "--copy" (inline [(assign mode "copy")])) (arm "--name" (inline [(assign name (default 2 "")) ["shift"]])) (arm "*" (inline [(assign path (var 1))]))])
+          (case (var 1) [(arm "--copy" (inline [(assign mode "copy")])) (arm "--ro" (inline [(assign mode "ro")])) (arm "--name" (inline [(assign name (default 2 "")) ["shift"]])) (arm "*" (inline [(assign path (var 1))]))])
           ["shift"]
         ])
         (chain [(test (nonEmpty (dq (var path)))) "||" [fail (dq "add needs a path")]])
@@ -22583,6 +22647,7 @@
         (for f' [(word [(dq (var grants)) "/*"])] [
           (chain [(test (exists (dq (var f')))) "||" ["continue"]])
           [(assign IFS (ansic "\t")) "read" "-r" path mode (redir "<" (dq (var f')))]
+          (chain [(test (isDir (dq (var path)))) "||" ["continue"]])
           (assign name (sub [["basename" "--" (dq (var f'))]]))
           (if' (chain [[apply_host (dq (var name)) (dq (var path)) (dq (var mode))] "&&" [mount_guest (dq (var name)) (dq (var path))]]) [
             ["continue"]
@@ -22809,9 +22874,14 @@
           };
       };
     };
+    crest_work_data = {
+      login = "CU-enterprise";
+      bot = "CU-Bot";
+    };
     omp_crest_auth_data = {
       Array,
       Bun,
+      Date,
       Error,
       JSON,
       Map,
@@ -22847,8 +22917,10 @@
       new,
       not,
       null',
+      number,
       obj,
       opt,
+      process,
       prop,
       return,
       return',
@@ -22876,6 +22948,11 @@
       CHAT_KINDS,
       Token,
       Entry,
+      MARGIN,
+      held,
+      logins,
+      WORK,
+      WORK_BOT,
       crestAuth,
       token,
       entries,
@@ -22889,10 +22966,16 @@
       blank
       (const PROVIDERS (infix [(array [(str "anthropic") (str "openai-codex")]) "as" const']))
       (const (typed CHAT_KINDS (generic Readonly [(generic Record [string true])])) (obj [(prop "chat" true) (prop "tiny" true)]))
+      (const MARGIN 300000)
+      (const held (new (generic Map [string Token]) []))
+      (const logins (new (generic Map [string string]) []))
+      (const WORK (str crest_work_data.login))
+      (const WORK_BOT (str crest_work_data.bot))
       blank
       (interface Token [
         (typed "access" string)
         (typed (opt "login") string)
+        (typed (opt "expires") number)
       ])
       blank
       (interface Entry [
@@ -22923,13 +23006,16 @@
         provider,
         value,
         login,
+        expires,
       }: (fn token (typed [(typed provider string)] (generic Promise [Token])) [
         (const (typed value unknown) (call (dot JSON "parse") [(await (call crestAuth [(str "token") provider]))]))
         (if' (infix [(typeof value) "!==" (str "object") "||" value "===" null' "||" (not (infix [(str "access") "in" value])) "||" (typeof (dot value "access")) "!==" (str "string")]) [
           (throw' (new Error [(tpl ["crest-auth json token " (sub provider) ": no access token"])]))
         ])
         (const login (ternary (infix [(str "login") "in" value "&&" (typeof (dot value "login")) "===" (str "string")]) (dot value "login") undefined))
-        (return (obj [(prop "access" (dot value "access")) login]))
+        (if' (infix [login "===" WORK "&&" (dot process "env.OMP_BOT_NAME") "!==" WORK_BOT]) (throw' (new Error [(tpl ["crest-auth picked " (sub WORK) ", which is for " (sub WORK_BOT) " only: every login ahead of it is cooling"])])))
+        (const expires (ternary (infix [(str "expires") "in" value "&&" (typeof (dot value "expires")) "===" (str "number")]) (dot value "expires") undefined))
+        (return (obj [(prop "access" (dot value "access")) login expires]))
       ])))
       blank
       (async ({value}: (fn entries (typed [] (generic Promise [(arrayOf Entry)])) [
@@ -22975,22 +23061,22 @@
         (return providers)
       ])))
       blank
-      ({
-        provider,
-        logins,
-      }: (fn rotating (typed [(typed provider string)] ApiKeyResolver) [
-        (const logins (new (generic Map [string string]) []))
+      ({provider}: (fn rotating (typed [(typed provider string)] ApiKeyResolver) [
         (return (async ({
           error,
           lastChance,
           previousKey,
+          kept,
           spent,
           next,
         }: (arrow [(obj [error lastChance previousKey])] [
+          (const kept (call (dot held "get") [provider]))
+          (if' (infix [error "===" undefined "&&" kept "!==" undefined "&&" [(dot kept "expires") "??" 0] "-" MARGIN ">" (call (dot Date "now") [])]) (return (dot kept "access")))
           (const spent (ternary (infix [previousKey "===" undefined]) undefined (call (dot logins "get") [previousKey])))
           (if' (infix [error "!==" undefined "&&" lastChance "&&" spent "!==" undefined]) (await (call crestAuth [(str "cool") spent])))
           (const next (await (call token [provider])))
           (if' (infix [(dot next "login") "!==" undefined]) (call (dot logins "set") [(dot next "access") (dot next "login")]))
+          (call (dot held "set") [provider next])
           (return (dot next "access"))
         ]))))
       ]))
@@ -23016,7 +23102,7 @@
             provider
             (obj (rows [
               baseUrl
-              (prop "apiKey" (tpl ["!crest-auth json token " (sub provider) " | jq -er .access || echo crest-unavailable"]))
+              (prop "apiKey" (tpl ["!crest-auth json token " (sub provider) " | jq -er --arg work " (sub WORK) " --arg bot " (sub WORK_BOT) " 'select(.login != $work or env.OMP_BOT_NAME == $bot) | .access' || echo crest-unavailable"]))
               api
               (prop "models" (call (dot bundled "map") [({model}: (arrow [model] (ternary (call (dot Object "hasOwn") [CHAT_KINDS (infix [(dot model "kind") "??" (str "chat")])]) (obj [(spread model) api]) model)))]))
               ({
@@ -23066,11 +23152,14 @@
         name = "optchat";
         runtimeInputs = [pkgs.coreutils pkgs.jq pkgs.util-linux];
         text = ''
-          mkdir -p ${dir}
+          mkdir -p ${dir}/log
           [ -p ${dir}/optchatd.fifo ] || mkfifo ${dir}/optchatd.fifo
-          if ! ${config.system.build.ompBox}/bin/omp-box list --json | jq -e --arg p ${dir} 'any(.[]; .path == $p)' >/dev/null; then
-            ${config.system.build.ompBox}/bin/omp-box add ${dir} || echo "optchat: the box cannot reach ${dir} yet" >&2
-          fi
+          grant() {
+            ${config.system.build.ompBox}/bin/omp-box list --json | jq -e --arg p "$1" 'any(.[]; .path == $p)' >/dev/null \
+              || ${config.system.build.ompBox}/bin/omp-box add "$@" || echo "optchat: the box cannot reach $1 yet" >&2
+          }
+          grant ${dir} --ro
+          grant ${dir}/log --name optchat.log
           cd ${dir}
           exec 9>${dir}/optchatd.lock
           flock -n 9 || { echo "optchat: already running (${dir}/optchatd.lock is held)" >&2; exit 1; }
@@ -24505,6 +24594,7 @@
       number,
       obj,
       opt,
+      process,
       prop,
       regex,
       return,
@@ -24540,6 +24630,8 @@
       Token,
       Entry,
       logins,
+      WORK,
+      WORK_BOT,
       crestAuth,
       token,
       entries,
@@ -24576,6 +24668,8 @@
       ])
       blank
       (const logins (new (generic Map [string string]) []))
+      (const WORK (str crest_work_data.login))
+      (const WORK_BOT (str crest_work_data.bot))
       blank
       ({args}: (fn crestAuth (typed [(typed (spread args) (arrayOf string))] (generic Promise [string])) [
         (return (new Promise [
@@ -24624,6 +24718,7 @@
             (throw' (new Error [(tpl ["crest-auth json token " (sub provider) ": no access token"])]))
           ])
         (const login (ternary (infix [(str "login") "in" value "&&" (typeof (dot value "login")) "===" (str "string")]) (dot value "login") undefined))
+        (if' (infix [login "===" WORK "&&" (dot process "env.OMP_BOT_NAME") "!==" WORK_BOT]) (throw' (new Error [(tpl ["crest-auth picked " (sub WORK) ", which is for " (sub WORK_BOT) " only: every login ahead of it is cooling"])])))
         (if' (infix [login "!==" undefined]) (call (dot logins "set") [(dot value "access") login]))
         (return (obj [(prop "access" (dot value "access")) (prop "expires" (dot value "expires")) login]))
       ])))
@@ -41660,6 +41755,7 @@
         core_podman = "modules/core/podman.nix";
         core_xdg = "modules/core/xdg.nix";
         creative = "modules/desktop/apps/creative.nix";
+        crest_work_data = "modules/dev/ai/crest-work.data.nix";
         cs2 = "modules/gaming/cs2.nix";
         cwd_data = "modules/dev/ai/omp/cwd.data.nix";
         daylight = "modules/desktop/session/daylight.nix";
