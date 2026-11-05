@@ -7362,7 +7362,7 @@
     ];
     bot_chat_frost_data = [
       {
-        select = ":root:not(#b0) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md, :root:not(#b0) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
+        select = ":root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md, :root:not(#b0):not(#b1):not(#b2) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
         set = [
           ["background" "light-dark(var(--pop-bg), var(--raise))"]
           ["backdrop-filter" "blur(18px) saturate(130%)"]
@@ -9710,7 +9710,7 @@
     ];
     chat_frost_data = [
       {
-        select = ":root:not(#s0) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor']";
+        select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body, :root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor']";
         set = [
           ["background" "light-dark(var(--pop-bg), var(--raise))"]
           ["backdrop-filter" "blur(18px) saturate(130%)"]
@@ -26688,7 +26688,7 @@
     };
     reply_frost_data = [
       {
-        select = ":root:not(#g0) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md, :root:not(#g0) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#g0) [data-role='omp.bot.xmsg']";
+        select = ":root:not(#g0):not(#g1):not(#g2):not(#g3) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md, :root:not(#g0):not(#g1):not(#g2):not(#g3) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'], :root:not(#g0):not(#g1):not(#g2):not(#g3) [data-role='omp.bot.xmsg']";
         set = [
           ["background" "color-mix(in srgb, var(--panel, var(--l1)) 45%, transparent) !important"]
           ["-webkit-backdrop-filter" "blur(40px) saturate(190%) !important"]
@@ -39466,7 +39466,7 @@
     ];
     user_frost_data = [
       {
-        select = ":root:not(#g0) .sf-card[data-role^='omp.user'] > .sf-card-body, :root:not(#g0) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
+        select = ":root:not(#g0):not(#g1):not(#g2):not(#g3) .sf-card[data-role^='omp.user'] > .sf-card-body, :root:not(#g0):not(#g1):not(#g2):not(#g3) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
         set = [
           ["background" "color-mix(in srgb, var(--panel, var(--l1)) 45%, transparent) !important"]
           ["-webkit-backdrop-filter" "blur(40px) saturate(190%) !important"]
