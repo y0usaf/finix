@@ -808,7 +808,7 @@
       ];
     };
     ai_crest = {inputPackages, ...}: let
-      crest = inputPackages.crest;
+      inherit (inputPackages) crest;
     in {
       user.persist.directories = [
         ".local/state/ouro"
@@ -851,7 +851,7 @@
       inputPackages,
       ...
     }: let
-      donsetch = inputPackages.pi-donsetch.donsetch;
+      inherit (inputPackages.pi-donsetch) donsetch;
     in {
       user.persist.directories = [".cache/donsetch"];
 
@@ -936,7 +936,7 @@
       ...
     }: let
       cfg = config.user.dev.nacre;
-      nacre = inputPackages.nacre;
+      inherit (inputPackages) nacre;
       userName = config.user.name;
       user = config.users.users.${userName};
       runtimeDir = "/run/user/${toString user.uid}";
@@ -1483,7 +1483,7 @@
         inherit user;
         inherit shares;
         inherit generators;
-        omp = inputPackages.oh-my-pi.omp;
+        inherit (inputPackages.oh-my-pi) omp;
       };
 
       selftestBox = mkBox {
@@ -2061,7 +2061,7 @@
       environment.systemPackages = [pkgs.rtk];
     };
     ai_silva = {inputPackages, ...}: let
-      silva = inputPackages.silva;
+      inherit (inputPackages) silva;
     in {
       user.persist.directories = [
         ".config/silva"
@@ -3611,7 +3611,7 @@
     }: {
       config = lib.mkIf config.hardware.nvidia.enable {
         environment.systemPackages = let
-          mado = inputPackages.mado;
+          inherit (inputPackages) mado;
         in [mado.mado-send mado.mado-timing];
         user.ui.tomoe.extraConfig =
           flakeInputs.mado.lib.tomoe
@@ -20747,7 +20747,7 @@
       userName = config.user.name;
       user = config.users.users.${userName};
       runtimeDir = "/run/user/${toString user.uid}";
-      omp = inputPackages.oh-my-pi.omp;
+      inherit (inputPackages.oh-my-pi) omp;
       src = flakeInputs.omp-bot;
       tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
       persistentHome = "/persist/home/${userName}";
@@ -21615,7 +21615,7 @@
       user = config.user.name;
       home = config.users.users.${user}.home;
       dir = "${home}/.local/state/optchat";
-      omp = inputPackages.oh-my-pi.omp;
+      inherit (inputPackages.oh-my-pi) omp;
 
       service = pkgs.writeShellApplication {
         name = "optchat";
