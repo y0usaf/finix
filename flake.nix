@@ -35266,6 +35266,7 @@
         "plugins/ozette/plugin.toml" = "${flakeInputs.tern-ozette}/plugin.toml";
         "plugins/ozette/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
         "plugins/ozette/window.luau" = "${flakeInputs.tern-ozette}/window.luau";
+        "plugins/ozette/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
         "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tab_order_plugin_data);
         "plugins/tab-order/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (tab_order_window_data generators.luau));
         "plugins/transparent/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource transparent_plugin_data);

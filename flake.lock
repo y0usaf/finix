@@ -2125,11 +2125,11 @@
     "tern-ozette": {
       "flake": false,
       "locked": {
-        "lastModified": 1793811535,
-        "narHash": "sha256-MZDN8C+5bv2WV8a/t5VF2Jc7DMW5j19+fbIVECjSUmk=",
+        "lastModified": 1793883330,
+        "narHash": "sha256-jCdZiXiLWylJrVGZYooo00nmYDwnVe/d2xlu/xBAXgk=",
         "ref": "refs/heads/main",
-        "rev": "3fcbc6844861cbb32ac015d81e6cc18a27374bbe",
-        "revCount": 19,
+        "rev": "a6c8d6494a9de9bc95e5892b454dbcbcd25750c3",
+        "revCount": 24,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       },
@@ -2141,11 +2141,11 @@
     "tern-themes": {
       "flake": false,
       "locked": {
-        "lastModified": 1793747516,
-        "narHash": "sha256-KqU8eI967j3+UudHbMEutSUyUJPMDQmnlQ6uXas5Nuk=",
+        "lastModified": 1793883330,
+        "narHash": "sha256-syUKJQholBRKm/zJ/RUG9kTawIskIfdzc/aElCnCJ6E=",
         "ref": "refs/heads/main",
-        "rev": "19e93f91d8243710a247a7dab12a8a002fc553a3",
-        "revCount": 8,
+        "rev": "13160d89360174ae2f51f02c2af65dd0849da0ee",
+        "revCount": 9,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-themes"
       },
