@@ -14871,18 +14871,20 @@
       ];
     frost_data = [
       {
-        select = "html.tn-themed, html.tn-themed[data-theme='dark']";
+        select = "html.tn-themed .cmdk, html.tn-themed .dlg-card, html.tn-themed .mdl, html.tn-themed .pk-sheet, html.tn-themed .sf-overlay.modal > .sf-ov-card, html.tn-themed .sf-prefs .pf-editor > .sf-col, html.tn-themed .tn-hd, html.tn-themed .tn-sc";
         set = [
-          ["--modal-filter" "blur(40px) saturate(190%)"]
+          ["-webkit-backdrop-filter" "blur(40px) saturate(190%) !important"]
+          ["backdrop-filter" "blur(40px) saturate(190%) !important"]
         ];
       }
       {
         at = "@media (prefers-contrast: more)";
         rules = [
           {
-            select = "html.tn-themed, html.tn-themed[data-theme='dark']";
+            select = "html.tn-themed .cmdk, html.tn-themed .dlg-card, html.tn-themed .mdl, html.tn-themed .pk-sheet, html.tn-themed .sf-overlay.modal > .sf-ov-card, html.tn-themed .sf-prefs .pf-editor > .sf-col, html.tn-themed .tn-hd, html.tn-themed .tn-sc";
             set = [
-              ["--modal-filter" "none"]
+              ["-webkit-backdrop-filter" "none !important"]
+              ["backdrop-filter" "none !important"]
             ];
           }
         ];
