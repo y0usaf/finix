@@ -226,10 +226,7 @@
 
     frame-charge.url = "github:y0usaf/frame-charge";
 
-    steam-frame-nixos = {
-      url = "github:y0usaf/steam-frame-nixos";
-      flake = false;
-    };
+    steam-frame-nixos.url = "github:y0usaf/steam-frame-nixos";
 
     strictix = {
       url = "github:y0usaf/strictix";
@@ -19035,7 +19032,7 @@
 
       patched = {
         "luajit-opcodes.patch" = pkgs.fetchFromGitHub luajit_data;
-        "aquamarine-gamescope.patch" = pkgs.aquamarine.src;
+        "aquamarine-gamescope.patch" = inputs.steam-frame-nixos.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.aquamarine.src;
         "rush-login-command.patch" = inputs.rush.packages.${pkgs.stdenv.hostPlatform.system}.default.src;
       };
 
@@ -19371,6 +19368,7 @@
             "tomoe"
             "mado"
             "frame-charge"
+            "steam-frame-nixos"
             "finix"
             "nixpkgs-librewolf"
           ];
