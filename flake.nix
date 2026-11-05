@@ -1042,21 +1042,20 @@
       # config.yml's paths alone and running sessions see no "newly enabled" extension to restart for. omp-bot's
       # env (the omp_bot module) names its extensions by the same links, so a bot loads each once.
       extDir = "${config.users.users.${config.user.name}.home}/.omp/agent/ext";
-      extLinks = {
-        pi-chronobreak = "${flakeInputs.pi-chronobreak}";
-        pi-recap = "${flakeInputs.pi-recap}";
-        pi-donsetch = "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}";
-        "code-mode.ts" = generators.sourceFile "code-mode.ts" (generators.ts.render (code_mode_data generators.ts));
-        "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts));
-        "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
-        "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (chat_look_data generators.ts));
-        "box-commands.ts" = generators.sourceFile "box-commands.ts" (generators.ts.render (box_commands_data generators.ts));
-        "cwd.ts" = generators.sourceFile "cwd.ts" (generators.ts.render (cwd_data generators.ts));
-        secrets = "${secrets}";
-        "crest-auth.ts" = generators.sourceFile "crest-auth.ts" (generators.ts.render (omp_crest_auth_data generators.ts));
-        optchat = generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;});
-        omp-bot = "${flakeInputs.omp-bot}";
-      };
+      extLinks =
+        lib.genAttrs ["pi-chronobreak" "pi-recap" "omp-bot"] (name: "${flakeInputs.${name}}")
+        // {
+          pi-donsetch = "${flakeInputs.pi-donsetch.packages.${pkgs.stdenv.hostPlatform.system}.default}";
+          "code-mode.ts" = generators.sourceFile "code-mode.ts" (generators.ts.render (code_mode_data generators.ts));
+          "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts));
+          "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
+          "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (chat_look_data generators.ts));
+          "box-commands.ts" = generators.sourceFile "box-commands.ts" (generators.ts.render (box_commands_data generators.ts));
+          "cwd.ts" = generators.sourceFile "cwd.ts" (generators.ts.render (cwd_data generators.ts));
+          secrets = "${secrets}";
+          "crest-auth.ts" = generators.sourceFile "crest-auth.ts" (generators.ts.render (omp_crest_auth_data generators.ts));
+          optchat = generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;});
+        };
       ompSecret = pkgs.writeShellScriptBin "omp-secret" ''
         PATH=${lib.makeBinPath [pkgs.age]}:$PATH exec ${pkgs.bun}/bin/bun ${secrets}/omp-secret.ts "$@"
       '';
@@ -1091,103 +1090,105 @@
       environment.systemPackages = [pkgs.jq pkgs.age ompSecret ompUntil];
       finit.services.omp-botd.path = [ompUntil];
 
-      manzil.users.${config.user.name}.files = lib.mapAttrs' (name: source: lib.nameValuePair ".omp/agent/ext/${name}" {source = "${source}";}) extLinks // {
-        ".omp/agent/config.yml" = {
-          generator = lib.generators.toYAML {};
-          value = {
-            defaultThinkingLevel = catalog.ompThinkingLevel;
-            advisor.enabled = true;
-            startup.checkUpdate = false;
-            setupVersion = 2;
-            symbolPreset = "unicode";
-            theme.dark = "titanium";
-            composer.tokenRate = false;
-            disabledExtensions = [];
-            dev.autoqaConsent = "granted";
-            colorBlindMode = false;
-            hideThinkingBlock = true;
-            statusLine = {
-              sessionAccent = true;
-              contextLine = "embedded";
-            };
-            tui = {
-              renderMermaid = true;
-              scrollbackRebuild = true;
-            };
-            display = {
-              shimmer = "classic";
-              smoothStreaming = true;
-            };
-            task = {
-              showResolvedModelBadge = false;
-              eager = "preferred";
-              enableLsp = false;
-            };
-            edit.mode = "hashline";
-            astGrep.enabled = true;
-            github.enabled = true;
-            eval.js = false;
-            codexResets.autoRedeem = "no";
-            title.icons = "nf+emoji";
-            interruptMode = "immediate";
-            modelRoles = {
-              default = "${catalog.defaultProvider}/${catalog.defaultModel}";
-              advisor = catalog.advisorModel;
-              smol = catalog.smolModel;
-              judge = catalog.judgeModel;
-            };
-            retry.fallbackChains = catalog.fallbackChains;
-            extensions = map (path: "${extDir}/${path}") [
-              "pi-chronobreak"
-              "pi-recap"
-              "pi-donsetch"
-              "code-mode.ts"
-              "compact-eval.ts"
-              "work-fold.ts"
-              "chat-look.ts"
-              "box-commands.ts"
-              "cwd.ts"
-              "secrets/secrets.ts"
-              "crest-auth.ts"
-              "optchat/extension.ts"
-              "omp-bot/omp/ompd.ts"
-            ];
-          };
-        };
-        ".omp/config.json" = {
-          generator = toJSON;
-          value = {
-            terminal_width_percent = 50;
-            panel_width_percent = 13;
-            ascii = true;
-            keybinds = {
-              project_next = "ctrl+l";
-              project_prev = "ctrl+h";
-              session_next = "ctrl+j";
-              session_prev = "ctrl+k";
+      manzil.users.${config.user.name}.files =
+        lib.mapAttrs' (name: source: lib.nameValuePair ".omp/agent/ext/${name}" {source = "${source}";}) extLinks
+        // {
+          ".omp/agent/config.yml" = {
+            generator = lib.generators.toYAML {};
+            value = {
+              defaultThinkingLevel = catalog.ompThinkingLevel;
+              advisor.enabled = true;
+              startup.checkUpdate = false;
+              setupVersion = 2;
+              symbolPreset = "unicode";
+              theme.dark = "titanium";
+              composer.tokenRate = false;
+              disabledExtensions = [];
+              dev.autoqaConsent = "granted";
+              colorBlindMode = false;
+              hideThinkingBlock = true;
+              statusLine = {
+                sessionAccent = true;
+                contextLine = "embedded";
+              };
+              tui = {
+                renderMermaid = true;
+                scrollbackRebuild = true;
+              };
+              display = {
+                shimmer = "classic";
+                smoothStreaming = true;
+              };
+              task = {
+                showResolvedModelBadge = false;
+                eager = "preferred";
+                enableLsp = false;
+              };
+              edit.mode = "hashline";
+              astGrep.enabled = true;
+              github.enabled = true;
+              eval.js = false;
+              codexResets.autoRedeem = "no";
+              title.icons = "nf+emoji";
+              interruptMode = "immediate";
+              modelRoles = {
+                default = "${catalog.defaultProvider}/${catalog.defaultModel}";
+                advisor = catalog.advisorModel;
+                smol = catalog.smolModel;
+                judge = catalog.judgeModel;
+              };
+              retry.fallbackChains = catalog.fallbackChains;
+              extensions = map (path: "${extDir}/${path}") [
+                "pi-chronobreak"
+                "pi-recap"
+                "pi-donsetch"
+                "code-mode.ts"
+                "compact-eval.ts"
+                "work-fold.ts"
+                "chat-look.ts"
+                "box-commands.ts"
+                "cwd.ts"
+                "secrets/secrets.ts"
+                "crest-auth.ts"
+                "optchat/extension.ts"
+                "omp-bot/omp/ompd.ts"
+              ];
             };
           };
-        };
-        ".omp/agent/settings.json" = {
-          generator = toJSON;
-          value = {
-            inherit (catalog) defaultProvider;
-            inherit (catalog) defaultModel;
-            defaultThinkingLevel = catalog.ompThinkingLevel;
-            inherit (catalog) enabledModels;
-            packages = [];
+          ".omp/config.json" = {
+            generator = toJSON;
+            value = {
+              terminal_width_percent = 50;
+              panel_width_percent = 13;
+              ascii = true;
+              keybinds = {
+                project_next = "ctrl+l";
+                project_prev = "ctrl+h";
+                session_next = "ctrl+j";
+                session_prev = "ctrl+k";
+              };
+            };
           };
+          ".omp/agent/settings.json" = {
+            generator = toJSON;
+            value = {
+              inherit (catalog) defaultProvider;
+              inherit (catalog) defaultModel;
+              defaultThinkingLevel = catalog.ompThinkingLevel;
+              inherit (catalog) enabledModels;
+              packages = [];
+            };
+          };
+          ".omp/agent/models.yml" = {
+            generator = lib.generators.toYAML {};
+            value = models_data;
+          };
+          ".omp/agent/models.json" = {
+            generator = toJSON;
+            value = catalog.models;
+          };
+          ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.shared}\n";
         };
-        ".omp/agent/models.yml" = {
-          generator = lib.generators.toYAML {};
-          value = models_data;
-        };
-        ".omp/agent/models.json" = {
-          generator = toJSON;
-          value = catalog.models;
-        };
-        ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.shared}\n";
-      };
     };
     ai_omp_box = {
       config,
@@ -1201,8 +1202,6 @@
       home = config.users.users.${user}.home;
       catalog = config.user.dev.modelCatalog;
       shares = [];
-      state = "${home}/.local/state/omp-box";
-      port = 22422;
       json = lib.generators.toJSON {};
 
       proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.python.render (gateway_proxy_data generators.python));
@@ -1218,7 +1217,7 @@
         "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts));
         "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
         optchat = generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;});
-        omp-bot = flakeInputs.omp-bot;
+        inherit (flakeInputs) omp-bot;
       };
       inBox = name: "${seedMount}/current/ext/${name}";
       files = {
@@ -1285,9 +1284,9 @@
       sshConfig = pkgs.writeText "omp-box-ssh-config" ''
         Host *
           HostName 127.0.0.1
-          Port ${toString port}
+          Port ${toString box.port}
           User ${user}
-          IdentityFile ${state}/ssh-key
+          IdentityFile ${box.state}/ssh-key
           IdentitiesOnly yes
           BatchMode yes
           LogLevel ERROR
@@ -1466,7 +1465,8 @@
       };
 
       box = mkBox {
-        inherit state port;
+        state = "${home}/.local/state/omp-box";
+        port = 22422;
       };
 
       pkg = pkgs.callPackage omp_box {
@@ -1627,7 +1627,7 @@
 
         manzil.users.${user}.files.".config/omp-bot/box.env".text = ''
           export OMP_BOT_BOX_SSH_CONFIG=${sshConfig}
-          export OMP_BOT_BOX_STATUS=${state}/status.json
+          export OMP_BOT_BOX_STATUS=${box.state}/status.json
           export OMP_BOT_BOX_EXT=${seedMount}/current/ext
           unset OMP_BOT_EXTENSION OMP_BOT_SECRETS_EXTENSION OMPD_SERVICE
         '';
@@ -1646,7 +1646,7 @@
             set -euo pipefail
             export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.openssh]}
             while :; do
-              if ssh -q -p ${toString port} -i ${state}/ssh-key \
+              if ssh -q -p ${toString box.port} -i ${box.state}/ssh-key \
                    -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
                    -o BatchMode=yes -o ConnectTimeout=1 -o ServerAliveInterval=2 -o ServerAliveCountMax=1 ${user}@127.0.0.1 \
                    mountpoint -q /mnt/shares 2>/dev/null; then
@@ -1678,7 +1678,7 @@
             set -euo pipefail
             export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.findutils pkgs.openssh]}
             trap 'echo "omp-box-seed: failed at line $LINENO: $BASH_COMMAND" >&2' ERR
-            dir=${state}/seed
+            dir=${box.state}/seed
             gen=${builtins.baseNameOf seed}
             mkdir -p "$dir"
             if [ ! -d "$dir/$gen" ]; then
@@ -1691,7 +1691,7 @@
             ln -sfn "$gen" "$dir/.current"
             mv -T "$dir/.current" "$dir/current"
             find "$dir" -mindepth 1 -maxdepth 1 -type d -name '*-omp-box-seed' -printf '%T@ %p\n' | sort -rn | tail -n +11 | cut -d' ' -f2- | xargs -r rm -rf
-            if ssh -q -p ${toString port} -i ${state}/ssh-key \
+            if ssh -q -p ${toString box.port} -i ${box.state}/ssh-key \
                  -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
                  -o BatchMode=yes -o ConnectTimeout=5 ${user}@127.0.0.1 sudo -n systemctl restart omp-seed 2>/dev/null; then
               echo "omp-box-seed: the box now loads $gen"
@@ -21332,16 +21332,6 @@
         firewall.enable = false;
         useNetworkd = true;
       };
-      systemd.network.networks."10-eth0" = {
-        matchConfig.Driver = "virtio_net";
-        networkConfig = {
-          Address = ["10.0.2.15/24"];
-          Gateway = "10.0.2.2";
-          DNS = ["10.0.2.3"];
-          Domains = ["home"];
-        };
-      };
-
       services.openssh = {
         enable = true;
         settings.PermitRootLogin = "no";
@@ -21358,9 +21348,6 @@
       };
       security.sudo.wheelNeedsPassword = false;
 
-      # Shares mount with sudo and would leave these root-owned, so the user's own programs couldn't write their caches and state beside them.
-      systemd.tmpfiles.rules = map (dir: "d ${home}/${dir} 0755 ${user} users -") [".cache" ".config" ".local" ".local/share" ".local/state" ".local/state/omp-bot"];
-
       fileSystems = {
         "${home}/.omp/run" = {
           device = "tmpfs";
@@ -21374,31 +21361,46 @@
         };
       };
 
-      systemd.services =
-        lib.mapAttrs' (name: settings: lib.nameValuePair "browser-${name}" (browser name settings)) ompBox.browsers
-        // {
-          # The omp config, read from the seed share's current generation at boot and again by the host's
-          # omp-box-seed whenever it puts a new one there; at boot it waits for omp-box-seed's first copy.
-          omp-seed = {
-            wantedBy = ["multi-user.target"];
-            unitConfig.RequiresMountsFor = ompBox.seedMount;
-            serviceConfig = {
-              Type = "oneshot";
-              TimeoutStartSec = "infinity";
-            };
-            script = ''
-              set -eu
-              src=${ompBox.seedMount}/current
-              until [ -e "$src/config.yml" ]; do sleep 1; done
-              dst=${home}/.omp/agent
-              install -d -o 1001 -g 100 -m 755 ${home}/.omp
-              install -d -o 1001 -g 100 -m 700 "$dst"
-              for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md; do
-                install -o 1001 -g 100 -m 600 "$src/$file" "$dst/$file"
-              done
-            '';
+      systemd = {
+        network.networks."10-eth0" = {
+          matchConfig.Driver = "virtio_net";
+          networkConfig = {
+            Address = ["10.0.2.15/24"];
+            Gateway = "10.0.2.2";
+            DNS = ["10.0.2.3"];
+            Domains = ["home"];
           };
         };
+
+        # Shares mount with sudo and would leave these root-owned, so the user's own programs couldn't write their caches and state beside them.
+        tmpfiles.rules = map (dir: "d ${home}/${dir} 0755 ${user} users -") [".cache" ".config" ".local" ".local/share" ".local/state" ".local/state/omp-bot"];
+
+        services =
+          lib.mapAttrs' (name: settings: lib.nameValuePair "browser-${name}" (browser name settings)) ompBox.browsers
+          // {
+            # The omp config, read from the seed share's current generation at boot and again by the host's
+            # omp-box-seed whenever it puts a new one there; at boot it waits for omp-box-seed's first copy.
+            omp-seed = {
+              wantedBy = ["multi-user.target"];
+              unitConfig.RequiresMountsFor = ompBox.seedMount;
+              serviceConfig = {
+                Type = "oneshot";
+                TimeoutStartSec = "infinity";
+              };
+              script = ''
+                set -eu
+                src=${ompBox.seedMount}/current
+                until [ -e "$src/config.yml" ]; do sleep 1; done
+                dst=${home}/.omp/agent
+                install -d -o 1001 -g 100 -m 755 ${home}/.omp
+                install -d -o 1001 -g 100 -m 700 "$dst"
+                for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md; do
+                  install -o 1001 -g 100 -m 600 "$src/$file" "$dst/$file"
+                done
+              '';
+            };
+          };
+      };
     };
     omp_crest_auth_data = {
       Array,
