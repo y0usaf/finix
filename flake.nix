@@ -1218,8 +1218,20 @@
         "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
         optchat = generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;});
         inherit (flakeInputs) omp-bot;
+        # The same store path as the host's ext link, so omp-bot-box names a boxed bot's secrets extension by this link.
+        secrets = generators.sourceDir pkgs "secrets" omp_secrets_data;
       };
       inBox = name: "${seedMount}/current/ext/${name}";
+      # Programs a boxed bot gets on PATH (box.env's OMP_BOT_BOX_PATH): the secrets extension's age and omp-secret.
+      # age is linked against the guest's own glibc, which the guest always has, as it is built from the same pkgs.
+      seedBin = {
+        age = "${pkgs.age}/bin/age";
+        age-keygen = "${pkgs.age}/bin/age-keygen";
+        omp-secret = pkgs.writeScript "omp-secret" ''
+          #!/bin/sh
+          exec bun "''${0%/*}/../ext/secrets/omp-secret.ts" "$@"
+        '';
+      };
       files = {
         models = pkgs.writeText "models.json" (json catalog.models);
         modelKeys = pkgs.writeText "models.yml" ''
@@ -1265,7 +1277,7 @@
         appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n";
       };
       seed = pkgs.runCommand "omp-box-seed" {} ''
-        mkdir -p $out/store $out/ext
+        mkdir -p $out/store $out/ext $out/bin
         cp ${files.models} $out/models.json
         cp ${files.modelKeys} $out/models.yml
         cp ${files.settings} $out/settings.json
@@ -1278,6 +1290,10 @@
             ln -s ../store/${copy} $out/ext/${name}
           '')
           extensions)}
+        ${lib.concatStrings (lib.mapAttrsToList (name: path: ''
+            cp -L ${path} $out/bin/${name}
+          '')
+          seedBin)}
       '';
 
       # How omp-bot's boxed bots reach the box (bin/omp-bot-box): the same key and port the omp wrapper uses.
@@ -1629,7 +1645,8 @@
           export OMP_BOT_BOX_SSH_CONFIG=${sshConfig}
           export OMP_BOT_BOX_STATUS=${box.state}/status.json
           export OMP_BOT_BOX_EXT=${seedMount}/current/ext
-          unset OMP_BOT_EXTENSION OMP_BOT_SECRETS_EXTENSION OMPD_SERVICE
+          export OMP_BOT_BOX_PATH=${seedMount}/current/bin
+          unset OMP_BOT_EXTENSION OMPD_SERVICE
         '';
 
         finit.services.omp-box-grants = {
@@ -28341,7 +28358,8 @@
 
       export const NAME = /^[A-Z][A-Z0-9_]{0,63}$/;
       export const REFERENCE = /\$\{?SECRET_([A-Z][A-Z0-9_]{0,63})/g;
-      export const ROOT = join(process.env.XDG_STATE_HOME || join(homedir(), ".local", "state"), "omp-secrets");
+      // OMP_SECRETS_DIR moves the store: omp-bot points a boxed bot's at a folder of its own shared into the box.
+      export const ROOT = process.env.OMP_SECRETS_DIR || join(process.env.XDG_STATE_HOME || join(homedir(), ".local", "state"), "omp-secrets");
       export const KEY = join(ROOT, "secrets.key");
       const DEFAULT_TTL = "24h";
 
