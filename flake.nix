@@ -35886,6 +35886,7 @@
       on,
       by_id,
       rail,
+      single,
       guard,
       paint,
       LOOKS,
@@ -35897,10 +35898,10 @@
       blank
       (local TWEAKS (rows (table [
         (rows (table [
-          (field "id" (str "sessions"))
-          (field "label" (str "hide session tabs"))
+          (field "id" (str "single"))
+          (field "label" (str "Single session"))
           (field "group" (str "Chrome"))
-          (field "css" (long ".tn-session-tab{display:none !important}"))
+          (field "css" (long ".tn-session-tab,\n.tn-vt > .nav-group:is(.g-sp, .g-sp-cur) > .nav-head,\n.tn-pl-scope[title^='Sessions'] {\n\tdisplay: none !important;\n}"))
         ]))
         (rows (table [
           (field "id" (str "account"))
@@ -36032,6 +36033,19 @@
       blank
       [(dot Rail "bind") on]
       blank
+      (localFunction single [{cx = null;}] ({cx}: [
+        (if' (dot on "single") [
+          [
+            pcall
+            (fn [] [
+              (if' (not (dot [(dot cx "sessions:current")] "locked")) [
+                [(dot cx "sessions:lock")]
+              ])
+            ])
+          ]
+        ])
+      ]))
+      blank
       (localFunction rail [{cx = null;}] ({cx}: [
         [
           pcall
@@ -36078,6 +36092,7 @@
       [guard (table [(str "layout:float") (str "layout:tiles") (str "layout:studio") (str "next_layout") (str "toggle_tab_orientation") (str "tabs:vertical")]) (str "lock") (str "The rail is locked")]
       [guard (table [(str "pane_headers:never") (str "pane_headers:split") (str "pane_headers:always") (str "status_bar") (str "interface_style")]) nil (str "This config fixes the chrome")]
       [guard (table [(str "files") (str "focus_files") (str "reveal_active_file")]) (str "files") (str "Files are off")]
+      [guard (table [(str "new_session") (str "new_session_on_host") (str "switch_session") (str "rename_session") (str "close_session") (str "lock_session") (str "move_session_up") (str "move_session_down") (str "move_pane_to_session") (str "collapse_all_sessions") (str "expand_all_sessions")]) (str "single") (str "Tabs only: one locked session")]
       blank
       [
         (dot tern "on")
@@ -36102,6 +36117,7 @@
           (if' (dot on "lock") [
             [rail cx]
           ])
+          [single cx]
         ]))
       ]
       blank
@@ -36115,6 +36131,9 @@
           (fn [{cx = null;}] ({cx}: [
             (if' (infix [cx "and" (dot on "lock")]) [
               [rail cx]
+            ])
+            (if' cx [
+              [single cx]
             ])
           ]))
         ]
@@ -36133,7 +36152,7 @@
         [paint t]
       ]))
       blank
-      (local LOOKS (table [(table [(field "id" (str "ozette")) (field "label" (str "Ozette"))]) (table [(field "id" (str "yorha")) (field "label" (str "YoRHa"))])]))
+      (local LOOKS (table [(table [(field "id" (str "ozette")) (field "label" (str "Ozette"))]) (table [(field "id" (str "yorha")) (field "label" (str "YoRHa"))]) (table [(field "id" (str "yorha-pixel")) (field "label" (str "YoRHa Pixel"))])]))
       blank
       (localFunction plugins (typed [] (table [(pair string string)])) ({
         root,
@@ -36179,6 +36198,9 @@
         ])
         (if' (infix [(dot t "id") "==" (str "lock") "and" (dot on "lock")]) [
           [rail cx]
+        ])
+        (if' (infix [(dot t "id") "==" (str "single")]) [
+          [single cx]
         ])
         [(dot tern "chrome.refresh")]
       ]))
@@ -36235,7 +36257,7 @@
         [add (table [(field "label" (str "None")) (field "group" (str "Look")) (field "icon" (str "palette")) (field "look" (str "")) (field "current" (infix [look "==" (str "")]))])]
         (local ids (table []))
         (for [{id = null;}] installed ({id}: [
-          (if' (infix [id "~=" (dot tern "plugin.id") "and" id "~=" (str "ozette") "and" id "~=" (str "yorha")]) [
+          (if' (infix [id "~=" (dot tern "plugin.id") "and" id "~=" (str "ozette") "and" id "~=" (str "yorha") "and" id "~=" (str "yorha-pixel")]) [
             (assign (idx ids (infix [(len ids) "+" 1])) id)
           ])
         ]))
