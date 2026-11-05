@@ -938,8 +938,8 @@
       cfg = config.user.dev.nacre;
       inherit (inputPackages) nacre;
       userName = config.user.name;
-      user = config.users.users.${userName};
-      runtimeDir = "/run/user/${toString user.uid}";
+      home = config.user.homeDirectory;
+      inherit (config.user) runtimeDir;
 
       waitRuntimeDir = pkgs.writeShellScript "wait-nacre-runtime" ''
         for _ in $(${pkgs.coreutils}/bin/seq 1 60); do
@@ -968,7 +968,7 @@
 
         environmentFiles = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = ["${user.home}/Tokens/AI_GATEWAY_API_KEY.txt"];
+          default = ["${home}/Tokens/AI_GATEWAY_API_KEY.txt"];
           description = ''
             Files whose contents become environment variables of the daemon (and so
             of every bot it runs), named like paseo's: basename without extension,
@@ -997,15 +997,15 @@
             group = "users";
             command = "${waitRuntimeDir} ${start}";
             environment = {
-              HOME = user.home;
+              HOME = home;
               XDG_RUNTIME_DIR = runtimeDir;
             };
             path = [
               pkgs.coreutils
               "/run/current-system/sw"
               "/run/wrappers"
-              "${user.home}/.nix-profile"
-              "${user.home}/.local/state/nix/profile"
+              "${home}/.nix-profile"
+              "${home}/.local/state/nix/profile"
               "/nix/var/nix/profiles/default"
             ];
             conditions = ["net/lo/up"];
@@ -2934,7 +2934,7 @@
       });
 
       userName = config.user.name;
-      runtimeDir = "/run/user/${toString config.users.users.${userName}.uid}";
+      inherit (config.user) runtimeDir;
 
       sherpaOnnxGpu = pkgs.stdenv.mkDerivation {
         pname = "sherpa-onnx-gpu-prebuilt";
@@ -4210,7 +4210,7 @@
       ...
     }: let
       userName = config.user.name;
-      runtimeDir = "/run/user/${toString config.users.users.${userName}.uid}";
+      inherit (config.user) runtimeDir;
       svcEnv = {
         HOME = config.users.users.${userName}.home;
         XDG_RUNTIME_DIR = runtimeDir;
@@ -8908,6 +8908,13 @@
           description = "The user's entry in finix.persistence.allowlist.users: directories and files under home that survive the boot-time home reset.";
         };
 
+        runtimeDir = lib.mkOption {
+          type = lib.types.str;
+          default = "/run/user/${toString config.user.uid}";
+          readOnly = true;
+          description = "The user's XDG_RUNTIME_DIR.";
+        };
+
         account = lib.mkOption {
           type = lib.types.deferredModule;
           default = {};
@@ -9545,8 +9552,8 @@
       ...
     }: let
       userName = config.user.name;
-      user = config.users.users.${userName};
-      runtimeDir = "/run/user/${toString user.uid}";
+      home = config.user.homeDirectory;
+      inherit (config.user) runtimeDir;
       latitude = "43.65";
       longitude = "-79.38";
 
@@ -9591,7 +9598,7 @@
       '';
 
       sessionEnvironment = {
-        HOME = user.home;
+        HOME = home;
         XDG_RUNTIME_DIR = runtimeDir;
       };
     in {
@@ -11033,7 +11040,7 @@
         description = "runtime dir for ${userName}";
         command = pkgs.writeShellScript "xdg-runtime-dir" ''
           export PATH=${lib.makeBinPath [pkgs.coreutils]}
-          install -d -m 0700 -o ${userName} -g users /run/user/${toString config.users.users.${userName}.uid}
+          install -d -m 0700 -o ${userName} -g users ${config.user.runtimeDir}
         '';
         log = true;
       };
@@ -20749,15 +20756,15 @@
       ...
     }: let
       userName = config.user.name;
-      user = config.users.users.${userName};
-      runtimeDir = "/run/user/${toString user.uid}";
+      home = config.user.homeDirectory;
+      inherit (config.user) runtimeDir;
       inherit (inputPackages.oh-my-pi) omp;
       src = flakeInputs.omp-bot;
       tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
       persistentHome = "/persist/home/${userName}";
       # The links to omp's extensions the ai_omp module keeps, named the same as in its config.yml, so a bot with
       # "extensions": true loads each once and a switch shows a running bot no new extension path.
-      ext = "${user.home}/.omp/agent/ext";
+      ext = "${home}/.omp/agent/ext";
       # Prints the persist paths of every bot on the persisted roster, relative to home, for persist-user-binds.
       persistPaths = pkgs.writeShellScript "omp-bot-persist-paths" ''
         roster=${persistentHome}/.local/state/omp-bot/bots.json
@@ -20765,8 +20772,8 @@
         ${pkgs.jq}/bin/jq -r '.[] | objects | .persist | arrays | .[] | strings' "$roster" | while IFS= read -r path; do
           case $path in
             "~/"?*) printf '%s\n' "''${path#"~/"}" ;;
-            ${user.home}/?*) printf '%s\n' "''${path#${user.home}/}" ;;
-            *) echo "omp-bot-persist-paths: $path is not inside ${user.home}, so it is not persisted" >&2 ;;
+            ${home}/?*) printf '%s\n' "''${path#${home}/}" ;;
+            *) echo "omp-bot-persist-paths: $path is not inside ${home}, so it is not persisted" >&2 ;;
           esac
         done
       '';
@@ -20782,8 +20789,8 @@
         shift
         for path in "$@"; do
           case $path in
-            ${user.home}/?*) relative=''${path#${user.home}/} ;;
-            *) echo "omp-bot-persist: $path is not inside ${user.home}" >&2; exit 1 ;;
+            ${home}/?*) relative=''${path#${home}/} ;;
+            *) echo "omp-bot-persist: $path is not inside ${home}" >&2; exit 1 ;;
           esac
           case "/$relative/" in
             */../* | */./* | *//*) echo "omp-bot-persist: $path is not a plain path" >&2; exit 1 ;;
@@ -20818,7 +20825,7 @@
         '';
       start = pkgs.writeShellScript "omp-botd-start" ''
         set -euo pipefail
-        key=${user.home}/Tokens/AI_GATEWAY_API_KEY.txt
+        key=${home}/Tokens/AI_GATEWAY_API_KEY.txt
         if [ -r "$key" ]; then
           AI_GATEWAY_API_KEY=$(${pkgs.coreutils}/bin/cat "$key") || { echo "omp-botd: cannot read $key" >&2; exit 1; }
           export AI_GATEWAY_API_KEY
@@ -20827,7 +20834,7 @@
       '';
       ompd = pkgs.writeShellScript "ompd-start" ''
         set -euo pipefail
-        logs=${user.home}/.local/state/omp-bot/logs
+        logs=${home}/.local/state/omp-bot/logs
         ${pkgs.coreutils}/bin/mkdir -p "$logs" || { echo "ompd: cannot create $logs" >&2; exit 1; }
         exec ${src}/bin/ompd serve --wait >>"$logs/ompd.log" 2>&1
       '';
@@ -20863,7 +20870,7 @@
         group = "users";
         command = "${start}";
         environment = {
-          HOME = user.home;
+          HOME = home;
           XDG_RUNTIME_DIR = runtimeDir;
         };
         path = lib.mkMerge [(tools ++ [pkgs.coreutils]) (lib.mkAfter ["/run/current-system/sw" "/run/wrappers"])];
@@ -20878,7 +20885,7 @@
         group = "users";
         command = "${ompd}";
         environment = {
-          HOME = user.home;
+          HOME = home;
           XDG_RUNTIME_DIR = runtimeDir;
         };
         path = lib.mkMerge [(tools ++ [pkgs.coreutils]) (lib.mkAfter ["/run/current-system/sw" "/run/wrappers"])];
@@ -35355,7 +35362,7 @@
       user.files = files // tuturu;
 
       finit = {
-        tmpfiles.rules = ["d /run/user/${toString config.users.users.${config.user.name}.uid} 0700 ${config.user.name} users"];
+        tmpfiles.rules = ["d ${config.user.runtimeDir} 0700 ${config.user.name} users"];
 
         tasks.tern-authorized-keys = {
           description = "seed ~/.ssh/authorized_keys for tern remote (${config.user.name})";
@@ -35369,7 +35376,7 @@
           user = config.user.name;
           environment = {
             HOME = config.user.homeDirectory;
-            XDG_RUNTIME_DIR = "/run/user/${toString config.users.users.${config.user.name}.uid}";
+            XDG_RUNTIME_DIR = config.user.runtimeDir;
           };
           command = remoteServe;
           conditions = ["net/lo/up" "task/tmpfiles-setup/success"];
@@ -37224,8 +37231,8 @@
       ...
     }: let
       userName = config.user.name;
-      user = config.users.users.${userName};
-      runtimeDir = "/run/user/${toString user.uid}";
+      home = config.user.homeDirectory;
+      inherit (config.user) runtimeDir;
 
       waitRuntimeDir = pkgs.writeShellScript "wait-user-daemon-runtime" ''
         export PATH=${lib.makeBinPath [pkgs.coreutils]}
@@ -37244,7 +37251,7 @@
           description = "ssh-agent (${userName})";
           user = userName;
           environment = {
-            HOME = user.home;
+            HOME = home;
             XDG_RUNTIME_DIR = runtimeDir;
           };
           command = "${waitRuntimeDir} ${pkgs.openssh}/bin/ssh-agent -D -a ${runtimeDir}/ssh-agent";
@@ -37255,7 +37262,7 @@
           description = "udiskie automount (${userName})";
           user = userName;
           environment = {
-            HOME = user.home;
+            HOME = home;
             XDG_RUNTIME_DIR = runtimeDir;
           };
           command = "${waitRuntimeDir} ${pkgs.udiskie}/bin/udiskie --automount";
