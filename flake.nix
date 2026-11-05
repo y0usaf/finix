@@ -19323,7 +19323,7 @@
         codecs = lib.mapAttrs (_: c: {inherit (c) extensions;} // lib.optionalAttrs (c ? generator) {inherit (c) generator;}) codecs;
         lint = {
           schema = schema "finix" (lib.concatMap (host: lib.optionAttrSetToDocList host.options) (builtins.attrValues hosts));
-          enabled = ["unused-option" "never-enabled-option" "constant-option" "duplicate-definitions" "singleton-attrset" "singleton-list" "templated-bindings" "scattered-documentation" "unformatted-file" "wrapped-prose" "repeated-dynamic-path" "per-system-input-lookup"];
+          enabled = ["unused-option" "never-enabled-option" "constant-option" "duplicate-definitions" "singleton-attrset" "singleton-list" "templated-bindings" "scattered-documentation" "unformatted-file" "wrapped-prose" "repeated-dynamic-path" "repeated-let-value" "per-system-input-lookup"];
           generated = ["modules/hosts/steam-frame/beat-saber/beatmods.data.nix"];
           constant-option = {
             readers = 3;
