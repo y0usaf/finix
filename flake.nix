@@ -1848,7 +1848,8 @@
     }: let
       catalog = config.user.dev.modelCatalog;
       toJSON = lib.generators.toJSON {};
-      flash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
+      flash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
+      cheapDeepseek.compat.vercelGatewayRouting.order = ["wafer" "morph" "runware"];
     in {
       options.user.dev.modelCatalog = lib.mkOption {
         type = lib.types.attrsOf lib.types.anything;
@@ -1878,6 +1879,8 @@
             vercel-ai-gateway.modelOverrides."zai/glm-5.3-flash" = {
               compat.vercelGatewayRouting.order = ["runware" "wafer"];
             };
+            vercel-ai-gateway.modelOverrides."deepseek/deepseek-v4.1-flash-1017" = cheapDeepseek;
+            vercel-ai-gateway.modelOverrides."deepseek/deepseek-v4.1-flash" = cheapDeepseek;
 
             vercel-ai-gateway.models = [
               {
@@ -1890,9 +1893,9 @@
                 contextWindow = 1000000;
                 maxTokens = 384000;
                 cost = {
-                  input = 0.15;
-                  output = 0.6;
-                  cacheRead = 0.003;
+                  input = 0.13;
+                  output = 0.5;
+                  cacheRead = 0.0026;
                   cacheWrite = 0;
                 };
               }
