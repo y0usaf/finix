@@ -1032,7 +1032,7 @@ The pieces:
 - [compact-eval.ts](modules/dev/ai/omp/compact-eval.ts) folds eval steps to their title, drops language badges, and names untitled steps after the tool they call or their first line.
 - [work-fold.ts](modules/dev/ai/omp/work-fold.ts) builds the rows. Your messages, skill and collab prompts, `!`/`$` commands and compaction markers start a new stretch.
 - [chat-look.ts](modules/dev/ai/omp/chat-look.ts) wraps each of your messages and the model's in an `omp.chat.msg` block, advisor notes in `omp.chat.advice` and the composer area in `omp.chat.dock`, for the chat looks to style. With tool activity hidden it tells the model so, to say in words what it found and ran. omp-bot loads it and `work-fold.ts` into every bot.
-- The answer bubble, the quieter sentences, the rail under an open row and the chat looks are tweaks in the [UI Menu](modules/tools/tern/config/plugins/ui-menu/window.luau) Tern plugin, whose settings menu (Ctrl+Alt+, or the palette's **Settings menu**) also picks the look (Ozette, YoRHa or none) and turns each installed plugin on or off.
+- The answer bubble, the quieter sentences, the rail under an open row and the chat looks are tweaks in the [UI Menu](modules/tools/tern/config/plugins/ui-menu/window.luau) Tern plugin, whose settings menu (Ctrl+Alt+, or the palette's **Settings menu**) also picks the look (Ozette, YoRHa, YoRHa Pixel, Unset all or None, each a stack of snippet layers) and turns each installed plugin on or off.
 
 omp is pinned by Nix, so its startup update check is off.
 
