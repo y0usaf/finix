@@ -19491,7 +19491,8 @@
     modules_outputs = inputs: let
       system = "x86_64-linux";
       inherit (pkgs) lib;
-      inputPackages = builtins.mapAttrs (_: input: input.packages.${system} or {}) inputs;
+      packagesFor = system: builtins.mapAttrs (_: input: input.packages.${system} or {}) inputs;
+      inputPackages = packagesFor system;
 
       mkPkgs = cudaSupport:
         import (toString inputs.nixpkgs) {
@@ -19840,6 +19841,7 @@
         };
         extraSpecialArgs = {
           flakeInputs = inputs;
+          inputPackages = packagesFor "aarch64-linux";
           inherit generators;
         };
         modules = [nix_on_droid];
@@ -19926,6 +19928,7 @@
       lib,
       pkgs,
       flakeInputs,
+      inputPackages,
       generators,
       ...
     }: let
@@ -19937,7 +19940,7 @@
 
       gitName = "y0usaf";
       tokensKey = "${homeDir}/Tokens/id_rsa_${gitName}";
-      manzil = flakeInputs.manzil.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      manzil = inputPackages.manzil.default;
       tailnet = modules_tailnet;
       bashFiles = (hosts_shared {inherit lib pkgs;}).bashFiles {
         interactive = ''
@@ -39845,10 +39848,8 @@
         "modules/desktop/apps/stoat-desktop.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/stoat-desktop\"];\n  environment.systemPackages = [pkgs.stoat-desktop];\n}\n";
         "modules/desktop/session/xdg-portals.nix" = "{\n  lib,\n  ...\n}: {\n  user.files = {\n    \".local/share/xdg-desktop-portal/portals/gnome.portal\" = {\n      generator = lib.generators.toINI {};\n      value.portal = {\n        DBusName = \"org.freedesktop.impl.portal.desktop.gnome\";\n        Interfaces = \"org.freedesktop.impl.portal.ScreenCast;org.freedesktop.impl.portal.Screenshot;org.freedesktop.impl.portal.RemoteDesktop;\";\n        UseIn = \"niri;gnome;\";\n      };\n    };\n\n    \".local/share/xdg-desktop-portal/portals/gtk.portal\" = {\n      generator = lib.generators.toINI {};\n      value.portal = {\n        DBusName = \"org.freedesktop.impl.portal.desktop.gtk\";\n        Interfaces = \"org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Print;org.freedesktop.impl.portal.Notification;org.freedesktop.impl.portal.Settings;\";\n        UseIn = \"niri;gtk;\";\n      };\n    };\n  };\n}\n";
         "modules/dev/ai/amp.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/amp\"\n    \".local/share/amp\"\n  ];\n  environment.systemPackages = [pkgs.amp-cli];\n  environment.variables.AMP_REMOTE_CONTROL_TERMINAL = \"1\";\n}\n";
-        "modules/dev/ai/crest.nix" = "{\n  inputPackages,\n  ...\n}: let\n  crest = inputPackages.crest;\nin {\n  user.persist.directories = [\n    \".local/state/ouro\"\n    \".local/state/guild\"\n    \".local/state/crest-auth\"\n  ];\n  environment.systemPackages = [\n    crest.crest-cli\n    crest.crest-auth\n    crest.crest-web\n    crest.crest-agent\n    crest.crest-cell\n    crest.crest-map\n    crest.crest-mcp\n    crest.crest-mux\n    crest.muntin\n    crest.guild\n    crest.ouro\n    crest.jev-review\n  ];\n}\n";
         "modules/dev/ai/phi.nix" = "{\n  inputPackages,\n  ...\n}: {\n  user.persist.directories = [\n    \".config/phi\"\n    \".local/share/phi\"\n    \".phi\"\n  ];\n  environment.systemPackages = [inputPackages.phi.default];\n}\n";
         "modules/dev/ai/rtk.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".local/share/rtk\"];\n  environment.systemPackages = [pkgs.rtk];\n}\n";
-        "modules/dev/ai/silva.nix" = "{\n  inputPackages,\n  ...\n}: let\n  silva = inputPackages.silva;\nin {\n  user.persist.directories = [\n    \".config/silva\"\n    \".local/share/silva\"\n    \".local/state/silva\"\n  ];\n  environment.systemPackages = [\n    silva.silva-up\n    silva.tui\n    silva.kitty\n  ];\n}\n";
         "modules/dev/android-tools.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist = {\n    directories = [\n      \".local/share/android\"\n      \".local/share/android/.android\"\n    ];\n    files = [\n      \".local/share/android/adbkey\"\n      \".local/share/android/adbkey.pub\"\n    ];\n  };\n  environment.systemPackages = [pkgs.android-tools];\n}\n";
         "modules/dev/gcloud.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.directories = [\".config/gcloud\"];\n  environment.systemPackages = [pkgs.google-cloud-sdk];\n}\n";
         "modules/dev/npm.nix" = "{\n  pkgs,\n  ...\n}: {\n  user.persist.files = [\".npmrc\"];\n  environment.systemPackages = [pkgs.nodejs];\n}\n";
