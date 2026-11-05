@@ -21232,6 +21232,7 @@
         hypervisor = "qemu";
         mem = 4096;
         vcpu = 4;
+        balloon = true;
         storeOnDisk = true;
         shares =
           map (p: {
@@ -21291,18 +21292,38 @@
       fonts.packages = [pkgs.noto-fonts-cjk-sans];
       documentation.enable = false;
 
-      boot.kernelParams = ["console=ttyS0" "loglevel=4"];
+      boot.kernelParams = [
+        "console=ttyS0"
+        "loglevel=4"
+        "sysctl.vm.mem_profiling=never"
+        "kfence.sample_interval=0"
+        "initcall_blacklist=ksm_init,tpm_init,init_tis"
+        "psi=0"
+        "transparent_hugepage=never"
+      ];
+      boot.blacklistedKernelModules = ["edac_core" "intel_rapl_msr" "intel_rapl_common" "kvm_amd" "kvm_intel" "kvm" "ccp" "irqbypass" "mousedev" "input_leds" "led_class" "cfg80211" "rfkill" "psmouse" "serio_raw" "atkbd" "i8042" "mac_hid" "pcspkr" "dm_mod" "loop" "virtiofs" "fuse"];
 
       networking = {
         hostName = "omp-box";
         firewall.enable = false;
         useNetworkd = true;
+        nameservers = ["10.0.2.3"];
       };
-      services.openssh = {
-        enable = true;
-        settings.PermitRootLogin = "no";
-        settings.PasswordAuthentication = false;
-        authorizedKeysFiles = ["/etc/ssh/omp-box/authorized_keys"];
+      system.nssModules = lib.mkForce [];
+      services = {
+        resolved.enable = false;
+        timesyncd.enable = false;
+        nscd.enable = false;
+        journald.settings.Journal = {
+          Storage = "volatile";
+          RuntimeMaxUse = "16M";
+        };
+        openssh = {
+          enable = true;
+          settings.PermitRootLogin = "no";
+          settings.PasswordAuthentication = false;
+          authorizedKeysFiles = ["/etc/ssh/omp-box/authorized_keys"];
+        };
       };
 
       users.groups.users.gid = 100;
@@ -21328,6 +21349,7 @@
       };
 
       systemd = {
+        oomd.enable = false;
         network.networks."10-eth0" = {
           matchConfig.Driver = "virtio_net";
           networkConfig = {
@@ -21344,6 +21366,9 @@
         services =
           lib.mapAttrs' (name: settings: lib.nameValuePair "browser-${name}" (browser name settings)) ompBox.browsers
           // {
+            "getty@tty1".enable = false;
+            "autovt@".enable = false;
+            "serial-getty@ttyS0".enable = false;
             # The omp config, read from the seed share's current generation at boot and again by the host's
             # omp-box-seed whenever it puts a new one there; at boot it waits for omp-box-seed's first copy.
             omp-seed = {
