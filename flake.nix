@@ -17724,9 +17724,9 @@
       const vec3 GROUND = vec3(0.180, 0.153, 0.176);
       const vec3 EDGE = vec3(0.129, 0.106, 0.137);
       const vec3 PEBBLE = vec3(0.220, 0.188, 0.212);
-      const vec3 BODY = vec3(0.776, 0.671, 0.529);
-      const vec3 TIP = vec3(0.478, 0.337, 0.220);
-      const vec3 EYE = vec3(0.180, 0.125, 0.094);
+      const vec3 BODY = vec3(0.478, 0.467, 0.600);
+      const vec3 TIP = vec3(0.212, 0.200, 0.302);
+      const vec3 EYE = vec3(0.965, 0.906, 0.659);
       const vec3 CACTUS = vec3(0.165, 0.267, 0.196);
       const vec3 BANG = vec3(0.910, 0.408, 0.290);
       const vec3 PACK = vec3(0.435, 0.455, 0.502);
