@@ -22272,7 +22272,6 @@
           : "''${OMP_BOT_PERSIST:=${persist}}"
         '';
         ".config/tern/plugins/omp-bot.path".text = "${src}/tern\n";
-        ".config/tern/plugins/task-board.path".text = "${src}/task-board\n";
       };
 
       finit.services.omp-botd = {
