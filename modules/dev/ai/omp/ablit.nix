@@ -30,25 +30,19 @@
       fi
 
       server=""
-      vram() {
+      mem() {
         command -v nvidia-smi >/dev/null 2>&1 || return 0
-        [ -n "$server" ] || return 0
-        nvidia-smi --query-compute-apps=pid,used_memory --format=csv,noheader,nounits |
-          awk -F', ' -v pid="$server" '$1 == pid {print "omp-ablit: llama-server holds " $2 " MiB of VRAM"}' >&2
-      }
-      timings() {
-        [ -f "$log" ] || return 0
-        grep -Eo '(prompt eval time|eval time) =.*' "$log" | tail -n 2 | sed 's/^/omp-ablit: /' >&2 || true
+        nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader,nounits
       }
       cleanup() {
         status=$?
         trap - EXIT
-        vram
         if [ -n "$server" ]; then
           kill "$server" 2>/dev/null || true
           wait "$server" 2>/dev/null || true
         fi
-        timings
+        [ -f "$log" ] || return 0
+        grep -Eo '(prompt eval time|eval time) =.*' "$log" | tail -n 2 | sed 's/^/omp-ablit: /' >&2 || true
         exit "$status"
       }
       trap cleanup EXIT
@@ -57,6 +51,7 @@
         echo "omp-ablit: using the llama-server another session already runs on $url" >&2
       else
         echo "omp-ablit: starting ${model.name} on $url" >&2
+        before=$(mem || true)
         : >"$log"
         llama-server \
           --model "$file" \
@@ -88,7 +83,7 @@
           tail -n 20 "$log" >&2 || true
           exit 1
         fi
-        vram
+        echo "omp-ablit: VRAM used,total after the load: $(mem || echo unknown) MiB; before it: $before" >&2
       fi
 
       omp --model ablit/${model.id} --config ${model.overlay} "$@"
