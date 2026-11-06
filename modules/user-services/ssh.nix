@@ -60,7 +60,7 @@ in {
       Host phone
           RemoteCommand exec $HOME/.nix-profile/bin/bash -i
 
-      Host steam-frame frame-nixos
+      Host steam-frame frame-nixos frame-nixos.home
           HostName frame-nixos.home
           User steamos
           IdentityFile ${homeDir}/.ssh/id_rsa_frame
