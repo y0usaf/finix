@@ -2179,11 +2179,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793970860,
-        "narHash": "sha256-/GI6gEWzA1I8Vm+KC82oUy1VSJGRE1mti2mdgnQ4qwg=",
+        "lastModified": 1793971355,
+        "narHash": "sha256-5O6D+EYthfTIzv05cPI/NVoGRZkoPm8dgaSuNXTSE9Y=",
         "ref": "refs/heads/main",
-        "rev": "13f550d53f2e88a90d8fac28253a4dcfe61dd098",
-        "revCount": 12,
+        "rev": "c3c1bcdacb9cd62b83c45cb2e8f39f4e3f702af6",
+        "revCount": 13,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-script"
       },
