@@ -36925,6 +36925,12 @@
 
       stylesheet = name: nodes: pkgs.writeText name (generators.cssSource nodes);
 
+      pluginPaths = {
+        "plugins/cmus.path" = plugins_cmus_data;
+        "plugins/ekko.path" = ekko_data;
+        "plugins/nix-fail.path" = nix_fail_data;
+      };
+
       configFiles = {
         "carly/HEARTBEAT.md" = generators.sourceFile "HEARTBEAT.md" (generators.markdown.render (HEARTBEAT_data generators.markdown));
         "carly/MEMORY.md" = generators.sourceFile "MEMORY.md" (generators.markdown.render (MEMORY_data generators.markdown));
@@ -36936,9 +36942,6 @@
         "plugins/agent-tabs/window.luau" = generators.sourceFile "window.luau" agent_tabs_window_data;
         "plugins/block-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource block_menu_plugin_data);
         "plugins/block-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (block_menu_window_data generators.luau));
-        "plugins/cmus.path" = generators.sourceFile "cmus.path" (generators.pathSource plugins_cmus_data);
-        "plugins/ekko.path" = generators.sourceFile "ekko.path" (generators.pathSource ekko_data);
-        "plugins/nix-fail.path" = generators.sourceFile "nix-fail.path" (generators.pathSource nix_fail_data);
         "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tab_order_plugin_data);
         "plugins/tab-order/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (tab_order_window_data generators.luau));
         "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource gitignore_data);
@@ -37029,13 +37032,11 @@
         "plugins/ui-menu/snippets/grok-bot-you.css" = "${flakeInputs.tern-ozette}/grok-bot-you.css";
         "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
         "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource settings_data);
-      };
+      } // lib.mapAttrs (name: path: generators.sourceFile (builtins.baseNameOf name) (generators.pathSource path)) pluginPaths;
 
       devTree = "${config.user.homeDirectory}/dev";
 
-      pointsIntoDevTree = file: lib.hasPrefix "${devTree}/" (lib.fileContents file);
-
-      devLinks = lib.filterAttrs (name: file: lib.hasSuffix ".path" name && pointsIntoDevTree file) configFiles;
+      devLinks = lib.filterAttrs (_: path: lib.hasPrefix "${devTree}/" path) pluginPaths;
 
       orphans =
         if lib.hasAttr devTree config.fileSystems
