@@ -22377,7 +22377,7 @@
           "\t\t\t\top: \"write\","
           "\t\t\t\tpath: record.path,"
           "\t\t\t\tchars: typeof record.content === \"string\" ? record.content.length : 0,"
-          (add "\t\t\t\t...(details.xdev ? { xdev: details.xdev } : {}),")
+          (add "\t\t\t\t...(details.xdev ? { xdev: isRecord(details.xdev) ? { tier: details.xdev.tier, readOnlyHint: details.xdev.readOnlyHint } : {} } : {}),")
           "\t\t\t});"
           "\t\tcase \"grep\":"
           "\t\t\treturn withError({"
