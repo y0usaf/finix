@@ -9713,9 +9713,11 @@
       JSON,
       Object,
       Set,
+      process,
       array,
       arrow,
       async,
+      await,
       below,
       blank,
       braces,
@@ -9760,6 +9762,11 @@
       INVENTORY_HEADING,
       MAX_DECLARATION_CHARS,
       TS_IDENTIFIER,
+      PILOT,
+      TOOL_ARGS,
+      HELPER_TOOLS,
+      HIDDEN_TOOLS,
+      descriptionText,
       wireSchema,
       tsType,
       declarationsFor,
@@ -9788,6 +9795,13 @@
       (const INVENTORY_HEADING (str "\\n# Tool Inventory\\n"))
       (const MAX_DECLARATION_CHARS (infix [64 "*" 1024]))
       (const TS_IDENTIFIER (regex "^[A-Za-z_$][A-Za-z0-9_$]*$" ""))
+      (const PILOT (infix [(dot process "env.OMP_BOT_NAME") "===" (str "Lloyd")]))
+      (const TOOL_ARGS (call (dot process "argv.lastIndexOf") [(str "--tools")]))
+      (const HELPER_TOOLS (ternary (infix [(dot process "env.OMP_BOT_HELPER") "&&" TOOL_ARGS ">=" 0]) (new Set [(call (dot (idx (dot process "argv") (infix [TOOL_ARGS "+" 1])) "split") [(str ",")])]) undefined))
+      (const HIDDEN_TOOLS (new Set [(array [(str "debug") (str "init_experiment") (str "run_experiment") (str "log_experiment") (str "update_notes") (str "web_crawl")])]))
+      ({text}: (fn descriptionText [text] [
+        (return (ternary (infix [(typeof text) "===" (str "string")]) (tpl ["/** " (sub (call (dot (call (dot text "replace") [(regex "\\s+" "g") (str " ")]) "replaceAll") [(str "*/") (str "* /")])) " */ "]) (str "")))
+      ]))
       blank
       ({parameters}: (fn wireSchema [parameters] [
         (if' (not parameters) (return undefined))
@@ -9813,7 +9827,15 @@
         schema,
         depth,
       }: (fn tsType [schema depth] [
-        (if' (infix [(not schema) "||" depth ">" 2]) (return (str "unknown")))
+        (if' (infix [(not schema) "||" depth ">" (ternary PILOT 8 2)]) (return (str "unknown")))
+        (if' PILOT ({variants}: [
+          (if' (call (dot Object "hasOwn") [schema (str "const")]) (return (call (dot JSON "stringify") [(dot schema "const")])))
+          (if' (call (dot Array "isArray") [(dot schema "enum")]) (return (call (dot (call (dot schema "enum.map") [({value}: (arrow value (call (dot JSON "stringify") [value])))]) "join") [(str " | ")])))
+            (const variants (infix [(dot schema "anyOf") "??" (dot schema "oneOf")]))
+            (if' (call (dot Array "isArray") [variants]) (return (call (dot (call (dot variants "map") [({value}: (arrow value (call tsType [value (infix [depth "+" 1])])) )]) "join") [(str " | ")])))
+          (if' (call (dot Array "isArray") [(dot schema "type")]) (return (call (dot (call (dot schema "type.map") [({type}: (arrow type (call tsType [(obj [(spread schema) type]) (infix [depth "+" 1])])) )]) "join") [(str " | ")])))
+          (if' (infix [(dot schema "type") "===" (str "null")]) (return (str "null")))
+        ]))
         (if' (infix [(call (dot Array "isArray") [(dot schema "enum")]) "&&" (call (dot schema "enum.every") [({value}: (arrow value (infix [(typeof value) "===" (str "string")])))])]) [
           (return (call (dot (call (dot schema "enum.map") [({value}: (arrow value (call (dot JSON "stringify") [value])))]) "join") [(str " | ")]))
         ])
@@ -9839,7 +9861,7 @@
                 printedKey,
               }: (arrow [(array [key value])] [
                 (const printedKey (ternary (call (dot TS_IDENTIFIER "test") [key]) key (call (dot JSON "stringify") [key])))
-                (return (tpl [(sub printedKey) (sub (ternary (call (dot required "has") [key]) (str "") (str "?"))) ": " (sub (call tsType [value (infix [depth "+" 1])]))]))
+                (return (tpl [(sub (ternary PILOT (call descriptionText [(dot value "description")]) (str ""))) (sub printedKey) (sub (ternary (call (dot required "has") [key]) (str "") (str "?"))) ": " (sub (call tsType [value (infix [depth "+" 1])]))]))
               ]))
             ]))
             (return (tpl ["{ " (sub (call (dot entries "join") [(str "; ")])) " }"]))
@@ -9870,7 +9892,8 @@
             (const wire (call wireSchema [(dot tool "parameters")]))
             (const args (ternary (infix [(dot wire "?.type") "===" (str "object") "&&" (dot wire "properties")]) (call tsType [wire 0]) (str "unknown")))
             (const printedName (ternary (call (dot TS_IDENTIFIER "test") [(dot tool "name")]) (dot tool "name") (call (dot JSON "stringify") [(dot tool "name")])))
-            (call (dot lines "push") [(tpl ["  " (sub printedName) "(args: " (sub args) "): Promise<unknown>;"])])
+            (if' PILOT (call (dot lines "push") [(tpl ["  " (sub (call descriptionText [(dot tool "description")]))])]))
+            (call (dot lines "push") [(tpl ["  " (sub printedName) "(args: " (sub args) "): Promise<" (sub (ternary PILOT (str "{ text: string; details?: unknown }") (str "unknown"))) ">;"])])
           ]))
         (let' text (tpl ["declare const tool: {\\n" (sub (call (dot lines "join") [(str "\\n")])) "\\n};"]))
         (if' (infix [(dot text "length") ">" MAX_DECLARATION_CHARS]) [
@@ -9880,6 +9903,7 @@
       ]))
       blank
       ({declarations}: (fn codeModeSection [declarations] [
+        (if' PILOT (return (tpl ["\n# Code Mode\nCells are Python, not JavaScript. Call enabled tools with \\`r = await tool.read({\"path\": \"file\"})\\` and print \\`r[\"text\"]\\`; results are dictionaries with text and optional details, not objects with \\`.text\\`. Batch independent calls with \\`import asyncio; results = await asyncio.gather(...)\\`, or use sequential awaits. Reserve separate cells for dependent work. \\`eval\\` is the only direct tool; the TypeScript declarations below document tool arguments, not the cell language.\nGive every cell a title of 2–5 words. Finished background jobs and helpers report back themselves: do not poll with pgrep, ps or sleep loops. Use \\`await tool.read({\"path\": \"proc://JOB_ID\"})\\` only when inspecting a known job is needed. Long shell work can use \\`{\"async\": True}\\`; this is a bash argument, not an eval argument.\nThere is no built-in sh helper. Python state usually persists, but a timeout or cancellation can restart the interpreter even if its banner says it remains running. If a previously defined helper or variable is missing after a timeout, reload its setup before using it.\n\n\\`\\`\\`ts\n" (sub declarations) "\n\\`\\`\\`\n"])))
         (return (tpl ["\n# Code Mode\n\\`eval\\` is the only tool callable directly. Every other session tool is reachable inside an eval cell as \\`await tool.<name>(args)\\`:\nplan several operations into one cell, run independent calls with \\`Promise.all\\`, and read \\`result.text\\` (plus \\`result.details\\`) instead of expecting a rendered tool card.\nReserve separate cells for steps that must inspect earlier results.\nGive every cell a \\`title\\` of 2–5 words saying what it does, such as \\`Reading provider config\\`: the transcript shows titles, not code.\n\n\\`\\`\\`ts\n" (sub declarations) "\n\\`\\`\\`\n"]))
       ]))
       blank
@@ -9979,6 +10003,16 @@
         (const coded (new Set []))
         blank
         (call (dot pi "setLabel") [(str "Code mode")])
+        (if' PILOT (call (dot pi "on") [
+          (str "session_start")
+          (async (arrow [] [
+            (if' (not (dot process "env.OMP_BOT_BOXED")) [
+              (call (dot HIDDEN_TOOLS "add") [(str "box")])
+              (call (dot HIDDEN_TOOLS "add") [(str "context_check")])
+            ])
+            (await (call (dot pi "setActiveTools") [(call (dot (call (dot pi "getActiveTools") []) "filter") [({name}: (arrow name (infix [(not (call (dot HIDDEN_TOOLS "has") [name])) "&&" (below (infix [(not HELPER_TOOLS) "||" (call (dot HELPER_TOOLS "has") [name])]))])))])]))
+          ]))
+        ]))
         blank
         (call (dot pi "on") [
           (str "tool_call")
@@ -9986,11 +10020,12 @@
             event,
             ctx,
           }: (arrow [event ctx] [
+            (if' (infix [PILOT "&&" (below (infix [(call (dot HIDDEN_TOOLS "has") [(dot event "toolName")]) "||" HELPER_TOOLS "&&" (not (call (dot HELPER_TOOLS "has") [(dot event "toolName")]))]))]) (return (obj [(prop "block" true) (prop "reason" (str "This tool is disabled for this session's tool allowlist."))])))
             (if' (infix [(dot event "toolName") "===" (str "eval")]) [
               (call (dot insideEval "add") [(call sessionId [ctx])])
               (return undefined)
             ])
-            (if' (infix [(not (call (dot coded "has") [(call sessionId [ctx])])) "||" (call (dot DIRECT_TOOLS "has") [(dot event "toolName")]) "||" (call (dot insideEval "has") [(call sessionId [ctx])])]) [
+            (if' (infix [(not (call (dot coded "has") [(call sessionId [ctx])])) "||" (call (dot DIRECT_TOOLS "has") [(dot event "toolName")]) "||" (ternary PILOT (call (dot (infix [(dot event "toolCallId") "??" (str "")]) "startsWith") [(tpl ["js-" (sub (dot event "toolName")) "-"])]) (call (dot insideEval "has") [(call sessionId [ctx])]))]) [
               (return undefined)
             ])
             (return (obj (rows [
@@ -10018,7 +10053,7 @@
             index,
           }: (arrow event [
             (if' (infix [(not (call (dot Array "isArray") [(dot event "systemPrompt")])) "||" (not (call (dot (call (dot pi "getActiveTools") []) "includes") [(str "eval")]))]) (return undefined))
-            (infix [declarationText "=" (call declarationsFor [(call (dot pi "getAllTools") [])])])
+            (infix [declarationText "=" (call declarationsFor [(call (dot (call (dot pi "getAllTools") []) "filter") [({tool}: (arrow tool (infix [(not PILOT) "||" (below (infix [(call (dot (call (dot pi "getActiveTools") []) "includes") [(dot tool "name")]) "&&" (not (call (dot HIDDEN_TOOLS "has") [(dot tool "name")])) "&&" (below (infix [(not HELPER_TOOLS) "||" (call (dot HELPER_TOOLS "has") [(dot tool "name")])]))]))])))])])])
             (const systemPrompt (array [(spread (dot event "systemPrompt"))]))
             (const index (call (dot systemPrompt "findIndex") (rows [
               ({part}: (arrow part (infix [(typeof part) "===" (str "string") "&&" (call (dot part "includes") [INVENTORY_HEADING])])))
@@ -21944,6 +21979,15 @@
       home = config.user.homeDirectory;
       inherit (config.user) runtimeDir;
       inherit (inputPackages.oh-my-pi) omp;
+      pilotConfig = pkgs.writeText "lloyd-python.yml" (lib.generators.toYAML {} {
+        python.interpreter = "${pkgs.python3.withPackages (ps: [ps.pillow])}/bin/python3";
+      });
+      pilotOmp = pkgs.writeShellScriptBin "omp" ''
+        if [ "''${OMP_BOT_NAME-}" = Lloyd ]; then
+          exec ${omp}/bin/omp --config ${pilotConfig} "$@"
+        fi
+        exec ${omp}/bin/omp "$@"
+      '';
       src = flakeInputs.omp-bot;
       tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
       persistentHome = "/persist/home/${userName}";
@@ -22034,7 +22078,7 @@
 
       user.files = {
         ".config/omp-bot/env".text = ''
-          : "''${OMP_BIN:=${omp}/bin/omp}"
+          : "''${OMP_BIN:=${pilotOmp}/bin/omp}"
           : "''${OMP_BOT_EXTENSION:=${ext}/crest-auth.ts}"
           : "''${OMP_BOT_CWD_EXTENSION:=${ext}/cwd.ts}"
           : "''${OMP_BOT_SECRETS_EXTENSION:=${ext}/secrets/secrets.ts}"
