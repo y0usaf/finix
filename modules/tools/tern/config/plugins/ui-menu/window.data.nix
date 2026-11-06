@@ -124,12 +124,6 @@
       (field "layer" true)
     ]))
     (rows (table [
-      (field "id" (str "grok-avatars"))
-      (field "label" (str "Grok bot avatars"))
-      (field "parent" (str "grok"))
-      (field "requires" (table [(str "grok") (str "bot-layout")]))
-    ]))
-    (rows (table [
       (field "id" (str "scratch"))
       (field "label" (str "Unset all"))
       (field "group" (str "Look layers"))
@@ -346,18 +340,6 @@
       (field "id" (str "bot-ask"))
       (field "label" (str "question cards"))
       (field "group" (str "omp bots"))
-    ]))
-    (rows (table [
-      (field "id" (str "bot-chao"))
-      (field "label" (str "Chao avatars"))
-      (field "parent" (str "bot-tints"))
-      (field "requires" (table [(str "bot-tints")]))
-    ]))
-    (rows (table [
-      (field "id" (str "bot-chao-motion"))
-      (field "label" (str "Chao animation"))
-      (field "parent" (str "bot-chao"))
-      (field "requires" (table [(str "bot-chao")]))
     ]))
     (rows (table [
       (field "id" (str "bot-names"))

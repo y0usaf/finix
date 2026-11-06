@@ -216,13 +216,6 @@
       "plugins/ui-menu/snippets/yorha-bot-you.css" = "${flakeInputs.tern-ozette}/yorha-bot-you.css";
       "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
       "plugins/ui-menu/snippets/grok.css" = "${flakeInputs.tern-ozette}/grok.css";
-      "plugins/ui-menu/snippets/grok-avatars.css" = "${flakeInputs.tern-ozette}/grok-avatars.css";
-      "plugins/ui-menu/grok-bots/lloyd.png" = "${flakeInputs.tern-ozette}/grok-bots/lloyd.png";
-      "plugins/ui-menu/grok-bots/sol.png" = "${flakeInputs.tern-ozette}/grok-bots/sol.png";
-      "plugins/ui-menu/grok-bots/random.png" = "${flakeInputs.tern-ozette}/grok-bots/random.png";
-      "plugins/ui-menu/grok-bots/cu.png" = "${flakeInputs.tern-ozette}/grok-bots/cu.png";
-      "plugins/ui-menu/grok-bots/bao.png" = "${flakeInputs.tern-ozette}/grok-bots/bao.png";
-      "plugins/ui-menu/grok-bots/regal.png" = "${flakeInputs.tern-ozette}/grok-bots/regal.png";
       "plugins/ui-menu/snippets/grok-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-answer-bubbles.css";
       "plugins/ui-menu/snippets/grok-user-bubbles.css" = "${flakeInputs.tern-ozette}/grok-user-bubbles.css";
       "plugins/ui-menu/snippets/grok-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-bot-answer-bubbles.css";
