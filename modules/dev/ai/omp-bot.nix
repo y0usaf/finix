@@ -16,6 +16,7 @@
   pilotOmp = pkgs.writeShellScriptBin "omp" ''
     if [ "''${OMP_BOT_NAME-}" = Lloyd ]; then
       export OMP_BOT_PREWALK="''${OMP_BOT_PREWALK-1}"
+      export OMP_BOT_MAX_HELPERS="''${OMP_BOT_MAX_HELPERS-16}"
       exec ${omp}/bin/omp --config ${pilotConfig} "$@"
     fi
     exec ${omp}/bin/omp "$@"
