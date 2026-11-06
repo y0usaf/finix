@@ -4,12 +4,14 @@
 # model at 36B parameters or fewer. The imatrix IQ4_XS quant with a q8_0 KV cache of a 32768-token window asks
 # the 4090 for 18.9 GiB, which fits beside bolod and the desktop; llama.cpp's --fit spills layers to the CPU
 # when another job holds the card, so a busy GPU costs speed, not a failed start. Gemma 4 calls tools natively.
-rec {
+let
+  file = "gemma-4-31B-it-heretic.i1-IQ4_XS.gguf";
+in {
   port = 8090;
   id = "gemma-4-31b-it-heretic";
   name = "Gemma 4 31B Heretic (local)";
   dir = ".local/share/omp-ablit";
-  file = "gemma-4-31B-it-heretic.i1-IQ4_XS.gguf";
+  inherit file;
   url = "https://huggingface.co/mradermacher/gemma-4-31B-it-heretic-i1-GGUF/resolve/main/${file}";
   sha256 = "8a1306ce8f821bb7aa98817fec6d8addfea5eb438769166e2e397708aaebf8a5";
   contextWindow = 32768;
