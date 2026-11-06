@@ -20,6 +20,9 @@
     ## Rules
 
     - No code comments; no markdown besides README.md and AGENTS.md.
+    - A README says what the project is, how to run it and what it depends on,
+      in short paragraphs and lists. Touch it only when one of those changes;
+      history, pilots and implementation detail go in the commit message.
     - No tests unless asked, except end-to-end tests of the built artifact under
       `nix flake check`.
     - Ship what the user asks you to change: commit, push, bump its pin in
