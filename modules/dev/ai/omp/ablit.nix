@@ -38,7 +38,7 @@
       }
       timings() {
         [ -f "$log" ] || return 0
-        grep -E 'prompt eval time| eval time' "$log" | tail -n 2 | sed 's/^/omp-ablit: /' >&2 || true
+        grep -Eo '(prompt eval time|eval time) =.*' "$log" | tail -n 2 | sed 's/^/omp-ablit: /' >&2 || true
       }
       cleanup() {
         status=$?
