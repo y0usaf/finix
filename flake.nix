@@ -1057,7 +1057,7 @@
         lib.genAttrs ["pi-chronobreak" "pi-recap" "omp-bot"] (name: "${flakeInputs.${name}}")
         // {
           pi-donsetch = "${inputPackages.pi-donsetch.default}";
-          "code-mode.ts" = "${flakeInputs.omp-bot}/omp/code-mode.ts";
+          "code-mode.ts" = generators.sourceFile "code-mode.ts" (generators.ts.render (code_mode_data generators.ts));
           "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts));
           "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
           "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (chat_look_data generators.ts));
@@ -1205,7 +1205,7 @@
       # ${seedMount}/current/ext/NAME, a path no switch changes, so a running omp sees the same extensions list.
       seedMount = "/mnt/seed";
       extensions = {
-        "code-mode.ts" = "${flakeInputs.omp-bot}/omp/code-mode.ts";
+        "code-mode.ts" = generators.sourceFile "code-mode.ts" (generators.ts.render (code_mode_data generators.ts));
         "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts));
         "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
         optchat = generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;});
@@ -9718,6 +9718,386 @@
       user.persist.directories = [".config/Claude"];
       environment.systemPackages = [(pkgs.callPackage "${flakeInputs.claude-desktop-linux}/nix/claude-desktop.nix" {})];
     };
+    code_mode_data = {
+      Array,
+      JSON,
+      Object,
+      Set,
+      process,
+      array,
+      arrow,
+      async,
+      await,
+      below,
+      blank,
+      braces,
+      call,
+      case,
+      catch,
+      comment,
+      const,
+      continue,
+      default,
+      delete,
+      dot,
+      export,
+      fn,
+      forOf,
+      idx,
+      if',
+      ifElse,
+      infix,
+      let',
+      new,
+      not,
+      obj,
+      optCall,
+      prop,
+      regex,
+      return,
+      rows,
+      spread,
+      str,
+      sub,
+      switch,
+      ternary,
+      tpl,
+      try,
+      typeof,
+      undefined,
+      ...
+    }: ({
+      DIRECT_TOOLS,
+      CLAUDE_TOOL_PREFIX,
+      INVENTORY_HEADING,
+      MAX_DECLARATION_CHARS,
+      TS_IDENTIFIER,
+      PILOT,
+      TOOL_ARGS,
+      HELPER_TOOLS,
+      HIDDEN_TOOLS,
+      descriptionText,
+      wireSchema,
+      tsType,
+      declarationsFor,
+      codeModeSection,
+      rewriteInventory,
+      toolName,
+      isDirect,
+      withoutDemotedToolChanges,
+      filterPayload,
+      sessionId,
+      codeMode,
+    }: [
+      (comment ''
+        /**
+         * Code mode for omp, extension-only.
+         *
+         * The provider request carries `eval` alone; every other enabled tool stays in
+         * the session registry, so `await tool.<name>(args)` inside an eval cell still
+         * dispatches through the normal tool pipeline. Declarations for the demoted
+         * tools are spliced into the system prompt, replacing the rendered tool
+         * inventory.
+         */'')
+      blank
+      (const DIRECT_TOOLS (new Set [(array [(str "eval") (str "think") (str "yield") (str "goal") (str "checkpoint") (str "rewind")])]))
+      (const CLAUDE_TOOL_PREFIX (str "_"))
+      (const INVENTORY_HEADING (str "\\n# Tool Inventory\\n"))
+      (const MAX_DECLARATION_CHARS (infix [64 "*" 1024]))
+      (const TS_IDENTIFIER (regex "^[A-Za-z_$][A-Za-z0-9_$]*$" ""))
+      (const PILOT (infix [(dot process "env.OMP_BOT_NAME") "===" (str "Lloyd")]))
+      (const TOOL_ARGS (call (dot process "argv.lastIndexOf") [(str "--tools")]))
+      (const HELPER_TOOLS (ternary (infix [(dot process "env.OMP_BOT_HELPER") "&&" TOOL_ARGS ">=" 0]) (new Set [(call (dot (idx (dot process "argv") (infix [TOOL_ARGS "+" 1])) "split") [(str ",")])]) undefined))
+      (const HIDDEN_TOOLS (new Set [(array [(str "debug") (str "init_experiment") (str "run_experiment") (str "log_experiment") (str "update_notes") (str "web_crawl")])]))
+      ({text}: (fn descriptionText [text] [
+        (return (ternary (infix [(typeof text) "===" (str "string")]) (tpl ["/** " (sub (call (dot (call (dot text "replace") [(regex "\\s+" "g") (str " ")]) "replaceAll") [(str "*/") (str "* /")])) " */ "]) (str "")))
+      ]))
+      blank
+      ({parameters}: (fn wireSchema [parameters] [
+        (if' (not parameters) (return undefined))
+        (if' (infix [(typeof (dot parameters "toJsonSchema")) "===" (str "function")]) [
+          (try [
+              (return (call (dot parameters "toJsonSchema") []))
+            ] [
+              (catch null [
+                (return undefined)
+              ])
+            ])
+        ])
+        (try [
+            (return (call (dot JSON "parse") [(call (dot JSON "stringify") [parameters])]))
+          ] [
+            (catch null [
+              (return undefined)
+            ])
+          ])
+      ]))
+      blank
+      ({
+        schema,
+        depth,
+      }: (fn tsType [schema depth] [
+        (if' (infix [(not schema) "||" depth ">" (ternary PILOT 8 2)]) (return (str "unknown")))
+        (if' PILOT ({variants}: [
+          (if' (call (dot Object "hasOwn") [schema (str "const")]) (return (call (dot JSON "stringify") [(dot schema "const")])))
+          (if' (call (dot Array "isArray") [(dot schema "enum")]) (return (call (dot (call (dot schema "enum.map") [({value}: (arrow value (call (dot JSON "stringify") [value])))]) "join") [(str " | ")])))
+          (const variants (infix [(dot schema "anyOf") "??" (dot schema "oneOf")]))
+          (if' (call (dot Array "isArray") [variants]) (return (call (dot (call (dot variants "map") [({value}: (arrow value (call tsType [value (infix [depth "+" 1])])))]) "join") [(str " | ")])))
+          (if' (call (dot Array "isArray") [(dot schema "type")]) (return (call (dot (call (dot schema "type.map") [({type}: (arrow type (call tsType [(obj [(spread schema) type]) (infix [depth "+" 1])])))]) "join") [(str " | ")])))
+          (if' (infix [(dot schema "type") "===" (str "null")]) (return (str "null")))
+        ]))
+        (if' (infix [(call (dot Array "isArray") [(dot schema "enum")]) "&&" (call (dot schema "enum.every") [({value}: (arrow value (infix [(typeof value) "===" (str "string")])))])]) [
+          (return (call (dot (call (dot schema "enum.map") [({value}: (arrow value (call (dot JSON "stringify") [value])))]) "join") [(str " | ")]))
+        ])
+        (switch (dot schema "type") [
+          (case (str "string") [(return (str "string"))])
+          (case (str "number") [])
+          (case (str "integer") [(return (str "number"))])
+          (case (str "boolean") [(return (str "boolean"))])
+          (case (str "array") (braces ({item}: [
+            (const item (call tsType [(dot schema "items") (infix [depth "+" 1])]))
+            (return (ternary (call (dot (regex "[|&]" "") "test") [item]) (tpl ["(" (sub item) ")[]"]) (tpl [(sub item) "[]"])))
+          ])))
+          (case (str "object") (braces ({
+            required,
+            entries,
+          }: [
+            (if' (not (dot schema "properties")) (return (str "Record<string, unknown>")))
+            (const required (new Set [(infix [(dot schema "required") "??" (array [])])]))
+            (const entries (call (dot (call (dot Object "entries") [(dot schema "properties")]) "map") [
+              ({
+                key,
+                value,
+                printedKey,
+              }: (arrow [(array [key value])] [
+                (const printedKey (ternary (call (dot TS_IDENTIFIER "test") [key]) key (call (dot JSON "stringify") [key])))
+                (return (tpl [(sub (ternary (infix [PILOT "&&" (typeof value) "===" (str "object") "&&" value "&&" (str "description") "in" value]) (call descriptionText [(dot value "description")]) (str ""))) (sub printedKey) (sub (ternary (call (dot required "has") [key]) (str "") (str "?"))) ": " (sub (call tsType [value (infix [depth "+" 1])]))]))
+              ]))
+            ]))
+            (return (tpl ["{ " (sub (call (dot entries "join") [(str "; ")])) " }"]))
+          ])))
+          (case null [(return (str "unknown"))])
+        ])
+      ]))
+      blank
+      ({
+        tools,
+        lines,
+        text,
+      }: (fn declarationsFor [tools] [
+        blank
+        (const lines (array []))
+        ({
+          tool,
+          wire,
+          args,
+          printedName,
+        }: (forOf tool (call (dot (array [(spread tools)]) "sort") [
+            ({
+              a,
+              b,
+            }: (arrow [a b] (call (dot a "name.localeCompare") [(dot b "name")])))
+          ]) [
+            (if' (call (dot DIRECT_TOOLS "has") [(dot tool "name")]) continue)
+            (const wire (call wireSchema [(dot tool "parameters")]))
+            (const args (ternary (infix [(dot wire "?.type") "===" (str "object") "&&" (dot wire "properties")]) (call tsType [wire 0]) (str "unknown")))
+            (const printedName (ternary (call (dot TS_IDENTIFIER "test") [(dot tool "name")]) (dot tool "name") (call (dot JSON "stringify") [(dot tool "name")])))
+            (if' PILOT (call (dot lines "push") [(tpl ["  " (sub (call descriptionText [(dot tool "description")]))])]))
+            (call (dot lines "push") [(tpl ["  " (sub printedName) "(args: " (sub args) "): Promise<" (sub (ternary PILOT (str "{ text: string; details?: unknown }") (str "unknown"))) ">;"])])
+          ]))
+        (let' text (tpl ["declare const tool: {\\n" (sub (call (dot lines "join") [(str "\\n")])) "\\n};"]))
+        (if' (infix [(dot text "length") ">" MAX_DECLARATION_CHARS]) [
+          (infix [text "=" (tpl [(sub (call (dot text "slice") [0 MAX_DECLARATION_CHARS])) "\\n  // truncated\\n};"])])
+        ])
+        (return text)
+      ]))
+      blank
+      ({declarations}: (fn codeModeSection [declarations] [
+        (if' PILOT (return (tpl ["\n# Code Mode\nCells are Python, not JavaScript. Call enabled tools with \\`r = await tool.read({\"path\": \"file\"})\\` and print \\`r[\"text\"]\\`; results are dictionaries with text and optional details, not objects with \\`.text\\`. Batch independent calls with \\`import asyncio; results = await asyncio.gather(...)\\`, or use sequential awaits. Reserve separate cells for dependent work. \\`eval\\` is the only direct tool; the TypeScript declarations below document tool arguments, not the cell language.\nGive every cell a title of 2–5 words. Finished background jobs and helpers report back themselves: do not poll with pgrep, ps or sleep loops. Use \\`await tool.read({\"path\": \"proc://JOB_ID\"})\\` only when inspecting a known job is needed. Long shell work can use \\`{\"async\": True}\\`; this is a bash argument, not an eval argument.\nThere is no built-in sh helper. Python state usually persists, but a timeout or cancellation can restart the interpreter even if its banner says it remains running. If a previously defined helper or variable is missing after a timeout, reload its setup before using it.\n\n\\`\\`\\`ts\n" (sub declarations) "\n\\`\\`\\`\n"])))
+        (return (tpl ["\n# Code Mode\n\\`eval\\` is the only tool callable directly. Every other session tool is reachable inside an eval cell as \\`await tool.<name>(args)\\`:\nplan several operations into one cell, run independent calls with \\`Promise.all\\`, and read \\`result.text\\` (plus \\`result.details\\`) instead of expecting a rendered tool card.\nReserve separate cells for steps that must inspect earlier results.\nGive every cell a \\`title\\` of 2–5 words saying what it does, such as \\`Reading provider config\\`: the transcript shows titles, not code.\n\n\\`\\`\\`ts\n" (sub declarations) "\n\\`\\`\\`\n"]))
+      ]))
+      blank
+      ({
+        text,
+        declarationText,
+        start,
+        bodyStart,
+        nextHeading,
+        end,
+      }: (fn rewriteInventory [text declarationText] [
+        (const start (call (dot text "indexOf") [INVENTORY_HEADING]))
+        (const bodyStart (infix [start "+" (dot INVENTORY_HEADING "length")]))
+        (const nextHeading (call (dot text "indexOf") [(str "\\n# ") bodyStart]))
+        (const end (ternary (infix [nextHeading "<" 0]) (dot text "length") (infix [nextHeading "+" 1])))
+        (return (tpl [(sub (call (dot text "slice") [0 start])) (sub (call codeModeSection [declarationText])) (sub (call (dot text "slice") [end]))]))
+      ]))
+      blank
+      ({
+        tool,
+        name,
+      }: (fn toolName [tool] [
+        (const name (infix [(dot tool "?.function?.name") "??" (dot tool "?.name")]))
+        (return (ternary (infix [(typeof name) "===" (str "string")]) name undefined))
+      ]))
+      blank
+      ({name}: (fn isDirect [name] [
+        (return (below (infix (rows [
+          (call (dot DIRECT_TOOLS "has") [name])
+          "||"
+          (call (dot name "startsWith") [CLAUDE_TOOL_PREFIX])
+          "&&"
+          (call (dot DIRECT_TOOLS "has") [(call (dot name "slice") [(dot CLAUDE_TOOL_PREFIX "length")])])
+        ]))))
+      ]))
+      blank
+      ({
+        messages,
+        tools,
+        kept,
+      }: (fn withoutDemotedToolChanges [messages tools] [
+        (const kept (new Set [(call (dot tools "map") [toolName])]))
+        (return (call (dot messages "flatMap") [
+          ({
+            message,
+            content,
+          }: (arrow message [
+            (if' (not (call (dot Array "isArray") [(dot message "?.content")])) (return (array [message])))
+            (const content (call (dot message "content.filter") (rows [
+              ({block}: (arrow block (below (infix [(dot block "?.type") "!==" (str "tool_addition") "&&" (dot block "?.type") "!==" (str "tool_removal") "||" (call (dot kept "has") [(dot block "tool?.name")])]))))
+            ])))
+            (if' (infix [(dot content "length") "===" (dot message "content.length")]) (return (array [message])))
+            (return (ternary (infix [(dot content "length") ">" 0]) (array [(obj [(spread message) content])]) (array [])))
+          ]))
+        ]))
+      ]))
+      blank
+      ({
+        payload,
+        tools,
+        next,
+        choice,
+        forced,
+      }: (fn filterPayload [payload] [
+        (if' (infix [(not payload) "||" (typeof payload) "!==" (str "object") "||" (not (call (dot Array "isArray") [(dot payload "tools")]))]) (return payload))
+        (const tools (call (dot payload "tools.filter") [
+          ({
+            tool,
+            name,
+          }: (arrow tool [
+            (const name (call toolName [tool]))
+            (return (infix [name "!==" undefined "&&" (call isDirect [name])]))
+          ]))
+        ]))
+        (const next (obj [(spread payload) tools]))
+        (if' (call (dot Array "isArray") [(dot payload "messages")]) (infix [(dot next "messages") "=" (call withoutDemotedToolChanges [(dot payload "messages") tools])]))
+        (const choice (dot payload "tool_choice"))
+        (const forced (ternary (infix [(typeof choice) "===" (str "string")]) choice (infix [(dot choice "?.name") "??" (dot choice "?.function?.name")])))
+        (if' (infix [(typeof forced) "===" (str "string") "&&" forced "!==" (str "auto") "&&" forced "!==" (str "none") "&&" (not (call isDirect [forced]))]) [
+          (delete (dot next "tool_choice"))
+        ])
+        (return next)
+      ]))
+      blank
+      ({ctx}: (fn sessionId [ctx] [
+        (return (infix [(optCall (dot ctx "?.sessionManager?.getSessionId") []) "??" (str "default")]))
+      ]))
+      blank
+      (export (default ({
+        pi,
+        declarationText,
+        insideEval,
+        coded,
+      }: (fn codeMode [pi] [
+        (let' declarationText (str ""))
+        (const insideEval (new Set []))
+        (const coded (new Set []))
+        blank
+        (call (dot pi "setLabel") [(str "Code mode")])
+        (if' PILOT (call (dot pi "on") [
+          (str "session_start")
+          (async (arrow [] [
+            (if' (not (dot process "env.OMP_BOT_BOXED")) [
+              (call (dot HIDDEN_TOOLS "add") [(str "box")])
+              (call (dot HIDDEN_TOOLS "add") [(str "context_check")])
+            ])
+            (await (call (dot pi "setActiveTools") [(call (dot (call (dot pi "getActiveTools") []) "filter") [({name}: (arrow name (infix [(not (call (dot HIDDEN_TOOLS "has") [name])) "&&" (below (infix [(not HELPER_TOOLS) "||" (call (dot HELPER_TOOLS "has") [name])]))])))])]))
+          ]))
+        ]))
+        blank
+        (call (dot pi "on") [
+          (str "tool_call")
+          (async ({
+            event,
+            ctx,
+          }: (arrow [event ctx] [
+            (if' (infix [PILOT "&&" (below (infix [(call (dot HIDDEN_TOOLS "has") [(dot event "toolName")]) "||" HELPER_TOOLS "&&" (not (call (dot HELPER_TOOLS "has") [(dot event "toolName")]))]))]) (return (obj [(prop "block" true) (prop "reason" (str "This tool is disabled for this session's tool allowlist."))])))
+            (if' (infix [(dot event "toolName") "===" (str "eval")]) [
+              (call (dot insideEval "add") [(call sessionId [ctx])])
+              (return undefined)
+            ])
+            (if' (infix [(not (call (dot coded "has") [(call sessionId [ctx])])) "||" (call (dot DIRECT_TOOLS "has") [(dot event "toolName")]) "||" (ternary PILOT (call (dot (infix [(dot event "toolCallId") "??" (str "")]) "startsWith") [(tpl ["js-" (sub (dot event "toolName")) "-"])]) (call (dot insideEval "has") [(call sessionId [ctx])]))]) [
+              (return undefined)
+            ])
+            (return (obj (rows [
+              (prop "block" true)
+              (prop "reason" (tpl ["Direct " (sub (dot event "toolName")) " calls are disabled; call tool." (sub (dot event "toolName")) "(args) from eval instead."]))
+            ])))
+          ])))
+        ])
+        blank
+        (call (dot pi "on") [
+          (str "tool_result")
+          (async ({
+            event,
+            ctx,
+          }: (arrow [event ctx] [
+            (if' (infix [(dot event "toolName") "===" (str "eval")]) (call (dot insideEval "delete") [(call sessionId [ctx])]))
+          ])))
+        ])
+        blank
+        (call (dot pi "on") [
+          (str "before_agent_start")
+          (async ({
+            event,
+            systemPrompt,
+            index,
+          }: (arrow event [
+            (if' (infix [(not (call (dot Array "isArray") [(dot event "systemPrompt")])) "||" (not (call (dot (call (dot pi "getActiveTools") []) "includes") [(str "eval")]))]) (return undefined))
+            (infix [declarationText "=" (call declarationsFor [(call (dot (call (dot pi "getAllTools") []) "filter") [({tool}: (arrow tool (infix [(not PILOT) "||" (below (infix [(call (dot (call (dot pi "getActiveTools") []) "includes") [(dot tool "name")]) "&&" (not (call (dot HIDDEN_TOOLS "has") [(dot tool "name")])) "&&" (below (infix [(not HELPER_TOOLS) "||" (call (dot HELPER_TOOLS "has") [(dot tool "name")])]))]))])))])])])
+            (const systemPrompt (array [(spread (dot event "systemPrompt"))]))
+            (const index (call (dot systemPrompt "findIndex") (rows [
+              ({part}: (arrow part (infix [(typeof part) "===" (str "string") "&&" (call (dot part "includes") [INVENTORY_HEADING])])))
+            ])))
+            (ifElse (infix [index ">=" 0]) [
+                (infix [(idx systemPrompt index) "=" (call rewriteInventory [(idx systemPrompt index) declarationText])])
+              ] (if' (infix [(dot systemPrompt "length") ">" 0]) ({last}: [
+                (const last (infix [(dot systemPrompt "length") "-" 1]))
+                (infix [(idx systemPrompt last) "=" (tpl [(sub (idx systemPrompt last)) "\\n" (sub (call codeModeSection [declarationText]))])])
+              ])))
+            (return (obj [systemPrompt]))
+          ])))
+        ])
+        blank
+        (call (dot pi "on") [
+          (str "before_provider_request")
+          (async ({
+            event,
+            ctx,
+            tools,
+            evalName,
+          }: (arrow [event ctx] [
+            (const tools (ternary (call (dot Array "isArray") [(dot event "payload?.tools")]) (dot event "payload.tools") (array [])))
+            (const evalName (tpl [(sub CLAUDE_TOOL_PREFIX) "eval"]))
+            (if' (not (call (dot tools "some") [({tool}: (arrow tool (infix [(call toolName [tool]) "===" (str "eval") "||" (call toolName [tool]) "===" evalName])))])) [
+              (call (dot coded "delete") [(call sessionId [ctx])])
+              (return (dot event "payload"))
+            ])
+            (call (dot coded "add") [(call sessionId [ctx])])
+            (return (call filterPayload [(dot event "payload")]))
+          ])))
+        ])
+      ]))))
+    ]);
     codex = {
       config,
       lib,
@@ -19833,6 +20213,7 @@
         ts = {
           "omp/box-commands.ts" = box_commands_data;
           "omp/chat-look.ts" = chat_look_data;
+          "omp/code-mode.ts" = code_mode_data;
           "omp/compact-eval.ts" = compact_eval_data;
           "omp/crest-auth.ts" = omp_crest_auth_data;
           "omp/cwd.ts" = cwd_data;
@@ -24894,24 +25275,17 @@
                   [window-rule (kw "launcher")]
                   [
                     (kw "match")
-                    ({
-                      window,
-                      snapshot,
-                    }:
+                    ({window, snapshot}:
                       rows [
                         [lambda [window snapshot]]
                         [[declare [ignore snapshot]]]
-                        [
-                          [
-                            or'
-                            [equal [getf window (kw "app-id")] [getf (constant policy-launcher) (kw "app-id")]]
-                            [
-                              and
-                              [equal [getf window (kw "app-id")] [getf (constant policy-terminal) (kw "app-id")]]
-                              [equal [getf window (kw "title")] (str "launcher")]
-                            ]
+                        [[or'
+                          [equal [getf window (kw "app-id")] [getf (constant policy-launcher) (kw "app-id")]]
+                          [and
+                            [equal [getf window (kw "app-id")] [getf (constant policy-terminal) (kw "app-id")]]
+                            [equal [getf window (kw "title")] (str "launcher")]
                           ]
-                        ]
+                        ]]
                       ])
                   ]
                   [(kw "properties") (quote [[(kw "float") dot t]]) (kw "reads") (quote [(kw "workareas")])]
@@ -25275,17 +25649,24 @@
       for,
       hex,
       idx,
-                    ({window, snapshot}:
+      if',
+      ifElse,
+      ifExpr,
+      infix,
       ipairs,
       len,
       local,
-                        [[or'
-                          [equal [getf window (kw "app-id")] [getf (constant policy-launcher) (kw "app-id")]]
-                          [and
-                            [equal [getf window (kw "app-id")] [getf (constant policy-terminal) (kw "app-id")]]
-                            [equal [getf window (kw "title")] (str "launcher")]
+      localFunction,
+      math,
+      nil,
+      not,
+      number,
+      opt,
+      os,
+      pair,
+      paren,
       pcall,
-                        ]]
+      return,
       rows,
       str,
       string,
@@ -36557,110 +36938,108 @@
         "plugins/nix-fail.path" = nix_fail_data;
       };
 
-      configFiles =
-        {
-          "carly/HEARTBEAT.md" = generators.sourceFile "HEARTBEAT.md" (generators.markdown.render (HEARTBEAT_data generators.markdown));
-          "carly/MEMORY.md" = generators.sourceFile "MEMORY.md" (generators.markdown.render (MEMORY_data generators.markdown));
-          "carly/SOUL.md" = generators.sourceFile "SOUL.md" (generators.markdown.render (SOUL_data generators.markdown));
-          "carly/USER.md" = generators.sourceFile "USER.md" (generators.markdown.render (USER_data generators.markdown));
-          "carly/memory/2026-10-29.md" = generators.sourceFile "2026-10-29.md" (generators.markdown.render (memory_2026_10_29_data generators.markdown));
-          "carly/memory/2026-10-30.md" = generators.sourceFile "2026-10-30.md" (generators.markdown.render (memory_2026_10_30_data generators.markdown));
-          "plugins/agent-tabs/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource agent_tabs_plugin_data);
-          "plugins/agent-tabs/window.luau" = generators.sourceFile "window.luau" agent_tabs_window_data;
-          "plugins/block-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource block_menu_plugin_data);
-          "plugins/block-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (block_menu_window_data generators.luau));
-          "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tab_order_plugin_data);
-          "plugins/tab-order/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (tab_order_window_data generators.luau));
-          "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource gitignore_data);
-          "plugins/tuturu/README.md" = generators.sourceFile "README.md" (generators.markdown.render (README_data generators.markdown));
-          "plugins/tuturu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tuturu_plugin_data);
-          "plugins/tuturu/scripts/play.vbs" = generators.sourceFile "play.vbs" (generators.vbs.render (play_data generators.vbs));
-          "plugins/tuturu/sounds.toml" = generators.sourceFile "sounds.toml" (generators.tomlSource tuturu_sounds_data);
-          "plugins/tuturu/src/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (src_window_data generators.luau));
-          "plugins/ui-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource ui_menu_plugin_data);
-          "plugins/ui-menu/rail.luau" = generators.sourceFile "rail.luau" (generators.luau.render (rail_data generators.luau));
-          "plugins/ui-menu/snippets/rail.css" = "${flakeInputs.tern-ozette}/rail.css";
-          "plugins/ui-menu/snippets/settings.css" = "${flakeInputs.tern-ozette}/settings.css";
-          "plugins/ui-menu/snippets/account.css" = stylesheet "account.css" account_data;
-          "plugins/ui-menu/snippets/answer-bubbles.css" = stylesheet "answer-bubbles.css" answer_bubbles_data;
-          "plugins/ui-menu/snippets/answer-frost.css" = stylesheet "answer-frost.css" answer_frost_data;
-          "plugins/ui-menu/snippets/attention.css" = stylesheet "attention.css" attention_data;
-          "plugins/ui-menu/snippets/bot-answer-bubbles.css" = stylesheet "bot-answer-bubbles.css" bot_answer_bubbles_data;
-          "plugins/ui-menu/snippets/bot-answer-frost.css" = stylesheet "bot-answer-frost.css" bot_answer_frost_data;
-          "plugins/ui-menu/snippets/bot-ask.css" = stylesheet "bot-ask.css" bot_ask_data;
-          "plugins/ui-menu/snippets/bot-cards.css" = stylesheet "bot-cards.css" bot_cards_data;
-          "plugins/ui-menu/snippets/bot-chao-motion.css" = stylesheet "bot-chao-motion.css" bot_chao_motion_data;
-          "plugins/ui-menu/snippets/bot-chao.css" = stylesheet "bot-chao.css" bot_chao_data;
-          "plugins/ui-menu/snippets/bot-chat-still.css" = stylesheet "bot-chat-still.css" bot_chat_still_data;
-          "plugins/ui-menu/snippets/bot-dock.css" = stylesheet "bot-dock.css" bot_dock_data;
-          "plugins/ui-menu/snippets/bot-events.css" = stylesheet "bot-events.css" bot_events_data;
-          "plugins/ui-menu/snippets/bot-jobs.css" = stylesheet "bot-jobs.css" bot_jobs_data;
-          "plugins/ui-menu/snippets/bot-layout.css" = stylesheet "bot-layout.css" bot_layout_data;
-          "plugins/ui-menu/snippets/bot-names.css" = stylesheet "bot-names.css" bot_names_data;
-          "plugins/ui-menu/snippets/bot-rail.css" = stylesheet "bot-rail.css" bot_rail_data;
-          "plugins/ui-menu/snippets/bot-spacing.css" = stylesheet "bot-spacing.css" bot_spacing_data;
-          "plugins/ui-menu/snippets/bot-stop.css" = stylesheet "bot-stop.css" bot_stop_data;
-          "plugins/ui-menu/snippets/bot-text.css" = stylesheet "bot-text.css" bot_text_data;
-          "plugins/ui-menu/snippets/bot-time.css" = stylesheet "bot-time.css" bot_time_data;
-          "plugins/ui-menu/snippets/bot-tints.css" = stylesheet "bot-tints.css" bot_tints_data;
-          "plugins/ui-menu/snippets/bot-turn-stats.css" = stylesheet "bot-turn-stats.css" bot_turn_stats_data;
-          "plugins/ui-menu/snippets/bot-work-rail.css" = stylesheet "bot-work-rail.css" bot_work_rail_data;
-          "plugins/ui-menu/snippets/bot-yorha-labels.css" = stylesheet "bot-yorha-labels.css" bot_yorha_labels_data;
-          "plugins/ui-menu/snippets/bot-you-frost.css" = stylesheet "bot-you-frost.css" bot_you_frost_data;
-          "plugins/ui-menu/snippets/bot-you.css" = stylesheet "bot-you.css" bot_you_data;
-          "plugins/ui-menu/snippets/bottom.css" = stylesheet "bottom.css" bottom_data;
-          "plugins/ui-menu/snippets/buttons.css" = stylesheet "buttons.css" buttons_data;
-          "plugins/ui-menu/snippets/centering.css" = stylesheet "centering.css" centering_data;
-          "plugins/ui-menu/snippets/chat-still.css" = stylesheet "chat-still.css" chat_still_data;
-          "plugins/ui-menu/snippets/dividers.css" = stylesheet "dividers.css" dividers_data;
-          "plugins/ui-menu/snippets/files.css" = stylesheet "files.css" files_data;
-          "plugins/ui-menu/snippets/frost.css" = stylesheet "frost.css" frost_data;
-          "plugins/ui-menu/snippets/grips.css" = stylesheet "grips.css" grips_data;
-          "plugins/ui-menu/snippets/inbox.css" = stylesheet "inbox.css" inbox_data;
-          "plugins/ui-menu/snippets/mini.css" = "${flakeInputs.tern-ozette}/mini.css";
-          "plugins/ui-menu/snippets/ozette-answer-bubbles.css" = "${flakeInputs.tern-ozette}/ozette-answer-bubbles.css";
-          "plugins/ui-menu/snippets/ozette-bot-you.css" = "${flakeInputs.tern-ozette}/ozette-bot-you.css";
-          "plugins/ui-menu/snippets/ozette-cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
-          "plugins/ui-menu/snippets/ozette-motion.css" = "${flakeInputs.tern-ozette}/motion.css";
-          "plugins/ui-menu/snippets/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
-          "plugins/ui-menu/snippets/pane-borders.css" = stylesheet "pane-borders.css" pane_borders_data;
-          "plugins/ui-menu/snippets/rail_ages.css" = stylesheet "rail_ages.css" (rail_ages_data lib);
-          "plugins/ui-menu/snippets/rail_card.css" = stylesheet "rail_card.css" rail_card_data;
-          "plugins/ui-menu/snippets/rail_compact.css" = stylesheet "rail_compact.css" rail_compact_data;
-          "plugins/ui-menu/snippets/rail_header.css" = stylesheet "rail_header.css" rail_header_data;
-          "plugins/ui-menu/snippets/rail_sections.css" = stylesheet "rail_sections.css" rail_sections_data;
-          "plugins/ui-menu/snippets/rail_status.css" = stylesheet "rail_status.css" rail_status_data;
-          "plugins/ui-menu/snippets/roomy.css" = stylesheet "roomy.css" roomy_data;
-          "plugins/ui-menu/snippets/row-keys.css" = stylesheet "row-keys.css" row_keys_data;
-          "plugins/ui-menu/snippets/scratch.css" = "${flakeInputs.tern-scratch}/min.css";
-          "plugins/ui-menu/snippets/single.css" = stylesheet "single.css" single_data;
-          "plugins/ui-menu/snippets/tabs.css" = stylesheet "tabs.css" tabs_data;
-          "plugins/ui-menu/snippets/transparent.css" = stylesheet "transparent.css" transparent_data;
-          "plugins/ui-menu/snippets/turn-stats.css" = stylesheet "turn-stats.css" turn_stats_data;
-          "plugins/ui-menu/snippets/user-frost.css" = stylesheet "user-frost.css" user_frost_data;
-          "plugins/ui-menu/snippets/composer-frost.css" = stylesheet "composer-frost.css" composer_frost_data;
-          "plugins/ui-menu/snippets/width.css" = stylesheet "width.css" width_data;
-          "plugins/ui-menu/snippets/work-rail.css" = stylesheet "work-rail.css" work_rail_data;
-          "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
-          "plugins/ui-menu/snippets/yorha-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-bot-answer-bubbles.css";
-          "plugins/ui-menu/snippets/yorha-bot-you.css" = "${flakeInputs.tern-ozette}/yorha-bot-you.css";
-          "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
-          "plugins/ui-menu/snippets/grok.css" = "${flakeInputs.tern-ozette}/grok.css";
-          "plugins/ui-menu/snippets/grok-avatars.css" = "${flakeInputs.tern-ozette}/grok-avatars.css";
-          "plugins/ui-menu/grok-bots/lloyd.png" = "${flakeInputs.tern-ozette}/grok-bots/lloyd.png";
-          "plugins/ui-menu/grok-bots/sol.png" = "${flakeInputs.tern-ozette}/grok-bots/sol.png";
-          "plugins/ui-menu/grok-bots/random.png" = "${flakeInputs.tern-ozette}/grok-bots/random.png";
-          "plugins/ui-menu/grok-bots/cu.png" = "${flakeInputs.tern-ozette}/grok-bots/cu.png";
-          "plugins/ui-menu/grok-bots/bao.png" = "${flakeInputs.tern-ozette}/grok-bots/bao.png";
-          "plugins/ui-menu/grok-bots/regal.png" = "${flakeInputs.tern-ozette}/grok-bots/regal.png";
-          "plugins/ui-menu/snippets/grok-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-answer-bubbles.css";
-          "plugins/ui-menu/snippets/grok-user-bubbles.css" = "${flakeInputs.tern-ozette}/grok-user-bubbles.css";
-          "plugins/ui-menu/snippets/grok-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-bot-answer-bubbles.css";
-          "plugins/ui-menu/snippets/grok-bot-you.css" = "${flakeInputs.tern-ozette}/grok-bot-you.css";
-          "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
-          "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource settings_data);
-        }
-        // lib.mapAttrs (name: path: generators.sourceFile (builtins.baseNameOf name) (generators.pathSource path)) pluginPaths;
+      configFiles = {
+        "carly/HEARTBEAT.md" = generators.sourceFile "HEARTBEAT.md" (generators.markdown.render (HEARTBEAT_data generators.markdown));
+        "carly/MEMORY.md" = generators.sourceFile "MEMORY.md" (generators.markdown.render (MEMORY_data generators.markdown));
+        "carly/SOUL.md" = generators.sourceFile "SOUL.md" (generators.markdown.render (SOUL_data generators.markdown));
+        "carly/USER.md" = generators.sourceFile "USER.md" (generators.markdown.render (USER_data generators.markdown));
+        "carly/memory/2026-10-29.md" = generators.sourceFile "2026-10-29.md" (generators.markdown.render (memory_2026_10_29_data generators.markdown));
+        "carly/memory/2026-10-30.md" = generators.sourceFile "2026-10-30.md" (generators.markdown.render (memory_2026_10_30_data generators.markdown));
+        "plugins/agent-tabs/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource agent_tabs_plugin_data);
+        "plugins/agent-tabs/window.luau" = generators.sourceFile "window.luau" agent_tabs_window_data;
+        "plugins/block-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource block_menu_plugin_data);
+        "plugins/block-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (block_menu_window_data generators.luau));
+        "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tab_order_plugin_data);
+        "plugins/tab-order/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (tab_order_window_data generators.luau));
+        "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource gitignore_data);
+        "plugins/tuturu/README.md" = generators.sourceFile "README.md" (generators.markdown.render (README_data generators.markdown));
+        "plugins/tuturu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tuturu_plugin_data);
+        "plugins/tuturu/scripts/play.vbs" = generators.sourceFile "play.vbs" (generators.vbs.render (play_data generators.vbs));
+        "plugins/tuturu/sounds.toml" = generators.sourceFile "sounds.toml" (generators.tomlSource tuturu_sounds_data);
+        "plugins/tuturu/src/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (src_window_data generators.luau));
+        "plugins/ui-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource ui_menu_plugin_data);
+        "plugins/ui-menu/rail.luau" = generators.sourceFile "rail.luau" (generators.luau.render (rail_data generators.luau));
+        "plugins/ui-menu/snippets/rail.css" = "${flakeInputs.tern-ozette}/rail.css";
+        "plugins/ui-menu/snippets/settings.css" = "${flakeInputs.tern-ozette}/settings.css";
+        "plugins/ui-menu/snippets/account.css" = stylesheet "account.css" account_data;
+        "plugins/ui-menu/snippets/answer-bubbles.css" = stylesheet "answer-bubbles.css" answer_bubbles_data;
+        "plugins/ui-menu/snippets/answer-frost.css" = stylesheet "answer-frost.css" answer_frost_data;
+        "plugins/ui-menu/snippets/attention.css" = stylesheet "attention.css" attention_data;
+        "plugins/ui-menu/snippets/bot-answer-bubbles.css" = stylesheet "bot-answer-bubbles.css" bot_answer_bubbles_data;
+        "plugins/ui-menu/snippets/bot-answer-frost.css" = stylesheet "bot-answer-frost.css" bot_answer_frost_data;
+        "plugins/ui-menu/snippets/bot-ask.css" = stylesheet "bot-ask.css" bot_ask_data;
+        "plugins/ui-menu/snippets/bot-cards.css" = stylesheet "bot-cards.css" bot_cards_data;
+        "plugins/ui-menu/snippets/bot-chao-motion.css" = stylesheet "bot-chao-motion.css" bot_chao_motion_data;
+        "plugins/ui-menu/snippets/bot-chao.css" = stylesheet "bot-chao.css" bot_chao_data;
+        "plugins/ui-menu/snippets/bot-chat-still.css" = stylesheet "bot-chat-still.css" bot_chat_still_data;
+        "plugins/ui-menu/snippets/bot-dock.css" = stylesheet "bot-dock.css" bot_dock_data;
+        "plugins/ui-menu/snippets/bot-events.css" = stylesheet "bot-events.css" bot_events_data;
+        "plugins/ui-menu/snippets/bot-jobs.css" = stylesheet "bot-jobs.css" bot_jobs_data;
+        "plugins/ui-menu/snippets/bot-layout.css" = stylesheet "bot-layout.css" bot_layout_data;
+        "plugins/ui-menu/snippets/bot-names.css" = stylesheet "bot-names.css" bot_names_data;
+        "plugins/ui-menu/snippets/bot-rail.css" = stylesheet "bot-rail.css" bot_rail_data;
+        "plugins/ui-menu/snippets/bot-spacing.css" = stylesheet "bot-spacing.css" bot_spacing_data;
+        "plugins/ui-menu/snippets/bot-stop.css" = stylesheet "bot-stop.css" bot_stop_data;
+        "plugins/ui-menu/snippets/bot-text.css" = stylesheet "bot-text.css" bot_text_data;
+        "plugins/ui-menu/snippets/bot-time.css" = stylesheet "bot-time.css" bot_time_data;
+        "plugins/ui-menu/snippets/bot-tints.css" = stylesheet "bot-tints.css" bot_tints_data;
+        "plugins/ui-menu/snippets/bot-turn-stats.css" = stylesheet "bot-turn-stats.css" bot_turn_stats_data;
+        "plugins/ui-menu/snippets/bot-work-rail.css" = stylesheet "bot-work-rail.css" bot_work_rail_data;
+        "plugins/ui-menu/snippets/bot-yorha-labels.css" = stylesheet "bot-yorha-labels.css" bot_yorha_labels_data;
+        "plugins/ui-menu/snippets/bot-you-frost.css" = stylesheet "bot-you-frost.css" bot_you_frost_data;
+        "plugins/ui-menu/snippets/bot-you.css" = stylesheet "bot-you.css" bot_you_data;
+        "plugins/ui-menu/snippets/bottom.css" = stylesheet "bottom.css" bottom_data;
+        "plugins/ui-menu/snippets/buttons.css" = stylesheet "buttons.css" buttons_data;
+        "plugins/ui-menu/snippets/centering.css" = stylesheet "centering.css" centering_data;
+        "plugins/ui-menu/snippets/chat-still.css" = stylesheet "chat-still.css" chat_still_data;
+        "plugins/ui-menu/snippets/dividers.css" = stylesheet "dividers.css" dividers_data;
+        "plugins/ui-menu/snippets/files.css" = stylesheet "files.css" files_data;
+        "plugins/ui-menu/snippets/frost.css" = stylesheet "frost.css" frost_data;
+        "plugins/ui-menu/snippets/grips.css" = stylesheet "grips.css" grips_data;
+        "plugins/ui-menu/snippets/inbox.css" = stylesheet "inbox.css" inbox_data;
+        "plugins/ui-menu/snippets/mini.css" = "${flakeInputs.tern-ozette}/mini.css";
+        "plugins/ui-menu/snippets/ozette-answer-bubbles.css" = "${flakeInputs.tern-ozette}/ozette-answer-bubbles.css";
+        "plugins/ui-menu/snippets/ozette-bot-you.css" = "${flakeInputs.tern-ozette}/ozette-bot-you.css";
+        "plugins/ui-menu/snippets/ozette-cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
+        "plugins/ui-menu/snippets/ozette-motion.css" = "${flakeInputs.tern-ozette}/motion.css";
+        "plugins/ui-menu/snippets/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
+        "plugins/ui-menu/snippets/pane-borders.css" = stylesheet "pane-borders.css" pane_borders_data;
+        "plugins/ui-menu/snippets/rail_ages.css" = stylesheet "rail_ages.css" (rail_ages_data lib);
+        "plugins/ui-menu/snippets/rail_card.css" = stylesheet "rail_card.css" rail_card_data;
+        "plugins/ui-menu/snippets/rail_compact.css" = stylesheet "rail_compact.css" rail_compact_data;
+        "plugins/ui-menu/snippets/rail_header.css" = stylesheet "rail_header.css" rail_header_data;
+        "plugins/ui-menu/snippets/rail_sections.css" = stylesheet "rail_sections.css" rail_sections_data;
+        "plugins/ui-menu/snippets/rail_status.css" = stylesheet "rail_status.css" rail_status_data;
+        "plugins/ui-menu/snippets/roomy.css" = stylesheet "roomy.css" roomy_data;
+        "plugins/ui-menu/snippets/row-keys.css" = stylesheet "row-keys.css" row_keys_data;
+        "plugins/ui-menu/snippets/scratch.css" = "${flakeInputs.tern-scratch}/min.css";
+        "plugins/ui-menu/snippets/single.css" = stylesheet "single.css" single_data;
+        "plugins/ui-menu/snippets/tabs.css" = stylesheet "tabs.css" tabs_data;
+        "plugins/ui-menu/snippets/transparent.css" = stylesheet "transparent.css" transparent_data;
+        "plugins/ui-menu/snippets/turn-stats.css" = stylesheet "turn-stats.css" turn_stats_data;
+        "plugins/ui-menu/snippets/user-frost.css" = stylesheet "user-frost.css" user_frost_data;
+        "plugins/ui-menu/snippets/composer-frost.css" = stylesheet "composer-frost.css" composer_frost_data;
+        "plugins/ui-menu/snippets/width.css" = stylesheet "width.css" width_data;
+        "plugins/ui-menu/snippets/work-rail.css" = stylesheet "work-rail.css" work_rail_data;
+        "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
+        "plugins/ui-menu/snippets/yorha-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-bot-answer-bubbles.css";
+        "plugins/ui-menu/snippets/yorha-bot-you.css" = "${flakeInputs.tern-ozette}/yorha-bot-you.css";
+        "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
+        "plugins/ui-menu/snippets/grok.css" = "${flakeInputs.tern-ozette}/grok.css";
+        "plugins/ui-menu/snippets/grok-avatars.css" = "${flakeInputs.tern-ozette}/grok-avatars.css";
+        "plugins/ui-menu/grok-bots/lloyd.png" = "${flakeInputs.tern-ozette}/grok-bots/lloyd.png";
+        "plugins/ui-menu/grok-bots/sol.png" = "${flakeInputs.tern-ozette}/grok-bots/sol.png";
+        "plugins/ui-menu/grok-bots/random.png" = "${flakeInputs.tern-ozette}/grok-bots/random.png";
+        "plugins/ui-menu/grok-bots/cu.png" = "${flakeInputs.tern-ozette}/grok-bots/cu.png";
+        "plugins/ui-menu/grok-bots/bao.png" = "${flakeInputs.tern-ozette}/grok-bots/bao.png";
+        "plugins/ui-menu/grok-bots/regal.png" = "${flakeInputs.tern-ozette}/grok-bots/regal.png";
+        "plugins/ui-menu/snippets/grok-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-answer-bubbles.css";
+        "plugins/ui-menu/snippets/grok-user-bubbles.css" = "${flakeInputs.tern-ozette}/grok-user-bubbles.css";
+        "plugins/ui-menu/snippets/grok-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-bot-answer-bubbles.css";
+        "plugins/ui-menu/snippets/grok-bot-you.css" = "${flakeInputs.tern-ozette}/grok-bot-you.css";
+        "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
+        "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource settings_data);
+      } // lib.mapAttrs (name: path: generators.sourceFile (builtins.baseNameOf name) (generators.pathSource path)) pluginPaths;
 
       devTree = "${config.user.homeDirectory}/dev";
 
@@ -36938,108 +37317,110 @@
           (if' (infix [(call bytes [text]) "<=" NODE]) (call (dot this "set") [(obj [(prop "l" 0) i]) text]))
           (call (dot this "view.push") [(obj [(prop "l" 0) i])])
           (call (dot this "small.push") [(obj [(prop "l" 0) i])])
-      configFiles = {
-        "carly/HEARTBEAT.md" = generators.sourceFile "HEARTBEAT.md" (generators.markdown.render (HEARTBEAT_data generators.markdown));
-        "carly/MEMORY.md" = generators.sourceFile "MEMORY.md" (generators.markdown.render (MEMORY_data generators.markdown));
-        "carly/SOUL.md" = generators.sourceFile "SOUL.md" (generators.markdown.render (SOUL_data generators.markdown));
-        "carly/USER.md" = generators.sourceFile "USER.md" (generators.markdown.render (USER_data generators.markdown));
-        "carly/memory/2026-10-29.md" = generators.sourceFile "2026-10-29.md" (generators.markdown.render (memory_2026_10_29_data generators.markdown));
-        "carly/memory/2026-10-30.md" = generators.sourceFile "2026-10-30.md" (generators.markdown.render (memory_2026_10_30_data generators.markdown));
-        "plugins/agent-tabs/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource agent_tabs_plugin_data);
-        "plugins/agent-tabs/window.luau" = generators.sourceFile "window.luau" agent_tabs_window_data;
-        "plugins/block-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource block_menu_plugin_data);
-        "plugins/block-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (block_menu_window_data generators.luau));
-        "plugins/tab-order/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tab_order_plugin_data);
-        "plugins/tab-order/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (tab_order_window_data generators.luau));
-        "plugins/tuturu/.gitignore" = generators.sourceFile ".gitignore" (generators.gitignoreSource gitignore_data);
-        "plugins/tuturu/README.md" = generators.sourceFile "README.md" (generators.markdown.render (README_data generators.markdown));
-        "plugins/tuturu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource tuturu_plugin_data);
-        "plugins/tuturu/scripts/play.vbs" = generators.sourceFile "play.vbs" (generators.vbs.render (play_data generators.vbs));
-        "plugins/tuturu/sounds.toml" = generators.sourceFile "sounds.toml" (generators.tomlSource tuturu_sounds_data);
-        "plugins/tuturu/src/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (src_window_data generators.luau));
-        "plugins/ui-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource ui_menu_plugin_data);
-        "plugins/ui-menu/rail.luau" = generators.sourceFile "rail.luau" (generators.luau.render (rail_data generators.luau));
-        "plugins/ui-menu/snippets/rail.css" = "${flakeInputs.tern-ozette}/rail.css";
-        "plugins/ui-menu/snippets/settings.css" = "${flakeInputs.tern-ozette}/settings.css";
-        "plugins/ui-menu/snippets/account.css" = stylesheet "account.css" account_data;
-        "plugins/ui-menu/snippets/answer-bubbles.css" = stylesheet "answer-bubbles.css" answer_bubbles_data;
-        "plugins/ui-menu/snippets/answer-frost.css" = stylesheet "answer-frost.css" answer_frost_data;
-        "plugins/ui-menu/snippets/attention.css" = stylesheet "attention.css" attention_data;
-        "plugins/ui-menu/snippets/bot-answer-bubbles.css" = stylesheet "bot-answer-bubbles.css" bot_answer_bubbles_data;
-        "plugins/ui-menu/snippets/bot-answer-frost.css" = stylesheet "bot-answer-frost.css" bot_answer_frost_data;
-        "plugins/ui-menu/snippets/bot-ask.css" = stylesheet "bot-ask.css" bot_ask_data;
-        "plugins/ui-menu/snippets/bot-cards.css" = stylesheet "bot-cards.css" bot_cards_data;
-        "plugins/ui-menu/snippets/bot-chao-motion.css" = stylesheet "bot-chao-motion.css" bot_chao_motion_data;
-        "plugins/ui-menu/snippets/bot-chao.css" = stylesheet "bot-chao.css" bot_chao_data;
-        "plugins/ui-menu/snippets/bot-chat-still.css" = stylesheet "bot-chat-still.css" bot_chat_still_data;
-        "plugins/ui-menu/snippets/bot-dock.css" = stylesheet "bot-dock.css" bot_dock_data;
-        "plugins/ui-menu/snippets/bot-events.css" = stylesheet "bot-events.css" bot_events_data;
-        "plugins/ui-menu/snippets/bot-jobs.css" = stylesheet "bot-jobs.css" bot_jobs_data;
-        "plugins/ui-menu/snippets/bot-layout.css" = stylesheet "bot-layout.css" bot_layout_data;
-        "plugins/ui-menu/snippets/bot-names.css" = stylesheet "bot-names.css" bot_names_data;
-        "plugins/ui-menu/snippets/bot-rail.css" = stylesheet "bot-rail.css" bot_rail_data;
-        "plugins/ui-menu/snippets/bot-spacing.css" = stylesheet "bot-spacing.css" bot_spacing_data;
-        "plugins/ui-menu/snippets/bot-stop.css" = stylesheet "bot-stop.css" bot_stop_data;
-        "plugins/ui-menu/snippets/bot-text.css" = stylesheet "bot-text.css" bot_text_data;
-        "plugins/ui-menu/snippets/bot-time.css" = stylesheet "bot-time.css" bot_time_data;
-        "plugins/ui-menu/snippets/bot-tints.css" = stylesheet "bot-tints.css" bot_tints_data;
-        "plugins/ui-menu/snippets/bot-turn-stats.css" = stylesheet "bot-turn-stats.css" bot_turn_stats_data;
-        "plugins/ui-menu/snippets/bot-work-rail.css" = stylesheet "bot-work-rail.css" bot_work_rail_data;
-        "plugins/ui-menu/snippets/bot-yorha-labels.css" = stylesheet "bot-yorha-labels.css" bot_yorha_labels_data;
-        "plugins/ui-menu/snippets/bot-you-frost.css" = stylesheet "bot-you-frost.css" bot_you_frost_data;
-        "plugins/ui-menu/snippets/bot-you.css" = stylesheet "bot-you.css" bot_you_data;
-        "plugins/ui-menu/snippets/bottom.css" = stylesheet "bottom.css" bottom_data;
-        "plugins/ui-menu/snippets/buttons.css" = stylesheet "buttons.css" buttons_data;
-        "plugins/ui-menu/snippets/centering.css" = stylesheet "centering.css" centering_data;
-        "plugins/ui-menu/snippets/chat-still.css" = stylesheet "chat-still.css" chat_still_data;
-        "plugins/ui-menu/snippets/dividers.css" = stylesheet "dividers.css" dividers_data;
-        "plugins/ui-menu/snippets/files.css" = stylesheet "files.css" files_data;
-        "plugins/ui-menu/snippets/frost.css" = stylesheet "frost.css" frost_data;
-        "plugins/ui-menu/snippets/grips.css" = stylesheet "grips.css" grips_data;
-        "plugins/ui-menu/snippets/inbox.css" = stylesheet "inbox.css" inbox_data;
-        "plugins/ui-menu/snippets/mini.css" = "${flakeInputs.tern-ozette}/mini.css";
-        "plugins/ui-menu/snippets/ozette-answer-bubbles.css" = "${flakeInputs.tern-ozette}/ozette-answer-bubbles.css";
-        "plugins/ui-menu/snippets/ozette-bot-you.css" = "${flakeInputs.tern-ozette}/ozette-bot-you.css";
-        "plugins/ui-menu/snippets/ozette-cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
-        "plugins/ui-menu/snippets/ozette-motion.css" = "${flakeInputs.tern-ozette}/motion.css";
-        "plugins/ui-menu/snippets/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
-        "plugins/ui-menu/snippets/pane-borders.css" = stylesheet "pane-borders.css" pane_borders_data;
-        "plugins/ui-menu/snippets/rail_ages.css" = stylesheet "rail_ages.css" (rail_ages_data lib);
-        "plugins/ui-menu/snippets/rail_card.css" = stylesheet "rail_card.css" rail_card_data;
-        "plugins/ui-menu/snippets/rail_compact.css" = stylesheet "rail_compact.css" rail_compact_data;
-        "plugins/ui-menu/snippets/rail_header.css" = stylesheet "rail_header.css" rail_header_data;
-        "plugins/ui-menu/snippets/rail_sections.css" = stylesheet "rail_sections.css" rail_sections_data;
-        "plugins/ui-menu/snippets/rail_status.css" = stylesheet "rail_status.css" rail_status_data;
-        "plugins/ui-menu/snippets/roomy.css" = stylesheet "roomy.css" roomy_data;
-        "plugins/ui-menu/snippets/row-keys.css" = stylesheet "row-keys.css" row_keys_data;
-        "plugins/ui-menu/snippets/scratch.css" = "${flakeInputs.tern-scratch}/min.css";
-        "plugins/ui-menu/snippets/single.css" = stylesheet "single.css" single_data;
-        "plugins/ui-menu/snippets/tabs.css" = stylesheet "tabs.css" tabs_data;
-        "plugins/ui-menu/snippets/transparent.css" = stylesheet "transparent.css" transparent_data;
-        "plugins/ui-menu/snippets/turn-stats.css" = stylesheet "turn-stats.css" turn_stats_data;
-        "plugins/ui-menu/snippets/user-frost.css" = stylesheet "user-frost.css" user_frost_data;
-        "plugins/ui-menu/snippets/composer-frost.css" = stylesheet "composer-frost.css" composer_frost_data;
-        "plugins/ui-menu/snippets/width.css" = stylesheet "width.css" width_data;
-        "plugins/ui-menu/snippets/work-rail.css" = stylesheet "work-rail.css" work_rail_data;
-        "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
-        "plugins/ui-menu/snippets/yorha-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-bot-answer-bubbles.css";
-        "plugins/ui-menu/snippets/yorha-bot-you.css" = "${flakeInputs.tern-ozette}/yorha-bot-you.css";
-        "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
-        "plugins/ui-menu/snippets/grok.css" = "${flakeInputs.tern-ozette}/grok.css";
-        "plugins/ui-menu/snippets/grok-avatars.css" = "${flakeInputs.tern-ozette}/grok-avatars.css";
-        "plugins/ui-menu/grok-bots/lloyd.png" = "${flakeInputs.tern-ozette}/grok-bots/lloyd.png";
-        "plugins/ui-menu/grok-bots/sol.png" = "${flakeInputs.tern-ozette}/grok-bots/sol.png";
-        "plugins/ui-menu/grok-bots/random.png" = "${flakeInputs.tern-ozette}/grok-bots/random.png";
-        "plugins/ui-menu/grok-bots/cu.png" = "${flakeInputs.tern-ozette}/grok-bots/cu.png";
-        "plugins/ui-menu/grok-bots/bao.png" = "${flakeInputs.tern-ozette}/grok-bots/bao.png";
-        "plugins/ui-menu/grok-bots/regal.png" = "${flakeInputs.tern-ozette}/grok-bots/regal.png";
-        "plugins/ui-menu/snippets/grok-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-answer-bubbles.css";
-        "plugins/ui-menu/snippets/grok-user-bubbles.css" = "${flakeInputs.tern-ozette}/grok-user-bubbles.css";
-        "plugins/ui-menu/snippets/grok-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-bot-answer-bubbles.css";
-        "plugins/ui-menu/snippets/grok-bot-you.css" = "${flakeInputs.tern-ozette}/grok-bot-you.css";
-        "plugins/ui-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (ui_menu_window_data generators.luau));
-        "settings.json" = generators.sourceFile "settings.json" (generators.jsonSource settings_data);
-      } // lib.mapAttrs (name: path: generators.sourceFile (builtins.baseNameOf name) (generators.pathSource path)) pluginPaths;
+          (return (call (dot this "fit") [(dot this "msgs.length")]))
+        ]))
+        blank
+        ({
+          l,
+          i,
+          a,
+          b,
+        }: (method "join" (typed [(typed l number) (typed i number)] boolean) [
+          (const a (idx (idx (dot this "nodes") (infix [l "-" 1])) (infix [2 "*" i])))
+          (const b (idx (idx (dot this "nodes") (infix [l "-" 1])) (infix [2 "*" i "+" 1])))
+          (if' (infix [(idx (idx (dot this "nodes") l) i) "!==" (str "") "||" a "===" (str "") "||" b "===" (str "") "||" (call bytes [a]) "+" 1 "+" (call bytes [b]) ">" NODE]) (return false))
+          (infix [(idx (idx (dot this "nodes") l) i) "=" (tpl [(sub a) "\\n" (sub b)])])
+          (call (dot this "onBuilt") [(obj [l i]) (idx (idx (dot this "nodes") l) i)])
+          (return true)
+        ]))
+        blank
+        ({
+          p,
+          text,
+          at,
+        }: (method "set" (typed [(typed p Part) (typed text string)] void) [
+          (infix [(idx (idx (dot this "nodes") (dot p "l")) (dot p "i")) "=" text])
+          (call (dot this "onBuilt") [p text])
+          (let' at p)
+          (while (below (infix (rows [
+              (dot at "l")
+              "+"
+              1
+              "<"
+              (dot this "nodes.length")
+              "&&"
+              (dot at "i")
+              ">>"
+              1
+              "<"
+              (dot (idx (dot this "nodes") (infix [(dot at "l") "+" 1])) "length")
+              "&&"
+              (call (dot this "join") [(infix [(dot at "l") "+" 1]) (infix [(dot at "i") ">>" 1])])
+            ]))) [
+              (infix [at "=" (obj [(prop "l" (infix [(dot at "l") "+" 1])) (prop "i" (infix [(dot at "i") ">>" 1]))])])
+            ])
+        ]))
+        blank
+        (method "freeMerges" (typed [] void) [
+          ({l}: (for (let' l 1) (infix [l "<" (dot this "nodes.length")]) (inc l) [
+            ({i}: (for (let' i 0) (infix [i "<" (dot (idx (dot this "nodes") l) "length")]) (inc i) (call (dot this "join") [l i])))
+          ]))
+        ])
+        blank
+        ({
+          n,
+          merged,
+        }: (method "fit" (typed [(typed n number)] boolean) [
+          (const merged (call (dot this "squeeze") [(dot this "view") n (dot this "big")]))
+          (if' merged [
+            (infix [(dot this "small") "=" (array [(spread (dot this "view"))])])
+            (infix [(dot this "little.draining") "=" true])
+          ])
+          (call (dot this "squeeze") [(dot this "small") n (dot this "little")])
+          (return merged)
+        ]))
+        blank
+        ({
+          view,
+          n,
+          limits,
+          size,
+          merged,
+        }: (method "squeeze" (typed [(typed view (arrayOf Part)) (typed n number) (typed limits Limits)] boolean) [
+          (let' size 0)
+          (let' merged false)
+          ({p}: (forOf p view (infix [size "+=" (call bytes [(call (dot this "text") [p])])])))
+          (if' (infix [size ">" (dot limits "max")]) (infix [(dot limits "draining") "=" true]))
+          (while (infix [(dot limits "draining") "&&" size ">" (dot limits "min")]) ({
+            best,
+            due,
+            a,
+            b,
+            parent,
+          }: [
+            (let' best (-1))
+            (let' due 0)
+            ({
+              k,
+              a,
+              b,
+              d,
+            }: (for (let' k 0) (infix [k "+" 1 "<" (dot view "length")]) (inc k) [
+              (const a (idx view k))
+              (const b (idx view (infix [k "+" 1])))
+              (if' (infix [(dot a "l") "!==" (dot b "l") "||" (dot a "i") "%" 2 "!==" 0 "||" (dot b "i") "!==" (dot a "i") "+" 1 "||" (not (call (dot this "built") [(obj [(prop "l" (infix [(dot a "l") "+" 1])) (prop "i" (infix [(dot a "i") "/" 2]))])]))]) continue)
+              (const d (infix [[n "-" (call end [b]) "+" 1] "/" 2 "**" (dot a "l")]))
+              (if' (infix [best "<" 0 "||" d ">" due]) [
+                (infix [best "=" k])
+                (infix [due "=" d])
+              ])
+            ]))
+            (if' (infix [best "<" 0]) (return merged))
+            (const a (idx view best))
+            (const b (idx view (infix [best "+" 1])))
+            (const parent (obj [(prop "l" (infix [(dot a "l") "+" 1])) (prop "i" (infix [(dot a "i") "/" 2]))]))
+            (infix [size "+=" (call bytes [(call (dot this "text") [parent])]) "-" (call bytes [(call (dot this "text") [a])]) "-" (call bytes [(call (dot this "text") [b])])])
+            (call (dot view "splice") [best 2 parent])
             (infix [merged "=" true])
           ]))
           (infix [(dot limits "draining") "=" false])
@@ -37158,11 +37539,7 @@
         ]))
       ]))
     ]);
-    tui_launcher = {
-      lib,
-      inputPackages,
-      ...
-    }: {
+    tui_launcher = {lib, inputPackages, ...}: {
       environment.systemPackages = [inputPackages.tern-run.default];
       user.defaults.launcher = lib.mkForce "${inputPackages.tern-run.default}/bin/tern-run";
     };
@@ -37539,7 +37916,11 @@
           (field "requires" (table [(str "bot-chao")]))
         ]))
         (rows (table [
-    tui_launcher = {lib, inputPackages, ...}: {
+          (field "id" (str "bot-names"))
+          (field "label" (str "names and status line"))
+          (field "group" (str "omp bots"))
+        ]))
+        (rows (table [
           (field "id" (str "bot-stop"))
           (field "label" (str "stop button"))
           (field "group" (str "omp bots"))
@@ -37660,13 +38041,7 @@
       blank
       (local pinned nil)
       (local folding false)
-      (localFunction single [{cx = null;}] ({
-        cx,
-        key,
-        pins,
-        ok,
-        err,
-      }: [
+      (localFunction single [{cx = null;}] ({cx, key, pins, ok, err}: [
         (local key [(dot cx ":window_key")])
         (local pins (infix [[(dot tern "kv.get") (str "single-pins")] "or" (table [])]))
         (if' (not (dot on "single")) [
@@ -37679,139 +38054,80 @@
         ])
         (if' folding [return])
         (assign folding true)
-        (local [ok err] [
-          pcall
-          (fn [] ({
-            sessions,
-            anchor,
-            sources,
-            sourceTabs,
-            count,
-            panes,
-            groups,
-            parked,
-            hostPanes,
-            result,
-            reason,
-          }: [
-            (local sessions [(dot cx "sessions:list")])
-            (local anchor nil)
-            (local [result reason] (tuple [nil nil]))
-            (assign pinned (infix [pinned "or" (idx pins key)]))
-            (for [{_ = null;} {session = null;}] [ipairs sessions] ({
-              _,
-              session,
-            }: [
-              (if' (infix [(dot session "id") "==" pinned]) [(assign anchor session)])
-            ]))
-            (if' (not anchor) [
-              (assign anchor [(dot cx "sessions:current")])
-              (assign pinned (dot anchor "id"))
-              (assign (idx pins key) pinned)
-              [(dot tern "kv.set") (str "single-pins") pins]
-            ])
-            (if' (infix [(dot [(dot cx "sessions:current")] "id") "~=" pinned]) [[(dot cx "sessions:switch") pinned]])
-            (local sources (table []))
-            (local sourceTabs (table []))
-            (local count 0)
-            (for [{_ = null;} {session = null;}] [ipairs sessions] ({
-              _,
-              session,
-            }: [
-              (if' (infix [(dot session "id") "~=" pinned "and" (dot session "host") "==" (dot anchor "host")]) [
-                (assign (idx sources (dot session "id")) true)
-                (assign count (infix [count "+" 1]))
-              ])
-            ]))
-            (if' (infix [count "==" 0]) [return])
-            (for [{_ = null;} {session = null;}] [ipairs [(dot cx "session:sessions")]] ({
-              _,
-              session,
-            }: [
-              (if' (idx sources (dot session "id")) [
-                (for [{_ = null;} {tab = null;}] [ipairs (dot session "tabs")] ({
-                  _,
-                  tab,
-                }: [(assign (idx sourceTabs tab) true)]))
-              ])
-            ]))
-            (local panes [(dot cx "session:panes")])
-            (local groups (table []))
-            (for [{_ = null;} {tab = null;}] [ipairs [(dot cx "session:tabs")]] ({
-              _,
-              tab,
-              blocks,
-            }: [
-              (local blocks (table []))
-              (if' (infix [(dot tab "session") "==" pinned]) [
-                [(dot table' "insert") groups (table [(field "tab" (dot tab "id")) (field "blocks" (table []))])]
-              ])
-              (if' (idx sourceTabs (dot tab "id")) [
-                (for [{_ = null;} {pane = null;}] [ipairs panes] ({
-                  _,
-                  pane,
-                }: [
-                  (if' (infix [(dot pane "tab") "==" (dot tab "id")]) [[(dot table' "insert") blocks (dot pane "pane")]])
-                ]))
-                (if' (infix [(len blocks) ">" 0]) [[(dot table' "insert") groups (table [(field "name" (dot tab "name")) (field "color" (dot tab "color")) (field "blocks" blocks)])]])
-              ])
-            ]))
-            (local parked (table []))
-            (local hostPanes (table []))
-            (for [{_ = null;} {host = null;}] [ipairs [(dot cx "hosts:list")]] ({
-              _,
-              host,
-            }: [
-              (if' (infix [(dot host "id") "==" (dot anchor "host")]) [
-                (for [{_ = null;} {pane = null;}] [ipairs (dot host "panes")] ({
-                  _,
-                  pane,
-                }: [(assign (idx hostPanes pane) true)]))
-              ])
-            ]))
-            (for [{_ = null;} {pane = null;}] [ipairs panes] ({
-              _,
-              pane,
-            }: [
-              (if' (infix [(dot pane "parked") "and" (idx hostPanes (dot pane "pane"))]) [
-                [(dot table' "insert") parked (dot pane "pane")]
-                [(dot table' "insert") groups (table [(field "blocks" (table [(dot pane "pane")]))])]
-              ])
-            ]))
-            (if' (infix [(len groups) ">" 0]) [
-              (assign [result reason] [(dot cx "layout:arrange") (table [(field "session" pinned) (field "tabs" groups)])])
-              (if' (not result) [[error reason]])
-              (for [{_ = null;} {pane = null;}] [ipairs parked] ({
-                _,
-                pane,
-              }: [[(dot cx "layout:park") pane]]))
-            ])
-            (for [{_ = null;} {session = null;}] [ipairs sessions] ({
-              _,
-              session,
-            }: [
-              (if' (idx sources (dot session "id")) [[(dot cx "sessions:close") (dot session "id")]])
-            ]))
+        (local [ok err] [pcall (fn [] ({sessions, anchor, sources, sourceTabs, count, panes, groups, parked, hostPanes, result, reason}: [
+          (local sessions [(dot cx "sessions:list")])
+          (local anchor nil)
+          (local [result reason] (tuple [nil nil]))
+          (assign pinned (infix [pinned "or" (idx pins key)]))
+          (for [{_ = null;} {session = null;}] [ipairs sessions] ({_, session}: [
+            (if' (infix [(dot session "id") "==" pinned]) [(assign anchor session)])
           ]))
-        ])
+          (if' (not anchor) [
+            (assign anchor [(dot cx "sessions:current")])
+            (assign pinned (dot anchor "id"))
+            (assign (idx pins key) pinned)
+            [(dot tern "kv.set") (str "single-pins") pins]
+          ])
+          (if' (infix [(dot [(dot cx "sessions:current")] "id") "~=" pinned]) [[(dot cx "sessions:switch") pinned]])
+          (local sources (table []))
+          (local sourceTabs (table []))
+          (local count 0)
+          (for [{_ = null;} {session = null;}] [ipairs sessions] ({_, session}: [
+            (if' (infix [(dot session "id") "~=" pinned "and" (dot session "host") "==" (dot anchor "host")]) [
+              (assign (idx sources (dot session "id")) true)
+              (assign count (infix [count "+" 1]))
+            ])
+          ]))
+          (if' (infix [count "==" 0]) [return])
+          (for [{_ = null;} {session = null;}] [ipairs [(dot cx "session:sessions")]] ({_, session}: [
+            (if' (idx sources (dot session "id")) [
+              (for [{_ = null;} {tab = null;}] [ipairs (dot session "tabs")] ({_, tab}: [(assign (idx sourceTabs tab) true)]))
+            ])
+          ]))
+          (local panes [(dot cx "session:panes")])
+          (local groups (table []))
+          (for [{_ = null;} {tab = null;}] [ipairs [(dot cx "session:tabs")]] ({_, tab, blocks}: [
+            (local blocks (table []))
+            (if' (infix [(dot tab "session") "==" pinned]) [
+              [(dot table' "insert") groups (table [(field "tab" (dot tab "id")) (field "blocks" (table []))])]
+            ])
+            (if' (idx sourceTabs (dot tab "id")) [
+              (for [{_ = null;} {pane = null;}] [ipairs panes] ({_, pane}: [
+                (if' (infix [(dot pane "tab") "==" (dot tab "id")]) [[(dot table' "insert") blocks (dot pane "pane")]])
+              ]))
+              (if' (infix [(len blocks) ">" 0]) [[(dot table' "insert") groups (table [(field "name" (dot tab "name")) (field "color" (dot tab "color")) (field "blocks" blocks)])]])
+            ])
+          ]))
+          (local parked (table []))
+          (local hostPanes (table []))
+          (for [{_ = null;} {host = null;}] [ipairs [(dot cx "hosts:list")]] ({_, host}: [
+            (if' (infix [(dot host "id") "==" (dot anchor "host")]) [
+              (for [{_ = null;} {pane = null;}] [ipairs (dot host "panes")] ({_, pane}: [(assign (idx hostPanes pane) true)]))
+            ])
+          ]))
+          (for [{_ = null;} {pane = null;}] [ipairs panes] ({_, pane}: [
+            (if' (infix [(dot pane "parked") "and" (idx hostPanes (dot pane "pane"))]) [
+              [(dot table' "insert") parked (dot pane "pane")]
+              [(dot table' "insert") groups (table [(field "blocks" (table [(dot pane "pane")]))])]
+            ])
+          ]))
+          (if' (infix [(len groups) ">" 0]) [
+            (assign [result reason] [(dot cx "layout:arrange") (table [(field "session" pinned) (field "tabs" groups)])])
+            (if' (not result) [[error reason]])
+            (for [{_ = null;} {pane = null;}] [ipairs parked] ({_, pane}: [[(dot cx "layout:park") pane]]))
+          ])
+          (for [{_ = null;} {session = null;}] [ipairs sessions] ({_, session}: [
+            (if' (idx sources (dot session "id")) [[(dot cx "sessions:close") (dot session "id")]])
+          ]))
+        ]))])
         (assign folding false)
         (if' (not ok) [
           [(dot tern "log.error") (infix [(str "Single session: ") ".." [tostring err]])]
           [(dot cx ":toast") (str "error") (infix [(str "Single session: ") ".." [tostring err]])]
         ])
       ]))
-      (for [{_ = null;} {event = null;}] [ipairs (table [(str "focus") (str "pane_created") (str "tab_created") (str "session_ended")])] ({
-        _,
-        event,
-      }: [
-        [
-          (dot tern "on")
-          event
-          (fn [{ev = null;} {cx = null;}] ({
-            ev,
-            cx,
-          }: [[single cx]]))
-        ]
+      (for [{_ = null;} {event = null;}] [ipairs (table [(str "focus") (str "pane_created") (str "tab_created") (str "session_ended")])] ({_, event}: [
+        [(dot tern "on") event (fn [{ev = null;} {cx = null;}] ({ev, cx}: [[single cx]]))]
       ]))
       blank
       (localFunction rail [{cx = null;}] ({cx}: [
@@ -38041,7 +38357,13 @@
         [(dot tern "kv.set") (str "on") on]
         [paint]
         (if' (dot t "apply") [
-      (localFunction single [{cx = null;}] ({cx, key, pins, ok, err}: [
+          [(dot t "apply") cx]
+        ])
+        (if' (infix [(dot t "id") "==" (str "lock") "and" (dot on "lock")]) [
+          [rail cx]
+        ])
+        (if' (infix [(dot t "id") "==" (str "single")]) [
+          [single cx]
         ])
         [(dot tern "chrome.refresh")]
       ]))
@@ -38054,80 +38376,139 @@
         items,
         add,
         ids,
-        (local [ok err] [pcall (fn [] ({sessions, anchor, sources, sourceTabs, count, panes, groups, parked, hostPanes, result, reason}: [
-          (local sessions [(dot cx "sessions:list")])
-          (local anchor nil)
-          (local [result reason] (tuple [nil nil]))
-          (assign pinned (infix [pinned "or" (idx pins key)]))
-          (for [{_ = null;} {session = null;}] [ipairs sessions] ({_, session}: [
-            (if' (infix [(dot session "id") "==" pinned]) [(assign anchor session)])
-          ]))
-          (if' (not anchor) [
-            (assign anchor [(dot cx "sessions:current")])
-            (assign pinned (dot anchor "id"))
-            (assign (idx pins key) pinned)
-            [(dot tern "kv.set") (str "single-pins") pins]
+        groups,
+        row,
+      }: [
+        (local disabled (infix [[(dot cx "settings:get") (str "plugins_disabled")] "or" (table [])]))
+        (local off (table []))
+        (for [{_ = null;} {id = null;}] [ipairs disabled] ({
+          _,
+          id,
+        }: [
+          (assign (idx off id) true)
+        ]))
+        (local installed [plugins])
+        (local items (table []))
+        (localFunction add [{item = null;} {state = opt boolean;}] ({
+          item,
+          state,
+        }: [
+          (if' (infix [state "~=" nil]) [
+            (assign (dot item "detail") (ifExpr [state (str "on") (str "off")]))
+            (assign (dot item "current") state)
           ])
-          (if' (infix [(dot [(dot cx "sessions:current")] "id") "~=" pinned]) [[(dot cx "sessions:switch") pinned]])
-          (local sources (table []))
-          (local sourceTabs (table []))
-          (local count 0)
-          (for [{_ = null;} {session = null;}] [ipairs sessions] ({_, session}: [
-            (if' (infix [(dot session "id") "~=" pinned "and" (dot session "host") "==" (dot anchor "host")]) [
-              (assign (idx sources (dot session "id")) true)
-              (assign count (infix [count "+" 1]))
-            ])
-          ]))
-          (if' (infix [count "==" 0]) [return])
-          (for [{_ = null;} {session = null;}] [ipairs [(dot cx "session:sessions")]] ({_, session}: [
-            (if' (idx sources (dot session "id")) [
-              (for [{_ = null;} {tab = null;}] [ipairs (dot session "tabs")] ({_, tab}: [(assign (idx sourceTabs tab) true)]))
-            ])
-          ]))
-          (local panes [(dot cx "session:panes")])
-          (local groups (table []))
-          (for [{_ = null;} {tab = null;}] [ipairs [(dot cx "session:tabs")]] ({_, tab, blocks}: [
-            (local blocks (table []))
-            (if' (infix [(dot tab "session") "==" pinned]) [
-              [(dot table' "insert") groups (table [(field "tab" (dot tab "id")) (field "blocks" (table []))])]
-            ])
-            (if' (idx sourceTabs (dot tab "id")) [
-              (for [{_ = null;} {pane = null;}] [ipairs panes] ({_, pane}: [
-                (if' (infix [(dot pane "tab") "==" (dot tab "id")]) [[(dot table' "insert") blocks (dot pane "pane")]])
-              ]))
-              (if' (infix [(len blocks) ">" 0]) [[(dot table' "insert") groups (table [(field "name" (dot tab "name")) (field "color" (dot tab "color")) (field "blocks" blocks)])]])
-            ])
-          ]))
-          (local parked (table []))
-          (local hostPanes (table []))
-          (for [{_ = null;} {host = null;}] [ipairs [(dot cx "hosts:list")]] ({_, host}: [
-            (if' (infix [(dot host "id") "==" (dot anchor "host")]) [
-              (for [{_ = null;} {pane = null;}] [ipairs (dot host "panes")] ({_, pane}: [(assign (idx hostPanes pane) true)]))
+          (assign (idx items (infix [(len items) "+" 1])) item)
+        ]))
+        (for [{i = null;} {l = null;}] [ipairs LOOKS] ({
+          i,
+          l,
+        }: [
+          [add (table [(field "label" (dot l "label")) (field "group" (str "Look")) (field "icon" (str "palette")) (field "look" i) (field "current" [wears (dot l "layers")])])]
+        ]))
+        (local ids (table []))
         (for [{id = null;}] installed ({id}: [
-          ]))
-          (for [{_ = null;} {pane = null;}] [ipairs panes] ({_, pane}: [
-            (if' (infix [(dot pane "parked") "and" (idx hostPanes (dot pane "pane"))]) [
-              [(dot table' "insert") parked (dot pane "pane")]
-              [(dot table' "insert") groups (table [(field "blocks" (table [(dot pane "pane")]))])]
-        [
-          }: [
-          (if' (infix [(len groups) ">" 0]) [
-            (assign [result reason] [(dot cx "layout:arrange") (table [(field "session" pinned) (field "tabs" groups)])])
-            (if' (not result) [[error reason]])
-            (for [{_ = null;} {pane = null;}] [ipairs parked] ({_, pane}: [[(dot cx "layout:park") pane]]))
+          (if' (infix [id "~=" (dot tern "plugin.id")]) [
+            (assign (idx ids (infix [(len ids) "+" 1])) id)
           ])
-          (for [{_ = null;} {session = null;}] [ipairs sessions] ({_, session}: [
-            (if' (idx sources (dot session "id")) [[(dot cx "sessions:close") (dot session "id")]])
+        ]))
+        [
+          (dot table' "sort")
+          ids
+          (fn [{a = null;} {b = null;}] ({
+            a,
+            b,
+          }: [
+            (return (infix [[(dot (idx installed a) ":lower")] "<" [(dot (idx installed b) ":lower")]]))
           ]))
-        ]))])
+        ]
+        (for [{_ = null;} {id = null;}] [ipairs ids] ({
+          _,
+          id,
+        }: [
+          [add (table [(field "label" (idx installed id)) (field "group" (str "Plugins")) (field "icon" (str "puzzle")) (field "plugin" id)]) (not (idx off id))]
+        ]))
+        (local groups (table []))
+        (for [{_ = null;} {t = null;}] [ipairs TWEAKS] ({
+          _,
+          t,
+        }: [
+          (if' (infix [(dot t "label") "and" (not (dot t "parent"))]) [
+            (if' (not (idx groups (dot t "group"))) [
+              (assign (idx groups (dot t "group")) (table []))
+              (assign (idx groups (infix [(len groups) "+" 1])) (dot t "group"))
+            ])
+            [(dot table' "insert") (idx groups (dot t "group")) t]
+          ])
+        ]))
+        (localFunction row [{t = null;} {group = null;} {depth = null;}] ({
+          t,
+          group,
+          depth,
+          label,
+          need,
+        }: [
+          (local label (infix [[(dot string "rep") (str [(unicode "2003")]) depth] ".." (dot t "label")]))
+          (local need nil)
+          (for [{_ = null;} {id = null;}] [ipairs (infix [(dot t "requires") "or" (table [])])] ({
+            _,
+            id,
+          }: [
+            (if' (infix [(not need) "and" (not [live (idx by_id id)])]) [
+              (assign need (infix [(dot (idx by_id id) "label") "or" id]))
+            ])
+          ]))
+          (ifElse need [
+              [add (table [(field "label" label) (field "group" group) (field "tweak" (dot t "id")) (field "need" need) (field "detail" (infix [(str "needs ") ".." need]))])]
+            ] [
+              [add (table [(field "label" label) (field "group" group) (field "tweak" (dot t "id"))]) (idx on (dot t "id"))]
+            ])
+          (for [{_ = null;} {c = null;}] [ipairs (infix [(idx children (dot t "id")) "or" (table [])])] ({
+            _,
+            c,
+          }: [
+            (if' (dot c "label") [
+              [row c group (infix [depth "+" 1])]
+            ])
+          ]))
+        ]))
+        (for [{_ = null;} {group = null;}] [ipairs groups] ({
+          _,
+          group,
+        }: [
+          (for [{_ = null;} {t = null;}] [ipairs (idx groups group)] ({
+            _,
+            t,
+          }: [
+            [row t group 0]
+          ]))
+        ]))
+        [
+          (dot [(dot cx ":pick") (table [(field "items" items) (field "placeholder" (str "Settings")) (field "icon" (str "sliders")) (field "action" (str "toggle"))])] ":next")
+          (fn [{item = null;} {_ = null;} {again = null;}] ({
+            item,
+            _,
+            again,
+            list,
+          }: [
+            (if' (infix [(not item) "or" (not again)]) [
               return
             ])
             (if' (dot item "need") [
               [(dot again ":toast") (str "info") (infix [(str "Turn on ") ".." (dot item "need") ".." (str " first")])]
               (return [menu again])
             ])
-      (for [{_ = null;} {event = null;}] [ipairs (table [(str "focus") (str "pane_created") (str "tab_created") (str "session_ended")])] ({_, event}: [
-        [(dot tern "on") event (fn [{ev = null;} {cx = null;}] ({ev, cx}: [[single cx]]))]
+            (if' (dot item "tweak") [
+              [toggle again (idx by_id (dot item "tweak"))]
+              (return [menu again])
+            ])
+            (if' (dot item "look") [
+              [pick (dot (idx LOOKS (dot item "look")) "layers")]
+              (return [menu again])
+            ])
+            (assign (idx off (dot item "plugin")) (not (idx off (dot item "plugin"))))
+            (local list (table []))
+            (for [{id = null;} {yes = null;}] off ({
+              id,
               yes,
             }: [
               (if' (infix [yes "and" id "~=" (dot tern "plugin.id")]) [
@@ -41124,6 +41505,7 @@
         chat_still_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-still.data.nix";
         claude_code = "modules/dev/ai/claude-code.nix";
         claude_desktop = "modules/desktop/apps/claude-desktop.nix";
+        code_mode_data = "modules/dev/ai/omp/code-mode.data.nix";
         codex = "modules/dev/ai/codex/codex.nix";
         colorschemes_data = "modules/desktop/session/theme/colorschemes.data.nix";
         common = "modules/finix/common.nix";
