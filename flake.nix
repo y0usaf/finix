@@ -20355,7 +20355,15 @@
           patches = (old.patches or []) ++ [(generators.sourceFile "omp-prewalk-eval.patch" (generators.patch.render (omp_prewalk_eval_data generators.patch)))];
         });
       in
-        packages // {oh-my-pi = packages.oh-my-pi // {inherit omp; default = omp;};};
+        packages
+        // {
+          oh-my-pi =
+            packages.oh-my-pi
+            // {
+              inherit omp;
+              default = omp;
+            };
+        };
 
       mkPkgs = cudaSupport:
         import (toString inputs.nixpkgs) {
