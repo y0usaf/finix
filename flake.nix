@@ -31,8 +31,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    tern-run = {
-      url = "git+file:///home/y0usaf/dev/developing/tern-run";
+    tern-script = {
+      url = "git+file:///home/y0usaf/dev/developing/tern-script";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

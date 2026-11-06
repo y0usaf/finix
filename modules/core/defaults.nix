@@ -16,7 +16,7 @@
     };
     launcher = lib.mkOption {
       type = lib.types.str;
-      default = "tern-run";
+      default = "tern-launcher";
       description = "Default application launcher";
     };
   };

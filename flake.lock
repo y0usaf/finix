@@ -1819,8 +1819,8 @@
         "strictix": "strictix",
         "tern-ekko": "tern-ekko",
         "tern-ozette": "tern-ozette",
-        "tern-run": "tern-run",
         "tern-scratch": "tern-scratch",
+        "tern-script": "tern-script",
         "tomoe": "tomoe"
       }
     },
@@ -2156,26 +2156,6 @@
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       }
     },
-    "tern-run": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1793934903,
-        "narHash": "sha256-EzniD3baOfPnYX4FubE6tGGhnqRilfq58LibNde0t88=",
-        "ref": "refs/heads/main",
-        "rev": "2355197d09a034935ffa8f31dbb1a8f8f4aa0994",
-        "revCount": 11,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-run"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-run"
-      }
-    },
     "tern-scratch": {
       "flake": false,
       "locked": {
@@ -2190,6 +2170,26 @@
       "original": {
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-scratch"
+      }
+    },
+    "tern-script": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793970860,
+        "narHash": "sha256-/GI6gEWzA1I8Vm+KC82oUy1VSJGRE1mti2mdgnQ4qwg=",
+        "ref": "refs/heads/main",
+        "rev": "13f550d53f2e88a90d8fac28253a4dcfe61dd098",
+        "revCount": 12,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-script"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-script"
       }
     },
     "tomoe": {
