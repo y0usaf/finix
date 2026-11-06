@@ -58,6 +58,8 @@ in {
       XDG_RUNTIME_DIR = runtimeDir;
       WAYLAND_DISPLAY = "tomoe-0";
       DBUS_SESSION_BUS_ADDRESS = "unix:path=${runtimeDir}/tomoe.tomoe-0.bus";
+      # Chromium's ozone picks Wayland from the session type, not from WAYLAND_DISPLAY.
+      XDG_SESSION_TYPE = "wayland";
       NIXOS_OZONE_WL = "1";
     };
     command = "${pkgs.writeShellScript "baobot-chromium-start" ''
