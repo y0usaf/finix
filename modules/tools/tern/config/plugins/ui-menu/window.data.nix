@@ -518,6 +518,7 @@
           [(dot tern "kv.set") (str "single-pins") pins]
         ])
         (if' (infix [(dot [(dot cx "sessions:current")] "id") "~=" pinned]) [[(dot cx "sessions:switch") pinned]])
+        (if' (dot anchor "locked") [[(dot cx "sessions:unlock") pinned]])
         (local sources (table []))
         (local sourceTabs (table []))
         (local count 0)
