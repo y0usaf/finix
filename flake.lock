@@ -2163,11 +2163,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793931164,
-        "narHash": "sha256-iSMzcsqMsfW0s/BWzCQMZS3k3y+jddd9rloGJ/WJhCM=",
+        "lastModified": 1793934903,
+        "narHash": "sha256-EzniD3baOfPnYX4FubE6tGGhnqRilfq58LibNde0t88=",
         "ref": "refs/heads/main",
-        "rev": "50bd638016e4389a2d3455848762c8b273990160",
-        "revCount": 9,
+        "rev": "2355197d09a034935ffa8f31dbb1a8f8f4aa0994",
+        "revCount": 11,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-run"
       },
