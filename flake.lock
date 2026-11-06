@@ -1817,7 +1817,9 @@
         "silva": "silva",
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
+        "tern-ekko": "tern-ekko",
         "tern-ozette": "tern-ozette",
+        "tern-run": "tern-run",
         "tern-scratch": "tern-scratch",
         "tomoe": "tomoe"
       }
@@ -2122,20 +2124,56 @@
         "type": "github"
       }
     },
+    "tern-ekko": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793930802,
+        "narHash": "sha256-FjP96Bii33IJNxV+qSD4f9h4HwzydQZJWkc/Zctd2N0=",
+        "ref": "refs/heads/main",
+        "rev": "34f51c9e4698f03e79f6421b1d4b57d7cf3b4413",
+        "revCount": 8,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-ekko"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-ekko"
+      }
+    },
     "tern-ozette": {
       "flake": false,
       "locked": {
-        "lastModified": 1793927594,
-        "narHash": "sha256-UnxGJhfAbvx4CBnlkXVHixWkisxCX6jVw4SGmvZhyKo=",
+        "lastModified": 1793930983,
+        "narHash": "sha256-2wtUh2QwzePXYj92FwkgeSApvIr6EuTt6vfrPvNVsE0=",
         "ref": "refs/heads/main",
-        "rev": "43dba682175bb08c34ef2c07b06e09018dca7715",
-        "revCount": 81,
+        "rev": "732dcc367ee9887341843d519e295800a3492751",
+        "revCount": 83,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       },
       "original": {
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
+      }
+    },
+    "tern-run": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793931164,
+        "narHash": "sha256-iSMzcsqMsfW0s/BWzCQMZS3k3y+jddd9rloGJ/WJhCM=",
+        "ref": "refs/heads/main",
+        "rev": "50bd638016e4389a2d3455848762c8b273990160",
+        "revCount": 9,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-run"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/tern-run"
       }
     },
     "tern-scratch": {
