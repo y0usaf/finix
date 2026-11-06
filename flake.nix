@@ -12885,7 +12885,7 @@
 
       environment.systemPackages = [inputPackages.ekko.default];
     };
-    ekko_data = "${flakeInputs.tern-ekko}";
+    ekko_data = "${inputs.tern-ekko}";
     elden_ring = {
       config,
       lib,
