@@ -353,7 +353,7 @@
     rows [
       [define-extension (str "sway")]
       (rows [
-        [(kw "reads") [(kw "windows") (kw "rules") (kw "workareas") (kw "outputs") (kw "focus") (kw "key") (kw "button") (kw "pointer") (kw "request") (kw "settings")]]
+        [(kw "reads") [(kw "windows") (kw "rules") (kw "data") (kw "workareas") (kw "outputs") (kw "focus") (kw "key") (kw "button") (kw "pointer") (kw "request") (kw "settings")]]
         [
           (kw "state")
           (rows [

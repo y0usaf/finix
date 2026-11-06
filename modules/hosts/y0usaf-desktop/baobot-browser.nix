@@ -1,5 +1,6 @@
 {
   config,
+  flakeInputs,
   lib,
   pkgs,
   ...
@@ -14,10 +15,12 @@
   port = 9233;
   profile = "${home}/.local/state/baobot-desktop/chromium";
   url = "https://www.taobao.com";
+  appId = "baobot-chromium";
   chromium = pkgs.writeShellScriptBin "baobot-chromium" ''
     exec ${lib.getExe pkgs.chromium} \
       --user-data-dir=${profile} \
       --remote-debugging-port=${toString port} \
+      --class=${appId} \
       --no-first-run \
       --no-default-browser-check \
       "$@"
@@ -27,6 +30,17 @@ in {
   finix.persistence.homeServices = ["baobot-chromium"];
 
   environment.systemPackages = [chromium];
+
+  user.ui.tomoe.extraConfig =
+    builtins.readFile "${flakeInputs.tomoe}/examples/special.lisp"
+    + ''
+      (setf +special-bindings+ '(("t" :taobao)))
+      (define-extension "baobot-chromium" (:reads ()) (snapshot state event)
+        (declare (ignore snapshot event))
+        (values state
+                (list (window-rule :baobot-chromium :app-id "${appId}" :properties '((:special . "taobao"))))
+                nil))
+    '';
 
   user.files = {
     ".local/state/omp-bot/bots/baobot/config.yml" = {
@@ -41,6 +55,7 @@ in {
         Terminal = false;
         Type = "Application";
         Categories = "Network;WebBrowser;";
+        StartupWMClass = appId;
         Comment = "baobot's Chromium for Taobao, DevTools on 127.0.0.1:${toString port}";
       };
     };

@@ -1031,7 +1031,7 @@
         [
           (kw "reads")
           (rows [
-            [(kw "windows") (kw "rules") (kw "outputs") (kw "workareas") (kw "layout") (kw "focus") (kw "key") (kw "button") (kw "pointer") (kw "request")]
+            [(kw "windows") (kw "rules") (kw "data") (kw "outputs") (kw "workareas") (kw "layout") (kw "focus") (kw "key") (kw "button") (kw "pointer") (kw "request")]
             (kw "settings")
           ])
         ]

@@ -30,6 +30,7 @@
   list,
   mapcar,
   max,
+  member,
   nil,
   or',
   place,
@@ -44,6 +45,7 @@
   rules-for,
   second,
   settings,
+  state-value,
   str,
   stringp,
   t,
@@ -105,7 +107,7 @@
       ({properties}:
         rows [
           [let' [[properties [rules-for snapshot window]]]]
-          [[or' [cdr [assoc (kw "float") properties]] [cdr [assoc (kw "hidden") properties]]]]
+          [[or' [member [getf window (kw "id")] [state-value snapshot (kw "wm-exclude")]] [cdr [assoc (kw "float") properties]] [cdr [assoc (kw "hidden") properties]]]]
         ])
     ])
   blank
