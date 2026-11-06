@@ -10591,6 +10591,7 @@
         pkgs.lm_sensors
         pkgs.fzf
         pkgs.ripgrep
+        pkgs.gnused
         inputPackages.strictix.default
         pkgs.alejandra
         pkgs.statix
