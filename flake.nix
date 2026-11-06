@@ -1057,7 +1057,6 @@
         lib.genAttrs ["pi-chronobreak" "pi-recap" "omp-bot"] (name: "${flakeInputs.${name}}")
         // {
           pi-donsetch = "${inputPackages.pi-donsetch.default}";
-          "code-mode.ts" = generators.sourceFile "code-mode.ts" (generators.ts.render (code_mode_data generators.ts));
           "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts));
           "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
           "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (chat_look_data generators.ts));
@@ -1133,7 +1132,7 @@
                 "pi-chronobreak"
                 "pi-recap"
                 "pi-donsetch"
-                "code-mode.ts"
+                "omp-bot/omp/code-mode.ts"
                 "compact-eval.ts"
                 "work-fold.ts"
                 "chat-look.ts"
@@ -1205,7 +1204,6 @@
       # ${seedMount}/current/ext/NAME, a path no switch changes, so a running omp sees the same extensions list.
       seedMount = "/mnt/seed";
       extensions = {
-        "code-mode.ts" = generators.sourceFile "code-mode.ts" (generators.ts.render (code_mode_data generators.ts));
         "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (compact_eval_data generators.ts));
         "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (work_fold_data generators.ts));
         optchat = generators.sourceDir pkgs "optchat" (optchat_data {inherit generators;});
@@ -1262,7 +1260,7 @@
           retry:
             fallbackChains: ${builtins.toJSON catalog.fallbackChains}
           extensions:
-            - "${inBox "code-mode.ts"}"
+            - "${inBox "omp-bot"}/omp/code-mode.ts"
             - "${inBox "compact-eval.ts"}"
             - "${inBox "work-fold.ts"}"
             - "${inBox "optchat"}/extension.ts"
@@ -9718,386 +9716,6 @@
       user.persist.directories = [".config/Claude"];
       environment.systemPackages = [(pkgs.callPackage "${flakeInputs.claude-desktop-linux}/nix/claude-desktop.nix" {})];
     };
-    code_mode_data = {
-      Array,
-      JSON,
-      Object,
-      Set,
-      process,
-      array,
-      arrow,
-      async,
-      await,
-      below,
-      blank,
-      braces,
-      call,
-      case,
-      catch,
-      comment,
-      const,
-      continue,
-      default,
-      delete,
-      dot,
-      export,
-      fn,
-      forOf,
-      idx,
-      if',
-      ifElse,
-      infix,
-      let',
-      new,
-      not,
-      obj,
-      optCall,
-      prop,
-      regex,
-      return,
-      rows,
-      spread,
-      str,
-      sub,
-      switch,
-      ternary,
-      tpl,
-      try,
-      typeof,
-      undefined,
-      ...
-    }: ({
-      DIRECT_TOOLS,
-      CLAUDE_TOOL_PREFIX,
-      INVENTORY_HEADING,
-      MAX_DECLARATION_CHARS,
-      TS_IDENTIFIER,
-      PILOT,
-      TOOL_ARGS,
-      HELPER_TOOLS,
-      HIDDEN_TOOLS,
-      descriptionText,
-      wireSchema,
-      tsType,
-      declarationsFor,
-      codeModeSection,
-      rewriteInventory,
-      toolName,
-      isDirect,
-      withoutDemotedToolChanges,
-      filterPayload,
-      sessionId,
-      codeMode,
-    }: [
-      (comment ''
-        /**
-         * Code mode for omp, extension-only.
-         *
-         * The provider request carries `eval` alone; every other enabled tool stays in
-         * the session registry, so `await tool.<name>(args)` inside an eval cell still
-         * dispatches through the normal tool pipeline. Declarations for the demoted
-         * tools are spliced into the system prompt, replacing the rendered tool
-         * inventory.
-         */'')
-      blank
-      (const DIRECT_TOOLS (new Set [(array [(str "eval") (str "think") (str "yield") (str "goal") (str "checkpoint") (str "rewind")])]))
-      (const CLAUDE_TOOL_PREFIX (str "_"))
-      (const INVENTORY_HEADING (str "\\n# Tool Inventory\\n"))
-      (const MAX_DECLARATION_CHARS (infix [64 "*" 1024]))
-      (const TS_IDENTIFIER (regex "^[A-Za-z_$][A-Za-z0-9_$]*$" ""))
-      (const PILOT (infix [(dot process "env.OMP_BOT_NAME") "===" (str "Lloyd")]))
-      (const TOOL_ARGS (call (dot process "argv.lastIndexOf") [(str "--tools")]))
-      (const HELPER_TOOLS (ternary (infix [(dot process "env.OMP_BOT_HELPER") "&&" TOOL_ARGS ">=" 0]) (new Set [(call (dot (idx (dot process "argv") (infix [TOOL_ARGS "+" 1])) "split") [(str ",")])]) undefined))
-      (const HIDDEN_TOOLS (new Set [(array [(str "debug") (str "init_experiment") (str "run_experiment") (str "log_experiment") (str "update_notes") (str "web_crawl")])]))
-      ({text}: (fn descriptionText [text] [
-        (return (ternary (infix [(typeof text) "===" (str "string")]) (tpl ["/** " (sub (call (dot (call (dot text "replace") [(regex "\\s+" "g") (str " ")]) "replaceAll") [(str "*/") (str "* /")])) " */ "]) (str "")))
-      ]))
-      blank
-      ({parameters}: (fn wireSchema [parameters] [
-        (if' (not parameters) (return undefined))
-        (if' (infix [(typeof (dot parameters "toJsonSchema")) "===" (str "function")]) [
-          (try [
-              (return (call (dot parameters "toJsonSchema") []))
-            ] [
-              (catch null [
-                (return undefined)
-              ])
-            ])
-        ])
-        (try [
-            (return (call (dot JSON "parse") [(call (dot JSON "stringify") [parameters])]))
-          ] [
-            (catch null [
-              (return undefined)
-            ])
-          ])
-      ]))
-      blank
-      ({
-        schema,
-        depth,
-      }: (fn tsType [schema depth] [
-        (if' (infix [(not schema) "||" depth ">" (ternary PILOT 8 2)]) (return (str "unknown")))
-        (if' PILOT ({variants}: [
-          (if' (call (dot Object "hasOwn") [schema (str "const")]) (return (call (dot JSON "stringify") [(dot schema "const")])))
-          (if' (call (dot Array "isArray") [(dot schema "enum")]) (return (call (dot (call (dot schema "enum.map") [({value}: (arrow value (call (dot JSON "stringify") [value])))]) "join") [(str " | ")])))
-          (const variants (infix [(dot schema "anyOf") "??" (dot schema "oneOf")]))
-          (if' (call (dot Array "isArray") [variants]) (return (call (dot (call (dot variants "map") [({value}: (arrow value (call tsType [value (infix [depth "+" 1])])))]) "join") [(str " | ")])))
-          (if' (call (dot Array "isArray") [(dot schema "type")]) (return (call (dot (call (dot schema "type.map") [({type}: (arrow type (call tsType [(obj [(spread schema) type]) (infix [depth "+" 1])])))]) "join") [(str " | ")])))
-          (if' (infix [(dot schema "type") "===" (str "null")]) (return (str "null")))
-        ]))
-        (if' (infix [(call (dot Array "isArray") [(dot schema "enum")]) "&&" (call (dot schema "enum.every") [({value}: (arrow value (infix [(typeof value) "===" (str "string")])))])]) [
-          (return (call (dot (call (dot schema "enum.map") [({value}: (arrow value (call (dot JSON "stringify") [value])))]) "join") [(str " | ")]))
-        ])
-        (switch (dot schema "type") [
-          (case (str "string") [(return (str "string"))])
-          (case (str "number") [])
-          (case (str "integer") [(return (str "number"))])
-          (case (str "boolean") [(return (str "boolean"))])
-          (case (str "array") (braces ({item}: [
-            (const item (call tsType [(dot schema "items") (infix [depth "+" 1])]))
-            (return (ternary (call (dot (regex "[|&]" "") "test") [item]) (tpl ["(" (sub item) ")[]"]) (tpl [(sub item) "[]"])))
-          ])))
-          (case (str "object") (braces ({
-            required,
-            entries,
-          }: [
-            (if' (not (dot schema "properties")) (return (str "Record<string, unknown>")))
-            (const required (new Set [(infix [(dot schema "required") "??" (array [])])]))
-            (const entries (call (dot (call (dot Object "entries") [(dot schema "properties")]) "map") [
-              ({
-                key,
-                value,
-                printedKey,
-              }: (arrow [(array [key value])] [
-                (const printedKey (ternary (call (dot TS_IDENTIFIER "test") [key]) key (call (dot JSON "stringify") [key])))
-                (return (tpl [(sub (ternary (infix [PILOT "&&" (typeof value) "===" (str "object") "&&" value "&&" (str "description") "in" value]) (call descriptionText [(dot value "description")]) (str ""))) (sub printedKey) (sub (ternary (call (dot required "has") [key]) (str "") (str "?"))) ": " (sub (call tsType [value (infix [depth "+" 1])]))]))
-              ]))
-            ]))
-            (return (tpl ["{ " (sub (call (dot entries "join") [(str "; ")])) " }"]))
-          ])))
-          (case null [(return (str "unknown"))])
-        ])
-      ]))
-      blank
-      ({
-        tools,
-        lines,
-        text,
-      }: (fn declarationsFor [tools] [
-        blank
-        (const lines (array []))
-        ({
-          tool,
-          wire,
-          args,
-          printedName,
-        }: (forOf tool (call (dot (array [(spread tools)]) "sort") [
-            ({
-              a,
-              b,
-            }: (arrow [a b] (call (dot a "name.localeCompare") [(dot b "name")])))
-          ]) [
-            (if' (call (dot DIRECT_TOOLS "has") [(dot tool "name")]) continue)
-            (const wire (call wireSchema [(dot tool "parameters")]))
-            (const args (ternary (infix [(dot wire "?.type") "===" (str "object") "&&" (dot wire "properties")]) (call tsType [wire 0]) (str "unknown")))
-            (const printedName (ternary (call (dot TS_IDENTIFIER "test") [(dot tool "name")]) (dot tool "name") (call (dot JSON "stringify") [(dot tool "name")])))
-            (if' PILOT (call (dot lines "push") [(tpl ["  " (sub (call descriptionText [(dot tool "description")]))])]))
-            (call (dot lines "push") [(tpl ["  " (sub printedName) "(args: " (sub args) "): Promise<" (sub (ternary PILOT (str "{ text: string; details?: unknown }") (str "unknown"))) ">;"])])
-          ]))
-        (let' text (tpl ["declare const tool: {\\n" (sub (call (dot lines "join") [(str "\\n")])) "\\n};"]))
-        (if' (infix [(dot text "length") ">" MAX_DECLARATION_CHARS]) [
-          (infix [text "=" (tpl [(sub (call (dot text "slice") [0 MAX_DECLARATION_CHARS])) "\\n  // truncated\\n};"])])
-        ])
-        (return text)
-      ]))
-      blank
-      ({declarations}: (fn codeModeSection [declarations] [
-        (if' PILOT (return (tpl ["\n# Code Mode\nCells are Python, not JavaScript. Call enabled tools with \\`r = await tool.read({\"path\": \"file\"})\\` and print \\`r[\"text\"]\\`; results are dictionaries with text and optional details, not objects with \\`.text\\`. Batch independent calls with \\`import asyncio; results = await asyncio.gather(...)\\`, or use sequential awaits. Reserve separate cells for dependent work. \\`eval\\` is the only direct tool; the TypeScript declarations below document tool arguments, not the cell language.\nGive every cell a title of 2–5 words. Finished background jobs and helpers report back themselves: do not poll with pgrep, ps or sleep loops. Use \\`await tool.read({\"path\": \"proc://JOB_ID\"})\\` only when inspecting a known job is needed. Long shell work can use \\`{\"async\": True}\\`; this is a bash argument, not an eval argument.\nThere is no built-in sh helper. Python state usually persists, but a timeout or cancellation can restart the interpreter even if its banner says it remains running. If a previously defined helper or variable is missing after a timeout, reload its setup before using it.\n\n\\`\\`\\`ts\n" (sub declarations) "\n\\`\\`\\`\n"])))
-        (return (tpl ["\n# Code Mode\n\\`eval\\` is the only tool callable directly. Every other session tool is reachable inside an eval cell as \\`await tool.<name>(args)\\`:\nplan several operations into one cell, run independent calls with \\`Promise.all\\`, and read \\`result.text\\` (plus \\`result.details\\`) instead of expecting a rendered tool card.\nReserve separate cells for steps that must inspect earlier results.\nGive every cell a \\`title\\` of 2–5 words saying what it does, such as \\`Reading provider config\\`: the transcript shows titles, not code.\n\n\\`\\`\\`ts\n" (sub declarations) "\n\\`\\`\\`\n"]))
-      ]))
-      blank
-      ({
-        text,
-        declarationText,
-        start,
-        bodyStart,
-        nextHeading,
-        end,
-      }: (fn rewriteInventory [text declarationText] [
-        (const start (call (dot text "indexOf") [INVENTORY_HEADING]))
-        (const bodyStart (infix [start "+" (dot INVENTORY_HEADING "length")]))
-        (const nextHeading (call (dot text "indexOf") [(str "\\n# ") bodyStart]))
-        (const end (ternary (infix [nextHeading "<" 0]) (dot text "length") (infix [nextHeading "+" 1])))
-        (return (tpl [(sub (call (dot text "slice") [0 start])) (sub (call codeModeSection [declarationText])) (sub (call (dot text "slice") [end]))]))
-      ]))
-      blank
-      ({
-        tool,
-        name,
-      }: (fn toolName [tool] [
-        (const name (infix [(dot tool "?.function?.name") "??" (dot tool "?.name")]))
-        (return (ternary (infix [(typeof name) "===" (str "string")]) name undefined))
-      ]))
-      blank
-      ({name}: (fn isDirect [name] [
-        (return (below (infix (rows [
-          (call (dot DIRECT_TOOLS "has") [name])
-          "||"
-          (call (dot name "startsWith") [CLAUDE_TOOL_PREFIX])
-          "&&"
-          (call (dot DIRECT_TOOLS "has") [(call (dot name "slice") [(dot CLAUDE_TOOL_PREFIX "length")])])
-        ]))))
-      ]))
-      blank
-      ({
-        messages,
-        tools,
-        kept,
-      }: (fn withoutDemotedToolChanges [messages tools] [
-        (const kept (new Set [(call (dot tools "map") [toolName])]))
-        (return (call (dot messages "flatMap") [
-          ({
-            message,
-            content,
-          }: (arrow message [
-            (if' (not (call (dot Array "isArray") [(dot message "?.content")])) (return (array [message])))
-            (const content (call (dot message "content.filter") (rows [
-              ({block}: (arrow block (below (infix [(dot block "?.type") "!==" (str "tool_addition") "&&" (dot block "?.type") "!==" (str "tool_removal") "||" (call (dot kept "has") [(dot block "tool?.name")])]))))
-            ])))
-            (if' (infix [(dot content "length") "===" (dot message "content.length")]) (return (array [message])))
-            (return (ternary (infix [(dot content "length") ">" 0]) (array [(obj [(spread message) content])]) (array [])))
-          ]))
-        ]))
-      ]))
-      blank
-      ({
-        payload,
-        tools,
-        next,
-        choice,
-        forced,
-      }: (fn filterPayload [payload] [
-        (if' (infix [(not payload) "||" (typeof payload) "!==" (str "object") "||" (not (call (dot Array "isArray") [(dot payload "tools")]))]) (return payload))
-        (const tools (call (dot payload "tools.filter") [
-          ({
-            tool,
-            name,
-          }: (arrow tool [
-            (const name (call toolName [tool]))
-            (return (infix [name "!==" undefined "&&" (call isDirect [name])]))
-          ]))
-        ]))
-        (const next (obj [(spread payload) tools]))
-        (if' (call (dot Array "isArray") [(dot payload "messages")]) (infix [(dot next "messages") "=" (call withoutDemotedToolChanges [(dot payload "messages") tools])]))
-        (const choice (dot payload "tool_choice"))
-        (const forced (ternary (infix [(typeof choice) "===" (str "string")]) choice (infix [(dot choice "?.name") "??" (dot choice "?.function?.name")])))
-        (if' (infix [(typeof forced) "===" (str "string") "&&" forced "!==" (str "auto") "&&" forced "!==" (str "none") "&&" (not (call isDirect [forced]))]) [
-          (delete (dot next "tool_choice"))
-        ])
-        (return next)
-      ]))
-      blank
-      ({ctx}: (fn sessionId [ctx] [
-        (return (infix [(optCall (dot ctx "?.sessionManager?.getSessionId") []) "??" (str "default")]))
-      ]))
-      blank
-      (export (default ({
-        pi,
-        declarationText,
-        insideEval,
-        coded,
-      }: (fn codeMode [pi] [
-        (let' declarationText (str ""))
-        (const insideEval (new Set []))
-        (const coded (new Set []))
-        blank
-        (call (dot pi "setLabel") [(str "Code mode")])
-        (if' PILOT (call (dot pi "on") [
-          (str "session_start")
-          (async (arrow [] [
-            (if' (not (dot process "env.OMP_BOT_BOXED")) [
-              (call (dot HIDDEN_TOOLS "add") [(str "box")])
-              (call (dot HIDDEN_TOOLS "add") [(str "context_check")])
-            ])
-            (await (call (dot pi "setActiveTools") [(call (dot (call (dot pi "getActiveTools") []) "filter") [({name}: (arrow name (infix [(not (call (dot HIDDEN_TOOLS "has") [name])) "&&" (below (infix [(not HELPER_TOOLS) "||" (call (dot HELPER_TOOLS "has") [name])]))])))])]))
-          ]))
-        ]))
-        blank
-        (call (dot pi "on") [
-          (str "tool_call")
-          (async ({
-            event,
-            ctx,
-          }: (arrow [event ctx] [
-            (if' (infix [PILOT "&&" (below (infix [(call (dot HIDDEN_TOOLS "has") [(dot event "toolName")]) "||" HELPER_TOOLS "&&" (not (call (dot HELPER_TOOLS "has") [(dot event "toolName")]))]))]) (return (obj [(prop "block" true) (prop "reason" (str "This tool is disabled for this session's tool allowlist."))])))
-            (if' (infix [(dot event "toolName") "===" (str "eval")]) [
-              (call (dot insideEval "add") [(call sessionId [ctx])])
-              (return undefined)
-            ])
-            (if' (infix [(not (call (dot coded "has") [(call sessionId [ctx])])) "||" (call (dot DIRECT_TOOLS "has") [(dot event "toolName")]) "||" (ternary PILOT (call (dot (infix [(dot event "toolCallId") "??" (str "")]) "startsWith") [(tpl ["js-" (sub (dot event "toolName")) "-"])]) (call (dot insideEval "has") [(call sessionId [ctx])]))]) [
-              (return undefined)
-            ])
-            (return (obj (rows [
-              (prop "block" true)
-              (prop "reason" (tpl ["Direct " (sub (dot event "toolName")) " calls are disabled; call tool." (sub (dot event "toolName")) "(args) from eval instead."]))
-            ])))
-          ])))
-        ])
-        blank
-        (call (dot pi "on") [
-          (str "tool_result")
-          (async ({
-            event,
-            ctx,
-          }: (arrow [event ctx] [
-            (if' (infix [(dot event "toolName") "===" (str "eval")]) (call (dot insideEval "delete") [(call sessionId [ctx])]))
-          ])))
-        ])
-        blank
-        (call (dot pi "on") [
-          (str "before_agent_start")
-          (async ({
-            event,
-            systemPrompt,
-            index,
-          }: (arrow event [
-            (if' (infix [(not (call (dot Array "isArray") [(dot event "systemPrompt")])) "||" (not (call (dot (call (dot pi "getActiveTools") []) "includes") [(str "eval")]))]) (return undefined))
-            (infix [declarationText "=" (call declarationsFor [(call (dot (call (dot pi "getAllTools") []) "filter") [({tool}: (arrow tool (infix [(not PILOT) "||" (below (infix [(call (dot (call (dot pi "getActiveTools") []) "includes") [(dot tool "name")]) "&&" (not (call (dot HIDDEN_TOOLS "has") [(dot tool "name")])) "&&" (below (infix [(not HELPER_TOOLS) "||" (call (dot HELPER_TOOLS "has") [(dot tool "name")])]))]))])))])])])
-            (const systemPrompt (array [(spread (dot event "systemPrompt"))]))
-            (const index (call (dot systemPrompt "findIndex") (rows [
-              ({part}: (arrow part (infix [(typeof part) "===" (str "string") "&&" (call (dot part "includes") [INVENTORY_HEADING])])))
-            ])))
-            (ifElse (infix [index ">=" 0]) [
-                (infix [(idx systemPrompt index) "=" (call rewriteInventory [(idx systemPrompt index) declarationText])])
-              ] (if' (infix [(dot systemPrompt "length") ">" 0]) ({last}: [
-                (const last (infix [(dot systemPrompt "length") "-" 1]))
-                (infix [(idx systemPrompt last) "=" (tpl [(sub (idx systemPrompt last)) "\\n" (sub (call codeModeSection [declarationText]))])])
-              ])))
-            (return (obj [systemPrompt]))
-          ])))
-        ])
-        blank
-        (call (dot pi "on") [
-          (str "before_provider_request")
-          (async ({
-            event,
-            ctx,
-            tools,
-            evalName,
-          }: (arrow [event ctx] [
-            (const tools (ternary (call (dot Array "isArray") [(dot event "payload?.tools")]) (dot event "payload.tools") (array [])))
-            (const evalName (tpl [(sub CLAUDE_TOOL_PREFIX) "eval"]))
-            (if' (not (call (dot tools "some") [({tool}: (arrow tool (infix [(call toolName [tool]) "===" (str "eval") "||" (call toolName [tool]) "===" evalName])))])) [
-              (call (dot coded "delete") [(call sessionId [ctx])])
-              (return (dot event "payload"))
-            ])
-            (call (dot coded "add") [(call sessionId [ctx])])
-            (return (call filterPayload [(dot event "payload")]))
-          ])))
-        ])
-      ]))))
-    ]);
     codex = {
       config,
       lib,
@@ -20213,7 +19831,6 @@
         ts = {
           "omp/box-commands.ts" = box_commands_data;
           "omp/chat-look.ts" = chat_look_data;
-          "omp/code-mode.ts" = code_mode_data;
           "omp/compact-eval.ts" = compact_eval_data;
           "omp/crest-auth.ts" = omp_crest_auth_data;
           "omp/cwd.ts" = cwd_data;
@@ -20229,6 +19846,7 @@
           "luajit-opcodes.patch" = luajit_opcodes_data;
           "aquamarine-gamescope.patch" = aquamarine_gamescope_data;
           "rush-login-command.patch" = rush_login_command_data;
+          "omp-prewalk-eval.patch" = omp_prewalk_eval_data;
         };
       };
 
@@ -20236,6 +19854,7 @@
         "luajit-opcodes.patch" = pkgs.fetchFromGitHub luajit_data;
         "aquamarine-gamescope.patch" = inputs.steam-frame-nixos.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.aquamarine.src;
         "rush-login-command.patch" = inputPackages.rush.default.src;
+        "omp-prewalk-eval.patch" = inputPackages.oh-my-pi.omp.src;
       };
 
       osc = lib.mapAttrs' (name: scheme:
@@ -20730,7 +20349,13 @@
       system = "x86_64-linux";
       inherit (pkgs) lib;
       packagesFor = platform: builtins.mapAttrs (_: input: input.packages.${platform} or {}) inputs;
-      inputPackages = packagesFor system;
+      inputPackages = let
+        packages = packagesFor system;
+        omp = packages.oh-my-pi.omp.overrideAttrs (old: {
+          patches = (old.patches or []) ++ [(generators.sourceFile "omp-prewalk-eval.patch" (generators.patch.render (omp_prewalk_eval_data generators.patch)))];
+        });
+      in
+        packages // {oh-my-pi = packages.oh-my-pi // {inherit omp; default = omp;};};
 
       mkPkgs = cudaSupport:
         import (toString inputs.nixpkgs) {
@@ -21994,6 +21619,7 @@
       });
       pilotOmp = pkgs.writeShellScriptBin "omp" ''
         if [ "''${OMP_BOT_NAME-}" = Lloyd ]; then
+          export OMP_BOT_PREWALK="''${OMP_BOT_PREWALK-1}"
           exec ${omp}/bin/omp --config ${pilotConfig} "$@"
         fi
         exec ${omp}/bin/omp "$@"
@@ -22657,6 +22283,99 @@
       login = "CU-enterprise";
       bot = "CU-Bot";
     };
+    omp_prewalk_eval_data = {
+      add,
+      del,
+      file,
+      hunk,
+      ...
+    }: [
+      (file "packages/coding-agent/src/session/prewalk.ts" [
+        (hunk 1 [
+          "import type { Agent, AgentMessage, AgentToolResult, AgentTurnEndContext } from \"@oh-my-pi/pi-agent-core\";"
+          "import { invalidateMessageCache } from \"@oh-my-pi/pi-agent-core/compaction\";"
+          "import type { Model, ToolResultMessage } from \"@oh-my-pi/pi-ai\";"
+          (del "import { logger, prompt } from \"@oh-my-pi/pi-utils\";")
+          (add "import { isRecord, logger, prompt } from \"@oh-my-pi/pi-utils\";")
+          "import type { AutoPrewalkDecision } from \"../auto-prewalk/classifier\";"
+          "import type { Settings } from \"../config/settings\";"
+          "import type { LocalProtocolOptions } from \"../internal-urls\";"
+        ])
+        (hunk 52 [
+          " * conservatively `write`, so an MCP tool the server declared read-only is"
+          " * excluded through the hint the dispatch recorded for the tool that ran."
+          " */"
+          (del "function isPrewalkImplementationAction(result: ToolResultMessage): boolean {")
+          (add "function isPrewalkImplementationAction(result: Pick<ToolResultMessage, \"toolName\" | \"details\">): boolean {")
+          "\tif (!PREWALK_ACTION_TOOLS[result.toolName]) return false;"
+          "\tconst details = result.details;"
+          "\t// A direct filesystem edit/write carries no `xd://` dispatch metadata."
+        ])
+        (hunk 312 [
+          "\t\t\tthis.#disarmNoop(prewalk);"
+          "\t\t\treturn;"
+          "\t\t}"
+          (del "\t\tif (context.toolResults.some(result => result.toolName === \"todo\" && !result.isError)) this.#todoSeen = true;")
+          (add "\t\tconst directTodoSeen = this.#todoSeen || context.toolResults.some(result => result.toolName === \"todo\" && !result.isError);")
+          (add "\t\tconst todoRequired = this.#host.getActiveToolNames().includes(\"todo\");")
+          (add "\t\tlet action: string | undefined;")
+          (add "\t\tfor (const result of context.toolResults) {")
+          (add "\t\t\tif (result.toolName === \"todo\" && !result.isError) this.#todoSeen = true;")
+          (add "\t\t\tif ((directTodoSeen || this.#todoSeen || !todoRequired) && isPrewalkImplementationAction(result)) action ??= result.toolName;")
+          (add "\t\t\tif (result.toolName !== \"eval\" || !isRecord(result.details) || !Array.isArray(result.details.cells)) continue;")
+          (add "\t\t\tfor (const cell of result.details.cells) {")
+          (add "\t\t\t\tif (!isRecord(cell) || !Array.isArray(cell.statusEvents)) continue;")
+          (add "\t\t\t\tfor (const event of cell.statusEvents) {")
+          (add "\t\t\t\t\tif (!isRecord(event) || event.hasError === true || event.error !== undefined) continue;")
+          (add "\t\t\t\t\tif (event.op === \"todo\" && event.committed === true) this.#todoSeen = true;")
+          (add "\t\t\t\t\tif (")
+          (add "\t\t\t\t\t\t(this.#todoSeen || !todoRequired) &&")
+          (add "\t\t\t\t\t\ttypeof event.op === \"string\" &&")
+          (add "\t\t\t\t\t\tPREWALK_ACTION_TOOLS[event.op] === true &&")
+          (add "\t\t\t\t\t\tisPrewalkImplementationAction({ toolName: event.op, details: event })")
+          (add "\t\t\t\t\t) action ??= event.op;")
+          (add "\t\t\t\t}")
+          (add "\t\t\t}")
+          (add "\t\t}")
+          ""
+          "\t\tconst hasToolResults = context.toolResults.length > 0;"
+          "\t\tif (this.#planInjected && hasToolResults) {"
+        ])
+        (hunk 329 [
+          "\t\t\t});"
+          "\t\t}"
+          ""
+          (del "\t\tconst todoGateOpen = this.#todoSeen || !this.#host.getActiveToolNames().includes(\"todo\");")
+          (del "\t\tconst action = todoGateOpen")
+          (del "\t\t\t? context.toolResults.find(result => isPrewalkImplementationAction(result))")
+          (del "\t\t\t: undefined;")
+          "\t\tif (!action) {"
+          "\t\t\tif (!this.#planInjected) {"
+          "\t\t\t\tthis.#planInjected = true;"
+        ])
+        (hunk 376 [
+          "\t\t}"
+          "\t\tthis.#host.emitNotice("
+          "\t\t\t\"info\","
+          (del "\t\t\t`Prewalk: switched to \${target.provider}/\${target.id} after first \${action.toolName} call.`,")
+          (add "\t\t\t`Prewalk: switched to \${target.provider}/\${target.id} after first \${action} call.`,")
+          "\t\t\t\"prewalk\","
+          "\t\t);"
+          "\t\tthis.#host.agent.steer({"
+        ])
+      ])
+      (file "packages/coding-agent/src/eval/js/tool-bridge.ts" [
+        (hunk 104 [
+          "\t\t\t\top: \"write\","
+          "\t\t\t\tpath: record.path,"
+          "\t\t\t\tchars: typeof record.content === \"string\" ? record.content.length : 0,"
+          (add "\t\t\t\t...(details.xdev ? { xdev: details.xdev } : {}),")
+          "\t\t\t});"
+          "\t\tcase \"grep\":"
+          "\t\t\treturn withError({"
+        ])
+      ])
+    ];
     omp_crest_auth_data = {
       Array,
       Bun,
@@ -41505,7 +41224,6 @@
         chat_still_data = "modules/tools/tern/config/plugins/ui-menu/snippets/chat-still.data.nix";
         claude_code = "modules/dev/ai/claude-code.nix";
         claude_desktop = "modules/desktop/apps/claude-desktop.nix";
-        code_mode_data = "modules/dev/ai/omp/code-mode.data.nix";
         codex = "modules/dev/ai/codex/codex.nix";
         colorschemes_data = "modules/desktop/session/theme/colorschemes.data.nix";
         common = "modules/finix/common.nix";
@@ -41607,6 +41325,7 @@
         omp_box_data = "omp-box/omp-box.data.nix";
         omp_box_guest = "omp-box/guest.nix";
         omp_crest_auth_data = "modules/dev/ai/omp/crest-auth.data.nix";
+        omp_prewalk_eval_data = "modules/dev/ai/omp/prewalk-eval.data.nix";
         omp_optchat = "modules/dev/ai/omp/optchat.nix";
         omp_secret_data = "modules/dev/ai/omp/secrets/omp-secret.data.nix";
         omp_secrets_data = "modules/dev/ai/omp/secrets.data.nix";
