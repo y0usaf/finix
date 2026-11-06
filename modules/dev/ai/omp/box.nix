@@ -10,6 +10,7 @@
   user = config.user.name;
   home = config.users.users.${user}.home;
   catalog = config.user.dev.modelCatalog;
+  ablit = import ./ablit.data.nix;
   shares = [];
   json = lib.generators.toJSON {};
 
@@ -53,11 +54,22 @@
         openai-codex:
           baseUrl: ${gatewayUrl}/openai-codex
           apiKey: "!echo crest"
+        ablit:
+          baseUrl: http://10.0.2.2:${toString ablit.port}/v1
+          apiKey: "!echo unused"
+          models:
+            - api: openai-completions
+              id: ${ablit.id}
+              name: ${ablit.name}
+              reasoning: true
+              input: [text]
+              contextWindow: ${toString ablit.contextWindow}
+              maxTokens: ${toString ablit.maxTokens}
     '';
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel;
       defaultThinkingLevel = catalog.ompThinkingLevel;
-      inherit (catalog) enabledModels;
+      enabledModels = catalog.enabledModels ++ ["ablit/${ablit.id}"];
       packages = [];
     });
     config = pkgs.writeText "config.yml" ''
