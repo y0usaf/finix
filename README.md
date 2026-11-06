@@ -1040,7 +1040,7 @@ The pieces:
 
 Grok is a standalone stock-Tern look from the local `tern-ozette` input, not an Ozette or YoRHa layer. Its bubble variants require their corresponding bubble options; shared frost controls their material and ink. Its optional **Grok bot avatars** child needs the bot layout and replays six faithfully redrawn, 128px lossless PNG atlases with the source four-second motion at 60fps, deduplicating identical frames. The atlases total 552,489 bytes; both appearances share the dark palette. No app asset file, app code, drawing generator or reference probe ships. Nix only resolves asset paths.
 
-The native Ekko Keys plugin is pinned separately by `tern-ekko` rather than loaded from a mutable worktree path. Its registered plugin ID and saved user data remain independent of its Nix store path. Ekko owns desktop rail geometry; native phone clients retain Tern’s full-width chat layout.
+The native Ekko Keys plugin is pinned separately by `tern-ekko` rather than loaded from a mutable worktree path. Its registered plugin ID and saved user data remain independent of its Nix store path. Ekko owns desktop rail geometry; native phone clients retain Tern’s full-width chat layout. Mutable development-tree plugin links are omitted on hosts without that mount; immutable store-pinned plugins remain available, with paths classified before their registration files are generated.
 
 omp is pinned by Nix, so its startup update check is off.
 
