@@ -22401,7 +22401,7 @@
         profile,
         port,
       }: {
-        description = "headless Chromium for ${name}, DevTools on 127.0.0.1:${toString port}";
+        description = "Chromium on a virtual screen for ${name}, DevTools on 127.0.0.1:${toString port}";
         wantedBy = ["multi-user.target"];
         startLimitIntervalSec = 0;
         environment.HOME = home;
@@ -22419,10 +22419,15 @@
           fi
           mkdir -p "$profile"
           rm -f "$profile/SingletonLock" "$profile/SingletonCookie" "$profile/SingletonSocket"
-          exec ${pkgs.chromium}/bin/chromium --headless=new --user-data-dir="$profile" --password-store=basic \
+          display=$((${toString port} - 9200))
+          rm -f "/tmp/.X$display-lock" "/tmp/.X11-unix/X$display"
+          ${pkgs.xvfb}/bin/Xvfb ":$display" -screen 0 1920x1080x24 -nolisten tcp &
+          while [ ! -e "/tmp/.X11-unix/X$display" ]; do sleep 0.1; done
+          export DISPLAY=":$display"
+          exec ${pkgs.chromium}/bin/chromium --ozone-platform=x11 --user-data-dir="$profile" --password-store=basic \
             --no-first-run --no-default-browser-check --disable-sync --noerrdialogs \
             --remote-debugging-address=127.0.0.1 --remote-debugging-port=${toString port} \
-            --window-size=1280,900 --user-agent=${lib.escapeShellArg userAgent}
+            --window-size=1920,1080 --user-agent=${lib.escapeShellArg userAgent}
         '';
       };
     in {
