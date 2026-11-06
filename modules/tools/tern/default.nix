@@ -268,6 +268,7 @@
     set -eu
     export PATH=${lib.makeBinPath [pkgs.coreutils]}
     ${waitForMount "${config.user.homeDirectory}/.config/tern"}
+    ${waitForMount "${config.user.homeDirectory}/.local/state/tern"}
     exec ${package}/bin/tern remote serve --user --state-dir ${config.user.homeDirectory}/.config/tern
   '';
 
@@ -300,6 +301,8 @@ in {
     ".config/tern"
     ".local/state/tern"
     ".local/state/brain"
+    ".local/state/cmus-tsp"
+    ".local/state/so.stencil.tern"
   ];
 
   user.files = files // tuturu;
