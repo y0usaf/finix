@@ -1500,11 +1500,11 @@
     "omp-bot": {
       "flake": false,
       "locked": {
-        "lastModified": 1793976541,
-        "narHash": "sha256-ZYpPwUp23jz62e1axGwbp3Yd0Sxi2AD+rznTx32+P78=",
+        "lastModified": 1793987087,
+        "narHash": "sha256-T/G/2iRmfA4WKf8X86V5Qd3YTDrSALmSHE8+b33rpRQ=",
         "ref": "refs/heads/main",
-        "rev": "8d2836d5805e7b34e10f629626cbd57ce30a5bae",
-        "revCount": 114,
+        "rev": "797b433751a5086cc9353fdf0eb7fd99c3504f22",
+        "revCount": 115,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/omp-bot"
       },
@@ -2143,11 +2143,11 @@
     "tern-ozette": {
       "flake": false,
       "locked": {
-        "lastModified": 1793987019,
-        "narHash": "sha256-fvy+VQsxIZ9bp7AOIy+nn5BcKwdnYiiqRjzSKFT9Dh0=",
+        "lastModified": 1793987081,
+        "narHash": "sha256-Zgx+MnXm+I0dutJH7mKR0LZ6iTIUtVpayGOARcsXnLs=",
         "ref": "refs/heads/main",
-        "rev": "3326350e6f6347ac5371c1411f3840e31118b3ba",
-        "revCount": 91,
+        "rev": "76d87a80603d83347ae84488ce3e338b5b26d26a",
+        "revCount": 92,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       },
