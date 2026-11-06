@@ -25278,13 +25278,13 @@
                       rows [
                         [lambda [window snapshot]]
                         [[declare [ignore snapshot]]]
-                        [or'
+                        [[or'
                           [equal [getf window (kw "app-id")] [getf (constant policy-launcher) (kw "app-id")]]
                           [and
                             [equal [getf window (kw "app-id")] [getf (constant policy-terminal) (kw "app-id")]]
                             [equal [getf window (kw "title")] (str "launcher")]
                           ]
-                        ]
+                        ]]
                       ])
                   ]
                   [(kw "properties") (quote [[(kw "float") dot t]]) (kw "reads") (quote [(kw "workareas")])]
