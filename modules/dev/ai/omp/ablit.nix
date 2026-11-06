@@ -8,11 +8,6 @@
   home = config.user.homeDirectory;
   dir = "${home}/${model.dir}";
   url = "http://127.0.0.1:${toString model.port}";
-  # A local session stays local: the box's config.yml asks the cloud advisor to review every agent turn.
-  overlay = pkgs.writeText "omp-ablit-config.yml" ''
-    advisor:
-      enabled: false
-  '';
   # Serves the model omp-ablit picked (ablit.data.nix) from the 4090 for as long as one omp run lasts. The box's
   # QEMU user networking hands omp, which runs in the box, the host loopback as 10.0.2.2, so the box's provider
   # entry (box.nix) reaches this server and the LAN never does. --fit offloads as few layers to the CPU as the
@@ -96,7 +91,7 @@
         vram
       fi
 
-      omp --model ablit/${model.id} --config ${overlay} "$@"
+      omp --model ablit/${model.id} --config ${model.overlay} "$@"
     '';
   };
 in {

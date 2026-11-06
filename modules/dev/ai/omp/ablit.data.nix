@@ -13,4 +13,7 @@ rec {
   sha256 = "8a1306ce8f821bb7aa98817fec6d8addfea5eb438769166e2e397708aaebf8a5";
   contextWindow = 65536;
   maxTokens = 16384;
+  # omp-ablit's config overlay, placed in the box seed by box.nix: omp runs in the box, which sees only the
+  # paths its shares carry, so the overlay rides the seed share like the config omp already reads there.
+  overlay = "/mnt/seed/current/ablit.yml";
 }

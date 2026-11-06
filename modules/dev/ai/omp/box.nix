@@ -66,6 +66,11 @@
               contextWindow: ${toString ablit.contextWindow}
               maxTokens: ${toString ablit.maxTokens}
     '';
+    # omp-ablit's own overlay (ablit.nix): a local session asks no cloud model for a review.
+    ablitConfig = pkgs.writeText "ablit.yml" ''
+      advisor:
+        enabled: false
+    '';
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel;
       defaultThinkingLevel = catalog.ompThinkingLevel;
@@ -105,6 +110,7 @@
     cp ${files.settings} $out/settings.json
     cp ${files.config} $out/config.yml
     cp ${files.appendSystem} $out/APPEND_SYSTEM.md
+    cp ${files.ablitConfig} $out/ablit.yml
     ${lib.concatStrings (lib.mapAttrsToList (name: path: let
         copy = builtins.baseNameOf (toString path);
       in ''
