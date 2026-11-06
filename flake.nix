@@ -9831,9 +9831,9 @@
         (if' PILOT ({variants}: [
           (if' (call (dot Object "hasOwn") [schema (str "const")]) (return (call (dot JSON "stringify") [(dot schema "const")])))
           (if' (call (dot Array "isArray") [(dot schema "enum")]) (return (call (dot (call (dot schema "enum.map") [({value}: (arrow value (call (dot JSON "stringify") [value])))]) "join") [(str " | ")])))
-            (const variants (infix [(dot schema "anyOf") "??" (dot schema "oneOf")]))
-            (if' (call (dot Array "isArray") [variants]) (return (call (dot (call (dot variants "map") [({value}: (arrow value (call tsType [value (infix [depth "+" 1])])) )]) "join") [(str " | ")])))
-          (if' (call (dot Array "isArray") [(dot schema "type")]) (return (call (dot (call (dot schema "type.map") [({type}: (arrow type (call tsType [(obj [(spread schema) type]) (infix [depth "+" 1])])) )]) "join") [(str " | ")])))
+          (const variants (infix [(dot schema "anyOf") "??" (dot schema "oneOf")]))
+          (if' (call (dot Array "isArray") [variants]) (return (call (dot (call (dot variants "map") [({value}: (arrow value (call tsType [value (infix [depth "+" 1])])))]) "join") [(str " | ")])))
+          (if' (call (dot Array "isArray") [(dot schema "type")]) (return (call (dot (call (dot schema "type.map") [({type}: (arrow type (call tsType [(obj [(spread schema) type]) (infix [depth "+" 1])])))]) "join") [(str " | ")])))
           (if' (infix [(dot schema "type") "===" (str "null")]) (return (str "null")))
         ]))
         (if' (infix [(call (dot Array "isArray") [(dot schema "enum")]) "&&" (call (dot schema "enum.every") [({value}: (arrow value (infix [(typeof value) "===" (str "string")])))])]) [
