@@ -7724,7 +7724,7 @@
     ];
     bot_time_data = [
       {
-        select = "[data-role='omp.bot.time']";
+        select = "[data-role^='omp.bot.time.']";
         set = [
           ["align-self" "stretch"]
           ["margin" "-2px 0 -8px"]
@@ -7842,7 +7842,7 @@
     ];
     bot_yorha_labels_data = [
       {
-        select = ":root:not(#oz) [data-role='omp.bot.time']";
+        select = ":root:not(#oz) [data-role^='omp.bot.time.']";
         set = [
           ["font" "400 11px/1 var(--sans)"]
           ["letter-spacing" "1.5px"]
@@ -36874,6 +36874,8 @@
         "plugins/tuturu/src/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (src_window_data generators.luau));
         "plugins/ui-menu/plugin.toml" = generators.sourceFile "plugin.toml" (generators.tomlSource ui_menu_plugin_data);
         "plugins/ui-menu/rail.luau" = generators.sourceFile "rail.luau" (generators.luau.render (rail_data generators.luau));
+        "plugins/ui-menu/snippets/rail.css" = "${flakeInputs.tern-ozette}/rail.css";
+        "plugins/ui-menu/snippets/settings.css" = "${flakeInputs.tern-ozette}/settings.css";
         "plugins/ui-menu/snippets/account.css" = stylesheet "account.css" account_data;
         "plugins/ui-menu/snippets/answer-bubbles.css" = stylesheet "answer-bubbles.css" answer_bubbles_data;
         "plugins/ui-menu/snippets/answer-frost.css" = stylesheet "answer-frost.css" answer_frost_data;
@@ -37762,6 +37764,7 @@
       pick,
     }: [
       (local Rail [require (str "./rail")])
+      [(dot tern "css") (str "ui-menu-base") (infix [[(dot tern "fs.read") (infix [(dot tern "plugin.dir") ".." (str "/snippets/rail.css")])] ".." [(dot tern "fs.read") (infix [(dot tern "plugin.dir") ".." (str "/snippets/settings.css")])]])]
       blank
       (local TWEAKS (rows (table [
         (rows (table [
