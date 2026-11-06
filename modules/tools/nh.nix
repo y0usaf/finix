@@ -1,11 +1,48 @@
 {
   config,
   lib,
+  pkgs,
   inputPackages,
   ...
-}: {
+}: let
+  finix-switch = pkgs.writeShellApplication {
+    name = "finix-switch";
+    runtimeInputs = [pkgs.git pkgs.util-linux inputPackages.nh.default];
+    text = ''
+      flake=''${NH_FLAKE:-$HOME/finix}
+      host=$(cat /proc/sys/kernel/hostname)
+      lock=''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/agent/finix-switch.lock
+      mkdir -p "''${lock%/*}"
+      if [ -n "$(git -C "$flake" status --porcelain --untracked-files=no)" ]; then
+        echo "finix-switch: uncommitted changes in $flake are left out" >&2
+      fi
+      while :; do
+        rev=$(git -C "$flake" rev-parse HEAD)
+        system=$(nix build --no-link --print-out-paths "git+file://$flake?rev=$rev#nixosConfigurations.$host.config.system.build.toplevel")
+        exec 9>"$lock"
+        if ! flock -n 9; then
+          echo "finix-switch: waiting for another switch to finish ($lock)" >&2
+          flock 9
+        fi
+        [ "$(git -C "$flake" rev-parse HEAD)" != "$rev" ] || break
+        echo "finix-switch: $flake moved past $rev during the build; building again" >&2
+        exec 9>&-
+      done
+      from=$(readlink -f /run/current-system)
+      [ "$from" = "$system" ] || nh os switch "$system" >&2
+      to=$(readlink -f /run/current-system)
+      if [ "$to" != "$system" ]; then
+        echo "finix-switch: /run/current-system is $to, not $system" >&2
+        exit 1
+      fi
+      switched=false
+      [ "$from" = "$to" ] || switched=true
+      printf '{"rev":"%s","from":"%s","to":"%s","switched":%s}\n' "$rev" "$from" "$to" "$switched"
+    '';
+  };
+in {
   environment = {
-    systemPackages = [inputPackages.nh.default];
+    systemPackages = [inputPackages.nh.default finix-switch];
     variables.NH_FLAKE = "${config.user.homeDirectory}/finix";
   };
   user.shell.rcExtra = lib.mkAfter ''

@@ -23,6 +23,7 @@ nhs                    # build this host with iets, then nh os switch
 nhs --nix              # same, evaluating with nix instead of iets
 nhs -u                 # nix flake update first; -d for a dry run
 nh os switch .         # plain nh, from ~/finix
+finix-switch           # build the committed HEAD, switch under the shared agent lock, print JSON
 nix build --no-link .#nixosConfigurations.y0usaf-desktop.config.system.build.toplevel
 nix flake check        # builds every host, plus the lint and codegen checks
 nix run .#lint         # strictix lint; `nix run .#lint -- fix` applies fixes
