@@ -1,7 +1,7 @@
 {
   config,
   frameSession,
-  madoPackages,
+  inputPackages,
   pkgs,
   ...
 }: {
@@ -26,7 +26,7 @@
       RestartSec = 5;
       TimeoutStopSec = 10;
       EnvironmentFile = frameSession.mesavars;
-      ExecStart = frameSession.inFhs "${madoPackages.mado-view}/bin/mado-view 192.168.2.201 --stats";
+      ExecStart = frameSession.inFhs "${inputPackages.mado.mado-view}/bin/mado-view 192.168.2.201 --stats";
     };
   };
 }

@@ -9,9 +9,11 @@
       finix = builtins.getFlake "path:${inputs.self}";
       config = (frame.inputs.nixpkgs.lib.nixosSystem {
         specialArgs = {
-          boloPackages = (builtins.getFlake "path:${inputs.bolo}").packages.aarch64-linux;
-          madoPackages = (builtins.getFlake "path:${inputs.mado}").packages.aarch64-linux;
-          flakeInputs.cleanker = builtins.getFlake "path:${inputs.cleanker}";
+          inputPackages = {
+            bolo = (builtins.getFlake "path:${inputs.bolo}").packages.aarch64-linux;
+            mado = (builtins.getFlake "path:${inputs.mado}").packages.aarch64-linux;
+            cleanker = (builtins.getFlake "path:${inputs.cleanker}").packages.aarch64-linux;
+          };
           inherit (finix.lib) generators;
         };
         modules = [

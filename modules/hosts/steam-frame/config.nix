@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }: {
@@ -21,6 +22,11 @@
     homeDirectory = lib.mkOption {
       type = lib.types.str;
       default = "/home/steamos";
+    };
+    files = lib.mkOption {
+      type = lib.types.attrsOf lib.types.deferredModule;
+      default = {};
+      description = "Files manzil manages in the user's home, by path relative to it.";
     };
   };
 
@@ -46,9 +52,10 @@
       };
     };
 
+    user.files = (import ../shared.nix {inherit lib;}).bashFiles {};
     manzil = {
       clobberByDefault = true;
-      users.${config.user.name}.files = (import ../shared.nix {inherit lib;}).bashFiles {};
+      users.${config.user.name}.files = lib.mkAliasDefinitions options.user.files;
     };
   };
 }

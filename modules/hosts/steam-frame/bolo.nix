@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  boloPackages,
+  inputPackages,
   ...
 }: let
   user = config.user.name;
@@ -29,8 +29,8 @@
   '';
 in {
   environment.systemPackages = [
-    boloPackages.bolo
-    boloPackages.bolod
+    inputPackages.bolo.bolo
+    inputPackages.bolo.bolod
   ];
 
   services.udev.extraRules = ''
@@ -63,7 +63,7 @@ in {
         pkgs.coreutils
       ];
       serviceConfig = {
-        ExecStart = "${boloPackages.bolod}/bin/bolod";
+        ExecStart = "${inputPackages.bolo.bolod}/bin/bolod";
         Restart = "on-failure";
         RestartSec = "5s";
       };
