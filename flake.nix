@@ -78,6 +78,11 @@
       flake = false;
     };
 
+    tern-ekko = {
+      url = "git+file:///home/y0usaf/dev/developing/tern-ekko";
+      flake = false;
+    };
+
     tern-ozette = {
       url = "git+file:///home/y0usaf/dev/developing/tern-ozette";
       flake = false;
@@ -12880,7 +12885,7 @@
 
       environment.systemPackages = [inputPackages.ekko.default];
     };
-    ekko_data = "/home/y0usaf/dev/developing/tern-ekko";
+    ekko_data = "${flakeInputs.tern-ekko}";
     elden_ring = {
       config,
       lib,
