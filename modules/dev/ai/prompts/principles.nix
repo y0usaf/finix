@@ -1,0 +1,89 @@
+{config, ...}: {
+  user.files."AGENTS.md".text = ''
+    # Principles
+
+    Build up from a floor that always works: small parts with one job each,
+    shipped together, each removable without residue. When the rules below
+    conflict, this decides.
+
+    For personal projects. In work repos, forks, upstream checkouts and
+    `~/dev/ref`, that repo's conventions win. Edit this file only when asked;
+    if a rule keeps losing arguments, propose changing it.
+
+    ## Code
+
+    - **One job.** A project's README opens with its job in one sentence.
+      A reference lends qualities, never a feature list. Each part can run
+      as its own process.
+    - **Least code.** Prefer deletion to addition. Abstract on the third need.
+    - **Least power.** Lowest rung that works on any machine: constant <
+      data < config < pure function < code with I/O or state.
+    - **Deterministic first.** What code can decide (lifecycle, cleanup,
+      routing, retries) is a state machine or a rule, not an agent call.
+      Spend model calls only on judgment.
+    - **Small engine, rich surface.** Few tools, commands and flags in the
+      machinery; play and polish belong in the UI, not the engine.
+    - **No hardcoding.** A value that could differ by machine or user is
+      discovered or read from config, and set in one place.
+    - **Least deps.** Take a dependency only for knowledge you'd otherwise
+      rediscover; when the interface under it is simpler (sysfs, /proc), use
+      that. Ship every dependency you keep inside the package.
+    - **Unix.** Decisions stay out of machinery. Narrow interfaces: a feature
+      lands in the module that owns it. Machine-readable output. State
+      inspectable without a debugger. Fail loudly on bad input where it
+      enters; a command that succeeds prints only its result. Generate
+      what you would hand-maintain. Measure before optimizing.
+
+    ## Architecture, when a system has these parts
+
+    - **Floor first.** The floor is the least a system needs for you to reach
+      it, see its state and fix it: silva's gateway and web UI, tomoe with its
+      default bindings. It starts with nothing above it and never waits on or
+      dies with what's above it. Anything that could crash it runs in another
+      process, from the same binary if you like; anything that could hang it
+      runs there or under a budget. `nix run` with no config reaches the
+      floor; break any part above it and the floor says what broke.
+    - **Clean unmount.** Anything mounted at runtime reverts all its effects
+      on unmount, child processes, locks and sockets included, and declares
+      what it reads; a changed dependency updates exactly its consumers.
+      Snapshot, mount, exercise, unmount, diff: residue is a bug. After a
+      kill, the next start clears what the dead run left and keeps its data.
+      Ref: github.com/cordiverse/paper
+    - **No privileged path.** Built-ins use the public API a stranger would,
+      and the system still starts without them.
+    - **Daemon, thin client.** State that outlives its viewer lives in a
+      daemon. One integer wire version; breaking changes reject old clients
+      explicitly.
+
+    ## Verification
+
+    Through Nix, locally: `nix build`, `nix flake check`, `nix run`; no CI.
+    `cargo fmt`, `clippy` and `nix fmt` run natively. Say it builds once
+    `nix build` exits zero; say it works only after running the built
+    artifact. Exercise instances you start (own socket, private bus,
+    `env -i`), never the running session. Quote the command. A commit that
+    deletes a check says so.
+
+    ## Filesystem
+
+    Every file has an owner, a lifetime and a reader; decide all three
+    before writing it.
+
+    - Repo work goes in the repo where its layout says, then gets committed
+      or deleted.
+    - A repo's prose is its README, and AGENTS.md for what an agent can't
+      learn from the code. Write no other markdown unless a person asked to
+      read it: a plan goes in the task list, progress in commit messages,
+      findings in the reply, a procedure in a script. An existing plan,
+      status or notes file is not precedent; delete it rather than update it.
+    - Session scratch (probes, logs, dumps, drafts) goes in the harness
+      scratchpad, else `$XDG_RUNTIME_DIR/agent/<slug>/`. Never the cwd,
+      `$HOME`, `~/dev`, or a repo root.
+    - Work that outlives the session (spike, repro, eval, report) goes in
+      `~/dev/sandbox/<slug>-<YYYYMMDD>/` with a one-line README.
+    - No `.orig` or `.bak`: git is the backup. `nix build` takes `--no-link`
+      or `-o` into scratch; a stray result link pins its store path.
+    - Before finishing, name each file you created outside the repo's
+      tracked tree, then delete it or report it.
+  '';
+}

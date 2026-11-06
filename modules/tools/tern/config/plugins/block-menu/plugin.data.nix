@@ -1,0 +1,1 @@
+[[["schema" 1] ["id" "block-menu"] ["name" "Block Menu"] ["version" "0.1.0"] ["description" "Ctrl+N opens a menu of every block type: terminal, agent, browser, plugins, and the rest."] ["icon" "plus"] ["window" "window.luau"]]]

@@ -1,0 +1,148 @@
+{
+  lib,
+  pkgs,
+  ...
+}: let
+  cpuThreads = 32;
+  perThread = 100000;
+in {
+  networking.hostName = "y0usaf-desktop";
+
+  finix.persistence.allowlist.directories = [
+    "/root"
+    "/var/lib/btrbk"
+    "/var/lib/sbctl"
+  ];
+
+  environment.systemPackages = [pkgs.btrbk];
+
+  finit = {
+    tmpfiles.rules = ["d /btrfs/_snapshots 0755 root root"];
+    cgroups.build = {
+      "cpu.idle" = 1;
+      "cpu.max" = cpuThreads * perThread * 6 / 10;
+    };
+    services = {
+      cargo-cgroup = {
+        description = "move session cargo builds into the build cgroup";
+        command = pkgs.writeShellScript "cargo-cgroup" ''
+          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.procps]}
+          cg=/sys/fs/cgroup/build/cargo
+          mkdir -p "$cg"
+          echo ${toString (cpuThreads / 2 * perThread)} > "$cg/cpu.max" 2>/dev/null
+          trap 'rmdir "$cg" 2>/dev/null; exit 0' TERM INT
+          while sleep 1; do
+            pids=$(pgrep -d, '^\.?(cargo|rustc|clippy-driver)')
+            while [ -n "$pids" ]; do
+              for pid in ''${pids//,/ }; do
+                case $(cat "/proc/$pid/cgroup" 2>/dev/null) in
+                  0::/user/*) echo "$pid" > "$cg/cgroup.procs" 2>/dev/null ;;
+                esac
+              done
+              pids=$(pgrep -d, -P "$pids")
+            done
+          done
+        '';
+      };
+      nix-daemon.cgroup = lib.mkForce {
+        build = {
+          "cpu.max" = cpuThreads / 2 * perThread;
+          "pids.max" = 1048576;
+        };
+      };
+      nacre.cgroup.system."cpu.max" = cpuThreads / 4 * perThread;
+    };
+  };
+
+  providers.scheduler = {
+    backend = "cron";
+    tasks.nix-gc = {
+      interval = "daily";
+      command = "${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +10 && ${pkgs.nix}/bin/nix-collect-garbage --delete-older-than 14d";
+    };
+    tasks.btrbk-snapshots = {
+      interval = "hourly";
+      command = "${lib.getExe pkgs.btrbk} -q -c ${pkgs.writeText "btrbk.conf" ''
+        timestamp_format long
+        snapshot_preserve_min 1d
+        snapshot_preserve 48h 14d 4w
+
+        volume /btrfs
+          snapshot_dir _snapshots
+          subvolume @persist
+          subvolume @dev
+      ''} run";
+    };
+  };
+
+  services = {
+    nftables.tables = {
+      nixos-fw.enable = false;
+      filter = {
+        family = "inet";
+        content = (import ../shared.nix {inherit lib;}).filterTable {
+          tailscaleComment = "tailnet peers are authenticated; primary sshd:2222 path";
+          input = ''
+            udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
+
+            iifname "eno1" tcp dport 2222 accept comment "sshd LAN fallback: independent of tailscale being up. Wired NIC only - never wlp96s0"
+
+            tcp dport { 25565, 27015, 27036 } accept comment "minecraft host; steam dedicatedServer; steam remotePlay"
+            udp dport { 21027, 27015, 41641 } accept comment "syncthing LAN discovery; steam dedicatedServer; tailscale direct path (parity.nix --port=41641)"
+            udp dport 27031-27036 accept comment "steam remotePlay"
+            tcp dport 2234 accept comment "nicotine-plus Soulseek"
+            udp dport 2234 accept comment "nicotine-plus Soulseek"
+
+            iifname "eno1" tcp dport 9757 accept comment "mado for the Steam Frame"
+            iifname "eno1" udp dport 9757 accept comment "mado for the Steam Frame"
+
+            iifname "eno1" udp dport 8376 accept comment "tern remote sessions over the LAN"
+            iifname "eno1" udp dport 51820 accept comment "wireguard mesh: hub on the server"
+            iifname "wg0" accept comment "wireguard mesh: traffic from mesh peers that ends here"
+          '';
+        };
+      };
+    };
+    sysklogd.extraConfig = "*.* @192.168.2.66:514";
+    cron.enable = true;
+    networkmanager.settings.keyfile.unmanaged-devices = "interface-name:wlp96s0";
+  };
+
+  user.uid = 1001;
+  users.users.root.passwordFile = "/persist/secrets/password-hashes/root";
+
+  networking.staticFallback.address = "192.168.2.28/24";
+
+  user = {
+    appearance = {
+      termFontSize = 16;
+      hyprcursorSize = 36;
+      glass = {
+        passes = 3;
+        offset = 4;
+      };
+    };
+
+    ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram" "frame"];
+    ui.tomoe.bar.style = "spine";
+    ui.tomoe.bar.scale = 1.5;
+
+    dev.nacre = {
+      enable = true;
+      app.enable = true;
+    };
+
+    gaming = {
+      p4g.enable = true;
+      solo-leveling-arise.enable = true;
+      aethermancer.enable = true;
+      elden-ring.enable = true;
+      proton.enable = true;
+      runelite.enable = true;
+      aniimo = {
+        enable = true;
+        mods = ["camera" "movement" "rewards" "catch"];
+      };
+    };
+  };
+}

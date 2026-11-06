@@ -1,0 +1,79 @@
+{
+  config,
+  lib,
+  pkgs,
+  flakeInputs,
+  ...
+}: {
+  imports = [
+    flakeInputs.finix.nixosModules.bluetooth
+    flakeInputs.finix.nixosModules.polkit
+    flakeInputs.finix.nixosModules.rtkit
+    flakeInputs.finix.nixosModules.udisks2
+    flakeInputs.finix.nixosModules.upower
+  ];
+
+  services = {
+    bluetooth.settings = {
+      General = {
+        ControllerMode = "dual";
+        FastConnectable = true;
+      };
+      Policy.AutoEnable = true;
+    };
+    polkit.adminIdentities = ["unix-user:${config.user.name}"];
+
+    udev.packages = [
+      (pkgs.writeTextFile {
+        name = "ntsync-udev";
+        destination = "/etc/udev/rules.d/70-ntsync.rules";
+        text = ''KERNEL=="ntsync", MODE="0644"'';
+      })
+    ];
+  };
+
+  boot.kernelModules = ["v4l2loopback" "zram" "uinput" "ntsync"];
+  finit = {
+    services.polkit.command = lib.mkForce "${config.services.polkit.package.out}/lib/polkit-1/polkitd --no-debug --replace";
+    services.rtkit-daemon.enable = false;
+    tasks = {
+      zram-swap = {
+        description = "zram swap (50% RAM, zstd)";
+        command = pkgs.writeShellScript "zram-swap" ''
+          set -eu
+          export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.gnugrep pkgs.gawk pkgs.kmod]}
+          modprobe zram || true
+          grep -q zram /proc/swaps && exit 0
+          mem_kb=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+          dev=$(zramctl --find --size "$((mem_kb / 2))K" --algorithm zstd)
+          mkswap "$dev" >/dev/null
+          swapon -p 100 "$dev"
+          echo "zram-swap: $dev active"
+        '';
+        log = true;
+      };
+      x11-socket-dir = {
+        description = "fix /tmp mode + create X11 socket dirs";
+        command = pkgs.writeShellScript "x11-socket-dir" ''
+          export PATH=${lib.makeBinPath [pkgs.coreutils]}
+          chmod 1777 /tmp
+          install -d -m 1777 /tmp/.X11-unix /tmp/.ICE-unix
+        '';
+        log = true;
+      };
+    };
+  };
+
+  boot.extraModulePackages = [config.boot.kernelPackages.v4l2loopback];
+  environment.etc."modprobe.d/v4l2loopback.conf".text = ''
+    options v4l2loopback exclusive_caps=1
+  '';
+
+  users.groups = {
+    gamemode = {};
+    bluetooth = {};
+    lp = {};
+    dialout = {};
+  };
+  user.account.extraGroups = ["gamemode" "input" "bluetooth" "lp" "dialout"];
+}

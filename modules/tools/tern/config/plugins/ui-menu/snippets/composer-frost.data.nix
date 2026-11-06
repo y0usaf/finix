@@ -1,0 +1,13 @@
+[
+  {
+    select = ":root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
+    set = [
+      ["background" "var(--modal-bg)"]
+      ["-webkit-backdrop-filter" "var(--frost)"]
+      ["backdrop-filter" "var(--frost)"]
+      ["box-shadow" "var(--frost-edge)"]
+      ["--t1" "var(--frost-ink)"]
+      ["color" "var(--frost-ink)"]
+    ];
+  }
+]

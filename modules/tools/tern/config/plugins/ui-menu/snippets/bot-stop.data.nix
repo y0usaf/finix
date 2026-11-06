@@ -1,0 +1,21 @@
+[
+  {
+    select = "[data-role='omp.bot.stop']";
+    set = [
+      ["margin-left" "auto"]
+      ["padding" "2px 8px"]
+      ["border-radius" "9px"]
+      ["font-size" "0.85em"]
+      ["box-shadow" "0 0 0 1px var(--l2)"]
+      ["opacity" "0.75"]
+      ["cursor" "pointer"]
+    ];
+  }
+  {
+    select = "[data-role='omp.bot.stop']:hover";
+    set = [
+      ["opacity" "1"]
+      ["background" "var(--l1)"]
+    ];
+  }
+]

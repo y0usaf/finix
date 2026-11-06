@@ -1,0 +1,25 @@
+[
+  {
+    select = ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
+    set = [
+      ["align-self" "flex-start"]
+      ["max-width" "82%"]
+      ["padding" "10px 16px"]
+      ["border-radius" "18px 18px 18px 6px"]
+      ["background" "var(--l1)"]
+      ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
+    ];
+  }
+  {
+    select = ".sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body";
+    set = [
+      ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
+    ];
+  }
+  {
+    select = ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md .md > :last-child, .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md .md > :last-child";
+    set = [
+      ["margin-bottom" "0"]
+    ];
+  }
+]

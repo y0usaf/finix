@@ -1,0 +1,5 @@
+{
+  entry = "xfs/luascripts/GameApp/Capture/Context/CameraThrowContext.lua";
+  entryMD5 = "f52063f82b0694453235a73fc399c50a";
+  name = "catch";
+}

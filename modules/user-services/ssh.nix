@@ -1,0 +1,92 @@
+{
+  config,
+  lib,
+  ...
+}: let
+  userName = config.user.name;
+  homeDir = config.user.homeDirectory;
+  serverAddress = config.tailnet.addresses.y0usaf-server;
+in {
+  user = {
+    persist.directories = [".ssh"];
+
+    files.".ssh/config".text = ''
+      AddKeysToAgent yes
+      ServerAliveInterval 60
+      ServerAliveCountMax 5
+      ControlMaster auto
+      ControlPath %d/.ssh/master-%r@%h:%p
+      ControlPersist 10m
+      SetEnv TERM=xterm-256color
+      Host server y0usaf-server
+          HostName y0usaf-server
+          Port 2200
+          User ${userName}
+          IdentityFile ${homeDir}/.ssh/id_ed25519
+          IdentitiesOnly yes
+          ForwardAgent yes
+
+      Host rescue server-ts
+          HostName ${serverAddress}
+          User ${userName}
+          IdentityFile ${homeDir}/.ssh/id_ed25519
+          StrictHostKeyChecking accept-new
+          UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
+
+      Host rescue-root
+          HostName ${serverAddress}
+          User root
+          StrictHostKeyChecking accept-new
+          UserKnownHostsFile ${homeDir}/.ssh/known_hosts.tailscale
+
+      Host desktop y0usaf-desktop
+          HostName y0usaf-desktop
+          Port 2222
+          User ${userName}
+          IdentityFile ${homeDir}/.ssh/id_ed25519
+          IdentitiesOnly yes
+          ForwardAgent yes
+
+      Host android-phone phone
+          HostName ${config.tailnet.addresses.y0usaf-phone}
+          Port 8022
+          User nix-on-droid
+          IdentityFile ${homeDir}/.ssh/id_ed25519
+          IdentitiesOnly yes
+          ForwardAgent yes
+          ProxyJump server
+          RequestTTY no
+
+      Host phone
+          RemoteCommand exec $HOME/.nix-profile/bin/bash -i
+
+      Host steam-frame frame-nixos
+          HostName frame-nixos.home
+          User steamos
+          IdentityFile ${homeDir}/.ssh/id_rsa_frame
+          IdentitiesOnly yes
+          ControlMaster no
+          ControlPath none
+          StrictHostKeyChecking no
+          UserKnownHostsFile /dev/null
+          LogLevel error
+
+      Host github.com
+          HostName github.com
+          User git
+          IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
+          ForwardAgent yes
+
+      Host forgejo
+          HostName y0usaf-server
+          Port 2222
+          User forgejo
+          IdentityFile ${homeDir}/Tokens/id_rsa_${userName}
+          IdentitiesOnly yes
+    '';
+
+    shell.rcExtra = lib.mkAfter ''
+      export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
+    '';
+  };
+}

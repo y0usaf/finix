@@ -1,0 +1,96 @@
+{
+  config,
+  lib,
+  pkgs,
+  inputPackages,
+  ...
+}: let
+  userName = config.user.name;
+
+  tomoePkg = inputPackages.tomoe.default;
+in {
+  finit.services.seatd.runlevels = lib.mkForce "234";
+
+  xdg.portal.portals = [
+    pkgs.xdg-desktop-portal-gtk
+    (pkgs.runCommand "tomoe-portal" {
+        meta.description = "xdg-desktop-portal ScreenCast backend metadata for tomoe";
+      } ''
+        install -Dm644 ${tomoePkg}/share/xdg-desktop-portal/portals/tomoe.portal \
+          $out/share/xdg-desktop-portal/portals/tomoe.portal
+        install -Dm644 ${tomoePkg}/share/xdg-desktop-portal/tomoe-portals.conf \
+          $out/share/xdg-desktop-portal/tomoe-portals.conf
+        install -Dm644 ${tomoePkg}/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service \
+          $out/share/dbus-1/services/org.freedesktop.impl.portal.desktop.tomoe.service
+      '')
+  ];
+
+  environment.etc."xdg/xdg-desktop-portal/tomoe-portals.conf".text = lib.generators.toINI {} {
+    preferred = {
+      default = "*";
+      "org.freedesktop.impl.portal.ScreenCast" = "tomoe";
+    };
+  };
+
+  finit.tasks.xdg-runtime-dir = lib.mkIf (!config.services.elogind.enable) {
+    description = "runtime dir for ${userName}";
+    command = pkgs.writeShellScript "xdg-runtime-dir" ''
+      export PATH=${lib.makeBinPath [pkgs.coreutils]}
+      install -d -m 0700 -o ${userName} -g users ${config.user.runtimeDir}
+    '';
+    log = true;
+  };
+  environment = {
+    etc."profile.d/xdg-runtime-dir.sh".text = ''
+      if [ -z "''${XDG_RUNTIME_DIR:-}" ]; then
+        export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+      fi
+    '';
+    etc."profile.d/display.sh".text = ''
+      if [ -z "''${DISPLAY:-}" ]; then
+        for _x in /tmp/.X11-unix/X*; do
+          [ -S "$_x" ] || continue
+          export DISPLAY=":''${_x##*/X}"
+          break
+        done
+        unset _x
+      fi
+    '';
+    systemPackages = [
+      tomoePkg
+      pkgs.xwayland-satellite
+    ];
+  };
+
+  security.pam.services.login.text = lib.mkForce ''
+    account required pam_unix.so # unix (order 10900)
+
+    auth optional pam_unix.so likeauth nullok # unix-early (order 11500)
+    auth sufficient pam_unix.so likeauth nullok try_first_pass # unix (order 12800)
+    auth required pam_deny.so # deny (order 13600)
+
+    password sufficient pam_unix.so nullok yescrypt # unix (order 10200)
+
+    session required pam_env.so conffile=/etc/security/pam_env.conf readenv=0 # env
+    session required pam_unix.so # unix
+    session required pam_loginuid.so # loginuid
+    session required pam_limits.so conf=/etc/security/limits.conf
+    ${lib.optionalString config.services.elogind.enable "session optional ${config.services.elogind.package}/lib/security/pam_elogind.so"}
+    session required ${config.security.pam.package}/lib/security/pam_lastlog.so silent # lastlog
+  '';
+
+  security.pam.services.sshd.text = lib.mkForce ''
+    account required pam_unix.so debug # unix (order 10900)
+
+    auth sufficient pam_unix.so likeauth try_first_pass debug # unix (order 11500)
+    auth required pam_deny.so debug # deny (order 12300)
+
+    password sufficient pam_unix.so nullok yescrypt debug # unix (order 10200)
+
+    session required pam_env.so debug conffile=/etc/security/pam_env.conf readenv=0 # env
+    session required pam_unix.so debug # unix
+    session required pam_loginuid.so debug # loginuid
+    session required pam_limits.so
+    ${lib.optionalString config.services.elogind.enable "session optional ${config.services.elogind.package}/lib/security/pam_elogind.so"}
+  '';
+}

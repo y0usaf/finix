@@ -1,0 +1,101 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  networking = {
+    hostName = "y0usaf-server";
+    staticFallback.address = "192.168.2.66/24";
+    hosts = {
+      ${config.tailnet.addresses.y0usaf-server} = ["forgejo" "syncthing-server"];
+      ${config.tailnet.addresses.y0usaf-desktop} = ["syncthing-desktop"];
+    };
+  };
+
+  environment.systemPackages = [pkgs.btrbk];
+
+  finix.persistence.allowlist.directories = [
+    "/var/lib/btrbk"
+    "/var/lib/forgejo"
+    "/var/lib/postgresql"
+    "/var/lib/tailscale"
+    "/var/log"
+  ];
+
+  boot.kernelModules = ["nf_tables"];
+
+  services = {
+    mdevd.enable = true;
+    dhcpcd.enable = true;
+    getty = {
+      enable = true;
+      ttys = ["tty1" "ttyS0"];
+    };
+    nix-daemon.settings.trusted-public-keys = ["cache:lPd94Ltnv0ZYpkoK5UtQi/VrGkEtHRT7Af6jUzy3PLA="];
+    openssh.settings.Port = [2200];
+    nftables = {
+      enable = true;
+      tables = {
+        nixos-fw.enable = false;
+        filter = {
+          family = "inet";
+          content = (import ../shared.nix {inherit lib;}).filterTable {
+            tailscaleComment = "tailnet peers are authenticated";
+            input = ''
+              udp sport 67 udp dport 68 accept comment "dhcpcd lease traffic"
+
+              iifname "eth0" tcp dport 2200 accept comment "sshd LAN fallback: this box has no console and no IPMI, so the tailnet must not be its only way in"
+
+              tcp dport { 80, 443, 2222, 3000, 22000, 4200, 8787 } accept comment "2222 = forgejo ssh, NOT sshd (that is the eth0 rule); 8787 attic cache (LAN builds, tailnet too slow)"
+              udp dport { 21027, 22000, 4200, 41641 } accept
+              udp dport 8376 accept comment "tern remote sessions: desktop and phone peers dial in here"
+
+              udp dport 51820 accept comment "wireguard mesh: desktop and phone peers dial in here"
+              iifname "wg0" accept comment "wireguard mesh: traffic from mesh peers that ends here"
+            '';
+            forward = ''
+              iifname "wg0" accept comment "wireguard mesh: this hub forwards between mesh peers"
+              oifname "wg0" accept
+            '';
+          };
+        };
+      };
+    };
+    cron.enable = true;
+  };
+
+  user.account.shell = lib.mkForce "${pkgs.bashInteractive}/bin/bash";
+
+  finit.services.dhcpcd = {
+    command = lib.mkForce (
+      "${lib.getExe config.services.dhcpcd.package} -B "
+      + lib.escapeShellArgs config.services.dhcpcd.extraArgs
+    );
+    type = lib.mkForce null;
+    pid = lib.mkForce null;
+  };
+
+  user.dev.paseo = {
+    listenAddress = config.tailnet.addresses.y0usaf-server;
+    relay.enable = false;
+    environmentFiles = ["/home/y0usaf/Tokens/ANTHROPIC_API_KEY.txt"];
+  };
+
+  providers.scheduler = {
+    backend = "cron";
+    tasks.btrbk-snapshots = {
+      interval = "daily";
+      command = "${lib.getExe pkgs.btrbk} -q -c ${pkgs.writeText "btrbk.conf" ''
+        timestamp_format long
+        snapshot_preserve_min 2d
+        snapshot_preserve 7d 4w
+
+        volume /btrfs
+          snapshot_dir _snapshots
+          subvolume @dcim
+          subvolume @music
+      ''} run";
+    };
+  };
+}

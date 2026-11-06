@@ -1,0 +1,153 @@
+{
+  config,
+  lib,
+  pkgs,
+  inputPackages,
+  ...
+}: let
+  inherit (config.user.ui) fonts;
+in {
+  options.user.ui.fonts = {
+    mainFontName = lib.mkOption {
+      type = lib.types.str;
+      default = "Nib";
+      description = "Main font family name";
+    };
+    backup.name = lib.mkOption {
+      type = lib.types.str;
+      default = "Noto Sans CJK";
+      description = "Backup font family name";
+    };
+    emoji.name = lib.mkOption {
+      type = lib.types.str;
+      default = "Noto Color Emoji";
+      description = "Emoji font family name";
+    };
+  };
+
+  config = {
+    fonts.packages = [
+      inputPackages.fonts.default
+      pkgs.noto-fonts-cjk-sans
+      pkgs.noto-fonts-color-emoji
+      pkgs.nerd-fonts.symbols-only
+      pkgs.crimson-pro
+      pkgs.ibm-plex
+    ];
+
+    user.files.".config/fontconfig/fonts.conf".text = ''
+      <?xml version="1.0"?>
+      <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+      <fontconfig>
+        <!-- Disable all fonts by default -->
+        <selectfont>
+          <rejectfont>
+            <pattern>
+              <patelt name="family">
+                <string>*</string>
+              </patelt>
+            </pattern>
+          </rejectfont>
+        </selectfont>
+        <!-- Explicitly enable only main, emoji, and CJK fonts -->
+        <selectfont>
+          <acceptfont>
+            <pattern>
+              <patelt name="family">
+                <string>${fonts.mainFontName}</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>${fonts.backup.name}</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Symbols Nerd Font</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Crimson Pro</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>IBM Plex Mono</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>${fonts.emoji.name}</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Quaver Mono</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Quaver Mono Condensed</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>m5x7 Mono</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>m5x7 Mono Condensed</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Nib</string>
+              </patelt>
+            </pattern>
+          </acceptfont>
+        </selectfont>
+        <!-- Set main font as default -->
+        <match>
+          <test name="family">
+            <string>*</string>
+          </test>
+          <edit name="family" mode="prepend">
+            <string>${fonts.mainFontName}</string>
+          </edit>
+        </match>
+        <!-- Fallback font configuration -->
+        <alias binding="strong">
+          <family>monospace</family>
+          <prefer>
+            <family>${fonts.mainFontName}</family>
+            <family>${fonts.backup.name}</family>
+            <family>Symbols Nerd Font</family>
+            <family>${fonts.emoji.name}</family>
+          </prefer>
+        </alias>
+        <alias binding="strong">
+          <family>sans-serif</family>
+          <prefer>
+            <family>${fonts.mainFontName}</family>
+            <family>${fonts.backup.name}</family>
+            <family>Symbols Nerd Font</family>
+            <family>${fonts.emoji.name}</family>
+          </prefer>
+        </alias>
+        <!-- Font rendering options -->
+        <match target="font">
+          <edit name="antialias" mode="assign"><bool>true</bool></edit>
+          <edit name="hinting" mode="assign"><bool>true</bool></edit>
+          <edit name="hintstyle" mode="assign"><const>hintslight</const></edit>
+          <edit name="rgba" mode="assign"><const>rgb</const></edit>
+          <edit name="autohint" mode="assign"><bool>true</bool></edit>
+          <edit name="lcdfilter" mode="assign"><const>lcdlight</const></edit>
+          <edit name="dpi" mode="assign"><double>${toString config.user.appearance.dpi}</double></edit>
+        </match>
+      </fontconfig>
+    '';
+  };
+}
