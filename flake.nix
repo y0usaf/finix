@@ -9861,7 +9861,7 @@
                 printedKey,
               }: (arrow [(array [key value])] [
                 (const printedKey (ternary (call (dot TS_IDENTIFIER "test") [key]) key (call (dot JSON "stringify") [key])))
-                (return (tpl [(sub (ternary PILOT (call descriptionText [(dot value "description")]) (str ""))) (sub printedKey) (sub (ternary (call (dot required "has") [key]) (str "") (str "?"))) ": " (sub (call tsType [value (infix [depth "+" 1])]))]))
+                (return (tpl [(sub (ternary (infix [PILOT "&&" (typeof value) "===" (str "object") "&&" value "!==" null "&&" (str "description") "in" value]) (call descriptionText [(dot value "description")]) (str ""))) (sub printedKey) (sub (ternary (call (dot required "has") [key]) (str "") (str "?"))) ": " (sub (call tsType [value (infix [depth "+" 1])]))]))
               ]))
             ]))
             (return (tpl ["{ " (sub (call (dot entries "join") [(str "; ")])) " }"]))
