@@ -47,10 +47,12 @@
   primaryFont = ''"${fonts.mainFontName}", "${fonts.backup.name}", "${fonts.emoji.name}"'';
 in {
   user.persist.directories = [
+    ".config/concord"
     ".config/discord"
     ".config/discordcanary"
     ".config/Vencord"
     ".config/vesktop"
+    ".local/state/concord"
   ];
   environment.systemPackages = [
     pkgs.vesktop
