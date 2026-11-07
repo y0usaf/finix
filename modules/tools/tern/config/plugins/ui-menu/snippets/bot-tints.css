@@ -1,0 +1,34 @@
+[data-role^='omp.bot.chat.'], [data-role^='omp.bot.hero.'], [data-role^='omp.bot.top.'], [data-role^='omp.bot.eventbox.'] {
+  --t: #8f6bff;
+  --p: 2px;
+  position: relative;
+  font-family: var(--sans);
+}
+
+[data-role^='omp.bot.'][data-role$='.red'] {
+  --t: #ff4d5e;
+}
+
+[data-role^='omp.bot.'][data-role$='.orange'] {
+  --t: #ff8a3d;
+}
+
+[data-role^='omp.bot.'][data-role$='.yellow'] {
+  --t: #f2b705;
+}
+
+[data-role^='omp.bot.'][data-role$='.green'] {
+  --t: #2fbf71;
+}
+
+[data-role^='omp.bot.'][data-role$='.teal'] {
+  --t: #19b8c4;
+}
+
+[data-role^='omp.bot.'][data-role$='.blue'] {
+  --t: #3d7bff;
+}
+
+[data-role^='omp.bot.'][data-role$='.pink'] {
+  --t: #ff5fa8;
+}

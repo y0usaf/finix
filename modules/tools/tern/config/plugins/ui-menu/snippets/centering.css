@@ -1,0 +1,8 @@
+html.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-tabs {
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}
+
+html.tn-themed.lay-rail.tabs-h #tabbar > .tb-in > .tb-add {
+  margin-top: 0 !important;
+}

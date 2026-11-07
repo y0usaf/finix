@@ -26,37 +26,40 @@
       "$@"
   '';
 in {
-  user.persist.directories = [".local/state/baobot-desktop"];
   finix.persistence.homeServices = ["baobot-chromium"];
 
   environment.systemPackages = [chromium];
 
-  user.ui.tomoe.extraConfig =
-    builtins.readFile "${flakeInputs.tomoe}/examples/special.lisp"
-    + ''
-      (setf +special-bindings+ '(("t" :taobao :park nil)))
-      (define-extension "baobot-chromium" (:reads ()) (snapshot state event)
-        (declare (ignore snapshot event))
-        (values state
-                (list (window-rule :baobot-chromium :app-id "${appId}" :properties '((:special . "taobao"))))
-                nil))
-    '';
+  user = {
+    persist.directories = [".local/state/baobot-desktop"];
 
-  user.files = {
-    ".local/state/omp-bot/bots/baobot/config.yml" = {
-      generator = lib.generators.toYAML {};
-      value.browser.cdpUrl = "http://10.0.2.2:${toString port}";
-    };
-    ".local/share/applications/baobot-chromium.desktop" = {
-      generator = lib.generators.toINI {};
-      value."Desktop Entry" = {
-        Name = "Taobao (baobot)";
-        Exec = "${lib.getExe chromium} ${url}";
-        Terminal = false;
-        Type = "Application";
-        Categories = "Network;WebBrowser;";
-        StartupWMClass = appId;
-        Comment = "baobot's Chromium for Taobao, DevTools on 127.0.0.1:${toString port}";
+    ui.tomoe.extraConfig =
+      builtins.readFile "${flakeInputs.tomoe}/examples/special.lisp"
+      + ''
+        (setf +special-bindings+ '(("t" :taobao :park nil)))
+        (define-extension "baobot-chromium" (:reads ()) (snapshot state event)
+          (declare (ignore snapshot event))
+          (values state
+                  (list (window-rule :baobot-chromium :app-id "${appId}" :properties '((:special . "taobao"))))
+                  nil))
+      '';
+
+    files = {
+      ".local/state/omp-bot/bots/baobot/config.yml" = {
+        generator = lib.generators.toYAML {};
+        value.browser.cdpUrl = "http://10.0.2.2:${toString port}";
+      };
+      ".local/share/applications/baobot-chromium.desktop" = {
+        generator = lib.generators.toINI {};
+        value."Desktop Entry" = {
+          Name = "Taobao (baobot)";
+          Exec = "${lib.getExe chromium} ${url}";
+          Terminal = false;
+          Type = "Application";
+          Categories = "Network;WebBrowser;";
+          StartupWMClass = appId;
+          Comment = "baobot's Chromium for Taobao, DevTools on 127.0.0.1:${toString port}";
+        };
       };
     };
   };

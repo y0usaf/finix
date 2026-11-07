@@ -14,7 +14,6 @@
             mado = (builtins.getFlake "path:${inputs.mado}").packages.aarch64-linux;
             cleanker = (builtins.getFlake "path:${inputs.cleanker}").packages.aarch64-linux;
           };
-          inherit (finix.lib) generators;
         };
         modules = [
           frame.nixosModules.default

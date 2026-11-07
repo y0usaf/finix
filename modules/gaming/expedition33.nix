@@ -1,11 +1,11 @@
 {
+  unreal,
   config,
   lib,
   pkgs,
   ...
 }: let
   iniDir = "${config.user.paths.steam}/steamapps/compatdata/1903340/pfx/drive_c/users/steamuser/AppData/Local/Sandfall/Saved/Config/Windows";
-  unreal = import ./unreal.data.nix;
   win64 = "${config.user.paths.steam}/steamapps/common/Expedition 33/Sandfall/Binaries/Win64";
   version = "0.0.13";
   clairObscurFix = pkgs.fetchzip {

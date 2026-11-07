@@ -46,7 +46,6 @@ The Frame deploy needs qemu aarch64 binfmt registered and the Frame booted from 
 | Command | Does |
 | --- | --- |
 | `nix run .#drift -- HOST [OTHER]` | list a host's packages, services and persisted paths, or diff two hosts |
-| `nix run .#beat-saber-lock -- VERSION` | print a fresh BeatMods lock for `modules/hosts/steam-frame/beat-saber/beatmods.data.nix` |
 | `nix run .#p4g-setup -- prepare\|status\|install\|disable` | install or remove the Persona 4 Golden mod pack |
 | `nix run .#omp-box-selftest` | test the omp-box microVM |
 | `nix run .#glsl-gate -- ORIGINAL GENERATED` | check two GLSL files are the same program |
@@ -57,7 +56,7 @@ The Frame deploy needs qemu aarch64 binfmt registered and the Frame booted from 
 - SSH access to y0usaf's private GitHub repos (several inputs are `git+ssh`).
 - Local checkouts under `~/dev/developing/`: `tern-script`, `boar-rs`, `omp-bot`, `tern-ekko`, `tern-ozette` and `tern-scratch` are `git+file` inputs.
 
-The main inputs are nixpkgs, finix, [manzil](https://github.com/y0usaf/manzil) (writes the user's home files), [nix-generators](https://github.com/y0usaf/nix-generators) (renders config files from Nix), [strictix](https://github.com/y0usaf/strictix) (lint) and nix-on-droid. `flake.nix` lists the rest.
+The main inputs are nixpkgs, finix, [manzil](https://github.com/y0usaf/manzil) (writes the user's home files), [strictix](https://github.com/y0usaf/strictix) (lint) and nix-on-droid. `flake.nix` lists the rest.
 
 ## Config it reads
 
@@ -82,7 +81,8 @@ The flake reads only Nix, plus the npm and Cargo lockfiles in `locks/`, which `n
 - A program that needs only its package is a line in its category's `packages.nix`.
 - Persisted paths no module owns go in `modules/hosts/common/persist.nix` when both graphical hosts keep them, else in the host's `config.nix`.
 - Declare an option only when hosts need different values or three or more modules read it.
-- A file a module renders lives beside it as `.data.nix` (structured data or a syntax tree) and renders byte for byte. `strictix import <language> FILE` converts an existing file.
+- A file a module installs lives beside it in its own language and is referenced by path or read with `builtins.readFile`/`lib.importJSON`.
+- `modules/hosts/steam-frame/beat-saber/lock.sh GAME_VERSION` rewrites `beatmods.json`, the BeatMods lock for one game version.
 - Module order matters: list options merge in load order, so moving a module can change the build.
 - Leave `programs.sudo.enable` off; its non-setuid sudo shadows the `/run/wrappers/bin/sudo` wrapper.
 - Runtime state and credentials stay out of the repo and the store. Don't add root-level `nix/`, `tests/` or `previews/`.

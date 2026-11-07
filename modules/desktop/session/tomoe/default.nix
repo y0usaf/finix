@@ -3,15 +3,12 @@
   lib,
   pkgs,
   inputPackages,
-  generators,
   ...
 }: let
   mkLispInline = form:
     if lib.isString form && builtins.match "[[:space:]]*" form == null
     then {__toLispInline = form;}
     else throw "mkLispInline: expected a nonblank string";
-
-  probeLisp = generators.lisp.render (import ./lisp/probe.data.nix generators.lisp);
 
   lispList = items:
     if items == []
@@ -62,7 +59,7 @@
 
   layouts = {
     deck = {
-      text = generators.lisp.render (import ./lisp/deck.data.nix generators.lisp);
+      file = ./lisp/deck.lisp;
       parameters.ratios = map mkLispInline ["1/2" "21/32" "11/32"];
       bindings = [
         (binding ["alt"] "h" "focus-left" "Focus Left Column")
@@ -84,7 +81,7 @@
       ];
     };
     sway = {
-      text = generators.lisp.render (import ./lisp/sway.data.nix generators.lisp);
+      file = ./lisp/sway.lisp;
       parameters.workspaces = 9;
       bindings = [
         (binding ["alt"] "h" "focus-left" "Focus Left")
@@ -257,14 +254,14 @@
   barLisp = let
     cassetteLisp = deck:
       "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
-      + probeLisp
-      + generators.lisp.render (import ./lisp/cassette.data.nix generators.lisp)
-      + deck;
+      + builtins.readFile ./lisp/probe.lisp
+      + builtins.readFile ./lisp/cassette.lisp
+      + builtins.readFile deck;
   in {
-    panels = "(defparameter +bar+ ${toLisp barParameters})\n" + generators.lisp.render (import ./lisp/bar.data.nix generators.lisp);
-    gap = "(defparameter +gap+ ${toLisp gapParameters})\n" + probeLisp + generators.lisp.render (import ./lisp/gap.data.nix generators.lisp);
-    cassette = cassetteLisp (generators.lisp.render (import ./lisp/plates.data.nix generators.lisp));
-    spine = cassetteLisp (generators.lisp.render (import ./lisp/spine.data.nix generators.lisp));
+    panels = "(defparameter +bar+ ${toLisp barParameters})\n" + builtins.readFile ./lisp/bar.lisp;
+    gap = "(defparameter +gap+ ${toLisp gapParameters})\n" + builtins.readFile ./lisp/probe.lisp + builtins.readFile ./lisp/gap.lisp;
+    cassette = cassetteLisp ./lisp/plates.lisp;
+    spine = cassetteLisp ./lisp/spine.lisp;
   };
 
   spineColors = {
@@ -319,17 +316,17 @@
 
   shaderWallpaperParameters = {
     shaders = map (entry: lib.take 2 entry ++ [(config.user.theme.apply (lib.last entry))]) [
-      ["${generators.sourceFile "cassette-squares.glsl" (import ./shaders/cassette-squares.data.nix)}" 30 "light"]
-      ["${generators.sourceFile "cassette-led.glsl" (import ./shaders/cassette-led.data.nix)}" 30 "light"]
-      ["${generators.sourceFile "hex-spiral.glsl" (import ./shaders/hex-spiral.data.nix)}" 30 "dark"]
-      ["${generators.sourceFile "dot-corridor.glsl" (import ./shaders/dot-corridor.data.nix)}" 30 "dark"]
-      ["${generators.sourceFile "su-ei.glsl" (import ./shaders/su-ei.data.nix)}" 30 "light"]
-      ["${generators.sourceFile "glass-mound.glsl" (import ./shaders/glass-mound.data.nix)}" 30 "light"]
-      ["${generators.sourceFile "llama-herd.glsl" (import ./shaders/llama-herd.data.nix)}" 240 "light"]
-      ["${generators.sourceFile "llama-herd-night.glsl" (import ./shaders/llama-herd-night.data.nix)}" 240 "dark"]
+      ["${./shaders/cassette-squares.glsl}" 30 "light"]
+      ["${./shaders/cassette-led.glsl}" 30 "light"]
+      ["${./shaders/hex-spiral.glsl}" 30 "dark"]
+      ["${./shaders/dot-corridor.glsl}" 30 "dark"]
+      ["${./shaders/su-ei.glsl}" 30 "light"]
+      ["${./shaders/glass-mound.glsl}" 30 "light"]
+      ["${./shaders/llama-herd.glsl}" 240 "light"]
+      ["${./shaders/llama-herd-night.glsl}" 240 "dark"]
       ["${shaderDir}/liquify.glsl" 30 "light"]
       ["${shaderDir}/okazz-spheres.glsl" 30 "dark"]
-      ["${generators.sourceFile "balatro.glsl" (import ./shaders/balatro.data.nix)}" 30 "dark"]
+      ["${./shaders/balatro.glsl}" 30 "dark"]
       ["${shaderDir}/xmb.glsl" 30 "dark"]
       ["${shaderDir}/aurora.glsl" 30 "dark"]
       ["${shaderDir}/stars.glsl" 24 "dark"]
@@ -475,22 +472,22 @@ in {
         // layout.parameters)})
       (defparameter +layout-bindings+ ${toLisp (layout.bindings ++ [(binding ["alt"] "t" "terminal" "Terminal")])})
     ''
-    (generators.lisp.render (import ./lisp/policy.data.nix generators.lisp))
-    layout.text
-    (generators.lisp.render (import ./lisp/user.data.nix generators.lisp))
+    (builtins.readFile ./lisp/policy.lisp)
+    (builtins.readFile layout.file)
+    (builtins.readFile ./lisp/user.lisp)
     "(defparameter +hud+ ${toLisp hudParameters})"
-    (generators.lisp.render (import ./lisp/hud.data.nix generators.lisp))
+    (builtins.readFile ./lisp/hud.lisp)
     "(defparameter +hud-theme+ ${toLisp hudThemeParameters})"
-    (generators.lisp.render (import ./lisp/theme.data.nix generators.lisp))
+    (builtins.readFile ./lisp/theme.lisp)
     "(defparameter +glass+ ${toLisp glassParameters})"
-    (generators.lisp.render (import ./lisp/glass.data.nix generators.lisp))
+    (builtins.readFile ./lisp/glass.lisp)
     barLisp.${bar.style}
     "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
-    (generators.lisp.render (import ./lisp/shader-wallpaper.data.nix generators.lisp))
+    (builtins.readFile ./lisp/shader-wallpaper.lisp)
     "(defparameter +peek+ ${toLisp peekParameters})"
-    (generators.lisp.render (import ./lisp/peek.data.nix generators.lisp))
+    (builtins.readFile ./lisp/peek.lisp)
     "(defparameter +sounds+ ${toLisp soundParameters})"
-    (generators.lisp.render (import ./lisp/sounds.data.nix generators.lisp))
+    (builtins.readFile ./lisp/sounds.lisp)
     cfg.extraConfig
   ];
 }

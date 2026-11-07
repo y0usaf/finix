@@ -1,0 +1,917 @@
+html.lay-rail.tabs-h .tb-tabs .tt .mk .hint {
+  display: none !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt .mk {
+  flex: none !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt .mk::before {
+  font-size: 11px;
+  color: var(--t4);
+  font-family: var(--sans);
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0100"] .sub::before {
+  content: "Working · now" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0100"] .mk::before {
+  content: "now" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0101"] .sub::before {
+  content: "Working · 1m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0101"] .mk::before {
+  content: "1m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0102"] .sub::before {
+  content: "Working · 2m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0102"] .mk::before {
+  content: "2m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0103"] .sub::before {
+  content: "Working · 3m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0103"] .mk::before {
+  content: "3m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0104"] .sub::before {
+  content: "Working · 4m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0104"] .mk::before {
+  content: "4m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0105"] .sub::before {
+  content: "Working · 5m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0105"] .mk::before {
+  content: "5m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0106"] .sub::before {
+  content: "Working · 6m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0106"] .mk::before {
+  content: "6m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0107"] .sub::before {
+  content: "Working · 7m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0107"] .mk::before {
+  content: "7m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0108"] .sub::before {
+  content: "Working · 8m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0108"] .mk::before {
+  content: "8m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0109"] .sub::before {
+  content: "Working · 9m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0109"] .mk::before {
+  content: "9m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E010A"] .sub::before {
+  content: "Working · 10m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E010A"] .mk::before {
+  content: "10m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E010B"] .sub::before {
+  content: "Working · 11m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E010B"] .mk::before {
+  content: "11m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E010C"] .sub::before {
+  content: "Working · 12m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E010C"] .mk::before {
+  content: "12m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E010D"] .sub::before {
+  content: "Working · 13m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E010D"] .mk::before {
+  content: "13m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E010E"] .sub::before {
+  content: "Working · 14m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E010E"] .mk::before {
+  content: "14m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E010F"] .sub::before {
+  content: "Working · 15m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E010F"] .mk::before {
+  content: "15m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0110"] .sub::before {
+  content: "Working · 16m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0110"] .mk::before {
+  content: "16m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0111"] .sub::before {
+  content: "Working · 17m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0111"] .mk::before {
+  content: "17m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0112"] .sub::before {
+  content: "Working · 18m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0112"] .mk::before {
+  content: "18m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0113"] .sub::before {
+  content: "Working · 19m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0113"] .mk::before {
+  content: "19m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0114"] .sub::before {
+  content: "Working · 20m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0114"] .mk::before {
+  content: "20m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0115"] .sub::before {
+  content: "Working · 21m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0115"] .mk::before {
+  content: "21m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0116"] .sub::before {
+  content: "Working · 22m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0116"] .mk::before {
+  content: "22m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0117"] .sub::before {
+  content: "Working · 23m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0117"] .mk::before {
+  content: "23m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0118"] .sub::before {
+  content: "Working · 24m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0118"] .mk::before {
+  content: "24m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0119"] .sub::before {
+  content: "Working · 25m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0119"] .mk::before {
+  content: "25m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E011A"] .sub::before {
+  content: "Working · 26m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E011A"] .mk::before {
+  content: "26m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E011B"] .sub::before {
+  content: "Working · 27m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E011B"] .mk::before {
+  content: "27m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E011C"] .sub::before {
+  content: "Working · 28m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E011C"] .mk::before {
+  content: "28m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E011D"] .sub::before {
+  content: "Working · 29m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E011D"] .mk::before {
+  content: "29m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E011E"] .sub::before {
+  content: "Working · 30m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E011E"] .mk::before {
+  content: "30m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E011F"] .sub::before {
+  content: "Working · 31m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E011F"] .mk::before {
+  content: "31m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0120"] .sub::before {
+  content: "Working · 32m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0120"] .mk::before {
+  content: "32m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0121"] .sub::before {
+  content: "Working · 33m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0121"] .mk::before {
+  content: "33m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0122"] .sub::before {
+  content: "Working · 34m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0122"] .mk::before {
+  content: "34m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0123"] .sub::before {
+  content: "Working · 35m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0123"] .mk::before {
+  content: "35m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0124"] .sub::before {
+  content: "Working · 36m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0124"] .mk::before {
+  content: "36m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0125"] .sub::before {
+  content: "Working · 37m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0125"] .mk::before {
+  content: "37m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0126"] .sub::before {
+  content: "Working · 38m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0126"] .mk::before {
+  content: "38m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0127"] .sub::before {
+  content: "Working · 39m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0127"] .mk::before {
+  content: "39m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0128"] .sub::before {
+  content: "Working · 40m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0128"] .mk::before {
+  content: "40m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0129"] .sub::before {
+  content: "Working · 41m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0129"] .mk::before {
+  content: "41m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E012A"] .sub::before {
+  content: "Working · 42m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E012A"] .mk::before {
+  content: "42m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E012B"] .sub::before {
+  content: "Working · 43m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E012B"] .mk::before {
+  content: "43m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E012C"] .sub::before {
+  content: "Working · 44m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E012C"] .mk::before {
+  content: "44m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E012D"] .sub::before {
+  content: "Working · 45m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E012D"] .mk::before {
+  content: "45m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E012E"] .sub::before {
+  content: "Working · 46m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E012E"] .mk::before {
+  content: "46m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E012F"] .sub::before {
+  content: "Working · 47m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E012F"] .mk::before {
+  content: "47m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0130"] .sub::before {
+  content: "Working · 48m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0130"] .mk::before {
+  content: "48m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0131"] .sub::before {
+  content: "Working · 49m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0131"] .mk::before {
+  content: "49m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0132"] .sub::before {
+  content: "Working · 50m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0132"] .mk::before {
+  content: "50m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0133"] .sub::before {
+  content: "Working · 51m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0133"] .mk::before {
+  content: "51m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0134"] .sub::before {
+  content: "Working · 52m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0134"] .mk::before {
+  content: "52m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0135"] .sub::before {
+  content: "Working · 53m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0135"] .mk::before {
+  content: "53m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0136"] .sub::before {
+  content: "Working · 54m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0136"] .mk::before {
+  content: "54m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0137"] .sub::before {
+  content: "Working · 55m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0137"] .mk::before {
+  content: "55m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0138"] .sub::before {
+  content: "Working · 56m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0138"] .mk::before {
+  content: "56m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0139"] .sub::before {
+  content: "Working · 57m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0139"] .mk::before {
+  content: "57m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E013A"] .sub::before {
+  content: "Working · 58m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E013A"] .mk::before {
+  content: "58m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E013B"] .sub::before {
+  content: "Working · 59m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E013B"] .mk::before {
+  content: "59m" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E013C"] .sub::before {
+  content: "Working · 1h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E013C"] .mk::before {
+  content: "1h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E013D"] .sub::before {
+  content: "Working · 2h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E013D"] .mk::before {
+  content: "2h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E013E"] .sub::before {
+  content: "Working · 3h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E013E"] .mk::before {
+  content: "3h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E013F"] .sub::before {
+  content: "Working · 4h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E013F"] .mk::before {
+  content: "4h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0140"] .sub::before {
+  content: "Working · 5h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0140"] .mk::before {
+  content: "5h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0141"] .sub::before {
+  content: "Working · 6h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0141"] .mk::before {
+  content: "6h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0142"] .sub::before {
+  content: "Working · 7h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0142"] .mk::before {
+  content: "7h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0143"] .sub::before {
+  content: "Working · 8h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0143"] .mk::before {
+  content: "8h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0144"] .sub::before {
+  content: "Working · 9h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0144"] .mk::before {
+  content: "9h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0145"] .sub::before {
+  content: "Working · 10h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0145"] .mk::before {
+  content: "10h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0146"] .sub::before {
+  content: "Working · 11h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0146"] .mk::before {
+  content: "11h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0147"] .sub::before {
+  content: "Working · 12h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0147"] .mk::before {
+  content: "12h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0148"] .sub::before {
+  content: "Working · 13h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0148"] .mk::before {
+  content: "13h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0149"] .sub::before {
+  content: "Working · 14h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0149"] .mk::before {
+  content: "14h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E014A"] .sub::before {
+  content: "Working · 15h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E014A"] .mk::before {
+  content: "15h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E014B"] .sub::before {
+  content: "Working · 16h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E014B"] .mk::before {
+  content: "16h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E014C"] .sub::before {
+  content: "Working · 17h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E014C"] .mk::before {
+  content: "17h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E014D"] .sub::before {
+  content: "Working · 18h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E014D"] .mk::before {
+  content: "18h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E014E"] .sub::before {
+  content: "Working · 19h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E014E"] .mk::before {
+  content: "19h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E014F"] .sub::before {
+  content: "Working · 20h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E014F"] .mk::before {
+  content: "20h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0150"] .sub::before {
+  content: "Working · 21h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0150"] .mk::before {
+  content: "21h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0151"] .sub::before {
+  content: "Working · 22h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0151"] .mk::before {
+  content: "22h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0152"] .sub::before {
+  content: "Working · 23h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0152"] .mk::before {
+  content: "23h" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0153"] .sub::before {
+  content: "Working · 1d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0153"] .mk::before {
+  content: "1d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0154"] .sub::before {
+  content: "Working · 2d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0154"] .mk::before {
+  content: "2d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0155"] .sub::before {
+  content: "Working · 3d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0155"] .mk::before {
+  content: "3d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0156"] .sub::before {
+  content: "Working · 4d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0156"] .mk::before {
+  content: "4d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0157"] .sub::before {
+  content: "Working · 5d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0157"] .mk::before {
+  content: "5d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0158"] .sub::before {
+  content: "Working · 6d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0158"] .mk::before {
+  content: "6d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0159"] .sub::before {
+  content: "Working · 7d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0159"] .mk::before {
+  content: "7d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E015A"] .sub::before {
+  content: "Working · 8d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E015A"] .mk::before {
+  content: "8d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E015B"] .sub::before {
+  content: "Working · 9d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E015B"] .mk::before {
+  content: "9d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E015C"] .sub::before {
+  content: "Working · 10d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E015C"] .mk::before {
+  content: "10d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E015D"] .sub::before {
+  content: "Working · 11d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E015D"] .mk::before {
+  content: "11d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E015E"] .sub::before {
+  content: "Working · 12d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E015E"] .mk::before {
+  content: "12d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E015F"] .sub::before {
+  content: "Working · 13d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E015F"] .mk::before {
+  content: "13d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0160"] .sub::before {
+  content: "Working · 14d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0160"] .mk::before {
+  content: "14d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0161"] .sub::before {
+  content: "Working · 15d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0161"] .mk::before {
+  content: "15d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0162"] .sub::before {
+  content: "Working · 16d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0162"] .mk::before {
+  content: "16d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0163"] .sub::before {
+  content: "Working · 17d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0163"] .mk::before {
+  content: "17d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0164"] .sub::before {
+  content: "Working · 18d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0164"] .mk::before {
+  content: "18d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0165"] .sub::before {
+  content: "Working · 19d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0165"] .mk::before {
+  content: "19d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0166"] .sub::before {
+  content: "Working · 20d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0166"] .mk::before {
+  content: "20d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0167"] .sub::before {
+  content: "Working · 21d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0167"] .mk::before {
+  content: "21d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0168"] .sub::before {
+  content: "Working · 22d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0168"] .mk::before {
+  content: "22d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0169"] .sub::before {
+  content: "Working · 23d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0169"] .mk::before {
+  content: "23d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E016A"] .sub::before {
+  content: "Working · 24d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E016A"] .mk::before {
+  content: "24d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E016B"] .sub::before {
+  content: "Working · 25d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E016B"] .mk::before {
+  content: "25d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E016C"] .sub::before {
+  content: "Working · 26d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E016C"] .mk::before {
+  content: "26d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E016D"] .sub::before {
+  content: "Working · 27d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E016D"] .mk::before {
+  content: "27d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E016E"] .sub::before {
+  content: "Working · 28d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E016E"] .mk::before {
+  content: "28d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E016F"] .sub::before {
+  content: "Working · 29d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E016F"] .mk::before {
+  content: "29d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working[title*="\E0170"] .sub::before {
+  content: "Working · 30d" !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not(.working)[title*="\E0170"] .mk::before {
+  content: "30d" !important;
+}

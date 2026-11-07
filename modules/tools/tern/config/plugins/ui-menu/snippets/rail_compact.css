@@ -1,0 +1,11 @@
+html.lay-rail.tabs-h .tb-tabs .tt {
+  height: 38px !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"]:not([data-tc]) {
+  height: 20px !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206E"]:not([data-tc]) .sub {
+  display: none !important;
+}

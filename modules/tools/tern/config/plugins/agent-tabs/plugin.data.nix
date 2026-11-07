@@ -1,1 +1,0 @@
-[[["schema" 1] ["id" "agent-tabs"] ["name" "Agent Tabs"] ["version" "0.1.0"] ["description" "Keeps registered agent tabs: reopens them after a restart in their place and colour, and relaunches one whose program exits with 76."] ["window" "window.luau"]]]

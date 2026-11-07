@@ -93,12 +93,6 @@
       flake = false;
     };
 
-    nix-generators = {
-      url = "github:y0usaf/nix-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.iets.follows = "iets";
-    };
-
     fonts = {
       url = "github:y0usaf/fonts";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -1,0 +1,26 @@
+[data-role^='omp.bot.chat.'] {
+  padding: 2px 4px 10px 6px;
+}
+
+[data-role^='omp.bot.hero.'] {
+  --p: 5px;
+  padding: 48px 0 20px 0;
+}
+
+[data-role^='omp.bot.top.'] {
+  --p: 1px;
+  padding: 2px 4px 10px 2px;
+  box-shadow: 0 1px 0 var(--l1);
+}
+
+[data-role='omp.bot.floor'] {
+  height: 34vh;
+}
+
+[data-role^='omp.bot.'].sf-void {
+  display: flex !important;
+}
+
+[data-role='omp.bot.none'], [data-role='omp.bot.none'].sf-void, [data-role='omp.bot.more'], [data-role='omp.bot.more'].sf-void {
+  display: none !important;
+}

@@ -5,7 +5,7 @@ inputs: let
   inputPackages = let
     packages = packagesFor system;
     omp = packages.oh-my-pi.omp.overrideAttrs (old: {
-      patches = (old.patches or []) ++ [(generators.sourceFile "omp-prewalk-eval.patch" (generators.patch.render (import ./dev/ai/omp/prewalk-eval.data.nix generators.patch)))];
+      patches = (old.patches or []) ++ [./dev/ai/omp/prewalk-eval.patch];
     });
   in
     packages
@@ -30,7 +30,7 @@ inputs: let
         inputs.claude-code-nix.overlays.default
         (_: _: {
           rush = inputPackages.rush.default.overrideAttrs (old: {
-            patches = (old.patches or []) ++ [(generators.sourceFile "rush-login-command.patch" (generators.patch.render (import ./shell/rush-login-command.data.nix generators.patch)))];
+            patches = (old.patches or []) ++ [./shell/rush-login-command.patch];
           });
           monstar = inputPackages.monstar.default;
           ash = inputPackages.ash.default;
@@ -52,8 +52,6 @@ inputs: let
     };
   pkgs = mkPkgs false;
 
-  generators = inputs.nix-generators.lib;
-
   mkFinixSystem = {
     modules,
     cudaSupport ? false,
@@ -63,7 +61,6 @@ inputs: let
       specialArgs = {
         flakeInputs = inputs;
         inherit inputPackages;
-        inherit generators;
       };
       modules =
         [
@@ -89,7 +86,7 @@ inputs: let
         ++ modules;
     };
 
-  nixFiles = dirs: builtins.filter (f: lib.hasSuffix ".nix" (toString f) && !lib.hasSuffix ".data.nix" (toString f)) (builtins.concatMap lib.filesystem.listFilesRecursive dirs);
+  nixFiles = dirs: builtins.filter (f: lib.hasSuffix ".nix" (toString f)) (builtins.concatMap lib.filesystem.listFilesRecursive dirs);
   graphicalModules = nixFiles [
     ./core
     ./desktop
@@ -255,12 +252,11 @@ inputs: let
     extraSpecialArgs = {
       flakeInputs = inputs;
       inputPackages = packagesFor "aarch64-linux";
-      inherit generators;
     };
     modules = [./hosts/android-phone/nix-on-droid.nix];
   };
 
-  lint = import ./lint.nix {inherit inputs inputPackages lib pkgs hosts droid generators;};
+  lint = import ./lint.nix {inherit inputs inputPackages lib pkgs hosts droid;};
 in {
   nixosConfigurations = hosts // {y0usaf-server-finix = hosts.y0usaf-server;};
 
@@ -268,27 +264,13 @@ in {
 
   nixosModules.steam-frame = ./hosts/steam-frame/config.nix;
 
-  lib = {
-    inherit generators;
-    lint = {inherit (lint) convert;};
-  };
+  lib.lint = {inherit (lint) convert;};
 
   finixConfigurations = hosts;
 
-  apps.${system} = {
-    lint = {
-      type = "app";
-      program = lib.getExe lint.app;
-    };
-    beat-saber-lock = {
-      type = "app";
-      program = lib.getExe (pkgs.writeShellApplication {
-        name = "beat-saber-lock";
-        runtimeInputs = [pkgs.coreutils pkgs.curl pkgs.findutils pkgs.jq pkgs.alejandra];
-        excludeShellChecks = ["SC2016"];
-        text = generators.shell.render (import ./hosts/steam-frame/beat-saber/lock.data.nix generators.shell);
-      });
-    };
+  apps.${system}.lint = {
+    type = "app";
+    program = lib.getExe lint.app;
   };
 
   packages.${system} = {

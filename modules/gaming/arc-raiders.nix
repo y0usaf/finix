@@ -1,10 +1,10 @@
 {
+  unreal,
   config,
   lib,
   ...
 }: let
   iniDir = "${config.user.paths.steam}/steamapps/compatdata/1808500/pfx/drive_c/users/steamuser/AppData/Local/PioneerGame/Saved/Config/WindowsClient";
-  unreal = import ./unreal.data.nix;
 in {
   user.files = {
     "${iniDir}/Engine.ini" = {

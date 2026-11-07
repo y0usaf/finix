@@ -1,0 +1,6 @@
+schema = 1
+id = "ui-menu"
+name = "UI Menu"
+version = "0.2.0"
+description = "Settings menu (Ctrl+Alt+,): independent look layers, shared message and Glass options, installed plugins and UI tweaks."
+window = "window.luau"

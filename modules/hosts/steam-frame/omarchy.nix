@@ -2,7 +2,6 @@
   lib,
   pkgs,
   frameSession,
-  generators,
   ...
 }: let
   width = 1920;
@@ -35,7 +34,7 @@
   '';
 
   aquamarine = pkgs.aquamarine.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [(generators.sourceFile "aquamarine-gamescope.patch" (generators.patch.render (import ./omarchy/aquamarine-gamescope.data.nix generators.patch)))];
+    patches = (old.patches or []) ++ [./omarchy/aquamarine-gamescope.patch];
   });
 
   uwsmApp = pkgs.writeShellScriptBin "uwsm-app" ''
@@ -114,7 +113,7 @@
     export LD_LIBRARY_PATH=${aquamarine}/lib
     unset DISPLAY
     [ -e "$HOME/.local/state/omarchy/current/theme" ] || OMARCHY_THEME_HEADLESS=1 omarchy-theme-set "Tokyo Night"
-    exec ${pkgs.hyprland}/bin/Hyprland -c ${generators.sourceFile "hyprland.lua" (generators.lua.render (import ./omarchy/hyprland.data.nix generators.lua))}
+    exec ${pkgs.hyprland}/bin/Hyprland -c ${./omarchy/hyprland.lua}
   '';
 
   overlay = lib.concatStringsSep " " [

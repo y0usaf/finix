@@ -2,7 +2,6 @@
   config,
   pkgs,
   inputPackages,
-  generators,
   ...
 }: let
   user = config.user.name;
@@ -26,7 +25,7 @@
       exec 9>${dir}/optchatd.lock
       flock -n 9 || { echo "optchat: already running (${dir}/optchatd.lock is held)" >&2; exit 1; }
       exec ${omp}/bin/omp --mode rpc --no-ui --no-session --no-extensions --no-tools --no-lsp --no-skills --no-rules --no-title \
-        -e ${generators.sourceDir pkgs "optchat" (import ./optchat/optchat.data.nix {inherit generators;})}/service.ts <>${dir}/optchatd.fifo >/dev/null
+        -e ${./optchat}/service.ts <>${dir}/optchatd.fifo >/dev/null
     '';
   };
 

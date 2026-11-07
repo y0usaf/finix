@@ -1,0 +1,125 @@
+[data-role^='omp.bot.tempo.'], [data-role^='omp.bot.type.'] {
+  position: relative;
+  flex: none;
+}
+
+[data-role='omp.bot.type.neutral'] {
+  --xb: color-mix(in srgb, var(--t) 35%, #fff);
+  --xm: color-mix(in srgb, var(--t) 50%, #fff);
+  --xs: color-mix(in srgb, var(--t) 70%, #fff);
+  --xc: color-mix(in srgb, var(--t) 82%, #000);
+  --xe: color-mix(in srgb, var(--t) 55%, #000);
+  --xw: #f8f8f8;
+  --xa: #f8f820;
+  --xi: #d8d868;
+  --xd: #c0b830;
+  --xn: #88a850;
+  --xj: #d8f8b0;
+}
+
+[data-role='omp.bot.type.hero'] {
+  --xb: #f8f8f8;
+  --xs: #bec2bf;
+  --xc: #647c9a;
+  --xe: #647c9a;
+  --xw: #f8f8f8;
+  --xj: #c8ebf1;
+  --xa: #89a8dd;
+  --xi: #c8ebf1;
+  --xd: #647c9a;
+  --xy: #f7df56;
+}
+
+[data-role='omp.bot.type.dark'] {
+  --xb: color-mix(in srgb, var(--t) 22%, #152745);
+  --xe: #1c63a1;
+  --xw: #f8f8f8;
+  --xa: #d52b38;
+  --xi: #d52b38;
+  --xd: #a71a30;
+}
+
+[data-role^='omp.bot.chao.'] {
+  position: relative;
+  flex: none;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+[data-role='omp.bot.emote'] {
+  flex: none;
+  align-items: flex-end;
+}
+
+[data-role='omp.bot.body'] {
+  position: relative;
+  align-items: center;
+}
+
+[data-role='omp.bot.line'] {
+  flex: none;
+  height: var(--p);
+  justify-content: center;
+}
+
+[data-role^='omp.bot.px.'] {
+  flex: none;
+  width: var(--p);
+  height: var(--p);
+}
+
+[data-role='omp.bot.px.o'] {
+  background: light-dark(#000, #44485e);
+}
+
+[data-role='omp.bot.px.r'] {
+  background: #ff4f7b;
+}
+
+[data-role='omp.bot.px.b'] {
+  background: var(--xb);
+}
+
+[data-role='omp.bot.px.m'] {
+  background: var(--xm);
+}
+
+[data-role='omp.bot.px.s'] {
+  background: var(--xs);
+}
+
+[data-role='omp.bot.px.c'] {
+  background: var(--xc);
+}
+
+[data-role='omp.bot.px.e'] {
+  background: var(--xe);
+}
+
+[data-role='omp.bot.px.a'] {
+  background: var(--xa);
+}
+
+[data-role='omp.bot.px.i'] {
+  background: var(--xi);
+}
+
+[data-role='omp.bot.px.d'] {
+  background: var(--xd);
+}
+
+[data-role='omp.bot.px.n'] {
+  background: var(--xn);
+}
+
+[data-role='omp.bot.px.j'] {
+  background: var(--xj);
+}
+
+[data-role='omp.bot.px.w'] {
+  background: var(--xw);
+}
+
+[data-role='omp.bot.px.y'] {
+  background: var(--xy);
+}

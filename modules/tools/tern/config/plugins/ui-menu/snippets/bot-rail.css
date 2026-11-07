@@ -1,0 +1,117 @@
+#tabbar .tt[data-tc='red'] {
+  --bot: #ff4d5e;
+}
+
+#tabbar .tt[data-tc='orange'] {
+  --bot: #ff8a3d;
+}
+
+#tabbar .tt[data-tc='yellow'] {
+  --bot: #f2b705;
+}
+
+#tabbar .tt[data-tc='green'] {
+  --bot: #2fbf71;
+}
+
+#tabbar .tt[data-tc='teal'] {
+  --bot: #19b8c4;
+}
+
+#tabbar .tt[data-tc='blue'] {
+  --bot: #3d7bff;
+}
+
+#tabbar .tt[data-tc='purple'] {
+  --bot: #8f6bff;
+}
+
+#tabbar .tt[data-tc='pink'] {
+  --bot: #ff5fa8;
+}
+
+#tabbar .tt[data-tc] {
+  border: none;
+  box-shadow: none;
+  border-radius: 10px;
+}
+
+#tabbar .tt[data-tc].on {
+  background: light-dark(#ececee, #2a2a2d) !important;
+}
+
+#tabbar .tt[data-tc] .mk.keys, #tabbar .tt[data-tc] .kbd, #tabbar .tt[data-tc] .tn-tc {
+  display: none;
+}
+
+#tabbar .tt[data-tc] .nm {
+  color: light-dark(#18181b, #f2f2f3);
+  font-weight: 500;
+}
+
+#tabbar .tt[data-tc] .sub {
+  opacity: 0.55;
+  font-size: 11px;
+}
+
+#tabbar .tt[data-tc] .sub::after {
+  font-family: var(--sans);
+  font-size: 11.5px;
+}
+
+#tabbar .tt[data-tc] .tn-dk-c {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  color: transparent;
+  background: none;
+}
+
+#tabbar .tt[data-tc] .tn-dk-c * {
+  opacity: 0;
+}
+
+#tabbar .tt[data-tc] .tn-dk-c::after {
+  content: '';
+  position: absolute;
+  left: -30px;
+  top: -30px;
+  width: 1px;
+  height: 1px;
+}
+
+#tabbar .tt[data-tc] .tn-dk-c[data-st='waiting']::before, #tabbar .tt[data-tc] .tn-dk-c[data-st='failed']::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  right: -4px;
+  top: -6px;
+  width: 4px;
+  height: 4px;
+  background: #f0a020;
+  box-shadow: 0 0 0 1px #000;
+}
+
+#tabbar .tt[data-tc] .tn-dk-c[data-st='working'] {
+  animation: railChaoBob 0.8s steps(1) infinite;
+}
+
+#tabbar .tt[data-tc] .tn-dk-c[data-st='failed']::before {
+  background: #e5484d;
+}
+
+@keyframes railChaoBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #tabbar .tt[data-tc] .tn-dk-c[data-st='working'] {
+    animation: none;
+  }
+}

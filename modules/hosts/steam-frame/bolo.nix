@@ -6,7 +6,7 @@
   ...
 }: let
   user = config.user.name;
-  inherit (import ../../desktop/apps/bolo.data.nix) model vocabulary;
+  inherit ((import ../shared.nix {inherit lib;}).bolo) model vocabulary;
   modelDir = "/home/${user}/.local/share/bolo/models/${model.name}";
   hashes = builtins.mapAttrs (_: hash:
     builtins.convertHash {

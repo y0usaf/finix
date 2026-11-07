@@ -1,20 +1,19 @@
 {
+  ablit,
   config,
   lib,
   pkgs,
   flakeInputs,
   inputPackages,
-  generators,
   ...
 }: let
   user = config.user.name;
   home = config.users.users.${user}.home;
   catalog = config.user.dev.modelCatalog;
-  ablit = import ./ablit.data.nix;
   shares = [];
   json = lib.generators.toJSON {};
 
-  proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.python.render (import ../../../../omp-box/gateway-proxy.data.nix generators.python));
+  proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (builtins.readFile ../../../../omp-box/gateway-proxy.py);
   gatewayUrl = "http://10.0.2.2:8899";
   # What omp in the box loads: built here, and copied while the box runs by omp-box-seed into the box's seed
   # share instead of baked into the guest, so a new extension, omp-bot or prompt reaches the box without
@@ -23,12 +22,12 @@
   # ${seedMount}/current/ext/NAME, a path no switch changes, so a running omp sees the same extensions list.
   seedMount = "/mnt/seed";
   extensions = {
-    "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (import ./compact-eval.data.nix generators.ts));
-    "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (import ./work-fold.data.nix generators.ts));
-    optchat = generators.sourceDir pkgs "optchat" (import ./optchat/optchat.data.nix {inherit generators;});
+    "compact-eval.ts" = "${./compact-eval.ts}";
+    "work-fold.ts" = "${./work-fold.ts}";
+    optchat = "${./optchat}";
     inherit (flakeInputs) omp-bot;
     # The same store path as the host's ext link, so omp-bot-box names a boxed bot's secrets extension by this link.
-    secrets = generators.sourceDir pkgs "secrets" (import ./secrets.data.nix);
+    secrets = "${./secrets}";
   };
   inBox = name: "${seedMount}/current/ext/${name}";
   # Programs a boxed bot gets on PATH (box.env's OMP_BOT_BOX_PATH): the secrets extension's age and omp-secret.
@@ -323,7 +322,6 @@
   pkg = pkgs.callPackage ../../../../omp-box {
     inherit user;
     inherit shares;
-    inherit generators;
     inherit (inputPackages.oh-my-pi) omp;
   };
 

@@ -3,7 +3,6 @@
   pkgs,
   flakeInputs,
   inputPackages,
-  generators,
   ...
 }: {
   user = {
@@ -15,7 +14,7 @@
     dev.prompts.host = ["`EKKO_INSTANCE` in your environment points at the ekko instance holding the live terminals."];
 
     files.".config/ekko/init.lisp".text =
-      lib.removeSuffix "\n" (generators.lisp.render (import ./init.data.nix generators.lisp))
+      builtins.readFile ./init.lisp
       + "\n"
       + builtins.readFile "${flakeInputs.ekko}/examples/themes/xp.lisp"
       + "\n(ekko/extensions:set-option :component ':xp :name :ground :value nil)\n";

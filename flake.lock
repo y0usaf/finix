@@ -1027,29 +1027,6 @@
     "nix-generators": {
       "inputs": {
         "iets": [
-          "iets"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1793910462,
-        "narHash": "sha256-pxMN9xgTMDYmg6+OVW7MWTO8HJq9VXHCDVLN1so/mSA=",
-        "owner": "y0usaf",
-        "repo": "nix-generators",
-        "rev": "7f090f4205cf9a88af0402265d996e982526b990",
-        "type": "github"
-      },
-      "original": {
-        "owner": "y0usaf",
-        "repo": "nix-generators",
-        "type": "github"
-      }
-    },
-    "nix-generators_2": {
-      "inputs": {
-        "iets": [
           "strictix",
           "iets"
         ],
@@ -1794,7 +1771,6 @@
         "monstar": "monstar",
         "nacre": "nacre",
         "nh": "nh",
-        "nix-generators": "nix-generators",
         "nix-on-droid": "nix-on-droid",
         "nixpkgs": "nixpkgs_7",
         "nixpkgs-discord-legacy": "nixpkgs-discord-legacy",
@@ -1975,7 +1951,7 @@
     "strictix": {
       "inputs": {
         "iets": "iets_2",
-        "nix-generators": "nix-generators_2",
+        "nix-generators": "nix-generators",
         "nixpkgs": [
           "nixpkgs"
         ]

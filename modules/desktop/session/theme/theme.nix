@@ -1,10 +1,9 @@
 {
-  generators,
   lib,
   pkgs,
   ...
 }: let
-  schemes = import ./colorschemes.data.nix;
+  schemes = lib.importJSON ./colorschemes.json;
 
   targets = {
     "discord-colors.css" = [".config/Vencord/themes/palette.css" ".config/vesktop/themes/palette.css"];
@@ -13,34 +12,43 @@
     "monstar-theme" = [".cache/theme/monstar"];
   };
 
-  scope = scheme: let
+  render = scheme: text: let
+    values = scheme.colors // scheme.special;
     hex = lib.removePrefix "#";
     channel = offset: value: toString (lib.fromHexString (builtins.substring offset 2 (hex value)));
-  in {
-    inherit generators;
-    values = scheme.colors // scheme.special;
     filters = {
       strip = hex;
       red = channel 0;
       green = channel 2;
       blue = channel 4;
     };
-  };
+    fill = part:
+      if builtins.isString part
+      then part
+      else let
+        filter = builtins.elemAt part 2;
+      in
+        (
+          if filter == null
+          then lib.id
+          else filters.${filter}
+        )
+        values.${builtins.elemAt part 0};
+  in
+    lib.concatMapStrings fill (builtins.split "[{][{] *([a-z0-9]+) *([|] *([a-z]+))? *[}][}]" text);
 
   templates = {
-    "discord-colors.css" = import ./templates/discord-colors.data.nix;
-    "foot-colors.ini" = import ./templates/foot-colors.data.nix;
-    "gtk-colors.css" = import ./templates/gtk-colors.data.nix;
-    "monstar-theme" = import ./templates/monstar-theme.data.nix;
-    "osc.sh" = import ./templates/osc.data.nix;
+    "discord-colors.css" = ./templates/discord-colors.css;
+    "foot-colors.ini" = ./templates/foot-colors.ini;
+    "gtk-colors.css" = ./templates/gtk-colors.css;
+    "monstar-theme" = ./templates/monstar-theme;
+    "osc.sh" = ./templates/osc.sh;
   };
 
-  instantiate = scheme: template: template (scope scheme);
-
   themes = pkgs.linkFarm "themes" (lib.concatLists (lib.mapAttrsToList (name: scheme:
-    lib.mapAttrsToList (template: source: {
+    lib.mapAttrsToList (template: file: {
       name = "${name}/${template}";
-      path = pkgs.writeText "${name}-${template}" (instantiate scheme source);
+      path = pkgs.writeText "${name}-${template}" (render scheme (builtins.readFile file));
     })
     templates)
   schemes));
@@ -96,8 +104,8 @@ in {
     default = name:
       if schemes ? ${name}
       then "${lib.getExe theme} ${name}"
-      else throw "theme: no colour scheme named ${name} in colorschemes.data.nix; there is light and dark";
-    description = "The shell command that applies the light or dark colour scheme from colorschemes.data.nix to every themed program at once, and sets the desktop colour-scheme and GTK theme that portal-aware and GTK3 apps follow live.";
+      else throw "theme: no colour scheme named ${name} in colorschemes.json; there is light and dark";
+    description = "The shell command that applies the light or dark colour scheme from colorschemes.json to every themed program at once, and sets the desktop colour-scheme and GTK theme that portal-aware and GTK3 apps follow live.";
   };
 
   config.environment.systemPackages = [theme pkgs.dconf adwaitaDark];

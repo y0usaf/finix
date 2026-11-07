@@ -5,7 +5,6 @@
   pkgs,
   hosts,
   droid,
-  generators,
 }: let
   strictix = lib.getExe' inputPackages.strictix.default "strictix";
 
@@ -33,26 +32,7 @@
 
   importers = lib.attrNames (lib.filterAttrs (_: c: !(c ? parse)) codecs);
 
-  tree = c: let
-    load = "generators.${c.id}.render (import ${c.data} generators.${c.id})";
-  in {
-    inherit (c) nix;
-    replacement =
-      if c.kind == "text"
-      then "(generators.${c.id}.render ((${c.nix}) generators.${c.id}))"
-      else if c.loader == "source"
-      then "(generators.sourceFile ${lib.strings.escapeNixString (baseNameOf c.target)} (${load}))"
-      else load;
-    reason = imported:
-      if generators.${c.id}.render (imported generators.${c.id}) == c.text
-      then null
-      else "rendering the syntax tree does not reproduce the text byte for byte";
-  };
-
-  convert = c:
-    if lib.elem c.id importers
-    then tree c
-    else literal c;
+  convert = literal;
 
   literal = c: let
     codec = codecs.${c.id};
@@ -89,120 +69,119 @@
     reason = imported: (lib.findFirst (f: f.failed) {reason = null;} (failures imported)).reason;
   };
 
-  trees = {
+  sources = {
     lisp = {
-      "tomoe-bar.lisp" = import ./desktop/session/tomoe/lisp/bar.data.nix;
-      "tomoe-cassette.lisp" = import ./desktop/session/tomoe/lisp/cassette.data.nix;
-      "tomoe-deck.lisp" = import ./desktop/session/tomoe/lisp/deck.data.nix;
-      "tomoe-gap.lisp" = import ./desktop/session/tomoe/lisp/gap.data.nix;
-      "tomoe-glass.lisp" = import ./desktop/session/tomoe/lisp/glass.data.nix;
-      "tomoe-hud.lisp" = import ./desktop/session/tomoe/lisp/hud.data.nix;
-      "tomoe-peek.lisp" = import ./desktop/session/tomoe/lisp/peek.data.nix;
-      "tomoe-plates.lisp" = import ./desktop/session/tomoe/lisp/plates.data.nix;
-      "tomoe-policy.lisp" = import ./desktop/session/tomoe/lisp/policy.data.nix;
-      "tomoe-shader-wallpaper.lisp" = import ./desktop/session/tomoe/lisp/shader-wallpaper.data.nix;
-      "tomoe-spine.lisp" = import ./desktop/session/tomoe/lisp/spine.data.nix;
-      "tomoe-sway.lisp" = import ./desktop/session/tomoe/lisp/sway.data.nix;
-      "tomoe-theme.lisp" = import ./desktop/session/tomoe/lisp/theme.data.nix;
-      "tomoe-user.lisp" = import ./desktop/session/tomoe/lisp/user.data.nix;
-      "ekko-init.lisp" = import ./shell/ekko/init.data.nix;
+      "tomoe-bar.lisp" = ./desktop/session/tomoe/lisp/bar.lisp;
+      "tomoe-cassette.lisp" = ./desktop/session/tomoe/lisp/cassette.lisp;
+      "tomoe-deck.lisp" = ./desktop/session/tomoe/lisp/deck.lisp;
+      "tomoe-gap.lisp" = ./desktop/session/tomoe/lisp/gap.lisp;
+      "tomoe-glass.lisp" = ./desktop/session/tomoe/lisp/glass.lisp;
+      "tomoe-hud.lisp" = ./desktop/session/tomoe/lisp/hud.lisp;
+      "tomoe-peek.lisp" = ./desktop/session/tomoe/lisp/peek.lisp;
+      "tomoe-plates.lisp" = ./desktop/session/tomoe/lisp/plates.lisp;
+      "tomoe-policy.lisp" = ./desktop/session/tomoe/lisp/policy.lisp;
+      "tomoe-shader-wallpaper.lisp" = ./desktop/session/tomoe/lisp/shader-wallpaper.lisp;
+      "tomoe-spine.lisp" = ./desktop/session/tomoe/lisp/spine.lisp;
+      "tomoe-sway.lisp" = ./desktop/session/tomoe/lisp/sway.lisp;
+      "tomoe-theme.lisp" = ./desktop/session/tomoe/lisp/theme.lisp;
+      "tomoe-user.lisp" = ./desktop/session/tomoe/lisp/user.lisp;
+      "ekko-init.lisp" = ./shell/ekko/init.lisp;
     };
-    javascript."jev-mcp.mjs" = import ./dev/ai/jev-mcp.data.nix;
+    javascript."jev-mcp.mjs" = ./dev/ai/jev-mcp.mjs;
     lua = {
-      "aniimo-catch.lua" = import ./gaming/aniimo/catch-lua.data.nix;
-      "aniimo-rewards.lua" = import ./gaming/aniimo/rewards-lua.data.nix;
-      "omarchy-hyprland.lua" = import ./hosts/steam-frame/omarchy/hyprland.data.nix;
+      "aniimo-catch.lua" = ./gaming/aniimo/catch.lua;
+      "aniimo-rewards.lua" = ./gaming/aniimo/rewards.lua;
+      "omarchy-hyprland.lua" = ./hosts/steam-frame/omarchy/hyprland.lua;
     };
     shell = {
-      "beat-saber-lock" = import ./hosts/steam-frame/beat-saber/lock.data.nix;
-      "omp-box" = import ../omp-box/omp-box.data.nix;
+      "beat-saber-lock" = ./hosts/steam-frame/beat-saber/lock.sh;
+      "omp-box" = ../omp-box/omp-box.sh;
     };
     glsl = {
-      "ozette-dark.glsl" = import ./desktop/session/tomoe/shaders/ozette-dark.data.nix;
-      "ozette-fields-dark.glsl" = import ./desktop/session/tomoe/shaders/ozette-fields-dark.data.nix;
-      "ozette-fields-light.glsl" = import ./desktop/session/tomoe/shaders/ozette-fields-light.data.nix;
-      "ozette-light.glsl" = import ./desktop/session/tomoe/shaders/ozette-light.data.nix;
-      "ozette-lilies-dark.glsl" = import ./desktop/session/tomoe/shaders/ozette-lilies-dark.data.nix;
-      "ozette-lilies-light.glsl" = import ./desktop/session/tomoe/shaders/ozette-lilies-light.data.nix;
-      "ozette-pond-dark.glsl" = import ./desktop/session/tomoe/shaders/ozette-pond-dark.data.nix;
-      "ozette-pond-light.glsl" = import ./desktop/session/tomoe/shaders/ozette-pond-light.data.nix;
+      "ozette-dark.glsl" = ./desktop/session/tomoe/shaders/ozette-dark.glsl;
+      "ozette-fields-dark.glsl" = ./desktop/session/tomoe/shaders/ozette-fields-dark.glsl;
+      "ozette-fields-light.glsl" = ./desktop/session/tomoe/shaders/ozette-fields-light.glsl;
+      "ozette-light.glsl" = ./desktop/session/tomoe/shaders/ozette-light.glsl;
+      "ozette-lilies-dark.glsl" = ./desktop/session/tomoe/shaders/ozette-lilies-dark.glsl;
+      "ozette-lilies-light.glsl" = ./desktop/session/tomoe/shaders/ozette-lilies-light.glsl;
+      "ozette-pond-dark.glsl" = ./desktop/session/tomoe/shaders/ozette-pond-dark.glsl;
+      "ozette-pond-light.glsl" = ./desktop/session/tomoe/shaders/ozette-pond-light.glsl;
     };
     luau = {
-      "tern-block-menu-window.luau" = import ./tools/tern/config/plugins/block-menu/window.data.nix;
-      "tern-tab-order-window.luau" = import ./tools/tern/config/plugins/tab-order/window.data.nix;
-      "tern-tuturu-window.luau" = import ./tools/tern/config/plugins/tuturu/src/window.data.nix;
-      "tern-ui-menu-rail.luau" = import ./tools/tern/config/plugins/ui-menu/rail.data.nix;
-      "tern-ui-menu-window.luau" = import ./tools/tern/config/plugins/ui-menu/window.data.nix;
+      "tern-block-menu-window.luau" = ./tools/tern/config/plugins/block-menu/window.luau;
+      "tern-tab-order-window.luau" = ./tools/tern/config/plugins/tab-order/window.luau;
+      "tern-tuturu-window.luau" = ./tools/tern/config/plugins/tuturu/src/window.luau;
+      "tern-ui-menu-rail.luau" = ./tools/tern/config/plugins/ui-menu/rail.luau;
+      "tern-ui-menu-window.luau" = ./tools/tern/config/plugins/ui-menu/window.luau;
     };
     markdown = {
-      "carly-HEARTBEAT.md" = import ./tools/tern/config/carly/HEARTBEAT.data.nix;
-      "carly-MEMORY.md" = import ./tools/tern/config/carly/MEMORY.data.nix;
-      "carly-SOUL.md" = import ./tools/tern/config/carly/SOUL.data.nix;
-      "carly-USER.md" = import ./tools/tern/config/carly/USER.data.nix;
-      "carly-2026-10-29.md" = import ./tools/tern/config/carly/memory/2026-10-29.data.nix;
-      "carly-2026-10-30.md" = import ./tools/tern/config/carly/memory/2026-10-30.data.nix;
-      "tuturu-README.md" = import ./tools/tern/config/plugins/tuturu/README.data.nix;
+      "carly-HEARTBEAT.md" = ./tools/tern/config/carly/HEARTBEAT.md;
+      "carly-MEMORY.md" = ./tools/tern/config/carly/MEMORY.md;
+      "carly-SOUL.md" = ./tools/tern/config/carly/SOUL.md;
+      "carly-USER.md" = ./tools/tern/config/carly/USER.md;
+      "carly-2026-10-29.md" = ./tools/tern/config/carly/memory/2026-10-29.md;
+      "carly-2026-10-30.md" = ./tools/tern/config/carly/memory/2026-10-30.md;
+      "tuturu-README.md" = ./tools/tern/config/plugins/tuturu/README.md;
     };
     python = {
-      "apply-reasoning-policy.py" = import ./dev/ai/codex/apply-reasoning-policy.data.nix;
-      "gateway-proxy.py" = import ../omp-box/gateway-proxy.data.nix;
-      "wrapper.py" = import ./dev/work/vercel/wrapper.data.nix;
-      "aniimo-apply.py" = import ./gaming/aniimo/apply.data.nix;
-      "p4g-setup.py" = import ./gaming/p4g/setup.data.nix;
+      "apply-reasoning-policy.py" = ./dev/ai/codex/apply-reasoning-policy.py;
+      "gateway-proxy.py" = ../omp-box/gateway-proxy.py;
+      "wrapper.py" = ./dev/work/vercel/wrapper.py;
+      "aniimo-apply.py" = ./gaming/aniimo/apply.py;
+      "p4g-setup.py" = ./gaming/p4g/setup.py;
     };
     ts = {
-      "omp/box-commands.ts" = import ./dev/ai/omp/box-commands.data.nix;
-      "omp/chat-look.ts" = import ./dev/ai/omp/chat-look.data.nix;
-      "omp/compact-eval.ts" = import ./dev/ai/omp/compact-eval.data.nix;
-      "omp/crest-auth.ts" = import ./dev/ai/omp/crest-auth.data.nix;
-      "omp/cwd.ts" = import ./dev/ai/omp/cwd.data.nix;
-      "omp/work-fold.ts" = import ./dev/ai/omp/work-fold.data.nix;
-      "optchat/extension.ts" = import ./dev/ai/omp/optchat/extension.data.nix;
-      "optchat/service.ts" = import ./dev/ai/omp/optchat/service.data.nix;
-      "optchat/store.ts" = import ./dev/ai/omp/optchat/store.data.nix;
-      "optchat/tree.ts" = import ./dev/ai/omp/optchat/tree.data.nix;
-      "pi/crest-auth.ts" = import ./dev/ai/pi/crest-auth.data.nix;
+      "omp/box-commands.ts" = ./dev/ai/omp/box-commands.ts;
+      "omp/chat-look.ts" = ./dev/ai/omp/chat-look.ts;
+      "omp/compact-eval.ts" = ./dev/ai/omp/compact-eval.ts;
+      "omp/crest-auth.ts" = ./dev/ai/omp/crest-auth.ts;
+      "omp/cwd.ts" = ./dev/ai/omp/cwd.ts;
+      "omp/work-fold.ts" = ./dev/ai/omp/work-fold.ts;
+      "optchat/extension.ts" = ./dev/ai/omp/optchat/extension.ts;
+      "optchat/service.ts" = ./dev/ai/omp/optchat/service.ts;
+      "optchat/store.ts" = ./dev/ai/omp/optchat/store.ts;
+      "optchat/tree.ts" = ./dev/ai/omp/optchat/tree.ts;
+      "pi/crest-auth.ts" = ./dev/ai/pi/crest-auth.ts;
     };
-    vbs."play.vbs" = import ./tools/tern/config/plugins/tuturu/scripts/play.data.nix;
+    vbs."play.vbs" = ./tools/tern/config/plugins/tuturu/scripts/play.vbs;
     patch = {
-      "luajit-opcodes.patch" = import ./gaming/aniimo/luajit-opcodes.data.nix;
-      "aquamarine-gamescope.patch" = import ./hosts/steam-frame/omarchy/aquamarine-gamescope.data.nix;
-      "rush-login-command.patch" = import ./shell/rush-login-command.data.nix;
-      "omp-prewalk-eval.patch" = import ./dev/ai/omp/prewalk-eval.data.nix;
+      "luajit-opcodes.patch" = ./gaming/aniimo/luajit-opcodes.patch;
+      "aquamarine-gamescope.patch" = ./hosts/steam-frame/omarchy/aquamarine-gamescope.patch;
+      "rush-login-command.patch" = ./shell/rush-login-command.patch;
+      "omp-prewalk-eval.patch" = ./dev/ai/omp/prewalk-eval.patch;
     };
   };
 
   patched = {
-    "luajit-opcodes.patch" = pkgs.fetchFromGitHub (import ./gaming/aniimo/luajit.data.nix);
+    "luajit-opcodes.patch" = pkgs.fetchFromGitHub {
+      owner = "LuaJIT";
+      repo = "LuaJIT";
+      rev = "4c2441c16ce3c4e312aaefecc6d40c4fe21de97c";
+      hash = "sha256-S1oVxgqitKPENLIbBfrmY8w8GgBQR6Byr52RjPpqz8g=";
+    };
     "aquamarine-gamescope.patch" = inputs.steam-frame-nixos.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.aquamarine.src;
     "rush-login-command.patch" = inputPackages.rush.default.src;
     "omp-prewalk-eval.patch" = inputPackages.oh-my-pi.omp.src;
   };
 
-  osc = lib.mapAttrs' (name: scheme:
-    lib.nameValuePair "osc-${name}.sh" (import ./desktop/session/theme/templates/osc.data.nix {
-      inherit generators;
-      values = scheme.colors // scheme.special;
-    }))
-  (import ./desktop/session/theme/colorschemes.data.nix);
-
-  rendered = lib.recursiveUpdate (lib.mapAttrs (language: lib.mapAttrs (_: syntax: generators.${language}.render (syntax (generators.${language} // lib.optionalAttrs (language == "glsl") {ozette = import ./desktop/session/theme/ozette.data.nix;})))) trees) {
+  read = lib.mapAttrs (_: lib.mapAttrs (_: builtins.readFile)) (lib.recursiveUpdate sources {
     glsl = {
-      "balatro.glsl" = import ./desktop/session/tomoe/shaders/balatro.data.nix;
-      "cassette-led.glsl" = import ./desktop/session/tomoe/shaders/cassette-led.data.nix;
-      "cassette-squares.glsl" = import ./desktop/session/tomoe/shaders/cassette-squares.data.nix;
-      "dot-corridor.glsl" = import ./desktop/session/tomoe/shaders/dot-corridor.data.nix;
-      "glass-mound.glsl" = import ./desktop/session/tomoe/shaders/glass-mound.data.nix;
-      "hex-spiral.glsl" = import ./desktop/session/tomoe/shaders/hex-spiral.data.nix;
-      "llama-herd.glsl" = import ./desktop/session/tomoe/shaders/llama-herd.data.nix;
-      "llama-herd-night.glsl" = import ./desktop/session/tomoe/shaders/llama-herd-night.data.nix;
-      "su-ei.glsl" = import ./desktop/session/tomoe/shaders/su-ei.data.nix;
+      "balatro.glsl" = ./desktop/session/tomoe/shaders/balatro.glsl;
+      "cassette-led.glsl" = ./desktop/session/tomoe/shaders/cassette-led.glsl;
+      "cassette-squares.glsl" = ./desktop/session/tomoe/shaders/cassette-squares.glsl;
+      "dot-corridor.glsl" = ./desktop/session/tomoe/shaders/dot-corridor.glsl;
+      "glass-mound.glsl" = ./desktop/session/tomoe/shaders/glass-mound.glsl;
+      "hex-spiral.glsl" = ./desktop/session/tomoe/shaders/hex-spiral.glsl;
+      "llama-herd.glsl" = ./desktop/session/tomoe/shaders/llama-herd.glsl;
+      "llama-herd-night.glsl" = ./desktop/session/tomoe/shaders/llama-herd-night.glsl;
+      "su-ei.glsl" = ./desktop/session/tomoe/shaders/su-ei.glsl;
     };
-    luau."tern-agent-tabs-window.luau" = import ./tools/tern/config/plugins/agent-tabs/window.data.nix;
-    shell = osc;
-    ts = lib.mapAttrs' (name: text: lib.nameValuePair "secrets/${name}" text) (import ./dev/ai/omp/secrets.data.nix);
-    python."wrapper.py" = builtins.replaceStrings ["@owners@"] ["{}"] (generators.python.render (trees.python."wrapper.py" generators.python));
-  };
+    luau."tern-agent-tabs-window.luau" = ./tools/tern/config/plugins/agent-tabs/window.luau;
+    shell."osc.sh" = ./desktop/session/theme/templates/osc.sh;
+    ts = lib.mapAttrs' (name: _: lib.nameValuePair "secrets/${name}" (./dev/ai/omp/secrets + "/${name}")) (builtins.readDir ./dev/ai/omp/secrets);
+  });
+
+  rendered = lib.recursiveUpdate read {python."wrapper.py" = builtins.replaceStrings ["@owners@"] ["{}"] read.python."wrapper.py";};
 
   reader = pkgs.writeText "read.lisp" ''
     (let ((*read-eval* nil))
@@ -495,7 +474,8 @@
     lint = {
       schema = schema "finix" (lib.concatMap (host: lib.optionAttrSetToDocList host.options) (builtins.attrValues hosts));
       enabled = ["unused-option" "never-enabled-option" "constant-option" "duplicate-definitions" "singleton-attrset" "singleton-list" "templated-bindings" "scattered-documentation" "unformatted-file" "wrapped-prose" "repeated-dynamic-path" "repeated-let-value" "per-system-input-lookup"];
-      generated = ["modules/hosts/steam-frame/beat-saber/beatmods.data.nix"];
+      generated = ["modules/hosts/steam-frame/beat-saber/beatmods.json"];
+      disabled = ["hand-maintained-data-file" "codec-candidate"];
       constant-option = {
         readers = 3;
         defined = lib.unique (lib.concatMap (host: map (o: lib.showOption o.loc) (lib.filter (o: lib.any (file: lib.hasPrefix "${inputs.self}" (toString file) || toString file == "<unknown-file>") o.declarations && o.definitionsWithLocations != []) (lib.collect lib.isOption host.options))) (builtins.attrValues hosts));
@@ -517,9 +497,9 @@
       ];
       machine-local-default.allow = ["/home/steamos"];
       per-system-input-lookup.argument = "inputPackages";
-      singleton-attrset.exempt = ["flake.nix" ".data.nix"];
-      singleton-list.exempt = ["flake.nix" ".data.nix"];
-      templated-bindings.exempt = ["flake.nix" ".data.nix"];
+      singleton-attrset.exempt = ["flake.nix"];
+      singleton-list.exempt = ["flake.nix"];
+      templated-bindings.exempt = ["flake.nix"];
       unformatted-file.command = "${lib.getExe inputPackages.alejandra.default} --quiet -";
     };
     schemas = {
@@ -527,7 +507,6 @@
       "modules/hosts/steam-frame" = "";
       "modules/hosts/shared.nix" = "";
       "omp-box" = "";
-      "modules/generators.nix" = "";
       "modules/lint.nix" = "";
     };
   };

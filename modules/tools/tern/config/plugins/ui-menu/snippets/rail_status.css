@@ -1,0 +1,94 @@
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::before, html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk::after {
+  display: none !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c {
+  position: relative;
+  overflow: visible !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c[data-st='working']::before {
+  inset: -4px;
+  box-sizing: border-box;
+  border: 2px dashed var(--pill);
+  border-radius: 50%;
+  animation: arc-spin 2.4s linear infinite;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]):is([title*="\206B"], [title*="\206C"], [title*="\206D"]) .tn-dk-c::before {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  right: -3px;
+  bottom: -3px;
+  width: 10px;
+  height: 10px;
+  background: var(--pill);
+  box-shadow: 0 0 0 2px var(--panel);
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:is(.working, [title*="\206B"], [title*="\206C"], [title*="\206D"]) .sub {
+  font-size: 0 !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:is(.working, [title*="\206B"], [title*="\206C"], [title*="\206D"]) .sub::before {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--sans);
+  color: var(--pill);
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working {
+  --pill: light-dark(#0f766e, #5eead4);
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt.working .sub::before {
+  content: "Working";
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206B"] {
+  --pill: light-dark(#b45309, #fbbf24);
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206B"] .sub::before {
+  content: "Awaiting input";
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206C"] {
+  --pill: light-dark(#15803d, #4ade80);
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206C"] .sub::before {
+  content: "Done · unseen";
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206D"] {
+  --pill: light-dark(#b91c1c, #f87171);
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt[title*="\206D"] .sub::before {
+  content: "Failed · unseen";
+}
+
+@keyframes arc-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:not([data-tc]) .tn-dk-c::after {
+  display: none !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:is(.working, [title*="\206B"], [title*="\206C"], [title*="\206D"]) .sub > * {
+  display: none !important;
+}
+
+html.lay-rail.tabs-h .tb-tabs .tt:is(.working, [title*="\206B"], [title*="\206C"], [title*="\206D"]) .sub::after {
+  display: none !important;
+}

@@ -1,0 +1,23 @@
+[data-role='omp.bot.words'] {
+  min-width: 0;
+}
+
+[data-role='omp.bot.name'] {
+  font-weight: 600;
+}
+
+[data-role='omp.bot.say'], [data-role='omp.bot.steps'] {
+  position: relative;
+  opacity: 0.58;
+}
+
+[data-role^='omp.bot.top.'] [data-role='omp.bot.name'] {
+  margin-left: 2px;
+}
+
+[data-role='omp.bot.hello'] {
+  margin-top: 14px;
+  font-size: 1.5em;
+  line-height: 1.3;
+  font-weight: 600;
+}

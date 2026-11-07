@@ -1,0 +1,79 @@
+--- a/packages/coding-agent/src/session/prewalk.ts
++++ b/packages/coding-agent/src/session/prewalk.ts
+@@ -1,7 +1,7 @@
+ import type { Agent, AgentMessage, AgentToolResult, AgentTurnEndContext } from "@oh-my-pi/pi-agent-core";
+ import { invalidateMessageCache } from "@oh-my-pi/pi-agent-core/compaction";
+ import type { Model, ToolResultMessage } from "@oh-my-pi/pi-ai";
+-import { logger, prompt } from "@oh-my-pi/pi-utils";
++import { isRecord, logger, prompt } from "@oh-my-pi/pi-utils";
+ import type { AutoPrewalkDecision } from "../auto-prewalk/classifier";
+ import type { Settings } from "../config/settings";
+ import type { LocalProtocolOptions } from "../internal-urls";
+@@ -52,7 +52,7 @@
+  * conservatively `write`, so an MCP tool the server declared read-only is
+  * excluded through the hint the dispatch recorded for the tool that ran.
+  */
+-function isPrewalkImplementationAction(result: ToolResultMessage): boolean {
++function isPrewalkImplementationAction(result: Pick<ToolResultMessage, "toolName" | "details">): boolean {
+ 	if (!PREWALK_ACTION_TOOLS[result.toolName]) return false;
+ 	const details = result.details;
+ 	// A direct filesystem edit/write carries no `xd://` dispatch metadata.
+@@ -312,7 +312,27 @@
+ 			this.#disarmNoop(prewalk);
+ 			return;
+ 		}
+-		if (context.toolResults.some(result => result.toolName === "todo" && !result.isError)) this.#todoSeen = true;
++		const directTodoSeen = this.#todoSeen || context.toolResults.some(result => result.toolName === "todo" && !result.isError);
++		const todoRequired = this.#host.getActiveToolNames().includes("todo");
++		let action: string | undefined;
++		for (const result of context.toolResults) {
++			if (result.toolName === "todo" && !result.isError) this.#todoSeen = true;
++			if ((directTodoSeen || this.#todoSeen || !todoRequired) && isPrewalkImplementationAction(result)) action ??= result.toolName;
++			if (result.toolName !== "eval" || !isRecord(result.details) || !Array.isArray(result.details.cells)) continue;
++			for (const cell of result.details.cells) {
++				if (!isRecord(cell) || !Array.isArray(cell.statusEvents)) continue;
++				for (const event of cell.statusEvents) {
++					if (!isRecord(event) || event.hasError === true || event.error !== undefined) continue;
++					if (event.op === "todo" && event.committed === true) this.#todoSeen = true;
++					if (
++						(this.#todoSeen || !todoRequired) &&
++						typeof event.op === "string" &&
++						PREWALK_ACTION_TOOLS[event.op] === true &&
++						isPrewalkImplementationAction({ toolName: event.op, details: event })
++					) action ??= event.op;
++				}
++			}
++		}
+ 
+ 		const hasToolResults = context.toolResults.length > 0;
+ 		if (this.#planInjected && hasToolResults) {
+@@ -329,10 +349,6 @@
+ 			});
+ 		}
+ 
+-		const todoGateOpen = this.#todoSeen || !this.#host.getActiveToolNames().includes("todo");
+-		const action = todoGateOpen
+-			? context.toolResults.find(result => isPrewalkImplementationAction(result))
+-			: undefined;
+ 		if (!action) {
+ 			if (!this.#planInjected) {
+ 				this.#planInjected = true;
+@@ -376,7 +392,7 @@
+ 		}
+ 		this.#host.emitNotice(
+ 			"info",
+-			`Prewalk: switched to ${target.provider}/${target.id} after first ${action.toolName} call.`,
++			`Prewalk: switched to ${target.provider}/${target.id} after first ${action} call.`,
+ 			"prewalk",
+ 		);
+ 		this.#host.agent.steer({
+--- a/packages/coding-agent/src/eval/js/tool-bridge.ts
++++ b/packages/coding-agent/src/eval/js/tool-bridge.ts
+@@ -104,6 +104,7 @@
+ 				op: "write",
+ 				path: record.path,
+ 				chars: typeof record.content === "string" ? record.content.length : 0,
++				...(details.xdev ? { xdev: isRecord(details.xdev) ? { tier: details.xdev.tier, readOnlyHint: details.xdev.readOnlyHint } : {} } : {}),
+ 			});
+ 		case "grep":
+ 			return withError({

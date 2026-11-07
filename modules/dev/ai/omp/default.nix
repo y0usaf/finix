@@ -4,12 +4,11 @@
   pkgs,
   flakeInputs,
   inputPackages,
-  generators,
   ...
 }: let
   catalog = config.user.dev.modelCatalog;
   toJSON = lib.generators.toJSON {};
-  secrets = generators.sourceDir pkgs "secrets" (import ./secrets.data.nix);
+  secrets = ./secrets;
   # omp loads its extensions through these links, not their store paths, so a switch that rebuilds one leaves
   # config.yml's paths alone and running sessions see no "newly enabled" extension to restart for. omp-bot's
   # env (the omp_bot module) names its extensions by the same links, so a bot loads each once.
@@ -18,14 +17,14 @@
     lib.genAttrs ["pi-chronobreak" "pi-recap" "omp-bot"] (name: "${flakeInputs.${name}}")
     // {
       pi-donsetch = "${inputPackages.pi-donsetch.default}";
-      "compact-eval.ts" = generators.sourceFile "compact-eval.ts" (generators.ts.render (import ./compact-eval.data.nix generators.ts));
-      "work-fold.ts" = generators.sourceFile "work-fold.ts" (generators.ts.render (import ./work-fold.data.nix generators.ts));
-      "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (import ./chat-look.data.nix generators.ts));
-      "box-commands.ts" = generators.sourceFile "box-commands.ts" (generators.ts.render (import ./box-commands.data.nix generators.ts));
-      "cwd.ts" = generators.sourceFile "cwd.ts" (generators.ts.render (import ./cwd.data.nix generators.ts));
+      "compact-eval.ts" = ./compact-eval.ts;
+      "work-fold.ts" = ./work-fold.ts;
+      "chat-look.ts" = ./chat-look.ts;
+      "box-commands.ts" = ./box-commands.ts;
+      "cwd.ts" = ./cwd.ts;
       secrets = "${secrets}";
-      "crest-auth.ts" = generators.sourceFile "crest-auth.ts" (generators.ts.render (import ./crest-auth.data.nix generators.ts));
-      optchat = generators.sourceDir pkgs "optchat" (import ./optchat/optchat.data.nix {inherit generators;});
+      "crest-auth.ts" = ./crest-auth.ts;
+      optchat = ./optchat;
     };
   ompSecret = pkgs.writeShellScriptBin "omp-secret" ''
     PATH=${lib.makeBinPath [pkgs.age]}:$PATH exec ${pkgs.bun}/bin/bun ${secrets}/omp-secret.ts "$@"
@@ -78,13 +77,17 @@ in {
             completionProbe = false;
           };
           edit.mode = "hashline";
-          # A steer backgrounds a running cell so a message lands at once; the hour keeps
-          # omp from backgrounding long cells on its own.
-          eval.autoBackground.enabled = true;
-          eval.autoBackground.thresholdMs = 3600000;
+          eval = {
+            # A steer backgrounds a running cell so a message lands at once; the hour keeps
+            # omp from backgrounding long cells on its own.
+            autoBackground = {
+              enabled = true;
+              thresholdMs = 3600000;
+            };
+            js = false;
+          };
           astGrep.enabled = true;
           github.enabled = true;
-          eval.js = false;
           codexResets.autoRedeem = "no";
           title.icons = "nf+emoji";
           interruptMode = "immediate";
@@ -138,10 +141,7 @@ in {
           packages = [];
         };
       };
-      ".omp/agent/models.yml" = {
-        generator = lib.generators.toYAML {};
-        value = import ./models.data.nix;
-      };
+      ".omp/agent/models.yml".text = builtins.readFile ./models.yml;
       ".omp/agent/models.json" = {
         generator = toJSON;
         value = catalog.models;

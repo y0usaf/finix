@@ -3,7 +3,6 @@
   lib,
   pkgs,
   inputPackages,
-  generators,
   ...
 }: {
   user.persist.directories = [
@@ -16,7 +15,7 @@
       ${pkgs.util-linux}/bin/setpriv \
         --reuid "$(${pkgs.coreutils}/bin/id -u ${lib.escapeShellArg config.user.name})" \
         --regid "$(${pkgs.coreutils}/bin/id -g ${lib.escapeShellArg config.user.name})" \
-        --clear-groups ${pkgs.python3}/bin/python3 ${generators.sourceFile "apply-reasoning-policy.py" (generators.python.render (import ./apply-reasoning-policy.data.nix generators.python))} \
+        --clear-groups ${pkgs.python3}/bin/python3 ${./apply-reasoning-policy.py} \
         ${lib.escapeShellArg "${config.users.users.${config.user.name}.home}/.config/codex/config.toml"}
     '';
   };

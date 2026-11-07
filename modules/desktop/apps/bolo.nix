@@ -5,7 +5,7 @@
   inputPackages,
   ...
 }: let
-  inherit (import ./bolo.data.nix) model vocabulary;
+  inherit ((import ../../hosts/shared.nix {inherit lib;}).bolo) model vocabulary;
   models.${model.name} = {
     inherit (model) engine;
     files = lib.mapAttrs (file: hash:

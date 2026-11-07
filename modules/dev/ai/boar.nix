@@ -3,7 +3,6 @@
   lib,
   pkgs,
   inputPackages,
-  generators,
   ...
 }: let
   gatewayModel = id: lib.getAttrs ["id" "name" "input" "reasoning" "cost"] (lib.findFirst (model: model.id == id) null config.user.dev.modelCatalog.models.providers.vercel-ai-gateway.models);
@@ -147,7 +146,7 @@
       };
       value.mcpServers.jev = {
         command = "${pkgs.nodejs}/bin/node";
-        args = ["${generators.sourceFile "jev-mcp.mjs" (generators.javascript.render (import ./jev-mcp.data.nix generators.javascript))}"];
+        args = ["${./jev-mcp.mjs}"];
       };
     };
   };

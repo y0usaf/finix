@@ -1,0 +1,11 @@
+:root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md {
+  line-height: 1.45;
+}
+
+:root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md > :first-child {
+  margin-top: 0;
+}
+
+:root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md > :last-child {
+  margin-bottom: 0;
+}

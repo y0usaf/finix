@@ -1,0 +1,69 @@
+import { homedir } from "node:os";
+
+const usage = "usage: /box [list | add PATH [--copy] | rm NAME | reconcile]";
+
+function expand(value) {
+  if (value === "~") return homedir();
+  if (value.startsWith("~/")) return `${homedir()}/${value.slice(2)}`;
+  return value;
+}
+
+async function ompBox(args) {
+  const proc = Bun.spawn(["omp-box", ...args], { stdout: "pipe", stderr: "pipe" });
+  const [stdout, stderr, code] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+  return { ok: code === 0, text: (code === 0 ? stdout : stderr || stdout).trim() };
+}
+
+export default function boxCommands(pi) {
+  pi.setLabel("Box access");
+
+  pi.registerCommand("box", {
+    description: "Manage what omp-box shares: list, add, copy, remove, reconcile",
+    handler: async (args, ctx) => {
+      const [action, ...rest] = String(args ?? "").trim().split(/\s+/).filter(Boolean);
+
+      if (!action || action === "list") {
+        const result = await ompBox(["list"]);
+        ctx.ui.notify(result.text || "no grants", result.ok ? "info" : "error");
+        return;
+      }
+
+      if (action === "add") {
+        const copy = rest.includes("--copy");
+        const path = rest.find(value => value !== "--copy");
+        if (!path) {
+          ctx.ui.notify(usage, "info");
+          return;
+        }
+        const boxArgs = ["add", expand(path)];
+        if (copy) boxArgs.push("--copy");
+        const result = await ompBox(boxArgs);
+        ctx.ui.notify(result.text || usage, result.ok ? "info" : "error");
+        return;
+      }
+
+      if (action === "rm") {
+        const name = rest[0];
+        if (!name) {
+          ctx.ui.notify(usage, "info");
+          return;
+        }
+        const result = await ompBox(["rm", name]);
+        ctx.ui.notify(result.text || usage, result.ok ? "info" : "error");
+        return;
+      }
+
+      if (action === "reconcile") {
+        const result = await ompBox(["reconcile"]);
+        ctx.ui.notify(result.text || "grants reconciled", result.ok ? "info" : "error");
+        return;
+      }
+
+      ctx.ui.notify(usage, "info");
+    },
+  });
+}

@@ -3,7 +3,6 @@
   lib,
   flakeInputs,
   inputPackages,
-  generators,
   ...
 }: let
   catalog = config.user.dev.modelCatalog;
@@ -185,7 +184,7 @@ in {
             "${flakeInputs.pi-ampersand}"
             "${inputPackages.pi-donsetch.default}"
           ];
-          extensions = ["${generators.sourceFile "crest-auth.ts" (generators.ts.render (import ./crest-auth.data.nix generators.ts))}"];
+          extensions = ["${./crest-auth.ts}"];
           enableInstallTelemetry = false;
           defaultTools = ["+codemode"];
           codemode.mode = "only";
@@ -218,10 +217,7 @@ in {
         value = catalog.models;
       };
 
-      ".pi/workflows/goal-loop.json" = {
-        generator = lib.generators.toJSON {};
-        value = import ./goal-loop.data.nix;
-      };
+      ".pi/workflows/goal-loop.json".source = ./goal-loop.json;
     };
   };
 }

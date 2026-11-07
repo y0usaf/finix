@@ -1,0 +1,149 @@
+[data-role='omp.bot.blink'] {
+  position: absolute;
+  inset: 0;
+  align-items: center;
+}
+
+[data-role='omp.bot.blink'] [data-role^='omp.bot.px.'] {
+  opacity: 0;
+  animation: chaoBlink 5.2s steps(1) infinite;
+}
+
+[data-role^='omp.bot.glyph.'] {
+  animation: chaoBob 1.8s steps(1) infinite;
+}
+
+[data-role='omp.bot.glyph.swirl'] {
+  animation: chaoSpin 0.8s steps(4) infinite;
+}
+
+[data-role='omp.bot.glyph.ask'] {
+  animation: chaoSway 1.2s steps(1) infinite;
+}
+
+[data-role='omp.bot.glyph.bang'] {
+  animation-duration: 0.5s;
+}
+
+[data-role='omp.bot.glyph.heart'] {
+  animation: chaoRise 1s steps(5) 1 both;
+}
+
+[data-role='omp.bot.glyph.droop'] {
+  transform: translateY(calc(2 * var(--p)));
+  animation: none;
+}
+
+[data-role='omp.bot.glyph.z'] {
+  animation: chaoZ 2.4s steps(6) infinite;
+}
+
+[data-role='omp.bot.chao.drowsy'] [data-role^='omp.bot.glyph.'] {
+  animation-duration: 4s;
+}
+
+[data-role='omp.bot.tempo.calm'] [data-role^='omp.bot.glyph.'] {
+  animation-duration: 2.6s;
+}
+
+[data-role='omp.bot.tempo.brisk'] [data-role^='omp.bot.glyph.'] {
+  animation-duration: 1.2s;
+}
+
+[data-role='omp.bot.tempo.calm'] [data-role='omp.bot.blink'] [data-role^='omp.bot.px.'] {
+  animation-duration: 7s;
+}
+
+[data-role='omp.bot.tempo.brisk'] [data-role='omp.bot.blink'] [data-role^='omp.bot.px.'] {
+  animation-duration: 3.6s;
+}
+
+[data-role='omp.bot.chao.happy'], [data-role='omp.bot.chao.boop'], [data-role='omp.bot.chao.listen'], [data-role^='omp.bot.chao.']:hover {
+  animation: chaoHop 0.6s cubic-bezier(0.3, 0.7, 0.4, 1) 1;
+}
+
+[data-role='omp.bot.chao.sleep']:hover {
+  animation: none;
+}
+
+@keyframes chaoBlink {
+  0%, 100% {
+    opacity: 0;
+  }
+
+  92%, 96% {
+    opacity: 1;
+  }
+}
+
+@keyframes chaoBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(calc(-1 * var(--p)));
+  }
+}
+
+@keyframes chaoSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes chaoSway {
+  0%, 100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(var(--p));
+  }
+}
+
+@keyframes chaoRise {
+  from {
+    transform: translateY(calc(3 * var(--p)));
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes chaoZ {
+  from {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(calc(3 * var(--p)), calc(-4 * var(--p)));
+  }
+}
+
+@keyframes chaoHop {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(calc(-5 * var(--p)));
+  }
+
+  70% {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-role^='omp.bot.chao.'], [data-role^='omp.bot.chao.'] * {
+    animation: none !important;
+  }
+}

@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  generators,
   ...
 }: let
   steam = "${config.user.homeDirectory}/${config.user.paths.steam}";
@@ -57,7 +56,7 @@
     name = "p4g-setup";
     runtimeInputs = [pkgs.python3 pkgs.protontricks pkgs.coreutils];
     text = ''
-      exec python3 ${generators.sourceFile "setup.py" (generators.python.render (import ./setup.data.nix generators.python))} ${settings} "$@"
+      exec python3 ${./setup.py} ${settings} "$@"
     '';
   };
 in {

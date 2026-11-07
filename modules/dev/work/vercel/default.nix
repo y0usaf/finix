@@ -1,5 +1,4 @@
 {
-  generators,
   lib,
   pkgs,
   ...
@@ -16,7 +15,7 @@
     sourceRoot = "package";
 
     postPatch = ''
-      cp ${generators.sourceFile "package.json" (generators.jsonSource (import ./package.data.nix))} package.json
+      cp ${./package.json} package.json
       cp ${../../../../locks/package-lock.json} package-lock.json
     '';
 
@@ -41,14 +40,10 @@ in {
       mkdir -p $out/bin
       cat > $out/bin/vercel <<EOF
       #!${pkgs.runtimeShell}
-      exec ${pkgs.python3}/bin/python3 ${pkgs.replaceVarsWith {
-        name = "wrapper.py";
-        src = generators.sourceFile "wrapper.py" (generators.python.render (import ./wrapper.data.nix generators.python));
-        replacements = {
-          vercel = package;
-          inherit (pkgs) git;
-          owners = builtins.toJSON {y0usaf = "personal";};
-        };
+      exec ${pkgs.python3}/bin/python3 ${pkgs.replaceVars ./wrapper.py {
+        vercel = package;
+        inherit (pkgs) git;
+        owners = builtins.toJSON {y0usaf = "personal";};
       }} "\$@"
       EOF
       for account in personal work; do
