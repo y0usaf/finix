@@ -85,6 +85,7 @@
       json,
       os,
       ssl,
+      sys,
       time,
       GATEWAY,
       KEY_FILE,
@@ -97,8 +98,6 @@
       DROP,
       MARGIN,
       HELD,
-      WORK,
-      WORK_BOT,
       CrestError,
       header_name,
       read_key,
@@ -122,6 +121,7 @@
       (import' json)
       (import' os)
       (import' ssl)
+      (import' sys)
       (import' time)
       blank
       (assign GATEWAY (str "ai-gateway.vercel.sh"))
@@ -135,8 +135,6 @@
       (assign DROP (set (rows [(str "host") (str "authorization") (str "x-api-key") (str "cf-aig-authorization") (str "connection") (str "proxy-connection") (str "accept-encoding")])))
       (assign MARGIN 300000)
       (assign HELD (dict []))
-      (assign WORK (str "CU-enterprise"))
-      (assign WORK_BOT (str "CU-Bot"))
       blank
       blank
       (class CrestError [Exception] [
@@ -199,9 +197,6 @@
           (assign token (call (dot HELD "get") [provider]))
           (if' [token "is" None "or" (call (dot token "get") [(str "expires") 0]) "-" MARGIN "<=" (call (dot time "time") []) "*" 1000] [
             (assign token (await (call crest_token [provider])))
-            (if' [(call (dot token "get") [(str "login")]) "==" WORK] [
-              (raise (call CrestError [(str ["only " (field WORK) " is ready, and it is " (field WORK_BOT) "'s"])]))
-            ])
             (assign (index HELD provider) token)
           ])
           (return token)
@@ -225,7 +220,7 @@
               ])
             ])
           (assign login (call (dot token "get") [(str "login")]))
-          (return (ternary token [login "not in" tried "and" login "!=" WORK] None))
+          (return (ternary token [login "not in" tried] None))
         ];
       })))
       blank
@@ -450,6 +445,9 @@
         response,
         login,
         following,
+        code,
+        who,
+        note,
         error,
       }: {
         params = [reader writer];
@@ -478,6 +476,11 @@
                 (assign outgoing (list (rows [(str [(field method) " " (field target) " HTTP/1.1"]) (str ["Host: " (field host)]) (star (call credentials [provider token names])) (star kept) (ternary (str "Connection: Upgrade") upgrade (str "Connection: close")) (str "") (str "")])))
                 (assign (commas [up_reader upstream response]) (await (call exchange (rows [[host [(call (dot (call (dot (str "\\r\\n") "join") [outgoing]) "encode") [(str "latin1")]) "+" body]]]))))
                 (assign login (ternary (call (dot token "get") [(str "login")]) token None))
+                (assign code (call (dot (index (call (dot response "split") [(bytes (str " ")) 2]) 1) "decode") []))
+                (assign who (ternary login login (sq "-")))
+                (assign note (str [(field (ternary provider provider (sq "gateway"))) " " (field who) " " (field code) "\\n"]))
+                (call (dot sys "stderr.write") [note])
+                (call (dot sys "stderr.flush") [])
                 (if' [(index (call (dot response "split") [(bytes (str " ")) 2]) 1) "==" (bytes (str "429")) "and" login "and" (not upgrade)] [
                   (call (dot tried "add") [login])
                   (await (call crest_auth [(str "cool") login]))
@@ -548,6 +551,7 @@
   extensions = {
     "compact-eval.ts" = "${./compact-eval.ts}";
     "work-fold.ts" = "${./work-fold.ts}";
+    "crest-reroute.ts" = "${./crest-reroute.ts}";
     optchat = "${./optchat}";
     inherit (flakeInputs) omp-bot;
     # The same store path as the host's ext link, so omp-bot-box names a boxed bot's secrets extension by this link.
@@ -628,6 +632,7 @@
         - "${inBox "omp-bot"}/omp/barge-in.ts"
         - "${inBox "compact-eval.ts"}"
         - "${inBox "work-fold.ts"}"
+        - "${inBox "crest-reroute.ts"}"
         - "${inBox "optchat"}/extension.ts"
         - "${inBox "omp-bot"}/omp/ompd.ts"
     '';

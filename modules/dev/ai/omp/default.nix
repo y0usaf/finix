@@ -20,6 +20,7 @@
       pi-donsetch = "${inputPackages.pi-donsetch.default}";
       "compact-eval.ts" = ./compact-eval.ts;
       "work-fold.ts" = ./work-fold.ts;
+      "crest-reroute.ts" = ./crest-reroute.ts;
       "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (({
           Array,
           Symbol,
@@ -652,7 +653,6 @@
           (export (default (async ({
             pi,
             providers,
-            reroute,
           }: (fn crest (typed [(typed pi ExtensionAPI)] (generic Promise [void])) [
             (const providers (await (call signedIn [])))
             ({
@@ -687,25 +687,6 @@
                 ]))
               ])
             ]))
-            (const reroute (async ({
-              _event,
-              ctx,
-              current,
-              id,
-              name,
-              routed,
-            }: (arrow [_event ctx] [
-              (const current (call (dot ctx "models.current") []))
-              (if' (infix [current "===" undefined]) return')
-              (const id (dot current "id"))
-              (const name (ternary (infix [(dot current "provider") "!==" (str "vercel-ai-gateway")]) (tpl [(sub (dot current "provider")) "/" (sub id)]) (ternary (call (dot id "startsWith") [(str "anthropic/")]) (call (dot id "replaceAll") [(str ".") (str "-")]) (ternary (call (dot id "startsWith") [(str "openai/")]) (tpl ["openai-codex/" (sub (call (dot id "slice") [7]))]) (tpl ["vercel-ai-gateway/" (sub id)])))))
-              (const routed (call (dot ctx "models.resolve") [name]))
-              (if' (infix [routed "!==" undefined "&&" (dot routed "api") "!==" (dot current "api") "&&" (dot routed "api") "===" (tpl ["crest-" (sub (dot routed "provider"))])]) [
-                (await (call (dot pi "setModel") [routed]))
-              ])
-            ]))))
-            (call (dot pi "on") [(str "session_start") reroute])
-            (call (dot pi "on") [(str "before_agent_start") reroute])
           ])))))
         ]))
         generators.ts));
@@ -797,6 +778,7 @@ in {
             "cwd.ts"
             "secrets/secrets.ts"
             "crest-auth.ts"
+            "crest-reroute.ts"
             "optchat/extension.ts"
             "omp-bot/omp/ompd.ts"
           ];
