@@ -522,8 +522,6 @@
           MARGIN,
           held,
           logins,
-          WORK,
-          WORK_BOT,
           Token,
           Entry,
           crestAuth,
@@ -542,8 +540,6 @@
           (const MARGIN 300000)
           (const held (new (generic Map [string Token]) []))
           (const logins (new (generic Map [string string]) []))
-          (const WORK (str "CU-enterprise"))
-          (const WORK_BOT (str "CU-Bot"))
           blank
           (interface Token [
             (typed "access" string)
@@ -586,7 +582,6 @@
               (throw' (new Error [(tpl ["crest-auth json token " (sub provider) ": no access token"])]))
             ])
             (const login (ternary (infix [(str "login") "in" value "&&" (typeof (dot value "login")) "===" (str "string")]) (dot value "login") undefined))
-            (if' (infix [login "===" WORK "&&" (dot process "env.OMP_BOT_NAME") "!==" WORK_BOT]) (throw' (new Error [(tpl ["crest-auth picked " (sub WORK) ", which is for " (sub WORK_BOT) " only: every login ahead of it is cooling"])])))
             (const expires (ternary (infix [(str "expires") "in" value "&&" (typeof (dot value "expires")) "===" (str "number")]) (dot value "expires") undefined))
             (return (obj [(prop "access" (dot value "access")) login expires]))
           ])))
@@ -657,6 +652,7 @@
           (export (default (async ({
             pi,
             providers,
+            reroute,
           }: (fn crest (typed [(typed pi ExtensionAPI)] (generic Promise [void])) [
             (const providers (await (call signedIn [])))
             ({
@@ -675,7 +671,7 @@
                 provider
                 (obj (rows [
                   baseUrl
-                  (prop "apiKey" (tpl ["!crest-auth json token " (sub provider) " | jq -er --arg work " (sub WORK) " --arg bot " (sub WORK_BOT) " 'select(.login != $work or env.OMP_BOT_NAME == $bot) | .access' || echo crest-unavailable"]))
+                  (prop "apiKey" (tpl ["!crest-auth json token " (sub provider) " | jq -er .access || echo crest-unavailable"]))
                   api
                   (prop "models" (call (dot bundled "map") [({model}: (arrow [model] (ternary (call (dot Object "hasOwn") [CHAT_KINDS (infix [(dot model "kind") "??" (str "chat")])]) (obj [(spread model) api]) model)))]))
                   ({
@@ -691,22 +687,25 @@
                 ]))
               ])
             ]))
-            (call (dot pi "on") [
-              (str "session_start")
-              (async ({
-                _event,
-                ctx,
-                current,
-                routed,
-              }: (arrow [_event ctx] [
-                (const current (call (dot ctx "models.current") []))
-                (if' (infix [current "===" undefined]) return')
-                (const routed (call (dot ctx "models.resolve") [(tpl [(sub (dot current "provider")) "/" (sub (dot current "id"))])]))
-                (if' (infix [routed "!==" undefined "&&" (dot routed "api") "!==" (dot current "api") "&&" (dot routed "api") "===" (tpl ["crest-" (sub (dot routed "provider"))])]) [
-                  (await (call (dot pi "setModel") [routed]))
-                ])
-              ])))
-            ])
+            (const reroute (async ({
+              _event,
+              ctx,
+              current,
+              id,
+              name,
+              routed,
+            }: (arrow [_event ctx] [
+              (const current (call (dot ctx "models.current") []))
+              (if' (infix [current "===" undefined]) return')
+              (const id (dot current "id"))
+              (const name (ternary (infix [(dot current "provider") "!==" (str "vercel-ai-gateway")]) (tpl [(sub (dot current "provider")) "/" (sub id)]) (ternary (call (dot id "startsWith") [(str "anthropic/")]) (call (dot id "replaceAll") [(str ".") (str "-")]) (ternary (call (dot id "startsWith") [(str "openai/")]) (tpl ["openai-codex/" (sub (call (dot id "slice") [7]))]) (tpl ["vercel-ai-gateway/" (sub id)])))))
+              (const routed (call (dot ctx "models.resolve") [name]))
+              (if' (infix [routed "!==" undefined "&&" (dot routed "api") "!==" (dot current "api") "&&" (dot routed "api") "===" (tpl ["crest-" (sub (dot routed "provider"))])]) [
+                (await (call (dot pi "setModel") [routed]))
+              ])
+            ]))))
+            (call (dot pi "on") [(str "session_start") reroute])
+            (call (dot pi "on") [(str "before_agent_start") reroute])
           ])))))
         ]))
         generators.ts));

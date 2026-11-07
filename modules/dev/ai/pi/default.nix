@@ -267,8 +267,6 @@ in {
                 Token,
                 Entry,
                 logins,
-                WORK,
-                WORK_BOT,
                 crestAuth,
                 token,
                 entries,
@@ -305,8 +303,6 @@ in {
                 ])
                 blank
                 (const logins (new (generic Map [string string]) []))
-                (const WORK (str "CU-enterprise"))
-                (const WORK_BOT (str "CU-Bot"))
                 blank
                 ({args}: (fn crestAuth (typed [(typed (spread args) (arrayOf string))] (generic Promise [string])) [
                   (return (new Promise [
@@ -355,7 +351,6 @@ in {
                       (throw' (new Error [(tpl ["crest-auth json token " (sub provider) ": no access token"])]))
                     ])
                   (const login (ternary (infix [(str "login") "in" value "&&" (typeof (dot value "login")) "===" (str "string")]) (dot value "login") undefined))
-                  (if' (infix [login "===" WORK "&&" (dot process "env.OMP_BOT_NAME") "!==" WORK_BOT]) (throw' (new Error [(tpl ["crest-auth picked " (sub WORK) ", which is for " (sub WORK_BOT) " only: every login ahead of it is cooling"])])))
                   (if' (infix [login "!==" undefined]) (call (dot logins "set") [(dot value "access") login]))
                   (return (obj [(prop "access" (dot value "access")) (prop "expires" (dot value "expires")) login]))
                 ])))
