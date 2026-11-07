@@ -78,6 +78,10 @@ in {
             completionProbe = false;
           };
           edit.mode = "hashline";
+          # A steer backgrounds a running cell so a message lands at once; the hour keeps
+          # omp from backgrounding long cells on its own.
+          eval.autoBackground.enabled = true;
+          eval.autoBackground.thresholdMs = 3600000;
           astGrep.enabled = true;
           github.enabled = true;
           eval.js = false;
@@ -97,6 +101,7 @@ in {
             "pi-recap"
             "pi-donsetch"
             "omp-bot/omp/code-mode.ts"
+            "omp-bot/omp/barge-in.ts"
             "compact-eval.ts"
             "work-fold.ts"
             "chat-look.ts"

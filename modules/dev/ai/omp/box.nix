@@ -94,8 +94,15 @@
         reviewMode: agent-end
       retry:
         fallbackChains: ${builtins.toJSON catalog.fallbackChains}
+      # A steer backgrounds a running cell so a message lands at once; the hour
+      # keeps omp from backgrounding long cells on its own.
+      eval:
+        autoBackground:
+          enabled: true
+          thresholdMs: 3600000
       extensions:
         - "${inBox "omp-bot"}/omp/code-mode.ts"
+        - "${inBox "omp-bot"}/omp/barge-in.ts"
         - "${inBox "compact-eval.ts"}"
         - "${inBox "work-fold.ts"}"
         - "${inBox "optchat"}/extension.ts"
