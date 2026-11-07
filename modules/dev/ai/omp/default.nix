@@ -54,7 +54,9 @@ in {
           theme.dark = "titanium";
           composer.tokenRate = false;
           disabledExtensions = [];
-          dev.autoqaConsent = "granted";
+          dev.autoqa = false;
+          debug.enabled = false;
+          exa.enabled = false;
           colorBlindMode = false;
           hideThinkingBlock = true;
           statusLine = {
@@ -73,6 +75,7 @@ in {
             showResolvedModelBadge = false;
             eager = "preferred";
             enableLsp = false;
+            completionProbe = false;
           };
           edit.mode = "hashline";
           astGrep.enabled = true;
