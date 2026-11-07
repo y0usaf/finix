@@ -22,6 +22,27 @@
       mainProgram = "Discord";
     };
   };
+  vencord =
+    if lib.versionAtLeast pkgs.vencord.version "1.15.16"
+    then pkgs.vencord
+    else
+      pkgs.vencord.overrideAttrs (finalAttrs: _: {
+        version = "1.15.16";
+        src = pkgs.fetchFromGitHub {
+          owner = "Vendicated";
+          repo = "Vencord";
+          tag = "v${finalAttrs.version}";
+          hash = "sha256-aUJubLJpyLAZWiOezqFxPY6oVPgWVPQpajFqrJvrO9U=";
+        };
+        patches = [];
+        postPatch = "";
+        pnpmDeps = pkgs.fetchPnpmDeps {
+          inherit (finalAttrs) pname src;
+          pnpm = pkgs.pnpm_11;
+          fetcherVersion = 4;
+          hash = "sha256-HS8uZNepvDefjrsG3buVLFCVv7sHvazcwdpcT3EQ/78=";
+        };
+      });
   inherit (config.user.ui) fonts;
   primaryFont = ''"${fonts.mainFontName}", "${fonts.backup.name}", "${fonts.emoji.name}"'';
 in {
@@ -36,6 +57,8 @@ in {
     (legacyDiscord.override {
       commandLineArgs = "--enable-features=WaylandWindowDecorations,WaylandLinuxDrmSyncobj --disable-smooth-scrolling";
       withOpenASAR = true;
+      withVencord = true;
+      inherit vencord;
       disableUpdates = false;
       withTTS = false;
       enableAutoscroll = true;
@@ -59,16 +82,19 @@ in {
           quickstart = false;
           css = ''
             @import url("file:///home/${userName}/.config/Vencord/themes/disblock.css");
-            @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-2.css");
-            @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-3.css");
-            @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-4.css");
-            @import url("file:///home/${userName}/.config/Vencord/themes/visual-refresh-hide-5.css");
             @import url("file:///home/${userName}/.config/Vencord/themes/system-font.css");
             @import url("file:///home/${userName}/.config/Vencord/themes/palette.css");
             @import url("file:///home/${userName}/.config/Vencord/themes/square.css");
           '';
         };
       };
+    };
+
+    # the pinned host loads its core from the persisted modules dir; a Vencord
+    # sideload there would run beside the patched app.asar, so keep it stock.
+    ".config/discord/${legacySource.version}/modules/discord_desktop_core/index.js" = {
+      clobber = true;
+      text = ''module.exports = require("./core.asar");'';
     };
 
     ".config/Vencord/themes/disblock.css".text = ''
