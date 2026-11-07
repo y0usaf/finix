@@ -96,7 +96,7 @@ in {
     # sideload there would run beside the patched app.asar, so keep it stock.
     ".config/discord/${legacySource.version}/modules/discord_desktop_core/index.js" = {
       clobber = true;
-      text = ''module.exports = require("./core.asar");'';
+      text = ''module.exports = require("/home/${userName}/.config/discord/${legacySource.version}/modules/discord_desktop_core/core.asar");'';
     };
 
     ".config/Vencord/themes/disblock.css".text = ''
