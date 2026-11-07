@@ -60,6 +60,7 @@ inputs: let
       inherit lib;
       specialArgs = {
         flakeInputs = inputs;
+        generators = inputs.nix-generators.lib;
         inherit inputPackages;
       };
       modules =
@@ -251,6 +252,7 @@ inputs: let
     };
     extraSpecialArgs = {
       flakeInputs = inputs;
+      generators = inputs.nix-generators.lib;
       inputPackages = packagesFor "aarch64-linux";
     };
     modules = [./hosts/android-phone/nix-on-droid.nix];
@@ -263,8 +265,6 @@ in {
   nixOnDroidConfigurations.default = droid;
 
   nixosModules.steam-frame = ./hosts/steam-frame/config.nix;
-
-  lib.lint = {inherit (lint) convert;};
 
   finixConfigurations = hosts;
 
