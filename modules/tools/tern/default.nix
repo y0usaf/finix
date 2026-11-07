@@ -2237,7 +2237,7 @@
       ]);
       "plugins/ui-menu/snippets/bot-answer-bubbles.css" = generators.sourceFile "bot-answer-bubbles.css" (generators.cssSource [
         {
-          select = ":root:not(#ob) [data-role='omp.bot.reply'] > [data-role^='omp.assistant']";
+          select = ":root:not(#ob) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
           set = [
             ["align-self" "flex-start"]
             ["max-width" "min(80%, 560px)"]
@@ -2251,7 +2251,7 @@
       ]);
       "plugins/ui-menu/snippets/bot-answer-frost.css" = generators.sourceFile "bot-answer-frost.css" (generators.cssSource [
         {
-          select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > [data-role^='omp.assistant']";
+          select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
           set = [
             ["background" "var(--modal-bg)"]
             ["-webkit-backdrop-filter" "var(--frost)"]
@@ -2282,453 +2282,6 @@
           select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options']";
           set = [
             ["margin-top" "8px"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-cards.css" = generators.sourceFile "bot-cards.css" (generators.cssSource [
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user']";
-          set = [
-            ["align-self" "stretch"]
-            ["width" "auto"]
-            ["max-width" "none"]
-            ["margin" "0"]
-          ];
-        }
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body";
-          set = [
-            ["align-self" "stretch"]
-            ["width" "auto"]
-            ["max-width" "none"]
-            ["margin" "0"]
-            ["padding" "0"]
-            ["border" "0"]
-            ["border-radius" "0"]
-            ["background" "none"]
-            ["box-shadow" "none"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-chao-motion.css" = generators.sourceFile "bot-chao-motion.css" (generators.cssSource [
-        {
-          select = "[data-role='omp.bot.blink']";
-          set = [
-            ["position" "absolute"]
-            ["inset" "0"]
-            ["align-items" "center"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.blink'] [data-role^='omp.bot.px.']";
-          set = [
-            ["opacity" "0"]
-            ["animation" "chaoBlink 5.2s steps(1) infinite"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.glyph.']";
-          set = [
-            ["animation" "chaoBob 1.8s steps(1) infinite"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.glyph.swirl']";
-          set = [
-            ["animation" "chaoSpin 0.8s steps(4) infinite"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.glyph.ask']";
-          set = [
-            ["animation" "chaoSway 1.2s steps(1) infinite"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.glyph.bang']";
-          set = [
-            ["animation-duration" "0.5s"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.glyph.heart']";
-          set = [
-            ["animation" "chaoRise 1s steps(5) 1 both"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.glyph.droop']";
-          set = [
-            ["transform" "translateY(calc(2 * var(--p)))"]
-            ["animation" "none"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.glyph.z']";
-          set = [
-            ["animation" "chaoZ 2.4s steps(6) infinite"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.chao.drowsy'] [data-role^='omp.bot.glyph.']";
-          set = [
-            ["animation-duration" "4s"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.tempo.calm'] [data-role^='omp.bot.glyph.']";
-          set = [
-            ["animation-duration" "2.6s"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.tempo.brisk'] [data-role^='omp.bot.glyph.']";
-          set = [
-            ["animation-duration" "1.2s"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.tempo.calm'] [data-role='omp.bot.blink'] [data-role^='omp.bot.px.']";
-          set = [
-            ["animation-duration" "7s"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.tempo.brisk'] [data-role='omp.bot.blink'] [data-role^='omp.bot.px.']";
-          set = [
-            ["animation-duration" "3.6s"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.chao.happy'], [data-role='omp.bot.chao.boop'], [data-role='omp.bot.chao.listen'], [data-role^='omp.bot.chao.']:hover";
-          set = [
-            ["animation" "chaoHop 0.6s cubic-bezier(0.3, 0.7, 0.4, 1) 1"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.chao.sleep']:hover";
-          set = [
-            ["animation" "none"]
-          ];
-        }
-        {
-          at = "@keyframes chaoBlink";
-          rules = [
-            {
-              select = "0%, 100%";
-              set = [
-                ["opacity" "0"]
-              ];
-            }
-            {
-              select = "92%, 96%";
-              set = [
-                ["opacity" "1"]
-              ];
-            }
-          ];
-        }
-        {
-          at = "@keyframes chaoBob";
-          rules = [
-            {
-              select = "0%, 100%";
-              set = [
-                ["transform" "translateY(0)"]
-              ];
-            }
-            {
-              select = "50%";
-              set = [
-                ["transform" "translateY(calc(-1 * var(--p)))"]
-              ];
-            }
-          ];
-        }
-        {
-          at = "@keyframes chaoSpin";
-          rules = [
-            {
-              select = "from";
-              set = [
-                ["transform" "rotate(0deg)"]
-              ];
-            }
-            {
-              select = "to";
-              set = [
-                ["transform" "rotate(360deg)"]
-              ];
-            }
-          ];
-        }
-        {
-          at = "@keyframes chaoSway";
-          rules = [
-            {
-              select = "0%, 100%";
-              set = [
-                ["transform" "translateX(0)"]
-              ];
-            }
-            {
-              select = "50%";
-              set = [
-                ["transform" "translateX(var(--p))"]
-              ];
-            }
-          ];
-        }
-        {
-          at = "@keyframes chaoRise";
-          rules = [
-            {
-              select = "from";
-              set = [
-                ["transform" "translateY(calc(3 * var(--p)))"]
-              ];
-            }
-            {
-              select = "to";
-              set = [
-                ["transform" "translateY(0)"]
-              ];
-            }
-          ];
-        }
-        {
-          at = "@keyframes chaoZ";
-          rules = [
-            {
-              select = "from";
-              set = [
-                ["opacity" "1"]
-                ["transform" "translate(0, 0)"]
-              ];
-            }
-            {
-              select = "to";
-              set = [
-                ["opacity" "0"]
-                ["transform" "translate(calc(3 * var(--p)), calc(-4 * var(--p)))"]
-              ];
-            }
-          ];
-        }
-        {
-          at = "@keyframes chaoHop";
-          rules = [
-            {
-              select = "0%, 100%";
-              set = [
-                ["transform" "translateY(0)"]
-              ];
-            }
-            {
-              select = "40%";
-              set = [
-                ["transform" "translateY(calc(-5 * var(--p)))"]
-              ];
-            }
-            {
-              select = "70%";
-              set = [
-                ["transform" "translateY(0)"]
-              ];
-            }
-          ];
-        }
-        {
-          at = "@media (prefers-reduced-motion: reduce)";
-          rules = [
-            {
-              select = "[data-role^='omp.bot.chao.'], [data-role^='omp.bot.chao.'] *";
-              set = [
-                ["animation" "none !important"]
-              ];
-            }
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-chao.css" = generators.sourceFile "bot-chao.css" (generators.cssSource [
-        {
-          select = "[data-role^='omp.bot.tempo.'], [data-role^='omp.bot.type.']";
-          set = [
-            ["position" "relative"]
-            ["flex" "none"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.type.neutral']";
-          set = [
-            ["--xb" "color-mix(in srgb, var(--t) 35%, #fff)"]
-            ["--xm" "color-mix(in srgb, var(--t) 50%, #fff)"]
-            ["--xs" "color-mix(in srgb, var(--t) 70%, #fff)"]
-            ["--xc" "color-mix(in srgb, var(--t) 82%, #000)"]
-            ["--xe" "color-mix(in srgb, var(--t) 55%, #000)"]
-            ["--xw" "#f8f8f8"]
-            ["--xa" "#f8f820"]
-            ["--xi" "#d8d868"]
-            ["--xd" "#c0b830"]
-            ["--xn" "#88a850"]
-            ["--xj" "#d8f8b0"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.type.hero']";
-          set = [
-            ["--xb" "#f8f8f8"]
-            ["--xs" "#bec2bf"]
-            ["--xc" "#647c9a"]
-            ["--xe" "#647c9a"]
-            ["--xw" "#f8f8f8"]
-            ["--xj" "#c8ebf1"]
-            ["--xa" "#89a8dd"]
-            ["--xi" "#c8ebf1"]
-            ["--xd" "#647c9a"]
-            ["--xy" "#f7df56"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.type.dark']";
-          set = [
-            ["--xb" "color-mix(in srgb, var(--t) 22%, #152745)"]
-            ["--xe" "#1c63a1"]
-            ["--xw" "#f8f8f8"]
-            ["--xa" "#d52b38"]
-            ["--xi" "#d52b38"]
-            ["--xd" "#a71a30"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.chao.']";
-          set = [
-            ["position" "relative"]
-            ["flex" "none"]
-            ["align-items" "flex-start"]
-            ["cursor" "pointer"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.emote']";
-          set = [
-            ["flex" "none"]
-            ["align-items" "flex-end"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.body']";
-          set = [
-            ["position" "relative"]
-            ["align-items" "center"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.line']";
-          set = [
-            ["flex" "none"]
-            ["height" "var(--p)"]
-            ["justify-content" "center"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.px.']";
-          set = [
-            ["flex" "none"]
-            ["width" "var(--p)"]
-            ["height" "var(--p)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.o']";
-          set = [
-            ["background" "light-dark(#000, #44485e)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.r']";
-          set = [
-            ["background" "#ff4f7b"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.b']";
-          set = [
-            ["background" "var(--xb)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.m']";
-          set = [
-            ["background" "var(--xm)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.s']";
-          set = [
-            ["background" "var(--xs)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.c']";
-          set = [
-            ["background" "var(--xc)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.e']";
-          set = [
-            ["background" "var(--xe)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.a']";
-          set = [
-            ["background" "var(--xa)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.i']";
-          set = [
-            ["background" "var(--xi)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.d']";
-          set = [
-            ["background" "var(--xd)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.n']";
-          set = [
-            ["background" "var(--xn)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.j']";
-          set = [
-            ["background" "var(--xj)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.w']";
-          set = [
-            ["background" "var(--xw)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.px.y']";
-          set = [
-            ["background" "var(--xy)"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-chat-still.css" = generators.sourceFile "bot-chat-still.css" (generators.cssSource [
-        {
-          select = ":root:not(#b0) [data-role='omp.bot.reply'] .md.streaming";
-          set = [
-            ["display" "none"]
           ];
         }
       ]);
@@ -2878,7 +2431,7 @@
           ];
         }
         {
-          select = "[data-role='omp.bot.say'], [data-role='omp.bot.steps']";
+          select = "[data-role='omp.bot.say']";
           set = [
             ["position" "relative"]
             ["opacity" "0.58"]
@@ -3203,45 +2756,9 @@
       ]);
       "plugins/ui-menu/snippets/bot-turn-stats.css" = generators.sourceFile "bot-turn-stats.css" (generators.cssSource [
         {
-          select = ":root:not(#b0) [data-role='omp.bot.reply'] [data-role='omp.turn.usage'], :root:not(#b0) [data-role='omp.bot.took']";
+          select = ":root:not(#b0) [data-role='omp.bot.took']";
           set = [
             ["display" "none !important"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-work-rail.css" = generators.sourceFile "bot-work-rail.css" (generators.cssSource [
-        {
-          select = ":root:not(#b0) [data-role='omp.bot.reply'] [data-role='omp.assistant.note'] .md";
-          set = [
-            ["font-size" "13px"]
-            ["color" "var(--t2)"]
-          ];
-        }
-        {
-          select = ":root:not(#b0) [data-role='omp.bot.reply'] [data-role='omp.assistant.note'] .md > :last-child";
-          set = [
-            ["margin-bottom" "0"]
-          ];
-        }
-        {
-          select = ":root:not(#b0) [data-role='omp.bot.reply'] .sf-section[data-role='omp.notice.work'] > .sf-section-head";
-          set = [
-            ["font-size" "13px"]
-            ["color" "var(--t2)"]
-          ];
-        }
-        {
-          select = ":root:not(#b0) [data-role='omp.bot.reply'] .sf-section[data-role='omp.notice.work'] > .sf-section-head .sf-t-dim";
-          set = [
-            ["color" "var(--t4)"]
-          ];
-        }
-        {
-          select = ":root:not(#b0) [data-role='omp.bot.reply'] .sf-section[data-role='omp.notice.work'] > .sf-section-body";
-          set = [
-            ["margin-left" "7px"]
-            ["padding-left" "15px"]
-            ["box-shadow" "inset 1px 0 0 var(--l2)"]
           ];
         }
       ]);
@@ -3335,6 +2852,7 @@
           select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user']";
           set = [
             ["align-self" "flex-end"]
+            ["width" "auto"]
             ["max-width" "min(80%, 560px)"]
             ["margin" "0 0 0 auto"]
           ];
@@ -3342,7 +2860,16 @@
         {
           select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body";
           set = [
+            ["align-self" "stretch"]
             ["align-items" "flex-end"]
+            ["width" "auto"]
+            ["max-width" "none"]
+            ["margin" "0"]
+            ["padding" "0"]
+            ["border" "0"]
+            ["border-radius" "0"]
+            ["background" "none"]
+            ["box-shadow" "none"]
           ];
         }
         {
@@ -3350,7 +2877,7 @@
           set = [
             ["padding" "7px 12px"]
             ["border-radius" "var(--r-card)"]
-            ["background" "var(--oz-pink, var(--l2))"]
+            ["background" "var(--l2)"]
           ];
         }
       ]);
@@ -3459,8 +2986,8 @@
         {
           select = "html.tn-themed .cmdk, html.tn-themed .dlg-card, html.tn-themed .mdl, html.tn-themed .pk-sheet, html.tn-themed .sf-overlay.modal > .sf-ov-card, html.tn-themed .sf-prefs .pf-editor > .sf-col, html.tn-themed .tn-hd, html.tn-themed .tn-sc";
           set = [
-            ["-webkit-backdrop-filter" "var(--frost) !important"]
-            ["backdrop-filter" "var(--frost) !important"]
+            ["-webkit-backdrop-filter" "var(--frost)"]
+            ["backdrop-filter" "var(--frost)"]
           ];
         }
         {

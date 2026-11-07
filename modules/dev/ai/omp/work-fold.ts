@@ -277,7 +277,7 @@ function install(state) {
 
 	transcript.nativeBlocks = function () {
 		const blocks = nativeBlocks.call(this);
-		if (chatTranscriptDisplayPreferences.hideToolActivity) return blocks;
+		const quiet = chatTranscriptDisplayPreferences.hideToolActivity;
 		const shown = [];
 		let pending;
 		let open = [];
@@ -314,7 +314,9 @@ function install(state) {
 					pending = { prose: block, thought };
 				}
 				if (ends.has(block)) emit(true);
-			} else if (isTool(block) || block instanceof AssistantMessageComponent || open.length > 0 || pending) {
+			} else if (isTool(block) || block instanceof AssistantMessageComponent) {
+				if (!quiet) open.push(block);
+			} else if (open.length > 0 || pending) {
 				open.push(block);
 			} else {
 				shown.push(block);

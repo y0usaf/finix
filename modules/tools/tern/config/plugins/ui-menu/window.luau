@@ -139,7 +139,7 @@ local TWEAKS = {
 	},
 	{
 		id = "bot-you-frost",
-		requires = { "user-frost", "bot-you" },
+		requires = { "frost", "bot-you" },
 	},
 	{
 		id = "reply-frost",
@@ -216,18 +216,8 @@ local TWEAKS = {
 		group = "omp bots",
 	},
 	{
-		id = "bot-work-rail",
-		label = "work steps on a rail",
-		group = "omp bots",
-	},
-	{
 		id = "bot-turn-stats",
-		label = "hide turn stats",
-		group = "omp bots",
-	},
-	{
-		id = "bot-chat-still",
-		label = "no streaming",
+		label = "hide the working timer",
 		group = "omp bots",
 	},
 	{
@@ -244,9 +234,6 @@ local TWEAKS = {
 		id = "bot-spacing",
 		label = "tight message spacing",
 		group = "omp bots",
-	},
-	{
-		id = "bot-cards",
 	},
 	{
 		id = "bot-you",
@@ -316,7 +303,7 @@ local TWEAKS = {
 	},
 	{
 		id = "grok-user-bubbles",
-		requires = { "grok", "answer-bubbles" },
+		requires = { "grok" },
 	},
 	{
 		id = "grok-bot-answer-bubbles",
@@ -343,6 +330,16 @@ for _, t in ipairs(TWEAKS) do
 	on[t.id] = if type(saved) == "table" and saved[t.id] ~= nil then saved[t.id] == true else t.default ~= false
 	by_id[t.id] = t
 end
+local function save()
+	local diff = {}
+	for _, t in ipairs(TWEAKS) do
+		if on[t.id] ~= (t.default ~= false) then
+			diff[t.id] = on[t.id]
+		end
+	end
+	tern.kv.set("on", diff)
+end
+
 local children = {}
 for _, t in ipairs(TWEAKS) do
 	for _, id in ipairs(t.requires or {}) do
@@ -633,7 +630,7 @@ local function pick(layers)
 	for id, yes in want(layers) do
 		on[id] = yes
 	end
-	tern.kv.set("on", on)
+	save()
 	paint()
 end
 
@@ -644,7 +641,7 @@ local function toggle(cx, t)
 			on[id] = false
 		end
 	end
-	tern.kv.set("on", on)
+	save()
 	paint()
 	if t.apply then
 		t.apply(cx)
