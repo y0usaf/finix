@@ -1,7 +1,0 @@
-html.lay-rail.tabs-h #tabbar {
-  width: 236px !important;
-}
-
-html.lay-rail.tabs-h #panel {
-  left: calc(236px * var(--tn-zoom, 1)) !important;
-}

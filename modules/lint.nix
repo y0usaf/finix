@@ -17,126 +17,6 @@
         docs);
     });
 
-  sources = {
-    lisp = {
-      "tomoe-bar.lisp" = ./desktop/session/tomoe/lisp/bar.lisp;
-      "tomoe-cassette.lisp" = ./desktop/session/tomoe/lisp/cassette.lisp;
-      "tomoe-deck.lisp" = ./desktop/session/tomoe/lisp/deck.lisp;
-      "tomoe-gap.lisp" = ./desktop/session/tomoe/lisp/gap.lisp;
-      "tomoe-glass.lisp" = ./desktop/session/tomoe/lisp/glass.lisp;
-      "tomoe-hud.lisp" = ./desktop/session/tomoe/lisp/hud.lisp;
-      "tomoe-peek.lisp" = ./desktop/session/tomoe/lisp/peek.lisp;
-      "tomoe-plates.lisp" = ./desktop/session/tomoe/lisp/plates.lisp;
-      "tomoe-policy.lisp" = ./desktop/session/tomoe/lisp/policy.lisp;
-      "tomoe-shader-wallpaper.lisp" = ./desktop/session/tomoe/lisp/shader-wallpaper.lisp;
-      "tomoe-spine.lisp" = ./desktop/session/tomoe/lisp/spine.lisp;
-      "tomoe-sway.lisp" = ./desktop/session/tomoe/lisp/sway.lisp;
-      "tomoe-theme.lisp" = ./desktop/session/tomoe/lisp/theme.lisp;
-      "tomoe-user.lisp" = ./desktop/session/tomoe/lisp/user.lisp;
-      "ekko-init.lisp" = ./shell/ekko/init.lisp;
-    };
-    javascript."jev-mcp.mjs" = ./dev/ai/jev-mcp.mjs;
-    lua = {
-      "aniimo-catch.lua" = ./gaming/aniimo/catch.lua;
-      "aniimo-rewards.lua" = ./gaming/aniimo/rewards.lua;
-      "omarchy-hyprland.lua" = ./hosts/steam-frame/omarchy/hyprland.lua;
-    };
-    shell = {
-      "beat-saber-lock" = ./hosts/steam-frame/beat-saber/lock.sh;
-      "omp-box" = ../omp-box/omp-box.sh;
-    };
-    glsl = {
-      "ozette-dark.glsl" = ./desktop/session/tomoe/shaders/ozette-dark.glsl;
-      "ozette-fields-dark.glsl" = ./desktop/session/tomoe/shaders/ozette-fields-dark.glsl;
-      "ozette-fields-light.glsl" = ./desktop/session/tomoe/shaders/ozette-fields-light.glsl;
-      "ozette-light.glsl" = ./desktop/session/tomoe/shaders/ozette-light.glsl;
-      "ozette-lilies-dark.glsl" = ./desktop/session/tomoe/shaders/ozette-lilies-dark.glsl;
-      "ozette-lilies-light.glsl" = ./desktop/session/tomoe/shaders/ozette-lilies-light.glsl;
-      "ozette-pond-dark.glsl" = ./desktop/session/tomoe/shaders/ozette-pond-dark.glsl;
-      "ozette-pond-light.glsl" = ./desktop/session/tomoe/shaders/ozette-pond-light.glsl;
-    };
-    luau = {
-      "tern-block-menu-window.luau" = ./tools/tern/config/plugins/block-menu/window.luau;
-      "tern-tab-order-window.luau" = ./tools/tern/config/plugins/tab-order/window.luau;
-      "tern-tuturu-window.luau" = ./tools/tern/config/plugins/tuturu/src/window.luau;
-      "tern-ui-menu-rail.luau" = ./tools/tern/config/plugins/ui-menu/rail.luau;
-      "tern-ui-menu-window.luau" = ./tools/tern/config/plugins/ui-menu/window.luau;
-    };
-    markdown = {
-      "carly-HEARTBEAT.md" = ./tools/tern/config/carly/HEARTBEAT.md;
-      "carly-MEMORY.md" = ./tools/tern/config/carly/MEMORY.md;
-      "carly-SOUL.md" = ./tools/tern/config/carly/SOUL.md;
-      "carly-USER.md" = ./tools/tern/config/carly/USER.md;
-      "carly-2026-10-29.md" = ./tools/tern/config/carly/memory/2026-10-29.md;
-      "carly-2026-10-30.md" = ./tools/tern/config/carly/memory/2026-10-30.md;
-      "tuturu-README.md" = ./tools/tern/config/plugins/tuturu/README.md;
-    };
-    python = {
-      "apply-reasoning-policy.py" = ./dev/ai/codex/apply-reasoning-policy.py;
-      "gateway-proxy.py" = ../omp-box/gateway-proxy.py;
-      "wrapper.py" = ./dev/work/vercel/wrapper.py;
-      "aniimo-apply.py" = ./gaming/aniimo/apply.py;
-      "p4g-setup.py" = ./gaming/p4g/setup.py;
-    };
-    ts = {
-      "omp/box-commands.ts" = ./dev/ai/omp/box-commands.ts;
-      "omp/chat-look.ts" = ./dev/ai/omp/chat-look.ts;
-      "omp/compact-eval.ts" = ./dev/ai/omp/compact-eval.ts;
-      "omp/crest-auth.ts" = ./dev/ai/omp/crest-auth.ts;
-      "omp/cwd.ts" = ./dev/ai/omp/cwd.ts;
-      "omp/work-fold.ts" = ./dev/ai/omp/work-fold.ts;
-      "optchat/extension.ts" = ./dev/ai/omp/optchat/extension.ts;
-      "optchat/service.ts" = ./dev/ai/omp/optchat/service.ts;
-      "optchat/store.ts" = ./dev/ai/omp/optchat/store.ts;
-      "optchat/tree.ts" = ./dev/ai/omp/optchat/tree.ts;
-      "pi/crest-auth.ts" = ./dev/ai/pi/crest-auth.ts;
-    };
-    vbs."play.vbs" = ./tools/tern/config/plugins/tuturu/scripts/play.vbs;
-    patch = {
-      "luajit-opcodes.patch" = ./gaming/aniimo/luajit-opcodes.patch;
-      "aquamarine-gamescope.patch" = ./hosts/steam-frame/omarchy/aquamarine-gamescope.patch;
-      "rush-login-command.patch" = ./shell/rush-login-command.patch;
-      "omp-prewalk-eval.patch" = ./dev/ai/omp/prewalk-eval.patch;
-    };
-  };
-
-  patched = {
-    "luajit-opcodes.patch" = pkgs.fetchFromGitHub {
-      owner = "LuaJIT";
-      repo = "LuaJIT";
-      rev = "4c2441c16ce3c4e312aaefecc6d40c4fe21de97c";
-      hash = "sha256-S1oVxgqitKPENLIbBfrmY8w8GgBQR6Byr52RjPpqz8g=";
-    };
-    "aquamarine-gamescope.patch" = inputs.steam-frame-nixos.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.aquamarine.src;
-    "rush-login-command.patch" = inputPackages.rush.default.src;
-    "omp-prewalk-eval.patch" = inputPackages.oh-my-pi.omp.src;
-  };
-
-  read = lib.mapAttrs (_: lib.mapAttrs (_: builtins.readFile)) (lib.recursiveUpdate sources {
-    glsl = {
-      "balatro.glsl" = ./desktop/session/tomoe/shaders/balatro.glsl;
-      "cassette-led.glsl" = ./desktop/session/tomoe/shaders/cassette-led.glsl;
-      "cassette-squares.glsl" = ./desktop/session/tomoe/shaders/cassette-squares.glsl;
-      "dot-corridor.glsl" = ./desktop/session/tomoe/shaders/dot-corridor.glsl;
-      "glass-mound.glsl" = ./desktop/session/tomoe/shaders/glass-mound.glsl;
-      "hex-spiral.glsl" = ./desktop/session/tomoe/shaders/hex-spiral.glsl;
-      "llama-herd.glsl" = ./desktop/session/tomoe/shaders/llama-herd.glsl;
-      "llama-herd-night.glsl" = ./desktop/session/tomoe/shaders/llama-herd-night.glsl;
-      "su-ei.glsl" = ./desktop/session/tomoe/shaders/su-ei.glsl;
-    };
-    luau."tern-agent-tabs-window.luau" = ./tools/tern/config/plugins/agent-tabs/window.luau;
-    shell."osc.sh" = ./desktop/session/theme/templates/osc.sh;
-    ts = lib.mapAttrs' (name: _: lib.nameValuePair "secrets/${name}" (./dev/ai/omp/secrets + "/${name}")) (builtins.readDir ./dev/ai/omp/secrets);
-  });
-
-  rendered = lib.recursiveUpdate read {python."wrapper.py" = builtins.replaceStrings ["@owners@"] ["{}"] read.python."wrapper.py";};
-
-  reader = pkgs.writeText "read.lisp" ''
-    (let ((*read-eval* nil))
-      (with-open-file (source (sb-ext:posix-getenv "SOURCE"))
-        (loop for form = (read source nil source) until (eq form source))))
-  '';
-
   prelude = pkgs.writeText "prelude.frag" ''
     #version 300 es
     precision highp float;
@@ -157,26 +37,6 @@
         mainImage(tomoe_color, vec2(v_local.x, iResolution.y - v_local.y));
     }
   '';
-
-  luajit = ["aniimo-catch.lua" "aniimo-rewards.lua"];
-
-  languageChecks = {
-    glsl = file: "cat ${prelude} ${file} ${entry} > shader.frag\n${lib.getExe' pkgs.glslang "glslangValidator"} -S frag shader.frag\n";
-    javascript = file: "${lib.getExe pkgs.nodejs} --check ${file}\n";
-    lisp = file: "SOURCE=${file} ${lib.getExe pkgs.sbcl} --script ${reader}\n";
-    lua = file:
-      if builtins.elem file.name luajit
-      then "${lib.getExe pkgs.luajit} -bl ${file} > /dev/null\n"
-      else "${lib.getExe' pkgs.lua5_5 "luac"} -p ${file}\n";
-    luau = file: "${lib.getExe' pkgs.luau "luau-analyze"} --formatter=plain ${file} > analysis || true\nif grep -F SyntaxError analysis; then exit 1; fi\n";
-    markdown = file: "${comrak} -e table -t xml ${file} > ast\n${comrak} -e table -t commonmark ${file} | ${comrak} -e table -t xml | cmp ast -\n";
-    patch = file: "${lib.getExe pkgs.git} -C ${patched.${file.name}} apply --check ${file}\n";
-    python = file: "PYTHONPYCACHEPREFIX=$TMPDIR/pycache ${lib.getExe pkgs.python3} -m py_compile ${file}\n";
-    shell = file: "${lib.getExe pkgs.bash} -n ${file}\n${lib.getExe pkgs.shellcheck} -s bash -S warning ${file}\n";
-    vbs = file: "${strictix} import vbs ${file} > /dev/null\n";
-  };
-
-  comrak = lib.getExe pkgs.comrak;
 
   glslGate = pkgs.writeShellApplication {
     name = "glsl-gate";
@@ -362,58 +222,12 @@
     '';
   };
 
-  ambient = pkgs.writeText "ambient.d.ts" ''
-    declare module "@oh-my-pi/pi-coding-agent" {
-      export type ExtensionAPI = any;
-      export type ExtensionContext = any;
-    }
-    declare module "@earendil-works/pi-coding-agent" {
-      export type ExtensionAPI = any;
-    }
-    declare module "@oh-my-pi/pi-ai" {
-      export type ApiKeyResolver = any;
-      export const completeSimple: (...args: any[]) => any;
-      export const streamSimple: any;
-    }
-    declare module "@earendil-works/pi-ai" {
-      export type Api = any;
-      export type AssistantMessage = any;
-      export type AssistantMessageEvent = any;
-      export type Model<T> = any;
-      export type Provider = any;
-      export const createAssistantMessageEventStream: any;
-    }
-    declare module "*";
-    declare type Buffer = any;
-    declare const Buffer: any;
-    declare const Bun: any;
-    declare const process: any;
-    declare namespace NodeJS {
-      type ErrnoException = any;
-      type Timeout = any;
-    }
-  '';
-
-  untyped = ["omp/chat-look.ts" "omp/compact-eval.ts" "omp/work-fold.ts" "secrets/omp-secret.ts"];
-
-  treeChecks = {
-    ts = files: let
-      farm = pkgs.linkFarm "ts" (lib.mapAttrsToList (name: text: {
-          inherit name;
-          path = pkgs.writeText (baseNameOf name) text;
-        })
-        files);
-      tsc = flags: names: "${lib.getExe' pkgs.typescript "tsc"} --noEmit --strict false --skipLibCheck --allowImportingTsExtensions --preserveSymlinks --target es2022 --module esnext --moduleResolution bundler --lib es2023,dom ${flags}${ambient} ${lib.concatMapStringsSep " " (name: "${farm}/${name}") names}\n";
-    in
-      tsc "" (lib.subtractLists untyped (lib.attrNames files)) + tsc "--noCheck " untyped;
-  };
-
   config = (pkgs.formats.toml {}).generate "strictix.toml" {
     lint = {
       schema = schema "finix" (lib.concatMap (host: lib.optionAttrSetToDocList host.options) (builtins.attrValues hosts));
       enabled = ["unused-option" "never-enabled-option" "constant-option" "duplicate-definitions" "singleton-attrset" "singleton-list" "templated-bindings" "scattered-documentation" "unformatted-file" "wrapped-prose" "repeated-dynamic-path" "repeated-let-value" "per-system-input-lookup"];
       generated = ["modules/hosts/steam-frame/beat-saber/beatmods.json"];
-      disabled = ["hand-maintained-data-file" "codec-candidate"];
+      disabled = ["hand-maintained-data-file"];
       constant-option = {
         readers = 3;
         defined = lib.unique (lib.concatMap (host: map (o: lib.showOption o.loc) (lib.filter (o: lib.any (file: lib.hasPrefix "${inputs.self}" (toString file) || toString file == "<unknown-file>") o.declarations && o.definitionsWithLocations != []) (lib.collect lib.isOption host.options))) (builtins.attrValues hosts));
@@ -452,13 +266,12 @@ in {
   inherit glslGate;
 
   app = pkgs.writeShellScriptBin "lint" ''
-    exec ${strictix} "''${1:-check}" "''${@:2}" --config ${config}
-  '';
-
-  codegen = pkgs.runCommand "codegen" {} ''
-    ${lib.concatStrings (lib.concatLists (lib.mapAttrsToList (language: files: lib.mapAttrsToList (name: text: languageChecks.${language} (pkgs.writeText name text)) files) (removeAttrs rendered (lib.attrNames treeChecks))))}
-    ${lib.concatStrings (lib.mapAttrsToList (language: check: check rendered.${language}) treeChecks)}
-    touch $out
+    command=''${1:-check}
+    shift || true
+    [ "$command" = fix ] || exec ${strictix} "$command" "$@" --config ${config}
+    set -euo pipefail
+    ${strictix} fix "$@" --config ${config} || true
+    exec ${strictix} import "$@"
   '';
 
   check = pkgs.runCommand "strictix" {} ''

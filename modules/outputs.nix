@@ -298,7 +298,6 @@ in {
     lib.mapAttrs' (name: host: lib.nameValuePair name host.config.system.build.toplevel) hosts
     // {
       strictix = lint.check;
-      inherit (lint) codegen;
     };
 
   formatter.${system} = inputPackages.alejandra.default;

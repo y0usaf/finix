@@ -98,6 +98,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-generators = {
+      url = "github:y0usaf/nix-generators/7f090f4205cf9a88af0402265d996e982526b990";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.iets.follows = "strictix/iets";
+    };
+
     cursors = {
       url = "github:y0usaf/cursors";
       inputs.nixpkgs.follows = "nixpkgs";

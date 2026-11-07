@@ -1031,6 +1031,31 @@
           "iets"
         ],
         "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793910462,
+        "narHash": "sha256-pxMN9xgTMDYmg6+OVW7MWTO8HJq9VXHCDVLN1so/mSA=",
+        "owner": "y0usaf",
+        "repo": "nix-generators",
+        "rev": "7f090f4205cf9a88af0402265d996e982526b990",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "nix-generators",
+        "rev": "7f090f4205cf9a88af0402265d996e982526b990",
+        "type": "github"
+      }
+    },
+    "nix-generators_2": {
+      "inputs": {
+        "iets": [
+          "strictix",
+          "iets"
+        ],
+        "nixpkgs": [
           "strictix",
           "nixpkgs"
         ]
@@ -1771,6 +1796,7 @@
         "monstar": "monstar",
         "nacre": "nacre",
         "nh": "nh",
+        "nix-generators": "nix-generators",
         "nix-on-droid": "nix-on-droid",
         "nixpkgs": "nixpkgs_7",
         "nixpkgs-discord-legacy": "nixpkgs-discord-legacy",
@@ -1951,17 +1977,17 @@
     "strictix": {
       "inputs": {
         "iets": "iets_2",
-        "nix-generators": "nix-generators",
+        "nix-generators": "nix-generators_2",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1793853662,
-        "narHash": "sha256-9dfzb+lvSJQccdJplzcVjNAWlqBIYWV7GhMxrZreonQ=",
+        "lastModified": 1794071882,
+        "narHash": "sha256-HU+oVRbZoD5KT5VtuHRV/bpzVZE4erfW8mhtqRpw2p0=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "237b75ac6dd946edc93934e756e7d4d8fa0bf8a3",
+        "rev": "fc53b59fbcdf3c5f6ad49fb1dd5a1df1b3d8f43e",
         "type": "github"
       },
       "original": {

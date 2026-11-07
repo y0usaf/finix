@@ -1,9 +1,0 @@
-:root:not(#ob) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'] {
-  align-self: flex-start;
-  max-width: min(80%, 560px);
-  margin: 0;
-  padding: 7px 12px;
-  border-radius: var(--r-card);
-  background: rgb(from var(--t1) r g b / 6%);
-  box-shadow: none;
-}
