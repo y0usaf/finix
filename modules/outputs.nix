@@ -2,21 +2,7 @@ inputs: let
   system = "x86_64-linux";
   inherit (pkgs) lib;
   packagesFor = platform: builtins.mapAttrs (_: input: input.packages.${platform} or {}) inputs;
-  inputPackages = let
-    packages = packagesFor system;
-    omp = packages.oh-my-pi.omp.overrideAttrs (old: {
-      patches = (old.patches or []) ++ [./dev/ai/omp/prewalk-eval.patch];
-    });
-  in
-    packages
-    // {
-      oh-my-pi =
-        packages.oh-my-pi
-        // {
-          inherit omp;
-          default = omp;
-        };
-    };
+  inputPackages = packagesFor system;
 
   mkPkgs = cudaSupport:
     import (toString inputs.nixpkgs) {
