@@ -6,7 +6,7 @@
 }: let
   # The local refusal-removed model omp-ablit serves, set once here for its server and, as the ablit module argument, omp's provider
   # (box.nix). huihui-ai's abliterated Qwen 3.8 27B, chosen by y0usaf; the UGI Leaderboard has not scored any
-  # Qwen 3.8 yet. The Unsloth-dynamic Q4_K_M quant (15.4 GiB) with a q8_0 KV cache of a 32768-token window fits
+  # Qwen 3.8 yet. The Unsloth-dynamic Q4_K_M quant (15.4 GiB) with a q4_0 KV cache of a 131072-token window, one slot, fits
   # beside bolod and the desktop; llama.cpp's --fit spills layers to the CPU when another job holds the card, so a
   # busy GPU costs speed, not a failed start. Qwen 3.8 calls tools natively.
   model = let
@@ -19,7 +19,7 @@
     inherit file;
     url = "https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF/resolve/main/${file}";
     sha256 = "0c7cfe3060493485bb9a6a51195897b0c1d347a49929206adb9a52170183ea03";
-    contextWindow = 32768;
+    contextWindow = 131072;
     maxTokens = 16384;
     # omp-ablit's box half, placed in the box seed by box.nix: omp runs in the box, which sees only the paths its
     # shares carry, so the program rides the seed share like the config omp already reads there.
@@ -75,8 +75,9 @@
           --host 127.0.0.1 \
           --port ${toString model.port} \
           --ctx-size ${toString model.contextWindow} \
-          --cache-type-k q8_0 \
-          --cache-type-v q8_0 \
+          --cache-type-k q4_0 \
+          --cache-type-v q4_0 \
+          --parallel 1 \
           --flash-attn on \
           --fit on \
           --jinja \
