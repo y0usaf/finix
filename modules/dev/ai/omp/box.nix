@@ -568,6 +568,16 @@
       exec bun "''${0%/*}/../ext/secrets/omp-secret.ts" "$@"
     '';
   };
+  optchatExtension = "${inBox "optchat"}/extension.ts";
+  ompExtensions = [
+    "${inBox "omp-bot"}/omp/code-mode.ts"
+    "${inBox "omp-bot"}/omp/barge-in.ts"
+    "${inBox "compact-eval.ts"}"
+    "${inBox "work-fold.ts"}"
+    "${inBox "crest-reroute.ts"}"
+    optchatExtension
+    "${inBox "omp-bot"}/omp/ompd.ts"
+  ];
   files = {
     models = pkgs.writeText "models.json" (json catalog.models);
     modelKeys = pkgs.writeText "models.yml" ''
@@ -597,6 +607,7 @@
     ablitConfig = pkgs.writeText "ablit.yml" ''
       advisor:
         enabled: false
+      extensions: ${builtins.toJSON (lib.remove optchatExtension ompExtensions)}
     '';
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel;
@@ -627,14 +638,7 @@
         autoBackground:
           enabled: true
           thresholdMs: 3600000
-      extensions:
-        - "${inBox "omp-bot"}/omp/code-mode.ts"
-        - "${inBox "omp-bot"}/omp/barge-in.ts"
-        - "${inBox "compact-eval.ts"}"
-        - "${inBox "work-fold.ts"}"
-        - "${inBox "crest-reroute.ts"}"
-        - "${inBox "optchat"}/extension.ts"
-        - "${inBox "omp-bot"}/omp/ompd.ts"
+      extensions: ${builtins.toJSON ompExtensions}
     '';
     appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n\n${catalog.taskNote}\n";
   };
