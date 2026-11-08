@@ -9,6 +9,54 @@
   shared = import ../shared.nix {inherit lib;};
   btrfs = shared.btrfs diskUuid ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
   cfg = config.programs.limine;
+  gpuUnlock = rec {
+    nv = "610.43.03";
+    src = pkgs.fetchFromGitHub {
+      owner = "Zagitta";
+      repo = "gpu-unlock";
+      rev = "7eb51bccae0a0b7e599e084d971170e9a1e82d0c";
+      hash = "sha256-1KD/J1S1uyI5GGoTwQ1cU/sXeEKlG54exSvi6U+j73M=";
+    };
+    firmware =
+      pkgs.runCommand "gpu-unlock-firmware-${nv}" {
+        nativeBuildInputs = [pkgs.python3 pkgs.zstd];
+        installer = pkgs.fetchurl {
+          url = "https://download.nvidia.com/XFree86/Linux-x86_64/${nv}/NVIDIA-Linux-x86_64-${nv}-no-compat32.run";
+          sha256 = "e084451db730a6df29d3d74f655749c4d236e3c945f7d94b5205e84318fe2f90";
+        };
+        kernelSource = pkgs.fetchurl {
+          url = "https://download.nvidia.com/XFree86/NVIDIA-kernel-module-source/NVIDIA-kernel-module-source-${nv}.tar.xz";
+          sha256 = "7e118923c7a23edc36114d63273a46e3e04e9af98695a42203e7ac2dfe9fc1dc";
+        };
+      } ''
+        tar -xf $kernelSource
+        python3 ${src}/firmware/extract_gsp.py $installer assets
+        python3 ${src}/firmware/extract_boot_assets.py NVIDIA-kernel-module-source-${nv} assets
+        install -Dm644 -t $out/lib/firmware/gpu-unlock/${nv} assets/*.bin
+      '';
+    module = let
+      inherit (config.boot.kernelPackages) kernel kernelModuleMakeFlags;
+      kdir = "${kernel.dev}/lib/modules/${kernel.modDirVersion}/build";
+    in
+      pkgs.stdenv.mkDerivation {
+        pname = "gpu-unlock";
+        version = "2.0.0";
+        inherit src;
+        sourceRoot = "source/kernel/gpu_unlock";
+        nativeBuildInputs = kernel.moduleBuildDependencies;
+        makeFlags =
+          kernelModuleMakeFlags
+          ++ [
+            "KDIR=${kdir}"
+            "INSTALL_MOD_PATH=${placeholder "out"}"
+            "INSTALL_MOD_DIR=extra"
+            "INSTALL_MOD_STRIP=1"
+            "DEPMOD=true"
+          ];
+        installTargets = ["modules_install"];
+        installFlags = ["-C" kdir "M=$(PWD)"];
+      };
+  };
 in {
   finix.diagnostics = {
     inherit diskUuid;
@@ -18,7 +66,7 @@ in {
   user.dev.prompts.host = ["The GPU is an NVIDIA GeForce RTX 4090."];
 
   hardware = {
-    firmware = [pkgs.linux-firmware];
+    firmware = [pkgs.linux-firmware gpuUnlock.firmware];
     cpu.amd.updateMicrocode = true;
     nvidia = {
       enable = true;
@@ -26,9 +74,11 @@ in {
     };
   };
 
+  environment.etc."modprobe.d/nvidia-uvm.conf".text = lib.mkForce "softdep nvidia pre: gpu_unlock post: nvidia_uvm\n";
+
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
-    extraModulePackages = [config.boot.kernelPackages.zenpower config.hardware.nvidia.package.mod];
+    extraModulePackages = [config.boot.kernelPackages.zenpower config.hardware.nvidia.package.mod gpuUnlock.module];
     initrd.availableKernelModules = [
       "nvme"
       "thunderbolt"
@@ -59,6 +109,7 @@ in {
       "nvidia.NVreg_RegistryDwords=RmEnableAggressiveVblank=1"
       "nvidia_modeset.disable_vrr_memclk_switch=1"
       "nvidia.NVreg_TemporaryFilePath=/var/tmp"
+      "gpu_unlock.targets=all"
     ];
     loader.efi.canTouchEfiVariables = true;
   };
