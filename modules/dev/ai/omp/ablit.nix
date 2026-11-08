@@ -21,9 +21,9 @@
     sha256 = "0c7cfe3060493485bb9a6a51195897b0c1d347a49929206adb9a52170183ea03";
     contextWindow = 32768;
     maxTokens = 16384;
-    # omp-ablit's config overlay, placed in the box seed by box.nix: omp runs in the box, which sees only the
-    # paths its shares carry, so the overlay rides the seed share like the config omp already reads there.
-    overlay = "/mnt/seed/current/ablit.yml";
+    # omp-ablit's box half, placed in the box seed by box.nix: omp runs in the box, which sees only the paths its
+    # shares carry, so the program rides the seed share like the config omp already reads there.
+    program = "/mnt/seed/current/bin/omp-ablit";
   };
   home = config.user.homeDirectory;
   dir = "${home}/${model.dir}";
@@ -38,7 +38,6 @@
     text = ''
       dir=${dir}
       file="$dir/${model.file}"
-      log="$dir/llama-server.log"
       url=${url}
 
       mkdir -p "$dir"
@@ -61,8 +60,6 @@
           kill "$server" 2>/dev/null || true
           wait "$server" 2>/dev/null || true
         fi
-        [ -f "$log" ] || return 0
-        grep -Eo '(prompt eval time|eval time) =.*' "$log" | tail -n 2 | sed 's/^/omp-ablit: /' >&2 || true
         exit "$status"
       }
       trap cleanup EXIT
@@ -72,7 +69,6 @@
       else
         echo "omp-ablit: starting ${model.name} on $url" >&2
         before=$(mem || true)
-        : >"$log"
         llama-server \
           --model "$file" \
           --alias ${model.id} \
@@ -85,7 +81,7 @@
           --fit on \
           --jinja \
           --no-webui \
-          >>"$log" 2>&1 &
+          >/dev/null 2>&1 &
         server=$!
         ready=""
         for _ in $(seq 1 600); do
@@ -99,14 +95,13 @@
           sleep 1
         done
         if [ -z "$ready" ]; then
-          echo "omp-ablit: llama-server did not come up on $url:" >&2
-          tail -n 20 "$log" >&2 || true
+          echo "omp-ablit: llama-server did not come up on $url" >&2
           exit 1
         fi
         echo "omp-ablit: VRAM used,total after the load: $(mem || echo unknown) MiB; before it: $before" >&2
       fi
 
-      omp --model ablit/${model.id} --config ${model.overlay} "$@"
+      OMP_BOX_PROGRAM=${model.program} omp "$@"
     '';
   };
 in {

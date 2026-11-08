@@ -567,8 +567,21 @@
       #!/bin/sh
       exec bun "''${0%/*}/../ext/secrets/omp-secret.ts" "$@"
     '';
+    omp-ablit = pkgs.writeScript "omp-ablit" ''
+      #!/bin/sh
+      set -eu
+      seed=${seedMount}/current
+      state=$(mktemp -d "$HOME/.omp-ablit.XXXXXX")
+      trap 'rm -rf "$state"' EXIT
+      trap 'exit 130' INT TERM HUP
+      mkdir "$state/agent"
+      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$seed/APPEND_SYSTEM.md" "$state/agent/"
+      PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
+        --model ablit/${ablit.id} --config "$seed/ablit.yml" "$@"
+    '';
   };
   optchatExtension = "${inBox "optchat"}/extension.ts";
+  ompdExtension = "${inBox "omp-bot"}/omp/ompd.ts";
   ompExtensions = [
     "${inBox "omp-bot"}/omp/code-mode.ts"
     "${inBox "omp-bot"}/omp/barge-in.ts"
@@ -576,7 +589,7 @@
     "${inBox "work-fold.ts"}"
     "${inBox "crest-reroute.ts"}"
     optchatExtension
-    "${inBox "omp-bot"}/omp/ompd.ts"
+    ompdExtension
   ];
   files = {
     models = pkgs.writeText "models.json" (json catalog.models);
@@ -603,11 +616,12 @@
               contextWindow: ${toString ablit.contextWindow}
               maxTokens: ${toString ablit.maxTokens}
     '';
-    # omp-ablit's own overlay (ablit.nix): a local session asks no cloud model for a review.
+    # omp-ablit's own overlay (ablit.nix): a local session asks no cloud model for a review, and loads neither
+    # OptChat, which logs every chat into the shared memory, nor ompd, which keeps each job's log on the host.
     ablitConfig = pkgs.writeText "ablit.yml" ''
       advisor:
         enabled: false
-      extensions: ${builtins.toJSON (lib.remove optchatExtension ompExtensions)}
+      extensions: ${builtins.toJSON (lib.subtractLists [optchatExtension ompdExtension] ompExtensions)}
     '';
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel;

@@ -33,7 +33,7 @@
     exec ${pkgs.openssh}/bin/ssh -q -p 22422 -i "$key" \
       -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
       -o BatchMode=yes -o SendEnv=TERM $tty ${user}@127.0.0.1 \
-      "exec sh -c $(printf %q "$seed cd $(printf %q "$PWD") && exec ${omp}/bin/omp $(for a in "$@"; do printf %q "$a"; printf ' '; done)")"
+      "exec sh -c $(printf %q "$seed cd $(printf %q "$PWD") && exec $(printf %q "''${OMP_BOX_PROGRAM:-${omp}/bin/omp}") $(for a in "$@"; do printf %q "$a"; printf ' '; done)")"
   '';
   local = pkgs.writeShellScriptBin "omp-local" ''exec ${omp}/bin/omp "$@"'';
   cli = pkgs.writeShellApplication {
