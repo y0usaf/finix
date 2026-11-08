@@ -96,3 +96,4 @@ Some setup lives outside Nix and has to be done once by hand.
 - **Beat Saber (Frame):** switch to Steam's `1.44.1_legacy` branch and set launch options to `/run/current-system/sw/bin/beat-saber-mods %command%`.
 - **Aniimo:** mods target Steam build 26426499; after a game update, re-pin `modules/gaming/aniimo/` against the new vanilla archive.
 - **omp and Tern:** restart running omp sessions after changing their extensions; `tern plugin reload` picks up stylesheet changes.
+- **Nix Userscripts:** `modules/desktop/apps/browsers/userscripts/` holds the userscripts LibreWolf publishes once `nixUserscripts` in that module is true. That needs the extension signed, plus its `ExtensionSettings` force-install entry; until then Violentmonkey keeps them.
