@@ -12,6 +12,23 @@ providers:
         maxTokens: 131072
         name: Ox Alpha
         reasoning: true
+  anthropic: 
+    models: 
+      - api: anthropic-messages
+        baseUrl: https://api.anthropic.com
+        contextWindow: 1000000
+        cost: 
+          cacheRead: 0.2
+          cacheWrite: 10
+          input: 8
+          output: 40
+        id: claude-fable-5-2
+        input: 
+          - text
+          - image
+        maxTokens: 128000
+        name: Claude Fable 5.2
+        reasoning: true
   vercel-ai-gateway:
     baseUrl: https://ai-gateway.vercel.sh/v1
     apiKey: AI_GATEWAY_API_KEY
@@ -24,6 +41,21 @@ providers:
               - bedrock
               - vertex
     models: 
+      - api: anthropic-messages
+        baseUrl: https://ai-gateway.vercel.sh
+        contextWindow: 1000000
+        cost: 
+          cacheRead: 0.2
+          cacheWrite: 10
+          input: 8
+          output: 40
+        id: anthropic/claude-fable-5.2
+        input: 
+          - text
+          - image
+        maxTokens: 128000
+        name: Claude Fable 5.2
+        reasoning: true
       - api: anthropic-messages
         baseUrl: https://ai-gateway.vercel.sh
         contextWindow: 1000000
