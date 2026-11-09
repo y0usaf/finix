@@ -77,7 +77,7 @@ in {
         {
           tag = "natives";
           source = ompBox.nativesDir;
-          mountPoint = "${home}/.omp/natives";
+          mountPoint = "/mnt/omp-natives";
           proto = "9p";
           readOnly = true;
         }
@@ -185,6 +185,22 @@ in {
         "getty@tty1".enable = false;
         "autovt@".enable = false;
         "serial-getty@ttyS0".enable = false;
+        omp-natives = {
+          wantedBy = ["multi-user.target"];
+          before = ["sshd.service"];
+          unitConfig.RequiresMountsFor = ["/mnt/omp-natives" "${home}/.omp/run"];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+          script = ''
+            mkdir -p /run/omp-natives/upper /run/omp-natives/work ${home}/.omp/natives
+            chown ${user}:users /run/omp-natives/upper
+            ${pkgs.util-linux}/bin/mount -t overlay overlay \
+              -o lowerdir=/mnt/omp-natives,upperdir=/run/omp-natives/upper,workdir=/run/omp-natives/work \
+              ${home}/.omp/natives
+          '';
+        };
         # The omp config, read from the seed share's current generation at boot and again by the host's
         # omp-box-seed whenever it puts a new one there; at boot it waits for omp-box-seed's first copy.
         omp-seed = {
