@@ -341,12 +341,12 @@
   };
 
   themes = pkgs.linkFarm "themes" (lib.concatLists (lib.mapAttrsToList (name: scheme:
-    lib.mapAttrsToList (template: file: {
-      name = "${name}/${template}";
-      path = pkgs.writeText "${name}-${template}" (render scheme (builtins.readFile file));
-    })
-    templates)
-  schemes));
+      lib.mapAttrsToList (template: file: {
+        name = "${name}/${template}";
+        path = pkgs.writeText "${name}-${template}" (render scheme (builtins.readFile file));
+      })
+      templates)
+    schemes));
 
   gtkThemes = {
     dark = "Adwaita-dark";
@@ -376,11 +376,11 @@
         mv -f "$2.new" "$2"
       }
       ${lib.concatStrings (lib.mapAttrsToList (template: paths:
-        lib.concatMapStrings (path: ''
-          place "$dir/${template}" "$HOME/${path}"
-        '')
-        paths)
-      targets)}
+          lib.concatMapStrings (path: ''
+            place "$dir/${template}" "$HOME/${path}"
+          '')
+          paths)
+        targets)}
       osc=$(${pkgs.runtimeShell} "$dir/osc.sh")
       for tty in /dev/pts/[0-9]*; do
         if [ -O "$tty" ] && [ -w "$tty" ]; then

@@ -8,12 +8,13 @@
   inherit ((import ../../hosts/shared.nix {inherit lib;}).bolo) model vocabulary;
   models.${model.name} = {
     inherit (model) engine;
-    files = lib.mapAttrs (file: hash:
-      pkgs.fetchurl {
-        url = "${model.url}/${file}";
-        inherit hash;
-      })
-    model.hashes;
+    files =
+      lib.mapAttrs (file: hash:
+        pkgs.fetchurl {
+          url = "${model.url}/${file}";
+          inherit hash;
+        })
+      model.hashes;
   };
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
