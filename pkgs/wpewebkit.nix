@@ -16,7 +16,7 @@ in
     separateDebugInfo = false;
     src = pkgs.fetchurl {
       url = "https://wpewebkit.org/releases/wpewebkit-${base.version}.tar.xz";
-      hash = "sha256-Dei9+6AR+c1jupqRcfpgON0sCCN4lPQIKru4IfKdP+k=";
+      hash = "sha256-8yhOGeR/y1rIxjwuHBE9vWWyQj64pUX1s0VweCkAT1Y=";
     };
     cmakeFlags = [
       "-DPORT=WPE"
