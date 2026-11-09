@@ -99,7 +99,7 @@
     };
 
     nix-generators = {
-      url = "github:y0usaf/nix-generators/7f090f4205cf9a88af0402265d996e982526b990";
+      url = "github:y0usaf/nix-generators";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.iets.follows = "strictix/iets";
     };
