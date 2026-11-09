@@ -22,6 +22,9 @@ inputs: let
           ash = inputPackages.ash.default;
         })
         (_: prev: {
+          tectonic-unwrapped = prev.tectonic-unwrapped.overrideAttrs (old: {
+            buildInputs = (old.buildInputs or []) ++ [prev.aws-lc];
+          });
           obs-studio-plugins =
             prev.obs-studio-plugins
             // {
