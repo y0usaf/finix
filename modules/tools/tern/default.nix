@@ -2995,10 +2995,14 @@
           at = "@media (prefers-contrast: more)";
           rules = [
             {
-              select = "html.tn-themed";
+              select = "html.tn-themed:not(#s0):not(#s1)";
               set = [
                 ["--frost" "none"]
                 ["--frost-fill" "var(--modal-bg)"]
+                ["--frost-you-fill" "initial"]
+                ["--frost-you-ink" "initial"]
+                ["--frost-reply-fill" "initial"]
+                ["--frost-reply-ink" "initial"]
               ];
             }
           ];
