@@ -20,7 +20,10 @@
     dbus.enable = true;
     bluetooth.enable = true;
     polkit.enable = true;
-    rtkit.enable = true;
+    rtkit = {
+      enable = true;
+      extraGroups = ["audio"];
+    };
     upower.enable = true;
     udisks2.enable = true;
     nftables.enable = true;

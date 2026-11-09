@@ -18,14 +18,17 @@ in {
 
   finit = {
     tmpfiles.rules = ["d /btrfs/_snapshots 0755 root root"];
-    cgroups.build = {
-      "cpu.idle" = 1;
-      "cpu.max" = cpuThreads * perThread * 6 / 10;
+    cgroups = {
+      user."cpu.weight" = 10000;
+      build = {
+        "cpu.idle" = 1;
+        "cpu.max" = cpuThreads * perThread * 6 / 10;
+      };
     };
     services = {
       scx-lavd = {
         description = "sched_ext latency-aware scheduler";
-        command = "${pkgs.scx.full}/bin/scx_lavd";
+        command = "${pkgs.scx.full}/bin/scx_lavd --no-core-compaction";
         pre = "${pkgs.writeShellScript "mount-debugfs" ''
           ${pkgs.util-linux}/bin/mountpoint -q /sys/kernel/debug \
             || ${pkgs.util-linux}/bin/mount -t debugfs debugfs /sys/kernel/debug
