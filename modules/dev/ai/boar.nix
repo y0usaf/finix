@@ -426,7 +426,11 @@ in {
     ".local/state/boar"
     ".local/state/boar-rs"
   ];
-  environment.systemPackages = [inputPackages.boar-rs.default];
+  environment.systemPackages = [
+    (inputPackages.boar-rs.default.overrideAttrs (old: {
+      buildInputs = (old.buildInputs or []) ++ [pkgs.sqlite];
+    }))
+  ];
   user.files =
     agentFiles ".local/state/boar/agent"
     // agentFiles ".local/state/boar-rs/agent";
