@@ -11,16 +11,22 @@
   environment.systemPackages = [
     (pkgs.rustPlatform.buildRustPackage (_finalAttrs: {
       pname = "stremio-linux-shell";
-      version = "1.1.4-unstable-3826d3c";
+      version = "1.2.2-unstable-97078df9";
 
       src = pkgs.fetchFromGitHub {
         owner = "Stremio";
         repo = "stremio-linux-shell";
-        rev = "3826d3c9a97e83d218b6bf87321f2817065cef46";
-        hash = "sha256-Y5BkMviHM1+DcwUrrv4eqCLjawKfA4ZaohjgpFQjjFk=";
+        rev = "97078df902462e613757571d307a9ac16843147a";
+        hash = "sha256-OWE0BapfjD7al5Dab6UjceYs2vckIwdpJis7ky04eIY=";
       };
 
-      cargoLock.lockFile = ../../../locks/stremio-Cargo.lock;
+      cargoLock = {
+        lockFile = ../../../locks/stremio-Cargo.lock;
+        outputHashes = {
+          "libmpv2-5.0.3" = "sha256-EhADLuOxJe2xYEXfwYRNSlFVuuV10TxqmwsG9oZPG3c=";
+          "libmpv2-sys-4.0.1" = "sha256-EhADLuOxJe2xYEXfwYRNSlFVuuV10TxqmwsG9oZPG3c=";
+        };
+      };
 
       postPatch = ''
         substituteInPlace src/app/video/imp.rs \
