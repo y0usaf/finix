@@ -2978,8 +2978,8 @@
         {
           select = "html.tn-themed";
           set = [
-            ["--frost" "blur(40px) saturate(190%)"]
-            ["--frost-fill" "rgb(from var(--modal-bg) r g b / 58%)"]
+            ["--frost" "blur(72px) saturate(160%)"]
+            ["--frost-fill" "rgb(from var(--modal-bg) r g b / 28%)"]
             ["--frost-edge" "0 0 0 1px light-dark(var(--l2), var(--l3)), inset 0 1px 0 var(--glass-hi)"]
             ["--frost-ink" "var(--t1)"]
           ];
