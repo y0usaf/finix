@@ -2199,11 +2199,11 @@
         "nixpkgs": "nixpkgs_12"
       },
       "locked": {
-        "lastModified": 1793986567,
-        "narHash": "sha256-xvuQvrhgv9tKImf9QpRNY/09CHF0ozT1sOoKpGUXyMI=",
+        "lastModified": 1794197344,
+        "narHash": "sha256-j2QX4BM0fF0uYq6Kn2f/axPOLLh7wQ4Yw07YgybpbAo=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "51be158afdd276a6f7e7219b92f864e2cf6bfa68",
+        "rev": "d6300b6c4774be6e5384d96335a3a077e5275652",
         "type": "github"
       },
       "original": {
