@@ -455,16 +455,17 @@
       "crest-auth.ts" = generators.sourceFile "crest-auth.ts" (generators.ts.render (({
           Array,
           Bun,
-          Date,
           Error,
           JSON,
           Map,
           Object,
+          Parameters,
           Promise,
           Readonly,
           Record,
           Response,
           Set,
+          String,
           array,
           arrayOf,
           arrow,
@@ -474,7 +475,6 @@
           blank,
           call,
           const,
-          const',
           continue,
           default,
           dot,
@@ -482,6 +482,7 @@
           fn,
           forOf,
           generic,
+          globalThis,
           idx,
           if',
           import',
@@ -494,7 +495,6 @@
           number,
           obj,
           opt,
-          process,
           prop,
           return,
           return',
@@ -512,40 +512,35 @@
           undefined,
           unknown,
           void,
+          while,
           ...
         }: ({
-          ApiKeyResolver,
+          Api,
+          Model,
           streamSimple,
-          getBundledModels,
           ExtensionAPI,
-          PROVIDERS,
+          ExtensionContext,
           CHAT_KINDS,
-          MARGIN,
-          held,
-          logins,
           Token,
           Entry,
           crestAuth,
           token,
           entries,
           signedIn,
-          rotating,
+          credential,
+          routed,
           crest,
         }: [
-          (import' [(typeOnly ApiKeyResolver) streamSimple] (str "@oh-my-pi/pi-ai"))
-          (import' [getBundledModels] (str "@oh-my-pi/pi-catalog/models"))
-          (import' (typeOnly [ExtensionAPI]) (str "@oh-my-pi/pi-coding-agent"))
+          (import' [(typeOnly Api) (typeOnly Model) streamSimple] (str "@oh-my-pi/pi-ai"))
+          (import' (typeOnly [ExtensionAPI ExtensionContext]) (str "@oh-my-pi/pi-coding-agent"))
           blank
-          (const PROVIDERS (infix [(array [(str "anthropic") (str "openai-codex")]) "as" const']))
           (const (typed CHAT_KINDS (generic Readonly [(generic Record [string true])])) (obj [(prop "chat" true) (prop "tiny" true)]))
-          (const MARGIN 300000)
-          (const held (new (generic Map [string Token]) []))
-          (const logins (new (generic Map [string string]) []))
           blank
           (interface Token [
-            (typed "access" string)
             (typed (opt "login") string)
-            (typed (opt "expires") number)
+            (typed (opt "secret") string)
+            (typed (opt "error") string)
+            (typed (opt "retry") number)
           ])
           blank
           (interface Entry [
@@ -574,17 +569,16 @@
           blank
           (async ({
             provider,
+            model,
             value,
-            login,
-            expires,
-          }: (fn token (typed [(typed provider string)] (generic Promise [Token])) [
-            (const (typed value unknown) (call (dot JSON "parse") [(await (call crestAuth [(str "token") provider]))]))
-            (if' (infix [(typeof value) "!==" (str "object") "||" value "===" null' "||" (not (infix [(str "access") "in" value])) "||" (typeof (dot value "access")) "!==" (str "string")]) [
-              (throw' (new Error [(tpl ["crest-auth json token " (sub provider) ": no access token"])]))
-            ])
-            (const login (ternary (infix [(str "login") "in" value "&&" (typeof (dot value "login")) "===" (str "string")]) (dot value "login") undefined))
-            (const expires (ternary (infix [(str "expires") "in" value "&&" (typeof (dot value "expires")) "===" (str "number")]) (dot value "expires") undefined))
-            (return (obj [(prop "access" (dot value "access")) login expires]))
+          }: (fn token (typed [(typed provider string) (typed model string)] (generic Promise [Token])) [
+            (const (typed value (generic Record [string unknown])) (call (dot JSON "parse") [(await (call crestAuth [(str "token") provider model]))]))
+            (return (obj (rows [
+              (prop "login" (ternary (infix [(typeof (dot value "login")) "===" (str "string")]) (dot value "login") undefined))
+              (prop "secret" (ternary (infix [(typeof (dot value "access")) "===" (str "string")]) (dot value "access") (ternary (infix [(typeof (dot value "key")) "===" (str "string")]) (dot value "key") undefined)))
+              (prop "error" (ternary (infix [(typeof (dot value "error")) "===" (str "string")]) (dot value "error") undefined))
+              (prop "retry" (ternary (infix [(typeof (dot value "retry")) "===" (str "number")]) (dot value "retry") undefined))
+            ])))
           ])))
           blank
           (async ({value}: (fn entries (typed [] (generic Promise [(arrayOf Entry)])) [
@@ -624,56 +618,100 @@
           (async ({providers}: (fn signedIn (typed [] (generic Promise [(generic Set [string])])) [
             (const providers (new (generic Set [string]) []))
             ({entry}: (forOf entry (await (call entries [])) [
-              (if' (infix [(dot entry "kind") "===" (str "login")]) (call (dot providers "add") [(str "anthropic")]))
-              (if' (infix [(dot entry "kind") "===" (str "oauth")]) (call (dot providers "add") [(dot entry "name")]))
+              (call (dot providers "add") [(ternary (infix [(dot entry "kind") "===" (str "login")]) (str "anthropic") (dot entry "name"))])
             ]))
             (return providers)
           ])))
           blank
-          ({provider}: (fn rotating (typed [(typed provider string)] ApiKeyResolver) [
+          ({
+            provider,
+            model,
+          }: (fn credential [(typed provider string) (typed model string)] [
+            (return (async ({next}: (arrow [] [
+              (const next (await (call token [provider model])))
+              (if' (infix [(dot next "secret") "===" undefined]) (throw' (new Error [(infix [(dot next "error") "??" (tpl ["crest-auth json token " (sub provider) ": no credential"])])])))
+              (return (dot next "secret"))
+            ]))))
+          ]))
+          blank
+          ({
+            provider,
+            model,
+          }: (fn routed [(typed provider string) (typed model string)] [
             (return (async ({
-              error,
-              lastChance,
-              previousKey,
-              kept,
-              spent,
-              next,
-            }: (arrow [(obj [error lastChance previousKey])] [
-              (const kept (call (dot held "get") [provider]))
-              (if' (infix [error "===" undefined "&&" kept "!==" undefined "&&" [(dot kept "expires") "??" 0] "-" MARGIN ">" (call (dot Date "now") [])]) (return (dot kept "access")))
-              (const spent (ternary (infix [previousKey "===" undefined]) undefined (call (dot logins "get") [previousKey])))
-              (if' (infix [error "!==" undefined "&&" lastChance "&&" spent "!==" undefined]) (await (call crestAuth [(str "cool") spent])))
-              (const next (await (call token [provider])))
-              (if' (infix [(dot next "login") "!==" undefined]) (call (dot logins "set") [(dot next "access") (dot next "login")]))
-              (call (dot held "set") [provider next])
-              (return (dot next "access"))
+              args,
+              input,
+              init,
+              headers,
+              carrier,
+            }: (arrow (typed [(typed (spread args) (generic Parameters [(typeof (dot globalThis "fetch"))]))] (generic Promise [Response])) [
+              (const (array [input init]) args)
+              (const headers (new (dot globalThis "Headers") [(dot init "?.headers")]))
+              (const carrier (call (dot (array [(str "x-api-key") (str "authorization")]) "find") [({name}: (arrow [name] (below (call (dot headers "has") [name]))))]))
+              (if' (infix [carrier "===" undefined]) (return (call (dot globalThis "fetch") [input init])))
+              (while true ({
+                next,
+                response,
+                verdict,
+              }: [
+                (const next (await (call token [provider model])))
+                (if' (infix [(dot next "secret") "===" undefined]) [
+                  (return (new Response [
+                    (call (dot JSON "stringify") [(obj [(prop "type" (str "error")) (prop "error" (obj [(prop "type" (str "rate_limit_error")) (prop "code" (str "rate_limit_exceeded")) (prop "message" (dot next "error"))]))])])
+                    (obj [(prop "status" 429) (prop "headers" (obj [(prop (str "content-type") (str "application/json")) (prop (str "retry-after") (call String [(infix [(dot next "retry") "??" 60])]))]))])
+                  ]))
+                ])
+                (call (dot headers "set") [carrier (ternary (infix [carrier "===" (str "authorization")]) (tpl ["Bearer " (sub (dot next "secret"))]) (dot next "secret"))])
+                (const response (await (call (dot globalThis "fetch") [input (obj [(spread init) headers])])))
+                (if' (infix [(dot response "ok") "||" (dot next "login") "===" undefined]) (return response))
+                (const (typed verdict (generic Record [string unknown])) (call (dot JSON "parse") [
+                  (await (call crestAuth [
+                    (str "cool")
+                    (dot next "login")
+                    model
+                    (call String [(dot response "status")])
+                    (spread (call (dot (array [(spread (dot response "headers"))]) "map") [
+                      ({
+                        name,
+                        value,
+                      }: (arrow [(array [name value])] (below (tpl [(sub name) "=" (sub value)]))))
+                    ]))
+                  ]))
+                ]))
+                (if' (infix [(dot verdict "limited") "!==" true]) (return response))
+                (await (call (dot response "body?.cancel") []))
+              ]))
             ]))))
           ]))
           blank
           (export (default (async ({
             pi,
-            providers,
+            wires,
+            key,
+            route,
+            adopt,
           }: (fn crest (typed [(typed pi ExtensionAPI)] (generic Promise [void])) [
-            (const providers (await (call signedIn [])))
-            ({
+            (const wires (new (generic Map [string (generic Map [string (generic Model [Api])])]) []))
+            (const key ({provider}: (arrow (typed [(typed provider string)] string) (below (tpl ["!crest-auth json token " (sub provider) " | jq -er '.access // .key' || echo crest-unavailable"])))))
+            ({provider}: (forOf provider (await (call signedIn [])) [
+              (call (dot wires "set") [provider (new Map [])])
+              (call (dot pi "registerProvider") [provider (obj [(prop "apiKey" (call key [provider]))])])
+            ]))
+            (const route ({
               provider,
-              bundled,
-              baseUrl,
-              api,
               wire,
-            }: (forOf provider PROVIDERS [
-              (const bundled (call getBundledModels [provider]))
-              (const baseUrl (dot (idx bundled 0) "?.baseUrl"))
-              (if' (infix [(not (call (dot providers "has") [provider])) "||" baseUrl "===" undefined]) continue)
+              api,
+              models,
+            }: (arrow (typed [(typed provider string) (typed wire (generic Map [string (generic Model [Api])]))] void) [
               (const api (tpl ["crest-" (sub provider)]))
-              (const wire (new Map [(call (dot bundled "map") [({model}: (arrow [model] (array [(dot model "id") model])))])]))
+              (const models (array [(spread (call (dot wire "values") []))]))
               (call (dot pi "registerProvider") [
                 provider
                 (obj (rows [
-                  baseUrl
-                  (prop "apiKey" (tpl ["!crest-auth json token " (sub provider) " | jq -er .access || echo crest-unavailable"]))
+                  (prop "baseUrl" (dot (idx models 0) "?.baseUrl"))
+                  (prop "apiKey" (call key [provider]))
                   api
-                  (prop "models" (call (dot bundled "map") [({model}: (arrow [model] (ternary (call (dot Object "hasOwn") [CHAT_KINDS (infix [(dot model "kind") "??" (str "chat")])]) (obj [(spread model) api]) model)))]))
+                  (prop "models" (call (dot models "map") [({model}: (arrow [model] (ternary (call (dot Object "hasOwn") [CHAT_KINDS (infix [(dot model "kind") "??" (str "chat")])]) (obj [(spread model) api]) model)))]))
                   ({
                     model,
                     context,
@@ -681,12 +719,43 @@
                     target,
                   }: (method "streamSimple" [model context options] [
                     (const target (call (dot wire "get") [(dot model "id")]))
-                    (if' (infix [target "===" undefined]) (throw' (new Error [(tpl ["crest: " (sub provider) " has no bundled model " (sub (dot model "id"))])])))
-                    (return (call streamSimple [target context (obj [(spread options) (prop "apiKey" (call rotating [provider]))])]))
+                    (if' (infix [target "===" undefined]) (throw' (new Error [(tpl ["crest: " (sub provider) " has no model " (sub (dot model "id"))])])))
+                    (return (call streamSimple [
+                      target
+                      context
+                      (obj [(spread options) (prop "apiKey" (call credential [provider (dot target "id")])) (prop "fetch" (call routed [provider (dot target "id")]))])
+                    ]))
                   ]))
                 ]))
               ])
-            ]))
+            ])))
+            (const adopt (async ({
+              _event,
+              ctx,
+              grown,
+              current,
+              next,
+            }: (arrow (typed [(typed _event unknown) (typed ctx ExtensionContext)] (generic Promise [void])) [
+              (const grown (new (generic Set [string]) []))
+              ({
+                model,
+                wire,
+              }: (forOf model (call (dot ctx "models.list") []) [
+                (const wire (call (dot wires "get") [(dot model "provider")]))
+                (if' (infix [wire "===" undefined "||" (call (dot wire "has") [(dot model "id")]) "||" (dot model "api") "===" (tpl ["crest-" (sub (dot model "provider"))])]) continue)
+                (call (dot wire "set") [(dot model "id") model])
+                (call (dot grown "add") [(dot model "provider")])
+              ]))
+              ({provider}: (forOf provider grown [
+                (call route [provider (infix [(call (dot wires "get") [provider]) "??" (new Map [])])])
+              ]))
+              (const current (call (dot ctx "models.current") []))
+              (if' (infix [current "===" undefined "||" (not (call (dot wires "has") [(dot current "provider")])) "||" (dot current "api") "===" (tpl ["crest-" (sub (dot current "provider"))])]) return')
+              (const next (call (dot ctx "models.resolve") [(tpl [(sub (dot current "provider")) "/" (sub (dot current "id"))])]))
+              (if' (infix [next "!==" undefined "&&" (dot next "api") "!==" (dot current "api")]) (await (call (dot pi "setModel") [next])))
+            ]))))
+            (call (dot pi "on") [(str "session_start") adopt])
+            (call (dot pi "on") [(str "before_agent_start") adopt])
           ])))))
         ]))
         generators.ts));

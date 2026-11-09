@@ -15,6 +15,7 @@
   json = lib.generators.toJSON {};
 
   proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.python.render (({
+      AttributeError,
       Exception,
       IndexError,
       None,
@@ -57,14 +58,12 @@
       listComp,
       neg,
       not,
-      open,
       pair,
       pass,
       raise,
       return,
       rows,
       set,
-      set',
       setComp,
       slice,
       sq,
@@ -86,9 +85,7 @@
       os,
       ssl,
       sys,
-      time,
       GATEWAY,
-      KEY_FILE,
       CREST_AUTH,
       HOST,
       PORT,
@@ -96,15 +93,14 @@
       ACCOUNT,
       RESIDENCY,
       DROP,
-      MARGIN,
-      HELD,
       CrestError,
       header_name,
-      read_key,
+      model_of,
       crest_auth,
       crest_token,
-      held,
-      successor,
+      hint,
+      spent,
+      limited,
       residency,
       credentials,
       route,
@@ -122,10 +118,8 @@
       (import' os)
       (import' ssl)
       (import' sys)
-      (import' time)
       blank
       (assign GATEWAY (str "ai-gateway.vercel.sh"))
-      (assign KEY_FILE (index (dot os "environ") (str "GATEWAY_KEY_FILE")))
       (assign CREST_AUTH (index (dot os "environ") (str "CREST_AUTH")))
       (assign HOST (call (dot os "environ.get") [(str "HOST") (str "127.0.0.1")]))
       (assign PORT (call int [(call (dot os "environ.get") [(str "PORT") (str "8899")])]))
@@ -133,8 +127,6 @@
       (assign ACCOUNT (str "chatgpt-account-id"))
       (assign RESIDENCY (str "x-openai-internal-codex-residency"))
       (assign DROP (set (rows [(str "host") (str "authorization") (str "x-api-key") (str "cf-aig-authorization") (str "connection") (str "proxy-connection") (str "accept-encoding")])))
-      (assign MARGIN 300000)
-      (assign HELD (dict []))
       blank
       blank
       (class CrestError [Exception] [
@@ -146,16 +138,6 @@
         params = [raw'];
         body = [
           (return (call (dot (call (dot (index (call (dot raw' "partition") [(str ":")]) 0) "strip") []) "lower") []))
-        ];
-      }))
-      blank
-      blank
-      (def read_key ({handle}: {
-        params = [];
-        body = [
-          (with' [(as (call open [KEY_FILE]) handle)] [
-            (return (call (dot (call (dot handle "read") []) "strip") []))
-          ])
         ];
       }))
       blank
@@ -180,49 +162,71 @@
       })))
       blank
       blank
-      (async (def crest_token ({provider}: {
-        params = [provider];
+      (async (def crest_token ({
+        provider,
+        model,
+      }: {
+        params = [provider model];
         body = [
-          (return (call (dot json "loads") [(await (call crest_auth [(str "token") provider]))]))
+          (return (call (dot json "loads") [(await (call crest_auth [(str "token") provider model]))]))
         ];
       })))
       blank
       blank
-      (async (def held ({
-        provider,
-        token,
-      }: {
-        params = [provider];
-        body = [
-          (assign token (call (dot HELD "get") [provider]))
-          (if' [token "is" None "or" (call (dot token "get") [(str "expires") 0]) "-" MARGIN "<=" (call (dot time "time") []) "*" 1000] [
-            (assign token (await (call crest_token [provider])))
-            (assign (index HELD provider) token)
-          ])
-          (return token)
-        ];
-      })))
-      blank
-      blank
-      (async (def successor ({
-        provider,
-        tried,
-        token,
-        login,
-      }: {
-        params = [provider tried];
+      (def model_of ({data}: {
+        params = [data];
         body = [
           (try [
-              (assign token (await (call crest_token [provider])))
+              (return (call str' [(call (dot (call (dot json "loads") [data]) "get") [(str "model") (str "")])]))
             ] [
-              (except CrestError [
-                (return None)
+              (except (tuple [AttributeError ValueError]) [
+                (return (str ""))
               ])
             ])
-          (assign login (call (dot token "get") [(str "login")]))
-          (return (ternary token [login "not in" tried] None))
+        ];
+      }))
+      blank
+      blank
+      (def hint ({raw'}: {
+        params = [raw'];
+        body = [
+          (return (str [(field (call header_name [raw'])) "=" (field (call (dot (index (call (dot raw' "partition") [(sq ":")]) 2) "strip") []))]))
+        ];
+      }))
+      blank
+      blank
+      (async (def spent ({
+        token,
+        model,
+        code,
+        head,
+        lines,
+        answer,
+      }: {
+        params = [token model code head];
+        body = [
+          (if' [(call int [code]) "<" 400] [
+            (return false)
+          ])
+          (assign lines (index (call (dot (call (dot head "decode") [(str "latin1")]) "split") [(str "\\r\\n")]) (slice 1 null)))
+          (assign answer (await (call crest_auth (rows [(str "cool") (index token (str "login")) model code (star (listComp ({raw'}: [(call hint [raw']) (compFor raw' lines) (compIf raw')])))]))))
+          (return (index (call (dot json "loads") [answer]) (str "limited")))
         ];
       })))
+      blank
+      blank
+      (def limited ({
+        token,
+        error,
+        body,
+      }: {
+        params = [token];
+        body = [
+          (assign error (dict (rows [(pair (str "type") (str "rate_limit_error")) (pair (str "code") (str "rate_limit_exceeded")) (pair (str "message") (index token (str "error")))])))
+          (assign body (call (dot (call (dot json "dumps") [(dict [(pair (str "type") (str "error")) (pair (str "error") error)])]) "encode") []))
+          (return [(call (dot (hang (strings (rows [(str "HTTP/1.1 429 Too Many Requests\\r\\n") (str "Content-Type: application/json\\r\\n") (str ["Retry-After: " (field (index token (sq "retry"))) "\\r\\n"]) (str ["Content-Length: " (field (call len [body])) "\\r\\nConnection: close\\r\\n\\r\\n"])]))) "encode") []) "+" body])
+        ];
+      }))
       blank
       blank
       (def residency ({
@@ -260,14 +264,13 @@
         token,
         names,
         lines,
+        secret,
         place,
       }: {
         params = [provider token names];
         body = [
-          (if' [provider "is" None] [
-            (return (list [(str ["Authorization: Bearer " (field (call read_key []))])]))
-          ])
-          (assign lines (list [(str ["Authorization: Bearer " (field (index token (sq "access")))])]))
+          (assign secret [(call (dot token "get") [(str "access")]) "or" (index token (str "key"))])
+          (assign lines (list [(str ["Authorization: Bearer " (field secret)])]))
           (if' [provider "==" (str "openai-codex")] [
             (if' [ACCOUNT "not in" names "and" (call (dot token "get") [(str "account_id")])] [
               (call (dot lines "append") [(str [(field ACCOUNT) ": " (field (index token (sq "account_id")))])])
@@ -297,7 +300,7 @@
               (return (commas [provider host [prefix "+" (call (dot path "removeprefix") [mount])]]))
             ])
           ])
-          (return (commas [None GATEWAY path]))
+          (return (commas [(str "vercel-ai-gateway") GATEWAY path]))
         ];
       }))
       blank
@@ -439,14 +442,11 @@
         answered,
         body,
         token,
-        tried,
         outgoing,
         up_reader,
         response,
-        login,
-        following,
+        model,
         code,
-        who,
         note,
         error,
       }: {
@@ -470,27 +470,23 @@
           (assign answered false)
           (try [
               (assign body (await (call read_body [reader kept])))
-              (assign token (ternary (await (call held [provider])) provider None))
-              (assign tried (call set' []))
+              (assign model (call model_of [body]))
               (while true [
+                (assign token (await (call crest_token [provider model])))
+                (if' [(str "error") "in" token] [
+                  (assign answered true)
+                  (call (dot writer "write") [(call limited [token])])
+                  break
+                ])
                 (assign outgoing (list (rows [(str [(field method) " " (field target) " HTTP/1.1"]) (str ["Host: " (field host)]) (star (call credentials [provider token names])) (star kept) (ternary (str "Connection: Upgrade") upgrade (str "Connection: close")) (str "") (str "")])))
                 (assign (commas [up_reader upstream response]) (await (call exchange (rows [[host [(call (dot (call (dot (str "\\r\\n") "join") [outgoing]) "encode") [(str "latin1")]) "+" body]]]))))
-                (assign login (ternary (call (dot token "get") [(str "login")]) token None))
                 (assign code (call (dot (index (call (dot response "split") [(bytes (str " ")) 2]) 1) "decode") []))
-                (assign who (ternary login login (sq "-")))
-                (assign note (str [(field (ternary provider provider (sq "gateway"))) " " (field who) " " (field code) "\\n"]))
+                (assign note (str [(field provider) " " (field (index token (sq "login"))) " " (field code) "\\n"]))
                 (call (dot sys "stderr.write") [note])
                 (call (dot sys "stderr.flush") [])
-                (if' [(index (call (dot response "split") [(bytes (str " ")) 2]) 1) "==" (bytes (str "429")) "and" login "and" (not upgrade)] [
-                  (call (dot tried "add") [login])
-                  (await (call crest_auth [(str "cool") login]))
-                  (assign following (await (call successor [provider tried])))
-                  (if' following [
-                    (call (dot upstream "close") [])
-                    (assign token following)
-                    (assign (index HELD provider) following)
-                    continue
-                  ])
+                (if' [(not upgrade) "and" (await (call spent [token model code response]))] [
+                  (call (dot upstream "close") [])
+                  continue
                 ])
                 (assign answered true)
                 (call (dot writer "write") [response])
@@ -1104,7 +1100,6 @@ in {
       respawn = true;
       log = true;
       environment = {
-        GATEWAY_KEY_FILE = "${home}/Tokens/AI_GATEWAY_API_KEY.txt";
         CREST_AUTH = "${inputPackages.crest.crest-auth}/bin/crest-auth";
         HOME = home;
       };
