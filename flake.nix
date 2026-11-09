@@ -252,7 +252,7 @@
 
     nixpkgs-librewolf.url = "github:NixOS/nixpkgs/56c02bc00adcf003215cc4bd996d6efaf4cff188";
     alejandra = {
-      url = "github:kamadorueda/alejandra/97ca3d241795927bae57f240430ccabca4a27004";
+      url = "github:kamadorueda/alejandra";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
