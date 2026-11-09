@@ -2998,6 +2998,7 @@
               select = "html.tn-themed";
               set = [
                 ["--frost" "none"]
+                ["--frost-fill" "var(--modal-bg)"]
               ];
             }
           ];
