@@ -23,6 +23,12 @@ in {
       "cpu.max" = cpuThreads * perThread * 6 / 10;
     };
     services = {
+      scx-lavd = {
+        description = "sched_ext latency-aware scheduler";
+        command = "${pkgs.scx.full}/bin/scx_lavd";
+        respawn = true;
+        log = true;
+      };
       cargo-cgroup = {
         description = "move session cargo builds into the build cgroup";
         command = pkgs.writeShellScript "cargo-cgroup" ''
