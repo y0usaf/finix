@@ -26,7 +26,10 @@ in {
       scx-lavd = {
         description = "sched_ext latency-aware scheduler";
         command = "${pkgs.scx.full}/bin/scx_lavd";
-        respawn = true;
+        pre = "${pkgs.writeShellScript "mount-debugfs" ''
+          ${pkgs.util-linux}/bin/mountpoint -q /sys/kernel/debug \
+            || ${pkgs.util-linux}/bin/mount -t debugfs debugfs /sys/kernel/debug
+        ''}";
         log = true;
       };
       cargo-cgroup = {
