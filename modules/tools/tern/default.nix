@@ -2212,7 +2212,7 @@
         {
           select = ":root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
           set = [
-            ["background" "var(--modal-bg)"]
+            ["background" "var(--frost-fill)"]
             ["-webkit-backdrop-filter" "var(--frost)"]
             ["backdrop-filter" "var(--frost)"]
             ["box-shadow" "var(--frost-edge)"]
@@ -2253,7 +2253,7 @@
         {
           select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
           set = [
-            ["background" "var(--modal-bg)"]
+            ["background" "var(--frost-fill)"]
             ["-webkit-backdrop-filter" "var(--frost)"]
             ["backdrop-filter" "var(--frost)"]
             ["box-shadow" "var(--frost-edge)"]
@@ -2838,7 +2838,7 @@
         {
           select = ":root:not(#s0):not(#s1) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
           set = [
-            ["background" "var(--modal-bg)"]
+            ["background" "var(--frost-fill)"]
             ["-webkit-backdrop-filter" "var(--frost)"]
             ["backdrop-filter" "var(--frost)"]
             ["box-shadow" "var(--frost-edge)"]
@@ -2979,6 +2979,7 @@
           select = "html.tn-themed";
           set = [
             ["--frost" "blur(40px) saturate(190%)"]
+            ["--frost-fill" "rgb(from var(--modal-bg) r g b / 58%)"]
             ["--frost-edge" "0 0 0 1px light-dark(var(--l2), var(--l3)), inset 0 1px 0 var(--glass-hi)"]
             ["--frost-ink" "var(--t1)"]
           ];
@@ -4819,7 +4820,7 @@
         {
           select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body";
           set = [
-            ["background" "var(--modal-bg)"]
+            ["background" "var(--frost-fill)"]
             ["-webkit-backdrop-filter" "var(--frost)"]
             ["backdrop-filter" "var(--frost)"]
             ["box-shadow" "var(--frost-edge)"]
@@ -4832,7 +4833,7 @@
         {
           select = ":root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
           set = [
-            ["background" "var(--modal-bg)"]
+            ["background" "var(--frost-fill)"]
             ["-webkit-backdrop-filter" "var(--frost)"]
             ["backdrop-filter" "var(--frost)"]
             ["box-shadow" "var(--frost-edge)"]
