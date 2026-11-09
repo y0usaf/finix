@@ -89,16 +89,16 @@
         "pi-rs": "pi-rs"
       },
       "locked": {
-        "lastModified": 1793398329,
-        "narHash": "sha256-l5M0k07Er3I1bVXc0cv850IRfZpGGbs2EssDEUMTU7Q=",
+        "lastModified": 1792849550,
+        "narHash": "sha256-r82TR/TY12m3RcJ/Gr2a0R91GpXfBNOfXn6/DBHR5Xk=",
         "ref": "refs/heads/main",
-        "rev": "c0e55085f9af7b379dc1118817188870d8242773",
-        "revCount": 650,
+        "rev": "00902d9e90c0c7525f5e3b862d48a75fa2ba5184",
+        "revCount": 588,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       },
       "original": {
-        "rev": "c0e55085f9af7b379dc1118817188870d8242773",
+        "rev": "00902d9e90c0c7525f5e3b862d48a75fa2ba5184",
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/boar-rs"
       }
@@ -1572,19 +1572,26 @@
       }
     },
     "pi": {
-      "flake": false,
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-darwin-x64": [
+          "nixpkgs"
+        ]
+      },
       "locked": {
-        "lastModified": 1791531608,
-        "narHash": "sha256-D37ic+vmdwufO2t7d7kCNPrFCzTZnOWhjh2oaLw5gTI=",
+        "lastModified": 1791074476,
+        "narHash": "sha256-DjWJE7KcCdNF/M3RrO76rKCSd6oFLo2dX9wFT0nwEXk=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "f1b2e77f5b13b2a199b1052cb79c235451afe7d7",
+        "rev": "cd32f7725fdbddbaecdff5b1e68491563394e0ca",
         "type": "github"
       },
       "original": {
         "owner": "earendil-works",
+        "ref": "v1.0.2",
         "repo": "pi",
-        "rev": "f1b2e77f5b13b2a199b1052cb79c235451afe7d7",
         "type": "github"
       }
     },
@@ -1698,27 +1705,20 @@
       }
     },
     "pi-rs": {
-      "inputs": {
-        "nixpkgs": [
-          "boar-rs",
-          "nixpkgs"
-        ],
-        "pi": "pi",
-        "piAi": "piAi",
-        "piExtensions": "piExtensions"
-      },
+      "flake": false,
       "locked": {
-        "lastModified": 1793395373,
-        "narHash": "sha256-x9hGVLbCWAxqVNCwdc7mH4wfTSJYwW8vxTXXLvmuOls=",
-        "owner": "y0usaf",
-        "repo": "pi-rs",
-        "rev": "83a60e1c88f08b56f0d61ea68c4b8544f35e6b39",
-        "type": "github"
+        "lastModified": 1792408282,
+        "narHash": "sha256-AvJ3sKswyiA4saseU21j9kqFFzucw9kclSDfmeof/4g=",
+        "ref": "main",
+        "rev": "720b70cfcee3f374c943d4f493e9116b4b80adc1",
+        "revCount": 232,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/pi-rs"
       },
       "original": {
-        "owner": "y0usaf",
-        "repo": "pi-rs",
-        "type": "github"
+        "ref": "main",
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/pi-rs"
       }
     },
     "root": {
@@ -2209,40 +2209,6 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "type": "github"
-      }
-    },
-    "piExtensions": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1792621753,
-        "narHash": "sha256-N9NOpiiZTbOMDMV+CxvJAgtLjJJ1/8NJBGS0cFHkhsc=",
-        "owner": "earendil-works",
-        "repo": "pi",
-        "rev": "4a080252f06caf63a525d7873c5d94d3c23887e0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "earendil-works",
-        "repo": "pi",
-        "rev": "4a080252f06caf63a525d7873c5d94d3c23887e0",
-        "type": "github"
-      }
-    },
-    "piAi": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1792835293,
-        "narHash": "sha256-SSnay9tohxuDT7+OzHbvKvA/5E8/CobwoTC07+W5h5U=",
-        "owner": "earendil-works",
-        "repo": "pi",
-        "rev": "bdb151774ed6bef2b5676bbff4669f20a0c233fe",
-        "type": "github"
-      },
-      "original": {
-        "owner": "earendil-works",
-        "repo": "pi",
-        "rev": "bdb151774ed6bef2b5676bbff4669f20a0c233fe",
         "type": "github"
       }
     }
