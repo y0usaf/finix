@@ -37,5 +37,14 @@
     "ctrl+shift+j": "move_tab_right",
     "ctrl+shift+k": "move_tab_left",
     "ctrl+tab": "show_previous_tab"
+  },
+  "agents": {
+    "custom": [
+      {
+        "id": "dsh",
+        "name": "DeepSeek",
+        "command": "dsh-acp"
+      }
+    ]
   }
 }
