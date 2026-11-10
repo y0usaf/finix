@@ -78,6 +78,16 @@
       flake = false;
     };
 
+    dsh-tsp = {
+      url = "git+file:///home/y0usaf/dev/developing/dsh-tsp";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    deepseek-harness-flake = {
+      url = "git+file:///home/y0usaf/dev/developing/deepseek-harness-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     tern-ekko = {
       url = "git+file:///home/y0usaf/dev/developing/tern-ekko";
       flake = false;

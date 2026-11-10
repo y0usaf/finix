@@ -406,6 +406,46 @@
         "type": "github"
       }
     },
+    "deepseek-harness-flake": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794313884,
+        "narHash": "sha256-T4QSXb7qXkiXF8HU27Xz0eoKBZBJqN1qO8LdsrD8Mxo=",
+        "ref": "refs/heads/main",
+        "rev": "3e7ecd723a0fa30076cd49aec3563b3a24f8fd07",
+        "revCount": 4,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/deepseek-harness-flake"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/deepseek-harness-flake"
+      }
+    },
+    "dsh-tsp": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794314105,
+        "narHash": "sha256-Now1SlkxuNmDv/WzEReT6mz3k9WT81wXed/CPlC5Klc=",
+        "ref": "refs/heads/main",
+        "rev": "a8cd5315179156a2ffbff046b7caa5a06ee9d2c2",
+        "revCount": 5,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/dsh-tsp"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/dsh-tsp"
+      }
+    },
     "durapi": {
       "inputs": {
         "nixpkgs": [
@@ -1735,6 +1775,8 @@
         "crest": "crest",
         "cudaterm": "cudaterm",
         "cursors": "cursors",
+        "deepseek-harness-flake": "deepseek-harness-flake",
+        "dsh-tsp": "dsh-tsp",
         "durapi": "durapi",
         "ekko": "ekko",
         "emeraldian": "emeraldian",
