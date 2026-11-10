@@ -8,6 +8,18 @@
   userName = config.user.name;
 
   tomoePkg = inputPackages.tomoe.default;
+
+  tomoeLogged = pkgs.symlinkJoin {
+    name = "tomoe-logged";
+    paths = [tomoePkg];
+    postBuild = ''
+      rm $out/bin/tomoe
+      install -m755 ${pkgs.writeShellScript "tomoe" ''
+        exec > >(${pkgs.coreutils}/bin/tee >(${pkgs.util-linux}/bin/logger -t tomoe)) 2>&1
+        exec ${tomoePkg}/bin/tomoe "$@"
+      ''} $out/bin/tomoe
+    '';
+  };
 in {
   finit.services.seatd.runlevels = lib.mkForce "234";
 
@@ -57,7 +69,7 @@ in {
       fi
     '';
     systemPackages = [
-      tomoePkg
+      tomoeLogged
       pkgs.xwayland-satellite
     ];
   };

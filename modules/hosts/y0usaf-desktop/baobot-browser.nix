@@ -81,12 +81,13 @@ in {
       NIXOS_OZONE_WL = "1";
     };
     command = "${pkgs.writeShellScript "baobot-chromium-start" ''
-      until [ -S ${runtimeDir}/tomoe-0 ]; do
+      until ${pkgs.coreutils}/bin/timeout 5 ${pkgs.wayland-utils}/bin/wayland-info >/dev/null 2>&1; do
         ${pkgs.coreutils}/bin/sleep 2
       done
       exec ${lib.getExe chromium} ${url}
     ''}";
     respawn = true;
+    restart-sec = 10;
     log = true;
   };
 }

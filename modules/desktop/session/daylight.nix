@@ -41,6 +41,14 @@
       exec ${program}
     '';
 
+  untilWayland = program:
+    pkgs.writeShellScript "wait-for-wayland" ''
+      until ${pkgs.coreutils}/bin/timeout 5 ${pkgs.wayland-utils}/bin/wayland-info >/dev/null 2>&1; do
+        ${pkgs.coreutils}/bin/sleep 2
+      done
+      exec ${program}
+    '';
+
   darkmanCli = pkgs.runCommand "darkman-cli" {} ''
     mkdir -p $out/bin
     ln -s ${pkgs.darkman}/bin/darkman $out/bin/darkman
@@ -85,8 +93,9 @@ in {
         // {
           WAYLAND_DISPLAY = "tomoe-0";
         };
-      command = "${waitFor "${runtimeDir}/tomoe-0" "${gammastep} -m wayland -l ${latitude}:${longitude} -t 6500:3400 -v"}";
+      command = "${untilWayland "${gammastep} -m wayland -l ${latitude}:${longitude} -t 6500:3400 -v"}";
       respawn = true;
+      restart-sec = 10;
       log = true;
     };
   };
