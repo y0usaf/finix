@@ -433,11 +433,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794320298,
-        "narHash": "sha256-/aHTeqeUZaTfllT/an6XfHWjHc0gbC6DZljszjHArN0=",
+        "lastModified": 1794320451,
+        "narHash": "sha256-EYAxGRh3nJPSx2nUrRTSg8PW2vAYyOPwIvE5R0YkOO0=",
         "ref": "refs/heads/main",
-        "rev": "47c5efed286f05cbbad8c6f68c5fc386b2e2318a",
-        "revCount": 3,
+        "rev": "c842e83f4a9d10d73046c7b90d00828929aec390",
+        "revCount": 4,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/dsh-tern"
       },
