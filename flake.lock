@@ -433,11 +433,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794314803,
-        "narHash": "sha256-k64TTylOrkk0gij/kv/zBxNd3uqhTI8jcTBfEQ1trDw=",
+        "lastModified": 1794314931,
+        "narHash": "sha256-HlrpFb6Cqf3AVehE3bTZ5hEIyZX8LPmnBwvf3Pqgxvk=",
         "ref": "refs/heads/main",
-        "rev": "42c9639517faf956ad1979119559e4e1cb05400f",
-        "revCount": 7,
+        "rev": "59a67bd9d763f066dd83fa7a6222d3aac45e7a2b",
+        "revCount": 8,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/dsh-tsp"
       },
