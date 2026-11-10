@@ -88,8 +88,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    t3-tsp = {
-      url = "git+file:///home/y0usaf/dev/developing/t3-tsp";
+    t3-tern = {
+      url = "git+file:///home/y0usaf/dev/developing/t3-tern";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

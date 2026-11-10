@@ -1817,7 +1817,7 @@
         "silva": "silva",
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
-        "t3-tsp": "t3-tsp",
+        "t3-tern": "t3-tern",
         "tern-ekko": "tern-ekko",
         "tern-ozette": "tern-ozette",
         "tern-scratch": "tern-scratch",
@@ -2070,24 +2070,24 @@
         "type": "github"
       }
     },
-    "t3-tsp": {
+    "t3-tern": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1794339638,
-        "narHash": "sha256-aSGcxTM53J8excXGUcHHJuac13ZZpY2bQ2x7L7ByTos=",
+        "lastModified": 1794345795,
+        "narHash": "sha256-oE3X5hYXCSM85pImkj8F6MvViYrXXRNcrWLcCNva4rc=",
         "ref": "refs/heads/main",
-        "rev": "4bfb401cb3c090bb19bfefc629456dfade774813",
-        "revCount": 1,
+        "rev": "2638b994195024fb6077dd82d943ea0d34dd69ac",
+        "revCount": 2,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/t3-tsp"
+        "url": "file:///home/y0usaf/dev/developing/t3-tern"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/t3-tsp"
+        "url": "file:///home/y0usaf/dev/developing/t3-tern"
       }
     },
     "terminal-browser": {
