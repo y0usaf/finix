@@ -78,11 +78,9 @@
             nix flake update "$input" --flake "$flake" >&2
             if git -C "$flake" diff --quiet -- flake.lock; then
               echo "ship: flake.lock already pins $input at $rev" >&2
-              jq -nc --arg repo "$repo" --arg branch "$branch" --arg rev "$rev" --arg subject "$subject" --arg input "$input" \
-                '{repo: $repo, branch: $branch, rev: $rev, subject: $subject, input: $input, finix: null, switch: null}'
-              exit 0
+            else
+              git -C "$flake" commit -q -m "bump $input: $subject" -- flake.lock
             fi
-            git -C "$flake" commit -q -m "bump $input: $subject" -- flake.lock
             finix_rev=$(git -C "$flake" rev-parse HEAD)
             switched=$(finix-switch | tail -1) || die "finix-switch failed"
             for remote in $remotes; do
