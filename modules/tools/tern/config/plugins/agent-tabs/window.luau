@@ -61,7 +61,22 @@ local function idle_shell(pane: PaneInfo?): boolean
 	return pane.at_prompt == true or SHELLS[program] == true
 end
 
+local last: { [string]: number } = {}
+local COOLDOWN_MS = 5000
+
+local function relaunchable(pane: PaneInfo?): boolean
+	if not pane then
+		return false
+	end
+	return pane.exited == RELAUNCH or idle_shell(pane)
+end
+
 local function relaunch(cx: WindowCx, pane: number, name: string, agent: Agent)
+	local now = tern.now()
+	if last[name] and now - last[name] < COOLDOWN_MS then
+		return
+	end
+	last[name] = now
 	local new = cx.layout:split(pane, "right", launch(agent))
 	if not new then
 		cx:toast("error", "Could not reopen " .. name)
@@ -99,7 +114,7 @@ local function restore(cx: WindowCx, reopen: boolean)
 				local agent = agents[entry.name]
 				local tab = tabs[entry.name]
 				if tab then
-					if tab.panes == 1 and idle_shell(cx.session:pane(tab.pane)) then
+					if tab.panes == 1 and relaunchable(cx.session:pane(tab.pane)) then
 						relaunch(cx, tab.pane, entry.name, agent)
 					end
 				elseif reopen and s.current then
@@ -119,6 +134,7 @@ local function restore(cx: WindowCx, reopen: boolean)
 end
 
 local gone: { [string]: number } = {}
+local seen: WindowCx? = nil
 
 local function remember(cx: WindowCx)
 	local agents = registered()
@@ -179,6 +195,7 @@ end
 local started = 0
 
 local function sync(_ev: any, cx: WindowCx)
+	seen = cx
 	relaunch_exited(cx)
 	if tern.now() - started < SETTLE_MS then
 		restore(cx, false)
@@ -241,6 +258,18 @@ tern.command({ id = "forget", title = "Agent tabs: Forget a tab", icon = "trash"
 for _, event in ipairs({ "focus", "pane_created", "pane_closed", "tab_created", "tab_closed", "title", "agent_state", "cwd", "command_finished", "agent_finished" }) do
 	tern.on(event, sync)
 end
+
+local POLL_MS = 2000
+
+local function tick(cx: WindowCx?)
+	seen = cx or seen
+	tern.timer(POLL_MS, tick)
+	if seen then
+		pcall(sync, nil, seen)
+	end
+end
+
+tern.timer(0, tick)
 
 tern.on("window_start", function(cx: WindowCx)
 	started = tern.now()
