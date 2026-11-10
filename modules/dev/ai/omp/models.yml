@@ -13,9 +13,9 @@ providers:
         name: Ox Alpha
         reasoning: true
   anthropic: 
+    baseUrl: https://api.anthropic.com
     models: 
       - api: anthropic-messages
-        baseUrl: https://api.anthropic.com
         contextWindow: 1000000
         cost: 
           cacheRead: 0.2
