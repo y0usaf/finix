@@ -83,6 +83,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    dsh-tern = {
+      url = "git+file:///home/y0usaf/dev/developing/dsh-tern";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     tern-ekko = {
       url = "git+file:///home/y0usaf/dev/developing/tern-ekko";
       flake = false;

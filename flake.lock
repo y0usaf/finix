@@ -426,6 +426,26 @@
         "url": "file:///home/y0usaf/dev/developing/deepseek-harness-flake"
       }
     },
+    "dsh-tern": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794319472,
+        "narHash": "sha256-7d593a48rZPa56i/gjUqa5B6rquYjLnWlvA1s/6RTOs=",
+        "ref": "refs/heads/main",
+        "rev": "69fbbd71349de103b444ab35b9382cf3555cce35",
+        "revCount": 2,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/dsh-tern"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/dsh-tern"
+      }
+    },
     "durapi": {
       "inputs": {
         "nixpkgs": [
@@ -1756,6 +1776,7 @@
         "cudaterm": "cudaterm",
         "cursors": "cursors",
         "deepseek-harness-flake": "deepseek-harness-flake",
+        "dsh-tern": "dsh-tern",
         "durapi": "durapi",
         "ekko": "ekko",
         "emeraldian": "emeraldian",
