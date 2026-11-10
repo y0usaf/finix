@@ -517,10 +517,12 @@
         }: ({
           Api,
           Model,
+          registerCustomApi,
           streamSimple,
           ExtensionAPI,
           ExtensionContext,
           CHAT_KINDS,
+          WIRES,
           Token,
           Entry,
           crestAuth,
@@ -531,10 +533,12 @@
           routed,
           crest,
         }: [
-          (import' [(typeOnly Api) (typeOnly Model) streamSimple] (str "@oh-my-pi/pi-ai"))
+          (import' [(typeOnly Api) (typeOnly Model) registerCustomApi streamSimple] (str "@oh-my-pi/pi-ai"))
           (import' (typeOnly [ExtensionAPI ExtensionContext]) (str "@oh-my-pi/pi-coding-agent"))
           blank
           (const (typed CHAT_KINDS (generic Readonly [(generic Record [string true])])) (obj [(prop "chat" true) (prop "tiny" true)]))
+          blank
+          (const (typed WIRES (generic Map [string (generic Map [string (generic Model [Api])])])) (new (generic Map [string (generic Map [string (generic Model [Api])])]) []))
           blank
           (interface Token [
             (typed (opt "login") string)
@@ -686,25 +690,41 @@
           blank
           (export (default (async ({
             pi,
-            wires,
             key,
             route,
             adopt,
           }: (fn crest (typed [(typed pi ExtensionAPI)] (generic Promise [void])) [
-            (const wires (new (generic Map [string (generic Map [string (generic Model [Api])])]) []))
             (const key ({provider}: (arrow (typed [(typed provider string)] string) (below (tpl ["!crest-auth json token " (sub provider) " | jq -er '.access // .key' || echo crest-unavailable"])))))
             ({provider}: (forOf provider (await (call signedIn [])) [
-              (call (dot wires "set") [provider (new Map [])])
+              (if' (not (call (dot WIRES "has") [provider])) (call (dot WIRES "set") [provider (new Map [])]))
               (call (dot pi "registerProvider") [provider (obj [(prop "apiKey" (call key [provider]))])])
             ]))
             (const route ({
               provider,
-              wire,
               api,
+              wire,
               models,
-            }: (arrow (typed [(typed provider string) (typed wire (generic Map [string (generic Model [Api])]))] void) [
+            }: (arrow (typed [(typed provider string)] void) [
               (const api (tpl ["crest-" (sub provider)]))
+              (const wire (infix [(call (dot WIRES "get") [provider]) "??" (new Map [])]))
               (const models (array [(spread (call (dot wire "values") []))]))
+              (call registerCustomApi [
+                api
+                ({
+                  model,
+                  context,
+                  options,
+                  target,
+                }: (arrow [model context options] [
+                  (const target (call (dot wire "get") [(dot model "id")]))
+                  (if' (infix [target "===" undefined]) (throw' (new Error [(tpl ["crest: " (sub provider) " has no model " (sub (dot model "id"))])])))
+                  (return (call streamSimple [
+                    target
+                    context
+                    (obj [(spread options) (prop "apiKey" (call credential [provider (dot target "id")])) (prop "fetch" (call routed [provider (dot target "id")]))])
+                  ]))
+                ]))
+              ])
               (call (dot pi "registerProvider") [
                 provider
                 (obj (rows [
@@ -712,20 +732,6 @@
                   (prop "apiKey" (call key [provider]))
                   api
                   (prop "models" (call (dot models "map") [({model}: (arrow [model] (ternary (call (dot Object "hasOwn") [CHAT_KINDS (infix [(dot model "kind") "??" (str "chat")])]) (obj [(spread model) api]) model)))]))
-                  ({
-                    model,
-                    context,
-                    options,
-                    target,
-                  }: (method "streamSimple" [model context options] [
-                    (const target (call (dot wire "get") [(dot model "id")]))
-                    (if' (infix [target "===" undefined]) (throw' (new Error [(tpl ["crest: " (sub provider) " has no model " (sub (dot model "id"))])])))
-                    (return (call streamSimple [
-                      target
-                      context
-                      (obj [(spread options) (prop "apiKey" (call credential [provider (dot target "id")])) (prop "fetch" (call routed [provider (dot target "id")]))])
-                    ]))
-                  ]))
                 ]))
               ])
             ])))
@@ -741,16 +747,16 @@
                 model,
                 wire,
               }: (forOf model (call (dot ctx "models.list") []) [
-                (const wire (call (dot wires "get") [(dot model "provider")]))
-                (if' (infix [wire "===" undefined "||" (call (dot wire "has") [(dot model "id")]) "||" (dot model "api") "===" (tpl ["crest-" (sub (dot model "provider"))])]) continue)
+                (const wire (call (dot WIRES "get") [(dot model "provider")]))
+                (if' (infix [wire "===" undefined "||" (dot model "api") "===" (tpl ["crest-" (sub (dot model "provider"))])]) continue)
                 (call (dot wire "set") [(dot model "id") model])
-                (call (dot grown "add") [(dot model "provider")])
+                (if' (call (dot Object "hasOwn") [CHAT_KINDS (infix [(dot model "kind") "??" (str "chat")])]) (call (dot grown "add") [(dot model "provider")]))
               ]))
               ({provider}: (forOf provider grown [
-                (call route [provider (infix [(call (dot wires "get") [provider]) "??" (new Map [])])])
+                (call route [provider])
               ]))
               (const current (call (dot ctx "models.current") []))
-              (if' (infix [current "===" undefined "||" (not (call (dot wires "has") [(dot current "provider")])) "||" (dot current "api") "===" (tpl ["crest-" (sub (dot current "provider"))])]) return')
+              (if' (infix [current "===" undefined "||" (not (call (dot WIRES "has") [(dot current "provider")])) "||" (dot current "api") "===" (tpl ["crest-" (sub (dot current "provider"))])]) return')
               (const next (call (dot ctx "models.resolve") [(tpl [(sub (dot current "provider")) "/" (sub (dot current "id"))])]))
               (if' (infix [next "!==" undefined "&&" (dot next "api") "!==" (dot current "api")]) (await (call (dot pi "setModel") [next])))
             ]))))
