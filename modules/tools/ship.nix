@@ -13,6 +13,15 @@
       }
       flake=''${NH_FLAKE:-$HOME/finix}
       remotes=''${SHIP_FINIX_REMOTES:-github forgejo}
+      case "''${1:-}" in
+        -h | --help)
+          echo "usage: ship [REPO] [--input NAME]"
+          exit 0
+          ;;
+      esac
+      if git -C "$flake" rev-parse --git-dir >/dev/null 2>&1; then
+        [ -z "$(git -C "$flake" status --porcelain --untracked-files=no)" ] || die "$flake has uncommitted changes"
+      fi
       repo=$(realpath "''${1:-$PWD}")
       shift || true
       input=""
@@ -38,7 +47,7 @@ $dirty"
 
       if [ -z "$input" ]; then
         origin=$(git -C "$repo" remote get-url origin | origin_slug)
-        meta=$(nix flake metadata --json "$flake" 2>/dev/null) || die "cannot read $flake's lock"
+        meta=$(nix flake metadata --json "$flake") || die "cannot read $flake's lock"
         matches=$(
           printf '%s' "$meta" |
             jq -r '.locks.nodes | . as $n | $n.root.inputs | to_entries[] | "\(.key)\t\($n[.value].original.url // "")"' |
@@ -65,7 +74,6 @@ $dirty"
         exit 0
       fi
 
-      [ -z "$(git -C "$flake" status --porcelain --untracked-files=no)" ] || die "$flake has uncommitted changes"
       echo "ship: nix flake update $input" >&2
       nix flake update "$input" --flake "$flake" >&2
       if git -C "$flake" diff --quiet -- flake.lock; then
@@ -74,7 +82,7 @@ $dirty"
           '{repo: $repo, branch: $branch, rev: $rev, subject: $subject, input: $input, finix: null, switch: null}'
         exit 0
       fi
-      git -C "$flake" commit -q -m "bump $input: $subject"
+      git -C "$flake" commit -q -m "bump $input: $subject" -- flake.lock
       finix_rev=$(git -C "$flake" rev-parse HEAD)
       switched=$(finix-switch | tail -1) || die "finix-switch failed"
       for remote in $remotes; do
