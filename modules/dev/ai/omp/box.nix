@@ -549,7 +549,6 @@
     "work-fold.ts" = "${./work-fold.ts}";
     "crest-reroute.ts" = "${./crest-reroute.ts}";
     optchat = "${./optchat}";
-    inherit (flakeInputs) omp-bot;
     # The same store path as the host's ext link, so omp-bot-box names a boxed bot's secrets extension by this link.
     secrets = "${./secrets}";
   };
@@ -577,15 +576,11 @@
     '';
   };
   optchatExtension = "${inBox "optchat"}/extension.ts";
-  ompdExtension = "${inBox "omp-bot"}/omp/ompd.ts";
   ompExtensions = [
-    "${inBox "omp-bot"}/omp/code-mode.ts"
-    "${inBox "omp-bot"}/omp/barge-in.ts"
     "${inBox "compact-eval.ts"}"
     "${inBox "work-fold.ts"}"
     "${inBox "crest-reroute.ts"}"
     optchatExtension
-    ompdExtension
   ];
   files = {
     models = pkgs.writeText "models.json" (json catalog.models);
@@ -613,11 +608,11 @@
               maxTokens: ${toString ablit.maxTokens}
     '';
     # omp-ablit's own overlay (ablit.nix): a local session asks no cloud model for a review, and loads neither
-    # OptChat, which logs every chat into the shared memory, nor ompd, which keeps each job's log on the host.
+    # OptChat, which logs every chat into the shared memory.
     ablitConfig = pkgs.writeText "ablit.yml" ''
       advisor:
         enabled: false
-      extensions: ${builtins.toJSON (lib.subtractLists [optchatExtension ompdExtension] ompExtensions)}
+      extensions: ${builtins.toJSON (lib.subtractLists [optchatExtension] ompExtensions)}
     '';
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel;
@@ -710,9 +705,6 @@
         sharesDir = "${state}/shares";
         authDir = "${state}/auth";
         nativesDir = "${state}/natives";
-        # Box sessions' ompd jobs (omp-bot's omp/ompd.ts, which starts an ompd in the box), kept on the host so
-        # a job's record and log outlive a box restart and a cut-off job is reported instead of forgotten.
-        ompdJobsDir = "${state}/ompd-jobs";
         inherit (inputPackages.oh-my-pi) omp;
       };
       modules = [
@@ -789,7 +781,7 @@
       previous=$(recorded_failures)
       trap 'fail "setup failed at line $LINENO: $BASH_COMMAND (exit $?)"' ERR
 
-      mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${state}/ompd-jobs ${state}/seed ${home}/.omp/natives
+      mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${state}/seed ${home}/.omp/natives
       rm -f ${state}/id_ed25519
       [ -f ${state}/ssh-key ] || ssh-keygen -q -t ed25519 -N "" -C omp-box -f ${state}/ssh-key
       cp ${state}/ssh-key.pub ${state}/auth/authorized_keys
@@ -899,7 +891,7 @@
           kill -TERM "$pid" 2>/dev/null || true
           wait "$pid" 2>/dev/null || true
         fi
-        [ ! -d "$state/ompd-jobs" ] || chmod 700 "$state/ompd-jobs"
+        [ ! -d "$state/shares" ] || chmod 700 "$state/shares"
         rm -rf "$root" "$work"
       }
       trap cleanup EXIT
@@ -948,8 +940,8 @@
       if [ -z "$(ss -Hltn "sport = :$port")" ]; then pass "qemu released 127.0.0.1:$port"; else flunk "127.0.0.1:$port still taken after stop"; fi
 
       echo "== b) unusable share source"
-      rm -rf "$state/ompd-jobs"
-      : >"$state/ompd-jobs"
+      rm -rf "$state/shares"
+      : >"$state/shares"
       for attempt in 1 2; do
         rc=0
         env -i HOME="$home" ${selftestBox.run} </dev/null >"$work/b$attempt.log" 2>&1 || rc=$?
@@ -993,9 +985,9 @@
       if [ "$retry" != 0 ]; then pass "omp-box retry refuses when the box is not failed"; else flunk "omp-box retry succeeded on a box that is not failed"; fi
 
       echo "== c) share source qemu cannot open"
-      rm -f "$state/ompd-jobs"
-      mkdir "$state/ompd-jobs"
-      chmod 000 "$state/ompd-jobs"
+      rm -f "$state/shares"
+      mkdir "$state/shares"
+      chmod 000 "$state/shares"
       rc=0
       env -i HOME="$home" ${selftestBox.run} </dev/null >"$work/c.log" 2>&1 || rc=$?
       if [ "$rc" != 0 ]; then pass "the run exits $rc"; else flunk "the run exited 0"; fi
@@ -1020,7 +1012,7 @@ in {
       export OMP_BOT_BOX_STATUS=${box.state}/status.json
       export OMP_BOT_BOX_EXT=${seedMount}/current/ext
       export OMP_BOT_BOX_PATH=${seedMount}/current/bin
-      unset OMP_BOT_EXTENSION OMPD_SERVICE
+      unset OMP_BOT_EXTENSION
     '';
 
     finit.services.omp-box-grants = {
@@ -1056,8 +1048,8 @@ in {
 
     # Copies the seed into the box's seed share whenever it changes (finit restarts this service, not omp-box,
     # on a switch that changes it): a new generation, then current pointed at it, then the box's omp-seed run
-    # again so its omp config names it. The ten newest generations stay, since a box session or the box's ompd
-    # may still run code from an older one; a box that is down reads current when it boots.
+    # again so its omp config names it. The ten newest generations stay, since a box session may still run code
+    # from an older one; a box that is down reads current when it boots.
     finit.services.omp-box-seed = {
       description = "copy what omp in the box loads into its seed share";
       inherit user;
@@ -1105,8 +1097,6 @@ in {
       };
       command = "${proxy}/bin/omp-gateway-proxy";
     };
-    finit.services.omp-botd.path = [pkg];
-
     finit.services.omp-box = {
       description = "omp NixOS microVM";
       inherit user;

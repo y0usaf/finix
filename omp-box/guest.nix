@@ -82,12 +82,6 @@ in {
           readOnly = true;
         }
         {
-          tag = "ompd-jobs";
-          source = ompBox.ompdJobsDir;
-          mountPoint = "${home}/.local/state/omp-bot/jobs";
-          proto = "9p";
-        }
-        {
           tag = "seed";
           source = ompBox.seedDir;
           mountPoint = ompBox.seedMount;

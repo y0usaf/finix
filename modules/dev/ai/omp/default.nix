@@ -15,7 +15,7 @@
   # env (the omp_bot module) names its extensions by the same links, so a bot loads each once.
   extDir = "${config.users.users.${config.user.name}.home}/.omp/agent/ext";
   extLinks =
-    lib.genAttrs ["pi-chronobreak" "pi-recap" "omp-bot"] (name: "${flakeInputs.${name}}")
+    lib.genAttrs ["pi-chronobreak" "pi-recap"] (name: "${flakeInputs.${name}}")
     // {
       pi-donsetch = "${inputPackages.pi-donsetch.default}";
       "compact-eval.ts" = ./compact-eval.ts;
@@ -845,8 +845,6 @@ in {
             "pi-chronobreak"
             "pi-recap"
             "pi-donsetch"
-            "omp-bot/omp/code-mode.ts"
-            "omp-bot/omp/barge-in.ts"
             "compact-eval.ts"
             "work-fold.ts"
             "chat-look.ts"
@@ -856,7 +854,6 @@ in {
             "crest-auth.ts"
             "crest-reroute.ts"
             "optchat/extension.ts"
-            "omp-bot/omp/ompd.ts"
           ];
         };
       };

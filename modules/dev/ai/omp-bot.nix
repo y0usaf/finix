@@ -16,7 +16,6 @@
   });
   pilotOmp = pkgs.writeShellScriptBin "omp" ''
     if [ "''${OMP_BOT_NAME-}" = Lloyd ]; then
-      export OMP_BOT_MAX_HELPERS="''${OMP_BOT_MAX_HELPERS-16}"
       exec ${omp}/bin/omp "$@" --config ${pilotConfig}
     fi
     exec ${omp}/bin/omp "$@"
@@ -85,28 +84,11 @@
     pkgs.writeShellScriptBin name ''
       PATH=${pkgs.lib.makeBinPath tools}:$PATH exec ${src}/bin/${name} "$@"
     '';
-  start = pkgs.writeShellScript "omp-botd-start" ''
-    set -euo pipefail
-    key=${home}/Tokens/AI_GATEWAY_API_KEY.txt
-    if [ -r "$key" ]; then
-      AI_GATEWAY_API_KEY=$(${pkgs.coreutils}/bin/cat "$key") || { echo "omp-botd: cannot read $key" >&2; exit 1; }
-      export AI_GATEWAY_API_KEY
-    fi
-    exec ${src}/bin/omp-botd
-  '';
-  ompd = pkgs.writeShellScript "ompd-start" ''
-    set -euo pipefail
-    logs=${home}/.local/state/omp-bot/logs
-    ${pkgs.coreutils}/bin/mkdir -p "$logs" || { echo "ompd: cannot create $logs" >&2; exit 1; }
-    exec ${src}/bin/ompd serve --wait >>"$logs/ompd.log" 2>&1
-  '';
 in {
   user.persist = {
     directories = [".local/state/omp-bot"];
     directorySources = [persistPaths];
   };
-  finix.persistence.homeServices = ["omp-botd" "ompd"];
-
   environment.systemPackages = [(command "omp-bot") (command "omp-bot-ctl") pkgs.age pkgs.gnutar];
 
   user.files = {
@@ -117,41 +99,9 @@ in {
       : "''${OMP_BOT_SECRETS_EXTENSION:=${ext}/secrets/secrets.ts}"
       : "''${OMP_BOT_WORK_FOLD_EXTENSION:=${ext}/work-fold.ts}"
       : "''${OMP_BOT_CHAT_LOOK_EXTENSION:=${ext}/chat-look.ts}"
-      : "''${OMP_BOT_OMPD_EXTENSION:=${ext}/omp-bot/omp/ompd.ts}"
       : "''${OMP_BOT_OPTCHAT:=${ext}/optchat}"
-      export OMPD_SERVICE="''${OMPD_SERVICE-1}"
       : "''${OMP_BOT_PERSIST:=${persist}}"
     '';
     ".config/tern/plugins/omp-bot.path".text = "${src}/tern\n";
-  };
-
-  finit.services.omp-botd = {
-    description = "omp-bot task supervisor (${userName})";
-    user = userName;
-    group = "users";
-    command = "${start}";
-    environment = {
-      HOME = home;
-      XDG_RUNTIME_DIR = runtimeDir;
-    };
-    path = lib.mkMerge [(tools ++ [pkgs.coreutils]) (lib.mkAfter ["/run/current-system/sw" "/run/wrappers"])];
-    respawn = true;
-    stop-timeout = 130;
-    log = true;
-  };
-
-  finit.services.ompd = {
-    description = "omp-bot job daemon (${userName})";
-    user = userName;
-    group = "users";
-    command = "${ompd}";
-    environment = {
-      HOME = home;
-      XDG_RUNTIME_DIR = runtimeDir;
-    };
-    path = lib.mkMerge [(tools ++ [pkgs.coreutils]) (lib.mkAfter ["/run/current-system/sw" "/run/wrappers"])];
-    cgroup.system.delegate = true;
-    respawn = true;
-    log = true;
   };
 }
