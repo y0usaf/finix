@@ -783,7 +783,8 @@ in {
           advisor.enabled = true;
           advisor.reviewMode = "agent-end";
           startup.checkUpdate = false;
-          setupVersion = 2;
+          startup.setupWizard = false;
+          setupVersion = 3;
           symbolPreset = "unicode";
           theme.dark = "titanium";
           composer.tokenRate = false;
