@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  inputPackages,
   ...
 }: let
   cpuThreads = 32;
@@ -139,18 +138,6 @@ in {
     ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram" "frame"];
     ui.tomoe.bar.style = "spine";
     ui.tomoe.bar.scale = 1.5;
-    ui.tomoe.extraConfig = ''
-      (define-extension "cursor-trail" (:reads () :state nil) (snapshot state event)
-        (declare (ignore snapshot state event))
-        (values nil
-                (list (shell-surface :cursor-trail (ui :stack)
-                                     :anchors '(:top :right :bottom :left)
-                                     :layer :overlay
-                                     :click-through t
-                                     :background (list :shader "${inputPackages.tomoe.default}/share/tomoe/examples/shaders/trail-pixels.glsl"
-                                                       :fps 60 :idle 0.5)))
-                nil))
-    '';
 
     dev.nacre = {
       enable = true;
