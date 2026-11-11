@@ -1,0 +1,12 @@
+diff --git a/packages/ai/src/providers/transform-messages.ts b/packages/ai/src/providers/transform-messages.ts
+index 78d5a13..c032290 100644
+--- a/packages/ai/src/providers/transform-messages.ts
++++ b/packages/ai/src/providers/transform-messages.ts
+@@ -1190,6 +1190,7 @@ export function transformMessages<TApi extends Api>(
+ 					// stay byte-identical. A separator baked into the block text would
+ 					// leak to non-flattening targets: Anthropic/Bedrock reject a
+ 					// terminal assistant message whose text ends with whitespace.
++					if (resolveCatalogPolicy(model).classifierCotExtraction === true) return [];
+ 					return {
+ 						type: "text" as const,
+ 						text: renderDemotedThinking(model.id, sanitized.thinking),

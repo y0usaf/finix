@@ -5,8 +5,10 @@ inputs: let
   rawInputPackages = packagesFor system;
   # omp re-appends the whole replayed primary transcript to `__advisor.jsonl` after every advisor
   # reset, so the file grows quadratically; the patch records replays once by position.
+  # Claude refuses with `reasoning_extraction` once enough Gemini/DeepSeek thinking is replayed to
+  # it as prose; the second patch drops foreign thinking for readers with that classifier.
   omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch];
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch];
   });
   inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 
