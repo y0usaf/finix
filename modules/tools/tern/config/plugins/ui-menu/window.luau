@@ -717,6 +717,15 @@ local function toggle(cx, t)
 			on[id] = false
 		end
 	end
+	for _, id in ipairs(CARBON) do
+		if id == t.id then
+			local any = false
+			for _, other in ipairs(CARBON) do
+				any = any or on[other] == true
+			end
+			on.bubbles = any
+		end
+	end
 	save()
 	paint()
 	if t.apply then
