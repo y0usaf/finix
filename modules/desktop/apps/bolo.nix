@@ -60,7 +60,7 @@
 
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
-    active = "parakeet-unified";
+    active = "earlybird";
     language = "en";
     provider = "cuda";
     threads = null;
@@ -75,6 +75,13 @@
           decoder = "${streamingModel}/decoder.onnx";
           joiner = "${streamingModel}/joiner.onnx";
           tokens = "${streamingModel}/tokens.txt";
+        }
+        {
+          name = "earlybird";
+          engine = "earlybird";
+          uri = lib.getExe inputPackages.bolo.earlybird;
+          hold_words = 1;
+          min_confidence = 0.9;
         }
       ]
       ++ lib.mapAttrsToList (name: m:
