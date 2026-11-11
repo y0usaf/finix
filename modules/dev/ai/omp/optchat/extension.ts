@@ -527,25 +527,31 @@ export default function optchat(pi: ExtensionAPI): void {
 			hidden.add(at);
 			left--;
 		}
-		const from = pick < 0 ? Infinity : (messages[pick].timestamp ?? 0);
-		const reported = new Map<string, Set<string>>();
-		for (let k = Math.max(pick, 0); k < messages.length; k++) {
-			const message = messages[k];
+		const delivered = new Map<string, Map<string, number>>();
+		messages.forEach((message, k) => {
 			const carries = message.role === "toolResult" ? message.toolName === "task" || message.toolName === "wait" : message.role === "custom" && message.customType === "async-result";
-			if (!carries) continue;
-			for (const result of joinText(message.content).matchAll(COMPLETED)) reported.set(result[1], (reported.get(result[1]) ?? new Set()).add(result[0]));
-		}
+			if (!carries) return;
+			for (const result of joinText(message.content).matchAll(COMPLETED)) {
+				const seen = delivered.get(result[1]) ?? new Map<string, number>();
+				if (!seen.has(result[0])) seen.set(result[0], k);
+				delivered.set(result[1], seen);
+			}
+		});
 		const prefix = `${session}.`;
 		const reports = new Map<string, number[]>();
-		for (let at = upto - 1; at >= 0; at--) {
+		for (let at = 0; at < upto; at++) {
 			const message = own.messages.get(at);
-			if (message === undefined || message.time < from) break;
-			if (!message.session.startsWith(prefix)) continue;
+			if (message === undefined || !message.session.startsWith(prefix)) continue;
 			const id = message.session.slice(prefix.length);
-			if (!reported.has(id)) continue;
-			reports.set(id, [...(reports.get(id) ?? []), at]);
+			if (delivered.has(id)) reports.set(id, [...(reports.get(id) ?? []), at]);
 		}
-		for (const [id, ats] of reports) if (ats.length <= (reported.get(id)?.size ?? 0)) for (const at of ats) hidden.add(at);
+		for (const [id, ats] of reports) {
+			const ks = [...delivered.get(id)!.values()];
+			if (ats.length !== ks.length) continue;
+			ats.forEach((at, i) => {
+				if (pick >= 0 && ks[i] >= pick) hidden.add(at);
+			});
+		}
 		const kept = rows.filter((row) => {
 			const at = ROW.exec(row);
 			if (at === null) return true;
