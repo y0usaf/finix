@@ -818,6 +818,7 @@ in {
             eager = "preferred";
             enableLsp = false;
             completionProbe = false;
+            softRequestBudget = 0;
           };
           edit.mode = "hashline";
           eval = {
