@@ -2172,6 +2172,20 @@
       "plugins/ui-menu/snippets/rail.css" = "${flakeInputs.tern-ozette}/rail.css";
       "plugins/ui-menu/snippets/settings.css" = "${flakeInputs.tern-ozette}/settings.css";
       "plugins/ui-menu/snippets/bubbles.css" = "${flakeInputs.tern-ozette}/bubbles.css";
+      "plugins/ui-menu/snippets/carbon-user-frost.css" = generators.sourceFile "carbon-user-frost.css" (generators.cssSource [
+        {
+          select = ":root:not(#s0):not(#s1) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body";
+          set = [
+            ["background" "var(--frost-you-fill)"]
+            ["-webkit-backdrop-filter" "var(--frost) !important"]
+            ["backdrop-filter" "var(--frost) !important"]
+            ["box-shadow" "var(--frost-edge)"]
+            ["--t1" "var(--frost-you-ink, var(--frost-ink))"]
+            ["--omp-userMessageText" "var(--frost-you-ink, var(--frost-ink))"]
+            ["color" "var(--frost-you-ink, var(--frost-ink))"]
+          ];
+        }
+      ]);
       "plugins/ui-menu/snippets/account.css" = generators.sourceFile "account.css" (generators.cssSource [
         {
           select = ".tn-peers";
@@ -2185,17 +2199,17 @@
           select = ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
           set = [
             ["align-self" "flex-start"]
-            ["max-width" "82%"]
-            ["padding" "10px 16px"]
-            ["border-radius" "18px 18px 18px 6px"]
-            ["background" "var(--l1)"]
-            ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
+            ["max-width" "var(--omp-answer-max, 82%)"]
+            ["padding" "var(--omp-answer-pad, 10px 16px)"]
+            ["border-radius" "var(--omp-answer-radius, 18px 18px 18px 6px)"]
+            ["background" "var(--omp-answer-bg, var(--l1))"]
+            ["box-shadow" "var(--omp-answer-edge, 0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi))"]
           ];
         }
         {
           select = ".sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body";
           set = [
-            ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
+            ["box-shadow" "var(--omp-answer-user-edge, 0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi))"]
           ];
         }
         {
@@ -2237,12 +2251,12 @@
           select = ":root:not(#ob) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
           set = [
             ["align-self" "flex-start"]
-            ["max-width" "min(80%, 560px)"]
+            ["max-width" "var(--omp-answer-max, min(80%, 560px))"]
             ["margin" "0"]
-            ["padding" "7px 12px"]
-            ["border-radius" "var(--r-card)"]
-            ["background" "rgb(from var(--t1) r g b / 6%)"]
-            ["box-shadow" "none"]
+            ["padding" "var(--omp-answer-pad, 7px 12px)"]
+            ["border-radius" "var(--omp-answer-radius, var(--r-card))"]
+            ["background" "var(--omp-bot-answer-bg, rgb(from var(--t1) r g b / 6%))"]
+            ["box-shadow" "var(--omp-bot-answer-edge, none)"]
           ];
         }
       ]);
@@ -2850,7 +2864,7 @@
           set = [
             ["align-self" "flex-end"]
             ["width" "auto"]
-            ["max-width" "min(80%, 560px)"]
+            ["max-width" "var(--omp-you-max, min(80%, 560px))"]
             ["margin" "0 0 0 auto"]
           ];
         }
@@ -2872,9 +2886,10 @@
         {
           select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
           set = [
-            ["padding" "7px 12px"]
-            ["border-radius" "var(--r-card)"]
-            ["background" "var(--l2)"]
+            ["padding" "var(--omp-you-pad, 7px 12px)"]
+            ["border-radius" "var(--omp-you-radius, var(--r-card))"]
+            ["background" "var(--omp-you-bg, var(--l2))"]
+            ["box-shadow" "var(--omp-you-edge, none)"]
           ];
         }
       ]);

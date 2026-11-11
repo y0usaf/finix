@@ -370,6 +370,13 @@ local TWEAKS = {
 		requires = { "grok", "bot-you" },
 	},
 	{
+		id = "carbon-user-frost",
+		label = false,
+		default = false,
+		layer = true,
+		requires = { "bubbles", "user-frost" },
+	},
+	{
 		id = "bubbles",
 		label = false,
 		default = false,
