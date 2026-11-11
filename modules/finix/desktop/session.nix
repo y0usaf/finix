@@ -15,6 +15,8 @@
     postBuild = ''
       rm $out/bin/tomoe
       install -m755 ${pkgs.writeShellScript "tomoe" ''
+        : "''${XDG_DATA_DIRS:=/etc/profiles/per-user/${userName}/share:/run/current-system/sw/share}"
+        export XDG_DATA_DIRS
         exec > >(${pkgs.coreutils}/bin/tee >(${pkgs.util-linux}/bin/logger -t tomoe)) 2>&1
         exec ${tomoePkg}/bin/tomoe "$@"
       ''} $out/bin/tomoe
