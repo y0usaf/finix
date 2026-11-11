@@ -164,11 +164,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    swarm = {
-      url = "git+ssh://git@github.com/y0usaf/swarm.git?ref=main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     oh-my-fx = {
       url = "github:y0usaf/oh-my-fx/8ea7aa8df1c82c915b6ea1d918f10a945e79b01d";
     };
