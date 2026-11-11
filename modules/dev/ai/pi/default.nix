@@ -12,7 +12,7 @@
   cheapDeepseek.compat.vercelGatewayRouting.order = ["wafer" "morph" "runware"];
   defaultProvider = "anthropic";
   defaultModel = "claude-opus-5-5";
-  taskModel = "openai-codex/gpt-6.1-sol";
+  taskModel = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
 in {
   options.user.dev.modelCatalog = lib.mkOption {
     type = lib.types.attrsOf lib.types.anything;
