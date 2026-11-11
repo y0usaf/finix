@@ -1817,6 +1817,7 @@
         "silva": "silva",
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
+        "swarm": "swarm",
         "t3-tern": "t3-tern",
         "tern-ekko": "tern-ekko",
         "tern-ozette": "tern-ozette",
@@ -1993,6 +1994,27 @@
         "owner": "y0usaf",
         "repo": "strictix",
         "type": "github"
+      }
+    },
+    "swarm": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794368181,
+        "narHash": "sha256-HXadkqG2u3kz3ecABBsnQkobWIwNVNcyEZsZx+koWPw=",
+        "ref": "main",
+        "rev": "f8ae01931d19544cbc365c57c28cc47735649b9f",
+        "revCount": 1,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/swarm.git"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/swarm.git"
       }
     },
     "systems": {
