@@ -89,7 +89,7 @@ in {
     directories = [".local/state/omp-bot"];
     directorySources = [persistPaths];
   };
-  environment.systemPackages = [(command "omp-bot") (command "omp-bot-ctl") pkgs.age pkgs.gnutar];
+  environment.systemPackages = [(command "omp-bot") (command "omp-bot-ctl") (command "omp-job") pkgs.age pkgs.gnutar];
 
   user.files = {
     ".config/omp-bot/env".text = ''
