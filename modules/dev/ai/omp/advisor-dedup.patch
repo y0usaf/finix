@@ -1,0 +1,175 @@
+diff --git a/packages/coding-agent/src/advisor/runtime.ts b/packages/coding-agent/src/advisor/runtime.ts
+index 015ae4b..b2c3ed3 100644
+--- a/packages/coding-agent/src/advisor/runtime.ts
++++ b/packages/coding-agent/src/advisor/runtime.ts
+@@ -81,6 +81,11 @@ export interface AdvisorRuntimeHost {
+ 	onTurnSuccess?(): Promise<void> | void;
+ 	/** Called when a failed batch is permanently dropped so replay-only state can be discarded. */
+ 	onTurnAbandoned?(): void;
++	/**
++	 * Called whenever the advisor's own context is cleared, so the next turn
++	 * replays the primary transcript from its beginning.
++	 */
++	onReplayFromStart?(): void;
+ 	/** Surface a non-recovering advisor failure to the host UI without adding model-visible context. */
+ 	notifyFailure?(error: unknown): void;
+ 	/** Signal that the advisor paused on a quota/rate-limit after host-level
+@@ -614,6 +619,7 @@ export class AdvisorRuntime {
+ 		this.#held = [];
+ 		this.#consecutiveFailures = 0;
+ 		this.#clearAdvisorContextAtCurrentCursor();
++		this.host.onReplayFromStart?.();
+ 		if (clearBacklog) {
+ 			this.#backlog = 0;
+ 		}
+diff --git a/packages/coding-agent/src/advisor/transcript-recorder.ts b/packages/coding-agent/src/advisor/transcript-recorder.ts
+index db64f83..5ef6524 100644
+--- a/packages/coding-agent/src/advisor/transcript-recorder.ts
++++ b/packages/coding-agent/src/advisor/transcript-recorder.ts
+@@ -16,6 +16,12 @@ export const ADVISOR_TRANSCRIPT_STEM = "__advisor";
+ export const ADVISOR_TRANSCRIPT_FILENAME = `${ADVISOR_TRANSCRIPT_STEM}.jsonl`;
+ 
+ const JSONL_SUFFIX = ".jsonl";
++/** Batch suffix `#renderDelta` appends while the primary turn is still running. */
++const REPLAY_WIP_SUFFIX = "\n\n---\n\n[in progress — more steps follow]";
++/** Batch heading and role label `#renderDelta` emits; re-prepared replays deliver the body alone. */
++const REPLAY_HEADING_PREFIX = /^(?:### Session update\n\n)?(?:\*\*(?:agent|user)\*\*:\n)?/;
++/** Deltas compared before a same-content match is trusted as the start of a replayed run. */
++const REPLAY_RUN_PROBE = 4;
+ 
+ /**
+  * Transcript filename for an advisor: `__advisor.jsonl` for the legacy/default
+@@ -145,6 +151,62 @@ export async function loadAdvisorTranscriptCosts(
+ 	return costs;
+ }
+ 
++function replayText(message: UserMessage): string | undefined {
++	const content = message.content;
++	if (typeof content === "string") return content;
++	if (!Array.isArray(content)) return undefined;
++	let text = "";
++	for (const part of content) {
++		if (part?.type !== "text" || typeof part.text !== "string") return undefined;
++		text += part.text;
++	}
++	return text;
++}
++
++function replayKey(message: AgentMessage): bigint | undefined {
++	const text = message.role === "user" ? replayText(message as UserMessage) : undefined;
++	if (text === undefined) return fingerprintMessage(message);
++	const body = text.endsWith(REPLAY_WIP_SUFFIX) ? text.slice(0, -REPLAY_WIP_SUFFIX.length) : text;
++	return Bun.hash.wyhash(body.replace(REPLAY_HEADING_PREFIX, ""));
++}
++
++function startsReplayedRun(keys: bigint[], index: number): boolean {
++	const probes = Math.min(REPLAY_RUN_PROBE, keys.length - index);
++	if (probes < REPLAY_RUN_PROBE) return false;
++	for (let offset = 1; offset < probes; offset++) {
++		if (keys[index + offset] !== keys[offset]) return false;
++	}
++	return true;
++}
++
++function lastReplayedRun(keys: bigint[]): bigint[] {
++	const head = keys[0];
++	if (head === undefined) return keys;
++	let start = 0;
++	for (let index = 1; index < keys.length; index++) {
++		if (keys[index] === head && startsReplayedRun(keys, index)) start = index;
++	}
++	return start === 0 ? keys : keys.slice(start);
++}
++
++async function readRecordedUserKeys(file: string): Promise<bigint[]> {
++	const keys: bigint[] = [];
++	try {
++		await visitEntriesFromFileStream(file, entry => {
++			const isObject = typeof entry === "object" && entry !== null;
++			if (!isObject || entry.type !== "message") return;
++			const message = entry.message;
++			if (!message || typeof message !== "object" || message.role !== "user") return;
++			const key = replayKey(message);
++			if (key !== undefined) keys.push(key);
++		});
++	} catch (err) {
++		logger.debug("advisor transcript replay seed failed", { file: path.basename(file), err: String(err) });
++		return [];
++	}
++	return lastReplayedRun(keys);
++}
++
+ /**
+  * Append-only persister for an advisor agent's transcript.
+  *
+@@ -187,6 +249,10 @@ export class AdvisorTranscriptRecorder {
+ 	#replayCursor = 0;
+ 	/** Target file {@link #replayWindow} belongs to; a switch starts a fresh window. */
+ 	#windowFile: string | undefined;
++	/** Replay keys of the user deltas first recorded in {@link #file}, in order. */
++	#userReplayKeys: bigint[] = [];
++	/** Position in {@link #userReplayKeys} of the next expected replayed delta. */
++	#userReplayCursor = 0;
+ 
+ 	/**
+ 	 * @param filename Transcript filename within the session dir. Defaults to
+@@ -266,15 +332,29 @@ export class AdvisorTranscriptRecorder {
+ 			}
+ 		}
+ 		const cwd = this.resolveCwd();
++		const userKey = message.role === "user" ? replayKey(message) : undefined;
+ 		this.#enqueue(async () => {
+ 			if (file !== this.#file) {
+ 				await this.#closeManager();
++				this.#userReplayKeys = await readRecordedUserKeys(file);
++				this.#userReplayCursor = 0;
+ 				this.#manager = await SessionManager.open(file, undefined, undefined, {
+ 					initialCwd: cwd,
+ 					suppressBreadcrumb: true,
+ 				});
+ 				this.#file = file;
+ 			}
++			if (userKey !== undefined) {
++				if (
++					this.#userReplayCursor < this.#userReplayKeys.length &&
++					this.#userReplayKeys[this.#userReplayCursor] === userKey
++				) {
++					this.#userReplayCursor++;
++					return;
++				}
++				if (this.#userReplayKeys.at(-1) !== userKey) this.#userReplayKeys.push(userKey);
++				this.#userReplayCursor = this.#userReplayKeys.length;
++			}
+ 			this.#manager?.appendMessage(persisted);
+ 		});
+ 	}
+@@ -302,6 +382,17 @@ export class AdvisorTranscriptRecorder {
+ 		this.#clearReplayWindow();
+ 	}
+ 
++	/**
++	 * Rewind replay matching to the start of the recorded deltas, queued behind
++	 * the records accepted so far. Called when the advisor's context is cleared
++	 * and the next turn re-delivers the primary transcript from its beginning.
++	 */
++	replayFromStart(): void {
++		this.#enqueue(async () => {
++			this.#userReplayCursor = 0;
++		});
++	}
++
+ 	/**
+ 	 * Queue a write barrier after all records accepted so far. Once `ready`
+ 	 * resolves, callers may safely snapshot the file length; records accepted
+diff --git a/packages/coding-agent/src/session/session-advisors.ts b/packages/coding-agent/src/session/session-advisors.ts
+index 47bc44e..1b5f936 100644
+--- a/packages/coding-agent/src/session/session-advisors.ts
++++ b/packages/coding-agent/src/session/session-advisors.ts
+@@ -1638,6 +1638,7 @@ export class SessionAdvisors {
+ 					// The dropped batch ends this episode; the next batch gets a fresh budget.
+ 					this.#resetRecoveryBudgets(advisorRef);
+ 				},
++				onReplayFromStart: () => advisorRef.recorder.replayFromStart(),
+ 				notifyFailure: error => {
+ 					this.#advisorStatuses.set(slug, { name: advisorName, status: "error" });
+ 					const message = error instanceof Error ? error.message : String(error);

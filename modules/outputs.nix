@@ -2,7 +2,13 @@ inputs: let
   system = "x86_64-linux";
   inherit (pkgs) lib;
   packagesFor = platform: builtins.mapAttrs (_: input: input.packages.${platform} or {}) inputs;
-  inputPackages = packagesFor system;
+  rawInputPackages = packagesFor system;
+  # omp re-appends the whole replayed primary transcript to `__advisor.jsonl` after every advisor
+  # reset, so the file grows quadratically; the patch records replays once by position.
+  omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch];
+  });
+  inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 
   mkPkgs = cudaSupport:
     import (toString inputs.nixpkgs) {
