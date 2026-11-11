@@ -2209,8 +2209,8 @@
           select = ":root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
           set = [
             ["background" "var(--frost-reply-fill, var(--frost-fill))"]
-            ["-webkit-backdrop-filter" "var(--frost)"]
-            ["backdrop-filter" "var(--frost)"]
+            ["-webkit-backdrop-filter" "var(--frost) !important"]
+            ["backdrop-filter" "var(--frost) !important"]
             ["box-shadow" "var(--frost-edge)"]
             ["--t1" "var(--frost-reply-ink, var(--frost-ink))"]
             ["color" "var(--frost-reply-ink, var(--frost-ink))"]
@@ -2250,8 +2250,8 @@
           select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
           set = [
             ["background" "var(--frost-reply-fill, var(--frost-fill))"]
-            ["-webkit-backdrop-filter" "var(--frost)"]
-            ["backdrop-filter" "var(--frost)"]
+            ["-webkit-backdrop-filter" "var(--frost) !important"]
+            ["backdrop-filter" "var(--frost) !important"]
             ["box-shadow" "var(--frost-edge)"]
             ["--t1" "var(--frost-reply-ink, var(--frost-ink))"]
             ["color" "var(--frost-reply-ink, var(--frost-ink))"]
@@ -2835,8 +2835,8 @@
           select = ":root:not(#s0):not(#s1) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
           set = [
             ["background" "var(--frost-you-fill, var(--frost-fill))"]
-            ["-webkit-backdrop-filter" "var(--frost)"]
-            ["backdrop-filter" "var(--frost)"]
+            ["-webkit-backdrop-filter" "var(--frost) !important"]
+            ["backdrop-filter" "var(--frost) !important"]
             ["box-shadow" "var(--frost-edge)"]
             ["--t1" "var(--frost-you-ink, var(--frost-ink))"]
             ["color" "var(--frost-you-ink, var(--frost-ink))"]
@@ -2975,16 +2975,17 @@
           select = "html.tn-themed";
           set = [
             ["--frost" "blur(72px) saturate(160%)"]
-            ["--frost-fill" "rgb(from var(--modal-bg) r g b / 28%)"]
+            ["--frost-fill" "color-mix(in srgb, var(--pop-bg) 28%, transparent)"]
             ["--frost-edge" "0 0 0 1px light-dark(var(--l2), var(--l3)), inset 0 1px 0 var(--glass-hi)"]
             ["--frost-ink" "var(--t1)"]
           ];
         }
         {
-          select = "html.tn-themed .cmdk, html.tn-themed .dlg-card, html.tn-themed .mdl, html.tn-themed .pk-sheet, html.tn-themed .sf-overlay.modal > .sf-ov-card, html.tn-themed .sf-prefs .pf-editor > .sf-col, html.tn-themed .tn-hd, html.tn-themed .tn-sc";
+          select = "html.tn-themed:not(#s0):not(#s1) :is(.cmdk, .dlg-card, .mdl, .pk-sheet, .sf-overlay.modal > .sf-ov-card, .sf-prefs .pf-editor > .sf-col, .tn-hd, .tn-sc)";
           set = [
-            ["-webkit-backdrop-filter" "var(--frost)"]
-            ["backdrop-filter" "var(--frost)"]
+            ["background" "var(--frost-fill)"]
+            ["-webkit-backdrop-filter" "var(--frost) !important"]
+            ["backdrop-filter" "var(--frost) !important"]
           ];
         }
         {
@@ -4822,8 +4823,8 @@
           select = ":root:not(#s0):not(#s1) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body";
           set = [
             ["background" "var(--frost-you-fill, var(--frost-fill))"]
-            ["-webkit-backdrop-filter" "var(--frost)"]
-            ["backdrop-filter" "var(--frost)"]
+            ["-webkit-backdrop-filter" "var(--frost) !important"]
+            ["backdrop-filter" "var(--frost) !important"]
             ["box-shadow" "var(--frost-edge)"]
             ["--t1" "var(--frost-you-ink, var(--frost-ink))"]
             ["color" "var(--frost-you-ink, var(--frost-ink))"]
@@ -4835,8 +4836,8 @@
           select = ":root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
           set = [
             ["background" "var(--frost-fill)"]
-            ["-webkit-backdrop-filter" "var(--frost)"]
-            ["backdrop-filter" "var(--frost)"]
+            ["-webkit-backdrop-filter" "var(--frost) !important"]
+            ["backdrop-filter" "var(--frost) !important"]
             ["box-shadow" "var(--frost-edge)"]
             ["--t1" "var(--frost-ink)"]
             ["color" "var(--frost-ink)"]
