@@ -61,6 +61,62 @@ local TWEAKS = {
 		layer = true,
 	},
 	{
+		id = "departure",
+		label = "Departure",
+		group = "Look layers",
+		default = false,
+		layer = true,
+	},
+	{
+		id = "automata",
+		label = "Automata",
+		group = "Look layers",
+		default = false,
+		layer = true,
+	},
+	{
+		id = "botanical",
+		label = "Botanical",
+		group = "Look layers",
+		default = false,
+		layer = true,
+	},
+	{
+		id = "braun",
+		label = "Braun",
+		group = "Look layers",
+		default = false,
+		layer = true,
+	},
+	{
+		id = "folio",
+		label = "Folio",
+		group = "Look layers",
+		default = false,
+		layer = true,
+	},
+	{
+		id = "blueprint",
+		label = "Blueprint",
+		group = "Look layers",
+		default = false,
+		layer = true,
+	},
+	{
+		id = "eink",
+		label = "Eink",
+		group = "Look layers",
+		default = false,
+		layer = true,
+	},
+	{
+		id = "phosphor",
+		label = "Phosphor",
+		group = "Look layers",
+		default = false,
+		layer = true,
+	},
+	{
 		id = "scratch",
 		label = "Unset all",
 		group = "Look layers",
@@ -312,6 +368,102 @@ local TWEAKS = {
 	{
 		id = "grok-bot-you",
 		requires = { "grok", "bot-you" },
+	},
+	{
+		id = "departure-answer-bubbles",
+		requires = { "departure", "answer-bubbles" },
+	},
+	{
+		id = "departure-bot-answer-bubbles",
+		requires = { "departure", "bot-answer-bubbles" },
+	},
+	{
+		id = "departure-bot-you",
+		requires = { "departure", "bot-you" },
+	},
+	{
+		id = "automata-answer-bubbles",
+		requires = { "automata", "answer-bubbles" },
+	},
+	{
+		id = "automata-bot-answer-bubbles",
+		requires = { "automata", "bot-answer-bubbles" },
+	},
+	{
+		id = "automata-bot-you",
+		requires = { "automata", "bot-you" },
+	},
+	{
+		id = "botanical-answer-bubbles",
+		requires = { "botanical", "answer-bubbles" },
+	},
+	{
+		id = "botanical-bot-answer-bubbles",
+		requires = { "botanical", "bot-answer-bubbles" },
+	},
+	{
+		id = "botanical-bot-you",
+		requires = { "botanical", "bot-you" },
+	},
+	{
+		id = "braun-answer-bubbles",
+		requires = { "braun", "answer-bubbles" },
+	},
+	{
+		id = "braun-bot-answer-bubbles",
+		requires = { "braun", "bot-answer-bubbles" },
+	},
+	{
+		id = "braun-bot-you",
+		requires = { "braun", "bot-you" },
+	},
+	{
+		id = "folio-answer-bubbles",
+		requires = { "folio", "answer-bubbles" },
+	},
+	{
+		id = "folio-bot-answer-bubbles",
+		requires = { "folio", "bot-answer-bubbles" },
+	},
+	{
+		id = "folio-bot-you",
+		requires = { "folio", "bot-you" },
+	},
+	{
+		id = "blueprint-answer-bubbles",
+		requires = { "blueprint", "answer-bubbles" },
+	},
+	{
+		id = "blueprint-bot-answer-bubbles",
+		requires = { "blueprint", "bot-answer-bubbles" },
+	},
+	{
+		id = "blueprint-bot-you",
+		requires = { "blueprint", "bot-you" },
+	},
+	{
+		id = "eink-answer-bubbles",
+		requires = { "eink", "answer-bubbles" },
+	},
+	{
+		id = "eink-bot-answer-bubbles",
+		requires = { "eink", "bot-answer-bubbles" },
+	},
+	{
+		id = "eink-bot-you",
+		requires = { "eink", "bot-you" },
+	},
+	{
+		id = "phosphor-answer-bubbles",
+		requires = { "phosphor", "answer-bubbles" },
+	},
+	{
+		id = "phosphor-bot-answer-bubbles",
+		requires = { "phosphor", "bot-answer-bubbles" },
+	},
+	{
+		id = "phosphor-bot-you",
+		requires = { "phosphor", "bot-you" },
 	},
 }
 
@@ -580,6 +732,14 @@ local LOOKS = {
 	{ label = "Ozette", layers = { "ozette", "ozette-motion", "ozette-cmus" } },
 	{ label = "YoRHa", layers = { "yorha" } },
 	{ label = "Grok", layers = { "grok" } },
+	{ label = "Departure", layers = { "departure" } },
+	{ label = "Automata", layers = { "automata" } },
+	{ label = "Botanical", layers = { "botanical" } },
+	{ label = "Braun", layers = { "braun" } },
+	{ label = "Folio", layers = { "folio" } },
+	{ label = "Blueprint", layers = { "blueprint" } },
+	{ label = "Eink", layers = { "eink" } },
+	{ label = "Phosphor", layers = { "phosphor" } },
 	{ label = "Unset all", layers = { "scratch" } },
 	{ label = "None", layers = {} },
 }

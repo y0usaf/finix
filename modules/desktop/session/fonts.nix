@@ -77,6 +77,47 @@ in {
                 <string>IBM Plex Mono</string>
               </patelt>
             </pattern>
+            <!-- Tern looks name these; keep them available to the interface. -->
+            <pattern>
+              <patelt name="family">
+                <string>IBM Plex Sans</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Departure Mono</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>EB Garamond</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>CommitMono 275</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Iosevka Term Slab Compact</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Spectral</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Atkinson Hyperlegible Mono Sonic</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Cozette Vector Px</string>
+              </patelt>
+            </pattern>
             <pattern>
               <patelt name="family">
                 <string>${fonts.emoji.name}</string>
