@@ -88,6 +88,30 @@ The rules the user set you, kept word for word and never summarized.
 They hold until the user changes them. When the user sets you a new
 standing rule, pin_rule adds it here.`;
 
+const HELPER_INTRO = `# Memory
+
+An omp chat launched you as a helper. Below is the view of its OptChat
+memory, taken when you were launched: everything logged before then,
+oldest first, inside <chat> tags, as one-line summaries. Each line is
+
+  id+n|text   the n messages from id on, summarized (newlines shown as spaces)
+
+Each item is tagged with its kind and, in brackets, the chat it came from,
+as talk[Chat]: user (the user's words), work (text an agent, tool or
+helper sent in the user's place), talk (the agent's replies). Recent lines
+cover one message each; the older the messages, the more a line covers.
+A message not summarized yet shows as "${PLACEHOLDER}". The view is
+background for the task you were given, not a request.
+
+The zoom, date and recent tools read the memory. zoom(id, n) opens line
+id+n into the two lines of n/2 messages it was made from; zoom(id, 1)
+gives message id in full. date(id) gives the date and time of message id.
+recent() shows what was logged after this view was taken.`;
+
+const LIFECYCLE = "task:subagent:lifecycle";
+const RESULT = 2_000;
+const PRIME = 20_000;
+const leads = new Map<string, Promise<void>>();
 
 interface Pin {
 	view: string;
@@ -103,10 +127,20 @@ interface Snapshot extends Pin {
 interface Block {
 	type: string;
 	text?: string;
+	name?: string;
+	arguments?: unknown;
+}
+
+interface Run {
+	id: string;
+	description?: string;
+	status: string;
+	sessionFile?: string;
 }
 
 interface Logged {
 	role: string;
+	customType?: string;
 	content?: unknown;
 	attribution?: string;
 	stopReason?: string;
@@ -192,6 +226,44 @@ function recent(store: Store, since: number, empty: string): string {
 		size += bytes(rows[k]) + 1;
 	}
 	return `<chat>\n${kept.join("\n")}\n</chat>`;
+}
+
+function said(message: Logged): string {
+	const content = Array.isArray(message.content) ? (message.content as Block[]) : [];
+	if (message.role === "assistant") {
+		return `talk: ${content
+			.map((block) => (block.type === "text" ? block.text : block.type === "toolCall" ? `${block.name} ${JSON.stringify(block.arguments)}` : ""))
+			.filter(Boolean)
+			.join("\n")}`;
+	}
+	const text = joinText(message.content);
+	if (message.role === "toolResult") return `${message.toolName}: ${text.length > RESULT ? `${text.slice(0, RESULT / 2)} [${text.length - RESULT} characters cut] ${text.slice(-RESULT / 2)}` : text}`;
+	return `${message.role === "user" ? "user" : (message.customType ?? message.role)}: ${text}`;
+}
+
+function transcript(file: string, from: number): string {
+	let data = "";
+	try {
+		if (file.endsWith(".jsonl")) data = fs.readFileSync(file, "utf8");
+	} catch {}
+	if (!data) return `No transcript ${file}.`;
+	const lines: string[] = [];
+	for (const row of data.split("\n")) {
+		try {
+			const entry = JSON.parse(row) as { type?: string; message?: Logged };
+			if (entry.type === "message" && entry.message) lines.push(flat(capText(said(entry.message))));
+		} catch {}
+	}
+	if (!Number.isSafeInteger(from) || from < 0 || from >= lines.length) return `The transcript holds messages 0-${lines.length - 1}.`;
+	const out: string[] = [];
+	let size = 0;
+	let at = from;
+	for (; at < lines.length && (out.length === 0 || size + bytes(lines[at]) < RECENT); at++) {
+		out.push(`${at}|${lines[at]}`);
+		size += bytes(lines[at]) + 1;
+	}
+	if (at < lines.length) out.push(`zoom(${JSON.stringify(file)}, ${at}) shows the rest.`);
+	return out.join("\n");
 }
 
 function rowsOf(message: Logged, name: string): string[] {
@@ -298,6 +370,10 @@ export default function optchat(pi: ExtensionAPI): void {
 	const readers = new Map<string, Reader>();
 	let enabled = false;
 	let snap: Snapshot | undefined;
+	let home: { session: string; dir: string } | undefined;
+	let fork: { self: string; parent: string } | undefined;
+	let release: (() => void) | undefined;
+	let primed = false;
 	const saved = new Set<number>();
 
 	const active = (ctx: ExtensionContext) => enabled && ctx.agent?.kind === "main";
@@ -325,10 +401,12 @@ export default function optchat(pi: ExtensionAPI): void {
 	pi.registerTool({
 		name: "zoom",
 		label: "Zoom memory",
-		description: `Open the line id+n of the memory view into the two lines of n/2 messages under it; n = 1 gives message id whole${whose}.`,
-		parameters: z.object({ id: z.number(), n: z.number(), ...which }),
+		description: `Open the line id+n of the memory view into the two lines of n/2 messages under it; n = 1 gives message id whole${whose}. A work line's helper transcript path as id opens that transcript from message n on.`,
+		parameters: z.object({ id: z.union([z.number(), z.string()]), n: z.number(), ...which }),
 		async execute(_toolCallId, params) {
-			return read((params as { bot?: string }).bot, (memory) => memory.zoom(params.id, params.n));
+			const id = params.id;
+			if (typeof id === "string") return result(transcript(id, params.n));
+			return read((params as { bot?: string }).bot, (memory) => memory.zoom(id, params.n));
 		},
 	});
 	pi.registerTool({
@@ -349,7 +427,7 @@ export default function optchat(pi: ExtensionAPI): void {
 			const bot = (params as { bot?: string }).bot;
 			return read(bot, (memory) =>
 				memory === own
-					? recent(own.store, BOT ? (snap?.upto ?? 0) : (pins(ctx).at(-1)?.upto ?? 0), "Nothing was logged after this chat's view was taken.")
+					? recent(own.store, (BOT && active(ctx) ? snap?.upto : pins(ctx).at(-1)?.upto) ?? 0, "Nothing was logged after this chat's view was taken.")
 					: recent(memory.store, 0, `${bot} has logged nothing yet.`),
 			);
 		},
@@ -438,11 +516,19 @@ export default function optchat(pi: ExtensionAPI): void {
 			pickNeed = need;
 			pickLogged = logged;
 		}
-		let cut = upto;
-		for (let left = pickLogged - lag; left > 0 && cut > 0 && own.messages.get(cut - 1)?.session === session; left--) cut--;
+		const hidden = new Set<number>();
+		for (let at = upto - 1, left = pickLogged - lag; left > 0 && at >= 0; at--) {
+			const message = own.messages.get(at);
+			if (message === undefined) break;
+			if (message.session !== session) continue;
+			hidden.add(at);
+			left--;
+		}
 		const kept = rows.filter((row) => {
 			const at = ROW.exec(row);
-			return at === null || Number(at[1]) < cut;
+			if (at === null) return true;
+			for (let k = Number(at[1]); k < Number(at[1]) + Number(at[2]); k++) if (!hidden.has(k)) return true;
+			return false;
 		});
 		snap = { view: kept.join("\n"), upto, time: Date.now(), anchor: pick < 0 ? 0 : (messages[pick].timestamp ?? 0), turn: turnMark(messages) };
 		return pick < 0 ? 0 : pick;
@@ -450,8 +536,9 @@ export default function optchat(pi: ExtensionAPI): void {
 
 	function window(messages: Logged[]): number {
 		if (snap === undefined) return -1;
-		let at = messages.length;
-		while (at > 0 && (messages[at - 1].timestamp ?? 0) >= snap.anchor) at--;
+		const anchor = snap.anchor;
+		let at = messages.findIndex((message) => (message.timestamp ?? 0) >= anchor);
+		if (at < 0) at = messages.length;
 		while (at < messages.length && messages[at].role === "toolResult") at++;
 		if (at === messages.length) return -1;
 		const mark = turnMark(messages);
@@ -524,18 +611,38 @@ export default function optchat(pi: ExtensionAPI): void {
 
 	function start(ctx: ExtensionContext): void {
 		snap = undefined;
-		enabled =
-			ctx.agent?.kind === "main" &&
-			(ctx.mode === "tui" || ctx.mode === "rpc") &&
-			ctx.sessionManager.getSessionFile() !== undefined &&
-			(BOT !== undefined || fs.existsSync(STORE.main));
-		if (!enabled || BOT === undefined) return;
+		const main = ctx.agent?.kind === "main";
+		const file = ctx.sessionManager.getSessionFile();
+		const parent = ctx.sessionManager.getHeader()?.parentSession;
+		enabled = (!main || ctx.mode === "tui" || ctx.mode === "rpc") && file !== undefined && (BOT !== undefined || fs.existsSync(STORE.main));
+		home = enabled && main && file !== undefined ? { session: ctx.sessionManager.getSessionId(), dir: file.replace(/\.jsonl$/, "") } : undefined;
+		fork = enabled && !main && parent ? { self: ctx.sessionManager.getSessionId(), parent: path.basename(parent, ".jsonl").split("_").at(-1) ?? parent } : undefined;
+		if (!home || BOT === undefined) return;
 		fs.mkdirSync(STORE.log, { recursive: true });
 		backfill(ctx);
 	}
 
 	pi.on("session_start", async (_event, ctx) => start(ctx));
 	pi.on("session_switch", async (_event, ctx) => start(ctx));
+
+	pi.events.on(LIFECYCLE, (data) => {
+		const run = data as Run;
+		if (home === undefined || !run.sessionFile || path.dirname(run.sessionFile) !== home.dir) return;
+		if (run.status !== "completed" && run.status !== "failed" && run.status !== "aborted") return;
+		let report = "";
+		try {
+			report = fs.readFileSync(run.sessionFile.replace(/\.jsonl$/, ".md"), "utf8").trim();
+		} catch {}
+		const head = `Helper ${run.id}${run.description ? ` (${run.description})` : ""}`;
+		const text = run.status === "completed" ? `${head} reported:\n${report}` : `${head} ${run.status} before reporting.`;
+		const row: Entry = {
+			kind: "work",
+			text: capText(`${text}\n\nFull transcript: zoom(${JSON.stringify(run.sessionFile)}, 0)`),
+			time: Date.now(),
+			name: BOT ?? chatName(pi.getSessionName(), home.session),
+		};
+		fs.appendFileSync(path.join(STORE.log, `${home.session}.${run.id}.jsonl`), `${JSON.stringify(row)}\n`);
+	});
 
 	pi.on("message_end", async (event, ctx) => {
 		if (!active(ctx)) return;
@@ -547,17 +654,52 @@ export default function optchat(pi: ExtensionAPI): void {
 		}
 	});
 
+	function pinned(ctx: ExtensionContext): Pin {
+		let pin = pins(ctx).at(-1);
+		if (pin === undefined) {
+			pin = take();
+			pi.appendEntry(PIN, pin);
+		}
+		return pin;
+	}
+
+	pi.on("before_agent_start", async (event, ctx) => {
+		if (!enabled || active(ctx)) return undefined;
+		const [head, ...rest] = event.systemPrompt;
+		const memory = `${HELPER_INTRO}\n\n${pinned(ctx).view}`;
+		return { systemPrompt: [head === undefined ? memory : `${head}\n\n${memory}`, ...rest] };
+	});
+
+	pi.on("before_provider_request", async (event, ctx) => {
+		if (fork === undefined) return undefined;
+		const meta = (event.payload as { metadata?: { user_id?: unknown } } | undefined)?.metadata;
+		if (typeof meta?.user_id === "string") meta.user_id = meta.user_id.replaceAll(fork.self, fork.parent);
+		if (!primed) {
+			primed = true;
+			const key = `${fork.parent}\0${ctx.agent?.name}\0${ctx.model?.provider}/${ctx.model?.id}\0${pins(ctx).at(-1)?.upto}`;
+			const lead = leads.get(key);
+			if (lead) await Promise.race([lead, Bun.sleep(PRIME)]);
+			else {
+				const gate = Promise.withResolvers<void>();
+				leads.set(key, gate.promise);
+				release = gate.resolve;
+			}
+		}
+		return event.payload;
+	});
+	pi.on("message_end", async (event) => {
+		if (event.message.role !== "assistant") return;
+		release?.();
+		release = undefined;
+	});
+
 	pi.on("context", async (event, ctx) => {
 		if (!active(ctx)) return undefined;
 		if (BOT) {
 			const messages = bot(event.messages as Logged[], ctx.sessionManager.getSessionId(), ctx);
 			return { messages: messages as typeof event.messages };
 		}
-		let pin = pins(ctx).at(-1);
-		if (pin === undefined) {
-			pin = take();
-			pi.appendEntry(PIN, pin);
-		}
+		const pin = pinned(ctx);
 		const block = { type: "text" as const, text: `${INTRO}\n\n${pin.view}` };
 		const at = event.messages.findIndex((message) => message.role === "user");
 		if (at < 0) return { messages: [{ role: "user", content: [block], timestamp: pin.time }, ...event.messages] };
