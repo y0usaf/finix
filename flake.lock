@@ -112,11 +112,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1794418366,
-        "narHash": "sha256-eeJTHbHZ07HgF86sSpp0MYB3yRGf5PjIk44TnFEaHUo=",
+        "lastModified": 1794436411,
+        "narHash": "sha256-ESt2wGMvHZ6ulV24Ipm/SzRCgMFm0mcWpIWPUAzNpw0=",
         "ref": "refs/heads/main",
-        "rev": "a0e9619d45acb9a832208b1390de27e76084d024",
-        "revCount": 22,
+        "rev": "eaf45ae9d2c2872d33506fa0f0912c949dfad402",
+        "revCount": 23,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/bolo.git"
       },
@@ -2165,12 +2165,12 @@
       "flake": false,
       "locked": {
         "lastModified": 1794428026,
+        "narHash": "sha256-yFZtcaRwba794oRm1XVgzYv6MbTIihunR+FEbu/5WbA=",
         "ref": "refs/heads/main",
         "rev": "502636ddae882eb6777bbf096bbb595802543882",
         "revCount": 108,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-ozette",
-        "narHash": "sha256-yFZtcaRwba794oRm1XVgzYv6MbTIihunR+FEbu/5WbA="
+        "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       },
       "original": {
         "type": "git",
