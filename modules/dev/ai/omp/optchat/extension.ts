@@ -22,7 +22,7 @@ const PIN = "optchat-pin";
 const CAP = 30_000;
 const RECENT = 64_000;
 const ROW = /^(\d+)\+(\d+)\|/;
-const COMPLETED = /<task-result id="([^"]+)"[^>]*status="completed"/g;
+const COMPLETED = /<task-result id="([^"]+)"[^>]*status="completed"[^>]*>/g;
 const BOT = process.env.OPTCHAT_BOT;
 const RULES = process.env.OPTCHAT_RULES;
 const BOTS = process.env.OPTCHAT_BOTS;
@@ -528,19 +528,24 @@ export default function optchat(pi: ExtensionAPI): void {
 			left--;
 		}
 		const from = pick < 0 ? Infinity : (messages[pick].timestamp ?? 0);
-		const reported = new Set<string>();
+		const reported = new Map<string, Set<string>>();
 		for (let k = Math.max(pick, 0); k < messages.length; k++) {
 			const message = messages[k];
 			const carries = message.role === "toolResult" ? message.toolName === "task" || message.toolName === "wait" : message.role === "custom" && message.customType === "async-result";
 			if (!carries) continue;
-			for (const result of joinText(message.content).matchAll(COMPLETED)) reported.add(result[1]);
+			for (const result of joinText(message.content).matchAll(COMPLETED)) reported.set(result[1], (reported.get(result[1]) ?? new Set()).add(result[0]));
 		}
 		const prefix = `${session}.`;
+		const reports = new Map<string, number[]>();
 		for (let at = upto - 1; at >= 0; at--) {
 			const message = own.messages.get(at);
 			if (message === undefined || message.time < from) break;
-			if (message.session.startsWith(prefix) && reported.has(message.session.slice(prefix.length))) hidden.add(at);
+			if (!message.session.startsWith(prefix)) continue;
+			const id = message.session.slice(prefix.length);
+			if (!reported.has(id)) continue;
+			reports.set(id, [...(reports.get(id) ?? []), at]);
 		}
+		for (const [id, ats] of reports) if (ats.length <= (reported.get(id)?.size ?? 0)) for (const at of ats) hidden.add(at);
 		const kept = rows.filter((row) => {
 			const at = ROW.exec(row);
 			if (at === null) return true;
