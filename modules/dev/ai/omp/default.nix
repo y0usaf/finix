@@ -819,6 +819,7 @@ in {
             enableLsp = false;
             completionProbe = false;
             softRequestBudget = 0;
+            perCallModel = "on";
           };
           edit.mode = "hashline";
           eval = {
