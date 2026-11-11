@@ -22,6 +22,7 @@ const PIN = "optchat-pin";
 const CAP = 30_000;
 const RECENT = 64_000;
 const ROW = /^(\d+)\+(\d+)\|/;
+const COMPLETED = /<task-result id="([^"]+)"[^>]*status="completed"/g;
 const BOT = process.env.OPTCHAT_BOT;
 const RULES = process.env.OPTCHAT_RULES;
 const BOTS = process.env.OPTCHAT_BOTS;
@@ -90,9 +91,10 @@ standing rule, pin_rule adds it here.`;
 
 const HELPER_INTRO = `# Memory
 
-An omp chat launched you as a helper. Below is the view of its OptChat
-memory, taken when you were launched: everything logged before then,
-oldest first, inside <chat> tags, as one-line summaries. Each line is
+An omp chat launched you as a helper. Below is the view of OptChat
+memory that chat held when it launched you: everything logged before the
+view was taken, oldest first, inside <chat> tags, as one-line summaries.
+That chat's own latest turns are not in it. Each line is
 
   id+n|text   the n messages from id on, summarized (newlines shown as spaces)
 
@@ -112,6 +114,7 @@ const LIFECYCLE = "task:subagent:lifecycle";
 const RESULT = 2_000;
 const PRIME = 20_000;
 const leads = new Map<string, Promise<void>>();
+const views = new Map<string, Pin>();
 
 interface Pin {
 	view: string;
@@ -524,6 +527,20 @@ export default function optchat(pi: ExtensionAPI): void {
 			hidden.add(at);
 			left--;
 		}
+		const from = pick < 0 ? Infinity : (messages[pick].timestamp ?? 0);
+		const reported = new Set<string>();
+		for (let k = Math.max(pick, 0); k < messages.length; k++) {
+			const message = messages[k];
+			const carries = message.role === "toolResult" ? message.toolName === "task" || message.toolName === "wait" : message.role === "custom" && message.customType === "async-result";
+			if (!carries) continue;
+			for (const result of joinText(message.content).matchAll(COMPLETED)) reported.add(result[1]);
+		}
+		const prefix = `${session}.`;
+		for (let at = upto - 1; at >= 0; at--) {
+			const message = own.messages.get(at);
+			if (message === undefined || message.time < from) break;
+			if (message.session.startsWith(prefix) && reported.has(message.session.slice(prefix.length))) hidden.add(at);
+		}
 		const kept = rows.filter((row) => {
 			const at = ROW.exec(row);
 			if (at === null) return true;
@@ -617,6 +634,7 @@ export default function optchat(pi: ExtensionAPI): void {
 		enabled = (!main || ctx.mode === "tui" || ctx.mode === "rpc") && file !== undefined && (BOT !== undefined || fs.existsSync(STORE.main));
 		home = enabled && main && file !== undefined ? { session: ctx.sessionManager.getSessionId(), dir: file.replace(/\.jsonl$/, "") } : undefined;
 		fork = enabled && !main && parent ? { self: ctx.sessionManager.getSessionId(), parent: path.basename(parent, ".jsonl").split("_").at(-1) ?? parent } : undefined;
+		if (enabled && !main) pinned(ctx);
 		if (!home || BOT === undefined) return;
 		fs.mkdirSync(STORE.log, { recursive: true });
 		backfill(ctx);
@@ -657,18 +675,12 @@ export default function optchat(pi: ExtensionAPI): void {
 	function pinned(ctx: ExtensionContext): Pin {
 		let pin = pins(ctx).at(-1);
 		if (pin === undefined) {
-			pin = take();
+			pin = (fork && views.get(fork.parent)) ?? take();
 			pi.appendEntry(PIN, pin);
 		}
+		views.set(ctx.sessionManager.getSessionId(), pin);
 		return pin;
 	}
-
-	pi.on("before_agent_start", async (event, ctx) => {
-		if (!enabled || active(ctx)) return undefined;
-		const [head, ...rest] = event.systemPrompt;
-		const memory = `${HELPER_INTRO}\n\n${pinned(ctx).view}`;
-		return { systemPrompt: [head === undefined ? memory : `${head}\n\n${memory}`, ...rest] };
-	});
 
 	pi.on("before_provider_request", async (event, ctx) => {
 		if (fork === undefined) return undefined;
@@ -694,9 +706,15 @@ export default function optchat(pi: ExtensionAPI): void {
 	});
 
 	pi.on("context", async (event, ctx) => {
-		if (!active(ctx)) return undefined;
+		if (!enabled) return undefined;
+		if (!active(ctx)) {
+			const pin = pinned(ctx);
+			return { messages: [{ role: "user", content: [{ type: "text" as const, text: `${HELPER_INTRO}\n\n${pin.view}` }], timestamp: pin.time }, ...event.messages] };
+		}
 		if (BOT) {
 			const messages = bot(event.messages as Logged[], ctx.sessionManager.getSessionId(), ctx);
+			const { view, upto, time } = snap as Snapshot;
+			views.set(ctx.sessionManager.getSessionId(), { view, upto, time });
 			return { messages: messages as typeof event.messages };
 		}
 		const pin = pinned(ctx);
