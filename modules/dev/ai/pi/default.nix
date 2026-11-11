@@ -12,7 +12,8 @@
   cheapDeepseek.compat.vercelGatewayRouting.order = ["wafer" "morph" "runware"];
   defaultProvider = "anthropic";
   defaultModel = "claude-opus-5-5";
-  taskModel = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
+  taskModel = flash;
+  fastFlash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
 in {
   options.user.dev.modelCatalog = lib.mkOption {
     type = lib.types.attrsOf lib.types.anything;
@@ -28,11 +29,11 @@ in {
       fallbackChains = {
         default = ["openai-codex/gpt-6.1-sol:xhigh" flash];
         advisor = [flash];
-        task = [flash];
+        task = [fastFlash];
       };
 
       enabledModels = [
-        "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast"
+        fastFlash
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash"
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017"
         "anthropic/claude-opus-5-5"
