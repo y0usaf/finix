@@ -20,6 +20,7 @@
       pi-donsetch = "${inputPackages.pi-donsetch.default}";
       "compact-eval.ts" = ./compact-eval.ts;
       "work-fold.ts" = ./work-fold.ts;
+      "message-interrupts.ts" = ./message-interrupts.ts;
       "crest-reroute.ts" = ./crest-reroute.ts;
       "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (({
           Array,
@@ -847,6 +848,7 @@ in {
             "pi-donsetch"
             "compact-eval.ts"
             "work-fold.ts"
+            "message-interrupts.ts"
             "chat-look.ts"
             "box-commands.ts"
             "cwd.ts"
