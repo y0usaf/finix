@@ -1,3 +1,41 @@
+diff --git a/packages/ai/src/providers/anthropic.ts b/packages/ai/src/providers/anthropic.ts
+index 07a8371..d2dd63c 100644
+--- a/packages/ai/src/providers/anthropic.ts
++++ b/packages/ai/src/providers/anthropic.ts
+@@ -8,6 +8,7 @@ import { hostMatchesUrl, isVertexRawPredictUrl, modelMatchesHost } from "@oh-my-
+ import type { Effort } from "@oh-my-pi/pi-catalog/effort";
+ import { mapEffortToAnthropicAdaptiveEffort } from "@oh-my-pi/pi-catalog/model-thinking";
+ import { buildModel } from "@oh-my-pi/pi-catalog/build";
++import { resolveCatalogPolicy } from "@oh-my-pi/pi-catalog/compat/catalog-policy";
+ import type { ModelSpec } from "@oh-my-pi/pi-catalog/types";
+ import { calculateCost, getBundledModel } from "@oh-my-pi/pi-catalog/models";
+ import { isAnthropicOAuthToken } from "@oh-my-pi/pi-catalog/utils";
+@@ -6003,6 +6004,7 @@ export function convertAnthropicMessages(
+ 				block =>
+ 					block.type === "thinking" && !!block.thinkingSignature && block.thinkingSignature.trim().length > 0,
+ 			);
++			const dropsUnsignedThinking = resolveCatalogPolicy(model).classifierCotExtraction === true;
+ 
+ 			// A caller that appends the compacting response itself holds the block
+ 			// on the assistant message; it opened that response, so it opens the
+@@ -6033,7 +6035,7 @@ export function convertAnthropicMessages(
+ 					}
+ 					if (hasSignedThinking) {
+ 						if (!block.thinkingSignature || block.thinkingSignature.trim().length === 0) {
+-							if (block.thinking.trim().length === 0) continue;
++							if (block.thinking.trim().length === 0 || dropsUnsignedThinking) continue;
+ 							blocks.push({
+ 								type: "text",
+ 								text: renderDemotedThinking(model.id, block.thinking),
+@@ -6055,7 +6057,7 @@ export function convertAnthropicMessages(
+ 								thinking: block.thinking.toWellFormed(),
+ 								signature: "",
+ 							});
+-						} else {
++						} else if (!dropsUnsignedThinking) {
+ 							blocks.push({
+ 								type: "text",
+ 								text: renderDemotedThinking(model.id, block.thinking),
 diff --git a/packages/ai/src/providers/transform-messages.ts b/packages/ai/src/providers/transform-messages.ts
 index 78d5a13..c032290 100644
 --- a/packages/ai/src/providers/transform-messages.ts
