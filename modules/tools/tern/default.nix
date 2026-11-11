@@ -2845,7 +2845,7 @@
             ["align-self" "flex-end"]
             ["width" "auto"]
             ["max-width" "var(--omp-user-max, min(80%, 560px))"]
-            ["margin" "16px 0 0 auto"]
+            ["margin" "16px 0"]
           ];
         }
         {
