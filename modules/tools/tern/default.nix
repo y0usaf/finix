@@ -2171,6 +2171,7 @@
         generators.luau));
       "plugins/ui-menu/snippets/rail.css" = "${flakeInputs.tern-ozette}/rail.css";
       "plugins/ui-menu/snippets/settings.css" = "${flakeInputs.tern-ozette}/settings.css";
+      "plugins/ui-menu/snippets/bubbles.css" = "${flakeInputs.tern-ozette}/bubbles.css";
       "plugins/ui-menu/snippets/account.css" = generators.sourceFile "account.css" (generators.cssSource [
         {
           select = ".tn-peers";
@@ -2180,17 +2181,6 @@
         }
       ]);
       "plugins/ui-menu/snippets/answer-bubbles.css" = generators.sourceFile "answer-bubbles.css" (generators.cssSource [
-        {
-          select = ".sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body";
-          set = [
-            ["max-width" "var(--omp-user-max, 540px)"]
-            ["padding" "var(--omp-user-pad, 10px 16px)"]
-            ["border-radius" "var(--omp-user-radius, 18px 18px 6px 18px)"]
-            ["background" "var(--omp-user-bg, var(--l2))"]
-            ["color" "var(--omp-user-ink, currentColor)"]
-            ["box-shadow" "var(--omp-user-edge, 0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi))"]
-          ];
-        }
         {
           select = ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
           set = [
@@ -2861,26 +2851,30 @@
         {
           select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body";
           set = [
-            ["align-self" "stretch"]
-            ["align-items" "flex-end"]
+            ["align-self" "flex-end"]
+            ["align-items" "flex-start"]
             ["width" "auto"]
-            ["max-width" "none"]
+            ["max-width" "100%"]
             ["margin" "0"]
-            ["padding" "0"]
+            ["padding" "var(--omp-user-pad, 7px 12px)"]
             ["border" "0"]
-            ["border-radius" "0"]
-            ["background" "none"]
-            ["box-shadow" "none"]
+            ["border-radius" "var(--omp-user-radius, var(--r-card))"]
+            ["background" "var(--omp-user-bg, var(--l2))"]
+            ["color" "var(--omp-user-ink, currentColor)"]
+            ["box-shadow" "var(--omp-user-edge, none)"]
           ];
         }
         {
           select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
           set = [
-            ["padding" "var(--omp-user-pad, 7px 12px)"]
-            ["border-radius" "var(--omp-user-radius, var(--r-card))"]
-            ["background" "var(--omp-user-bg, var(--l2))"]
-            ["color" "var(--omp-user-ink, currentColor)"]
-            ["box-shadow" "var(--omp-user-edge, none)"]
+            ["width" "auto"]
+            ["max-width" "100%"]
+            ["padding" "0"]
+            ["border" "0"]
+            ["border-radius" "0"]
+            ["background" "none"]
+            ["color" "inherit"]
+            ["box-shadow" "none"]
           ];
         }
       ]);

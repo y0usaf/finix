@@ -1,5 +1,5 @@
 local Rail = require("./rail")
-tern.css("ui-menu-base", tern.fs.read(tern.plugin.dir .. "/snippets/rail.css") .. tern.fs.read(tern.plugin.dir .. "/snippets/settings.css"))
+tern.css("ui-menu-base", tern.fs.read(tern.plugin.dir .. "/snippets/rail.css") .. tern.fs.read(tern.plugin.dir .. "/snippets/settings.css") .. tern.fs.read(tern.plugin.dir .. "/snippets/bubbles.css"))
 
 local TWEAKS = {
 	{
