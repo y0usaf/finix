@@ -70,7 +70,7 @@ in {
       fi
       local out="$XDG_RUNTIME_DIR/nhs-system"
       rm -f "$out"
-      if ! iets build -o "$out" "$NH_FLAKE#nixosConfigurations.$(hostname).config.system.build.toplevel"; then
+      if ! iets build --impure -o "$out" "$NH_FLAKE#nixosConfigurations.$(hostname).config.system.build.toplevel"; then
         echo "nhs: iets failed; 'nhs --nix' evaluates with nix instead" >&2
         return 1
       fi
