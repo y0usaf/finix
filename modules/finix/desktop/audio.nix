@@ -9,6 +9,7 @@
   svcEnv = {
     HOME = config.users.users.${userName}.home;
     XDG_RUNTIME_DIR = runtimeDir;
+    LADSPA_PATH = "${pkgs.rnnoise-plugin.ladspa}/lib/ladspa";
   };
 
   waitSock = pkgs.writeShellScript "wait-pipewire-sock" ''
@@ -35,9 +36,14 @@ in {
           "filter.graph".nodes = [
             {
               type = "ladspa";
-              name = "deepfilter";
-              plugin = "${pkgs.deepfilternet}/lib/ladspa/libdeep_filter_ladspa.so";
-              label = "deep_filter_mono";
+              name = "rnnoise";
+              plugin = "librnnoise_ladspa";
+              label = "noise_suppressor_mono";
+              control = {
+                "VAD Threshold (%)" = 50;
+                "VAD Grace Period (ms)" = 20;
+                "Retroactive VAD Grace (ms)" = 0;
+              };
             }
           ];
           "audio.rate" = 48000;
