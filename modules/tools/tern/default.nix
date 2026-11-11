@@ -2181,20 +2181,25 @@
       ]);
       "plugins/ui-menu/snippets/answer-bubbles.css" = generators.sourceFile "answer-bubbles.css" (generators.cssSource [
         {
-          select = ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
+          select = ".sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body";
           set = [
-            ["align-self" "flex-start"]
-            ["max-width" "82%"]
-            ["padding" "10px 16px"]
-            ["border-radius" "18px 18px 18px 6px"]
-            ["background" "var(--l1)"]
-            ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
+            ["max-width" "var(--omp-user-max, 540px)"]
+            ["padding" "var(--omp-user-pad, 10px 16px)"]
+            ["border-radius" "var(--omp-user-radius, 18px 18px 6px 18px)"]
+            ["background" "var(--omp-user-bg, var(--l2))"]
+            ["color" "var(--omp-user-ink, currentColor)"]
+            ["box-shadow" "var(--omp-user-edge, 0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi))"]
           ];
         }
         {
-          select = ".sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body";
+          select = ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
           set = [
-            ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
+            ["align-self" "flex-start"]
+            ["max-width" "var(--omp-reply-max, 82%)"]
+            ["padding" "var(--omp-reply-pad, 10px 16px)"]
+            ["border-radius" "var(--omp-reply-radius, 18px 18px 18px 6px)"]
+            ["background" "var(--omp-reply-bg, var(--l1))"]
+            ["box-shadow" "var(--omp-reply-edge, 0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi))"]
           ];
         }
         {
@@ -2208,10 +2213,10 @@
         {
           select = ":root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
           set = [
-            ["background" "var(--frost-reply-fill, var(--frost-fill))"]
+            ["background" "var(--omp-reply-bg, var(--frost-reply-fill, var(--frost-fill)))"]
             ["-webkit-backdrop-filter" "var(--frost) !important"]
             ["backdrop-filter" "var(--frost) !important"]
-            ["box-shadow" "var(--frost-edge)"]
+            ["box-shadow" "var(--omp-reply-edge, var(--frost-edge))"]
             ["--t1" "var(--frost-reply-ink, var(--frost-ink))"]
             ["color" "var(--frost-reply-ink, var(--frost-ink))"]
           ];
@@ -2236,12 +2241,12 @@
           select = ":root:not(#ob) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
           set = [
             ["align-self" "flex-start"]
-            ["max-width" "min(80%, 560px)"]
+            ["max-width" "var(--omp-reply-max, min(80%, 560px))"]
             ["margin" "0"]
-            ["padding" "7px 12px"]
-            ["border-radius" "var(--r-card)"]
-            ["background" "rgb(from var(--t1) r g b / 6%)"]
-            ["box-shadow" "none"]
+            ["padding" "var(--omp-reply-pad, 7px 12px)"]
+            ["border-radius" "var(--omp-reply-radius, var(--r-card))"]
+            ["background" "var(--omp-reply-bg, rgb(from var(--t1) r g b / 6%))"]
+            ["box-shadow" "var(--omp-reply-edge, none)"]
           ];
         }
       ]);
@@ -2249,10 +2254,10 @@
         {
           select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
           set = [
-            ["background" "var(--frost-reply-fill, var(--frost-fill))"]
+            ["background" "var(--omp-reply-bg, var(--frost-reply-fill, var(--frost-fill)))"]
             ["-webkit-backdrop-filter" "var(--frost) !important"]
             ["backdrop-filter" "var(--frost) !important"]
-            ["box-shadow" "var(--frost-edge)"]
+            ["box-shadow" "var(--omp-reply-edge, var(--frost-edge))"]
             ["--t1" "var(--frost-reply-ink, var(--frost-ink))"]
             ["color" "var(--frost-reply-ink, var(--frost-ink))"]
           ];
@@ -2849,7 +2854,7 @@
           set = [
             ["align-self" "flex-end"]
             ["width" "auto"]
-            ["max-width" "min(80%, 560px)"]
+            ["max-width" "var(--omp-user-max, min(80%, 560px))"]
             ["margin" "0 0 0 auto"]
           ];
         }
@@ -2871,9 +2876,11 @@
         {
           select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
           set = [
-            ["padding" "7px 12px"]
-            ["border-radius" "var(--r-card)"]
-            ["background" "var(--l2)"]
+            ["padding" "var(--omp-user-pad, 7px 12px)"]
+            ["border-radius" "var(--omp-user-radius, var(--r-card))"]
+            ["background" "var(--omp-user-bg, var(--l2))"]
+            ["color" "var(--omp-user-ink, currentColor)"]
+            ["box-shadow" "var(--omp-user-edge, none)"]
           ];
         }
       ]);
@@ -4911,30 +4918,6 @@
       "plugins/ui-menu/snippets/blueprint.css" = "${flakeInputs.tern-ozette}/blueprint.css";
       "plugins/ui-menu/snippets/eink.css" = "${flakeInputs.tern-ozette}/eink.css";
       "plugins/ui-menu/snippets/phosphor.css" = "${flakeInputs.tern-ozette}/phosphor.css";
-      "plugins/ui-menu/snippets/departure-answer-bubbles.css" = "${flakeInputs.tern-ozette}/departure-answer-bubbles.css";
-      "plugins/ui-menu/snippets/automata-answer-bubbles.css" = "${flakeInputs.tern-ozette}/automata-answer-bubbles.css";
-      "plugins/ui-menu/snippets/botanical-answer-bubbles.css" = "${flakeInputs.tern-ozette}/botanical-answer-bubbles.css";
-      "plugins/ui-menu/snippets/braun-answer-bubbles.css" = "${flakeInputs.tern-ozette}/braun-answer-bubbles.css";
-      "plugins/ui-menu/snippets/folio-answer-bubbles.css" = "${flakeInputs.tern-ozette}/folio-answer-bubbles.css";
-      "plugins/ui-menu/snippets/blueprint-answer-bubbles.css" = "${flakeInputs.tern-ozette}/blueprint-answer-bubbles.css";
-      "plugins/ui-menu/snippets/eink-answer-bubbles.css" = "${flakeInputs.tern-ozette}/eink-answer-bubbles.css";
-      "plugins/ui-menu/snippets/phosphor-answer-bubbles.css" = "${flakeInputs.tern-ozette}/phosphor-answer-bubbles.css";
-      "plugins/ui-menu/snippets/departure-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/departure-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/automata-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/automata-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/botanical-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/botanical-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/braun-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/braun-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/folio-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/folio-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/blueprint-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/blueprint-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/eink-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/eink-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/phosphor-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/phosphor-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/departure-bot-you.css" = "${flakeInputs.tern-ozette}/departure-bot-you.css";
-      "plugins/ui-menu/snippets/automata-bot-you.css" = "${flakeInputs.tern-ozette}/automata-bot-you.css";
-      "plugins/ui-menu/snippets/botanical-bot-you.css" = "${flakeInputs.tern-ozette}/botanical-bot-you.css";
-      "plugins/ui-menu/snippets/braun-bot-you.css" = "${flakeInputs.tern-ozette}/braun-bot-you.css";
-      "plugins/ui-menu/snippets/folio-bot-you.css" = "${flakeInputs.tern-ozette}/folio-bot-you.css";
-      "plugins/ui-menu/snippets/blueprint-bot-you.css" = "${flakeInputs.tern-ozette}/blueprint-bot-you.css";
-      "plugins/ui-menu/snippets/eink-bot-you.css" = "${flakeInputs.tern-ozette}/eink-bot-you.css";
-      "plugins/ui-menu/snippets/phosphor-bot-you.css" = "${flakeInputs.tern-ozette}/phosphor-bot-you.css";
       "plugins/ui-menu/window.luau" = ./config/plugins/ui-menu/window.luau;
       "settings.json" = ./config/settings.json;
     }
