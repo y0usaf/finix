@@ -2003,11 +2003,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794368181,
-        "narHash": "sha256-HXadkqG2u3kz3ecABBsnQkobWIwNVNcyEZsZx+koWPw=",
+        "lastModified": 1794368351,
+        "narHash": "sha256-XUlUmjwaTOQfCD7xXr7ZORBQPONcZLlejbHnucOKwXA=",
         "ref": "main",
-        "rev": "f8ae01931d19544cbc365c57c28cc47735649b9f",
-        "revCount": 1,
+        "rev": "a45e21bac6df2118527e39c332c4b9333bce6193",
+        "revCount": 2,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/swarm.git"
       },
