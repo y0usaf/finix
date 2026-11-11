@@ -60,7 +60,7 @@
 
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
-    active = "earlybird";
+    active = "parakeet-unified";
     language = "en";
     provider = "cuda";
     threads = null;

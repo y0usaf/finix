@@ -6,6 +6,7 @@ import {
 	CompactionSummaryMessageComponent,
 	HandoffSummaryMessageComponent,
 } from "@oh-my-pi/pi-tui/chat/compaction-summary-message";
+import { chatTranscriptDisplayPreferences } from "@oh-my-pi/pi-tui/chat/display-preferences";
 import { EvalExecutionComponent } from "@oh-my-pi/pi-tui/chat/eval-execution";
 import { ReadToolGroupComponent } from "@oh-my-pi/pi-tui/chat/read-tool-group";
 import { SkillMessageComponent } from "@oh-my-pi/pi-tui/chat/skill-message";
@@ -276,6 +277,7 @@ function install(state) {
 
 	transcript.nativeBlocks = function () {
 		const blocks = nativeBlocks.call(this);
+		if (chatTranscriptDisplayPreferences.hideToolActivity) return blocks;
 		const shown = [];
 		let pending;
 		let open = [];
