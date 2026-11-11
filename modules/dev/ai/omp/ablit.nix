@@ -102,7 +102,7 @@
         echo "omp-ablit: VRAM used,total after the load: $(mem || echo unknown) MiB; before it: $before" >&2
       fi
 
-      OMP_BOX_PROGRAM=${model.program} omp "$@"
+      OMP_BOX_PROGRAM=${model.program} omp-box "$@"
     '';
   };
 in {

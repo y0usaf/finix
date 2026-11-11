@@ -11,7 +11,8 @@ ssh=(ssh -q -p "$port" -i "$key" -o LogLevel=ERROR -o UserKnownHostsFile=/dev/nu
 
 usage() {
   cat <<'EOF'
-usage: omp-box <command>
+usage: omp-box [OMP ARGS...]   run omp in the box, in this folder
+       omp-box <command>
 
   list [--json]        granted folders
   add PATH [--copy | --ro] [--name NAME]
@@ -158,5 +159,6 @@ case ${1:-} in
   rm) shift; cmd_rm "$@" ;;
   reconcile) cmd_reconcile ;;
   retry) cmd_retry ;;
-  *) usage; exit 2 ;;
+  -h | --help | help) usage ;;
+  *) exec "$boxed" "$@" ;;
 esac

@@ -6,7 +6,7 @@
   user ? "y0usaf",
 }: let
   staticArms = lib.concatMapStringsSep "\n    " (p: ''case "$PWD/" in ${p}/*) allowed=1 ;; esac'') shares;
-  wrapper = pkgs.writeShellScriptBin "omp" ''
+  boxed = pkgs.writeShellScript "omp-in-box" ''
     set -eu
     state="''${XDG_STATE_HOME:-$HOME/.local/state}/omp-box"
     key="$state/ssh-key"
@@ -35,17 +35,17 @@
       -o BatchMode=yes -o SendEnv=TERM $tty ${user}@127.0.0.1 \
       "exec sh -c $(printf %q "$seed cd $(printf %q "$PWD") && exec $(printf %q "''${OMP_BOX_PROGRAM:-${omp}/bin/omp}") $(for a in "$@"; do printf %q "$a"; printf ' '; done)")"
   '';
-  local = pkgs.writeShellScriptBin "omp-local" ''exec ${omp}/bin/omp "$@"'';
+  local = pkgs.writeShellScriptBin "omp" ''exec ${omp}/bin/omp "$@"'';
   cli = pkgs.writeShellApplication {
     name = "omp-box";
     runtimeInputs = [pkgs.coreutils pkgs.util-linux pkgs.openssh pkgs.findutils pkgs.jq];
+    runtimeEnv.boxed = "${boxed}";
     text = builtins.readFile ./omp-box.sh;
   };
 in
   pkgs.symlinkJoin {
     name = "omp-box";
     paths = [
-      wrapper
       cli
       local
     ];
