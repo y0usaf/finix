@@ -2185,11 +2185,17 @@
           select = ".sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
           set = [
             ["align-self" "flex-start"]
-            ["max-width" "var(--omp-reply-max, 82%)"]
-            ["padding" "var(--omp-reply-pad, 10px 16px)"]
-            ["border-radius" "var(--omp-reply-radius, 18px 18px 18px 6px)"]
-            ["background" "var(--omp-reply-bg, var(--l1))"]
-            ["box-shadow" "var(--omp-reply-edge, 0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi))"]
+            ["max-width" "82%"]
+            ["padding" "10px 16px"]
+            ["border-radius" "18px 18px 18px 6px"]
+            ["background" "var(--l1)"]
+            ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
+          ];
+        }
+        {
+          select = ".sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body";
+          set = [
+            ["box-shadow" "0 0 0 1px var(--l1), 0 10px 26px -16px light-dark(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.65)), inset 0 1px 0 var(--glass-hi)"]
           ];
         }
         {
@@ -2203,10 +2209,10 @@
         {
           select = ":root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md, :root:not(#s0):not(#s1) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md";
           set = [
-            ["background" "var(--omp-reply-bg, var(--frost-reply-fill, var(--frost-fill)))"]
+            ["background" "var(--frost-reply-fill, var(--frost-fill))"]
             ["-webkit-backdrop-filter" "var(--frost) !important"]
             ["backdrop-filter" "var(--frost) !important"]
-            ["box-shadow" "var(--omp-reply-edge, var(--frost-edge))"]
+            ["box-shadow" "var(--frost-edge)"]
             ["--t1" "var(--frost-reply-ink, var(--frost-ink))"]
             ["color" "var(--frost-reply-ink, var(--frost-ink))"]
           ];
@@ -2231,12 +2237,12 @@
           select = ":root:not(#ob) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
           set = [
             ["align-self" "flex-start"]
-            ["max-width" "var(--omp-reply-max, min(80%, 560px))"]
+            ["max-width" "min(80%, 560px)"]
             ["margin" "0"]
-            ["padding" "var(--omp-reply-pad, 7px 12px)"]
-            ["border-radius" "var(--omp-reply-radius, var(--r-card))"]
-            ["background" "var(--omp-reply-bg, rgb(from var(--t1) r g b / 6%))"]
-            ["box-shadow" "var(--omp-reply-edge, none)"]
+            ["padding" "7px 12px"]
+            ["border-radius" "var(--r-card)"]
+            ["background" "rgb(from var(--t1) r g b / 6%)"]
+            ["box-shadow" "none"]
           ];
         }
       ]);
@@ -2244,10 +2250,10 @@
         {
           select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
           set = [
-            ["background" "var(--omp-reply-bg, var(--frost-reply-fill, var(--frost-fill)))"]
+            ["background" "var(--frost-reply-fill, var(--frost-fill))"]
             ["-webkit-backdrop-filter" "var(--frost) !important"]
             ["backdrop-filter" "var(--frost) !important"]
-            ["box-shadow" "var(--omp-reply-edge, var(--frost-edge))"]
+            ["box-shadow" "var(--frost-edge)"]
             ["--t1" "var(--frost-reply-ink, var(--frost-ink))"]
             ["color" "var(--frost-reply-ink, var(--frost-ink))"]
           ];
@@ -2844,37 +2850,31 @@
           set = [
             ["align-self" "flex-end"]
             ["width" "auto"]
-            ["max-width" "var(--omp-user-max, min(80%, 560px))"]
-            ["margin" "16px 0"]
+            ["max-width" "min(80%, 560px)"]
+            ["margin" "0 0 0 auto"]
           ];
         }
         {
           select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body";
           set = [
-            ["align-self" "flex-end"]
-            ["align-items" "flex-start"]
+            ["align-self" "stretch"]
+            ["align-items" "flex-end"]
             ["width" "auto"]
-            ["max-width" "100%"]
+            ["max-width" "none"]
             ["margin" "0"]
-            ["padding" "var(--omp-user-pad, 7px 12px)"]
+            ["padding" "0"]
             ["border" "0"]
-            ["border-radius" "var(--omp-user-radius, var(--r-card))"]
-            ["background" "var(--omp-user-bg, var(--l2))"]
-            ["color" "var(--omp-user-ink, currentColor)"]
-            ["box-shadow" "var(--omp-user-edge, none)"]
+            ["border-radius" "0"]
+            ["background" "none"]
+            ["box-shadow" "none"]
           ];
         }
         {
           select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
           set = [
-            ["width" "auto"]
-            ["max-width" "100%"]
-            ["padding" "0"]
-            ["border" "0"]
-            ["border-radius" "0"]
-            ["background" "none"]
-            ["color" "inherit"]
-            ["box-shadow" "none"]
+            ["padding" "7px 12px"]
+            ["border-radius" "var(--r-card)"]
+            ["background" "var(--l2)"]
           ];
         }
       ]);

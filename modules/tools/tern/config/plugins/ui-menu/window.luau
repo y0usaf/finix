@@ -1,5 +1,5 @@
 local Rail = require("./rail")
-tern.css("ui-menu-base", tern.fs.read(tern.plugin.dir .. "/snippets/rail.css") .. tern.fs.read(tern.plugin.dir .. "/snippets/settings.css") .. tern.fs.read(tern.plugin.dir .. "/snippets/bubbles.css"))
+tern.css("ui-menu-base", tern.fs.read(tern.plugin.dir .. "/snippets/rail.css") .. tern.fs.read(tern.plugin.dir .. "/snippets/settings.css"))
 
 local TWEAKS = {
 	{
@@ -369,6 +369,12 @@ local TWEAKS = {
 		id = "grok-bot-you",
 		requires = { "grok", "bot-you" },
 	},
+	{
+		id = "bubbles",
+		label = false,
+		default = false,
+		layer = true,
+	},
 }
 
 for _, t in ipairs(Rail.tweaks) do
@@ -386,6 +392,12 @@ for _, t in ipairs(TWEAKS) do
 	on[t.id] = if type(saved) == "table" and saved[t.id] ~= nil then saved[t.id] == true else t.default ~= false
 	by_id[t.id] = t
 end
+local CARBON = { "departure", "automata", "botanical", "braun", "folio", "blueprint", "eink", "phosphor" }
+local carbon = false
+for _, id in ipairs(CARBON) do
+	carbon = carbon or on[id] == true
+end
+on.bubbles = carbon
 local function save()
 	local diff = {}
 	for _, t in ipairs(TWEAKS) do
@@ -636,14 +648,14 @@ local LOOKS = {
 	{ label = "Ozette", layers = { "ozette", "ozette-motion", "ozette-cmus" } },
 	{ label = "YoRHa", layers = { "yorha" } },
 	{ label = "Grok", layers = { "grok" } },
-	{ label = "Departure", layers = { "departure" } },
-	{ label = "Automata", layers = { "automata" } },
-	{ label = "Botanical", layers = { "botanical" } },
-	{ label = "Braun", layers = { "braun" } },
-	{ label = "Folio", layers = { "folio" } },
-	{ label = "Blueprint", layers = { "blueprint" } },
-	{ label = "Eink", layers = { "eink" } },
-	{ label = "Phosphor", layers = { "phosphor" } },
+	{ label = "Departure", layers = { "departure", "bubbles" } },
+	{ label = "Automata", layers = { "automata", "bubbles" } },
+	{ label = "Botanical", layers = { "botanical", "bubbles" } },
+	{ label = "Braun", layers = { "braun", "bubbles" } },
+	{ label = "Folio", layers = { "folio", "bubbles" } },
+	{ label = "Blueprint", layers = { "blueprint", "bubbles" } },
+	{ label = "Eink", layers = { "eink", "bubbles" } },
+	{ label = "Phosphor", layers = { "phosphor", "bubbles" } },
 	{ label = "Unset all", layers = { "scratch" } },
 	{ label = "None", layers = {} },
 }
