@@ -1960,11 +1960,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1793984238,
-        "narHash": "sha256-prbsAZsyee+S5Ih761yNYPlyJ+SIhYy6Yg0KW0wTJz8=",
+        "lastModified": 1794454639,
+        "narHash": "sha256-lX+Krlq7MKc6VojgkA7rQ4+cikr7KzZnbzD/n0q+y6E=",
         "owner": "y0usaf",
         "repo": "steam-frame-nixos",
-        "rev": "f3a261caaa7c8b79b4e0068bd48b24a1f7e3a174",
+        "rev": "89151d1d3735777177e301dcc74c91f7bb15e400",
         "type": "github"
       },
       "original": {
