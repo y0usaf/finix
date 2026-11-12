@@ -35,22 +35,22 @@
     hash = "sha256-niRJ4Qh0ltjUyrqQfyPgvT942R+lUkebucI6wJy7H9Y=";
   };
 
+  # parakeet-unified rewired for cache-aware streaming (each 320 ms chunk is
+  # encoded once against per-layer caches instead of re-encoding a 5.9 s
+  # window every 80 ms), healed by distilling the original model's offline
+  # transcripts, fp16. Needs a bolo with the token-marker strip (online.rs
+  # TOKEN_MARK).
   streamingModel = pkgs.requireFile {
-    name = "parakeet-unified-en-0.6b-streaming-320ms-fp32";
+    name = "parakeet-unified-en-0.6b-cache-aware-c4-healed-fp16";
     hashMode = "recursive";
-    hash = "sha256-WNF98/EvTK8+Q2rhZVr3cYAt1va8UdkLdxJAilv1LoQ=";
+    hash = "sha256-MXqwOuWmdDfR2sCtid4nrT37/q6WrZLfsUfbr44aW48=";
     message = ''
-      The fp32 streaming export of nvidia/parakeet-unified-en-0.6b is not in
-      the store. In a Python env with nemo_toolkit[asr], onnx, onnxruntime:
+      The healed cache-aware export of nvidia/parakeet-unified-en-0.6b is not
+      in the store. It is built in ~/dev/sandbox/bolo-fast-20261111:
 
-        curl -LO https://huggingface.co/nvidia/parakeet-unified-en-0.6b/resolve/main/parakeet-unified-en-0.6b.nemo
-        curl -LO https://raw.githubusercontent.com/k2-fsa/sherpa-onnx/master/scripts/nemo/parakeet-unified-en-0.6b/export_onnx_streaming.py
-        # The script has no 320ms preset; add it to LATENCY_PRESETS:
-        #   "320ms": {"left": 70, "chunk": 1, "right": 3},
-        python export_onnx_streaming.py --latency 320ms
-        mkdir parakeet-unified-en-0.6b-streaming-320ms-fp32
-        cp encoder.onnx encoder.weights decoder.onnx joiner.onnx tokens.txt parakeet-unified-en-0.6b-streaming-320ms-fp32/
-        nix-store --add-fixed --recursive sha256 parakeet-unified-en-0.6b-streaming-320ms-fp32
+        ./export_stream.py --chunk 4 --ckpt ckpt/heal_A_c4.pt --fp16 \
+          --out release/parakeet-unified-en-0.6b-cache-aware-c4-healed-fp16
+        nix-store --add-fixed --recursive sha256 release/parakeet-unified-en-0.6b-cache-aware-c4-healed-fp16
 
       An export is not byte-reproducible; update the hash to the new path's.
     '';
