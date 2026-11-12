@@ -9,6 +9,7 @@
       finix = builtins.getFlake "path:${inputs.self}";
       config = (frame.inputs.nixpkgs.lib.nixosSystem {
         specialArgs = {
+          generators = finix.inputs.nix-generators.lib;
           inputPackages = {
             bolo = (builtins.getFlake "path:${inputs.bolo}").packages.aarch64-linux;
             mado = (builtins.getFlake "path:${inputs.mado}").packages.aarch64-linux;
