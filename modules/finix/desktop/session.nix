@@ -72,6 +72,7 @@ in {
     '';
     systemPackages = [
       tomoeLogged
+      pkgs.xwayland
       pkgs.xwayland-satellite
     ];
   };
