@@ -30,8 +30,9 @@ in {
     "context.modules" = [
       {
         name = "libpipewire-module-roc-sink";
+        flags = ["nofail"];
         args = {
-          "remote.ip" = "frame-nixos.home";
+          "remote.ip" = "192.168.2.237";
           "remote.source.port" = 10001;
           "remote.repair.port" = 10002;
           "remote.control.port" = 10003;

@@ -3,6 +3,7 @@
     "context.modules" = [
       {
         name = "libpipewire-module-roc-source";
+        flags = ["nofail"];
         args = {
           "local.ip" = "0.0.0.0";
           "local.source.port" = 10001;
