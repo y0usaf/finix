@@ -26,6 +26,31 @@ in {
   finix.persistence.homeServices = ["wireplumber"];
   user.account.extraGroups = ["audio"];
 
+  environment.etc."pipewire/pipewire.conf.d/60-frame-sink.conf".text = builtins.toJSON {
+    "context.modules" = [
+      {
+        name = "libpipewire-module-roc-sink";
+        args = {
+          "remote.ip" = "frame-nixos.home";
+          "remote.source.port" = 10001;
+          "remote.repair.port" = 10002;
+          "remote.control.port" = 10003;
+          "fec.code" = "rs8m";
+          "sink.name" = "frame-audio";
+          "sink.props" = {
+            "node.name" = "frame-audio";
+            "node.description" = "Frame";
+            "audio.rate" = 48000;
+            "priority.session" = 100;
+            "node.pause-on-idle" = false;
+            "node.always-process" = true;
+          };
+          "audio.position" = "[ FL FR ]";
+        };
+      }
+    ];
+  };
+
   environment.etc."pipewire/pipewire.conf.d/99-input-denoising.conf".text = builtins.toJSON {
     "context.modules" = [
       {

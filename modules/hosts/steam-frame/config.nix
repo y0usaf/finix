@@ -8,6 +8,7 @@
   imports = [
     ../../tools/git.nix
     ../../tools/tmux.nix
+    ./audio.nix
     ./bolo.nix
     ./mado.nix
     ./omarchy.nix
