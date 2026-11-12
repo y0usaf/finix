@@ -2218,11 +2218,11 @@
         "nixpkgs": "nixpkgs_12"
       },
       "locked": {
-        "lastModified": 1794458343,
-        "narHash": "sha256-cNyjnX52CjuKe3chhDHSIzgheFB5imb+jTRcvWrYaVU=",
+        "lastModified": 1794488128,
+        "narHash": "sha256-ZN6vulIIrpE9wyi5m4pjcGlXHWBSt7zAFY7QXuJ2v6w=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "8537718b0fe410f3118551b6d0ec4d51be77256a",
+        "rev": "3b351c9bf342ff010fd1a71ec41fbd7bdb73d329",
         "type": "github"
       },
       "original": {
