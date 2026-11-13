@@ -132,11 +132,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794576458,
-        "narHash": "sha256-U+iVWXqGaFCUkq24u8PTk1mxzWce+QbS2FYdGT8Ps+g=",
+        "lastModified": 1794576671,
+        "narHash": "sha256-U3LwzCwlD/Mz9IAFC0LRZw5IbiL9j4SAR8DLDtko9cg=",
         "ref": "refs/heads/main",
-        "rev": "61b7dca4e8b6169c7e60b51a73c9808e207797d6",
-        "revCount": 6,
+        "rev": "07751effd773e0b4bf870681e7e943ea2a5395db",
+        "revCount": 7,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/finit-bootvine"
       },
