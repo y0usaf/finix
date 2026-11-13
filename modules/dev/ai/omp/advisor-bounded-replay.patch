@@ -1,5 +1,5 @@
 diff --git a/packages/coding-agent/src/advisor/runtime.ts b/packages/coding-agent/src/advisor/runtime.ts
-index b2c3ed3..fe7ec19 100644
+index b2c3ed3..809f1d3 100644
 --- a/packages/coding-agent/src/advisor/runtime.ts
 +++ b/packages/coding-agent/src/advisor/runtime.ts
 @@ -35,7 +35,7 @@ export interface AdvisorAgent {
@@ -11,7 +11,7 @@ index b2c3ed3..fe7ec19 100644
  }
  
  export interface AdvisorRuntimeHost {
-@@ -725,6 +725,26 @@ export class AdvisorRuntime {
+@@ -725,6 +725,27 @@ export class AdvisorRuntime {
  		this.#wakeAllWaiters();
  	}
  
@@ -29,7 +29,8 @@ index b2c3ed3..fe7ec19 100644
 +			if (all[i].role === "user") turn = i;
 +		}
 +		if (fit === 0) return;
-+		const start = turn > 0 ? turn : fit;
++		for (let i = fit - 1; turn < 0 && i >= 0; i--) if (all[i].role === "user") turn = i;
++		const start = turn >= 0 ? turn : fit;
 +		this.#deliveredPrefix = all.slice(0, start).map(message => ({ message, fingerprint: fingerprintMessage(message) }));
 +		this.#lastCount = start;
 +		logger.debug("advisor replay bounded to transcript tail", { skipped: start, total: all.length });
@@ -38,7 +39,7 @@ index b2c3ed3..fe7ec19 100644
  	/**
  	 * Re-align the delivered prefix with the primary transcript after an
  	 * in-place rewrite the advisor's own context already covers (the primary's
-@@ -1004,6 +1024,7 @@ export class AdvisorRuntime {
+@@ -1004,6 +1025,7 @@ export class AdvisorRuntime {
  			logger.debug("advisor context reset", { reason: "delivered-prefix-changed", lastCount: this.#lastCount });
  			this.#resetAdvisorContext(true, true);
  		}
