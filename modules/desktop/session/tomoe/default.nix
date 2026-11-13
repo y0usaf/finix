@@ -125,7 +125,7 @@
       parameters = {
         ratios = map mkLispInline ["1/2" "21/32" "11/32"];
         tab-font = config.user.ui.fonts.mainFontName;
-        tab-size = 12;
+        tab-size = 16;
       };
       bindings = [
         (binding ["alt"] "h" "focus-left" "Focus Left Column")

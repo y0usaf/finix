@@ -40,36 +40,76 @@ a scroll would have revealed; at the bottom of the column, the one above it."
   (and (not (member id (getf state :fullscreen))) (not (member id (getf state :floating)))))
 
 (defparameter +deck--tab-gap+ 3
-  "Logical pixels between two tabs in a strip.")
-(defparameter +deck--tab-pad+ 7
-  "Logical pixels of breathing room beside a tab's title.")
+  "Logical pixels between two tab rows in a stack.")
+(defparameter +deck--tab-frame+ 3
+  "Logical pixels of stack face showing around and between the tab rows.")
+(defparameter +deck--tab-pad+ 10
+  "Logical pixels of breathing room either side of a tab's title.")
 (defparameter +deck--tab-radius+ 3
-  "Logical corner radius of a tab.")
+  "Logical corner radius of a tab row.")
 (defparameter +deck--tab-advance+ 0.62
   "Roughly how much of a tab's font size one character covers, for fitting titles.
-Titles are also clipped by their own box, so a wrong estimate costs space, never
-an overflow into the next tab.")
+Titles are also clipped by their row, so a wrong estimate costs space, never an
+overflow past the row's edges.")
 (defparameter +deck--tab-colours+
-  (list :base "#1e1e2e" :accent "#89b4fa" :subtext0 "#a6adc8")
-  "Theme colours for the strips, used until the :THEME publisher carries its own.")
+  (list :base "#1e1e2e" :text "#cdd6f4" :accent "#89b4fa")
+  "Theme colours for the stacks, used until the :THEME publisher carries its own.")
 
 (defun deck--scale (area)
   (let ((output (getf area :output))) (/ (getf output :scale-120 120) 120)))
-(defun deck--tab-height (area)
-  "The strip's height: a title's line plus room above and below it."
-  (let ((size (getf +layout+ :tab-size)))
-    (round (* (deck--scale area) (+ size 12)))))
+(defun deck--tab-row-height (area)
+  "One tab row's height in screen pixels: a title's line plus room above and below."
+  (let ((size (deck--tab-size)))
+    (round (* (deck--scale area) (+ size 20)))))
+(defun deck--tab-stack-height (state area side)
+  "A column's stack height in screen pixels: one row per tab window, the rows
+gapped like the cards they name."
+  (let ((count (length (deck--tab-windows state side))))
+    (when (plusp count)
+      (let ((scale (deck--scale area)))
+        (+ (* count (deck--tab-row-height area))
+           (round (* scale (+ (* 2 +deck--tab-frame+)
+                              (* +deck--tab-gap+ (1- count))))))))))
 (defun deck--tab-font ()
   (or (getf +layout+ :tab-font) "monospace, Bold"))
 (defun deck--tab-size ()
-  (or (getf +layout+ :tab-size) 12))
+  (or (getf +layout+ :tab-size) 16))
 (defun deck--colour (theme key)
   (or (getf theme key) (getf +deck--tab-colours+ key)))
-(defun deck--tint (colour alpha)
-  "COLOUR carrying ALPHA (0-255), when it has no alpha channel of its own."
-  (if (and (stringp colour) (= (length colour) 7))
-      (concatenate 'string colour (format nil "~2,'0X" alpha))
-      colour))
+(defun deck--channel (value)
+  "A linearised 0-1 sRGB channel from VALUE, 0-255."
+  (let ((level (/ value 255.0)))
+    (if (> level 0.04045) (expt (/ (+ level 0.055) 1.055) 2.4) (/ level 12.92))))
+(defun deck--luminance (colour)
+  "Relative luminance of an RRGGBB COLOUR, or NIL when it is not one."
+  (when (and (stringp colour) (= (length colour) 7))
+    (destructuring-bind (red green blue)
+        (loop for i from 1 by 2 repeat 3
+              collect (parse-integer colour :start i :end (+ i 2) :radix 16))
+      (+ (* 0.2126 (deck--channel red))
+         (* 0.7152 (deck--channel green))
+         (* 0.0722 (deck--channel blue))))))
+(defun deck--contrast (one other)
+  "The contrast ratio between two relative luminances."
+  (let ((high (max one other)) (low (min one other))) (/ (+ high 0.05) (+ low 0.05))))
+(defun deck--on (fill one other)
+  "Whichever of ONE and OTHER reads better on FILL."
+  (let ((ground (deck--luminance fill))
+        (first (deck--luminance one))
+        (second (deck--luminance other)))
+    (if (and ground first second (> (deck--contrast ground first) (deck--contrast ground second)))
+        one
+        other)))
+
+(defun deck--mix (one other fraction)
+  "ONE blended FRACTION of the way to OTHER, both RRGGBB."
+  (if (and (stringp one) (stringp other) (= (length one) 7) (= (length other) 7))
+      (format nil "#~{~A~}"
+              (loop for i from 1 by 2 repeat 3
+                    collect (format nil "~2,'0X"
+                                    (round (+ (* (- 1 fraction) (parse-integer one :start i :end (+ i 2) :radix 16))
+                                              (* fraction (parse-integer other :start i :end (+ i 2) :radix 16)))))))
+      one))
 (defun deck--tabs-p (state area)
   "Whether the deck draws tab strips at all: only where it has two tiled columns
 on a wide output, so never in the even grid, beside a fullscreen window, or on an
@@ -109,14 +149,14 @@ to lose something."
         (list (+ x left seam) y (- width seam left) height))))
 
 (defun deck--tab-strip (state area side)
-  "SIDE's strip in screen pixels: the top of the column's own box, where the tabs
-sit and that the column's windows are placed under."
+  "SIDE's stack in screen pixels: the top of the column's own box, where the tab
+rows sit and that the column's windows are placed under."
   (let ((output (getf area :output)))
     (destructuring-bind (x y width height) (deck--column-frame state area side)
       (declare (ignore height))
       (list :output (getf output :name) :ox (getf output :x) :oy (getf output :y)
-            :x x :y y :width width :height (deck--tab-height area)
-            :scale (deck--scale area)))))
+            :x x :y y :width width :height (deck--tab-stack-height state area side)
+            :row (deck--tab-row-height area) :scale (deck--scale area)))))
 
 (defun deck--tab-surface (state theme strip side windows)
   "One strip of tabs for SIDE, or NIL when the strip has nothing to show.
@@ -125,19 +165,17 @@ WINDOWS are the managed windows the tabs name."
          (front (deck--front state side))
          (size (deck--tab-size))
          (font (deck--tab-font))
-         (height (/ (getf strip :height) (getf strip :scale)))
-         (width (/ (getf strip :width) (getf strip :scale)))
-         (count (length tabs))
-         (gap (if (= count 1) 0 +deck--tab-gap+)))
+         (width (- (/ (getf strip :width) (getf strip :scale)) (* 2 +deck--tab-frame+)))
+         (row-height (/ (getf strip :row) (getf strip :scale)))
+         (count (length tabs)))
     (when (plusp count)
-      (let ((tab-width (/ (- width (* gap (1- count))) count))
-            (base (deck--colour theme :base))
-            (accent (deck--colour theme :accent))
-            (subtext (deck--colour theme :subtext0)))
+      (let ((base (deck--colour theme :base))
+            (ink (deck--colour theme :text))
+            (accent (deck--colour theme :accent)))
         (shell-surface (if (eql side :left) :deck-tabs-left :deck-tabs-right)
-                       (ui :row :gap gap :height height
+                       (ui :column :gap +deck--tab-gap+ :padding +deck--tab-frame+
                            :radius +deck--tab-radius+
-                           :background (deck--tint base 230)
+                           :background (deck--mix base ink 0.38)
                            :children
                            (loop for id in tabs
                                  for label = (deck--tab-title
@@ -146,15 +184,15 @@ WINDOWS are the managed windows the tabs name."
                                  collect
                                  (ui :button :key (intern (format nil "TAB-~D" id) :keyword)
                                      :on-click :tab
-                                     :width tab-width :height height
+                                     :width width :height row-height
                                      :radius +deck--tab-radius+
-                                     :align :center
-                                     :background (when active accent)
+                                     :align :center :justify :center
+                                     :background (if active accent base)
                                      :children
-                                     (list (ui :text :text (deck--tab-fit label (- tab-width (* 2 +deck--tab-pad+)))
+                                     (list (ui :text
+                                               :text (deck--tab-fit label (- width (* 2 +deck--tab-pad+)))
                                                :size size :font font
-                                               :color (if active base subtext)
-                                               :width (max 1 (- tab-width (* 2 +deck--tab-pad+))))))))
+                                               :color (if active (deck--on accent base ink) ink))))))
                        :output (getf strip :output)
                        :anchors '(:top :left)
                        :margin (list (round (- (getf strip :y) (getf strip :oy)) (getf strip :scale))
@@ -270,7 +308,7 @@ odd number of columns, or when the seam is no wider than two gaps."
               (front (position (deck--front state side) column))
               (index (position id column))
               (strip (and side (deck--tab-strip-p state area side)
-                          (+ (deck--tab-height area) gaps))))
+                          (+ (deck--tab-stack-height state area side) gaps))))
          (when (and side index front)
            (destructuring-bind (column-x column-y column-width column-height)
                (deck--column-frame state area side)
