@@ -224,8 +224,12 @@ class Driver:
 
     def vt_text(self, number):
         text = self.guest(f"cat /dev/vcs{number} 2>/dev/null")
-        text = re.sub(r"\n?#\s*$", "", text)
-        return text.strip("\r\n")
+        text = text.strip("\r\n")
+        text = re.sub(r"#\s*$", "", text)
+        start = text.find("finix")
+        if start > 0 and "\x1b" in text[:start]:
+            text = text[start:]
+        return text
 
     def active_vt(self):
         text = self.guest("cat /sys/class/tty/tty0/active 2>/dev/null")
@@ -276,13 +280,18 @@ class Driver:
 
         boot_samples = []
         slow_seen = False
-        failure_seen = False
+        done_seen = False
         login_seen = False
         deadline = time.time() + self.args.boot_timeout
         while time.time() < deadline:
             text = self.vt_text(12)
             if text.strip():
                 boot_samples.append(text)
+            if not done_seen and re.search(r"slowpoke\D{0,80}?done", text):
+                done_seen = True
+                self.save_screen("screen-done.txt", text)
+                self.screenshot("boot-done")
+                self.log("captured the finished boot frame")
             if "slowpoke" in text and ("start" in text or "runni" in text or "active" in text):
                 if not slow_seen:
                     slow_seen = True
@@ -309,6 +318,7 @@ class Driver:
         self.check("boot screen shows the failing service", "broken" in final)
         self.check("boot screen gives the failure reason", "status 3" in final, self.first_line(final, "broken"))
         self.check("boot screen shows the slow service duration", re.search(r"[789]\.\d+s", all_boot) is not None)
+        self.check("boot screen kept the finished frame", done_seen)
         self.check("boot screen hides finit status", "Starting " not in final and "Calling '" not in final)
         self.check("login prompt reached on tty1", login_seen)
         if not login_seen:
