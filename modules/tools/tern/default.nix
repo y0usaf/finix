@@ -118,7 +118,6 @@
   pluginPaths = {
     "plugins/cmus.path" = lib.fileContents ./config/plugins/cmus.path;
     "plugins/ekko.path" = "${flakeInputs.tern-ekko}";
-    "plugins/nix-fail.path" = lib.fileContents ./config/plugins/nix-fail.path;
   };
 
   configFiles =
