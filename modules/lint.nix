@@ -235,7 +235,6 @@
       duplicate-definitions.min-leaves = 6;
       flake-input-without-nixpkgs-follows.allow = [
         "cudaterm"
-        "silva"
         "oh-my-fx"
         "oh-my-pi"
         "autolith"

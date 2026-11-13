@@ -46,13 +46,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    grok-bot = {
-      url = "git+ssh://git@github.com/y0usaf/silva-bot.git";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    silva.url = "git+ssh://git@github.com/y0usaf/silva.git";
-
     boar-rs = {
       url = "git+file:///home/y0usaf/dev/developing/boar-rs?rev=00902d9e90c0c7525f5e3b862d48a75fa2ba5184";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -129,18 +122,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    claude-desktop-linux = {
-      url = "github:aaddrick/claude-desktop-debian";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     leverage = {
       url = "git+ssh://git@github.com/y0usaf/leverage-linux.git";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    codex-cli-nix = {
-      url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -1,7 +1,6 @@
 {pkgs, ...}: {
   user.persist.directories = [
     ".barony"
-    ".config/bolt-launcher"
     ".config/unity3d"
     ".local/share/.Wurst encryption"
     ".local/share/.renpy"
@@ -21,7 +20,6 @@
     ".local/share/aspyr-media"
     ".local/share/balatroai"
     ".local/share/binding of isaac rebirth"
-    ".local/share/bolt-launcher"
     ".local/share/com.overboy.noobsarecoming"
     ".local/share/godot/app_userdata"
     ".local/share/hackerpg"

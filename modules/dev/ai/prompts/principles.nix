@@ -37,8 +37,7 @@
     ## Architecture, when a system has these parts
 
     - **Floor first.** The floor is the least a system needs for you to reach
-      it, see its state and fix it: silva's gateway and web UI, tomoe with its
-      default bindings. It starts with nothing above it and never waits on or
+      it, see its state and fix it: tomoe with its default bindings. It starts with nothing above it and never waits on or
       dies with what's above it. Anything that could crash it runs in another
       process, from the same binary if you like; anything that could hang it
       runs there or under a budget. `nix run` with no config reaches the

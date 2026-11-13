@@ -7,7 +7,7 @@
     generator = lib.generators.toINI {};
     value."Desktop Entry" = {
       Name = name;
-      Exec = "${lib.getExe pkgs.chromium} --app=${url} --enable-features=WebContentsForceDark %U";
+      Exec = "${lib.getExe pkgs.ungoogled-chromium} --app=${url} --enable-features=WebContentsForceDark %U";
       Terminal = false;
       Type = "Application";
       Categories = categories;

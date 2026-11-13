@@ -284,7 +284,6 @@
           (local agents (rows (table [
             (table [(field "label" (str "omp")) (field "icon" (str "app-omp")) (field "command" (str "omp"))])
             (table [(field "label" (str "Claude Code")) (field "icon" (str "app-claude")) (field "command" (str "tern acp claude"))])
-            (table [(field "label" (str "Codex")) (field "icon" (str "app-codex")) (field "command" (str "tern acp codex"))])
           ])))
           blank
           (localFunction launch [{cx = WindowCx;} {command = string;}] ({

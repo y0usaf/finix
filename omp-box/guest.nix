@@ -7,7 +7,7 @@
   inherit (ompBox) user;
   home = "/home/${user}";
   # Headless Chromium says HeadlessChrome in its user agent, which shops turn away; claim the same version as Chrome.
-  userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${lib.versions.major pkgs.chromium.version}.0.0.0 Safari/537.36";
+  userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${lib.versions.major pkgs.ungoogled-chromium.version}.0.0.0 Safari/537.36";
   browser = name: {
     profile,
     port,
@@ -35,7 +35,7 @@
       ${pkgs.xvfb}/bin/Xvfb ":$display" -screen 0 1920x1080x24 -nolisten tcp &
       while [ ! -e "/tmp/.X11-unix/X$display" ]; do sleep 0.1; done
       export DISPLAY=":$display"
-      exec ${pkgs.chromium}/bin/chromium --ozone-platform=x11 --user-data-dir="$profile" --password-store=basic \
+      exec ${pkgs.ungoogled-chromium}/bin/ungoogled-chromium --ozone-platform=x11 --user-data-dir="$profile" --password-store=basic \
         --no-first-run --no-default-browser-check --disable-sync --noerrdialogs \
         --remote-debugging-address=127.0.0.1 --remote-debugging-port=${toString port} \
         --window-size=1920,1080 --user-agent=${lib.escapeShellArg userAgent}
@@ -98,7 +98,7 @@ in {
     ];
   };
 
-  environment.systemPackages = [ompBox.omp pkgs.bun pkgs.python3 pkgs.chromium pkgs.git pkgs.ripgrep pkgs.curl pkgs.gh pkgs.jq pkgs.fd pkgs.gnumake pkgs.gcc];
+  environment.systemPackages = [ompBox.omp pkgs.bun pkgs.python3 pkgs.ungoogled-chromium pkgs.git pkgs.ripgrep pkgs.curl pkgs.gh pkgs.jq pkgs.fd pkgs.gnumake pkgs.gcc];
   fonts.packages = [pkgs.noto-fonts-cjk-sans];
   documentation.enable = false;
 

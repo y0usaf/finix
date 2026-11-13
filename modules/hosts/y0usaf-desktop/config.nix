@@ -144,7 +144,6 @@ in {
       aethermancer.enable = true;
       elden-ring.enable = true;
       proton.enable = true;
-      runelite.enable = true;
       aniimo = {
         enable = true;
         mods = ["camera" "movement" "rewards" "catch"];
