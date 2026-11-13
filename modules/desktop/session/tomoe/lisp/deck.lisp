@@ -154,14 +154,10 @@ odd number of columns, or when the seam is no wider than two gaps."
             (let* ((tiles (remove-if-not (lambda (candidate) (deck--manageable-p state candidate)) column))
                    (count (length tiles))
                    (slot (position id tiles))
-                   (rows (ceiling (sqrt count)))
-                   (cols (if (< (* 2 right-width) (* 3 height)) 1 (ceiling count rows)))
-                   (rows (ceiling count cols))
-                   (cell-width (floor (- right-width (* (1- cols) gaps)) cols))
-                   (cell-height (floor (- height (* (1- rows) gaps)) rows)))
-              (list (+ x left-width seam (* (mod slot cols) (+ cell-width gaps)))
-                    (+ y (* (floor slot cols) (+ cell-height gaps)))
-                    cell-width cell-height)))))))))
+                   (cell-height (floor (- height (* (1- count) gaps)) count)))
+              (list (+ x left-width seam)
+                    (+ y (* slot (+ cell-height gaps)))
+                    right-width cell-height)))))))))
 
 (defun deck--places (managed state area)
   "One place effect per managed window: exactly one owner, no duplicates."
