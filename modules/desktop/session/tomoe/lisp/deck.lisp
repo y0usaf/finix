@@ -106,18 +106,6 @@ odd number of columns, or when the seam is no wider than two gaps."
             :x (+ x split gaps) :y (+ (getf area :y) gaps)
             :width inner :height (- (getf area :height) (* 2 gaps))))))
 
-(defun deck--gapless (slot count)
-  "Column, row, columns and rows-in-that-column of SLOT in dwm's gapless grid of
-COUNT tiles: ceil(sqrt COUNT) columns, the leftover tiles going to the last
-columns, so every column is full height and no cell stays empty."
-  (let* ((cols (ceiling (sqrt count)))
-         (base (floor count cols))
-         (short (- cols (mod count cols))))
-    (loop for column from 0
-          for rows = (if (< column short) base (1+ base))
-          if (< slot rows) return (values column slot cols rows)
-          do (decf slot rows))))
-
 (defun deck--box (state area id)
   "Where ID goes, or NIL when it is not in the window set."
   (let* ((gaps (getf +layout+ :gaps))
@@ -163,15 +151,8 @@ columns, so every column is full height and no cell stays empty."
            ((eql side :left)
             (list x (+ y (* (- index front) (+ height gaps))) left-width height))
            (t
-            (let* ((tiles (remove-if-not (lambda (candidate) (deck--manageable-p state candidate)) column))
-                   (slot (position id tiles)))
-              (when slot
-                (multiple-value-bind (col row cols rows) (deck--gapless slot (length tiles))
-                  (let ((cell-width (floor (- right-width (* (1- cols) gaps)) cols))
-                        (cell-height (floor (- height (* (1- rows) gaps)) rows)))
-                    (list (+ x left-width seam (* col (+ cell-width gaps)))
-                          (+ y (* row (+ cell-height gaps)))
-                          cell-width cell-height))))))))))))
+            (list (+ x left-width seam) (+ y (* (- index front) (+ height gaps)))
+                  right-width height))))))))
 
 (defun deck--places (managed state area)
   "One place effect per managed window: exactly one owner, no duplicates."
