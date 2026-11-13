@@ -1,0 +1,48 @@
+diff --git a/packages/coding-agent/src/advisor/runtime.ts b/packages/coding-agent/src/advisor/runtime.ts
+index b2c3ed3..fe7ec19 100644
+--- a/packages/coding-agent/src/advisor/runtime.ts
++++ b/packages/coding-agent/src/advisor/runtime.ts
+@@ -35,7 +35,7 @@ export interface AdvisorAgent {
+ 	 * turn `Agent.#runLoop` records on its internal state.
+ 	 */
+ 	rollbackTo?(count: number): void;
+-	readonly state: { messages: AgentMessage[]; error?: string };
++	readonly state: { messages: AgentMessage[]; error?: string; model?: { contextWindow?: number } };
+ }
+ 
+ export interface AdvisorRuntimeHost {
+@@ -725,6 +725,26 @@ export class AdvisorRuntime {
+ 		this.#wakeAllWaiters();
+ 	}
+ 
++	#skipToReplayTail(all: AgentMessage[]): void {
++		const window = this.agent.state.model?.contextWindow ?? 0;
++		if (window <= 0) return;
++		const budget = window * 2;
++		let size = 0;
++		let fit = all.length;
++		let turn = -1;
++		for (let i = all.length - 1; i >= 0; i--) {
++			size += JSON.stringify(all[i]).length;
++			if (size > budget) break;
++			fit = i;
++			if (all[i].role === "user") turn = i;
++		}
++		if (fit === 0) return;
++		const start = turn > 0 ? turn : fit;
++		this.#deliveredPrefix = all.slice(0, start).map(message => ({ message, fingerprint: fingerprintMessage(message) }));
++		this.#lastCount = start;
++		logger.debug("advisor replay bounded to transcript tail", { skipped: start, total: all.length });
++	}
++
+ 	/**
+ 	 * Re-align the delivered prefix with the primary transcript after an
+ 	 * in-place rewrite the advisor's own context already covers (the primary's
+@@ -1004,6 +1024,7 @@ export class AdvisorRuntime {
+ 			logger.debug("advisor context reset", { reason: "delivered-prefix-changed", lastCount: this.#lastCount });
+ 			this.#resetAdvisorContext(true, true);
+ 		}
++		if (this.#lastCount === 0) this.#skipToReplayTail(all);
+ 		const rawMessages = all.slice(this.#lastCount);
+ 		for (let i = this.#lastCount; i < all.length; i++) {
+ 			const message = all[i];
