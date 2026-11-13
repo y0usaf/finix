@@ -140,6 +140,11 @@ class Memory {
 	readonly model;
 	dirty = true;
 
+	/** Nothing to ingest, nothing merging, no retry waiting, nothing unsaved. */
+	quiet(): boolean {
+		return this.busy.size === 0 && this.pending.length === 0 && this.later.size === 0 && !this.dirty;
+	}
+
 	constructor() {
 		const luna = getBundledModels(PROVIDER).find((model) => model.id === MODEL);
 		if (luna === undefined) throw new Error(`no bundled model ${PROVIDER}/${MODEL}`);
@@ -363,7 +368,16 @@ export default function optchatd(pi: ExtensionAPI): void {
 			fs.writeFileSync(LOCK, String(process.pid));
 			const memory = new Memory();
 			memory.load();
-			ctx.setInterval(() => memory.tick(), 1000);
+			const idle = Number(process.env.OPTCHAT_IDLE_MS ?? 120_000);
+			let quiet = 0;
+			ctx.setInterval(() => {
+				memory.tick();
+				if (idle <= 0) return;
+				quiet = memory.quiet() ? quiet + 1 : 0;
+				if (quiet * 1000 < idle) return;
+				report(`nothing to summarize for ${idle / 1000}s, stopping`);
+				process.exit(0);
+			}, 1000);
 			report(`serving ${memory.tree.msgs.length} messages from ${DIR}`);
 		} catch (error) {
 			report(`cannot start: ${describe(error)}`);
