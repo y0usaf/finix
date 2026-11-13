@@ -64,7 +64,7 @@
       fi
 
       # 9>&- so the browser does not hold the lock above for as long as it runs.
-      setsid ${lib.getExe pkgs.chromium} \
+      setsid ${lib.getExe pkgs.ungoogled-chromium} \
         --user-data-dir="$profile" \
         --remote-debugging-port="$port" \
         --class=${appId} \
@@ -101,7 +101,7 @@
     if curl -fsS -m 1 "http://127.0.0.1:$port/json/version" >/dev/null 2>&1; then
       # Already up: Chromium hands this command line to the running instance through the profile's
       # singleton lock, which opens a window there, and this process exits.
-      exec ${lib.getExe pkgs.chromium} --user-data-dir="$profile" --class=${appId} "$@"
+      exec ${lib.getExe pkgs.ungoogled-chromium} --user-data-dir="$profile" --class=${appId} "$@"
     fi
     exec ${lib.getExe ensure} "$@"
   '';
