@@ -146,13 +146,11 @@ odd number of columns, or when the seam is no wider than two gaps."
               (column (deck--column state side))
               (front (position (deck--front state side) column))
               (index (position id column)))
-         (cond
-           ((not (and side index front)) nil)
-           ((eql side :left)
-            (list x (+ y (* (- index front) (+ height gaps))) left-width height))
-           (t
-            (list (+ x left-width seam) (+ y (* (- index front) (+ height gaps)))
-                  right-width height))))))))
+         (when (and side index front)
+           (list (if (eql side :left) x (+ x left-width seam))
+                 (+ y (* (- index front) (+ height gaps)))
+                 (if (eql side :left) left-width right-width)
+                 height)))))))
 
 (defun deck--places (managed state area)
   "One place effect per managed window: exactly one owner, no duplicates."
@@ -187,29 +185,6 @@ odd number of columns, or when the seam is no wider than two gaps."
              (target (nth (mod (+ index direction) (length column)) column)))
         (deck--adopt-front state side target)
         (deck--focus-window state target)))))
-
-(defun deck--cycle-master (state direction)
-  "Rotate the tiled windows through the master: the next stack window takes the
-left, the old master goes to the far end of the stack, so repeating visits all."
-  (let* ((tiled (lambda (side) (remove-if-not (lambda (id) (deck--manageable-p state id))
-                                              (deck--column state side))))
-         (ring (append (funcall tiled :left) (funcall tiled :right)))
-         (count (length ring)))
-    (when (> count 1)
-      (let* ((shift (mod direction count))
-             (turned (append (nthcdr shift ring) (subseq ring 0 shift)))
-             (master (first turned))
-             (stack-front (deck--front state :right))
-             (slots (remove-if-not (lambda (id) (member id ring)) (deck--windows state))))
-        (setf (getf state :windows)
-              (mapcar (lambda (id) (if (member id ring) (nth (position id slots) turned) id))
-                      (deck--windows state)))
-        (dolist (id ring)
-          (setf (cdr (assoc id (getf state :columns))) (if (eql id master) :left :right)))
-        (deck--adopt-front state :left master)
-        (deck--adopt-front state :right (if (eql stack-front master) (second turned) stack-front))
-        (deck--focus-window state master)))
-    state))
 
 (defun deck--reorder (state direction)
   "Swap the current window with its neighbour in its own column's order."
@@ -267,25 +242,6 @@ left, the old master goes to the far end of the stack, so repeating visits all."
       (deck--adopt-front state side id))
     state))
 
-(defun deck--master (state)
-  "Keep one tiled window on the left: its front stays master, every other tiled
-left window joins the stack, and an empty left takes a stack window, other than
-the stack's front when it can, so sending the master right swaps the two."
-  (let* ((left (remove-if-not (lambda (id) (deck--manageable-p state id)) (deck--column state :left)))
-         (front (deck--front state :left))
-         (master (if (member front left) front (first left))))
-    (dolist (id (remove master left))
-      (setf (cdr (assoc id (getf state :columns))) :right))
-    (unless master
-      (let ((stack (remove-if-not (lambda (id) (deck--manageable-p state id)) (deck--column state :right)))
-            (stack-front (cdr (assoc :right (deck--fronts state)))))
-        (setf master (or (find-if (lambda (id) (not (eql id stack-front))) stack) (first stack)))
-        (when master
-          (setf (cdr (assoc master (getf state :columns))) :left)
-          (when (eql master stack-front)
-            (deck--adopt-front state :right nil)))))
-    (deck--adopt-front state :left master)))
-
 (defun deck--set-fullscreen (state id on)
   (setf (getf state :fullscreen) (remove id (getf state :fullscreen)))
   (when on
@@ -320,14 +276,8 @@ the stack's front when it can, so sending the master right swaps the two."
      (deck--focus-window state (or (deck--front state :left) (deck--current state))))
     ((equal command "focus-right")
      (deck--focus-window state (or (deck--front state :right) (deck--current state))))
-    ((equal command "scroll-down")
-     (if (eql (deck--side-of state (deck--current state)) :left)
-         (deck--cycle-master state 1)
-         (deck--rotate state 1)))
-    ((equal command "scroll-up")
-     (if (eql (deck--side-of state (deck--current state)) :left)
-         (deck--cycle-master state -1)
-         (deck--rotate state -1)))
+    ((equal command "scroll-down") (deck--rotate state 1))
+    ((equal command "scroll-up") (deck--rotate state -1))
     ((equal command "next") (deck--cycle state 1))
     ((equal command "previous") (deck--cycle state -1))
     ((equal command "swap-columns") (deck--swap-columns state))
@@ -429,7 +379,6 @@ the stack's front when it can, so sending the master right swaps the two."
           (when (and (deck--manageable-p state id) (deck--side-of state id))
             (deck--adopt-front state (deck--side-of state id) id))
           (deck--focus-window state id))))
-    (deck--master state)
     (let ((current (deck--current state)))
       (values state
               (append (mapcar (lambda (binding) (apply #'bind-key binding))
