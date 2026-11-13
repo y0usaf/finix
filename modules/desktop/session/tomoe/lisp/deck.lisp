@@ -146,11 +146,20 @@ odd number of columns, or when the seam is no wider than two gaps."
               (column (deck--column state side))
               (front (position (deck--front state side) column))
               (index (position id column)))
-         (when (and side index front)
-           (list (if (eql side :left) x (+ x left-width seam))
-                 (+ y (* (- index front) (+ height gaps)))
-                 (if (eql side :left) left-width right-width)
-                 height)))))))
+         (cond
+           ((not (and side index front)) nil)
+           ((eql side :left)
+            (list x (+ y (* (- index front) (+ height gaps))) left-width height))
+           (t
+            (let* ((count (length column))
+                   (rows (ceiling (sqrt count)))
+                   (cols (if (< (* 2 right-width) (* 3 height)) 1 (ceiling count rows)))
+                   (rows (ceiling count cols))
+                   (cell-width (floor (- right-width (* (1- cols) gaps)) cols))
+                   (cell-height (floor (- height (* (1- rows) gaps)) rows)))
+              (list (+ x left-width seam (* (mod index cols) (+ cell-width gaps)))
+                    (+ y (* (floor index cols) (+ cell-height gaps)))
+                    cell-width cell-height)))))))))
 
 (defun deck--places (managed state area)
   "One place effect per managed window: exactly one owner, no duplicates."

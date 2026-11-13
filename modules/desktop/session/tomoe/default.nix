@@ -122,7 +122,7 @@
   layouts = {
     deck = {
       file = ./lisp/deck.lisp;
-      parameters.ratios = map mkLispInline ["1/2" "21/32" "11/32"];
+      parameters.ratios = map mkLispInline ["1/2" "21/32"];
       bindings = [
         (binding ["alt"] "h" "focus-left" "Focus Left Column")
         (binding ["alt"] "l" "focus-right" "Focus Right Column")
@@ -135,7 +135,7 @@
         (binding ["alt"] "bracketleft" "to-left" "Move Window to Left Column")
         (binding ["alt"] "bracketright" "to-right" "Move Window to Right Column")
         (binding ["alt"] "o" "grid" "Toggle Even Grid")
-        (binding ["alt"] "r" "ratio" "Cycle Column Split (16:9+16:9 / 21:9+11:9 / 11:9+21:9)")
+        (binding ["alt"] "r" "ratio" "Toggle Main Width (16:9 / 21:9)")
         (binding ["alt"] "f" "fullscreen" "Toggle Fullscreen")
         (binding ["super"] "space" "floating" "Toggle Floating")
         (binding ["super"] "Tab" "next" null)
