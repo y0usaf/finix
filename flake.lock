@@ -242,11 +242,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794580618,
-        "narHash": "sha256-jAFkpfiX6dFHWoctJThO+PIoga9M9EeolnPxCOFaSqk=",
+        "lastModified": 1794581844,
+        "narHash": "sha256-zPiDI9YzeTg1Ndbsp4WCozgqK+jy10A8l5HvcrP+gKM=",
         "owner": "y0usaf",
         "repo": "cleanker",
-        "rev": "e05bce3a32eed1080de48da3d2f593863f20942e",
+        "rev": "9ed6c2040e61790067d9977c9bfea23230180d80",
         "type": "github"
       },
       "original": {
