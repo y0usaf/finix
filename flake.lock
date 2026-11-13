@@ -1011,26 +1011,6 @@
         "type": "github"
       }
     },
-    "nacre": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1793132978,
-        "narHash": "sha256-w/wNR36c+8dR4tJSU2R8Www67uMgyfK0O6Suu47/7WM=",
-        "ref": "refs/heads/main",
-        "rev": "e48dd62a8e7b043268a44e2087a0adda26f8cc2d",
-        "revCount": 337,
-        "type": "git",
-        "url": "ssh://git@github.com/y0usaf/nacre.git"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/y0usaf/nacre.git"
-      }
-    },
     "nh": {
       "inputs": {
         "nixpkgs": [
@@ -1813,7 +1793,6 @@
         "manzil": "manzil",
         "microvm": "microvm",
         "monstar": "monstar",
-        "nacre": "nacre",
         "nh": "nh",
         "nix-generators": "nix-generators",
         "nix-on-droid": "nix-on-droid",
@@ -1838,7 +1817,6 @@
         "silva": "silva",
         "steam-frame-nixos": "steam-frame-nixos",
         "strictix": "strictix",
-        "t3-tern": "t3-tern",
         "tern-ekko": "tern-ekko",
         "tern-ozette": "tern-ozette",
         "tern-scratch": "tern-scratch",
@@ -2089,26 +2067,6 @@
         "owner": "nix-systems",
         "repo": "x86_64-darwin",
         "type": "github"
-      }
-    },
-    "t3-tern": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1794345795,
-        "narHash": "sha256-oE3X5hYXCSM85pImkj8F6MvViYrXXRNcrWLcCNva4rc=",
-        "ref": "refs/heads/main",
-        "rev": "2638b994195024fb6077dd82d943ea0d34dd69ac",
-        "revCount": 2,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/t3-tern"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/t3-tern"
       }
     },
     "terminal-browser": {

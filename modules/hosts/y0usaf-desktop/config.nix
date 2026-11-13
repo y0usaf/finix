@@ -62,7 +62,6 @@ in {
           "pids.max" = 1048576;
         };
       };
-      nacre.cgroup.system."cpu.max" = cpuThreads / 4 * perThread;
     };
   };
 
@@ -138,11 +137,6 @@ in {
     ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram" "frame"];
     ui.tomoe.bar.style = "spine";
     ui.tomoe.bar.scale = 1.5;
-
-    dev.nacre = {
-      enable = true;
-      app.enable = true;
-    };
 
     gaming = {
       p4g.enable = true;

@@ -68,11 +68,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nacre = {
-      url = "git+ssh://git@github.com/y0usaf/nacre.git";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     omp-bot = {
       url = "git+file:///home/y0usaf/dev/developing/omp-bot";
       flake = false;
@@ -85,11 +80,6 @@
 
     dsh-tern = {
       url = "git+file:///home/y0usaf/dev/developing/dsh-tern";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    t3-tern = {
-      url = "git+file:///home/y0usaf/dev/developing/t3-tern";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
