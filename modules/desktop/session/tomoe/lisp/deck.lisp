@@ -106,6 +106,18 @@ odd number of columns, or when the seam is no wider than two gaps."
             :x (+ x split gaps) :y (+ (getf area :y) gaps)
             :width inner :height (- (getf area :height) (* 2 gaps))))))
 
+(defun deck--gapless (slot count)
+  "Column, row, columns and rows-in-that-column of SLOT in dwm's gapless grid of
+COUNT tiles: ceil(sqrt COUNT) columns, the leftover tiles going to the last
+columns, so every column is full height and no cell stays empty."
+  (let* ((cols (ceiling (sqrt count)))
+         (base (floor count cols))
+         (short (- cols (mod count cols))))
+    (loop for column from 0
+          for rows = (if (< column short) base (1+ base))
+          if (< slot rows) return (values column slot cols rows)
+          do (decf slot rows))))
+
 (defun deck--box (state area id)
   "Where ID goes, or NIL when it is not in the window set."
   (let* ((gaps (getf +layout+ :gaps))
@@ -152,12 +164,14 @@ odd number of columns, or when the seam is no wider than two gaps."
             (list x (+ y (* (- index front) (+ height gaps))) left-width height))
            (t
             (let* ((tiles (remove-if-not (lambda (candidate) (deck--manageable-p state candidate)) column))
-                   (count (length tiles))
-                   (slot (position id tiles))
-                   (cell-height (floor (- height (* (1- count) gaps)) count)))
-              (list (+ x left-width seam)
-                    (+ y (* slot (+ cell-height gaps)))
-                    right-width cell-height)))))))))
+                   (slot (position id tiles)))
+              (when slot
+                (multiple-value-bind (col row cols rows) (deck--gapless slot (length tiles))
+                  (let ((cell-width (floor (- right-width (* (1- cols) gaps)) cols))
+                        (cell-height (floor (- height (* (1- rows) gaps)) rows)))
+                    (list (+ x left-width seam (* col (+ cell-width gaps)))
+                          (+ y (* row (+ cell-height gaps)))
+                          cell-width cell-height))))))))))))
 
 (defun deck--places (managed state area)
   "One place effect per managed window: exactly one owner, no duplicates."
@@ -248,6 +262,25 @@ odd number of columns, or when the seam is no wider than two gaps."
       (setf (cdr (assoc id (getf state :columns))) side)
       (deck--adopt-front state side id))
     state))
+
+(defun deck--master (state)
+  "Keep one tiled window on the left: its front stays master, every other tiled
+left window joins the stack, and an empty left takes a stack window, other than
+the stack's front when it can, so sending the master right swaps the two."
+  (let* ((left (remove-if-not (lambda (id) (deck--manageable-p state id)) (deck--column state :left)))
+         (front (deck--front state :left))
+         (master (if (member front left) front (first left))))
+    (dolist (id (remove master left))
+      (setf (cdr (assoc id (getf state :columns))) :right))
+    (unless master
+      (let ((stack (remove-if-not (lambda (id) (deck--manageable-p state id)) (deck--column state :right)))
+            (stack-front (cdr (assoc :right (deck--fronts state)))))
+        (setf master (or (find-if (lambda (id) (not (eql id stack-front))) stack) (first stack)))
+        (when master
+          (setf (cdr (assoc master (getf state :columns))) :left)
+          (when (eql master stack-front)
+            (deck--adopt-front state :right nil)))))
+    (deck--adopt-front state :left master)))
 
 (defun deck--set-fullscreen (state id on)
   (setf (getf state :fullscreen) (remove id (getf state :fullscreen)))
@@ -386,6 +419,7 @@ odd number of columns, or when the seam is no wider than two gaps."
           (when (and (deck--manageable-p state id) (deck--side-of state id))
             (deck--adopt-front state (deck--side-of state id) id))
           (deck--focus-window state id))))
+    (deck--master state)
     (let ((current (deck--current state)))
       (values state
               (append (mapcar (lambda (binding) (apply #'bind-key binding))
