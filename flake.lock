@@ -138,11 +138,11 @@
         "rev": "07751effd773e0b4bf870681e7e943ea2a5395db",
         "revCount": 7,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/finit-bootvine"
+        "url": "ssh://git@github.com/y0usaf/finit-bootvine.git"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/finit-bootvine"
+        "url": "ssh://git@github.com/y0usaf/finit-bootvine.git"
       }
     },
     "bun2nix": {

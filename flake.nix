@@ -266,7 +266,7 @@
     finix.url = "github:finix-community/finix";
 
     bootvine = {
-      url = "git+file:///home/y0usaf/dev/developing/finit-bootvine";
+      url = "git+ssh://git@github.com/y0usaf/finit-bootvine.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
