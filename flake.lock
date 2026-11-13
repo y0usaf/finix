@@ -937,11 +937,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1794463515,
-        "narHash": "sha256-JxWx6ZYBh6USlg+8CDVz5zl9pL+N1v4+9aNGHObfFCk=",
+        "lastModified": 1794593092,
+        "narHash": "sha256-tnHcSgB6E7kTnfd3f5KiA0QNRllu2Q5OCi4OS52xEHY=",
         "ref": "refs/heads/main",
-        "rev": "7ec7326e6710993da6c6e5df20adfa2f907b33a6",
-        "revCount": 110,
+        "rev": "6129167c0cd5c4d3d336267ec7d1d20b9b0528b4",
+        "revCount": 112,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/mado.git"
       },
@@ -2239,11 +2239,11 @@
         "nixpkgs": "nixpkgs_12"
       },
       "locked": {
-        "lastModified": 1794541882,
-        "narHash": "sha256-uglgTyHPLPOKoexgiJ8du2ZJHma4WDKSV/ZOqzZSsLk=",
+        "lastModified": 1794594067,
+        "narHash": "sha256-t2vaUfBlIRJWq/sI5397av8cfWY2OUC4k36mfBdWceg=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "2c78d256876b5fd24d877d951b8b64dbb9c4639d",
+        "rev": "d30461f75d65e51d99fc491093454f4e505b44b3",
         "type": "github"
       },
       "original": {

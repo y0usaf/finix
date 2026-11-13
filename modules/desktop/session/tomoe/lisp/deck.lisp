@@ -16,6 +16,24 @@
   (remove-if-not (lambda (id) (eql (deck--side-of state id) side)) (deck--windows state)))
 (defparameter +deck--column-commands+
   '("focus-left" "focus-right" "swap-columns" "to-left" "to-right" "ratio"))
+
+(defparameter +deck-commands+
+  (list (define-command "focus-left" :description "Focus the left column's front window.")
+        (define-command "focus-right" :description "Focus the right column's front window.")
+        (define-command "scroll-down" :description "Bring the next window in the column forward.")
+        (define-command "scroll-up" :description "Bring the previous window in the column forward.")
+        (define-command "swap-columns" :description "Swap the left and right columns.")
+        (define-command "move-down" :description "Move the focused window down its column.")
+        (define-command "move-up" :description "Move the focused window up its column.")
+        (define-command "to-left" :description "Send the focused window to the left column.")
+        (define-command "to-right" :description "Send the focused window to the right column.")
+        (define-command "grid" :description "Toggle the even tiling grid.")
+        (define-command "ratio" :description "Cycle the column split between 16:9, 21:9 and 11:9.")
+        (define-command "floating" :description "Toggle the focused window between floating and tiled.")
+        (define-command "fullscreen" :description "Toggle the focused window between fullscreen and tiled.")
+        (define-command "next" :description "Cycle the deck to the next window.")
+        (define-command "previous" :description "Cycle the deck to the previous window.")
+        (define-command "terminal" :description "Focus the terminal, or start one when none is open.")))
 (defun deck--narrow-p (area)
   (let ((output (and area (getf area :output))))
     (and output (< (* 9 (getf output :width)) (* 21 (getf output :height))))))
@@ -489,7 +507,7 @@ is the tab's hit key, TAB-ID."
                   (getf state :fullscreen))))
 
 (define-extension "deck"
-    (:reads (:windows :rules :data :outputs :workareas :layout :focus :key :button :pointer :request
+    (:reads (:windows :rules :data :outputs :workareas :layout :focus :command :button :pointer :request
              :settings :ui)
      :state (deck--state) :admission t)
     (snapshot state event)
@@ -499,7 +517,8 @@ is the tab's hit key, TAB-ID."
          (focused (previous-context snapshot :focus))
          (area (deck--area snapshot))
          (type (getf event :type))
-         (command (and (eq type :key) (equal (getf event :owner) "deck") (getf event :command)))
+         (command (and (eq type :command) (equal (getf event :owner) "deck")
+                       (getf event :name)))
          (terminal (and (equal command "terminal") (policy--terminal windows))))
     (when (eq type :unmap)
       (let ((gone (getf event :id)))
@@ -577,6 +596,7 @@ is the tab's hit key, TAB-ID."
                               when strip
                                 collect (deck--tab-surface state theme strip side windows)))
                       (deck--raises state current)
+                      +deck-commands+
                       (list (focus current :raise nil)))
               (when (and (equal command "terminal") (null terminal))
                 (list (apply #'launch (policy--launch "terminal"))))))))

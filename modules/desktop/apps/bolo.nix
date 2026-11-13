@@ -206,12 +206,15 @@ in {
     };
 
     user.ui.tomoe.extraConfig = ''
-      (define-extension "bolo" (:reads (:key)) (snapshot state event)
+      (define-extension "bolo" (:reads (:command)) (snapshot state event)
         (declare (ignore snapshot))
         (values state
-                (list (bind-key (list :alt) "m"
-                                :press :description "Toggle speech-to-text (bolo)"))
-                (when (and (eq (getf event :type) :key) (equal (getf event :owner) "bolo"))
+                (list (define-command "toggle-bolo"
+                        :description "Toggle speech-to-text (bolo).")
+                      (bind-key (list :alt) "m" "toggle-bolo"
+                                :description "Toggle speech-to-text (bolo)"))
+                (when (and (eq (getf event :type) :command)
+                           (equal (getf event :name) "toggle-bolo"))
                   (list (launch "${bolo}/bin/bolo")))))
 
       ;; The daemon writes its state file on every transition; this watches it

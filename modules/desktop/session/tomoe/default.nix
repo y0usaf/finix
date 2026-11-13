@@ -115,9 +115,95 @@
   inherit (cfg) bar;
 
   keyword = name: mkLispInline ":${name}";
+
+  # A binding names a registered command; a command that starts a program uses
+  # the built-in launch command with the argv declared for it.
+  launchCommands = {
+    browser = [defaults.browser];
+    discord = ["discord"];
+    steam = ["steam"];
+    obs = ["obs"];
+    launcher = ["sh" "-c" defaults.launcher];
+    files = ["pcmanfm"];
+    volume-up = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"];
+    volume-down = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"];
+    volume-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
+    mic-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"];
+  };
+
+  commandCall = command:
+    if launchCommands ? ${command}
+    then ["launch" (keyword "argv") launchCommands.${command}]
+    else command;
+
   binding = modifiers: key: command: description:
-    [(map keyword modifiers) key (keyword command)]
+    [(map keyword modifiers) key (commandCall command)]
     ++ lib.optionals (description != null) [(keyword "description") description];
+
+  userCommands = [
+    {
+      name = "power";
+      description = "Blank or restore every output.";
+    }
+    {
+      name = "screenshot";
+      description = "Screenshot a region of an output.";
+    }
+    {
+      name = "screenshot-screen";
+      description = "Screenshot a whole output.";
+    }
+    {
+      name = "play-pause";
+      description = "Pause or resume the playing media.";
+    }
+    {
+      name = "track-next";
+      description = "Play the next track.";
+    }
+    {
+      name = "track-prev";
+      description = "Play the previous track.";
+    }
+    {
+      name = "brightness-up";
+      description = "Raise the backlight by five percent.";
+    }
+    {
+      name = "brightness-down";
+      description = "Lower the backlight by five percent.";
+    }
+  ];
+
+  userCommandsLisp =
+    "(defparameter +user-commands+\n  (list "
+    + lib.concatStringsSep "\n        " (
+      map (entry: "(define-command \"${entry.name}\" :description \"${entry.description}\")") userCommands
+    )
+    + "))\n";
+
+  userLisp =
+    "(in-package #:tomoe-user)\n\n"
+    + userCommandsLisp
+    + "\n"
+    + ''
+      (define-extension "user" (:reads (:command :focus) :state nil) (snapshot state event)
+        (declare (ignore state snapshot))
+        (let ((command (and (eq (getf event :type) :command) (getf event :name))))
+          (values nil
+                  (append (mapcar (lambda (binding) (apply #'bind-key binding)) +policy-bindings+)
+                          +user-commands+)
+                  (cond
+                    ((null command) nil)
+                    ((equal command "power") (list (output-power :toggle)))
+                    ((equal command "screenshot") (list (screenshot)))
+                    ((equal command "screenshot-screen") (list (screenshot :screen)))
+                    ((equal command "play-pause") (list (media-control :play-pause)))
+                    ((equal command "track-next") (list (media-control :next)))
+                    ((equal command "track-prev") (list (media-control :previous)))
+                    ((equal command "brightness-up") (list (adjust-brightness 5)))
+                    ((equal command "brightness-down") (list (adjust-brightness -5)))))))
+    '';
 
   layouts = {
     deck = {
@@ -178,7 +264,7 @@
       (binding ["alt"] "9" "power" "Blank/Restore All Outputs")
       (binding ["super"] "r" "launcher" "Run an Application")
       (binding ["alt"] "e" "files" "File Manager")
-      (binding ["alt"] "q" "close" "Close Window")
+      (binding ["alt"] "q" "close-window" "Close Window")
       (binding ["alt" "shift"] "e" "quit" null)
       (binding ["alt"] "g" "screenshot" "Screenshot")
       (binding ["alt" "shift"] "g" "screenshot-screen" "Screenshot Screen")
@@ -195,17 +281,10 @@
       XF86MonBrightnessDown = "brightness-down";
     };
 
-  launches = lib.mapAttrsToList (command: argv: [command argv]) {
-    browser = [defaults.browser];
-    inherit (lib.genAttrs ["discord" "steam" "obs"] (name: [name])) discord steam obs;
+  # TERMINAL is not bound to a key: the deck's terminal command starts it.
+  launches = lib.mapAttrsToList (command: argv: [command argv]) (launchCommands // {
     terminal = ["tern"];
-    launcher = ["sh" "-c" defaults.launcher];
-    files = ["pcmanfm"];
-    volume-up = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"];
-    volume-down = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"];
-    volume-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
-    mic-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"];
-  };
+  });
 
   palette = "${config.user.homeDirectory}/.cache/theme/gtk.css";
 
@@ -2898,10 +2977,10 @@
       gap = 24;
       border = 4;
     };
-    bind = binding ["alt" "shift"] "b" "menu" "Choose Wallpaper";
+    bind = binding ["alt" "shift"] "b" "shader-wallpaper-menu" "Choose Wallpaper";
   };
 
-  peekParameters.bind = binding ["alt"] "p" "toggle" "Peek at the Desktop";
+  peekParameters.bind = binding ["alt"] "p" "toggle-peek" "Peek at the Desktop";
 
   kenneyInterfaceSounds = pkgs.fetchzip {
     name = "kenney-interface-sounds";
@@ -3338,112 +3417,7 @@ in {
       ]))
       generators.lisp))
     (builtins.readFile layout.file)
-    (generators.lisp.render (({
-        adjust-brightness,
-        and,
-        apply,
-        bind-key,
-        blank,
-        close-window,
-        cond,
-        constant,
-        context,
-        declare,
-        define-extension,
-        eq,
-        equal,
-        function,
-        getf,
-        ignore,
-        in-package,
-        kw,
-        lambda,
-        launch,
-        let',
-        list,
-        mapcar,
-        media-control,
-        nil,
-        null',
-        output-power,
-        policy--launch,
-        policy-bindings,
-        quit,
-        rows,
-        screenshot,
-        str,
-        t,
-        uninterned,
-        values,
-        when,
-        ...
-      }: [
-        [in-package (uninterned "tomoe-user")]
-        blank
-        ({
-          snapshot,
-          state,
-          event,
-        }:
-          rows [
-            [define-extension (str "user") [(kw "reads") [(kw "key") (kw "focus")] (kw "state") nil] [snapshot state event]]
-            [[declare [ignore state]]]
-            ({
-              command,
-              focused,
-            }:
-              rows [
-                [
-                  let'
-                  (rows [
-                    [
-                      [
-                        command
-                        (rows [
-                          [
-                            when
-                            (rows [
-                              [and [eq [getf event (kw "type")] (kw "key")]]
-                              [[equal [getf event (kw "owner")] (str "user")]]
-                            ])
-                          ]
-                          [[getf event (kw "command")]]
-                        ])
-                      ]
-                    ]
-                    [[focused [context snapshot (kw "focus")]]]
-                  ])
-                ]
-                (rows [
-                  [values nil]
-                  [[mapcar ({binding}: [lambda [binding] [apply (function bind-key) binding]]) (constant policy-bindings)]]
-                  (rows [
-                    cond
-                    [[[null' command] nil]]
-                    [[[equal command (str "close")] [when focused [list [close-window focused]]]]]
-                    [[[equal command (str "quit")] [list [quit]]]]
-                    [[[equal command (str "power")] [list [output-power (kw "toggle")]]]]
-                    [[[equal command (str "screenshot")] [list [screenshot]]]]
-                    [[[equal command (str "screenshot-screen")] [list [screenshot (kw "screen")]]]]
-                    [[[equal command (str "play-pause")] [list [media-control (kw "play-pause")]]]]
-                    [[[equal command (str "track-next")] [list [media-control (kw "next")]]]]
-                    [[[equal command (str "track-prev")] [list [media-control (kw "previous")]]]]
-                    [[[equal command (str "brightness-up")] [list [adjust-brightness 5]]]]
-                    [[[equal command (str "brightness-down")] [list [adjust-brightness (-5)]]]]
-                    (rows [
-                      t
-                      ({argv}:
-                        rows [
-                          [let' [[argv [policy--launch command]]]]
-                          [[when argv [list [apply (function launch) argv]]]]
-                        ])
-                    ])
-                  ])
-                ])
-              ])
-          ])
-      ])
-      generators.lisp))
+    userLisp
     "(defparameter +hud+ ${toLisp hudParameters})"
     (generators.lisp.render (({
         and,
@@ -4114,309 +4088,88 @@ in {
       generators.lisp))
     barLisp.${bar.style}
     "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
-    (generators.lisp.render (({
-        and,
-        and-key,
-        append,
-        apply,
-        bind-key,
-        blank,
-        case,
-        collect,
-        constant,
-        context,
-        define-extension,
-        defun,
-        destructuring-bind,
-        equal,
-        exec-async,
-        first,
-        floor,
-        for,
-        format,
-        from,
-        function,
-        getf,
-        if',
-        in',
-        in-package,
-        intern,
-        keyboard-grab,
-        kw,
-        length,
-        let',
-        list,
-        loop,
-        menu-choice,
-        min,
-        mod,
-        multiple-value-bind,
-        nconc,
-        nil,
-        nth,
-        or',
-        quote,
-        rows,
-        second,
-        setf,
-        shader-wallpaper,
-        shell-surface,
-        str,
-        t,
-        theme,
-        third,
-        ui,
-        uninterned,
-        values,
-        when,
-        ...
-      }: ({shader-wallpaper--menu}: [
-        [in-package (uninterned "tomoe-user")]
-        blank
-        ({
-          shaders,
-          chosen,
-          outputs,
-        }:
-          rows [
-            [defun shader-wallpaper--menu [shaders chosen outputs]]
-            ({
-              width,
-              height,
-              gap',
-              border,
-            }:
-              rows [
-                [destructuring-bind [and-key width height gap' border] [getf (constant shader-wallpaper) (kw "preview")]]
-                ({count}:
-                  rows [
-                    [let' [[count [length shaders]]]]
-                    (rows [
-                      [
-                        "list*"
-                        (rows [
-                          [shell-surface (kw "shader-menu") [ui (kw "column") (kw "on-click") (kw "cancel") (kw "background") (str "#00000066")]]
-                          [(kw "anchors") (quote [(kw "top") (kw "right") (kw "bottom") (kw "left")]) (kw "layer") (kw "overlay")]
-                          [(kw "background") (str "#00000000") (kw "blur") t]
-                        ])
-                      ]
-                      [[keyboard-grab]]
-                      [[bind-key nil (str "Left") (kw "up")] [bind-key nil (str "h") (kw "up")]]
-                      [[bind-key nil (str "Right") (kw "down")] [bind-key nil (str "l") (kw "down")]]
-                      [[bind-key nil (str "Return") (kw "select")] [bind-key nil (str "Escape") (kw "cancel")]]
-                      ({
-                        output,
-                        scale,
-                        output-width,
-                        output-height,
-                        tile-width,
-                        tile-height,
-                        left,
-                        top,
-                      }:
-                        rows [
-                          [loop for output in' outputs]
-                          [for scale "=" [getf output (kw "scale-120") 120]]
-                          [for output-width "=" [floor ["*" [getf output (kw "width")] 120] scale]]
-                          [for output-height "=" [floor ["*" [getf output (kw "height")] 120] scale]]
-                          [for tile-width "=" [min width [floor ["-" output-width ["*" ["1+" count] gap']] count]]]
-                          [for tile-height "=" [floor ["*" height tile-width] width]]
-                          [for left "=" [floor ["-" output-width ["-" ["*" count ["+" tile-width gap']] gap']] 2]]
-                          [for top "=" [floor ["-" output-height tile-height] 2]]
-                          [
-                            nconc
-                            ({
-                              path,
-                              fps,
-                              index,
-                            }:
-                              rows [
-                                [loop for [path fps] in' shaders]
-                                [for index from 0]
-                                [
-                                  collect
-                                  (rows [
-                                    shell-surface
-                                    (rows [
-                                      [intern [format nil (str "SHADER-PREVIEW-~A-~D") [getf output (kw "name")] index]]
-                                      (kw "keyword")
-                                    ])
-                                    (rows [
-                                      [ui (kw "stack") (kw "width") tile-width (kw "height") tile-height]
-                                      [(kw "border") [if' ["=" index chosen] border 0]]
-                                      [(kw "border-color") [theme (kw "accent")]]
-                                      [(kw "on-click") [intern [format nil (str "SELECT-~D") index] (kw "keyword")]]
-                                      [(kw "on-hover") [intern [format nil (str "HOVER-~D") index] (kw "keyword")]]
-                                    ])
-                                    [(kw "output") [getf output (kw "name")] (kw "anchors") (quote [(kw "top") (kw "left")])]
-                                    [(kw "margin") [list top 0 0 ["+" left ["*" index ["+" tile-width gap']]]]]
-                                    [(kw "width") tile-width (kw "height") tile-height (kw "layer") (kw "overlay")]
-                                    [(kw "background") [list (kw "shader") path (kw "fps") fps]]
-                                  ])
-                                ]
-                              ])
-                          ]
-                        ])
-                    ])
-                  ])
-              ])
-          ])
-        blank
-        ({
-          snapshot,
-          state,
-          event,
-        }:
-          rows [
-            [define-extension (str "shader-wallpaper") [(kw "reads") [(kw "key") (kw "ui") (kw "outputs")] (kw "state") nil] [snapshot state event]]
-            ({
-              shaders,
-              count,
-            }:
-              rows [
-                [
-                  "let*"
-                  (rows [
-                    [[shaders [getf (constant shader-wallpaper) (kw "shaders")]]]
-                    [[count [length shaders]]]
-                  ])
-                ]
-                ({
-                  index,
-                  menu,
-                }:
-                  rows [
-                    [destructuring-bind [and-key [index 0] menu] state]
-                    (rows [
-                      [when [equal [getf event (kw "owner")] (str "shader-wallpaper")]]
-                      (rows [
-                        [if' [equal [getf event (kw "command")] (str "menu")]]
-                        [[setf menu index]]
-                        ({
-                          action',
-                          choice,
-                        }:
-                          rows [
-                            [multiple-value-bind [action' choice] [and menu [menu-choice event menu count]]]
-                            (rows [
-                              [case action']
-                              [[(kw "select") [setf index choice menu nil]]]
-                              [[(kw "cancel") [setf menu nil]]]
-                              [[(kw "move") [setf menu choice]]]
-                            ])
-                          ])
-                      ])
-                    ])
-                    [[setf index [mod index count] menu [and menu [mod menu count]]]]
-                    ({
-                      shown,
-                      command,
-                    }:
-                      rows [
-                        [
-                          let'
-                          (rows [
-                            [[shown [nth [or' menu index] shaders]]]
-                            [[command [third [nth index shaders]]]]
-                          ])
-                        ]
-                        (rows [
-                          [values [list (kw "index") index (kw "menu") menu]]
-                          (rows [
-                            ["list*" [apply (function bind-key) [getf (constant shader-wallpaper) (kw "bind")]]]
-                            (rows [
-                              [shell-surface (kw "shader-wallpaper") [ui (kw "stack")]]
-                              [(kw "anchors") (quote [(kw "top") (kw "right") (kw "bottom") (kw "left")]) (kw "layer") (kw "background")]
-                              [(kw "background") [list (kw "shader") [first shown] (kw "fps") [second shown]]]
-                            ])
-                            (rows [
-                              [append [when command [list [exec-async (kw "theme") command]]]]
-                              [[when menu [shader-wallpaper--menu shaders menu [context snapshot (kw "outputs")]]]]
-                            ])
-                          ])
-                          nil
-                        ])
-                      ])
-                  ])
-              ])
-          ])
-      ]))
-      generators.lisp))
+    ''
+      (in-package #:tomoe-user)
+
+      (defun shader-wallpaper--menu (shaders chosen outputs)
+        (destructuring-bind (&key width height gap border) (getf +shader-wallpaper+ :preview)
+          (let ((count (length shaders)))
+            (list* (shell-surface :shader-menu (ui :column :on-click :cancel :background "#00000066")
+                                  :anchors '(:top :right :bottom :left) :layer :overlay
+                                  :background "#00000000" :blur t)
+                   (keyboard-grab)
+                   (bind-key nil "Left" (list :callback "up")) (bind-key nil "h" (list :callback "up"))
+                   (bind-key nil "Right" (list :callback "down")) (bind-key nil "l" (list :callback "down"))
+                   (bind-key nil "Return" (list :callback "select"))
+                   (bind-key nil "Escape" (list :callback "cancel"))
+                   (loop for output in outputs
+                         for scale = (getf output :scale-120 120)
+                         for output-width = (floor (* (getf output :width) 120) scale)
+                         for output-height = (floor (* (getf output :height) 120) scale)
+                         for tile-width = (min width (floor (- output-width (* (1+ count) gap)) count))
+                         for tile-height = (floor (* height tile-width) width)
+                         for left = (floor (- output-width (- (* count (+ tile-width gap)) gap)) 2)
+                         for top = (floor (- output-height tile-height) 2)
+                         nconc (loop for (path fps) in shaders
+                                     for index from 0
+                                     collect (shell-surface
+                                              (intern (format nil "SHADER-PREVIEW-~A-~D" (getf output :name) index)
+                                                      :keyword)
+                                              (ui :stack :width tile-width :height tile-height
+                                                  :border (if (= index chosen) border 0)
+                                                  :border-color (theme :accent)
+                                                  :on-click (intern (format nil "SELECT-~D" index) :keyword)
+                                                  :on-hover (intern (format nil "HOVER-~D" index) :keyword))
+                                              :output (getf output :name) :anchors '(:top :left)
+                                              :margin (list top 0 0 (+ left (* index (+ tile-width gap))))
+                                              :width tile-width :height tile-height :layer :overlay
+                                              :background (list :shader path :fps fps))))))))
+
+      (define-extension "shader-wallpaper" (:reads (:command :ui :outputs) :state nil) (snapshot state event)
+        (let* ((shaders (getf +shader-wallpaper+ :shaders))
+               (count (length shaders)))
+          (destructuring-bind (&key (index 0) menu) state
+            (when (equal (getf event :owner) "shader-wallpaper")
+              (if (equal (if (eq (getf event :type) :command)
+                             (getf event :name)
+                             (getf event :command))
+                         "shader-wallpaper-menu")
+                  (setf menu index)
+                  (multiple-value-bind (action choice) (and menu (menu-choice event menu count))
+                    (case action
+                      (:select (setf index choice menu nil))
+                      (:cancel (setf menu nil))
+                      (:move (setf menu choice))))))
+            (setf index (mod index count) menu (and menu (mod menu count)))
+            (let ((shown (nth (or menu index) shaders))
+                  (command (third (nth index shaders))))
+              (values (list :index index :menu menu)
+                      (list* (define-command "shader-wallpaper-menu"
+                               :description "Choose the shader wallpaper.")
+                             (apply #'bind-key (getf +shader-wallpaper+ :bind))
+                             (shell-surface :shader-wallpaper (ui :stack)
+                                            :anchors '(:top :right :bottom :left) :layer :background
+                                            :background (list :shader (first shown) :fps (second shown)))
+                             (append (when command (list (exec-async :theme command)))
+                                     (when menu (shader-wallpaper--menu shaders menu (context snapshot :outputs)))))
+                      nil)))))
+    ''
     "(defparameter +peek+ ${toLisp peekParameters})"
-    (generators.lisp.render (({
-        and,
-        apply,
-        bind-key,
-        blank,
-        cond,
-        cons,
-        constant,
-        context,
-        define-extension,
-        eq,
-        equal,
-        focus,
-        function,
-        getf,
-        hide-window,
-        in-package,
-        intersection,
-        kw,
-        lambda,
-        let',
-        mapcar,
-        nil,
-        peek,
-        rows,
-        setf,
-        str,
-        subsetp,
-        uninterned,
-        unless,
-        values,
-        when,
-        ...
-      }: [
-        [in-package (uninterned "tomoe-user")]
-        blank
-        ({
-          snapshot,
-          hidden,
-          event,
-        }:
-          rows [
-            [define-extension (str "peek") [(kw "reads") [(kw "key") (kw "windows")] (kw "state") nil] [snapshot hidden event]]
-            ({live}:
-              rows [
-                [let' [[live [mapcar ({window}: [lambda [window] [getf window (kw "id")]]) [context snapshot (kw "windows")]]]]]
-                [
-                  [
-                    setf
-                    hidden
-                    (rows [
-                      [
-                        cond
-                        (rows [
-                          [[and [eq [getf event (kw "type")] (kw "key")] [equal [getf event (kw "owner")] (str "peek")]]]
-                          [[unless hidden live]]
-                        ])
-                      ]
-                      [[[subsetp live hidden] [intersection hidden live]]]
-                    ])
-                  ]
-                ]
-                (rows [
-                  [values hidden]
-                  (rows [
-                    ["list*" [apply (function bind-key) [getf (constant peek) (kw "bind")]]]
-                    [[when hidden [cons [focus nil] [mapcar (function hide-window) hidden]]]]
-                  ])
-                  nil
-                ])
-              ])
-          ])
-      ])
-      generators.lisp))
+    ''
+      (in-package #:tomoe-user)
+
+      (define-extension "peek" (:reads (:command :windows) :state nil) (snapshot hidden event)
+        (let ((live (mapcar (lambda (window) (getf window :id)) (context snapshot :windows))))
+          (setf hidden (cond ((and (eq (getf event :type) :command)
+                                   (equal (getf event :name) "toggle-peek"))
+                              (unless hidden live))
+                             ((subsetp live hidden) (intersection hidden live))))
+          (values hidden
+                  (list* (define-command "toggle-peek" :description "Hide every window, or bring them back.")
+                         (apply #'bind-key (getf +peek+ :bind))
+                         (when hidden (cons (focus nil) (mapcar #'hide-window hidden))))
+                  nil)))
+    ''
     "(defparameter +sounds+ ${toLisp soundParameters})"
     (generators.lisp.render (({
         constant,

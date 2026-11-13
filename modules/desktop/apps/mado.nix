@@ -15,13 +15,13 @@
         (setf +mado-bitrate+ 200)
         (setf +mado-keys+
               (append '(("D S C F" "Hold to move the panel you look at around you"
-                         (nil "d" :move-up :stop-up) (nil "s" :move-left :stop-left)
-                         (nil "c" :move-down :stop-down) (nil "f" :move-right :stop-right))
-                        ("R" "Centre the headset panels" (nil "r" :home))
-                        ("Shift R" "Make the main panel follow your head, or set it down" ((:shift) "r" :follow))
-                        ("T" "Show or hide the room around you" (nil "t" :passthrough)))
+                         (nil "d" "mado-move-up" "mado-stop-up") (nil "s" "mado-move-left" "mado-stop-left")
+                         (nil "c" "mado-move-down" "mado-stop-down") (nil "f" "mado-move-right" "mado-stop-right"))
+                        ("R" "Centre the headset panels" (nil "r" "mado-home"))
+                        ("Shift R" "Make the main panel follow your head, or set it down" ((:shift) "r" "mado-follow"))
+                        ("T" "Show or hide the room around you" (nil "t" "mado-passthrough")))
                       (remove-if (lambda (group)
-                                   (some (lambda (bind) (member (third bind) '(:move-up :home :follow :passthrough)))
+                                   (some (lambda (bind) (member (third bind) '("mado-move-up" "mado-home" "mado-follow" "mado-passthrough") :test #'equal))
                                          (cddr group)))
                                  +mado-keys+)))
       '';
