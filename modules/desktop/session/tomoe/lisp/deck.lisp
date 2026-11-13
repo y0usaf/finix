@@ -39,6 +39,132 @@ a scroll would have revealed; at the bottom of the column, the one above it."
 (defun deck--manageable-p (state id)
   (and (not (member id (getf state :fullscreen))) (not (member id (getf state :floating)))))
 
+(defparameter +deck--tab-gap+ 3
+  "Logical pixels between two tabs in a strip.")
+(defparameter +deck--tab-pad+ 7
+  "Logical pixels of breathing room beside a tab's title.")
+(defparameter +deck--tab-radius+ 3
+  "Logical corner radius of a tab.")
+(defparameter +deck--tab-advance+ 0.62
+  "Roughly how much of a tab's font size one character covers, for fitting titles.
+Titles are also clipped by their own box, so a wrong estimate costs space, never
+an overflow into the next tab.")
+(defparameter +deck--tab-colours+
+  (list :base "#1e1e2e" :accent "#89b4fa" :subtext0 "#a6adc8")
+  "Theme colours for the strips, used until the :THEME publisher carries its own.")
+
+(defun deck--scale (area)
+  (let ((output (getf area :output))) (/ (getf output :scale-120 120) 120)))
+(defun deck--tab-height (area)
+  "The strip's height: a title's line plus room above and below it."
+  (let ((size (getf +layout+ :tab-size)))
+    (round (* (deck--scale area) (+ size 12)))))
+(defun deck--tab-font ()
+  (or (getf +layout+ :tab-font) "monospace, Bold"))
+(defun deck--tab-size ()
+  (or (getf +layout+ :tab-size) 12))
+(defun deck--colour (theme key)
+  (or (getf theme key) (getf +deck--tab-colours+ key)))
+(defun deck--tint (colour alpha)
+  "COLOUR carrying ALPHA (0-255), when it has no alpha channel of its own."
+  (if (and (stringp colour) (= (length colour) 7))
+      (concatenate 'string colour (format nil "~2,'0X" alpha))
+      colour))
+(defun deck--tabs-p (state area)
+  "Whether the deck draws tab strips at all: only where it has two tiled columns
+on a wide output, so never in the even grid, beside a fullscreen window, or on an
+output the deck lays out as one column."
+  (and area (not (getf state :grid)) (not (getf state :fullscreen)) (not (deck--narrow-p area))))
+(defun deck--tab-windows (state side)
+  "The windows of SIDE that get a tab: the column's tiled windows, never a float."
+  (remove-if-not (lambda (id) (deck--manageable-p state id)) (deck--column state side)))
+(defun deck--tab-strip-p (state area side)
+  (and (deck--tabs-p state area) (deck--tab-windows state side)))
+(defun deck--tab-title (window)
+  "A tab's label: the window title, else its app id, else a word for a bare window."
+  (let ((title (getf window :title)) (app (getf window :app-id)))
+    (cond ((and (stringp title) (plusp (length title))) title)
+          ((and (stringp app) (plusp (length app))) app)
+          (t "window"))))
+(defun deck--tab-fit (text width)
+  "TEXT cut to WIDTH logical pixels at the tab's size, with an ellipsis when it has
+to lose something."
+  (let* ((limit (max 1 (floor (/ width (* +deck--tab-advance+ (deck--tab-size))))))
+         (length (length text)))
+    (if (<= length limit)
+        text
+        (concatenate 'string (subseq text 0 (max 0 (1- limit))) (string (code-char #x2026))))))
+
+(defun deck--column-frame (state area side)
+  "The gap-inset box (X Y WIDTH HEIGHT) of SIDE's column on AREA."
+  (let* ((gaps (getf +layout+ :gaps))
+         (x (+ (getf area :x) gaps))
+         (y (+ (getf area :y) gaps))
+         (width (- (getf area :width) (* 2 gaps)))
+         (height (- (getf area :height) (* 2 gaps)))
+         (seam (getf +layout+ :seam))
+         (left (deck--left-width state width)))
+    (if (eql side :left)
+        (list x y left height)
+        (list (+ x left seam) y (- width seam left) height))))
+
+(defun deck--tab-strip (state area side)
+  "SIDE's strip in screen pixels: the top of the column's own box, where the tabs
+sit and that the column's windows are placed under."
+  (let ((output (getf area :output)))
+    (destructuring-bind (x y width height) (deck--column-frame state area side)
+      (declare (ignore height))
+      (list :output (getf output :name) :ox (getf output :x) :oy (getf output :y)
+            :x x :y y :width width :height (deck--tab-height area)
+            :scale (deck--scale area)))))
+
+(defun deck--tab-surface (state theme strip side windows)
+  "One strip of tabs for SIDE, or NIL when the strip has nothing to show.
+WINDOWS are the managed windows the tabs name."
+  (let* ((tabs (deck--tab-windows state side))
+         (front (deck--front state side))
+         (size (deck--tab-size))
+         (font (deck--tab-font))
+         (height (/ (getf strip :height) (getf strip :scale)))
+         (width (/ (getf strip :width) (getf strip :scale)))
+         (count (length tabs))
+         (gap (if (= count 1) 0 +deck--tab-gap+)))
+    (when (plusp count)
+      (let ((tab-width (/ (- width (* gap (1- count))) count))
+            (base (deck--colour theme :base))
+            (accent (deck--colour theme :accent))
+            (subtext (deck--colour theme :subtext0)))
+        (shell-surface (if (eql side :left) :deck-tabs-left :deck-tabs-right)
+                       (ui :row :gap gap :height height
+                           :radius +deck--tab-radius+
+                           :background (deck--tint base 230)
+                           :children
+                           (loop for id in tabs
+                                 for label = (deck--tab-title
+                                              (find id windows :key (lambda (window) (getf window :id))))
+                                 for active = (eql id front)
+                                 collect
+                                 (ui :button :key (intern (format nil "TAB-~D" id) :keyword)
+                                     :on-click :tab
+                                     :width tab-width :height height
+                                     :radius +deck--tab-radius+
+                                     :align :center
+                                     :background (when active accent)
+                                     :children
+                                     (list (ui :text :text (deck--tab-fit label (- tab-width (* 2 +deck--tab-pad+)))
+                                               :size size :font font
+                                               :color (if active base subtext)
+                                               :width (max 1 (- tab-width (* 2 +deck--tab-pad+))))))))
+                       :output (getf strip :output)
+                       :anchors '(:top :left)
+                       :margin (list (round (- (getf strip :y) (getf strip :oy)) (getf strip :scale))
+                                     0 0
+                                     (round (- (getf strip :x) (getf strip :ox)) (getf strip :scale)))
+                       :width (round (getf strip :width) (getf strip :scale))
+                       :height (round (getf strip :height) (getf strip :scale))
+                       :layer :top
+                       :background "#00000000")))))
+
 (defun deck--current (state)
   "The window a command acts on: the focused one while it is in the window set,
 otherwise whatever the deck still shows. A command must never depend on an id a
@@ -139,18 +265,19 @@ odd number of columns, or when the seam is no wider than two gaps."
          (when index
            (list x (+ y (* (- index front) (+ height gaps))) width height))))
       (t
-       (let* ((seam (getf +layout+ :seam))
-              (left-width (deck--left-width state width))
-              (right-width (- width seam left-width))
-              (side (deck--side-of state id))
+       (let* ((side (deck--side-of state id))
               (column (deck--column state side))
               (front (position (deck--front state side) column))
-              (index (position id column)))
+              (index (position id column))
+              (strip (and side (deck--tab-strip-p state area side)
+                          (+ (deck--tab-height area) gaps))))
          (when (and side index front)
-           (list (if (eql side :left) x (+ x left-width seam))
-                 (+ y (* (- index front) (+ height gaps)))
-                 (if (eql side :left) left-width right-width)
-                 height)))))))
+           (destructuring-bind (column-x column-y column-width column-height)
+               (deck--column-frame state area side)
+             (let ((card-y (+ column-y (or strip 0)))
+                   (card-height (max 1 (- column-height (or strip 0)))))
+               (list column-x (+ card-y (* (- index front) (+ card-height gaps)))
+                     column-width card-height)))))))))
 
 (defun deck--places (managed state area)
   "One place effect per managed window: exactly one owner, no duplicates."
@@ -304,6 +431,19 @@ odd number of columns, or when the seam is no wider than two gaps."
        (deck--focus-window state id))))
   state)
 
+(defun deck--tab-click (state element)
+  "Bring the window a tab names to the front of its column and focus it. ELEMENT
+is the tab's hit key, TAB-ID."
+  (let ((id (and (stringp element)
+                 (>= (length element) 4)
+                 (string= "tab-" element :end2 4)
+                 (parse-integer element :start 4 :junk-allowed t))))
+    (when (and id (member id (deck--windows state)))
+      (let ((side (deck--side-of state id)))
+        (when (and side (deck--manageable-p state id)) (deck--adopt-front state side id)))
+      (deck--focus-window state id)))
+  state)
+
 (defun deck--raises (state current)
   (mapcar #'raise-window
           (append (remove current (reverse (getf state :floating)))
@@ -312,7 +452,7 @@ odd number of columns, or when the seam is no wider than two gaps."
 
 (define-extension "deck"
     (:reads (:windows :rules :data :outputs :workareas :layout :focus :key :button :pointer :request
-             :settings)
+             :settings :ui)
      :state (deck--state) :admission t)
     (snapshot state event)
   (let* ((windows (remove-if (lambda (window) (policy--unmanaged-p snapshot window))
@@ -379,6 +519,8 @@ odd number of columns, or when the seam is no wider than two gaps."
           (when (and (deck--manageable-p state id) (deck--side-of state id))
             (deck--adopt-front state (deck--side-of state id) id))
           (deck--focus-window state id))))
+    (when (and (eq type :ui) (equal (getf event :command) "tab"))
+      (deck--tab-click state (getf event :element)))
     (let ((current (deck--current state)))
       (values state
               (append (mapcar (lambda (binding) (apply #'bind-key binding))
@@ -390,6 +532,12 @@ odd number of columns, or when the seam is no wider than two gaps."
                                   +layout-bindings+))
                       (when area (deck--places windows state area))
                       (list (publish-state :deck-seam (deck--seam state area)))
+                      (let ((theme (state-value snapshot :theme)))
+                        (loop for side in '(:left :right)
+                              for strip = (and area (deck--tab-strip-p state area side)
+                                               (deck--tab-strip state area side))
+                              when strip
+                                collect (deck--tab-surface state theme strip side windows)))
                       (deck--raises state current)
                       (list (focus current :raise nil)))
               (when (and (equal command "terminal") (null terminal))

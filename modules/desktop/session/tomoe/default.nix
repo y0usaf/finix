@@ -122,7 +122,11 @@
   layouts = {
     deck = {
       file = ./lisp/deck.lisp;
-      parameters.ratios = map mkLispInline ["1/2" "21/32" "11/32"];
+      parameters = {
+        ratios = map mkLispInline ["1/2" "21/32" "11/32"];
+        tab-font = config.user.ui.fonts.mainFontName;
+        tab-size = 12;
+      };
       bindings = [
         (binding ["alt"] "h" "focus-left" "Focus Left Column")
         (binding ["alt"] "l" "focus-right" "Focus Right Column")
