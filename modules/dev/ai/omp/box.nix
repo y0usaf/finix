@@ -589,6 +589,46 @@
         vercel-ai-gateway:
           baseUrl: ${gatewayUrl}
           apiKey: "!echo unused"
+          models:
+            - api: openai-completions
+              baseUrl: ${gatewayUrl}
+              contextWindow: 1048576
+              cost:
+                cacheRead: 0.1
+                cacheWrite: 0
+                input: 2
+                output: 10
+              id: google/gemini-4-argon
+              input: [text, image]
+              maxTokens: 65536
+              name: Gemini 4 Argon
+              reasoning: true
+            - api: openai-completions
+              baseUrl: ${gatewayUrl}
+              contextWindow: 1048576
+              cost:
+                cacheRead: 0.1
+                cacheWrite: 0
+                input: 2
+                output: 10
+              id: google/gemini-4-carbon
+              input: [text, image]
+              maxTokens: 65536
+              name: Gemini 4 Carbon
+              reasoning: true
+            - api: openai-completions
+              baseUrl: ${gatewayUrl}
+              contextWindow: 1048576
+              cost:
+                cacheRead: 0.075
+                cacheWrite: 0
+                input: 1.5
+                output: 7.5
+              id: google/gemini-4-hydrogen
+              input: [text, image]
+              maxTokens: 65536
+              name: Gemini 4 Hydrogen
+              reasoning: true
         anthropic:
           baseUrl: ${gatewayUrl}/anthropic
           apiKey: "!echo sk-ant-oat-crest"
