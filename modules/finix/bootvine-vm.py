@@ -232,17 +232,17 @@ class Driver:
         return text
 
     def active_vt(self):
-        text = self.guest("cat /sys/class/tty/tty0/active 2>/dev/null")
-        match = re.search(r"tty\d+", text)
+        text = self.guest("echo ACTIVE=$(cat /sys/class/tty/tty0/active 2>/dev/null)")
+        match = re.search(r"ACTIVE=(tty\d+)", text)
         if match:
-            return match.group(0)
+            return match.group(1)
         return ""
 
     def vt_columns(self):
-        size = self.guest("stty size < /dev/tty12 2>/dev/null")
-        fields = size.split()
-        if len(fields) == 2 and fields[1].isdigit():
-            return int(fields[1])
+        size = self.guest("echo SIZE=$(stty size < /dev/tty12 2>/dev/null)")
+        match = re.search(r"SIZE=\d+ (\d+)", size)
+        if match:
+            return int(match.group(1))
         return 80
 
     def save_screen(self, name, text):
@@ -272,38 +272,32 @@ class Driver:
         self.log("serial connected")
         self.qmp.connect()
         self.log("qmp connected")
+        began = time.time()
         if not self.wait_shell():
             self.check("serial console shell", False, "no shell prompt")
             return self.finish()
         self.columns = self.vt_columns()
-        self.log(f"console is {self.columns} columns wide")
+        self.log(f"serial shell ready after {time.time() - began:.1f}s, {self.columns} columns wide")
 
         boot_samples = []
-        slow_seen = False
-        done_seen = False
         login_seen = False
+        delayed_state = ""
         deadline = time.time() + self.args.boot_timeout
         while time.time() < deadline:
             text = self.vt_text(12)
             if text.strip():
                 boot_samples.append(text)
-            if not done_seen and re.search(r"slowpoke\D{0,80}?done", text):
-                done_seen = True
-                self.save_screen("screen-done.txt", text)
-                self.screenshot("boot-done")
-                self.log("captured the finished boot frame")
-            if "slowpoke" in text and ("start" in text or "runni" in text or "active" in text):
-                if not slow_seen:
-                    slow_seen = True
-                    self.save_screen("screen-slow.txt", text)
-                    self.screenshot("boot-slow")
-                    self.log("captured the slow service on the boot screen")
-            active = self.active_vt()
-            if active == "tty1":
+            if self.active_vt() == "tty1":
                 login = self.vt_text(1)
                 if "login:" in login:
                     login_seen = True
+                    self.log(f"login prompt seen after {time.time() - began:.1f}s")
                     self.save_screen("screen-login.txt", login)
+                    self.screenshot("login")
+                    delayed_state = self.guest(
+                        "echo STARTED=$(test -e /run/delayed-start && echo yes || echo no)"
+                        " DONE=$(test -e /run/delayed-done && echo yes || echo no)"
+                    )
                     break
             time.sleep(0.4)
 
@@ -312,21 +306,28 @@ class Driver:
         all_boot = "\n\n".join(boot_samples)
         self.save_screen("screen-boot-samples.txt", all_boot)
 
-        self.check("boot screen shows the slow service", "slowpoke" in all_boot)
-        self.check("boot screen keeps the slow service running", slow_seen,
-                   "captured while it was still running" if slow_seen else "never caught it running")
-        self.check("boot screen shows the failing service", "broken" in final)
+        self.check("boot screen shows the slow task", "slowpoke" in final)
+        self.check("boot screen shows how long the slow task ran",
+                   re.search(r"slowpoke\D{0,80}?[789]\.\d+s", final) is not None,
+                   self.first_line(final, "slowpoke"))
+        self.check("boot screen shows the failing task", "broken" in final)
         self.check("boot screen gives the failure reason", "status 3" in final, self.first_line(final, "broken"))
-        self.check("boot screen shows the slow service duration", re.search(r"[789]\.\d+s", all_boot) is not None)
-        self.check("boot screen kept the finished frame", done_seen)
+        self.check("boot screen kept its last frame for the handover",
+                   "runlevel 2" in final and "slowpoke" in final and "broken" in final)
         self.check("boot screen hides finit status", "Starting " not in final and "Calling '" not in final)
         self.check("login prompt reached on tty1", login_seen)
         if not login_seen:
             self.check("active terminal after boot", False, self.active_vt())
             login = self.vt_text(1)
             self.save_screen("screen-login.txt", login)
-        else:
-            self.screenshot("login")
+        started = re.search(r"STARTED=(yes|no)", delayed_state)
+        done = re.search(r"DONE=(yes|no)", delayed_state)
+        self.check("the slow runlevel 2 task had started",
+                   started is not None and started.group(1) == "yes",
+                   self.first_line(delayed_state, "STARTED"))
+        self.check("login prompt did not wait for the slow runlevel 2 task",
+                   done is not None and done.group(1) == "no",
+                   self.first_line(delayed_state, "DONE"))
 
         self.serial.take()
         self.serial.send("initctl poweroff\n")

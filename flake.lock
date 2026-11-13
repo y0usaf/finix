@@ -132,11 +132,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794577150,
-        "narHash": "sha256-MBfSQnJy+cUBXctfVjFisQGRTOUOz2fUx+6RqxFmTXk=",
+        "lastModified": 1794596610,
+        "narHash": "sha256-/HiRoqYVy3k9ETi08nQSJlxiLdY1mEwR1x9wCOmIT+I=",
         "ref": "refs/heads/main",
-        "rev": "ae8eb218b344478e5ecbc4ba977b69aaf51d9f48",
-        "revCount": 8,
+        "rev": "e8ea5ba1d516aa78b6a6799416b19f79b7559d20",
+        "revCount": 13,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/finit-bootvine.git"
       },

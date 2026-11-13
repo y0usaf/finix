@@ -59,15 +59,21 @@
 
         finit.tasks.slowpoke = {
           description = "deliberately slow service";
-          runlevel = "2";
+          runlevel = "S";
           script = "sleep 8";
         };
 
         finit.tasks.broken = {
           description = "deliberately failing service";
-          runlevel = "2";
+          runlevel = "S2";
           log = true;
           script = "echo 'cannot frobnicate the widget'; exit 3";
+        };
+
+        finit.tasks.delayed = {
+          description = "deliberately slow runlevel 2 task";
+          runlevel = "2";
+          script = "touch /run/delayed-start; sleep 45; touch /run/delayed-done";
         };
 
         finit.services.slowstop = {
