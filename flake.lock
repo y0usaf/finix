@@ -125,6 +125,26 @@
         "url": "ssh://git@github.com/y0usaf/bolo.git"
       }
     },
+    "bootvine": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794576458,
+        "narHash": "sha256-U+iVWXqGaFCUkq24u8PTk1mxzWce+QbS2FYdGT8Ps+g=",
+        "ref": "refs/heads/main",
+        "rev": "61b7dca4e8b6169c7e60b51a73c9808e207797d6",
+        "revCount": 6,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/finit-bootvine"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/finit-bootvine"
+      }
+    },
     "bun2nix": {
       "inputs": {
         "flake-parts": "flake-parts_3",
@@ -1768,6 +1788,7 @@
         "autolith": "autolith",
         "boar-rs": "boar-rs",
         "bolo": "bolo",
+        "bootvine": "bootvine",
         "claude-code-nix": "claude-code-nix",
         "claude-desktop-linux": "claude-desktop-linux",
         "cleanker": "cleanker",

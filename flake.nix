@@ -265,6 +265,11 @@
 
     finix.url = "github:finix-community/finix";
 
+    bootvine = {
+      url = "git+file:///home/y0usaf/dev/developing/finit-bootvine";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixpkgs-librewolf.url = "github:NixOS/nixpkgs/56c02bc00adcf003215cc4bd996d6efaf4cff188";
     alejandra = {
       url = "github:kamadorueda/alejandra";

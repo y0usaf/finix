@@ -145,6 +145,10 @@ inputs: let
           ./server/amp-orb.nix
         ]
         ++ graphicalModules
+        ++ [
+          ./finix/bootvine.nix
+          {finix.bootScreen.enable = true;}
+        ]
         ++ nixFiles [./hosts/y0usaf-desktop];
     };
 
@@ -287,6 +291,7 @@ in {
     drift = import ./drift.nix {inherit lib pkgs hosts;};
     inherit (hosts.y0usaf-desktop.config.system.build) chatgpt p4g-setup;
     omp-box-selftest = hosts.y0usaf-desktop.config.system.build.ompBoxSelftest;
+    boot-screen-vm = (import ./finix/bootvine-vm.nix {inherit inputs pkgs lib;}).vm;
     tomoe = inputPackages.tomoe.default;
     glsl-gate = lint.glslGate;
   };
