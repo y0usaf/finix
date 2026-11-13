@@ -8,7 +8,6 @@
 }: let
   userName = config.user.name;
   home = config.user.homeDirectory;
-  inherit (config.user) runtimeDir;
   inherit (inputPackages.oh-my-pi) omp;
   pilotConfig = pkgs.writeText "lloyd-python.yml" (lib.generators.toYAML {} {
     python.interpreter = "${pkgs.python3.withPackages (ps: [ps.pillow])}/bin/python3";

@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  flakeInputs,
+  inputPackages,
   ...
 }: let
   cfg = config.finix.bootScreen;
@@ -20,14 +20,14 @@
       configureFlags = (old.configureFlags or []) ++ ["--enable-kernel-cmdline"];
     });
 
-  finit = mkFinit { } // {override = mkFinit;};
+  finit = mkFinit {} // {override = mkFinit;};
 in {
   options.finix.bootScreen = {
     enable = lib.mkEnableOption "a live tree of finit services on the boot console";
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = flakeInputs.bootvine.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      inherit (inputPackages.bootvine) default;
       description = "The boot screen program.";
     };
 

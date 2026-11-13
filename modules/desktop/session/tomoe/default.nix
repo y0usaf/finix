@@ -118,18 +118,17 @@
 
   # A binding names a registered command; a command that starts a program uses
   # the built-in launch command with the argv declared for it.
-  launchCommands = {
-    browser = [defaults.browser];
-    discord = ["discord"];
-    steam = ["steam"];
-    obs = ["obs"];
-    launcher = ["sh" "-c" defaults.launcher];
-    files = ["pcmanfm"];
-    volume-up = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"];
-    volume-down = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"];
-    volume-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
-    mic-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"];
-  };
+  launchCommands =
+    {
+      browser = [defaults.browser];
+      launcher = ["sh" "-c" defaults.launcher];
+      files = ["pcmanfm"];
+      volume-up = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"];
+      volume-down = ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"];
+      volume-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
+      mic-mute = ["wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"];
+    }
+    // lib.genAttrs ["discord" "steam" "obs"] (name: [name]);
 
   commandCall = command:
     if launchCommands ? ${command}
@@ -278,9 +277,10 @@
     };
 
   # TERMINAL is not bound to a key: the deck's terminal command starts it.
-  launches = lib.mapAttrsToList (command: argv: [command argv]) (launchCommands // {
-    terminal = ["tern"];
-  });
+  launches = lib.mapAttrsToList (command: argv: [command argv]) (launchCommands
+    // {
+      terminal = ["tern"];
+    });
 
   palette = "${config.user.homeDirectory}/.cache/theme/gtk.css";
 

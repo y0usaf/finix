@@ -291,7 +291,7 @@ in {
     drift = import ./drift.nix {inherit lib pkgs hosts;};
     inherit (hosts.y0usaf-desktop.config.system.build) chatgpt p4g-setup;
     omp-box-selftest = hosts.y0usaf-desktop.config.system.build.ompBoxSelftest;
-    boot-screen-vm = (import ./finix/bootvine-vm.nix {inherit inputs pkgs lib;}).vm;
+    boot-screen-vm = import ./finix/bootvine-vm.nix {inherit inputs pkgs lib;};
     tomoe = inputPackages.tomoe.default;
     glsl-gate = lint.glslGate;
   };

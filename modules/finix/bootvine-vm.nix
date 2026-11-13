@@ -3,11 +3,15 @@
   pkgs,
   lib,
 }: let
-  finix = inputs.finix;
+  inputPackages = lib.mapAttrs (_: input: input.packages.${pkgs.stdenv.hostPlatform.system} or {}) inputs;
+  inherit (inputs) finix;
   qemuModule = import "${finix}/modules/virtualisation/qemu.nix";
   system = finix.lib.finixSystem {
-    lib = pkgs.lib;
-    specialArgs = {flakeInputs = inputs;};
+    inherit (pkgs) lib;
+    specialArgs = {
+      flakeInputs = inputs;
+      inherit inputPackages;
+    };
     modules = [
       {
         nixpkgs.pkgs = pkgs;
@@ -50,60 +54,65 @@
           ttys = ["tty1"];
         };
 
-        finit.ttys.serial = {
-          device = "/dev/ttyS0";
-          runlevel = "S0123456";
-          nologin = true;
-          nowait = true;
+        finit = {
+          ttys.serial = {
+            device = "/dev/ttyS0";
+            runlevel = "S0123456";
+            nologin = true;
+            nowait = true;
+          };
+
+          tasks = {
+            slowpoke = {
+              description = "deliberately slow service";
+              runlevel = "S";
+              script = "sleep 8";
+            };
+
+            broken = {
+              description = "deliberately failing service";
+              runlevel = "S2";
+              log = true;
+              script = "echo 'cannot frobnicate the widget'; exit 3";
+            };
+
+            delayed = {
+              description = "deliberately slow runlevel 2 task";
+              runlevel = "2";
+              script = "touch /run/delayed-start; sleep 45; touch /run/delayed-done";
+            };
+          };
+
+          services.slowstop = {
+            description = "deliberately slow to stop";
+            runlevel = "234";
+            stop-timeout = 8;
+            restart = 0;
+            script = ''
+              trap 'sleep 4; exit 0' TERM
+              while :; do
+                sleep 0.2
+              done
+            '';
+          };
         };
 
-        finit.tasks.slowpoke = {
-          description = "deliberately slow service";
-          runlevel = "S";
-          script = "sleep 8";
+        virtualisation = {
+          memorySize = 2048;
+          cores = 2;
+          qemu.extraArgs = [
+            "-display"
+            "none"
+            "-vga"
+            "std"
+            "-no-reboot"
+          ];
         };
-
-        finit.tasks.broken = {
-          description = "deliberately failing service";
-          runlevel = "S2";
-          log = true;
-          script = "echo 'cannot frobnicate the widget'; exit 3";
-        };
-
-        finit.tasks.delayed = {
-          description = "deliberately slow runlevel 2 task";
-          runlevel = "2";
-          script = "touch /run/delayed-start; sleep 45; touch /run/delayed-done";
-        };
-
-        finit.services.slowstop = {
-          description = "deliberately slow to stop";
-          runlevel = "234";
-          stop-timeout = 8;
-          restart = 0;
-          script = ''
-            trap 'sleep 4; exit 0' TERM
-            while :; do
-              sleep 0.2
-            done
-          '';
-        };
-
-        virtualisation.memorySize = 2048;
-        virtualisation.cores = 2;
-        virtualisation.qemu.extraArgs = [
-          "-display"
-          "none"
-          "-vga"
-          "std"
-          "-no-reboot"
-        ];
       })
     ];
   };
-in {
-  inherit system;
-  vm = pkgs.stdenvNoCC.mkDerivation {
+in
+  pkgs.stdenvNoCC.mkDerivation {
     name = "boot-screen-vm";
     nativeBuildInputs = [pkgs.python3];
     buildCommand = ''
@@ -112,5 +121,4 @@ in {
       python3 ${./bootvine-vm.py} --argv $TMPDIR/argv.json --out $out --work $TMPDIR
     '';
     requiredSystemFeatures = [];
-  };
-}
+  }

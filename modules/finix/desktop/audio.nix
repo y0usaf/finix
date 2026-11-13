@@ -26,75 +26,77 @@ in {
   finix.persistence.homeServices = ["wireplumber"];
   user.account.extraGroups = ["audio"];
 
-  environment.etc."pipewire/pipewire.conf.d/60-frame-sink.conf".text = builtins.toJSON {
-    "context.modules" = [
-      {
-        name = "libpipewire-module-roc-sink";
-        flags = ["nofail"];
-        args = {
-          "remote.ip" = "192.168.2.237";
-          "remote.source.port" = 10001;
-          "remote.repair.port" = 10002;
-          "remote.control.port" = 10003;
-          "fec.code" = "rs8m";
-          "sink.name" = "frame-audio";
-          "sink.props" = {
-            "node.name" = "frame-audio";
-            "node.description" = "Frame";
-            "audio.rate" = 48000;
-            "priority.session" = 100;
-            "node.pause-on-idle" = false;
-            "node.always-process" = true;
+  environment = {
+    etc."pipewire/pipewire.conf.d/60-frame-sink.conf".text = builtins.toJSON {
+      "context.modules" = [
+        {
+          name = "libpipewire-module-roc-sink";
+          flags = ["nofail"];
+          args = {
+            "remote.ip" = "192.168.2.237";
+            "remote.source.port" = 10001;
+            "remote.repair.port" = 10002;
+            "remote.control.port" = 10003;
+            "fec.code" = "rs8m";
+            "sink.name" = "frame-audio";
+            "sink.props" = {
+              "node.name" = "frame-audio";
+              "node.description" = "Frame";
+              "audio.rate" = 48000;
+              "priority.session" = 100;
+              "node.pause-on-idle" = false;
+              "node.always-process" = true;
+            };
+            "audio.position" = "[ FL FR ]";
           };
-          "audio.position" = "[ FL FR ]";
-        };
-      }
+        }
+      ];
+    };
+
+    etc."pipewire/pipewire.conf.d/99-input-denoising.conf".text = builtins.toJSON {
+      "context.modules" = [
+        {
+          name = "libpipewire-module-filter-chain";
+          args = {
+            "node.description" = "Noise Cancelling source";
+            "media.name" = "Noise Cancelling source";
+            "filter.graph".nodes = [
+              {
+                type = "ladspa";
+                name = "rnnoise";
+                plugin = "librnnoise_ladspa";
+                label = "noise_suppressor_mono";
+                control = {
+                  "VAD Threshold (%)" = 50;
+                  "VAD Grace Period (ms)" = 20;
+                  "Retroactive VAD Grace (ms)" = 0;
+                };
+              }
+            ];
+            "audio.rate" = 48000;
+            "audio.position" = ["MONO"];
+            "capture.props" = {
+              "node.name" = "capture.rnnoise_source";
+              "node.passive" = true;
+              "audio.rate" = 48000;
+              "audio.channels" = 1;
+            };
+            "playback.props" = {
+              "node.name" = "rnnoise_source";
+              "media.class" = "Audio/Source";
+              "audio.channels" = 1;
+            };
+          };
+        }
+      ];
+    };
+
+    systemPackages = [
+      pkgs.pipewire
+      pkgs.wireplumber
+      pkgs.pulseaudio
     ];
   };
-
-  environment.etc."pipewire/pipewire.conf.d/99-input-denoising.conf".text = builtins.toJSON {
-    "context.modules" = [
-      {
-        name = "libpipewire-module-filter-chain";
-        args = {
-          "node.description" = "Noise Cancelling source";
-          "media.name" = "Noise Cancelling source";
-          "filter.graph".nodes = [
-            {
-              type = "ladspa";
-              name = "rnnoise";
-              plugin = "librnnoise_ladspa";
-              label = "noise_suppressor_mono";
-              control = {
-                "VAD Threshold (%)" = 50;
-                "VAD Grace Period (ms)" = 20;
-                "Retroactive VAD Grace (ms)" = 0;
-              };
-            }
-          ];
-          "audio.rate" = 48000;
-          "audio.position" = ["MONO"];
-          "capture.props" = {
-            "node.name" = "capture.rnnoise_source";
-            "node.passive" = true;
-            "audio.rate" = 48000;
-            "audio.channels" = 1;
-          };
-          "playback.props" = {
-            "node.name" = "rnnoise_source";
-            "media.class" = "Audio/Source";
-            "audio.channels" = 1;
-          };
-        };
-      }
-    ];
-  };
-
-  environment.systemPackages = [
-    pkgs.pipewire
-    pkgs.wireplumber
-    pkgs.pulseaudio
-  ];
 
   finit.services = {
     pipewire = {
