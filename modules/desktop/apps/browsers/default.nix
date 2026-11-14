@@ -352,9 +352,22 @@ in {
         ];
       }
       {
+        select = "#back-button, #forward-button, #stop-reload-button";
+        set = [
+          ["order" "-2 !important"]
+        ];
+      }
+      {
         select = "#nav-bar-customization-target > #downloads-button";
         set = [
+          ["order" "0 !important"]
           ["margin-inline-start" "auto !important"]
+        ];
+      }
+      {
+        select = "#fxa-toolbar-menu-button";
+        set = [
+          ["order" "1 !important"]
         ];
       }
       {
@@ -486,6 +499,20 @@ in {
           ["border" "0 !important"]
           ["border-radius" "0 !important"]
           ["background" "transparent !important"]
+        ];
+      }
+      {
+        select = "#tabs-newtab-button, #vertical-tabs-newtab-button";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = "#new-tab-button, #alltabs-button";
+        set = [
+          ["display" "flex !important"]
+          ["flex" "0 0 auto !important"]
+          ["margin-inline-start" "0 !important"]
         ];
       }
       {
