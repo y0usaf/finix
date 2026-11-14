@@ -621,7 +621,6 @@ findbar .findbar-textbox::selection {
   flex: 1 1 auto !important;
   min-width: 0 !important;
   height: 100% !important;
-  counter-reset: tab !important;
 }
 
 #tabbrowser-tabs:has(#pinned-tabs-container > .tabbrowser-tab):not([overflow]) {
@@ -722,7 +721,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   overflow: hidden !important;
   background-color: var(--tok-bg) !important;
   color: var(--tok-ink) !important;
-  counter-increment: tab !important;
   transition:
     max-width var(--quick) var(--ease),
     min-width var(--quick) var(--ease),
@@ -763,10 +761,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   visibility: hidden !important;
 }
 
-.tabbrowser-tab[closing] {
-  counter-increment: none !important;
-}
-
 #tabbrowser-tabs[movingtab] .tabbrowser-tab {
   position: relative !important;
 }
@@ -793,12 +787,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   white-space: nowrap !important;
 }
 
-.tab-content::before {
-  content: counter(tab) ":";
-  flex: none !important;
-  order: -1 !important;
-}
-
 .tab-label-container {
   display: flex !important;
   align-items: center !important;
@@ -813,6 +801,7 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   min-width: 0 !important;
   overflow: hidden !important;
   white-space: nowrap !important;
+  text-align: center !important;
   text-overflow: ".." !important;
 }
 
