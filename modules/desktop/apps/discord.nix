@@ -56,15 +56,49 @@ in {
   ];
   environment.systemPackages = [
     pkgs.vesktop
-    (legacyDiscord.override {
-      commandLineArgs = "--enable-features=WaylandWindowDecorations,WaylandLinuxDrmSyncobj --disable-smooth-scrolling";
-      withOpenASAR = true;
-      withVencord = true;
-      inherit vencord;
-      disableUpdates = false;
-      withTTS = false;
-      enableAutoscroll = true;
-    })
+    # Chromium (Electron) caps zwp_linux_dmabuf_v1 at version 3, so it never sees
+    # this session's dmabuf feedback and allocates its GPU buffers on the first
+    # render node, the AMD iGPU, while Tomoe composites on the NVIDIA card that
+    # drives DP-4. NVIDIA's EGL accepts those foreign linear buffers but samples
+    # zeros, which drew Discord as a transparent window over the deck backdrop
+    # (its wl_shm software path draws fine, so it looked app-specific). The
+    # launch wrapper pins Chromium's render node and EGL to the NVIDIA device, so
+    # its buffers live where the compositor samples them; both are resolved from
+    # sysfs at launch so driver or node-number changes cannot break it.
+    (let
+      base = legacyDiscord.override {
+        commandLineArgs = "--enable-features=WaylandWindowDecorations,WaylandLinuxDrmSyncobj --disable-smooth-scrolling";
+        withOpenASAR = true;
+        withVencord = true;
+        inherit vencord;
+        disableUpdates = false;
+        withTTS = false;
+        enableAutoscroll = true;
+      };
+      launcher = pkgs.writeShellScript "discord" ''
+        vendor=/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json
+        node=
+        for dir in /sys/class/drm/renderD*; do
+          if [ "$(basename "$(readlink -f "$dir/device/driver" 2>/dev/null)")" = nvidia ]; then
+            node="/dev/dri/$(basename "$dir")"
+            break
+          fi
+        done
+        if [ -e "$vendor" ]; then
+          __EGL_VENDOR_LIBRARY_FILENAMES=$vendor
+          export __EGL_VENDOR_LIBRARY_FILENAMES
+        fi
+        if [ -n "$node" ]; then
+          exec ${base}/bin/discord --render-node-override="$node" "$@"
+        fi
+        exec ${base}/bin/discord "$@"
+      '';
+    in
+      pkgs.runCommand "discord" {} ''
+        mkdir -p $out/bin $out/share
+        cp -r ${base}/share/. $out/share/
+        ln -s ${launcher} $out/bin/discord
+      '')
   ];
 
   user.files = {
