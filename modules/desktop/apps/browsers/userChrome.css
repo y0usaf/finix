@@ -709,7 +709,7 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 
 .tabbrowser-tab {
   --tok-bg: var(--frame);
-  --tok-ink: var(--frame-ink);
+  --tok-ink: var(--frame-dim);
   display: flex !important;
   align-items: stretch !important;
   flex: 0 1 auto !important;
@@ -737,8 +737,13 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 }
 
 .tabbrowser-tab[visuallyselected] {
-  --tok-bg: var(--frame-ink);
-  --tok-ink: var(--frame);
+  --tok-bg: var(--frame);
+  --tok-ink: var(--frame-ink);
+}
+
+.tabbrowser-tab[visuallyselected] .tab-label {
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
 }
 
 .tabbrowser-tab[pending]:not([visuallyselected]) {
