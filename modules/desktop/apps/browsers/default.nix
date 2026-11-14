@@ -115,6 +115,7 @@
 
     "browser.tabs.inTitlebar" = 0;
     "browser.toolbars.bookmarks.visibility" = "never";
+    "toolkit.tabbox.switchByScrolling" = true;
 
     "media.hardware-video-decoding.enabled" = true;
     "media.ffmpeg.vaapi.enabled" = false;

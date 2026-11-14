@@ -3,10 +3,12 @@
   --chrome-font-size: 11px;
   --line: 14px;
   --side: 20ch;
-  --tab-width: 24ch;
-  --tab-min: 10ch;
+  --w0: 40ch;
+  --w1: 24ch;
+  --w2: 16ch;
+  --w3: 11ch;
   --pop-top: 24vh;
-  --pop-width: clamp(560px, 42vw, 960px);
+  --pop-width: min(clamp(560px, 42vw, 960px), calc(100vw - 4ch));
   --pop-font-size: 22px;
   --pop-row: 40px;
   --pop-result: 22px;
@@ -17,6 +19,7 @@
   --frame-ink: var(--ink);
   --dim: var(--soft);
   --frame-dim: var(--soft);
+  --faint: color-mix(in srgb, var(--ink) 78%, var(--paper));
   --edge: color-mix(in srgb, var(--ink) 30%, var(--paper));
   --wash: color-mix(in srgb, var(--ink) 10%, var(--paper));
   --frame-wash: var(--wash);
@@ -26,6 +29,7 @@
   --warn: light-dark(#8a0030, #ffc2ca);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --quick: 140ms;
+  --glide: 220ms;
   --snap: 90ms;
 }
 
@@ -138,7 +142,6 @@ body {
   #downloads-button,
   #PanelUI-menu-button,
   #new-tab-button,
-  #tabs-newtab-button,
   #alltabs-button
 ) {
   display: flex !important;
@@ -162,14 +165,13 @@ body {
   #downloads-button,
   #PanelUI-menu-button,
   #new-tab-button,
-  #tabs-newtab-button,
   #alltabs-button
 ):not([disabled]):hover {
   color: inherit !important;
   background-color: var(--wash) !important;
 }
 
-:is(#new-tab-button, #tabs-newtab-button, #alltabs-button):not([disabled]):hover {
+:is(#new-tab-button, #alltabs-button):not([disabled]):hover {
   background-color: var(--frame-wash) !important;
 }
 
@@ -183,14 +185,13 @@ body {
   #downloads-button,
   #PanelUI-menu-button,
   #new-tab-button,
-  #tabs-newtab-button,
   #alltabs-button
 ):is(:active, [open], [checked]):not([disabled]) {
   color: var(--paper) !important;
   background-color: var(--ink) !important;
 }
 
-:is(#new-tab-button, #tabs-newtab-button, #alltabs-button):is(:active, [open]) {
+:is(#new-tab-button, #alltabs-button):is(:active, [open]) {
   color: var(--frame) !important;
   background-color: var(--frame-ink) !important;
 }
@@ -231,8 +232,7 @@ body {
   content: "=";
 }
 
-#new-tab-button::before,
-#tabs-newtab-button::before {
+#new-tab-button::before {
   content: "+";
 }
 
@@ -254,11 +254,11 @@ body {
 }
 
 #nav-bar:not(:hover, :focus-within) :is(#sidebar-button, #back-button, #forward-button, #stop-reload-button, #unified-extensions-button, .unified-extensions-item, #PanelUI-button:not(:has([open], [badge-status])), #downloads-button:not([attention], [progress], [open])),
-#TabsToolbar:not(:hover, :focus-within) :is(#tabs-newtab-button, #new-tab-button, #alltabs-button):not([open]) {
+#TabsToolbar:not(:hover, :focus-within) :is(#new-tab-button, #alltabs-button):not([open]) {
   opacity: 0 !important;
 }
 
-:is(#sidebar-button, #back-button, #forward-button, #stop-reload-button, #unified-extensions-button, .unified-extensions-item, #PanelUI-button, #downloads-button, #tabs-newtab-button, #new-tab-button, #alltabs-button) {
+:is(#sidebar-button, #back-button, #forward-button, #stop-reload-button, #unified-extensions-button, .unified-extensions-item, #PanelUI-button, #downloads-button, #new-tab-button, #alltabs-button) {
   transition: opacity var(--snap) linear, color var(--snap) linear, background-color var(--snap) linear !important;
 }
 
@@ -305,20 +305,25 @@ body {
   display: flex !important;
   flex-direction: column !important;
   position: fixed !important;
-  inset-inline: var(--side) !important;
-  top: auto !important;
-  bottom: var(--line) !important;
-  width: auto !important;
+  top: calc(100vh - 2 * var(--line)) !important;
+  left: var(--side) !important;
+  width: calc(100vw - 2 * var(--side)) !important;
   height: var(--line) !important;
   margin: 0 !important;
   color: var(--ink) !important;
   font-size: var(--chrome-font-size) !important;
+  transition:
+    top var(--glide) var(--ease),
+    left var(--glide) var(--ease),
+    width var(--glide) var(--ease) !important;
 }
 
 #urlbar > .urlbar-background {
   display: block !important;
   position: absolute !important;
   inset: 0 !important;
+  border: 1px solid transparent !important;
+  transition: background-color var(--glide) linear, border-color var(--glide) linear !important;
 }
 
 #urlbar > .urlbar-input-container {
@@ -328,7 +333,10 @@ body {
   flex: none !important;
   width: 100% !important;
   height: var(--line) !important;
-  transition: opacity var(--snap) linear !important;
+  transition:
+    opacity var(--snap) linear,
+    height var(--glide) var(--ease),
+    padding var(--glide) var(--ease) !important;
 }
 
 moz-urlbar-slot {
@@ -354,6 +362,7 @@ moz-urlbar-slot {
   font: inherit !important;
   text-align: center !important;
   outline: none !important;
+  transition: font-size var(--glide) var(--ease) !important;
 }
 
 #urlbar-input::selection,
@@ -372,20 +381,16 @@ findbar .findbar-textbox::selection {
 }
 
 #urlbar:is([focused], [breakout-extend]) {
-  inset-inline: 0 !important;
   top: var(--pop-top) !important;
-  bottom: auto !important;
+  left: calc(50vw - var(--pop-width) / 2) !important;
   width: var(--pop-width) !important;
-  max-width: calc(100vw - 4ch) !important;
   height: auto !important;
-  margin-inline: auto !important;
-  animation: lw-unfold var(--quick) var(--ease) backwards !important;
 }
 
 #urlbar:is([focused], [breakout-extend]) > .urlbar-background {
   background-color: var(--glass) !important;
   backdrop-filter: var(--frost) !important;
-  border: 1px solid var(--edge) !important;
+  border-color: var(--edge) !important;
 }
 
 #urlbar:is([focused], [breakout-extend]) > .urlbar-input-container {
@@ -586,7 +591,6 @@ findbar .findbar-textbox::selection {
   position: relative !important;
   min-width: 0 !important;
   height: var(--line) !important;
-  padding-inline: 1ch !important;
   overflow: hidden !important;
   background-color: var(--frame) !important;
   color: var(--frame-ink) !important;
@@ -594,84 +598,82 @@ findbar .findbar-textbox::selection {
 
 :root[privatebrowsingmode="temporary"] #TabsToolbar::before {
   content: "[private]";
+  display: flex !important;
+  align-items: center !important;
   position: absolute !important;
-  inset-inline-start: 1ch !important;
+  inset-block: 0 !important;
+  inset-inline-start: 0 !important;
+  z-index: 3 !important;
+  padding-inline: 1ch !important;
+  background-color: var(--frame) !important;
   color: inherit !important;
 }
 
-#TabsToolbar > .toolbar-items {
-  display: flex !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  height: 100% !important;
-}
-
-#TabsToolbar-customization-target {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  height: 100% !important;
-}
-
-#tabbrowser-tabs {
-  display: flex !important;
-  align-items: center !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  height: 100% !important;
-}
-
-#tabbrowser-tabs:has(#pinned-tabs-container > .tabbrowser-tab):not([overflow]) {
-  padding-inline: var(--side) !important;
-}
-
-#pinned-tabs-container,
+#TabsToolbar > .toolbar-items,
+#TabsToolbar-customization-target,
+#tabbrowser-tabs,
 #tabbrowser-arrowscrollbox {
   display: flex !important;
   align-items: center !important;
+  flex: 1 1 auto !important;
   min-width: 0 !important;
   height: 100% !important;
+}
+
+toolbarbutton:is(#scrollbutton-up, #scrollbutton-down)[tooltiptext],
+spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[orient="horizontal"] + *) {
+  display: none !important;
+}
+
+scrollbox[part="scrollbox"][orient="horizontal"] {
+  scroll-snap-type: x mandatory !important;
 }
 
 #pinned-tabs-container {
-  flex: none !important;
-}
-
-#tabbrowser-tabs:not([overflow]) #pinned-tabs-container {
+  display: flex !important;
+  align-items: center !important;
   position: absolute !important;
   inset-block: 0 !important;
-  inset-inline-start: 1ch !important;
+  inset-inline-start: 0 !important;
+  z-index: 2 !important;
+  padding-inline: 1ch !important;
+  background-color: var(--frame) !important;
 }
 
-#tabbrowser-arrowscrollbox {
-  flex: 1 1 auto !important;
+#pinned-tabs-container:not(:has(> .tabbrowser-tab)) {
+  display: none !important;
 }
 
-#tabbrowser-arrowscrollbox:not([overflowing]) {
-  padding-inline-start: 2ch !important;
+:root[privatebrowsingmode="temporary"] #pinned-tabs-container {
+  inset-inline-start: 11ch !important;
 }
 
-#tabbrowser-arrowscrollbox > :is(.tabbrowser-tab, tab-group > .tab-group-label-container):first-child,
+#tabbrowser-arrowscrollbox > .tabbrowser-tab:first-child,
 #tabbrowser-arrowscrollbox > tab-group:first-child > .tab-group-label-container {
-  margin-inline-start: auto !important;
+  margin-inline-start: 50vw !important;
 }
 
 #tabbrowser-arrowscrollbox-periphery {
-  display: flex !important;
-  align-items: center !important;
+  display: block !important;
   flex: none !important;
+  width: 50vw !important;
   height: 100% !important;
-  margin-inline-end: auto !important;
 }
 
-#tabbrowser-arrowscrollbox:not([overflowing]) #tabs-newtab-button {
-  display: flex !important;
+#TabsToolbar :is(#new-tab-button, #alltabs-button) {
+  position: absolute !important;
+  inset-block: 0 !important;
+  z-index: 2 !important;
+  width: 3ch !important;
+  background-color: var(--frame) !important;
 }
 
-#tabbrowser-tabs:not([overflow]) ~ :is(#new-tab-button, #alltabs-button) {
-  display: none !important;
+#new-tab-button {
+  inset-inline-end: 0 !important;
+}
+
+#alltabs-button {
+  inset-inline-end: 3ch !important;
 }
 
 tab-group,
@@ -708,24 +710,34 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 
 .tabbrowser-tab {
   --tok-bg: var(--frame);
-  --tok-ink: var(--frame-dim);
+  --lens-ink: var(--faint);
+  --tok-ink: var(--lens-ink);
+  --w: var(--w3);
   display: flex !important;
   align-items: stretch !important;
-  flex: 0 1 auto !important;
   position: relative !important;
-  flex: 0 1 var(--tab-width) !important;
-  width: var(--tab-width) !important;
-  min-width: var(--tab-min) !important;
-  max-width: var(--tab-width) !important;
+  flex: none !important;
+  width: var(--w) !important;
+  min-width: var(--w) !important;
+  max-width: var(--w) !important;
   height: var(--line) !important;
   overflow: hidden !important;
   background-color: var(--tok-bg) !important;
   color: var(--tok-ink) !important;
   transition:
-    max-width var(--quick) var(--ease),
-    min-width var(--quick) var(--ease),
+    max-width var(--snap) linear,
     background-color var(--snap) linear,
     color var(--snap) linear !important;
+}
+
+.tabbrowser-tab:is([visuallyselected] + .tabbrowser-tab, :has(+ .tabbrowser-tab[visuallyselected])) {
+  --lens-ink: var(--frame-dim);
+  --w: var(--w1);
+}
+
+.tabbrowser-tab:is([visuallyselected] + .tabbrowser-tab + .tabbrowser-tab, :has(+ .tabbrowser-tab + .tabbrowser-tab[visuallyselected])) {
+  --lens-ink: var(--frame-dim);
+  --w: var(--w2);
 }
 
 .tabbrowser-tab:hover,
@@ -737,6 +749,9 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 .tabbrowser-tab[visuallyselected] {
   --tok-bg: var(--frame);
   --tok-ink: var(--frame-ink);
+  --w: var(--w0);
+  scroll-margin-inline: calc(50vw - var(--w0) / 2 - 1px) !important;
+  scroll-snap-align: center !important;
 }
 
 .tabbrowser-tab[visuallyselected] .tab-label {
@@ -744,24 +759,19 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   text-underline-offset: 2px !important;
 }
 
-.tabbrowser-tab[pending]:not([visuallyselected]) {
-  --tok-ink: var(--soft);
-}
-
 .tabbrowser-tab[pinned] {
-  flex: none !important;
   width: auto !important;
   min-width: 0 !important;
   max-width: none !important;
 }
 
 .tabbrowser-tab:not([pinned]):not([fadein]) {
-  min-width: 0.1px !important;
-  max-width: 0.1px !important;
+  --w: 0.1px;
   visibility: hidden !important;
 }
 
 #tabbrowser-tabs[movingtab] .tabbrowser-tab {
+  --w: var(--w1);
   position: relative !important;
 }
 
@@ -853,18 +863,21 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   content: "<!";
 }
 
-.tabbrowser-tab:is([busy], [attention], [titlechanged]) .tab-content::after {
+.tabbrowser-tab:is([attention], [titlechanged]):not([busy]) .tab-content::after {
+  content: "!";
   flex: none !important;
   order: 2 !important;
   margin-inline-start: 1ch !important;
 }
 
-.tabbrowser-tab[busy] .tab-content::after {
-  content: "~";
-}
-
-.tabbrowser-tab:is([attention], [titlechanged]):not([busy]) .tab-content::after {
-  content: "!";
+.tabbrowser-tab[busy] .tab-stack::before {
+  content: "";
+  position: absolute !important;
+  inset-inline: 1ch !important;
+  top: 0 !important;
+  height: 1px !important;
+  background-color: currentColor !important;
+  animation: lw-scan 1s var(--ease) infinite !important;
 }
 
 .tabbrowser-tab:not([pinned]):hover .tab-close-button {
@@ -1279,6 +1292,17 @@ tooltip {
   background-color: var(--paper) !important;
   color: var(--ink) !important;
   padding: 0.15em 1ch !important;
+}
+
+@keyframes lw-scan {
+  from {
+    scale: 0 1;
+    opacity: 1;
+  }
+  to {
+    scale: 1 1;
+    opacity: 0;
+  }
 }
 
 @keyframes lw-unfold {
