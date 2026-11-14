@@ -1,26 +1,29 @@
 :root {
   --font-family: monospace;
   --chrome-font-size: 11px;
-  --line: 17px;
+  --line: 14px;
   --side: 20ch;
+  --tab-width: 24ch;
+  --tab-min: 10ch;
   --pop-top: 24vh;
   --pop-width: clamp(560px, 42vw, 960px);
   --pop-font-size: 22px;
   --pop-row: 40px;
   --pop-result: 22px;
-  --ink: var(--toolbar-text-color, -moz-dialogtext);
-  --paper: var(--toolbar-background-color, -moz-dialog);
-  --frame: var(--lwt-accent-color, color-mix(in srgb, var(--ink) 7%, -moz-dialog));
-  --frame-ink: var(--lwt-text-color, var(--ink));
-  --dim: color-mix(in srgb, currentColor 52%, transparent);
+  --paper: var(--lwt-accent-color, -moz-dialog);
+  --ink: color-mix(in srgb, contrast-color(var(--paper)) 94%, var(--paper));
+  --soft: color-mix(in srgb, var(--ink) 86%, var(--paper));
+  --frame: var(--paper);
+  --frame-ink: var(--ink);
+  --dim: var(--soft);
+  --frame-dim: var(--soft);
   --edge: color-mix(in srgb, var(--ink) 30%, var(--paper));
-  --wash: color-mix(in srgb, var(--ink) 12%, var(--paper));
-  --frame-wash: color-mix(in srgb, var(--frame-ink) 14%, var(--frame));
-  --frame-dim: color-mix(in srgb, var(--frame-ink) 56%, var(--frame));
-  --glass: color-mix(in srgb, var(--paper) 86%, transparent);
+  --wash: color-mix(in srgb, var(--ink) 10%, var(--paper));
+  --frame-wash: var(--wash);
+  --glass: color-mix(in srgb, var(--paper) 94%, transparent);
   --frost: blur(40px) saturate(1.4);
   --accent: var(--focus-outline-color, AccentColor);
-  --warn: light-dark(#c50042, #ff848b);
+  --warn: light-dark(#8a0030, #ffc2ca);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --quick: 140ms;
   --snap: 90ms;
@@ -250,10 +253,19 @@ body {
   inset: 0 !important;
 }
 
+#nav-bar:not(:hover, :focus-within) :is(#sidebar-button, #back-button, #forward-button, #stop-reload-button, #unified-extensions-button, .unified-extensions-item, #PanelUI-button:not(:has([open], [badge-status])), #downloads-button:not([attention], [progress], [open])),
+#TabsToolbar:not(:hover, :focus-within) :is(#tabs-newtab-button, #new-tab-button, #alltabs-button):not([open]) {
+  opacity: 0 !important;
+}
+
+:is(#sidebar-button, #back-button, #forward-button, #stop-reload-button, #unified-extensions-button, .unified-extensions-item, #PanelUI-button, #downloads-button, #tabs-newtab-button, #new-tab-button, #alltabs-button) {
+  transition: opacity var(--snap) linear, color var(--snap) linear, background-color var(--snap) linear !important;
+}
+
 #downloads-button:is([attention], [progress]),
 #unified-extensions-button[attention],
 #PanelUI-menu-button[badge-status] {
-  color: var(--accent) !important;
+  color: inherit !important;
 }
 
 .unified-extensions-item,
@@ -431,11 +443,11 @@ findbar .findbar-textbox::selection {
 }
 
 #star-button-box::before {
-  content: "*";
+  content: "+";
 }
 
-#star-button-box:has(#star-button[starred]) {
-  color: var(--accent) !important;
+#star-button-box:has(#star-button[starred])::before {
+  content: "*";
 }
 
 #reader-mode-button::before {
@@ -443,7 +455,7 @@ findbar .findbar-textbox::selection {
 }
 
 #reader-mode-button[readeractive] {
-  color: var(--accent) !important;
+  color: inherit !important;
 }
 
 #picture-in-picture-button::before {
@@ -487,6 +499,7 @@ findbar .findbar-textbox::selection {
 }
 
 .urlbarView-row[selected] {
+  --soft: color-mix(in srgb, var(--paper) 86%, var(--ink));
   background-color: var(--ink) !important;
   color: var(--paper) !important;
 }
@@ -504,7 +517,7 @@ findbar .findbar-textbox::selection {
   content: "-";
   flex: none !important;
   width: 1ch !important;
-  opacity: 0.55 !important;
+  color: var(--soft) !important;
 }
 
 .urlbarView-row:is([type="search"], [type="rich-search"], [type="tabtosearch"]) .urlbarView-row-inner::before {
@@ -551,7 +564,7 @@ findbar .findbar-textbox::selection {
 .urlbarView-url,
 .urlbarView-action {
   flex: 0 1000 auto !important;
-  opacity: 0.55 !important;
+  color: var(--soft) !important;
 }
 
 .urlbarView-favicon,
@@ -583,7 +596,7 @@ findbar .findbar-textbox::selection {
   content: "[private]";
   position: absolute !important;
   inset-inline-start: 1ch !important;
-  color: var(--accent) !important;
+  color: inherit !important;
 }
 
 #TabsToolbar > .toolbar-items {
@@ -696,13 +709,15 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 
 .tabbrowser-tab {
   --tok-bg: var(--frame);
-  --tok-ink: var(--frame-dim);
+  --tok-ink: var(--frame-ink);
   display: flex !important;
   align-items: stretch !important;
   flex: 0 1 auto !important;
   position: relative !important;
-  min-width: 10ch !important;
-  max-width: 28ch !important;
+  flex: 0 1 var(--tab-width) !important;
+  width: var(--tab-width) !important;
+  min-width: var(--tab-min) !important;
+  max-width: var(--tab-width) !important;
   height: var(--line) !important;
   overflow: hidden !important;
   background-color: var(--tok-bg) !important;
@@ -727,10 +742,12 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 }
 
 .tabbrowser-tab[pending]:not([visuallyselected]) {
-  --tok-ink: color-mix(in srgb, var(--frame-ink) 38%, var(--frame));
+  --tok-ink: var(--soft);
 }
 
 .tabbrowser-tab[pinned] {
+  flex: none !important;
+  width: auto !important;
   min-width: 0 !important;
   max-width: none !important;
 }
@@ -775,19 +792,20 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   content: counter(tab) ":";
   flex: none !important;
   order: -1 !important;
-  opacity: 0.55 !important;
 }
 
 .tab-label-container {
   display: flex !important;
   align-items: center !important;
-  flex: 0 1 auto !important;
+  flex: 1 1 auto !important;
   min-width: 0 !important;
   overflow: hidden !important;
 }
 
 .tab-label {
   display: block !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
   overflow: hidden !important;
   white-space: nowrap !important;
   text-overflow: ".." !important;
@@ -845,7 +863,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   flex: none !important;
   order: 2 !important;
   margin-inline-start: 1ch !important;
-  opacity: 0.7 !important;
 }
 
 .tabbrowser-tab[busy] .tab-content::after {
@@ -875,13 +892,9 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   inset-inline-end: 0 !important;
   z-index: 2 !important;
   width: 3ch !important;
-  background-color: color-mix(in srgb, var(--tok-ink) 16%, var(--tok-bg)) !important;
-  pointer-events: none !important;
-}
-
-.tab-stack:has(.tab-close-button:hover)::after {
   background-color: var(--tok-ink) !important;
   color: var(--tok-bg) !important;
+  pointer-events: none !important;
 }
 
 toolbartabstop {
@@ -1147,6 +1160,7 @@ body:has(#toolbar-menubar:not([inactive])) {
 #unified-extensions-panel,
 #downloadsPanel,
 #widget-overflow,
+#tab-preview-panel,
 #confirmation-hint {
   margin: 0 !important;
   margin-block: 4px !important;
@@ -1162,6 +1176,15 @@ body:has(#toolbar-menubar:not([inactive])) {
   --panel-shadow: none !important;
   --arrowpanel-background: transparent !important;
   --arrowpanel-border-radius: 0 !important;
+}
+
+#tab-preview-panel,
+#tab-preview-panel * {
+  border-radius: 0 !important;
+}
+
+#tab-preview-panel .tab-preview-thumbnail-container {
+  outline: 1px solid var(--edge) !important;
 }
 
 .panel-viewstack,
@@ -1241,13 +1264,13 @@ menupopup > :is(menu, menuitem) {
 }
 
 menupopup > :is(menu, menuitem)[_moz-menuactive]:not([disabled]) {
+  --soft: color-mix(in srgb, var(--paper) 86%, var(--ink));
   background-color: var(--ink) !important;
   color: var(--paper) !important;
 }
 
 .menu-accel {
   color: inherit !important;
-  opacity: 0.55 !important;
 }
 
 #unified-extensions-panel {
