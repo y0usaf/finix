@@ -2009,11 +2009,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1794594067,
-        "narHash": "sha256-t2vaUfBlIRJWq/sI5397av8cfWY2OUC4k36mfBdWceg=",
+        "lastModified": 1794625272,
+        "narHash": "sha256-WbNuWCKzVD78JF8Av7XjuRgIh1B9P4aMJ409YAWOOYo=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "d30461f75d65e51d99fc491093454f4e505b44b3",
+        "rev": "37dec43b3ef58fd3fce12fdfe51999c1445af22f",
         "type": "github"
       },
       "original": {

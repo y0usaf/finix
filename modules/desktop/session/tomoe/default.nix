@@ -2949,23 +2949,23 @@
 
   shaderWallpaperParameters = {
     shaders = map (entry: lib.take 2 entry ++ [(config.user.theme.apply (lib.last entry))]) [
-      ["${./shaders/cassette-squares.glsl}" 30 "light"]
-      ["${./shaders/cassette-led.glsl}" 30 "light"]
-      ["${./shaders/hex-spiral.glsl}" 30 "dark"]
-      ["${./shaders/dot-corridor.glsl}" 30 "dark"]
-      ["${./shaders/su-ei.glsl}" 30 "light"]
-      ["${./shaders/glass-mound.glsl}" 30 "light"]
-      ["${./shaders/llama-herd.glsl}" 240 "light"]
-      ["${./shaders/llama-herd-night.glsl}" 240 "dark"]
-      ["${shaderDir}/liquify.glsl" 30 "light"]
-      ["${shaderDir}/okazz-spheres.glsl" 30 "dark"]
-      ["${./shaders/balatro.glsl}" 30 "dark"]
-      ["${shaderDir}/xmb.glsl" 30 "dark"]
-      ["${shaderDir}/aurora.glsl" 30 "dark"]
-      ["${shaderDir}/stars.glsl" 24 "dark"]
-      ["${shaderDir}/towers.glsl" 24 "dark"]
-      ["${shaderDir}/cubes.glsl" 30 "dark"]
-      ["${shaderDir}/okazz-glyphs.glsl" 30 "dark"]
+      ["${./shaders/cassette-squares.glsl}" 0 "light"]
+      ["${./shaders/cassette-led.glsl}" 0 "light"]
+      ["${./shaders/hex-spiral.glsl}" 0 "dark"]
+      ["${./shaders/dot-corridor.glsl}" 0 "dark"]
+      ["${./shaders/su-ei.glsl}" 0 "light"]
+      ["${./shaders/glass-mound.glsl}" 0 "light"]
+      ["${./shaders/llama-herd.glsl}" 0 "light"]
+      ["${./shaders/llama-herd-night.glsl}" 0 "dark"]
+      ["${shaderDir}/liquify.glsl" 0 "light"]
+      ["${shaderDir}/okazz-spheres.glsl" 0 "dark"]
+      ["${./shaders/balatro.glsl}" 0 "dark"]
+      ["${shaderDir}/xmb.glsl" 0 "dark"]
+      ["${shaderDir}/aurora.glsl" 0 "dark"]
+      ["${shaderDir}/stars.glsl" 0 "dark"]
+      ["${shaderDir}/towers.glsl" 0 "dark"]
+      ["${shaderDir}/cubes.glsl" 0 "dark"]
+      ["${shaderDir}/okazz-glyphs.glsl" 0 "dark"]
     ];
     preview = {
       width = 256;
@@ -3023,7 +3023,7 @@ in {
                                    :anchors '(:top :right :bottom :left)
                                    :layer :overlay
                                    :click-through t
-                                   :background '(:shader "${shaderDir}/trail-pixels.glsl" :fps 60 :idle 0.5)))
+                                   :background '(:trail :cell 9 :life 0.35 :steps 4 :color #xb8e0ffff :idle 0.5)))
               nil))
   '';
 
