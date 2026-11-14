@@ -11,7 +11,6 @@
   };
 
   iconTheme = variant: "${variant}/share/icons/${variant.xcursorThemeName}";
-  iconDir = "${config.user.homeDirectory}/.local/share/icons";
 
   fallback = pkgs.runCommand "pixel-cursor-fallback" {} ''
     mkdir -p $out/share/icons
@@ -36,8 +35,9 @@
           exit 1
           ;;
       esac
-      mkdir -p ${iconDir}
-      ln -sfn "$target" ${iconDir}/${config.user.appearance.cursorTheme}
+      data="''${XDG_DATA_HOME:-$HOME/.local/share}"
+      mkdir -p "$data/icons"
+      ln -sfn "$target" "$data/icons/${config.user.appearance.cursorTheme}"
       dconf write /org/gnome/desktop/interface/cursor-theme "'$theme'"
       dconf write /org/gnome/desktop/interface/cursor-size ${toString config.user.appearance.cursorSize}
     '';
