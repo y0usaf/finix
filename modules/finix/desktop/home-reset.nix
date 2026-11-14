@@ -234,6 +234,7 @@
             ".cache/mesa_shader_cache"
             ".cache/nix"
             ".cache/nv"
+            ".cache/nvidia"
             ".config/AionUi"
             ".config/Frame"
             ".config/GitHub Desktop"
