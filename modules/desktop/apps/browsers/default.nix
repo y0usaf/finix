@@ -219,85 +219,519 @@ in {
       {
         select = ":root";
         set = [
-          ["--theme-frame" "var(--lwt-accent-color, light-dark(#ffffff, #000000))"]
-          ["--theme-toolbar" "var(--toolbar-bgcolor, var(--theme-frame))"]
-          ["--theme-tab-selected" "var(--lwt-selected-tab-background-color, var(--theme-toolbar))"]
-          ["--theme-toolbar-field" "var(--toolbar-field-background-color, var(--theme-toolbar))"]
-          ["--theme-tab-text" "var(--tab-text-color, var(--lwt-tab-text, light-dark(#000000, #ffffff)))"]
           ["--font-family" "monospace"]
           ["--chrome-font-size" "11px"]
-          ["--bar-pad" "2px"]
+          ["--bar-pad" "3px"]
           ["--bar-width" "75vw"]
-          ["--bar-height" "calc(var(--chrome-font-size) + 2 * var(--bar-pad) + 2px)"]
+          ["--bar-height" "calc(var(--chrome-font-size) + 2 * var(--bar-pad))"]
           ["--breakout-width" "50vw"]
           ["--breakout-top" "20vh"]
-          ["--popup-offset-top" "calc(var(--breakout-top) - 100vh)"]
+          ["--chrome-text" "var(--toolbar-text-color, -moz-dialogtext)"]
+          ["--chrome-dim" "color-mix(in srgb, currentColor 55%, transparent)"]
+          ["--chrome-line" "var(--toolbar-field-border-color, light-dark(#d6d5da, #3f3e42))"]
+          ["--chrome-selected" "var(--tab-background-color-selected, light-dark(#e9e9ed, #3e3d42))"]
+          ["--chrome-field" "var(--toolbar-field-background-color, light-dark(#ffffff, #1c1b22))"]
+          ["--chrome-glass" "color-mix(in srgb, var(--chrome-field) 84%, transparent)"]
+          ["--chrome-accent" "AccentColor"]
           ["--tab-min-height" "var(--bar-height) !important"]
+          ["--tab-block-margin" "0px !important"]
+          ["--tab-margin-block" "0px !important"]
+          ["--tab-inline-padding" "0.5em !important"]
+          ["--tab-label-line-height" "1 !important"]
+          ["--tab-close-button-padding" "0px !important"]
+          ["--tab-icon-end-margin" "0.4em !important"]
           ["--urlbar-min-height" "var(--bar-height) !important"]
           ["--urlbar-height" "var(--bar-height) !important"]
           ["--urlbar-container-height" "var(--bar-height) !important"]
           ["--toolbarbutton-inner-padding" "var(--bar-pad) !important"]
           ["--toolbarbutton-outer-padding" "0px !important"]
+          ["--toolbarbutton-padding-inner" "var(--bar-pad) !important"]
+          ["--toolbarbutton-padding-outer" "0px !important"]
           ["--toolbar-start-end-padding" "0px !important"]
-          ["--tab-block-margin" "0px !important"]
-          ["--tab-inline-padding" "0.25em !important"]
-          ["--urlbarview-row-pad" "0.35em"]
-          ["--urlbarview-row-min" "calc(1.4em + 2 * var(--urlbarview-row-pad))"]
+          ["--urlbarview-row-pad" "0.25em"]
+          ["--urlbarview-row-min" "1.6em"]
           ["--urlbarView-row-gutter" "0px !important"]
+          ["--panel-border-radius" "0px !important"]
+          ["--arrowpanel-border-radius" "0px !important"]
+          ["--toolbarbutton-border-radius" "0px !important"]
+          ["--tab-border-radius" "0px !important"]
+          ["--urlbar-border-radius" "0px !important"]
+          ["--urlbar-inner-border-radius" "0px !important"]
+          ["--urlbarView-row-border-radius" "0px !important"]
+          ["--urlbarView-icon-border-radius" "0px !important"]
+          ["--urlbar-background-inset" "0px !important"]
+          ["--panel-menuitem-border-radius" "0px !important"]
+          ["--button-border-radius" "0px !important"]
+          ["--border-radius-small" "0px !important"]
+          ["--border-radius-medium" "0px !important"]
+          ["--border-radius-large" "0px !important"]
+          ["--border-radius-xlarge" "0px !important"]
+          ["--border-radius-xxlarge" "0px !important"]
         ];
       }
       {
-        select = "#TabsToolbar, #nav-bar, #titlebar";
+        select = ":root, panel, menupopup";
         set = [
+          ["font-family" "var(--font-family) !important"]
           ["font-size" "var(--chrome-font-size) !important"]
+          ["color" "var(--chrome-text) !important"]
         ];
       }
       {
         select = "#navigator-toolbox";
         set = [
           ["display" "contents !important"]
+          ["border" "0 !important"]
+          ["background" "transparent !important"]
         ];
       }
       {
-        select = "#toolbar-menubar";
+        select = "#toolbar-menubar[inactive]";
         set = [
-          ["order" "-2 !important"]
+          ["display" "none !important"]
         ];
       }
       {
-        select = "#titlebar";
+        select = "#toolbar-menubar:not([inactive])";
         set = [
           ["order" "-1 !important"]
-          ["background-color" "var(--theme-frame) !important"]
-          ["min-height" "var(--bar-height) !important"]
-          ["max-height" "var(--bar-height) !important"]
+          ["height" "var(--bar-height) !important"]
+          ["min-height" "0 !important"]
+          ["padding" "0 !important"]
+          ["background" "transparent !important"]
         ];
       }
       {
-        select = "#main-window > body > #browser";
+        select = "#browser";
         set = [
-          ["order" "0 !important"]
+          ["padding" "0 !important"]
+        ];
+      }
+      {
+        select = "#PersonalToolbar, #statuspanel, .titlebar-buttonbox-container, .titlebar-spacer";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = "#TabsToolbar, #nav-bar";
+        set = [
+          ["width" "var(--bar-width) !important"]
+          ["margin-inline" "auto !important"]
+          ["margin-block" "0 !important"]
+          ["padding" "0 !important"]
+          ["border" "0 !important"]
+          ["background" "transparent !important"]
+          ["font-size" "var(--chrome-font-size) !important"]
+        ];
+      }
+      {
+        select = "#TabsToolbar";
+        set = [
+          ["height" "var(--bar-height) !important"]
+          ["min-height" "0 !important"]
+          ["max-height" "var(--bar-height) !important"]
+          ["align-items" "center !important"]
         ];
       }
       {
         select = "#nav-bar";
         set = [
           ["order" "1 !important"]
-          ["width" "var(--bar-width) !important"]
+          ["position" "relative !important"]
           ["height" "var(--bar-height) !important"]
-          ["margin" "0 auto !important"]
-          ["border" "0 !important"]
-          ["background-color" "var(--theme-frame) !important"]
+          ["min-height" "0 !important"]
+          ["max-height" "var(--bar-height) !important"]
+          ["align-items" "center !important"]
+        ];
+      }
+      {
+        select = "toolbarspring, #customizableui-special-spring1, #customizableui-special-spring2";
+        set = [
+          ["display" "none !important"]
+        ];
+      }
+      {
+        select = "#nav-bar-customization-target > #downloads-button";
+        set = [
+          ["margin-inline-start" "auto !important"]
         ];
       }
       {
         select = "#nav-bar-customization-target";
         set = [
           ["min-width" "0 !important"]
+          ["align-items" "center !important"]
         ];
       }
       {
-        select = "#PersonalToolbar";
+        select = "#TabsToolbar-customization-target";
+        set = [
+          ["min-width" "0 !important"]
+          ["height" "var(--bar-height) !important"]
+          ["align-items" "center !important"]
+        ];
+      }
+      {
+        select = "#tabbrowser-tabs, #tabbrowser-arrowscrollbox, #pinned-tabs-container";
+        set = [
+          ["min-height" "0 !important"]
+          ["height" "var(--bar-height) !important"]
+          ["align-items" "center !important"]
+        ];
+      }
+      {
+        select = "#tabbrowser-arrowscrollbox:not([overflowing])";
+        set = [
+          ["justify-content" "center !important"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab";
+        set = [
+          ["height" "var(--bar-height) !important"]
+          ["min-height" "0 !important"]
+          ["padding" "0 !important"]
+          ["margin" "0 !important"]
+          ["align-items" "center !important"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab .tab-stack, .tabbrowser-tab .tab-content";
+        set = [
+          ["height" "100% !important"]
+          ["margin" "0 !important"]
+          ["align-items" "center !important"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab .tab-content";
+        set = [
+          ["padding-inline" "var(--tab-inline-padding) !important"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab .tab-label-container";
+        set = [
+          ["min-width" "0 !important"]
+          ["overflow" "hidden !important"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab .tab-background";
+        set = [
+          ["margin" "0 !important"]
+          ["border" "0 !important"]
+          ["border-radius" "0 !important"]
+          ["background" "transparent !important"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab[selected] .tab-background, .tabbrowser-tab[visuallyselected] .tab-background";
+        set = [
+          ["background-color" "var(--chrome-selected) !important"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab:hover:not([selected]) .tab-background";
+        set = [
+          ["background-color" "color-mix(in srgb, currentColor 8%, transparent) !important"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab .tab-label";
+        set = [
+          ["line-height" "1 !important"]
+          ["margin" "0 !important"]
+        ];
+      }
+      {
+        select = ".tab-icon-image, .tab-throbber, .tab-icon-pending, .tab-icon-overlay, .tab-audio-button";
+        set = [
+          ["width" "1em !important"]
+          ["height" "1em !important"]
+          ["min-width" "0 !important"]
+          ["padding" "0 !important"]
+          ["margin-inline-end" "var(--tab-icon-end-margin) !important"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab .tab-close-button";
+        set = [
+          ["width" "1em !important"]
+          ["height" "1em !important"]
+          ["padding" "0 !important"]
+          ["margin-inline-start" "0.4em !important"]
+          ["border-radius" "0 !important"]
+          ["background" "transparent !important"]
+          ["opacity" "0.6"]
+        ];
+      }
+      {
+        select = ".tabbrowser-tab .tab-close-button:hover";
+        set = [
+          ["opacity" "1"]
+          ["background-color" "color-mix(in srgb, currentColor 18%, transparent) !important"]
+        ];
+      }
+      {
+        select = "#TabsToolbar toolbarbutton, #nav-bar toolbarbutton, #nav-bar .toolbarbutton-1";
+        set = [
+          ["appearance" "none !important"]
+          ["min-width" "0 !important"]
+          ["min-height" "0 !important"]
+          ["height" "calc(var(--bar-height) - 2px) !important"]
+          ["margin" "0 !important"]
+          ["padding" "0 var(--bar-pad) !important"]
+          ["border" "0 !important"]
+          ["border-radius" "0 !important"]
+          ["background" "transparent !important"]
+        ];
+      }
+      {
+        select = "#TabsToolbar .toolbarbutton-icon, #nav-bar .toolbarbutton-icon, #nav-bar .toolbarbutton-badge-stack, #nav-bar .unified-extensions-item .toolbarbutton-badge-stack";
+        set = [
+          ["width" "1em !important"]
+          ["height" "1em !important"]
+          ["min-width" "0 !important"]
+          ["padding" "0 !important"]
+          ["margin" "0 !important"]
+        ];
+      }
+      {
+        select = "#nav-bar .unified-extensions-item, #nav-bar #PanelUI-button";
+        set = [
+          ["height" "var(--bar-height) !important"]
+          ["min-height" "0 !important"]
+          ["align-items" "center !important"]
+          ["margin" "0 !important"]
+        ];
+      }
+      {
+        select = "#urlbar-container";
+        set = [
+          ["position" "absolute !important"]
+          ["inset-inline" "0 !important"]
+          ["top" "0 !important"]
+          ["bottom" "0 !important"]
+          ["height" "var(--bar-height) !important"]
+          ["width" "var(--breakout-width) !important"]
+          ["max-width" "100% !important"]
+          ["min-width" "0 !important"]
+          ["margin-inline" "auto !important"]
+          ["margin-block" "0 !important"]
+          ["padding" "0 !important"]
+          ["z-index" "5 !important"]
+        ];
+      }
+      {
+        select = "#urlbar";
+        set = [
+          ["height" "var(--bar-height) !important"]
+          ["min-height" "0 !important"]
+          ["margin" "0 !important"]
+          ["padding" "0 !important"]
+          ["border" "0 !important"]
+          ["border-radius" "0 !important"]
+          ["background" "transparent !important"]
+          ["box-shadow" "none !important"]
+          ["font-size" "var(--chrome-font-size) !important"]
+          ["text-align" "center !important"]
+        ];
+      }
+      {
+        select = "#urlbar > .urlbar-background";
+        set = [
+          ["background" "transparent !important"]
+          ["border" "0 !important"]
+          ["border-radius" "0 !important"]
+          ["box-shadow" "none !important"]
+        ];
+      }
+      {
+        select = "#urlbar:not([breakout-extend]) > .urlbar-input-container";
+        set = [
+          ["height" "var(--bar-height) !important"]
+          ["min-height" "0 !important"]
+          ["padding" "0 !important"]
+          ["border" "0 !important"]
+        ];
+      }
+      {
+        select = "#urlbar-input";
+        set = [
+          ["position" "absolute !important"]
+          ["inset-inline" "0 !important"]
+          ["top" "0 !important"]
+          ["height" "100% !important"]
+          ["width" "auto !important"]
+          ["font-size" "var(--chrome-font-size) !important"]
+          ["text-align" "center !important"]
+          ["margin" "0 !important"]
+          ["padding-inline" "4.5em !important"]
+          ["outline" "none !important"]
+        ];
+      }
+      {
+        select = "#urlbar > .urlbar-input-container";
+        set = [
+          ["position" "relative !important"]
+          ["padding" "0 !important"]
+        ];
+      }
+      {
+        select = ".urlbar-input-box";
+        set = [
+          ["position" "absolute !important"]
+          ["inset-inline" "0 !important"]
+          ["top" "0 !important"]
+          ["height" "100% !important"]
+          ["margin" "0 !important"]
+        ];
+      }
+      {
+        select = "#identity-box, #tracking-protection-icon-container, .urlbar-page-action, #urlbar-searchmode-switcher, #urlbar-go-button, #urlbar-revert-button-container";
+        set = [
+          ["position" "relative !important"]
+          ["z-index" "2 !important"]
+        ];
+      }
+      {
+        select = "#urlbar-input::placeholder";
+        set = [
+          ["opacity" "0.5 !important"]
+        ];
+      }
+      {
+        select = "#urlbar[focused]:not([breakout-extend]) > .urlbar-background";
+        set = [
+          ["background-color" "var(--chrome-field) !important"]
+          ["outline" "1px solid var(--chrome-line) !important"]
+          ["outline-offset" "-1px !important"]
+        ];
+      }
+      {
+        select = "#identity-box, #identity-box:hover, #tracking-protection-icon-container";
+        set = [
+          ["border-radius" "0 !important"]
+          ["background" "transparent !important"]
+        ];
+      }
+      {
+        select = ".urlbar-icon, #identity-box image, #identity-icon, #identity-permission-box image";
+        set = [
+          ["width" "1em !important"]
+          ["height" "1em !important"]
+          ["padding" "0 !important"]
+          ["margin" "0 !important"]
+        ];
+      }
+      {
+        select = "#urlbar[breakout][breakout-extend]";
+        set = [
+          ["position" "fixed !important"]
+          ["inset-inline" "0 !important"]
+          ["top" "var(--breakout-top) !important"]
+          ["bottom" "auto !important"]
+          ["transform" "none !important"]
+          ["width" "var(--breakout-width) !important"]
+          ["min-width" "min(600px, 90vw) !important"]
+          ["max-width" "90vw !important"]
+          ["height" "auto !important"]
+          ["margin-block" "0 !important"]
+          ["margin-inline" "auto !important"]
+          ["padding" "0 !important"]
+          ["border" "0 !important"]
+          ["border-radius" "0 !important"]
+          ["box-shadow" "none !important"]
+          ["font-size" "calc(var(--chrome-font-size) * 1.25) !important"]
+          ["z-index" "999 !important"]
+        ];
+      }
+      {
+        select = "#urlbar[breakout][breakout-extend] > .urlbar-background";
+        set = [
+          ["background-color" "var(--chrome-glass) !important"]
+          ["backdrop-filter" "blur(24px) !important"]
+          ["outline" "1px solid var(--chrome-line) !important"]
+          ["outline-offset" "-1px !important"]
+          ["border" "0 !important"]
+          ["border-radius" "0 !important"]
+        ];
+      }
+      {
+        select = "#urlbar[breakout][breakout-extend] > .urlbar-input-container";
+        set = [
+          ["background" "transparent !important"]
+          ["padding" "var(--bar-pad) 0 !important"]
+          ["border" "0 !important"]
+        ];
+      }
+      {
+        select = "#urlbar-results, .search-one-offs, #urlbar-one-offs-container";
+        set = [
+          ["padding" "0 !important"]
+          ["margin" "0 !important"]
+          ["min-height" "0 !important"]
+        ];
+      }
+      {
+        select = ".urlbarView";
+        set = [
+          ["border-top" "1px solid var(--chrome-line) !important"]
+          ["position" "absolute !important"]
+          ["inset-inline" "0 !important"]
+          ["top" "100% !important"]
+          ["bottom" "auto !important"]
+          ["width" "auto !important"]
+          ["margin" "0 !important"]
+          ["padding" "0 !important"]
+          ["background-color" "var(--chrome-glass) !important"]
+          ["backdrop-filter" "blur(24px) !important"]
+          ["outline" "1px solid var(--chrome-line) !important"]
+          ["outline-offset" "-1px !important"]
+          ["border" "0 !important"]
+          ["border-radius" "0 !important"]
+          ["box-shadow" "none !important"]
+          ["max-height" "calc(100vh - var(--breakout-top) - 3 * var(--bar-height)) !important"]
+          ["overflow-y" "auto !important"]
+          ["font-size" "var(--chrome-font-size) !important"]
+        ];
+      }
+      {
+        select = ".urlbarView-row";
+        set = [
+          ["min-height" "var(--urlbarview-row-min) !important"]
+          ["padding" "0 !important"]
+          ["margin" "0 !important"]
+          ["border-radius" "0 !important"]
+        ];
+      }
+      {
+        select = ".urlbarView-row > .urlbarView-row-inner";
+        set = [
+          ["min-height" "var(--urlbarview-row-min) !important"]
+          ["padding" "var(--urlbarview-row-pad) 0.5em !important"]
+          ["align-items" "center !important"]
+        ];
+      }
+      {
+        select = ".urlbarView-favicon, .urlbarView-type-icon";
+        set = [
+          ["width" "1em !important"]
+          ["height" "1em !important"]
+          ["margin-inline-end" "0.4em !important"]
+        ];
+      }
+      {
+        select = ".urlbarView-url";
+        set = [
+          ["color" "var(--chrome-dim) !important"]
+          ["margin-inline-start" "0.4em !important"]
+        ];
+      }
+      {
+        select = ".urlbarView-row[label]::before, .urlbarView-row[label] > .urlbarView-row-inner::before";
         set = [
           ["display" "none !important"]
         ];
@@ -306,49 +740,208 @@ in {
         at = "@media (-moz-platform: linux)";
         rules = [
           {
-            select = "#notification-popup[side=\"top\"], #permission-popup[side=\"top\"], #identity-popup[side=\"top\"], #protections-popup[side=\"top\"], #editBookmarkPanel[side=\"top\"], #appMenu-popup[side=\"top\"], #unified-extensions-panel[side=\"top\"], #downloadsPanel[side=\"top\"], #widget-overflow[side=\"top\"], #confirmation-hint[side=\"top\"], #customizationui-widget-panel[side=\"top\"]:not(:has(#allTabsMenu-allTabsView))";
+            select = "#notification-popup, #permission-popup, #identity-popup, #protections-popup, #editBookmarkPanel, #appMenu-popup, #unified-extensions-panel, #downloadsPanel, #widget-overflow, #confirmation-hint, #customizationui-widget-panel:not(:has(#allTabsMenu-allTabsView))";
             set = [
-              ["margin-top" "var(--popup-offset-top) !important"]
+              ["margin" "0 !important"]
+              ["margin-bottom" "6px !important"]
+              ["border-radius" "0 !important"]
+              ["background-color" "var(--chrome-glass) !important"]
+              ["backdrop-filter" "blur(24px) !important"]
+              ["outline" "1px solid var(--chrome-line) !important"]
+              ["outline-offset" "-1px !important"]
+              ["box-shadow" "none !important"]
+              ["font-size" "var(--chrome-font-size) !important"]
+            ];
+          }
+          {
+            select = "#appMenu-popup, #unified-extensions-panel, #downloadsPanel, #widget-overflow";
+            set = [
+              ["--panel-background" "transparent !important"]
             ];
           }
         ];
       }
       {
-        select = ".panel-viewstack";
+        select = ".panel-viewstack, .panel-viewcontainer";
         set = [
-          ["max-height" "calc(100vh - var(--breakout-top) - var(--bar-height) - 8px) !important"]
+          ["max-height" "calc(100vh - 2 * var(--breakout-top) - 2px) !important"]
+          ["background" "transparent !important"]
+          ["border-radius" "0 !important"]
         ];
       }
       {
-        select = "#TabsToolbar-customization-target, :root";
+        select = ".panel-subview-body, .panel-header, .panel-footer";
         set = [
-          ["background-color" "var(--theme-frame) !important"]
+          ["padding" "0 !important"]
+          ["border-radius" "0 !important"]
         ];
       }
       {
-        select = ":root, menupopup, panel, toolbar";
+        select = ".panel-subview-body";
         set = [
-          ["--panel-border-radius" "0px !important"]
-          ["--arrowpanel-border-radius" "0px !important"]
-          ["--toolbarbutton-border-radius" "0px !important"]
-          ["--tab-border-radius" "0px !important"]
-          ["--urlbar-border-radius" "0px !important"]
-          ["--border-radius-small" "0px !important"]
-          ["--border-radius-medium" "0px !important"]
-          ["--border-radius-large" "0px !important"]
-          ["--border-radius-xlarge" "0px !important"]
-          ["--border-radius-xxlarge" "0px !important"]
-          ["--button-border-radius" "0px !important"]
-          ["--urlbarview-border-radius" "0px !important"]
-          ["--urlbar-inner-border-radius" "0px !important"]
-          ["--urlbarView-row-border-radius" "0px !important"]
-          ["--urlbarView-icon-border-radius" "0px !important"]
-          ["--urlbar-background-inset" "0px !important"]
+          ["padding-block" "2px !important"]
         ];
       }
       {
-        select = "#urlbar, .urlbar-background, .urlbar-input-container, .tab-background, .toolbarbutton-1, .urlbarView-row";
+        select = ".subviewbutton, .panel-banner-item, .toolbarbutton-1.subviewbutton";
         set = [
+          ["min-height" "1.7em !important"]
+          ["height" "auto !important"]
+          ["padding" "0.1em 0.5em !important"]
+          ["margin" "0 !important"]
+          ["border-radius" "0 !important"]
+        ];
+      }
+      {
+        select = ".panel-header, .unified-extensions-item, .unified-extensions-item-row-wrapper";
+        set = [
+          ["min-height" "0 !important"]
+          ["border-radius" "0 !important"]
+        ];
+      }
+      {
+        select = ".unified-extensions-item-name, .unified-extensions-item-message, .unified-extensions-item-message-deck";
+        set = [
+          ["line-height" "1.35 !important"]
+          ["margin" "0 !important"]
+          ["overflow" "hidden !important"]
+          ["white-space" "nowrap !important"]
+          ["text-overflow" "ellipsis !important"]
+        ];
+      }
+      {
+        select = ".subviewbutton > .menu-iconic-text, .subviewbutton > .toolbarbutton-text";
+        set = [
+          ["margin" "0 !important"]
+        ];
+      }
+      {
+        select = "toolbarseparator, .panel-separator, menuseparator";
+        set = [
+          ["border-top" "1px solid var(--chrome-line) !important"]
+          ["border-bottom" "0 !important"]
+          ["margin" "0.2em 0 !important"]
+          ["padding" "0 !important"]
+          ["height" "0 !important"]
+        ];
+      }
+      {
+        select = "menupopup";
+        set = [
+          ["appearance" "none !important"]
+          ["border" "1px solid var(--chrome-line) !important"]
+          ["border-radius" "0 !important"]
+          ["background-color" "var(--chrome-field) !important"]
+          ["color" "var(--chrome-text) !important"]
+          ["max-height" "90vh !important"]
+        ];
+      }
+      {
+        select = "menupopup > menu, menupopup > menuitem";
+        set = [
+          ["appearance" "none !important"]
+          ["padding" "0.15em 1em 0.15em 0.5em !important"]
+          ["margin" "0 !important"]
+          ["border-radius" "0 !important"]
+        ];
+      }
+      {
+        select = "menu, menuitem";
+        set = [
+          ["border-radius" "0 !important"]
+          ["background-image" "none !important"]
+        ];
+      }
+      {
+        select = "menupopup > menu[_moz-menuactive]:not([disabled]), menupopup > menuitem[_moz-menuactive]:not([disabled]), menu[_moz-menuactive]:not([disabled]), menuitem[_moz-menuactive]:not([disabled])";
+        set = [
+          ["background-color" "var(--chrome-selected) !important"]
+          ["color" "var(--chrome-text) !important"]
+        ];
+      }
+      {
+        select = ".menu-accel, .menu-iconic-accel";
+        set = [
+          ["color" "var(--chrome-dim) !important"]
+          ["opacity" "1 !important"]
+        ];
+      }
+      {
+        select = "findbar";
+        set = [
+          ["width" "var(--bar-width) !important"]
+          ["margin-inline" "auto !important"]
+          ["border-top" "1px solid var(--chrome-line) !important"]
+          ["height" "var(--bar-height) !important"]
+          ["min-height" "0 !important"]
+          ["padding" "0 !important"]
+          ["border" "0 !important"]
+          ["border-radius" "0 !important"]
+          ["background" "transparent !important"]
+          ["font-size" "var(--chrome-font-size) !important"]
+        ];
+      }
+      {
+        select = "findbar .findbar-container, findbar .findbar-textbox, findbar .findbar-find-status, findbar .found-matches, findbar .findbar-button";
+        set = [
+          ["height" "var(--bar-height) !important"]
+          ["min-height" "0 !important"]
+          ["padding" "0 var(--bar-pad) !important"]
+          ["margin" "0 !important"]
+          ["border-radius" "0 !important"]
+          ["font-size" "var(--chrome-font-size) !important"]
+        ];
+      }
+      {
+        select = "findbar .findbar-textbox";
+        set = [
+          ["background-color" "var(--chrome-field) !important"]
+          ["outline" "1px solid var(--chrome-line) !important"]
+          ["outline-offset" "-1px !important"]
+          ["border" "0 !important"]
+        ];
+      }
+      {
+        select = "findbar .findbar-checkbox, findbar .findbar-button";
+        set = [
+          ["padding" "0 0.4em !important"]
+          ["border" "1px solid var(--chrome-line) !important"]
+          ["height" "1.5em !important"]
+          ["min-width" "0 !important"]
+        ];
+      }
+      {
+        select = "findbar .findbar-checkbox[checked='true'], findbar .findbar-button[checked='true']";
+        set = [
+          ["background-color" "var(--chrome-selected) !important"]
+        ];
+      }
+      {
+        select = "#context-navigation > menuitem";
+        set = [
+          ["padding" "0 !important"]
+          ["min-height" "0 !important"]
+        ];
+      }
+      {
+        select = "#context-navigation image, #context-navigation .menu-iconic-icon";
+        set = [
+          ["width" "1.4em !important"]
+          ["height" "1.4em !important"]
+        ];
+      }
+      {
+        select = "#unified-extensions-panel";
+        set = [
+          ["width" "32em !important"]
+          ["max-width" "92vw !important"]
+        ];
+      }
+      {
+        select = "notification-message, #notifications-toolbar";
+        set = [
+          ["min-height" "0 !important"]
+          ["font-size" "var(--chrome-font-size) !important"]
           ["border-radius" "0 !important"]
         ];
       }
@@ -363,200 +956,6 @@ in {
               ["scroll-behavior" "auto !important"]
             ];
           }
-        ];
-      }
-      {
-        select = "#statuspanel, .titlebar-buttonbox-container, .titlebar-spacer, .toolbar-spring, .urlbarView-row[label=\"LibreWolf Suggest\"], toolbarspring";
-        set = [
-          ["display" "none !important"]
-        ];
-      }
-      {
-        select = ":root:not([customizing]) #TabsToolbar";
-        set = [
-          ["margin" "0 auto !important"]
-          ["width" "var(--bar-width) !important"]
-          ["padding" "0 !important"]
-          ["min-height" "0 !important"]
-          ["max-height" "var(--bar-height) !important"]
-          ["background-color" "var(--theme-frame) !important"]
-        ];
-      }
-      {
-        select = "#TabsToolbar, #titlebar, toolbar";
-        set = [
-          ["margin" "0 !important"]
-          ["padding" "0 !important"]
-        ];
-      }
-      {
-        select = "#tabbrowser-arrowscrollbox, #tabbrowser-tabs, #tabbrowser-tabs > .tabbrowser-arrowscrollbox, .tabbrowser-tab";
-        set = [
-          ["min-height" "0 !important"]
-        ];
-      }
-      {
-        select = "#tabbrowser-arrowscrollbox:not([overflowing])";
-        set = [
-          ["--uc-flex-justify" "center !important"]
-        ];
-      }
-      {
-        select = "scrollbox[orient=\"horizontal\"] > slot";
-        set = [
-          ["justify-content" "var(--uc-flex-justify, initial) !important"]
-        ];
-      }
-      {
-        select = ".tabbrowser-tab";
-        set = [
-          ["height" "var(--bar-height) !important"]
-          ["align-items" "center !important"]
-          ["margin-bottom" "0 !important"]
-          ["background-color" "var(--theme-frame) !important"]
-        ];
-      }
-      {
-        select = ".tabbrowser-tab .tab-content, .tabbrowser-tab .tab-background, .tabbrowser-tab .tab-stack";
-        set = [
-          ["margin" "0 !important"]
-        ];
-      }
-      {
-        select = ".tabbrowser-tab[selected=\"true\"], .tabbrowser-tab[selected=\"true\"] .tab-background, .tabbrowser-tab[visuallyselected=\"true\"], .tabbrowser-tab[visuallyselected=\"true\"] .tab-background";
-        set = [
-          ["background-color" "var(--theme-tab-selected) !important"]
-        ];
-      }
-      {
-        select = "#PersonalToolbar toolbarbutton, #TabsToolbar toolbarbutton, #nav-bar toolbarbutton, .toolbarbutton-1, toolbar .toolbarbutton-1, :root:not([customizing]) #TabsToolbar .titlebar-button, :root:not([customizing]) #tabbrowser-tabs .tabs-newtab-button, :root:not([customizing]) #tabs-newtab-button";
-        set = [
-          ["-moz-appearance" "none !important"]
-          ["margin" "0 !important"]
-          ["padding" "0 0.25em !important"]
-        ];
-      }
-      {
-        select = ".tab-icon-image, .toolbarbutton-icon, .urlbar-icon";
-        set = [
-          ["width" "1em !important"]
-          ["height" "auto !important"]
-          ["padding" "0 !important"]
-        ];
-      }
-      {
-        select = ".tab-icon-image";
-        set = [
-          ["margin-right" "0.3em !important"]
-        ];
-      }
-      {
-        select = "#urlbar-container";
-        set = [
-          ["font-family" "var(--font-family) !important"]
-          ["margin" "0 !important"]
-          ["padding" "0 !important"]
-          ["z-index" "1 !important"]
-        ];
-      }
-      {
-        select = "#urlbar";
-        set = [
-          ["min-height" "var(--bar-height) !important"]
-          ["border-color" "transparent !important"]
-        ];
-      }
-      {
-        select = "#urlbar:not([breakout-extend])";
-        set = [
-          ["height" "var(--bar-height) !important"]
-        ];
-      }
-      {
-        select = "#urlbar:not([breakout-extend]) > .urlbar-input-container";
-        set = [
-          ["height" "var(--bar-height) !important"]
-          ["min-height" "var(--bar-height) !important"]
-        ];
-      }
-      {
-        select = "#urlbar-input";
-        set = [
-          ["margin" "0 0.5em !important"]
-          ["text-align" "center !important"]
-        ];
-      }
-      {
-        select = "#urlbar > .urlbar-input-container";
-        set = [
-          ["padding" "0 !important"]
-          ["border" "0 !important"]
-        ];
-      }
-      {
-        select = "#urlbar[breakout][breakout-extend]";
-        set = [
-          ["width" "var(--breakout-width) !important"]
-          ["min-width" "min(600px, 90vw) !important"]
-          ["top" "var(--breakout-top) !important"]
-          ["left" "50% !important"]
-          ["position" "fixed !important"]
-          ["transform" "translateX(-50%) !important"]
-          ["z-index" "999 !important"]
-          ["margin" "0 !important"]
-          ["box-shadow" "0 15px 30px rgba(0, 0, 0, 0.2) !important"]
-          ["font-size" "calc(var(--chrome-font-size) * 1.3) !important"]
-        ];
-      }
-      {
-        select = "#urlbar[breakout][breakout-extend] > .urlbar-background, #urlbar[breakout][breakout-extend] > .urlbar-input-container";
-        set = [
-          ["background-color" "color-mix(in srgb, var(--theme-toolbar-field) 75%, transparent) !important"]
-          ["backdrop-filter" "blur(30px) !important"]
-          ["outline" "1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.2)) !important"]
-          ["outline-offset" "-1px !important"]
-        ];
-      }
-      {
-        select = ".urlbarView";
-        set = [
-          ["max-height" "60vh !important"]
-          ["overflow-y" "auto !important"]
-          ["bottom" "100% !important"]
-          ["top" "auto !important"]
-        ];
-      }
-      {
-        select = ".urlbarView-row";
-        set = [
-          ["min-height" "var(--urlbarview-row-min) !important"]
-        ];
-      }
-      {
-        select = ".urlbarView-row > .urlbarView-row-inner";
-        set = [
-          ["min-height" "var(--urlbarview-row-min) !important"]
-          ["padding-block" "var(--urlbarview-row-pad) !important"]
-          ["padding-inline" "0.5em !important"]
-        ];
-      }
-      {
-        select = ".urlbarView-row-inner *";
-        set = [
-          ["padding" "0 !important"]
-          ["margin" "0 !important"]
-        ];
-      }
-      {
-        select = ".urlbarView-favicon";
-        set = [
-          ["margin-inline-end" "0.4em !important"]
-        ];
-      }
-      {
-        select = ":root[inFullscreen] #nav-bar";
-        set = [
-          ["display" "none !important"]
         ];
       }
     ];
