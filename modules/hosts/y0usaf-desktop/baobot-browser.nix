@@ -118,11 +118,11 @@ in {
     ui.tomoe.extraConfig =
       builtins.readFile "${flakeInputs.tomoe}/examples/special.lisp"
       + ''
-        (setf +special-bindings+ '((\"t\" :taobao :park nil)))
-        (define-extension \"baobot-chromium\" (:reads ()) (snapshot state event)
+        (setf +special-bindings+ '(("t" :taobao :park nil)))
+        (define-extension "baobot-chromium" (:reads ()) (snapshot state event)
           (declare (ignore snapshot event))
           (values state
-                  (list (window-rule :baobot-chromium :app-id \"${appId}\" :properties '((:special . \"taobao\"))))
+                  (list (window-rule :baobot-chromium :app-id "${appId}" :properties '((:special . "taobao"))))
                   nil))
       '';
 
