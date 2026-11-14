@@ -100,6 +100,7 @@ in {
       : "''${OMP_BOT_CHAT_LOOK_EXTENSION:=${ext}/chat-look.ts}"
       : "''${OMP_BOT_OPTCHAT:=${ext}/optchat}"
       : "''${OMP_BOT_PERSIST:=${persist}}"
+      : "''${OMP_BOT_MODEL:=${config.user.dev.modelCatalog.defaultProvider}/${config.user.dev.modelCatalog.defaultModel}}"
     '';
     ".config/tern/plugins/omp-bot.path".text = "${src}/tern\n";
   };
