@@ -117,8 +117,7 @@
     "browser.toolbars.bookmarks.visibility" = "never";
 
     "media.hardware-video-decoding.enabled" = true;
-    "media.ffmpeg.vaapi.enabled" = true;
-    "widget.dmabuf.force-enabled" = true;
+    "media.ffmpeg.vaapi.enabled" = false;
 
     "browser.sessionstore.interval" = 15000;
     "network.http.max-persistent-connections-per-server" = 10;
@@ -162,7 +161,7 @@ in {
     ".mozilla"
   ];
   environment.systemPackages = [
-    ((librewolfPkgs.librewolf-bin.override {
+    (librewolfPkgs.librewolf-bin.override {
       extraPrefs =
         lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") lockedPrefs
         + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
@@ -194,9 +193,7 @@ in {
             ./userscripts/x-translator.user.js
           ];
         };
-    }).overrideAttrs (old: {
-      makeWrapperArgs = old.makeWrapperArgs ++ ["--set" "NVD_BACKEND" "direct" "--set" "MOZ_DISABLE_RDD_SANDBOX" "1"];
-    }))
+    })
   ];
   user.files = {
     ".librewolf/profiles.ini" = {
