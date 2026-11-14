@@ -305,6 +305,16 @@ in {
         select = "#browser";
         set = [
           ["padding" "0 !important"]
+          ["grid-row" "2 !important"]
+          ["grid-column" "1 / -1 !important"]
+          ["min-height" "0 !important"]
+          ["min-width" "0 !important"]
+        ];
+      }
+      {
+        select = "#notifications-toolbar";
+        set = [
+          ["display" "none !important"]
         ];
       }
       {
@@ -314,10 +324,37 @@ in {
         ];
       }
       {
+        select = "body";
+        set = [
+          ["position" "relative !important"]
+          ["display" "grid !important"]
+          ["grid-template-columns" "auto minmax(0, 1fr) !important"]
+          ["grid-template-rows" "var(--bar-height) minmax(0, 1fr) !important"]
+        ];
+      }
+      {
+        select = "#browser";
+        set = [
+          ["flex" "1 1 100% !important"]
+          ["width" "100% !important"]
+          ["order" "2 !important"]
+        ];
+      }
+      {
+        select = "#TabsToolbar";
+        set = [
+          ["grid-row" "1 !important"]
+          ["grid-column" "1 !important"]
+          ["width" "25vw !important"]
+          ["min-width" "12em !important"]
+          ["max-width" "calc(50vw - 4em) !important"]
+          ["margin" "0 !important"]
+          ["overflow" "hidden !important"]
+        ];
+      }
+      {
         select = "#TabsToolbar, #nav-bar";
         set = [
-          ["width" "var(--bar-width) !important"]
-          ["margin-inline" "auto !important"]
           ["margin-block" "0 !important"]
           ["padding" "0 !important"]
           ["border" "0 !important"]
@@ -337,7 +374,9 @@ in {
       {
         select = "#nav-bar";
         set = [
-          ["order" "1 !important"]
+          ["grid-row" "1 !important"]
+          ["grid-column" "2 !important"]
+          ["width" "auto !important"]
           ["position" "relative !important"]
           ["height" "var(--bar-height) !important"]
           ["min-height" "0 !important"]
@@ -540,7 +579,7 @@ in {
           ["position" "absolute !important"]
           ["inset-inline" "0 !important"]
           ["top" "0 !important"]
-          ["bottom" "0 !important"]
+          ["height" "var(--bar-height) !important"]
           ["height" "var(--bar-height) !important"]
           ["width" "var(--breakout-width) !important"]
           ["max-width" "100% !important"]
@@ -770,7 +809,7 @@ in {
             select = "#notification-popup, #permission-popup, #identity-popup, #protections-popup, #editBookmarkPanel, #appMenu-popup, #unified-extensions-panel, #downloadsPanel, #widget-overflow, #confirmation-hint, #customizationui-widget-panel:not(:has(#allTabsMenu-allTabsView))";
             set = [
               ["margin" "0 !important"]
-              ["margin-bottom" "6px !important"]
+              ["margin-top" "6px !important"]
               ["border-radius" "0 !important"]
               ["background-color" "var(--chrome-glass) !important"]
               ["backdrop-filter" "blur(24px) !important"]
