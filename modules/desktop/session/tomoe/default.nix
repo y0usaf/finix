@@ -2947,26 +2947,112 @@
 
   shaderDir = "${inputPackages.tomoe.default}/share/tomoe/examples/shaders";
 
+  shaderWallpapers = [
+    {
+      name = "cassette-squares";
+      path = "${./shaders/cassette-squares.glsl}";
+      mode = "light";
+    }
+    {
+      name = "cassette-led";
+      path = "${./shaders/cassette-led.glsl}";
+      mode = "light";
+    }
+    {
+      name = "hex-spiral";
+      path = "${./shaders/hex-spiral.glsl}";
+      mode = "dark";
+    }
+    {
+      name = "dot-corridor";
+      path = "${./shaders/dot-corridor.glsl}";
+      mode = "dark";
+    }
+    {
+      name = "su-ei";
+      path = "${./shaders/su-ei.glsl}";
+      mode = "light";
+    }
+    {
+      name = "glass-mound";
+      path = "${./shaders/glass-mound.glsl}";
+      mode = "light";
+    }
+    {
+      name = "llama-herd";
+      path = "${./shaders/llama-herd.glsl}";
+      mode = "light";
+    }
+    {
+      name = "llama-herd-night";
+      path = "${./shaders/llama-herd-night.glsl}";
+      mode = "dark";
+    }
+    {
+      name = "liquify";
+      path = "${shaderDir}/liquify.glsl";
+      mode = "light";
+    }
+    {
+      name = "okazz-spheres";
+      path = "${shaderDir}/okazz-spheres.glsl";
+      mode = "dark";
+    }
+    {
+      name = "balatro";
+      path = "${./shaders/balatro.glsl}";
+      mode = "dark";
+    }
+    {
+      name = "xmb";
+      path = "${shaderDir}/xmb.glsl";
+      mode = "dark";
+    }
+    {
+      name = "aurora";
+      path = "${shaderDir}/aurora.glsl";
+      mode = "dark";
+    }
+    {
+      name = "stars";
+      path = "${shaderDir}/stars.glsl";
+      mode = "dark";
+    }
+    {
+      name = "towers";
+      path = "${shaderDir}/towers.glsl";
+      mode = "dark";
+    }
+    {
+      name = "cubes";
+      path = "${shaderDir}/cubes.glsl";
+      mode = "dark";
+    }
+    {
+      name = "okazz-glyphs";
+      path = "${shaderDir}/okazz-glyphs.glsl";
+      mode = "dark";
+    }
+  ];
+
+  wallpaperNames = map (entry: entry.name) shaderWallpapers;
+
+  wallpaper = name:
+    let
+      found = lib.filter (entry: entry.name == name) shaderWallpapers;
+    in
+      if found == []
+      then throw "user.ui.tomoe.wallpapers: no shader wallpaper named ${name}; there is ${lib.concatStringsSep ", " wallpaperNames}"
+      else builtins.head found;
+
   shaderWallpaperParameters = {
-    shaders = map (entry: lib.take 2 entry ++ [(config.user.theme.apply (lib.last entry))]) [
-      ["${./shaders/cassette-squares.glsl}" 0 "light"]
-      ["${./shaders/cassette-led.glsl}" 0 "light"]
-      ["${./shaders/hex-spiral.glsl}" 0 "dark"]
-      ["${./shaders/dot-corridor.glsl}" 0 "dark"]
-      ["${./shaders/su-ei.glsl}" 0 "light"]
-      ["${./shaders/glass-mound.glsl}" 0 "light"]
-      ["${./shaders/llama-herd.glsl}" 0 "light"]
-      ["${./shaders/llama-herd-night.glsl}" 0 "dark"]
-      ["${shaderDir}/liquify.glsl" 0 "light"]
-      ["${shaderDir}/okazz-spheres.glsl" 0 "dark"]
-      ["${./shaders/balatro.glsl}" 0 "dark"]
-      ["${shaderDir}/xmb.glsl" 0 "dark"]
-      ["${shaderDir}/aurora.glsl" 0 "dark"]
-      ["${shaderDir}/stars.glsl" 0 "dark"]
-      ["${shaderDir}/towers.glsl" 0 "dark"]
-      ["${shaderDir}/cubes.glsl" 0 "dark"]
-      ["${shaderDir}/okazz-glyphs.glsl" 0 "dark"]
-    ];
+    shaders = map (entry: [
+      entry.path
+      0
+      (config.user.theme.apply entry.mode)
+      entry.mode
+    ]) (map wallpaper cfg.wallpapers);
+    mode = config.user.daylight.mode;
     preview = {
       width = 256;
       height = 144;
@@ -3060,6 +3146,12 @@ in {
       type = lib.types.lines;
       default = "";
       description = "Extra Common Lisp appended to the generated ~/.config/tomoe/init.lisp.";
+    };
+
+    wallpapers = lib.mkOption {
+      type = lib.types.listOf (lib.types.enum wallpaperNames);
+      default = wallpaperNames;
+      description = "Shader wallpapers in menu order: what the wallpaper menu offers and what a session may pick for the sun's mode. Each one carries the colour scheme it applies, so a session that starts at night picks the dark one by itself.";
     };
 
     bar = {
@@ -4123,31 +4215,54 @@ in {
 
       (define-extension "shader-wallpaper" (:reads (:command :ui :outputs) :state nil) (snapshot state event)
         (let* ((shaders (getf +shader-wallpaper+ :shaders))
-               (count (length shaders)))
-          (destructuring-bind (&key (index 0) menu) state
+               (count (length shaders))
+               (probe (getf +shader-wallpaper+ :mode)))
+          (destructuring-bind (&key index menu mode ticks) state
             (when (equal (getf event :owner) "shader-wallpaper")
               (if (equal (if (eq (getf event :type) :command)
                              (getf event :name)
                              (getf event :command))
                          "shader-wallpaper-menu")
-                  (setf menu index)
+                  (setf menu (or index 0))
                   (multiple-value-bind (action choice) (and menu (menu-choice event menu count))
                     (case action
                       (:select (setf index choice menu nil))
                       (:cancel (setf menu nil))
                       (:move (setf menu choice))))))
-            (setf index (mod index count) menu (and menu (mod menu count)))
-            (let ((shown (nth (or menu index) shaders))
-                  (command (third (nth index shaders))))
-              (values (list :index index :menu menu)
-                      (list* (define-command "shader-wallpaper-menu"
-                               :description "Choose the shader wallpaper.")
-                             (apply #'bind-key (getf +shader-wallpaper+ :bind))
-                             (shell-surface :shader-wallpaper (ui :stack)
-                                            :anchors '(:top :right :bottom :left) :layer :background
-                                            :background (list :shader (first shown) :fps (second shown)))
-                             (append (when command (list (exec-async :theme command)))
-                                     (when menu (shader-wallpaper--menu shaders menu (context snapshot :outputs)))))
+            (flet ((follow (name)
+                     (let ((found (position name shaders :test #'equal
+                                                   :key (lambda (entry) (fourth entry)))))
+                       (when (and found (not (equal name mode)))
+                         (setf index found mode name)))))
+              (case (getf event :type)
+                (:timer
+                 (when (equal (getf event :name) :shader-mode-poll)
+                   (setf ticks (1+ (or ticks 0)))))
+                (:exec
+                 (when (and (equal (getf event :name) :shader-mode)
+                            (eql (getf event :code) 0))
+                   (follow (string-trim '(#\Space #\Tab #\Newline)
+                                        (or (getf event :stdout) "")))))))
+            (when index (setf index (mod index count)))
+            (setf menu (and menu (mod menu count)))
+            (let* ((slot (or menu index))
+                   (shown (and slot (nth slot shaders)))
+                   (command (and index (third (nth index shaders)))))
+              (values (list :index index :menu menu :mode mode :ticks ticks)
+                      (append (list (define-command "shader-wallpaper-menu"
+                                      :description "Choose the shader wallpaper.")
+                                    (apply #'bind-key (getf +shader-wallpaper+ :bind))
+                                    (interval :shader-mode-poll 30000))
+                              (when (and index shown)
+                                (list (shell-surface :shader-wallpaper (ui :stack)
+                                                     :anchors '(:top :right :bottom :left)
+                                                     :layer :background
+                                                     :background (list :shader (first shown) :fps (second shown)))))
+                              (when probe
+                                (list (exec-async :shader-mode (format nil "~A # ~D" probe (or ticks 0)))))
+                              (when command (list (exec-async :theme command)))
+                              (when menu
+                                (shader-wallpaper--menu shaders menu (context snapshot :outputs))))
                       nil)))))
     ''
     "(defparameter +peek+ ${toLisp peekParameters})"

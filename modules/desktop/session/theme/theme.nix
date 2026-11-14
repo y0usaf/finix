@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   generators,
@@ -362,7 +363,9 @@
     runtimeInputs = [pkgs.coreutils pkgs.dconf];
     text = ''
       case "''${1:-}" in
-        ${lib.concatMapStringsSep "\n  " (name: "${name}) gtk=${gtkThemes.${name}} ;;") (builtins.attrNames schemes)}
+        ${lib.concatMapStringsSep "\n  "
+          (name: "${name}) gtk=${gtkThemes.${name}}; cursor=(${config.user.appearance.applyCursor name}) ;;")
+          (builtins.attrNames schemes)}
         *)
           echo "usage: theme <${lib.concatStringsSep "|" (builtins.attrNames schemes)}>" >&2
           exit 1
@@ -390,6 +393,7 @@
 
       dconf write /org/gnome/desktop/interface/color-scheme "'prefer-$1'"
       dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk'"
+      "''${cursor[@]}"
     '';
   };
 in {
@@ -400,7 +404,7 @@ in {
       if schemes ? ${name}
       then "${lib.getExe theme} ${name}"
       else throw "theme: no colour scheme named ${name} in colorschemes.json; there is light and dark";
-    description = "The shell command that applies the light or dark colour scheme from colorschemes.json to every themed program at once, and sets the desktop colour-scheme and GTK theme that portal-aware and GTK3 apps follow live.";
+    description = "The shell command that applies the light or dark colour scheme from colorschemes.json to every themed program at once, sets the desktop colour-scheme and GTK theme that portal-aware and GTK3 apps follow live, and points the session cursor at the light or dark variant.";
   };
 
   config.environment.systemPackages = [theme pkgs.dconf adwaitaDark];

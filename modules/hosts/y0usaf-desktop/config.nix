@@ -137,6 +137,7 @@ in {
     ui.tomoe.bar.modules = ["media" "cpu" "memory" "time" "date" "gpu" "vram" "frame"];
     ui.tomoe.bar.style = "spine";
     ui.tomoe.bar.scale = 1.5;
+    ui.tomoe.wallpapers = ["llama-herd" "llama-herd-night"];
 
     gaming = {
       p4g.enable = true;

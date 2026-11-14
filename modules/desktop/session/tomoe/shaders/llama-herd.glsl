@@ -6,8 +6,8 @@ const vec3 CLOUD = vec3(1.000, 0.992, 0.973);
 const vec3 GROUND = vec3(0.863, 0.773, 0.627);
 const vec3 EDGE = vec3(0.722, 0.592, 0.420);
 const vec3 PEBBLE = vec3(0.780, 0.671, 0.510);
-const vec3 BODY = vec3(0.851, 0.737, 0.580);
-const vec3 TIP = vec3(0.478, 0.337, 0.220);
+const vec3 COAT[4] = vec3[4](vec3(0.902, 0.831, 0.702), vec3(0.851, 0.737, 0.580), vec3(0.663, 0.502, 0.353), vec3(0.400, 0.318, 0.259));
+const vec3 COAT_TIP[4] = vec3[4](vec3(0.678, 0.588, 0.475), vec3(0.478, 0.337, 0.220), vec3(0.400, 0.278, 0.176), vec3(0.914, 0.878, 0.812));
 const vec3 EYE = vec3(0.180, 0.125, 0.094);
 const vec3 CACTUS = vec3(0.431, 0.608, 0.353);
 const vec3 BANG = vec3(0.910, 0.408, 0.290);
@@ -105,7 +105,7 @@ vec3 scenery(vec2 p, float sw, float ground, float time) {
     return color;
 }
 
-vec3 llama(vec2 p, vec2 o, float s, bool air, vec3 color) {
+vec3 llama(vec2 p, vec2 o, float s, bool air, int coat, vec3 color) {
     vec2 c = floor((p - o) / s);
     if (c.x < 0.0 || c.y < 0.0 || c.x > 11.0 || c.y > 11.0) {
         return color;
@@ -125,10 +125,10 @@ vec3 llama(vec2 p, vec2 o, float s, bool air, vec3 color) {
         return EYE;
     }
     if (bit(body, col)) {
-        return BODY;
+        return COAT[coat];
     }
     if (bit(tips, col)) {
-        return TIP;
+        return COAT_TIP[coat];
     }
     return color;
 }
@@ -193,7 +193,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
                 }
             }
         }
-        color = llama(pf, o, s, at.y < -3.0 || jet, color);
+        color = llama(pf, o, s, at.y < -3.0 || jet, i, color);
         if (jet) {
             float flame = t >= t1 + JET_ON + 0.2 ? 4.0 + mod(floor(iTime * 20.0), 3.0) + (flying ? 5.0 : 0.0) : 0.0;
             color = jetpack(pf, o, s, flame, color);
