@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  inputPackages,
   ...
 }: let
   inherit (config.user.ui.fonts) mainFontName;
@@ -35,8 +34,8 @@ in {
       ".config/gtk-3.0/settings.ini" = {
         generator = lib.generators.toINI {};
         value.Settings = {
-          gtk-cursor-theme-name = inputPackages.cursors.deepin-dark.xcursorThemeName;
-          gtk-cursor-theme-size = "18";
+          gtk-cursor-theme-name = config.user.appearance.cursorTheme;
+          gtk-cursor-theme-size = toString config.user.appearance.cursorSize;
           gtk-font-name = "${mainFontName} 12";
           gtk-xft-antialias = 1;
           gtk-xft-dpi = config.user.appearance.dpi * 1024;
@@ -106,8 +105,8 @@ in {
       ".config/gtk-4.0/settings.ini" = {
         generator = lib.generators.toINI {};
         value.Settings = {
-          gtk-cursor-theme-name = inputPackages.cursors.deepin-dark.xcursorThemeName;
-          gtk-cursor-theme-size = "18";
+          gtk-cursor-theme-name = config.user.appearance.cursorTheme;
+          gtk-cursor-theme-size = toString config.user.appearance.cursorSize;
           gtk-font-name = "${mainFontName} 12";
         };
       };
