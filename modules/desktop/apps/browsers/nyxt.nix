@@ -29,6 +29,14 @@
 in {
   environment.systemPackages = [nyxt];
   system.build.nyxt = nyxt;
+  user.files.".config/nyxt/config.lisp".text = ''
+    (sb-int:encapsulate 'nyxt/renderer/cef::configure-appimage-cef 'wayland
+      (lambda (f interface)
+        (funcall f interface)
+        (setf (cef:launch-options interface)
+              (append (cef:launch-options interface)
+                      '("--ozone-platform=wayland" "--use-angle=gl" "--disable-features=Vulkan")))))
+  '';
   user.persist.directories = [
     ".config/nyxt"
     ".local/share/nyxt"
