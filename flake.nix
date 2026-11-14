@@ -127,11 +127,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    glide-browser = {
-      url = "github:glide-browser/glide.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     phi = {
       url = "git+ssh://git@github.com/y0usaf/phi.git?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";

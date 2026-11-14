@@ -117,23 +117,17 @@
     "browser.tabs.inTitlebar" = 0;
     "browser.toolbars.bookmarks.visibility" = "never";
 
-    "gfx.webrender.all" = true;
     "media.hardware-video-decoding.enabled" = true;
-    "media.ffmpeg.vaapi.enabled" = false;
-    "layers.acceleration.disabled" = false;
+    "media.ffmpeg.vaapi.enabled" = true;
+    "widget.dmabuf.force-enabled" = true;
 
     "browser.sessionstore.interval" = 15000;
     "network.http.max-persistent-connections-per-server" = 10;
-    "browser.cache.disk.enable" = false;
-    "browser.cache.memory.enable" = true;
-    "browser.cache.memory.capacity" = 1048576;
+    "browser.cache.disk.enable" = true;
     "browser.sessionhistory.max_entries" = 50;
     "network.prefetch-next" = true;
 
     "browser.theme.dark-private-windows" = false;
-
-    "dom.webcomponents.enabled" = true;
-    "layout.css.shadow-parts.enabled" = true;
 
     "browser.ml.enable" = false;
     "browser.ml.chat.enabled" = false;
@@ -162,7 +156,6 @@
   };
 in {
   user.persist.directories = [
-    ".config/glide"
     ".cache/librewolf"
     ".config/firefox"
     ".config/librewolf"
@@ -170,7 +163,7 @@ in {
     ".mozilla"
   ];
   environment.systemPackages = [
-    (librewolfPkgs.librewolf-bin.override {
+    ((librewolfPkgs.librewolf-bin.override {
       extraPrefs =
         lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") lockedPrefs
         + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
@@ -202,36 +195,11 @@ in {
             ./userscripts/x-translator.user.js
           ];
         };
-    })
-    (pkgs.wrapFirefox (pkgs.callPackage "${flakeInputs.glide-browser}/package.nix" {}) {
-      pname = "glide-browser";
-      extraPrefs =
-        lib.concatMapAttrsStringSep "\n" (name: value: "lockPref(\"${name}\", ${builtins.toJSON value});") (builtins.removeAttrs lockedPrefs ["browser.nova.enabled"])
-        + "\ndefaultPref(\"browser.display.use_document_fonts\", 0);";
-      extraPolicies =
-        policies
-        // {
-          DisableFirefoxAccounts = false;
-          ExtensionSettings = builtins.removeAttrs policies.ExtensionSettings ["vimium-c@gdh1995.cn"];
-        };
-    })
+    }).overrideAttrs (old: {
+      makeWrapperArgs = old.makeWrapperArgs ++ ["--set" "NVD_BACKEND" "direct" "--set" "MOZ_DISABLE_RDD_SANDBOX" "1"];
+    }))
   ];
   user.files = {
-    ".config/glide/glide/profiles.ini" = {
-      generator = lib.generators.toINI {};
-      value = {
-        Profile0 = {
-          Name = "default";
-          IsRelative = 1;
-          Path = userName;
-          Default = 1;
-        };
-        General = {
-          StartWithLastProfile = 1;
-          Version = 2;
-        };
-      };
-    };
     ".librewolf/profiles.ini" = {
       generator = lib.generators.toINI {};
       value = {

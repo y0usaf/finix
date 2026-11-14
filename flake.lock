@@ -687,49 +687,7 @@
         "type": "github"
       }
     },
-    "glide-browser": {
-      "inputs": {
-        "home-manager": "home-manager",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792621440,
-        "narHash": "sha256-e4MNi8eB64VPnCRAcDziSSFdyVOzpgi4vPa6Tbc8ii8=",
-        "owner": "glide-browser",
-        "repo": "glide.nix",
-        "rev": "d5725b07982374282336e29c9aa17157e477e5c8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "glide-browser",
-        "repo": "glide.nix",
-        "type": "github"
-      }
-    },
     "home-manager": {
-      "inputs": {
-        "nixpkgs": [
-          "glide-browser",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1788651960,
-        "narHash": "sha256-v9wJd32eZ2bvhBzVOd7TIjLQd011P7nwOhjKtWlci5I=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "2c0350c759688177331b8f5242311fae8877bdb3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
-    "home-manager_2": {
       "inputs": {
         "nixpkgs": [
           "nix-on-droid",
@@ -1031,7 +989,7 @@
     },
     "nix-on-droid": {
       "inputs": {
-        "home-manager": "home-manager_2",
+        "home-manager": "home-manager",
         "nix-formatter-pack": "nix-formatter-pack",
         "nixpkgs": [
           "nixpkgs"
@@ -1653,7 +1611,6 @@
         "finix": "finix",
         "fonts": "fonts",
         "frame-charge": "frame-charge",
-        "glide-browser": "glide-browser",
         "iets": "iets",
         "leverage": "leverage",
         "linear-cli": "linear-cli",
