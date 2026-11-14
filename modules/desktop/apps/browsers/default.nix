@@ -764,7 +764,6 @@ in {
       {
         select = ".panel-viewstack, .panel-viewcontainer";
         set = [
-          ["max-height" "calc(100vh - 2 * var(--breakout-top) - 2px) !important"]
           ["background" "transparent !important"]
           ["border-radius" "0 !important"]
         ];
