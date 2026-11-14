@@ -38,9 +38,73 @@ in {
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017"
         "anthropic/claude-opus-5-5"
         "anthropic/claude-sonnet-5-5"
+        "google-antigravity/gemini-4-carbon-high"
+        "google-gemini-cli/gemini-4-carbon"
       ];
 
       models.providers = {
+        google-antigravity = {
+          baseUrl = "https://daily-cloudcode-pa.googleapis.com";
+          auth = "oauth";
+          models = [
+            {
+              id = "gemini-4-carbon-high";
+              name = "Gemini 4 Carbon (High)";
+              api = "google-gemini-cli";
+              reasoning = true;
+              input = ["text" "image"];
+              contextWindow = 1048576;
+              maxTokens = 65536;
+              cost = { input = 2; output = 10; cacheRead = 0.2; cacheWrite = 0; };
+            }
+            {
+              id = "gemini-4-carbon";
+              name = "Gemini 4 Carbon";
+              api = "google-gemini-cli";
+              reasoning = true;
+              input = ["text" "image"];
+              contextWindow = 1048576;
+              maxTokens = 65536;
+              cost = { input = 2; output = 10; cacheRead = 0.2; cacheWrite = 0; };
+            }
+            {
+              id = "gemini-4-argon-high";
+              name = "Gemini 4 Argon (High)";
+              api = "google-gemini-cli";
+              reasoning = true;
+              input = ["text" "image"];
+              contextWindow = 1048576;
+              maxTokens = 65536;
+              cost = { input = 2; output = 10; cacheRead = 0.2; cacheWrite = 0; };
+            }
+            {
+              id = "gemini-4-hydrogen-high";
+              name = "Gemini 4 Hydrogen (High)";
+              api = "google-gemini-cli";
+              reasoning = true;
+              input = ["text" "image"];
+              contextWindow = 1048576;
+              maxTokens = 65536;
+              cost = { input = 1.5; output = 7.5; cacheRead = 0.1; cacheWrite = 0; };
+            }
+          ];
+        };
+        google-gemini-cli = {
+          baseUrl = "https://cloudcode-pa.googleapis.com";
+          auth = "oauth";
+          models = [
+            {
+              id = "gemini-4-carbon";
+              name = "Gemini 4 Carbon";
+              api = "google-gemini-cli";
+              reasoning = true;
+              input = ["text" "image"];
+              contextWindow = 1048576;
+              maxTokens = 65536;
+              cost = { input = 2; output = 10; cacheRead = 0.2; cacheWrite = 0; };
+            }
+          ];
+        };
         vercel-ai-gateway = {
           modelOverrides = {
             "zai/glm-5.3-flash".compat.vercelGatewayRouting.order = ["runware" "wafer"];

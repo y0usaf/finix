@@ -30,6 +30,84 @@ providers:
         maxTokens: 128000
         name: Claude Fable 5.2
         reasoning: true
+  google-antigravity:
+    baseUrl: https://daily-cloudcode-pa.googleapis.com
+    auth: oauth
+    models:
+      - api: google-gemini-cli
+        contextWindow: 1048576
+        cost:
+          cacheRead: 0.2
+          cacheWrite: 0
+          input: 2
+          output: 10
+        id: gemini-4-carbon-high
+        input:
+          - text
+          - image
+        maxTokens: 65536
+        name: Gemini 4 Carbon (High)
+        reasoning: true
+      - api: google-gemini-cli
+        contextWindow: 1048576
+        cost:
+          cacheRead: 0.2
+          cacheWrite: 0
+          input: 2
+          output: 10
+        id: gemini-4-carbon
+        input:
+          - text
+          - image
+        maxTokens: 65536
+        name: Gemini 4 Carbon
+        reasoning: true
+      - api: google-gemini-cli
+        contextWindow: 1048576
+        cost:
+          cacheRead: 0.2
+          cacheWrite: 0
+          input: 2
+          output: 10
+        id: gemini-4-argon-high
+        input:
+          - text
+          - image
+        maxTokens: 65536
+        name: Gemini 4 Argon (High)
+        reasoning: true
+      - api: google-gemini-cli
+        contextWindow: 1048576
+        cost:
+          cacheRead: 0.1
+          cacheWrite: 0
+          input: 1.5
+          output: 7.5
+        id: gemini-4-hydrogen-high
+        input:
+          - text
+          - image
+        maxTokens: 65536
+        name: Gemini 4 Hydrogen (High)
+        reasoning: true
+  google-gemini-cli:
+    baseUrl: https://cloudcode-pa.googleapis.com
+    auth: oauth
+    models:
+      - api: google-gemini-cli
+        contextWindow: 1048576
+        cost:
+          cacheRead: 0.2
+          cacheWrite: 0
+          input: 2
+          output: 10
+        id: gemini-4-carbon
+        input:
+          - text
+          - image
+        maxTokens: 65536
+        name: Gemini 4 Carbon
+        reasoning: true
   vercel-ai-gateway:
     baseUrl: https://ai-gateway.vercel.sh/v1
     apiKey: AI_GATEWAY_API_KEY

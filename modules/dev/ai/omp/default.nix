@@ -546,6 +546,7 @@
             (typed (opt "secret") string)
             (typed (opt "error") string)
             (typed (opt "retry") number)
+            (typed (opt "project") string)
           ])
           blank
           (interface Entry [
@@ -581,6 +582,7 @@
             (return (obj (rows [
               (prop "login" (ternary (infix [(typeof (dot value "login")) "===" (str "string")]) (dot value "login") undefined))
               (prop "secret" (ternary (infix [(typeof (dot value "access")) "===" (str "string")]) (dot value "access") (ternary (infix [(typeof (dot value "key")) "===" (str "string")]) (dot value "key") undefined)))
+              (prop "project" (ternary (infix [(typeof (dot value "project")) "===" (str "string")]) (dot value "project") undefined))
               (prop "error" (ternary (infix [(typeof (dot value "error")) "===" (str "string")]) (dot value "error") undefined))
               (prop "retry" (ternary (infix [(typeof (dot value "retry")) "===" (str "number")]) (dot value "retry") undefined))
             ])))
@@ -635,7 +637,7 @@
             (return (async ({next}: (arrow [] [
               (const next (await (call token [provider model])))
               (if' (infix [(dot next "secret") "===" undefined]) (throw' (new Error [(infix [(dot next "error") "??" (tpl ["crest-auth json token " (sub provider) ": no credential"])])])))
-              (return (dot next "secret"))
+              (return (ternary (infix [provider "===" (str "google-gemini-cli") "||" provider "===" (str "google-antigravity")]) (call (dot JSON "stringify") [(obj [(prop "token" (dot next "secret")) (prop "projectId" (dot next "project"))])]) (dot next "secret")))
             ]))))
           ]))
           blank
