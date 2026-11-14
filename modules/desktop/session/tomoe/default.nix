@@ -295,9 +295,12 @@
 
   gaps = 8;
 
+  # The spine's width in bar units; the deck's seam widens to hold it.
+  spineWidth = 28;
+
   seam =
     if bar.style == "spine"
-    then builtins.ceil (28.0 * bar.scale) + 2 * gaps
+    then builtins.ceil (spineWidth * bar.scale) + 2 * gaps
     else gaps;
 
   hudThemeParameters = {
@@ -351,7 +354,17 @@
           dark = spineColors;
           light = spineLightColors;
         };
-        spine-title = 12;
+        spine-title = 20;
+        # Screen pixels per font pixel for the spine's text, so the Nib pixel
+        # font lands on whole pixels: big text is the largest whose three
+        # digits (6 font pixels each) fit inside the spine's border and
+        # margin, small text half of it.
+        spine-pixels = let
+          big = lib.max 1 ((builtins.floor (spineWidth * bar.scale) - 4) / 18);
+        in {
+          inherit big;
+          small = lib.max 1 (big / 2);
+        };
       }
       else {
         colors = {
@@ -372,7 +385,7 @@
     shine = "#FFFFFF59";
     shade = "#0000001F";
     ink = "#292928";
-    dim = "#6E6A62";
+    dim = "#5E5A53";
     groove = "#0000001F";
     hole = "#00000038";
     lcd = "#C2C8B6";
@@ -2901,7 +2914,7 @@
     shine = "#FFFFFF14";
     shade = "#00000066";
     ink = "#ECE7DC";
-    dim = "#9A958A";
+    dim = "#ADA89C";
     groove = "#FFFFFF1F";
     hole = "#FFFFFF38";
     lcd = "#1A1C17";
@@ -3157,7 +3170,7 @@ in {
       style = lib.mkOption {
         type = lib.types.enum ["panels" "gap" "cassette" "spine"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. spine: the same parts, inked for the light or dark theme, on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. spine: the same parts, inked for the light or dark theme, on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move. Its text sits on whole pixels of the bar font, readings stand large over slim LED rows, and the media title reads down the spine as on a J-card. On outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
       };
 
       modules = lib.mkOption {

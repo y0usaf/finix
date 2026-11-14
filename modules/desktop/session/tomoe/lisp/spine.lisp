@@ -7,52 +7,97 @@
         when (plusp (length part)) collect part
         while i do (setf start (1+ i))))
 
-(defun spine--text (text color &optional (size 11))
-  (ui :text :text text :size (cassette--px size) :line-height (cassette--px size) :color color
-      :font (getf +cassette+ :font)))
+(defun spine--pixel (step)
+  "Screen pixels per Nib font pixel for STEP, :small or :big text."
+  (getf (getf +cassette+ :spine-pixels) step))
+
+(defun spine--font (k)
+  "Nib's 11-row em at K screen pixels per font pixel, so every stroke lands on
+whole pixels and the text stays sharp."
+  (* 11 k))
+
+(defun spine--text (text color &optional (step :small))
+  "TEXT for the spine in Nib at a whole pixel scale. The line box is the 7-row
+cap height, so capitals and digits sit centred on their ink. Nib keeps each
+glyph's blank column on its right; a matching column of padding on the left
+centres the ink, not the advance."
+  (let ((k (spine--pixel step)))
+    (ui :row :padding (list 0 0 0 k)
+        :children (list (ui :text :text text :size (spine--font k) :line-height (* 7 k) :color color
+                            :font (getf +cassette+ :font))))))
+
+(defun spine--detail (text color)
+  "TEXT as small text. Nib has no degree sign and a fallback font would knock
+the line off Nib's baseline, so a trailing one is drawn as a 3-pixel ring."
+  (let ((text (string-trim " " text)))
+    (if (and (plusp (length text)) (char= (char text (1- (length text))) #\°))
+        (let ((k (spine--pixel :small)))
+          (ui :row :align :start
+              :children (list (spine--text (subseq text 0 (1- (length text))) color)
+                              (ui :rect :width (* 3 k) :height (* 3 k) :border k :border-color color))))
+        (spine--text text color))))
 
 (defun spine--groove ()
   (ui :rect :height 1 :background (cassette--c :groove)))
 
-(defun spine--ladder (fraction)
+(defun spine--meter (fraction)
+  "A row of LED segments lit up to FRACTION, quiet under the number it backs."
   (let* ((count (getf +cassette+ :segments))
          (lit (round (* count (max 0 (min 1 fraction))))))
-    (ui :column :gap (cassette--px 1) :align :center
-        :children (loop for i from (1- count) downto 0
-                        collect (ui :rect :width (cassette--px 8) :height (cassette--px 3)
+    (ui :row :gap 1
+        :children (loop for i below count
+                        collect (ui :rect :width (cassette--px 1) :height (cassette--px 2)
                                     :background (if (< i lit) (cassette--zone (/ (1+ i) count)) (cassette--c :led-off)))))))
 
 (defun spine--gauge (label percent detail &optional hot)
   (let ((percent (max 0 (min 100 (round (or percent 0))))))
-    (ui :column :align :center :gap (cassette--px 2)
+    (ui :column :align :center :gap (cassette--px 3)
         :children (remove nil
-                          (list (spine--text label (cassette--c :dim) 7)
-                                (spine--ladder (/ percent 100))
-                                (ui :row :align :end
-                                    :children (list (spine--text (format nil "~D" percent) (cassette--c :ink))
-                                                    (spine--text "%" (cassette--c :dim) 7)))
-                                (when detail (spine--text detail (if hot (cassette--c :orange) (cassette--c :dim)) 7)))))))
+                          (list (spine--text label (cassette--c :dim))
+                                (spine--text (format nil "~D" percent) (cassette--c :ink) :big)
+                                (spine--meter (/ percent 100))
+                                (when detail
+                                  (spine--detail detail (if hot (cassette--c :orange) (cassette--c :dim)))))))))
+
+(defun spine--window (text)
+  "One tape-counter window: TEXT lit amber over the unlit 8s behind it."
+  (ui :column :align :center :background (cassette--c :counter) :border 1 :border-color (cassette--c :rim)
+      :padding (list (cassette--px 2) 0 (cassette--px 2) 0)
+      :children (list (ui :stack :children (list (spine--text (cassette--ghost text) (cassette--c :counter-ghost) :big)
+                                                 (spine--text text (cassette--c :amber) :big))))))
 
 (defun spine--counter ()
   (ui :column :align :stretch :gap (cassette--px 1)
       :children (loop for part in (spine--parts (clock-text (getf +cassette+ :time)))
-                      collect (cassette--window part :face (cassette--c :counter) :rim (cassette--c :rim)
-                                                     :ghost (cassette--c :counter-ghost) :ink (cassette--c :amber)))))
+                      collect (spine--window part))))
 
 (defun spine--date ()
   (destructuring-bind (&optional day date month &rest rest)
       (spine--parts (string-upcase (clock-text (getf +cassette+ :date))))
     (declare (ignore rest))
-    (ui :column :align :center :gap (cassette--px 2)
+    (ui :column :align :center :gap (cassette--px 3)
         :children (remove nil
-                          (list (when day (spine--text day (cassette--c :dim) 7))
-                                (when date (spine--text date (cassette--c :ink)))
-                                (when month (spine--text month (cassette--c :dim) 7)))))))
+                          (list (when day (spine--text day (cassette--c :dim)))
+                                (when date (spine--text date (cassette--c :ink) :big))
+                                (when month (spine--text month (cassette--c :dim))))))))
 
-(defun spine--stacked (text color)
-  (ui :column :align :center
-      :children (loop for c across (string-right-trim " " text)
-                      collect (spine--text (string c) color 8))))
+(defun spine--fit (text width)
+  "TEXT fitted to WIDTH characters as the cassette fits it, without the padding
+after it or a space left before the cut."
+  (let* ((fit (string-right-trim " " (cassette--fit text width)))
+         (cut (- (length fit) 2)))
+    (if (and (plusp cut) (string= ".." fit :start2 cut))
+        (concatenate 'string (string-right-trim " " (subseq fit 0 cut)) "..")
+        fit)))
+
+(defun spine--title (text color)
+  "TEXT turned a quarter clockwise to read down the spine, as on a J-card. The
+line box keeps Nib's 3 rows below the baseline, which now lie on the left;
+as much padding on the right centres the capitals across the spine."
+  (let ((k (spine--pixel :big)))
+    (ui :row :padding (list 0 (* 3 k) 0 0)
+        :children (list (ui :text :text text :size (spine--font k) :line-height (* 10 k) :rotate 90
+                            :color color :font (getf +cassette+ :font))))))
 
 (defun spine--media (snapshot)
   (let* ((service (service-state snapshot :mpris))
@@ -65,7 +110,8 @@
       (ui :column :align :center :gap (cassette--px 4)
           :children (list (cassette--led (equal status "Playing"))
                           (cassette--reel (- 1 played))
-                          (spine--stacked (cassette--fit title (getf +cassette+ :spine-title)) (cassette--c :ink))
+                          (spine--title (spine--fit title (getf +cassette+ :spine-title))
+                                        (if (equal status "Playing") (cassette--c :ink) (cassette--c :dim)))
                           (cassette--reel played))))))
 
 (defun spine--module (module state snapshot)
@@ -86,7 +132,7 @@
       (:network (let ((online (getf (service-state snapshot :network) :connected)))
                   (ui :column :align :center :gap (cassette--px 3)
                       :children (list (cassette--led online)
-                                      (spine--text (if online "NET" "OFF") (cassette--c :dim) 7)))))
+                                      (spine--text (if online "NET" "OFF") (cassette--c :dim))))))
       (:frame (let ((battery (state-value snapshot :frame-battery)))
                 (when (getf battery :percent)
                   (spine--gauge (if (equal (getf battery :status) "Discharging") "VR" "VR+") (getf battery :percent) nil)))))))
