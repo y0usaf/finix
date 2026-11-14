@@ -18,7 +18,6 @@ inputs: let
       config = {
         allowUnfree = true;
         inherit cudaSupport;
-        permittedInsecurePackages = ["openclaw-2026.10.5"];
       };
       overlays = [
         inputs.claude-code-nix.overlays.default
@@ -120,12 +119,10 @@ inputs: let
           ./hosts/y0usaf-server/hardware-config.nix
           ./hosts/y0usaf-server/boot.nix
           ./server/attic.nix
-          ./server/amp-orb.nix
           ./server/packages.nix
           ./dev/ai/prompts/policy.nix
           ./dev/ai/claude-code.nix
           ./dev/ai/paseo.nix
-          ./server/openclaw.nix
           ./tools/git.nix
           ./tools/tern
           ./tools/tmux.nix
@@ -142,7 +139,6 @@ inputs: let
           inputs.finix.nixosModules.limine
           ./finix/static-net.nix
           ./hosts/wireguard.nix
-          ./server/amp-orb.nix
         ]
         ++ graphicalModules
         ++ [
