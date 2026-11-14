@@ -10,8 +10,8 @@
   toJSON = lib.generators.toJSON {};
   flash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
   cheapDeepseek.compat.vercelGatewayRouting.order = ["wafer" "morph" "runware"];
-  defaultProvider = "anthropic";
-  defaultModel = "claude-opus-5-5";
+  defaultProvider = "google-antigravity";
+  defaultModel = "gemini-4-carbon-high";
   carbon = "google-antigravity/gemini-4-carbon-high";
   taskModel = carbon;
   fastFlash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
@@ -28,9 +28,9 @@ in {
       smolModel = flash;
       judgeModel = flash;
       fallbackChains = {
-        default = ["openai-codex/gpt-6.1-sol:xhigh" flash];
+        default = ["anthropic/claude-opus-5-5" "openai-codex/gpt-6.1-sol:xhigh" flash];
         advisor = [flash];
-        task = [flash];
+        task = [flash fastFlash];
       };
 
       enabledModels = [
