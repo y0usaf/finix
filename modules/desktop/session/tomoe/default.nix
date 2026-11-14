@@ -214,6 +214,8 @@
         (binding ["alt"] "j" "scroll-down" "Scroll Deck Down")
         (binding ["alt"] "k" "scroll-up" "Scroll Deck Up")
         (binding ["alt"] "Tab" "swap-columns" "Swap Columns")
+        (binding ["alt" "shift"] "h" "swap-columns" null)
+        (binding ["alt" "shift"] "l" "swap-columns" null)
         (binding ["alt" "shift"] "j" "move-down" "Move Window Down")
         (binding ["alt" "shift"] "k" "move-up" "Move Window Up")
         (binding ["alt"] "bracketleft" "to-left" "Move Window to Left Column")
