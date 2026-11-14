@@ -861,7 +861,7 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   margin-inline-start: 1ch !important;
 }
 
-.tabbrowser-tab[busy] .tab-stack::before {
+.tabbrowser-tab:is([busy], [titlechanged]:not([visuallyselected])) .tab-stack::before {
   content: "";
   position: absolute !important;
   inset-inline: 1ch !important;
@@ -869,6 +869,14 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   height: 1px !important;
   background-color: currentColor !important;
   animation: lw-scan 1s var(--ease) infinite !important;
+}
+
+.tabbrowser-tab[titlechanged]:not([busy], [visuallyselected]) .tab-stack::before {
+  animation: lw-scan 900ms var(--ease) both !important;
+}
+
+.tabbrowser-tab[fadein]:not([pinned]) .tab-stack {
+  animation: lw-drop var(--glide) var(--ease) !important;
 }
 
 .tabbrowser-tab:not([pinned]):hover .tab-close-button {
@@ -911,7 +919,22 @@ findbar {
   padding-inline: 1ch !important;
   background-color: var(--paper) !important;
   color: var(--ink) !important;
-  animation: lw-unfold var(--quick) var(--ease) backwards !important;
+  clip-path: inset(0) !important;
+  transition: clip-path var(--quick) var(--ease), visibility 0s linear 0s !important;
+}
+
+findbar[hidden] {
+  display: flex !important;
+  visibility: hidden !important;
+  clip-path: inset(0 50%) !important;
+  pointer-events: none !important;
+  transition: clip-path var(--quick) var(--ease), visibility 0s linear var(--quick) !important;
+}
+
+@starting-style {
+  findbar:not([hidden]) {
+    clip-path: inset(0 50%) !important;
+  }
 }
 
 findbar::before {
@@ -1296,19 +1319,15 @@ tooltip {
   }
 }
 
-@keyframes lw-unfold {
+@keyframes lw-drop {
   from {
-    clip-path: inset(0 50% 0 50%);
+    translate: 0 calc(-1 * var(--line));
     opacity: 0;
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-    opacity: 1;
   }
 }
 
 :is(#navigator-toolbox, findbar, #statuspanel) :is([hidden], [collapsed]),
-:is(findbar, #statuspanel)[hidden] {
+#statuspanel[hidden] {
   display: none !important;
 }
 
