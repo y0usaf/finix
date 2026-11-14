@@ -552,6 +552,7 @@
           (interface Entry [
             (typed "name" string)
             (typed "kind" string)
+            (typed (opt "provider") string)
           ])
           blank
           (async ({
@@ -618,14 +619,14 @@
                 (typeof (dot entry "kind"))
                 "==="
                 (str "string")
-              ])) (below (array [(obj [(prop "name" (dot entry "name")) (prop "kind" (dot entry "kind"))])])) (below (array []))))))
+              ])) (below (array [(obj [(prop "name" (dot entry "name")) (prop "kind" (dot entry "kind")) (prop "provider" (ternary (infix [(typeof (dot entry "provider")) "===" (str "string")]) (dot entry "provider") undefined))])])) (below (array []))))))
             ]))
           ])))
           blank
           (async ({providers}: (fn signedIn (typed [] (generic Promise [(generic Set [string])])) [
             (const providers (new (generic Set [string]) []))
             ({entry}: (forOf entry (await (call entries [])) [
-              (call (dot providers "add") [(ternary (infix [(dot entry "kind") "===" (str "login")]) (str "anthropic") (dot entry "name"))])
+              (call (dot providers "add") [(ternary (infix [(dot entry "kind") "===" (str "login")]) (str "anthropic") (ternary (infix [(dot entry "kind") "===" (str "oauth")]) (infix [(dot entry "provider") "??" (dot entry "name")]) (dot entry "name")))])
             ]))
             (return providers)
           ])))
