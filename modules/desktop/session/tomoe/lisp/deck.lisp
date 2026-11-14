@@ -57,6 +57,15 @@ a scroll would have revealed; at the bottom of the column, the one above it."
 (defun deck--manageable-p (state id)
   (and (not (member id (getf state :fullscreen))) (not (member id (getf state :floating)))))
 
+(defun deck--background-p (snapshot window)
+  "Whether WINDOW's launch asked to stay in the background."
+  (let ((entry (assoc :focus (rules-for snapshot window))))
+    (and entry (null (cdr entry)))))
+
+(defun deck--watched-fullscreen-p (state id)
+  "Whether ID is the window the user is watching fullscreen."
+  (and id (member id (getf state :fullscreen))))
+
 (defun deck--current (state)
   "The window a command acts on: the focused one while it is in the window set,
 otherwise whatever the deck still shows. A command must never depend on an id a
@@ -341,7 +350,8 @@ odd number of columns, or when the seam is no wider than two gaps."
          (type (getf event :type))
          (command (and (eq type :command) (equal (getf event :owner) "deck")
                        (getf event :name)))
-         (terminal (and (equal command "terminal") (policy--terminal windows))))
+         (terminal (and (equal command "terminal") (policy--terminal windows)))
+         (quiet nil))
     (when (eq type :unmap)
       (let ((gone (getf event :id)))
         (dolist (side '(:left :right))
@@ -380,8 +390,12 @@ odd number of columns, or when the seam is no wider than two gaps."
                  (side (or focus-side (if (<= left right) :left :right))))
             (push (cons id side) (getf state :columns))
             (setf (getf state :windows) (append (getf state :windows) (list id)))
-            (deck--adopt-front state side id)
-            (setf (getf state :focus) id)
+            (if (or (deck--background-p snapshot window)
+                    (deck--watched-fullscreen-p state (or focused (getf state :focus))))
+                (pushnew id quiet)
+                (progn
+                  (deck--adopt-front state side id)
+                  (deck--focus-window state id)))
             (when (getf window :fullscreen-requested)
               (deck--set-fullscreen state id t))))))
     (when command
@@ -389,6 +403,8 @@ odd number of columns, or when the seam is no wider than two gaps."
     (when terminal
       (deck--request state terminal :activate nil))
     (when (and (member type '(:metadata :request)) (member (getf event :id) ids))
+      (when (eql (getf event :request) :activate)
+        (setf quiet (remove (getf event :id) quiet)))
       (deck--request state (getf event :id) (getf event :request) (getf event :requested)))
     (when (or (and (eq type :button) (eql (getf event :state) :pressed))
               (and (eq type :pointer) (eq (getf event :state) :enter) (getf event :moved)
@@ -411,6 +427,6 @@ odd number of columns, or when the seam is no wider than two gaps."
                       (list (publish-state :deck-seam (deck--seam state area)))
                       (deck--raises state current)
                       +deck-commands+
-                      (list (focus current :raise nil)))
+                      (list (focus (unless (member current quiet) current) :raise nil)))
               (when (and (equal command "terminal") (null terminal))
                 (list (apply #'launch (policy--launch "terminal"))))))))
