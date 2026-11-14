@@ -3,10 +3,7 @@
   --chrome-font-size: 11px;
   --line: 14px;
   --side: 20ch;
-  --w0: 40ch;
-  --w1: 24ch;
-  --w2: 16ch;
-  --w3: 11ch;
+  --tab-width: 24ch;
   --pop-top: 24vh;
   --pop-width: min(clamp(560px, 42vw, 960px), calc(100vw - 4ch));
   --pop-font-size: 22px;
@@ -648,8 +645,8 @@ scrollbox[part="scrollbox"][orient="horizontal"] {
   inset-inline-start: 11ch !important;
 }
 
-#tabbrowser-arrowscrollbox > .tabbrowser-tab:first-child,
-#tabbrowser-arrowscrollbox > tab-group:first-child > .tab-group-label-container {
+#tabbrowser-arrowscrollbox > .tabbrowser-tab:nth-child(1 of .tabbrowser-tab[fadein], tab-group),
+#tabbrowser-arrowscrollbox > tab-group:nth-child(1 of .tabbrowser-tab[fadein], tab-group) > .tab-group-label-container {
   margin-inline-start: 50vw !important;
 }
 
@@ -712,7 +709,7 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   --tok-bg: var(--frame);
   --lens-ink: var(--faint);
   --tok-ink: var(--lens-ink);
-  --w: var(--w3);
+  --w: var(--tab-width);
   display: flex !important;
   align-items: stretch !important;
   position: relative !important;
@@ -730,14 +727,8 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
     color var(--snap) linear !important;
 }
 
-.tabbrowser-tab:is([visuallyselected] + .tabbrowser-tab, :has(+ .tabbrowser-tab[visuallyselected])) {
+.tabbrowser-tab:is([visuallyselected] + .tabbrowser-tab, [visuallyselected] + .tabbrowser-tab + .tabbrowser-tab, :has(+ .tabbrowser-tab[visuallyselected]), :has(+ .tabbrowser-tab + .tabbrowser-tab[visuallyselected])) {
   --lens-ink: var(--frame-dim);
-  --w: var(--w1);
-}
-
-.tabbrowser-tab:is([visuallyselected] + .tabbrowser-tab + .tabbrowser-tab, :has(+ .tabbrowser-tab + .tabbrowser-tab[visuallyselected])) {
-  --lens-ink: var(--frame-dim);
-  --w: var(--w2);
 }
 
 .tabbrowser-tab:hover,
@@ -749,8 +740,8 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 .tabbrowser-tab[visuallyselected] {
   --tok-bg: var(--frame);
   --tok-ink: var(--frame-ink);
-  --w: var(--w0);
-  scroll-margin-inline: calc(50vw - var(--w0) / 2 - 1px) !important;
+  margin-inline: 1px !important;
+  scroll-margin-inline: calc(50vw - var(--tab-width) / 2 - 1px) !important;
   scroll-snap-align: center !important;
 }
 
@@ -767,11 +758,11 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 
 .tabbrowser-tab:not([pinned]):not([fadein]) {
   --w: 0.1px;
+  position: absolute !important;
   visibility: hidden !important;
 }
 
 #tabbrowser-tabs[movingtab] .tabbrowser-tab {
-  --w: var(--w1);
   position: relative !important;
 }
 
