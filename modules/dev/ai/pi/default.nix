@@ -12,8 +12,7 @@
   cheapDeepseek.compat.vercelGatewayRouting.order = ["wafer" "morph" "runware"];
   defaultProvider = "anthropic";
   defaultModel = "claude-opus-5-5";
-  carbon = "google-antigravity/gemini-4-carbon-high";
-  taskModel = carbon;
+  taskModel = flash;
   fastFlash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
 in {
   options.user.dev.modelCatalog = lib.mkOption {
@@ -24,13 +23,13 @@ in {
       defaultThinkingLevel = "xhigh";
       ompThinkingLevel = "auto";
       advisorModel = "openai-codex/gpt-6.1-sol:high";
-      taskNote = "omp task workers run on ${taskModel} unless the task names a model; DeepSeek V4.1 Flash 1017 is the fallback; give Lean proofs and compiler work `model: \"${defaultProvider}/${defaultModel}\"`.";
+      taskNote = "omp task workers run on ${taskModel} unless the task names a model; give Lean proofs and compiler work `model: \"${defaultProvider}/${defaultModel}\"`.";
       smolModel = flash;
       judgeModel = flash;
       fallbackChains = {
         default = ["openai-codex/gpt-6.1-sol:xhigh" flash];
         advisor = [flash];
-        task = [flash];
+        task = [fastFlash];
       };
 
       enabledModels = [
