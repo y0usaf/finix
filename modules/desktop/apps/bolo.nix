@@ -6,16 +6,54 @@
   ...
 }: let
   inherit ((import ../../hosts/shared.nix {inherit lib;}).bolo) model vocabulary;
-  models.${model.name} = {
-    inherit (model) engine;
-    files =
-      lib.mapAttrs (file: hash:
-        pkgs.fetchurl {
-          url = "${model.url}/${file}";
-          inherit hash;
-        })
-      model.hashes;
+
+  # One directory per model under ~/.local/share/bolo/models. The graphs load
+  # their weights from a sibling `.data` file by name, so every file of a
+  # model has to be installed side by side.
+  modelDirs = {
+    fluid-speech-pro = {
+      engine = "sherpa-onnx-transducer";
+      url = "https://huggingface.co/FluidVoice-Labs/fluid-speech-pro-onnx/resolve/main";
+      layout = {
+        encoder = "encoder-model.onnx";
+        decoder = "decoder.onnx";
+        joiner = "joiner.onnx";
+        tokens = "vocab.txt";
+      };
+      hashes = {
+        "encoder-model.onnx" = "sha256-YGMe+Msd8H7+bhmYtWrA+y/ahwWF/vz0lIrOa782G4k=";
+        "encoder-model.onnx.data" = "sha256-w1C/NgZcOwdkKdHdRYyGlS1a7UnYz7ptqAOUS8YM9Y4=";
+        "decoder.onnx" = "sha256-G6tePF+9ulCal55t8gkK4xCCn4vnLvpeJtxUEK2h5JQ=";
+        "decoder.onnx.data" = "sha256-Yyw8v1nT5S0vf03aO/jijARfejuz2+8PRFKbpjkm76o=";
+        "joiner.onnx" = "sha256-gE2WzIJcr4Kuu4DV4jX/wVva02qCIlASbia15xd9h8Y=";
+        "joiner.onnx.data" = "sha256-QITbAjwESChwyoqqqkp7ktLOfJ9t3Y12LSH7VVInH+Q=";
+        "vocab.txt" = "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=";
+      };
+    };
+    # NVIDIA Parakeet TDT v3, int8: the CPU alternative (see shared.nix).
+    ${model.name} = {
+      inherit (model) engine url hashes;
+      layout = {
+        encoder = "encoder.int8.onnx";
+        decoder = "decoder.int8.onnx";
+        joiner = "joiner.int8.onnx";
+        tokens = "tokens.txt";
+      };
+    };
   };
+
+  models = lib.mapAttrs (name: m:
+    m
+    // {
+      files =
+        lib.mapAttrs (file: hash:
+          pkgs.fetchurl {
+            url = "${m.url}/${file}";
+            inherit hash;
+          })
+        m.hashes;
+    })
+  modelDirs;
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
 
@@ -35,69 +73,25 @@
     hash = "sha256-niRJ4Qh0ltjUyrqQfyPgvT942R+lUkebucI6wJy7H9Y=";
   };
 
-  # parakeet-unified rewired for cache-aware streaming (each 320 ms chunk is
-  # encoded once against per-layer caches instead of re-encoding a 5.9 s
-  # window every 80 ms), healed by distilling the original model's offline
-  # transcripts, fp16. Needs a bolo with the token-marker strip (online.rs
-  # TOKEN_MARK).
-  streamingModel = pkgs.requireFile {
-    name = "parakeet-unified-en-0.6b-cache-aware-c4-healed-fp16";
-    hashMode = "recursive";
-    hash = "sha256-MXqwOuWmdDfR2sCtid4nrT37/q6WrZLfsUfbr44aW48=";
-    message = ''
-      The healed cache-aware export of nvidia/parakeet-unified-en-0.6b is not
-      in the store. It is built in ~/dev/sandbox/bolo-fast-20261111:
-
-        ./export_stream.py --chunk 4 --ckpt ckpt/heal_A_c4.pt --fp16 \
-          --out release/parakeet-unified-en-0.6b-cache-aware-c4-healed-fp16
-        nix-store --add-fixed --recursive sha256 release/parakeet-unified-en-0.6b-cache-aware-c4-healed-fp16
-
-      An export is not byte-reproducible; update the hash to the new path's.
-    '';
-  };
-
   keywords = pkgs.writeText "bolo-keywords.txt" "▁JA R VI S\n";
 
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
-    active = "parakeet-unified";
-    language = "en";
+    active = "fluid-speech-pro";
     provider = "cuda";
     threads = null;
     gain = 6.0;
-    pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\n'; while IFS= read -r line || [ -n \"$line\" ]; do printf 'type %s\\n' \"$line\"; done; } | dotool";
-    models =
-      [
-        {
-          name = "parakeet-unified";
-          engine = "sherpa-onnx-online-transducer";
-          encoder = "${streamingModel}/encoder.onnx";
-          decoder = "${streamingModel}/decoder.onnx";
-          joiner = "${streamingModel}/joiner.onnx";
-          tokens = "${streamingModel}/tokens.txt";
-        }
-        {
-          name = "earlybird";
-          engine = "earlybird";
-          uri = lib.getExe inputPackages.bolo.earlybird;
-          hold_words = 1;
-          min_confidence = 0.9;
-        }
-      ]
-      ++ lib.mapAttrsToList (name: m:
-        {
-          inherit name;
-          inherit (m) engine;
-        }
-        // lib.optionalAttrs (m ? uri) {inherit (m) uri;}
-        // lib.optionalAttrs (m ? language) {inherit (m) language;}
-        // lib.optionalAttrs (m ? files) {
-          encoder = "${modelDir name}/encoder.int8.onnx";
-          decoder = "${modelDir name}/decoder.int8.onnx";
-          joiner = "${modelDir name}/joiner.int8.onnx";
-          tokens = "${modelDir name}/tokens.txt";
-        })
-      models;
+    # Whole-clip turns: one write of the finished transcript, typed once.
+    pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool";
+    models = lib.mapAttrsToList (name: m: {
+      inherit name;
+      inherit (m) engine;
+      encoder = "${modelDir name}/${m.layout.encoder}";
+      decoder = "${modelDir name}/${m.layout.decoder}";
+      joiner = "${modelDir name}/${m.layout.joiner}";
+      tokens = "${modelDir name}/${m.layout.tokens}";
+    })
+    models;
     vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) vocabulary;
     vocab_fuzzy = 0.85;
     wake = {
@@ -206,16 +200,22 @@ in {
     };
 
     user.ui.tomoe.extraConfig = ''
+      ;; Hold Alt+M to dictate. Key down starts the recorder; key up stops it,
+      ;; and the finished clip is transcribed whole and typed once.
       (define-extension "bolo" (:reads (:command)) (snapshot state event)
         (declare (ignore snapshot))
         (values state
-                (list (define-command "toggle-bolo"
-                        :description "Toggle speech-to-text (bolo).")
-                      (bind-key (list :alt) "m" "toggle-bolo"
-                                :description "Toggle speech-to-text (bolo)"))
-                (when (and (eq (getf event :type) :command)
-                           (equal (getf event :name) "toggle-bolo"))
-                  (list (launch "${bolo}/bin/bolo")))))
+                (list (define-command "start-bolo"
+                        :description "Start recording (bolo).")
+                      (define-command "stop-bolo"
+                        :description "Stop recording and transcribe (bolo).")
+                      (bind-key (list :alt) "m" "start-bolo" :release "stop-bolo"
+                                :description "Hold to dictate (bolo)."))
+                (let ((name (and (eq (getf event :type) :command)
+                                 (getf event :name))))
+                  (when (member name '("start-bolo" "stop-bolo") :test #'equal)
+                    (list (launch "${bolo}/bin/bolo"
+                                  (if (string= name "start-bolo") "start" "stop")))))))
 
       ;; The daemon writes its state file on every transition; this watches it
       ;; and shows a pill while a turn is in flight.

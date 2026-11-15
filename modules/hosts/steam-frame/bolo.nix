@@ -76,7 +76,6 @@ in {
     value = {
       version = 1;
       active = model.name;
-      language = "en";
       provider = "cpu";
       threads = null;
       pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | ${pkgs.dotool}/bin/dotool";
