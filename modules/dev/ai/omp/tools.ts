@@ -12,6 +12,7 @@ const OFF: Record<string, true> = {
 	box: true,
 	context_check: true,
 	date: true,
+	ast_edit: true,
 	web_crawl: true,
 };
 
