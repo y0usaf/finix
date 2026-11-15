@@ -4221,27 +4221,24 @@ in {
         (let* ((shaders (getf +shader-wallpaper+ :shaders))
                (count (length shaders))
                (probe (getf +shader-wallpaper+ :mode)))
-          (destructuring-bind (&key index menu mode ticks pinned) state
+          (destructuring-bind (&key index menu mode ticks) state
             (when (equal (getf event :owner) "shader-wallpaper")
               (let ((name (if (eq (getf event :type) :command)
                               (getf event :name)
                               (getf event :command))))
                 (cond ((equal name "shader-wallpaper-menu")
                        (setf menu (or index 0)))
-                      ((equal name "shader-wallpaper-auto")
-                       (setf pinned nil mode "auto"))
                       (t
                        (multiple-value-bind (action choice) (and menu (menu-choice event menu count))
                          (case action
-                           (:select (setf index choice menu nil pinned t))
+                           (:select (setf index choice menu nil))
                            (:cancel (setf menu nil))
                            (:move (setf menu choice))))))))
             (flet ((follow (sun current)
                      (flet ((pick (name)
                               (position name shaders :test #'equal
                                                      :key (lambda (entry) (fourth entry)))))
-                       (cond (pinned)
-                             ((null mode)
+                       (cond ((null mode)
                               (setf mode sun
                                     index (or (pick current) (pick sun))))
                              ((not (equal sun mode))
@@ -4264,11 +4261,9 @@ in {
             (let* ((slot (or menu index))
                    (shown (and slot (nth slot shaders)))
                    (command (and index (third (nth index shaders)))))
-              (values (list :index index :menu menu :mode mode :ticks ticks :pinned pinned)
+              (values (list :index index :menu menu :mode mode :ticks ticks)
                       (append (list (define-command "shader-wallpaper-menu"
                                       :description "Choose the shader wallpaper.")
-                                    (define-command "shader-wallpaper-auto"
-                                      :description "Let the wallpaper follow sunrise and sunset again.")
                                     (apply #'bind-key (getf +shader-wallpaper+ :bind))
                                     (interval :shader-mode-poll 30000))
                               (when (and index shown)
