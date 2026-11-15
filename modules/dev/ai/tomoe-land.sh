@@ -64,15 +64,15 @@ note_step() {
 take_lease() {
 	local mode=$1 pendmax=${2:-$PENDINGWAIT} waited=0
 	if [[ $mode == -x ]]; then
-		mkdir -p "$PENDING" || exit 1
-		: >"$PENDING/$AGENT.$$" || exit 1
+		mkdir -p "$PENDING" || return 1
+		: >"$PENDING/$AGENT.$$" || return 1
 	elif [[ -d $PENDING ]]; then
 		while [[ -n $(ls -A "$PENDING" 2>/dev/null) ]] && ((waited < pendmax)); do
 			sleep 2
 			waited=$((waited + 2))
 		done
 	fi
-	exec 9>"$LOCK" || exit 1
+	exec 9>"$LOCK" || return 1
 	if ! flock "$mode" -w "$LEASEWAIT" 9; then
 		rm -f "$PENDING/$AGENT.$$"
 		return 75
@@ -103,13 +103,15 @@ submit() {
 	done
 	if [[ $type == timing && -z $ref ]]; then ref=$BASE; fi
 	[[ -n $ref ]] || die "submit needs a commit or branch"
-	local ns id file
+	local ns id file tmp
 	ns=$(date +%s%N)
 	id=$ns
 	file=$QUEUE/$ns-$id
-	printf '%s\t%s\t%s\t%s\n' "$type" "$ref" "$suite" "$timeout" >"$file.tmp" ||
+	tmp=$ROOT/.submitting/$$-$ns
+	mkdir -p "$ROOT/.submitting" || die "cannot write the submission"
+	printf '%s\t%s\t%s\t%s\n' "$type" "$ref" "$suite" "$timeout" >"$tmp" ||
 		die "cannot write the submission"
-	mv "$file.tmp" "$file" || die "cannot queue the submission"
+	mv "$tmp" "$file" || die "cannot queue the submission"
 	rm -f "$RESULTS/$id"
 	printf '%s\n' "$id"
 }
@@ -212,6 +214,8 @@ run_land() {
 	note_step resolve passed "$log/resolve.log"
 
 	tree=$ROOT/work/$id
+	rm -rf "$tree"
+	git -C "$repo" worktree prune >/dev/null 2>&1 || true
 	git -C "$repo" worktree add --quiet --detach "$tree" "$sha" >"$log/rebase.log" 2>&1 || {
 		printf 'cannot create a worktree for %s\n' "$sha" >>"$log/rebase.log"
 		finish "$id" failed "$sha" "$base_sha" rebase "$log/rebase.log"
@@ -238,13 +242,24 @@ run_land() {
 	fi
 	note_step smoke passed "$log/smoke.log"
 
-	if ! push_landing "$id" "$repo" "$tip" "$base_sha" "$ref" "$log/push.log"; then
+	push_landing "$id" "$repo" "$tip" "$base_sha" "$ref" "$log/push.log"
+	case $? in
+	0)
+		note_step push passed "$log/push.log"
+		note_step forgejo passed "$log/push.log.forgejo"
+		;;
+	2)
+		note_step push passed "$log/push.log"
+		note_step forgejo failed "$log/push.log.forgejo"
+		;;
+	*)
 		cleanup_tree "$repo" "$tree"
 		finish "$id" failed "$tip" "$base_sha" push "$log/push.log"
 		return 1
-	fi
+		;;
+	esac
 	cleanup_tree "$repo" "$tree"
-	finish "$id" passed "$tip" "$tip" push "$log/push.log"
+	finish "$id" passed "$tip" "$tip" "" ""
 	return 0
 }
 
@@ -304,7 +319,7 @@ run_smoke() {
 }
 
 push_landing() {
-	local id=$1 repo=$2 tip=$3 base=$4 ref=$5 log=$6 head remote
+	local id=$1 repo=$2 tip=$3 base=$4 ref=$5 log=$6 head
 	: >"$log"
 	head=$(git -C "$repo" rev-parse --verify --quiet refs/remotes/origin/main) || true
 	if [[ $head != "$base" ]]; then
@@ -312,22 +327,25 @@ push_landing() {
 		return 1
 	fi
 	git -C "$repo" push origin "$tip:refs/heads/main" >>"$log" 2>&1 || return 1
-	git -C "$repo" push forgejo "$tip:refs/heads/main" >>"$log" 2>&1 || return 1
-	for remote in origin forgejo; do
-		head=$(git ls-remote --heads "$remote" main | cut -f1)
-		if [[ $head != "$tip" ]]; then
-			printf '%s main is %s, not %s\n' "$remote" "$head" "$tip" >>"$log"
-			return 1
-		fi
-	done
+	head=$(git ls-remote --heads origin main | cut -f1)
+	if [[ $head != "$tip" ]]; then
+		printf 'origin main is %s, not %s\n' "$head" "$tip" >>"$log"
+		return 1
+	fi
 	if [[ $ref =~ ^[0-9a-f]{7,40}$ ]]; then
 		printf 'pushed %s by commit id\n' "$tip" >>"$log"
 	else
 		git -C "$repo" push origin --delete "$ref" >>"$log" 2>&1 || true
-		git -C "$repo" push forgejo --delete "$ref" >>"$log" 2>&1 || true
 		printf 'pushed %s and deleted %s\n' "$tip" "$ref" >>"$log"
 	fi
-	return 0
+	if git -C "$repo" push forgejo "$tip:refs/heads/main" >"$log.forgejo" 2>&1 &&
+		[[ $(git ls-remote --heads forgejo main | cut -f1) == "$tip" ]]; then
+		printf 'forgejo has %s\n' "$tip" >>"$log.forgejo"
+		return 0
+	fi
+	printf 'forgejo did not take %s; push it again when the server answers\n' "$tip" \
+		>>"$log.forgejo"
+	return 2
 }
 
 run_timing() {
@@ -340,6 +358,8 @@ run_timing() {
 	}
 	git -C "$repo" fetch --quiet origin >/dev/null 2>&1 || true
 	tree=$ROOT/work/$id
+	rm -rf "$tree"
+	git -C "$repo" worktree prune >/dev/null 2>&1 || true
 	git -C "$repo" worktree add --quiet --detach "$tree" "$BASE" >"$log/resolve.log" 2>&1 || {
 		finish "$id" failed "" "" resolve "$log/resolve.log"
 		return 1
@@ -394,6 +414,7 @@ run_timing() {
 
 finish() {
 	local id=$1 status=$2 sha=$3 main=$4 step=$5 log=$6 tmp=$RESULTS/.$1.tmp
+	[[ -f $RESULTS/$id ]] && return 0
 	{
 		printf '{"id":"%s","status":"%s","sha":"%s","main":"%s","steps":[' \
 			"$id" "$status" "$sha" "$main"
@@ -416,10 +437,15 @@ finish() {
 
 daemon() {
 	mkdir -p "$ROOT"
+	rm -f "$PENDING/$AGENT."* 2>/dev/null
+	for leftover in "$ACTIVE"/*; do
+		[[ -e $leftover ]] || continue
+		mv "$leftover" "$QUEUE/" 2>/dev/null || true
+	done
 	printf '%s daemon up pid %s\n' "$(date -u +%FT%TZ)" "$$" >>"$ROOT/daemon.log"
 	while :; do
 		local next id type ref suite timeout
-		next=$(ls "$QUEUE" 2>/dev/null | sort | head -1)
+		next=$(ls "$QUEUE" 2>/dev/null | grep -v '\.tmp$' | sort | head -1)
 		if [[ -z $next ]]; then
 			sleep 1
 			continue
