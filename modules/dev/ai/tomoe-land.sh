@@ -33,6 +33,8 @@ die() {
 }
 
 for d in "$QUEUE" "$ACTIVE" "$RESULTS" "$LOGS" "$DONE"; do mkdir -p "$d"; done
+REPO=$(git rev-parse --git-common-dir 2>/dev/null) || REPO=""
+[[ -n $REPO ]] && REPO=$(cd "$REPO" && pwd)
 
 usage() {
 	cat <<'EOF'
@@ -245,7 +247,6 @@ run_land() {
 		return 1
 	fi
 	note_step smoke passed "$log/smoke.log"
-	printf '%s\n' "$tip" >"$ROOT/undeployed"
 	[[ -f $RESULTS/$id ]] && {
 		cleanup_tree "$repo" "$tree"
 		return 1
@@ -256,10 +257,12 @@ run_land() {
 	0)
 		note_step push passed "$log/push.log"
 		note_step forgejo passed "$log/push.log.forgejo"
+		printf '%s\n' "$tip" >"$ROOT/undeployed"
 		;;
 	2)
 		note_step push passed "$log/push.log"
 		note_step forgejo failed "$log/push.log.forgejo"
+		printf '%s\n' "$tip" >"$ROOT/undeployed"
 		;;
 	*)
 		cleanup_tree "$repo" "$tree"
@@ -337,7 +340,7 @@ run_smoke() {
 }
 
 pin_finix() {
-	local log=$1 tip=$2 rev short
+	local log=$1 tip=$2 rev short remote=github
 	[[ -d $FINIX/.git ]] || {
 		printf 'no finix checkout at %s\n' "$FINIX" >"$log"
 		return 1
@@ -351,14 +354,15 @@ pin_finix() {
 		return 1
 	fi
 	short=$(git -C "$REPO" rev-parse --short "$tip") || return 1
+	git -C "$FINIX" remote 2>/dev/null | grep -qx "$remote" || remote=origin
 	(
 		cd "$FINIX" || exit 1
-		git fetch --quiet origin || exit 1
+		git fetch --quiet "$remote" || exit 1
 		nix flake update tomoe || exit 1
 		git add flake.lock || exit 1
 		git -c user.name=tomoe-land -c user.email=tomoe-land@localhost commit --quiet \
 			-m "finix: pin tomoe $short" -- flake.lock || exit 1
-		git push origin HEAD:main || exit 1
+		git push "$remote" HEAD:main || exit 1
 	) >"$log" 2>&1 || return 1
 	rev=$(git -C "$FINIX" rev-parse --short HEAD) || return 1
 	printf 'finix %s\n' "$rev" >>"$log"
@@ -497,6 +501,16 @@ finish() {
 	printf '%s %s %s\n' "$id" "$status" "$(date -u +%FT%TZ)" >>"$ROOT/results.log"
 }
 
+finix_pin_rev() {
+	if command -v jq >/dev/null 2>&1; then
+		jq -r '.nodes.tomoe.locked.rev // empty' "$FINIX/flake.lock" 2>/dev/null
+	elif command -v python3 >/dev/null 2>&1; then
+		python3 -c 'import json,sys
+d = json.load(open(sys.argv[1]))
+print(d["nodes"]["tomoe"]["locked"].get("rev", ""))' "$FINIX/flake.lock" 2>/dev/null
+	fi
+}
+
 retry_pin() {
 	local sha pinned to now
 	sha=$(cat "$ROOT/undeployed" 2>/dev/null)
@@ -504,9 +518,8 @@ retry_pin() {
 		rm -f "$ROOT/undeployed"
 		return 0
 	}
-	if [[ ! -f $ROOT/switch-pending ]] &&
-		git -C "$FINIX" log -1 --format=%s 2>/dev/null | grep -q "pin tomoe"; then
-		pinned=$(sed -n 's/.*"rev": "\([0-9a-f]\{40\}\)".*/\1/p' "$FINIX/flake.lock" 2>/dev/null | head -1)
+	if [[ ! -f $ROOT/switch-pending ]]; then
+		pinned=$(finix_pin_rev)
 		to=$(sed -n 's/.*"to":"\([^"]*\)".*/\1/p' "$ROOT/switch.log" 2>/dev/null | tail -1)
 		now=$(readlink -f /run/current-system 2>/dev/null)
 		if [[ -n $pinned && -n $to && $to == "$now" ]] &&
@@ -574,7 +587,7 @@ daemon() {
 	printf '%s daemon up pid %s\n' "$(date -u +%FT%TZ)" "$$" >>"$ROOT/daemon.log"
 	[[ -f $ROOT/undeployed ]] && retry_pin
 	while :; do
-		local next id supervisor busy=""
+		local next id supervisor sp busy=""
 		for adopted in "$ACTIVE"/*; do
 			[[ -e $adopted ]] || continue
 			case $adopted in *.pid) continue ;; esac
@@ -583,14 +596,25 @@ daemon() {
 				rm -f "$adopted.pid"
 				continue
 			fi
-			busy=$adopted
-			break
+			sp=$(cat "$adopted.pid" 2>/dev/null)
+			if [[ -n $sp ]] && kill -0 "$sp" 2>/dev/null; then
+				busy=$adopted
+				break
+			fi
+			if mv "$adopted" "$QUEUE/$(basename "$adopted")" 2>/dev/null; then
+				rm -f "$adopted.pid"
+				printf '%s requeued %s (no supervisor)\n' "$(date -u +%FT%TZ)" \
+					"$(basename "$adopted")" >>"$ROOT/journal.log"
+			fi
 		done
 		if [[ -n $busy ]]; then
 			sleep 2
 			continue
 		fi
-		next=$(ls "$QUEUE" 2>/dev/null | grep -v -e '\.tmp$' -e '\.pid$' | sort | head -1)
+		next=$(for f in $(ls "$QUEUE" 2>/dev/null | grep -v -e '\.tmp$' -e '\.pid$'); do
+			kind=$(cut -f1 "$QUEUE/$f" 2>/dev/null)
+			if [[ $kind == land ]]; then printf '0 %s\n' "$f"; else printf '1 %s\n' "$f"; fi
+		done | sort | head -1 | cut -d' ' -f2-)
 		if [[ -z $next ]]; then
 			if [[ -f $ROOT/undeployed ]]; then
 				retry_pin
