@@ -57,23 +57,10 @@
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
 
-  kwsModel =
-    pkgs.runCommand "sherpa-onnx-kws-model" {
-      src = pkgs.fetchurl {
-        url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2";
-        hash = "sha256-8XABO0cW5Btiub/YCWh8IHzveY75vGU01SThevm2Vho=";
-      };
-    } ''
-      mkdir -p $out
-      ${pkgs.bzip2}/bin/bunzip2 -c $src | ${pkgs.gnutar}/bin/tar -x --strip-components=1 -C $out
-    '';
-
   vadModel = pkgs.fetchurl {
     url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx";
     hash = "sha256-niRJ4Qh0ltjUyrqQfyPgvT942R+lUkebucI6wJy7H9Y=";
   };
-
-  keywords = pkgs.writeText "bolo-keywords.txt" "▁JA R VI S\n";
 
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
@@ -94,18 +81,14 @@
     models;
     vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) vocabulary;
     vocab_fuzzy = 0.85;
-    wake = {
-      kws = {
-        model = "${kwsModel}";
-        keywords = "${keywords}";
-        threshold = 0.05;
-      };
+    turn = {
       vad = {
         model = "${vadModel}";
         threshold = 0.35;
-        min_silence = 1.2;
+        min_silence = 2.5;
       };
-      max_turn = 60.0;
+      start_timeout = 10.0;
+      max_speech = null;
     };
   });
 
