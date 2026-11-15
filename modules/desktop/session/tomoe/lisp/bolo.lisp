@@ -30,11 +30,32 @@
 (defun cassette--bolo-since (path)
   "When the turn began, in CASSETTE--BOLO-NOW seconds. Bolo writes its state
 as the turn opens, so the file's own write date is the turn's start rather than
-a guess, and a bar reloaded mid-turn still shows the elapsed time."
+a guess, and a bar reloaded mid-turn still shows the elapsed time. The result
+may be negative -- the file can predate the bar's own process clock -- and the
+clock reads that as time already spent, not as zero."
   (let ((written (ignore-errors (file-write-date path))))
     (if (and written (<= written (get-universal-time)))
-        (max 0 (- (cassette--bolo-now) (- (get-universal-time) written)))
+        (- (cassette--bolo-now) (- (get-universal-time) written))
         (cassette--bolo-now))))
+
+(defun cassette--bolo-read-state ()
+  "The state in bolo's file right now, or nil if it is missing or unexpected."
+  (let ((line (ignore-errors
+                (with-open-file (in (getf +bolo+ :state) :if-does-not-exist nil)
+                  (when in (read-line in nil ""))))))
+    (let ((content (and line (cassette--bolo-trim line))))
+      (when (member content '("idle" "listening" "recording" "transcribing" "done" "error")
+                    :test #'equal)
+        content))))
+
+(defun cassette--bolo-sync (state)
+  "Read bolo's state file and fold it in when it differs from STATE's. A watch
+reports only writes made after it opens, so this is what shows the turn a bar
+mounted into, and what clears a state write the watch missed."
+  (let ((content (cassette--bolo-read-state)))
+    (when (and content (not (equal content (getf state :bolo-state))))
+      (cassette--bolo-watch state (list :name :bolo-state :content content))))
+  state)
 
 (defun cassette--bolo-bar (level)
   "One sample row: a centred bar as wide as LEVEL, teal while there is voice
@@ -54,8 +75,8 @@ theme rather than as a blank block."
 the spine as it is spoken. Rows that are not there yet sit on the same baseline,
 which keeps the block's height still from the first frame."
   (ui :column :align :center :gap (cassette--px (getf +bolo-voice+ :gap))
-      :children (loop for i below (getf +bolo-voice+ :rows)
-                      for rest on history
+      :children (loop for rest = history then (cdr rest)
+                      repeat (getf +bolo-voice+ :rows)
                       collect (cassette--bolo-bar (first rest)))))
 
 (defun cassette--bolo (state)
