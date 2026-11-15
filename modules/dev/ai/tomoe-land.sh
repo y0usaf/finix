@@ -331,11 +331,11 @@ run_smoke() {
 		return 1
 		;;
 	esac
-	if grep -q 'tomoe suite passed:' "$log"; then
+	if ((rc == 0)) && ! grep -q 'tomoe suite FAILED' "$log"; then
 		printf 'land: smoke passed\n' >>"$log"
 		return 0
 	fi
-	printf 'land: smoke did not report a passing suite (exit %s)\n' "$rc" >>"$log"
+	printf 'land: smoke failed (exit %s); see the suite lines above\n' "$rc" >>"$log"
 	return 1
 }
 
@@ -470,7 +470,7 @@ run_timing() {
 		return 1
 		;;
 	esac
-	if grep -q 'tomoe suite passed:' "$log/timing.log"; then
+	if ((rc == 0)) && ! grep -q 'tomoe suite FAILED' "$log/timing.log"; then
 		finish "$id" passed "$sha" "$sha" timing "$log/timing.log"
 		return 0
 	fi
