@@ -41,6 +41,7 @@ in
         TOMOE_LOCK = "${runtime}/tomoe-vm.lock";
         TOMOE_PENDING = "${runtime}/tomoe-vm.pending";
         TOMOE_AGENT = "tomoe-land";
+        SSH_AUTH_SOCK = "/run/user/1001/ssh-agent";
       };
       log = true;
     };
