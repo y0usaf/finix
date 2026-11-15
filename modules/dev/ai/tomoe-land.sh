@@ -245,6 +245,11 @@ run_land() {
 		return 1
 	fi
 	note_step smoke passed "$log/smoke.log"
+	printf '%s\n' "$tip" >"$ROOT/undeployed"
+	[[ -f $RESULTS/$id ]] && {
+		cleanup_tree "$repo" "$tree"
+		return 1
+	}
 
 	push_landing "$id" "$repo" "$tip" "$base_sha" "$ref" "$log/push.log"
 	case $? in
@@ -293,6 +298,10 @@ run_smoke() {
 			--option cores "$NIXCORES" ".#checks.$SYSTEM.$SMOKE.driver"
 	) >>"$log" 2>&1
 	release_lease
+	[[ -f $RESULTS/$id ]] && {
+		printf 'land: cancelled before the run\n' >>"$log"
+		return 75
+	}
 	if [[ -z $driver ]]; then
 		printf 'land: the smoke driver did not build\n' >>"$log"
 		return 76
@@ -328,28 +337,33 @@ run_smoke() {
 }
 
 pin_finix() {
-	local log=$1 tip=$2 rev
+	local log=$1 tip=$2 rev short
 	[[ -d $FINIX/.git ]] || {
 		printf 'no finix checkout at %s\n' "$FINIX" >"$log"
 		return 1
 	}
+	if ! git -C "$FINIX" diff --quiet --cached; then
+		printf '%s has staged changes; not touching its index\n' "$FINIX" >"$log"
+		return 1
+	fi
+	if ! git -C "$FINIX" diff --quiet -- flake.lock; then
+		printf '%s has an uncommitted flake.lock; not overwriting it\n' "$FINIX" >"$log"
+		return 1
+	fi
+	short=$(git -C "$REPO" rev-parse --short "$tip") || return 1
 	(
 		cd "$FINIX" || exit 1
-		nix flake update tomoe &&
-			git add flake.lock &&
-			git -c user.name=tomoe-land -c user.email=tomoe-land@localhost commit -q \
-				-m "finix: pin tomoe $(git -C "$REPO" rev-parse --short "$tip")"
+		git fetch --quiet origin || exit 1
+		nix flake update tomoe || exit 1
+		git add flake.lock || exit 1
+		git -c user.name=tomoe-land -c user.email=tomoe-land@localhost commit --quiet \
+			-m "finix: pin tomoe $short" -- flake.lock || exit 1
+		git push origin HEAD:main || exit 1
 	) >"$log" 2>&1 || return 1
-	# The switch restarts this service, so it runs detached and the result is
-	# written before it lands; the queue resumes from disk when finit brings the
-	# daemon back.
-	(
-		cd "$FINIX" || exit 1
-		setsid nohup finix-switch >>"$log.switch" 2>&1 &
-	)
 	rev=$(git -C "$FINIX" rev-parse --short HEAD) || return 1
 	printf 'finix %s\n' "$rev" >>"$log"
 	FINIX_REV=$rev
+	printf '%s\n' "$rev" >"$ROOT/switch-pending"
 	return 0
 }
 
@@ -418,6 +432,11 @@ run_timing() {
 			--option cores "$NIXCORES" ".#legacyPackages.$SYSTEM.suites.$suite.driver"
 	) >"$log/timing.log" 2>&1
 	release_lease
+	[[ -f $RESULTS/$id ]] && {
+		printf 'land: cancelled before the run\n' >>"$log/timing.log"
+		cleanup_tree "$repo" "$tree"
+		return 75
+	}
 	if [[ -z $driver ]]; then
 		cleanup_tree "$repo" "$tree"
 		finish "$id" failed "$sha" "" driver "$log/timing.log"
@@ -478,6 +497,60 @@ finish() {
 	printf '%s %s %s\n' "$id" "$status" "$(date -u +%FT%TZ)" >>"$ROOT/results.log"
 }
 
+retry_pin() {
+	local sha pinned to now
+	sha=$(cat "$ROOT/undeployed" 2>/dev/null)
+	[[ -n $sha ]] || {
+		rm -f "$ROOT/undeployed"
+		return 0
+	}
+	if [[ ! -f $ROOT/switch-pending ]] &&
+		git -C "$FINIX" log -1 --format=%s 2>/dev/null | grep -q "pin tomoe"; then
+		pinned=$(sed -n 's/.*"rev": "\([0-9a-f]\{40\}\)".*/\1/p' "$FINIX/flake.lock" 2>/dev/null | head -1)
+		to=$(sed -n 's/.*"to":"\([^"]*\)".*/\1/p' "$ROOT/switch.log" 2>/dev/null | tail -1)
+		now=$(readlink -f /run/current-system 2>/dev/null)
+		if [[ -n $pinned && -n $to && $to == "$now" ]] &&
+			git -C "$REPO" merge-base --is-ancestor "$sha" "$pinned" 2>/dev/null; then
+			rm -f "$ROOT/undeployed"
+			printf '%s deployed %s\n' "$(date -u +%FT%TZ)" "$sha" >>"$ROOT/journal.log"
+			return 0
+		fi
+	fi
+	pin_finix "$ROOT/pin-retry.log" "$sha" || true
+	return 0
+}
+
+job_main() {
+	local ticket=$1 next id type ref suite timeout
+	next=$(basename "$ticket")
+	id=${next#*-}
+	ACTIVE_FILE=$ticket
+	: >"$ROOT/steps"
+	if [[ -f $RESULTS/$id ]]; then
+		mv "$ticket" "$DONE/$next" 2>/dev/null || rm -f "$ticket"
+		return 0
+	fi
+	IFS=$'\t' read -r type ref suite timeout <"$ticket"
+	printf '%s start %s %s %s\n' "$(date -u +%FT%TZ)" "$id" "$type" "$ref" >>"$ROOT/daemon.log"
+	printf '%s taken %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/journal.log"
+	case $type in
+	land) run_land "$id" "$ref" ;;
+	timing)
+		[[ -n $timeout ]] || timeout=$TIMING_TIMEOUT
+		[[ -n $suite ]] || suite=timing
+		run_timing "$id" "$suite" "$timeout" "$ref"
+		;;
+	*) finish "$id" failed "" "" type "" ;;
+	esac
+	if [[ ! -f $RESULTS/$id ]]; then
+		finish "$id" failed "" "" lost "no result was written"
+		printf '%s lost %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/journal.log"
+	fi
+	mv "$ticket" "$DONE/$next" 2>/dev/null || rm -f "$ticket"
+	rm -f "$ticket.pid"
+	printf '%s done %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/daemon.log"
+}
+
 daemon() {
 	mkdir -p "$ROOT"
 	rm -f "$PENDING/$AGENT."* 2>/dev/null
@@ -489,46 +562,73 @@ daemon() {
 			continue
 			;;
 		esac
+		if [[ -f $leftover.pid ]] && kill -0 "$(cat "$leftover.pid")" 2>/dev/null; then
+			printf '%s adopting %s\n' "$(date -u +%FT%TZ)" "$(basename "$leftover")" \
+				>>"$ROOT/journal.log"
+			continue
+		fi
 		mv "$leftover" "$QUEUE/" 2>/dev/null || true
 		printf '%s requeued %s\n' "$(date -u +%FT%TZ)" "$(basename "$leftover")" \
 			>>"$ROOT/journal.log"
 	done
 	printf '%s daemon up pid %s\n' "$(date -u +%FT%TZ)" "$$" >>"$ROOT/daemon.log"
+	[[ -f $ROOT/undeployed ]] && retry_pin
 	while :; do
-		local next id type ref suite timeout
+		local next id supervisor busy=""
+		for adopted in "$ACTIVE"/*; do
+			[[ -e $adopted ]] || continue
+			case $adopted in *.pid) continue ;; esac
+			if [[ -f $RESULTS/${adopted##*-} ]]; then
+				mv "$adopted" "$DONE/$(basename "$adopted")" 2>/dev/null || rm -f "$adopted"
+				rm -f "$adopted.pid"
+				continue
+			fi
+			busy=$adopted
+			break
+		done
+		if [[ -n $busy ]]; then
+			sleep 2
+			continue
+		fi
 		next=$(ls "$QUEUE" 2>/dev/null | grep -v -e '\.tmp$' -e '\.pid$' | sort | head -1)
 		if [[ -z $next ]]; then
+			if [[ -f $ROOT/undeployed ]]; then
+				retry_pin
+			fi
+			if [[ -f $ROOT/switch-pending ]]; then
+				local rev
+				rev=$(cat "$ROOT/switch-pending")
+				rm -f "$ROOT/switch-pending"
+				printf '%s switching finix %s\n' "$(date -u +%FT%TZ)" "$rev" \
+					>>"$ROOT/journal.log"
+				(
+					cd "$FINIX" || exit 1
+					setsid nohup finix-switch >>"$ROOT/switch.log" 2>&1 &
+				)
+				sleep 30
+			fi
 			sleep 1
 			continue
 		fi
 		ACTIVE_FILE=$ACTIVE/$next
 		mv "$QUEUE/$next" "$ACTIVE_FILE" 2>/dev/null || continue
-		: >"$ROOT/steps"
 		id=${next#*-}
-		printf '%s taken %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/journal.log"
-		IFS=$'\t' read -r type ref suite timeout <"$ACTIVE_FILE"
-		printf '%s start %s %s %s\n' "$(date -u +%FT%TZ)" "$id" "$type" "$ref" >>"$ROOT/daemon.log"
-		case $type in
-		land) run_land "$id" "$ref" ;;
-		timing)
-			[[ -n $timeout ]] || timeout=$TIMING_TIMEOUT
-			[[ -n $suite ]] || suite=timing
-			run_timing "$id" "$suite" "$timeout" "$ref"
-			;;
-		*) finish "$id" failed "" "" type "" ;;
-		esac
-		if [[ ! -f $RESULTS/$id ]]; then
-			finish "$id" failed "" "" lost "no result was written; the ticket is kept in done/"
-			printf '%s lost %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/journal.log"
+		if [[ -f $RESULTS/$id ]]; then
+			mv "$ACTIVE_FILE" "$DONE/$next" 2>/dev/null || rm -f "$ACTIVE_FILE"
+			continue
 		fi
-		mv "$ACTIVE_FILE" "$DONE/$next" 2>/dev/null || rm -f "$ACTIVE_FILE"
-		printf '%s done %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/journal.log"
-		printf '%s done %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/daemon.log"
+		setsid "$0" _job "$ACTIVE_FILE" >>"$ROOT/jobs.log" 2>&1 &
+		supervisor=$!
+		printf '%s\n' "$supervisor" >"$ACTIVE_FILE.pid"
+		while [[ ! -f $RESULTS/$id ]] && kill -0 "$supervisor" 2>/dev/null; do
+			sleep 2
+		done
 	done
 }
 
 case ${1:-} in
 daemon) shift; daemon ;;
+_job) shift; job_main "$@" ;;
 submit) shift; submit "$@" ;;
 wait) shift; wait_result "$@" ;;
 status) shift; status ;;
