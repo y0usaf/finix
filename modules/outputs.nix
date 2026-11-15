@@ -11,8 +11,10 @@ inputs: let
   # cache tail; the fourth patch appends a changed reminder after the last turn instead.
   # A wait that gives up after seconds makes helpers poll; the fifth blocks until a result
   # arrives, under one 30-minute dead-man and with no "waiting is not progress" nag.
+  # A helper that cannot reach a model looks like work for its whole run; the sixth fails it
+  # to its parent a minute in, with what its transcript shows.
   omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch];
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch ./dev/ai/omp/spawn-launch-check.patch];
   });
   inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 
