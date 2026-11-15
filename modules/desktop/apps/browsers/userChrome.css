@@ -763,6 +763,11 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   transition: background-color var(--tint), color var(--tint) !important;
 }
 
+.tabbrowser-tab:not([pinned]):not([fadein]) {
+  max-width: 0.1px !important;
+  transition: max-width 1ms !important;
+}
+
 .tabbrowser-tab[visuallyselected] {
   color: var(--surface-ink) !important;
 }
