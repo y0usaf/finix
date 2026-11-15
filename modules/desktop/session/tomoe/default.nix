@@ -4234,15 +4234,15 @@ in {
                       (:cancel (setf menu nil))
                       (:move (setf menu choice))))))
             (flet ((follow (sun current)
-                     (flet ((slot (name)
+                     (flet ((pick (name)
                               (position name shaders :test #'equal
                                                      :key (lambda (entry) (fourth entry)))))
                        (cond ((null mode)
                               (setf mode sun
-                                    index (or (slot current) (slot sun))))
+                                    index (or (pick current) (pick sun))))
                              ((not (equal sun mode))
                               (setf mode sun
-                                    index (or (slot sun) index)))))))
+                                    index (or (pick sun) index)))))))
               (case (getf event :type)
                 (:timer
                  (when (equal (getf event :name) :shader-mode-poll)
@@ -4253,7 +4253,8 @@ in {
                    (let* ((out (or (getf event :stdout) ""))
                           (cut (or (position #\Newline out) (length out)))
                           (sun (string-trim '(#\Space #\Tab #\Newline) (subseq out 0 cut))))
-                     (follow sun (if (search "dark" out :start2 cut) "dark" "light")))))))
+                     (follow sun (cond ((search "dark" out :start2 cut) "dark")
+                                       ((search "light" out :start2 cut) "light"))))))))
             (when index (setf index (mod index count)))
             (setf menu (and menu (mod menu count)))
             (let* ((slot (or menu index))
