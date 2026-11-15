@@ -653,10 +653,10 @@ daemon() {
 case ${1:-} in
 daemon) shift; daemon ;;
 _job) shift; job_main "$@" ;;
-submit) shift; submit "$@" ;;
-wait) shift; wait_result "$@" ;;
-status) shift; status ;;
-cancel) shift; cancel "$@" ;;
+submit) shift; exec 9>&-; submit "$@" ;;
+wait) shift; exec 9>&-; wait_result "$@" ;;
+status) shift; exec 9>&-; status ;;
+cancel) shift; exec 9>&-; cancel "$@" ;;
 -h | --help | help) usage ;;
 *) usage >&2; exit 2 ;;
 esac
