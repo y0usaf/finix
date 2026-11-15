@@ -7,8 +7,10 @@ inputs: let
   # reset, so the file grows quadratically; the patch records replays once by position.
   # Claude refuses with `reasoning_extraction` once enough Gemini/DeepSeek thinking is replayed to
   # it as prose; the second patch drops foreign thinking for readers with that classifier.
+  # A date/cwd reminder written into a turn that was already sent rewrites the whole provider
+  # cache tail; the fourth patch appends a changed reminder after the last turn instead.
   omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch];
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch];
   });
   inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 

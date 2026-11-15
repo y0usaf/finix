@@ -1,0 +1,29 @@
+diff --git a/packages/coding-agent/src/session/date-cwd-reminder.ts b/packages/coding-agent/src/session/date-cwd-reminder.ts
+index 3856f69319..dfd17f814b 100644
+--- a/packages/coding-agent/src/session/date-cwd-reminder.ts
++++ b/packages/coding-agent/src/session/date-cwd-reminder.ts
+@@ -610,7 +610,14 @@ export class DateCwdReminderInjector {
+ 				}
+ 			}
+ 			const turnIndex = newUser ?? (lastTurn >= 0 ? lastTurn : messages.length - 1);
+-			if (newUser !== undefined) {
++			// Only a conversation that has never been sent a reminder takes the changed one
++			// inside a user turn. Every other conversation gets it appended after its last
++			// turn, so no byte an earlier request sent is rewritten and the provider's
++			// cached prefix stays intact: a restored conversation can mistake a turn it
++			// already sent for a new one, and rewriting that turn costs the whole tail.
++			const placed = state.injections.size > 0 || state.controls.length > 0;
++			const canPrefix = newUser !== undefined && !placed;
++			if (canPrefix) {
+ 				const message = messages[newUser] as UserMessage;
+ 				state.injections.set(keys[newUser]!, {
+ 					reminder,
+@@ -625,7 +632,7 @@ export class DateCwdReminderInjector {
+ 				// The journal names the first turn after its conversation: a hook may re-create it under a new key.
+ 				turn: turnIndex === firstIndex ? state.conversation : keys[turnIndex]!,
+ 				reminder,
+-				placement: newUser === undefined ? "control" : "prefix",
++				placement: canPrefix ? "prefix" : "control",
+ 			});
+ 			state.reminder = reminder;
+ 		}
