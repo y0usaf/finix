@@ -17,14 +17,8 @@
                                       :bolo-since nil :bolo-history nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
-    ;; bolo writes the level only inside a turn, so a level event with no turn
-    ;; in hand is the moment to read the state the watch may have missed.
-    (when (and (eq (getf event :name) :bolo-level)
-               (not (cassette--bolo-turn-p (getf state :bolo-state))))
-      (cassette--bolo-sync state))
     (cassette--bolo-watch state event))
   (when (and (eq (getf event :type) :timer) (eq (getf event :name) :sample))
-    (cassette--bolo-sync state)
     (let ((system (context snapshot :system)))
       (dolist (probe '(:cpu :memory :gpu))
         (setf (getf state probe) (probe--sample probe (getf state probe) system)))))

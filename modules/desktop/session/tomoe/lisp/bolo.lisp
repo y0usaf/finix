@@ -27,35 +27,14 @@
   (let ((whole (max 0 (floor (or seconds 0)))))
     (format nil "~D:~2,'0D" (floor whole 60) (mod whole 60))))
 
-(defun cassette--bolo-since (path)
+(defun cassette--bolo-since (age)
   "When the turn began, in CASSETTE--BOLO-NOW seconds. Bolo writes its state
-as the turn opens, so the file's own write date is the turn's start rather than
-a guess, and a bar reloaded mid-turn still shows the elapsed time. The result
-may be negative -- the file can predate the bar's own process clock -- and the
-clock reads that as time already spent, not as zero."
-  (let ((written (ignore-errors (file-write-date path))))
-    (if (and written (<= written (get-universal-time)))
-        (- (cassette--bolo-now) (- (get-universal-time) written))
-        (cassette--bolo-now))))
-
-(defun cassette--bolo-read-state ()
-  "The state in bolo's file right now, or nil if it is missing or unexpected."
-  (let ((line (ignore-errors
-                (with-open-file (in (getf +bolo+ :state) :if-does-not-exist nil)
-                  (when in (read-line in nil ""))))))
-    (let ((content (and line (cassette--bolo-trim line))))
-      (when (member content '("idle" "listening" "recording" "transcribing" "done" "error")
-                    :test #'equal)
-        content))))
-
-(defun cassette--bolo-sync (state)
-  "Read bolo's state file and fold it in when it differs from STATE's. A watch
-reports only writes made after it opens, so this is what shows the turn a bar
-mounted into, and what clears a state write the watch missed."
-  (let ((content (cassette--bolo-read-state)))
-    (when (and content (not (equal content (getf state :bolo-state))))
-      (cassette--bolo-watch state (list :name :bolo-state :content content))))
-  state)
+as the turn opens, so the age the watch reports with the file's content is the
+turn's start rather than a guess, and a bar reloaded mid-turn still shows the
+elapsed time."
+  (if (and age (<= 0 age))
+      (- (cassette--bolo-now) age)
+      (cassette--bolo-now)))
 
 (defun cassette--bolo-bar (level)
   "One sample row: a centred bar as wide as LEVEL, teal while there is voice
@@ -95,8 +74,8 @@ an idle bar wakes no more than it did without it."
 
 (defun cassette--bolo-watch (state event)
   "Fold one watch event from bolo's state or level file into STATE. A turn opens
-the clock from the state file's write date and starts a fresh waveform, and
-level events scroll that waveform."
+the clock from the age the watch reports with the file and starts a fresh
+waveform, and level events scroll that waveform."
   (let ((content (cassette--bolo-trim (getf event :content))))
     (cond
       ((eq (getf event :name) :bolo-state)
@@ -108,12 +87,12 @@ level events scroll that waveform."
                       (cassette--bolo-turn-p content))
            (setf (getf state :bolo-history) nil)
            (when (cassette--bolo-turn-p content)
-             (setf (getf state :bolo-since) (cassette--bolo-since (getf +bolo+ :state)))))
+             (setf (getf state :bolo-since) (cassette--bolo-since (getf event :age)))))
          (setf (getf state :bolo-state) content)))
       ((eq (getf event :name) :bolo-level)
        (let ((level (ignore-errors (read-from-string content))))
          (when (and (realp level) (<= 0 level 1))
-           (let ((level (coerce level 'single-float)))
+           (let ((level (coerce level 'double-float)))
              (setf (getf state :bolo-level) level)
              (when (cassette--bolo-turn-p (getf state :bolo-state))
                (let ((history (cons level (getf state :bolo-history)))
@@ -125,9 +104,9 @@ level events scroll that waveform."
   state)
 
 (defun cassette--bolo-watches ()
-  "Watch bolo's state and level files. A watch on a missing file is an error,
-and bolo may not have started yet, so only existing files are watched."
+  "Watch bolo's state and level files. A file that is not there yet is not an
+error: the watch reports it as missing and starts reporting its content once
+bolo creates it."
   (loop for (name path) in (list (list :bolo-state (getf +bolo+ :state))
                                  (list :bolo-level (getf +bolo+ :level)))
-        when (probe-file path)
-          collect (watch-file name path)))
+        collect (watch-file name path)))
