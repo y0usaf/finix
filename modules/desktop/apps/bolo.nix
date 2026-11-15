@@ -200,22 +200,20 @@ in {
     };
 
     user.ui.tomoe.extraConfig = ''
-      ;; Hold Alt+M to dictate. Key down starts the recorder; key up stops it,
-      ;; and the finished clip is transcribed whole and typed once.
       (define-extension "bolo" (:reads (:command)) (snapshot state event)
         (declare (ignore snapshot))
         (values state
-                (list (define-command "start-bolo"
-                        :description "Start recording (bolo).")
-                      (define-command "stop-bolo"
-                        :description "Stop recording and transcribe (bolo).")
-                      (bind-key (list :alt) "m" "start-bolo" :release "stop-bolo"
-                                :description "Hold to dictate (bolo)."))
+                (list (define-command "toggle-bolo"
+                        :description "Start dictating, or stop (bolo).")
+                      (define-command "release-bolo"
+                        :description "Stop dictating if the key was held (bolo).")
+                      (bind-key (list :alt) "m" "toggle-bolo" :release "release-bolo"
+                                :description "Tap to dictate, or hold (bolo)."))
                 (let ((name (and (eq (getf event :type) :command)
                                  (getf event :name))))
-                  (when (member name '("start-bolo" "stop-bolo") :test #'equal)
+                  (when (member name '("toggle-bolo" "release-bolo") :test #'equal)
                     (list (launch "${bolo}/bin/bolo"
-                                  (if (string= name "start-bolo") "start" "stop")))))))
+                                  (if (string= name "toggle-bolo") "toggle" "release")))))))
     '';
   };
 }
