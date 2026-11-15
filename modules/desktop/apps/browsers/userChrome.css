@@ -21,8 +21,8 @@
   /* The bands keep this much of the theme colour and hand the rest to the
      compositor, which blurs the desktop through them. --paper stays opaque so
      the ink mixed from it keeps its contrast. */
-  --band: color-mix(in srgb, var(--paper) 40%, transparent);
-  --glass: color-mix(in srgb, var(--paper) 55%, transparent);
+  --band: transparent;
+  --glass: transparent;
   --frost: blur(40px) saturate(1.4);
   --accent: var(--focus-outline-color, AccentColor);
   --warn: light-dark(#8a0030, #ffc2ca);
