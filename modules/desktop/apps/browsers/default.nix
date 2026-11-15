@@ -117,6 +117,10 @@
     "browser.toolbars.bookmarks.visibility" = "never";
     "toolkit.tabbox.switchByScrolling" = true;
 
+    /* The chrome paints at partial opacity, so the window itself has to keep its
+       alpha for the compositor's blur behind it to reach the screen. */
+    "widget.transparent-windows" = true;
+
     "media.hardware-video-decoding.enabled" = true;
     "media.ffmpeg.vaapi.enabled" = false;
 

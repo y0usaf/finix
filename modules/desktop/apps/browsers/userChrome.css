@@ -4,10 +4,7 @@
   --line: 14px;
   --side: 20ch;
   --tab-width: 24ch;
-  --pop-top: 24vh;
   --pop-width: min(clamp(560px, 42vw, 960px), calc(100vw - 4ch));
-  --pop-font-size: 22px;
-  --pop-row: 40px;
   --pop-result: 22px;
   --paper: var(--lwt-accent-color, -moz-dialog);
   --ink: color-mix(in srgb, contrast-color(var(--paper)) 94%, var(--paper));
@@ -19,7 +16,11 @@
   --edge: color-mix(in srgb, var(--ink) 30%, var(--paper));
   --wash: color-mix(in srgb, var(--ink) 10%, var(--paper));
   --frame-wash: var(--wash);
-  --glass: color-mix(in srgb, var(--paper) 94%, transparent);
+  /* The bands keep this much of the theme colour and hand the rest to the
+     compositor, which blurs the desktop through them. --paper stays opaque so
+     the ink mixed from it keeps its contrast. */
+  --band: color-mix(in srgb, var(--paper) 78%, transparent);
+  --glass: color-mix(in srgb, var(--paper) 88%, transparent);
   --frost: blur(40px) saturate(1.4);
   --accent: var(--focus-outline-color, AccentColor);
   --warn: light-dark(#8a0030, #ffc2ca);
@@ -64,12 +65,25 @@ findbar *:not(input):focus-visible {
   outline-offset: -1px !important;
 }
 
+/* Everything outside the page is see-through: the window keeps its alpha, the
+   compositor blurs the desktop behind it, and the bands paint the theme colour
+   at partial opacity on top. */
+:root,
+#main-window,
+body {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
 body {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) !important;
   grid-template-rows: minmax(0, 1fr) auto var(--line) var(--line) !important;
   grid-template-areas: "content" "notes" "nav" "tabs" !important;
-  background-color: var(--frame) !important;
+}
+
+#tabbrowser-tabpanels {
+  background-color: var(--paper) !important;
 }
 
 #navigator-toolbox {
@@ -97,7 +111,7 @@ body {
   min-width: 0 !important;
   height: var(--line) !important;
   padding-inline: 1ch !important;
-  background-color: var(--paper) !important;
+  background-color: var(--band) !important;
   color: var(--ink) !important;
 }
 
@@ -308,48 +322,69 @@ body {
   margin: 0 !important;
   color: var(--ink) !important;
   font-size: var(--chrome-font-size) !important;
-  transition:
-    top var(--glide) var(--ease),
-    left var(--glide) var(--ease),
-    width var(--glide) var(--ease) !important;
 }
 
 #urlbar > .urlbar-background {
-  display: block !important;
-  position: absolute !important;
-  inset: 0 !important;
-  border: 1px solid transparent !important;
-  transition: background-color var(--glide) linear, border-color var(--glide) linear !important;
+  display: none !important;
 }
 
 #urlbar > .urlbar-input-container {
   display: flex !important;
   align-items: center !important;
+  justify-content: center !important;
   position: relative !important;
   flex: none !important;
+  gap: 1ch !important;
   width: 100% !important;
   height: var(--line) !important;
-  transition:
-    opacity var(--snap) linear,
-    height var(--glide) var(--ease),
-    padding var(--glide) var(--ease) !important;
+  padding: 0 !important;
+  transition: opacity var(--snap) linear !important;
 }
 
 moz-urlbar-slot {
   display: contents !important;
 }
 
+/* The address is a box the size of the URL in it, so the whole row is one
+   object: [ example.com/path ]. It keeps the row's height whether the URL is
+   long, short, or being typed into. The brackets are anchored to the text box
+   because the wrapper around it is a XUL box that fills the row. */
 .urlbar-input-box {
   display: flex !important;
-  flex: 1 1 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
   min-width: 0 !important;
   height: 100% !important;
 }
 
+.urlbar-input-box::before,
+.urlbar-input-box::after {
+  position: absolute !important;
+  inset-block-start: 0 !important;
+  line-height: var(--line) !important;
+  pointer-events: none !important;
+}
+
+.urlbar-input-box::before {
+  content: "[";
+  inset-inline-start: anchor(--lw-address left) !important;
+  translate: calc(-100% - 1ch) 0 !important;
+}
+
+.urlbar-input-box::after {
+  content: "]";
+  inset-inline-start: anchor(--lw-address right) !important;
+  translate: 1ch 0 !important;
+}
+
 #urlbar-input {
   display: block !important;
-  width: 100% !important;
-  height: 100% !important;
+  anchor-name: --lw-address !important;
+  field-sizing: content !important;
+  inline-size: auto !important;
+  block-size: 100% !important;
+  min-inline-size: 1ch !important;
+  max-inline-size: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
@@ -358,7 +393,6 @@ moz-urlbar-slot {
   font: inherit !important;
   text-align: center !important;
   outline: none !important;
-  transition: font-size var(--glide) var(--ease) !important;
 }
 
 #urlbar-input::selection,
@@ -376,36 +410,20 @@ findbar .findbar-textbox::selection {
   color: var(--warn) !important;
 }
 
-#urlbar:is([focused], [breakout-extend]) {
-  top: var(--pop-top) !important;
-  left: calc(50vw - var(--pop-width) / 2) !important;
-  width: var(--pop-width) !important;
-  height: auto !important;
-}
-
-#urlbar:is([focused], [breakout-extend]) > .urlbar-background {
-  background-color: var(--glass) !important;
-  backdrop-filter: var(--frost) !important;
-  border-color: var(--edge) !important;
-}
-
-#urlbar:is([focused], [breakout-extend]) > .urlbar-input-container {
-  gap: 1ch !important;
-  height: var(--pop-row) !important;
-  padding-inline: 2ch !important;
-}
-
-#urlbar:is([focused], [breakout-extend]) #urlbar-input {
-  font-size: var(--pop-font-size) !important;
-}
-
-#urlbar:is([focused], [breakout-extend]) #trust-icon-container {
+/* Site info and the page actions are single-character marks pinned to the row's
+   ends, so they never push the address off centre and the row keeps its size. */
+#trust-icon-container {
   display: flex !important;
   align-items: center !important;
+  position: absolute !important;
+  inset-inline-start: 0 !important;
+  inset-block: 0 !important;
   flex: none !important;
-  height: 100% !important;
-  font-size: var(--pop-font-size) !important;
   color: var(--dim) !important;
+}
+
+.urlbar-input-container:not([pageproxystate="valid"]) #trust-icon-container {
+  display: none !important;
 }
 
 #trust-icon-container::before {
@@ -424,12 +442,20 @@ findbar .findbar-textbox::selection {
   color: inherit !important;
 }
 
-#urlbar:is([focused], [breakout-extend]) #page-action-buttons {
+#page-action-buttons {
   display: flex !important;
   align-items: center !important;
-  flex: none !important;
+  position: absolute !important;
+  inset-inline-end: 0 !important;
+  inset-block: 0 !important;
   gap: 1ch !important;
-  height: 100% !important;
+  flex: none !important;
+  color: var(--dim) !important;
+  transition: opacity var(--snap) linear !important;
+}
+
+#nav-bar:not(:hover, :focus-within) #page-action-buttons {
+  opacity: 0 !important;
 }
 
 .urlbar-page-action {
@@ -463,23 +489,32 @@ findbar .findbar-textbox::selection {
   content: "P";
 }
 
-:root:has(#statuspanel:not([inactive], [hidden])) #urlbar:not([focused], [breakout-extend]) > .urlbar-input-container,
-:root:has(#tabbrowser-tabpanels > .deck-selected findbar:not([hidden])) #urlbar:not([focused], [breakout-extend]) > .urlbar-input-container {
+:root:has(#statuspanel:not([inactive], [hidden])) #urlbar:not([focused]) > .urlbar-input-container,
+:root:has(#tabbrowser-tabpanels > .deck-selected findbar:not([hidden])) #urlbar:not([focused]) > .urlbar-input-container {
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
+/* The suggestions open upward out of the row, as a panel of their own: the row
+   underneath keeps its size and its brackets. */
 #urlbar > .urlbarView {
   display: block !important;
-  position: relative !important;
+  position: absolute !important;
+  inset-block-end: 100% !important;
+  left: 50% !important;
+  translate: -50% 0 !important;
+  width: var(--pop-width) !important;
   max-height: 60vh !important;
   overflow-y: auto !important;
-  border-top: 0 !important;
+  border: 0 !important;
   padding-block: 0.5ch !important;
+  background-color: var(--glass) !important;
+  backdrop-filter: var(--frost) !important;
+  color: var(--ink) !important;
 }
 
 #urlbar:not([open]) > .urlbarView,
-#urlbar:not([focused], [breakout-extend]) > .urlbarView {
+#urlbar:not([focused]) > .urlbarView {
   display: none !important;
 }
 
@@ -588,7 +623,7 @@ findbar .findbar-textbox::selection {
   min-width: 0 !important;
   height: var(--line) !important;
   overflow: hidden !important;
-  background-color: var(--frame) !important;
+  background-color: var(--band) !important;
   color: var(--frame-ink) !important;
 }
 
@@ -601,7 +636,7 @@ findbar .findbar-textbox::selection {
   inset-inline-start: 0 !important;
   z-index: 3 !important;
   padding-inline: 1ch !important;
-  background-color: var(--frame) !important;
+  background-color: var(--band) !important;
   color: inherit !important;
 }
 
@@ -626,7 +661,7 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   align-items: center !important;
   flex: none !important;
   padding-inline: 1ch !important;
-  background-color: var(--frame) !important;
+  background-color: var(--band) !important;
 }
 
 #pinned-tabs-container:not(:has(> .tabbrowser-tab)) {
@@ -656,7 +691,8 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   inset-block: 0 !important;
   z-index: 2 !important;
   width: 3ch !important;
-  background-color: var(--frame) !important;
+  background-color: var(--band) !important;
+  backdrop-filter: var(--frost) !important;
 }
 
 #new-tab-button {
@@ -718,8 +754,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 
 .tabbrowser-tab[visuallyselected] .tab-label {
   -webkit-text-stroke: 0.4px currentColor !important;
-  text-decoration: underline !important;
-  text-underline-offset: 2px !important;
 }
 
 .tabbrowser-tab:not([pinned]):not([fadein]) {
@@ -766,12 +800,33 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 
 .tab-label {
   display: block !important;
+  position: relative !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
   overflow: hidden !important;
   white-space: nowrap !important;
   text-align: center !important;
   text-overflow: ellipsis !important;
+}
+
+/* The underline is a box under the label, so it can be drawn and withdrawn
+   rather than switched: the tab that loses the selection retracts it, the one
+   that gains it runs it out, both in the same direction. */
+.tab-label::after {
+  content: "" !important;
+  position: absolute !important;
+  inset-inline: 0 !important;
+  inset-block-end: 0 !important;
+  height: 1px !important;
+  background-color: currentColor !important;
+  transform: scaleX(0) !important;
+  transform-origin: 100% 50% !important;
+  transition: transform var(--quick) var(--ease) !important;
+}
+
+.tabbrowser-tab[visuallyselected] .tab-label::after {
+  transform: scaleX(1) !important;
+  transform-origin: 0 50% !important;
 }
 
 .tab-icon-stack {
@@ -837,7 +892,7 @@ findbar {
   z-index: 8 !important;
   height: var(--line) !important;
   padding-inline: 1ch !important;
-  background-color: var(--paper) !important;
+  background-color: var(--band) !important;
   color: var(--ink) !important;
   clip-path: inset(0) !important;
   transition: clip-path var(--quick) var(--ease), visibility 0s linear 0s !important;
@@ -1036,7 +1091,7 @@ body:has(#toolbar-menubar:not([inactive])) {
   align-items: center !important;
   height: var(--line) !important;
   padding-inline: 1ch !important;
-  background-color: var(--frame) !important;
+  background-color: var(--band) !important;
   color: var(--frame-ink) !important;
   border-bottom: 0 !important;
 }
@@ -1086,7 +1141,7 @@ body:has(#toolbar-menubar:not([inactive])) {
   top: 100% !important;
 }
 
-:root[inFullscreen] #urlbar:not([focused], [breakout-extend]) {
+:root[inFullscreen] #urlbar:not([focused]) {
   opacity: 0 !important;
   pointer-events: none !important;
 }
