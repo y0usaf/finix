@@ -297,15 +297,19 @@
 
   gaps = 8;
 
+  # The theme draws a window's border OUTSIDE its box, so the rail's seam is two
+  # borders, two channels and the rail itself.
+  borderWidth = 2;
+
   seam =
-    if bar.style == "spine"
-    then builtins.ceil (28.0 * bar.scale) + 2 * gaps
+    if bar.style == "rail"
+    then 2 * borderWidth + 2 * bar.rail.channel + bar.rail.width
     else gaps;
 
   hudThemeParameters = {
     palette-file = palette;
     palette-command = "mkdir -p ${lib.escapeShellArg (dirOf palette)} && { cat ${lib.escapeShellArg palette} 2>/dev/null || true; }";
-    border = 2;
+    border = borderWidth;
     focus-flash = 220;
     tick = frameTick;
   };
@@ -334,6 +338,36 @@
     media-width = 34;
   };
 
+  # KEYWAY's rail: one static surface in the deck's seam, a carriage on every
+  # carried card and one accent key on the focused one.
+  railParameters = {
+    inherit (barParameters) modules time date;
+    width = bar.rail.width;
+    channel = bar.rail.channel;
+    shoe = bar.rail.shoe;
+    dog = bar.rail.dog;
+    bite = bar.rail.bite;
+    key-bar = bar.rail.keyBar;
+    key-motion = keyword bar.rail.keyMotion;
+    throw = keyword bar.rail.throwMode;
+    carry-max = bar.rail.carryMax;
+    focus-border = bar.rail.focusBorder;
+    sample = 1000;
+    colors = lib.mapAttrs (_: keyword) {
+      steel = "color8";
+      key = "accent";
+      ink = "ink";
+      dim = "dim";
+      tie = "rim";
+      track = "led-off";
+      hot = "color3";
+      red = "color1";
+      teal = "color6";
+      face = "face";
+      tray = "counter";
+    };
+  };
+
   gapParameters = {
     inherit (barParameters) modules center-between edges inset time date hot media-width;
     font = config.user.ui.fonts.mainFontName;
@@ -347,11 +381,11 @@
       segments = 10;
     }
     // (
-      if bar.style == "spine"
+      if bar.style == "rail"
       then {
         colors = {
-          dark = spineColors;
-          light = spineLightColors;
+          dark = railColors;
+          light = railLightColors;
         };
       }
       else {
@@ -368,7 +402,7 @@
 
   glassAlpha = lib.fixedWidthString 2 "0" (lib.toHexString (builtins.floor (config.user.appearance.glass.opacity * 255 + 0.5)));
 
-  spineLightColors = {
+  railLightColors = {
     face = "#FFFFFF" + glassAlpha;
     shine = "#FFFFFF59";
     shade = "#0000001F";
@@ -397,6 +431,7 @@
       "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
       # Where bolo keeps the dictation state and level the bar reads.
       + "(defparameter +bolo+ (list :state \"${config.user.runtimeDir}/bolo/state\" :level \"${config.user.runtimeDir}/bolo/level\"))\n"
+      + "(defparameter +rail+ ${toLisp railParameters})\n"
       + source_probe
       + (generators.lisp.render (({
           and,
@@ -2897,10 +2932,10 @@
         ]))
         generators.lisp));
     cassette = cassetteLisp ./lisp/plates.lisp;
-    spine = cassetteLisp ./lisp/spine.lisp;
+    rail = cassetteLisp ./lisp/rail.lisp;
   };
 
-  spineColors = {
+  railColors = {
     face = "#000000" + glassAlpha;
     shine = "#FFFFFF14";
     shade = "#00000066";
@@ -3160,9 +3195,9 @@ in {
 
     bar = {
       style = lib.mkOption {
-        type = lib.types.enum ["panels" "gap" "cassette" "spine"];
+        type = lib.types.enum ["panels" "gap" "cassette" "rail"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. spine: the same parts, its media shown by the LED and reels alone with no title, inked for the light or dark theme, on one vertical J-card spine standing between the deck's two columns, which widen their seam for it and carry it along when they move; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. rail: KEYWAY, the deck's seam as a steel rail: a frosted body with a way down each edge and a plate at each end, the readings, clock and bolo's voice stamped into its web, a guide shoe on every carried card and one orange key clamped to the focused card, which rides the rail on a scroll, is thrown across it on a focus change and crosses with its card on a swap. The rail widens the seam it stands in and never scales its type; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
       };
 
       modules = lib.mkOption {
@@ -3182,6 +3217,59 @@ in {
         default = 1;
         description = "Gap bar size multiplier: text, meters, gaps and offsets grow with it.";
       };
+
+      rail = {
+        width = lib.mkOption {
+          type = lib.types.ints.positive;
+          default = 56;
+          description = "Rail body width in physical pixels.";
+        };
+        channel = lib.mkOption {
+          type = lib.types.ints.positive;
+          default = 8;
+          description = "Air between a window's border and the rail, where the carriages' shoes sit.";
+        };
+        shoe = lib.mkOption {
+          type = lib.types.ints.positive;
+          default = 24;
+          description = "Guide shoe and key lug height.";
+        };
+        dog = lib.mkOption {
+          type = lib.types.numbers.nonnegative;
+          default = 40;
+          description = "The key's centre dog height; 0 draws no dog.";
+        };
+        bite = lib.mkOption {
+          type = lib.types.ints.positive;
+          default = 2;
+          description = "How far a key lug overhangs the window frame and the rail's way.";
+        };
+        keyBar = lib.mkOption {
+          type = lib.types.ints.positive;
+          default = 4;
+          description = "Width of the bar joining the key's lugs.";
+        };
+        keyMotion = lib.mkOption {
+          type = lib.types.enum ["ride" "dock"];
+          default = "ride";
+          description = "ride: a scroll attaches the key to the incoming card and it arrives with it. dock: the key stays at rest and the cards slide past under it.";
+        };
+        throwMode = lib.mkOption {
+          type = lib.types.enum ["slide" "cut"];
+          default = "slide";
+          description = "slide: a focus change throws the key across the rail on the window-move spring. cut: it appears on the other lane at once.";
+        };
+        carryMax = lib.mkOption {
+          type = lib.types.ints.positive;
+          default = 24;
+          description = "Most carriages emitted; past this only the cards nearest each column's front carry shoes.";
+        };
+        focusBorder = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Also keep Tomoe's own focused border on carried windows. Off, the key is the only focus indicator.";
+        };
+      };
     };
   };
 
@@ -3194,7 +3282,8 @@ in {
           focus-follows-mouse = true;
           pointer-follows-focus = true;
         }
-        // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;})})
+        // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;}
+        // lib.optionalAttrs (bar.style == "rail") {animations = {focus-outline = false;};})})
       (defparameter +policy-launcher+ ${toLisp {
         app-id = "launcher";
         ratio = mkLispInline "1/3";

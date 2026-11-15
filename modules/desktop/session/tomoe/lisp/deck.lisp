@@ -133,6 +133,12 @@ odd number of columns, or when the seam is no wider than two gaps."
             :x (+ x split gaps) :y (+ (getf area :y) gaps)
             :width inner :height (- (getf area :height) (* 2 gaps))))))
 
+(defun deck--columns (state seam)
+  "Each column's ids, nearest its front first, or NIL when there is no seam to
+carry them. A grid keeps ordinary borders, so it publishes nothing either."
+  (when (and seam (not (getf state :grid)))
+    (list :left (deck--column state :left) :right (deck--column state :right))))
+
 (defun deck--box (state area id)
   "Where ID goes, or NIL when it is not in the window set."
   (let* ((gaps (getf +layout+ :gaps))
@@ -414,7 +420,8 @@ odd number of columns, or when the seam is no wider than two gaps."
           (when (and (deck--manageable-p state id) (deck--side-of state id))
             (deck--adopt-front state (deck--side-of state id) id))
           (deck--focus-window state id))))
-    (let ((current (deck--current state)))
+    (let* ((current (deck--current state))
+           (seam (deck--seam state area)))
       (values state
               (append (mapcar (lambda (binding) (apply #'bind-key binding))
                               (if (deck--narrow-p area)
@@ -424,7 +431,8 @@ odd number of columns, or when the seam is no wider than two gaps."
                                              +layout-bindings+)
                                   +layout-bindings+))
                       (when area (deck--places windows state area))
-                      (list (publish-state :deck-seam (deck--seam state area)))
+                      (list (publish-state :deck-seam seam)
+                            (publish-state :deck-columns (deck--columns state seam)))
                       (deck--raises state current)
                       +deck-commands+
                       (list (focus (unless (member current quiet) current) :raise nil)))

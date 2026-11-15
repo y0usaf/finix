@@ -23,7 +23,7 @@
   (member name '("listening" "recording") :test #'equal))
 
 (defun cassette--bolo-clock (seconds)
-  "SECONDS as the m:ss the spine reads at a glance."
+  "SECONDS as the m:ss the bar reads at a glance."
   (let ((whole (max 0 (floor (or seconds 0)))))
     (format nil "~D:~2,'0D" (floor whole 60) (mod whole 60))))
 
@@ -72,7 +72,7 @@ theme rather than as a blank block."
 
 (defun cassette--bolo-wave (history)
   "HISTORY's newest level at the top, one row each, so the waveform scrolls down
-the spine as it is spoken. Rows that are not there yet sit on the same baseline,
+the bar as it is spoken. Rows that are not there yet sit on the same baseline,
 which keeps the block's height still from the first frame."
   (ui :column :align :center :gap (cassette--px (getf +bolo-voice+ :gap))
       :children (loop for rest = history then (cdr rest)
@@ -80,7 +80,7 @@ which keeps the block's height still from the first frame."
                       collect (cassette--bolo-bar (first rest)))))
 
 (defun cassette--bolo (state)
-  "Bolo's dictation at the top of the spine: the elapsed turn and bolo's own
+  "Bolo's dictation at the top of the bar: the elapsed turn and bolo's own
 level breathing down as a live waveform in the theme's teal. Nothing between
 turns -- a nil cell draws nothing, and the block adds no timer of its own, so
 an idle bar wakes no more than it did without it."
