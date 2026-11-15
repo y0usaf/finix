@@ -622,39 +622,16 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   display: none !important;
 }
 
-scrollbox[part="scrollbox"][orient="horizontal"] {
-  scroll-snap-type: x mandatory !important;
-}
-
 #pinned-tabs-container {
   display: flex !important;
   align-items: center !important;
-  position: absolute !important;
-  inset-block: 0 !important;
-  inset-inline-start: 0 !important;
-  z-index: 2 !important;
+  flex: none !important;
   padding-inline: 1ch !important;
   background-color: var(--frame) !important;
 }
 
 #pinned-tabs-container:not(:has(> .tabbrowser-tab)) {
   display: none !important;
-}
-
-:root[privatebrowsingmode="temporary"] #pinned-tabs-container {
-  inset-inline-start: 11ch !important;
-}
-
-#tabbrowser-arrowscrollbox > .tabbrowser-tab:nth-child(1 of .tabbrowser-tab[fadein], tab-group),
-#tabbrowser-arrowscrollbox > tab-group:nth-child(1 of .tabbrowser-tab[fadein], tab-group) > .tab-group-label-container {
-  margin-inline-start: 50vw !important;
-}
-
-#tabbrowser-arrowscrollbox-periphery {
-  display: block !important;
-  flex: none !important;
-  width: 50vw !important;
-  height: 100% !important;
 }
 
 #TabsToolbar :is(#new-tab-button, #alltabs-button) {
@@ -706,14 +683,12 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 }
 
 .tabbrowser-tab {
-  --w: var(--tab-width);
   display: flex !important;
   align-items: stretch !important;
   position: relative !important;
   flex: none !important;
-  width: var(--w) !important;
-  min-width: var(--w) !important;
-  max-width: var(--w) !important;
+  min-width: 0 !important;
+  max-width: var(--tab-width) !important;
   height: var(--line) !important;
   overflow: hidden !important;
   margin-inline: 0.5ch !important;
@@ -722,18 +697,15 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 
 .tabbrowser-tab[visuallyselected] {
   color: var(--frame-ink) !important;
-  scroll-margin-inline: calc(50vw - var(--tab-width) / 2) !important;
-  scroll-snap-align: center !important;
 }
 
 .tabbrowser-tab[visuallyselected] .tab-label {
-  font-weight: bold !important;
+  -webkit-text-stroke: 0.4px currentColor !important;
   text-decoration: underline !important;
   text-underline-offset: 2px !important;
 }
 
 .tabbrowser-tab:not([pinned]):not([fadein]) {
-  --w: 0.1px;
   position: absolute !important;
   visibility: hidden !important;
 }
@@ -758,11 +730,13 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 .tab-content::before {
   content: "[";
   flex: none !important;
+  padding-inline-end: 1ch !important;
 }
 
 .tab-content::after {
   content: "]";
   flex: none !important;
+  padding-inline-start: 1ch !important;
 }
 
 .tab-label-container {
