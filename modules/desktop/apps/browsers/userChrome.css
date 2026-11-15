@@ -1,7 +1,7 @@
 :root {
   --font-family: monospace;
   --chrome-font-size: 11px;
-  --line: 9px;
+  --line: 11px;
   --side: 20ch;
   --tab-width: 24ch;
   --pop-width: min(clamp(560px, 42vw, 960px), calc(100vw - 4ch));
@@ -14,7 +14,7 @@
   --soft: color-mix(in srgb, var(--surface-ink) 86%, var(--surface));
   --faint: color-mix(in srgb, var(--surface-ink) 78%, var(--surface));
 
-  --row-h: 10px;
+  --row-h: 12px;
   --row-inset: 1ch;
   --row-hot: var(--surface-ink);
   --row-hot-ink: var(--surface);
@@ -30,11 +30,10 @@
     var(--dash-y) left top / 1px 100% no-repeat,
     var(--dash-y) right top / 1px 100% no-repeat,
     var(--surface);
-  --hatch: "////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////";
+  --tick: repeating-linear-gradient(90deg, var(--divider-ink) 0 1px, transparent 1px 6px);
 
   --tint: var(--snap) linear;
 
-  --accent: var(--focus-outline-color, AccentColor);
   --warn: light-dark(#8a0030, #ffc2ca);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --quick: 140ms;
@@ -73,7 +72,7 @@ menupopup {
 
 #navigator-toolbox *:not(input):focus-visible,
 findbar *:not(input):focus-visible {
-  outline: 1px solid var(--accent) !important;
+  outline: 1px solid var(--surface-ink) !important;
   outline-offset: -1px !important;
 }
 
@@ -120,8 +119,33 @@ body {
   min-width: 0 !important;
   height: var(--line) !important;
   padding-inline: 0 !important;
+  box-shadow: 0 -1px 0 var(--divider-ink) !important;
   background-color: var(--surface) !important;
   color: var(--surface-ink) !important;
+}
+
+.browserContainer {
+  border-bottom: 0 !important;
+}
+
+#nav-bar::before,
+#nav-bar::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset-block: 5px !important;
+  background: var(--tick) !important;
+  pointer-events: none !important;
+}
+
+#nav-bar::before {
+  left: 0 !important;
+  right: calc(100% - 50vw + var(--url-col) / 2) !important;
+}
+
+#nav-bar::after {
+  left: calc(50vw + var(--url-col) / 2) !important;
+  right: 0 !important;
 }
 
 #nav-bar-customization-target {
@@ -156,18 +180,22 @@ body {
 
 #stop-reload-button {
   right: calc(50vw + var(--url-col) / 2 + 1ch) !important;
+  width: 6ch !important;
 }
 
 #forward-button {
-  right: calc(50vw + var(--url-col) / 2 + 3ch) !important;
+  right: calc(50vw + var(--url-col) / 2 + 8ch) !important;
+  width: 7ch !important;
 }
 
 #back-button {
-  right: calc(50vw + var(--url-col) / 2 + 5ch) !important;
+  right: calc(50vw + var(--url-col) / 2 + 16ch) !important;
+  width: 4ch !important;
 }
 
 #sidebar-button {
-  right: calc(50vw + var(--url-col) / 2 + 7ch) !important;
+  right: calc(50vw + var(--url-col) / 2 + 21ch) !important;
+  width: 7ch !important;
 }
 
 #stop-reload-button > * {
@@ -202,6 +230,24 @@ body {
   transition: color var(--tint), background-color var(--tint) !important;
 }
 
+:is(#sidebar-button, #back-button, #forward-button, #reload-button, #stop-button) {
+  padding-inline: 0 !important;
+}
+
+:is(
+  #sidebar-button,
+  #back-button,
+  #forward-button,
+  #reload-button,
+  #stop-button,
+  #downloads-button,
+  #unified-extensions-button,
+  #PanelUI-button,
+  .unified-extensions-item
+) {
+  background-color: var(--surface) !important;
+}
+
 :is(
   #sidebar-button,
   #back-button,
@@ -223,35 +269,39 @@ body {
 }
 
 #sidebar-button::before {
-  content: "|";
+  content: "sidebar";
 }
 
 #back-button::before {
-  content: "<";
+  content: "back";
 }
 
 #forward-button::before {
-  content: ">";
+  content: "forward";
 }
 
 #reload-button::before {
-  content: "r";
+  content: "reload";
+}
+
+#reload-button[displaystop]::before {
+  content: "stop";
 }
 
 #stop-button::before {
-  content: "x";
+  content: "stop";
 }
 
 #unified-extensions-button::before {
-  content: "&";
+  content: "extensions";
 }
 
 #downloads-button::before {
-  content: "v";
+  content: "downloads";
 }
 
 #PanelUI-menu-button::before {
-  content: "=";
+  content: "menu";
 }
 
 #new-tab-button::before {
@@ -281,14 +331,15 @@ body {
 
 #downloads-button[progress] {
   justify-content: flex-start !important;
-  width: 11ch !important;
+  width: 17ch !important;
+  padding-inline: 0 !important;
 }
 
 #downloads-button[progress] #downloads-indicator-progress-outer {
   display: block !important;
   position: absolute !important;
   inset-block: 0 !important;
-  inset-inline-start: 2ch !important;
+  inset-inline-start: 9ch !important;
   width: 8ch !important;
   color: var(--divider-ink) !important;
 }
@@ -319,18 +370,6 @@ body {
 
 #downloads-button:is([attention="warning"], [attention="severe"]) {
   color: var(--warn) !important;
-}
-
-#downloads-button:is([attention="warning"], [attention="severe"])::before {
-  content: "v!";
-}
-
-#unified-extensions-button[attention]::before {
-  content: "&!";
-}
-
-#PanelUI-menu-button[badge-status]::before {
-  content: "=!";
 }
 
 #nav-bar:not(:hover, :focus-within) :is(#sidebar-button, #back-button, #forward-button, #stop-reload-button:not(:has(#reload-button[displaystop])), #unified-extensions-button:not([attention]), .unified-extensions-item:not(:has(.toolbarbutton-badge:not(:empty))), #PanelUI-button:not(:has([open], [badge-status])), #downloads-button:not([attention], [progress], [open])),
@@ -378,8 +417,6 @@ body {
 .unified-extensions-item-action-button::before {
   content: attr(label);
   display: block !important;
-  max-width: 4ch !important;
-  overflow: clip !important;
   white-space: nowrap !important;
   text-transform: lowercase !important;
 }
@@ -462,52 +499,6 @@ body {
   padding-inline: 1ch !important;
 }
 
-#urlbar > .urlbar-input-container::before,
-#urlbar > .urlbar-input-container::after {
-  content: var(--hatch);
-  display: block !important;
-  position: absolute !important;
-  inset-block: 0 !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  text-overflow: "" !important;
-  line-height: var(--line) !important;
-  color: var(--divider-ink) !important;
-  pointer-events: none !important;
-}
-
-#urlbar > .urlbar-input-container::before {
-  direction: rtl !important;
-  left: 4ch !important;
-  right: calc(anchor(--lw-address left) + 2ch) !important;
-}
-
-#urlbar > .urlbar-input-container::after {
-  direction: ltr !important;
-  left: calc(anchor(--lw-address right) + 2ch) !important;
-  right: 4ch !important;
-}
-
-#urlbar:is([focused], [breakout-extend]) > .urlbar-input-container::before {
-  left: 5ch !important;
-}
-
-#urlbar:is([focused], [breakout-extend]) > .urlbar-input-container::after {
-  right: 5ch !important;
-}
-
-#urlbar:is([focused], [breakout-extend]) #trust-icon-container {
-  inset-inline-start: 1ch !important;
-}
-
-#urlbar:is([focused], [breakout-extend]) #identity-box {
-  inset-inline-start: 3ch !important;
-}
-
-#urlbar:is([focused], [breakout-extend]) #page-action-buttons {
-  inset-inline-end: 1ch !important;
-}
-
 moz-urlbar-slot {
   display: contents !important;
 }
@@ -550,7 +541,7 @@ moz-urlbar-slot {
   inline-size: auto !important;
   block-size: 100% !important;
   min-inline-size: 1ch !important;
-  max-inline-size: 100% !important;
+  max-inline-size: calc(100% - 14ch) !important;
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
@@ -580,42 +571,39 @@ findbar .findbar-textbox::selection {
   display: flex !important;
   align-items: center !important;
   position: absolute !important;
-  inset-inline-start: 0 !important;
   inset-block: 0 !important;
+  inset-inline-start: calc(anchor(--lw-address left) - 2ch) !important;
+  translate: -100% 0 !important;
   flex: none !important;
+  white-space: nowrap !important;
   color: var(--faint) !important;
 }
 
-.urlbar-input-container:not([pageproxystate="valid"]) :is(#trust-icon-container, #identity-box) {
+#trust-icon-container > * {
   display: none !important;
 }
 
 #trust-icon-container::before {
-  content: "s";
-}
-
-#trust-icon-container::after {
-  content: "t";
-}
-
-#trust-icon-container.inactive::after {
-  content: "-";
-  color: var(--divider-ink) !important;
-}
-
-#trust-icon-container.breached::after {
-  content: "b";
-  color: var(--warn) !important;
+  content: "secure";
 }
 
 #trust-icon-container.insecure::before {
-  content: "!";
+  content: "insecure";
   color: var(--warn) !important;
 }
 
 #trust-icon-container.warning::before {
-  content: "?";
+  content: "unsafe";
   color: var(--warn) !important;
+}
+
+#trust-icon-container.breached::before {
+  content: "breached";
+  color: var(--warn) !important;
+}
+
+#trust-icon-container.inactive::before {
+  content: none;
 }
 
 #trust-icon-container:hover {
@@ -623,53 +611,48 @@ findbar .findbar-textbox::selection {
   background-color: var(--row-hot) !important;
 }
 
+.urlbar-input-container:not([pageproxystate="valid"]) #trust-icon-container {
+  display: none !important;
+}
+
 #identity-box {
   display: flex !important;
-  align-items: center !important;
   position: absolute !important;
-  inset-inline-start: 2ch !important;
   inset-block: 0 !important;
+  inset-inline-start: calc(anchor(--lw-address left) - 1ch) !important;
+  translate: -100% 0 !important;
+  flex: none !important;
   width: 1ch !important;
-  color: var(--divider-ink) !important;
 }
 
-#identity-box::before {
-  content: "-";
-}
-
-#identity-box:has(#identity-permission-box[hasPermissions])::before {
-  content: "p";
-  color: var(--soft) !important;
-}
-
-#identity-box:has(.blocked-permission-icon[showing])::before {
-  content: "x";
-  color: var(--soft) !important;
-}
-
-#identity-box:has(#notification-popup-box:not([hidden]))::before {
-  content: "?";
-  color: var(--surface-ink) !important;
+#identity-box > * {
+  display: none !important;
 }
 
 #page-action-buttons {
   display: flex !important;
   align-items: center !important;
   position: absolute !important;
-  inset-inline-end: 0 !important;
+  inset-inline-start: calc(anchor(--lw-address right) + 2ch) !important;
   inset-block: 0 !important;
-  gap: 0 !important;
+  gap: 1ch !important;
   flex: none !important;
+  white-space: nowrap !important;
   color: var(--soft) !important;
+  opacity: 0 !important;
+  transition: opacity var(--snap) linear !important;
 }
 
-.urlbar-page-action,
-#page-action-buttons > :is(#reader-mode-button, #picture-in-picture-button)[hidden] {
+.urlbar-page-action {
   display: flex !important;
   align-items: center !important;
-  width: 1ch !important;
   height: 100% !important;
-  color: var(--soft) !important;
+  color: inherit !important;
+}
+
+.urlbar-page-action:not(#star-button-box),
+.urlbar-page-action > * {
+  display: none !important;
 }
 
 .urlbar-page-action:hover {
@@ -681,38 +664,24 @@ findbar .findbar-textbox::selection {
   order: 1 !important;
 }
 
-#reader-mode-button {
-  order: 2 !important;
-}
-
-#picture-in-picture-button {
-  order: 3 !important;
-}
-
 #star-button-box::before {
-  content: "-";
-  color: var(--divider-ink) !important;
+  content: "bookmark";
 }
 
 #star-button-box:has(#star-button[starred])::before {
-  content: "*";
-  color: var(--surface-ink) !important;
+  content: "saved";
+  color: var(--faint) !important;
 }
 
-#page-action-buttons > :is(#reader-mode-button, #picture-in-picture-button)[hidden]::before {
-  content: "-";
-  color: var(--divider-ink) !important;
-}
-
-#page-action-buttons > :is(#reader-mode-button, #picture-in-picture-button)[hidden] > * {
-  display: none !important;
+#nav-bar:is(:hover, :focus-within) #page-action-buttons,
+#page-action-buttons:has(#star-button[starred], #userContext-icons:not([hidden])) {
+  opacity: 1 !important;
 }
 
 #userContext-icons:not([hidden]) {
   display: flex !important;
   align-items: center !important;
   order: 0 !important;
-  margin-inline-end: 1ch !important;
   color: var(--identity-icon-color, var(--soft)) !important;
 }
 
@@ -720,19 +689,6 @@ findbar .findbar-textbox::selection {
   display: block !important;
   text-transform: lowercase !important;
   white-space: nowrap !important;
-}
-
-#reader-mode-button::before {
-  content: "r";
-}
-
-#reader-mode-button[readeractive]::before {
-  content: "R";
-  color: var(--surface-ink) !important;
-}
-
-#picture-in-picture-button::before {
-  content: "p";
 }
 
 :root:has(#statuspanel:not([inactive], [hidden])) #urlbar:not([focused]) > .urlbar-input-container,
@@ -875,38 +831,21 @@ findbar .findbar-textbox::selection {
   color: var(--surface-ink) !important;
 }
 
-#TabsToolbar::before,
-#TabsToolbar::after {
-  content: var(--hatch);
+#TabsToolbar::before {
+  content: "" !important;
   display: block !important;
   position: absolute !important;
-  inset-block: 0 !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  text-overflow: "" !important;
-  line-height: var(--line) !important;
-  color: var(--divider-ink) !important;
+  inset-block: 5px !important;
+  inset-inline: 0 !important;
+  background: var(--tick) !important;
   pointer-events: none !important;
 }
 
-#TabsToolbar::before {
-  direction: rtl !important;
-  left: 0 !important;
-  right: calc(anchor(--lw-head left) + 1ch) !important;
+#TabsToolbar:has(#tabbrowser-tabs[overflow])::before {
+  display: none !important;
 }
 
-#TabsToolbar:has(#pinned-tabs-container > .tabbrowser-tab)::before {
-  right: calc(anchor(--lw-pin left) + 1ch) !important;
-}
-
-#TabsToolbar::after {
-  direction: ltr !important;
-  left: calc(anchor(--lw-count right) + 1ch) !important;
-  right: 0 !important;
-}
-
-#TabsToolbar:has(#tabbrowser-tabs[overflow])::before,
-#TabsToolbar:has(#tabbrowser-tabs[overflow])::after {
+#TabsToolbar:has(#tabbrowser-tabs[overflow])::before {
   display: none !important;
 }
 
@@ -935,9 +874,7 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   align-items: center !important;
   flex: none !important;
   padding-inline-end: 1ch !important;
-}
-
-#pinned-tabs-container {
+  background-color: var(--surface) !important;
   anchor-name: --lw-pin !important;
 }
 
@@ -971,8 +908,19 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
 }
 
 #new-tab-button {
-  left: calc(anchor(--lw-last right) + 1ch) !important;
-  width: 2ch !important;
+  left: calc(anchor(--lw-last right)) !important;
+  width: 3ch !important;
+}
+
+#alltabs-button::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset-block: 0 !important;
+  inset-inline-end: 100% !important;
+  width: 3ch !important;
+  background-color: var(--surface) !important;
+  pointer-events: none !important;
 }
 
 #alltabs-button {
@@ -980,7 +928,7 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   left: calc(anchor(--lw-last right) + 3ch) !important;
   min-width: 0 !important;
   padding-inline: 0 !important;
-  color: var(--faint) !important;
+  color: var(--soft) !important;
 }
 
 #TabsToolbar:has(#tabbrowser-tabs[overflow]) #new-tab-button {
@@ -995,7 +943,7 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
 }
 
 #tabbrowser-tabs[overflow] {
-  padding-inline-end: 9ch !important;
+  padding-inline: 2ch 9ch !important;
 }
 
 tab-group,
@@ -1009,6 +957,7 @@ tab-split-view-wrapper {
   flex: none !important;
   height: 100% !important;
   padding-inline: 1ch !important;
+  background-color: var(--surface) !important;
   color: var(--tab-group-color, var(--surface-ink)) !important;
 }
 
@@ -1045,7 +994,8 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   overflow: hidden !important;
   margin-inline: 0 !important;
   counter-increment: lw-tab !important;
-  color: var(--faint) !important;
+  color: var(--soft) !important;
+  background-color: var(--surface) !important;
   transition: background-color var(--tint), color var(--tint), max-width 1ms linear !important;
 }
 
@@ -1062,10 +1012,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 .tabbrowser-tab[visuallyselected] {
   color: var(--row-hot-ink) !important;
   background-color: var(--row-hot) !important;
-}
-
-.tabbrowser-tab[visuallyselected] .tab-label {
-  -webkit-text-stroke: 0.4px currentColor !important;
 }
 
 .tabbrowser-tab:not([pinned]):not([fadein]) {
@@ -1125,18 +1071,24 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 .tab-label-container {
   display: flex !important;
   align-items: center !important;
-  flex: 1 1 auto !important;
+  flex: 0 1 auto !important;
   min-width: 0 !important;
   overflow: hidden !important;
 }
 
 .tab-label {
   display: block !important;
-  flex: 1 1 auto !important;
+  flex: 0 1 auto !important;
   min-width: 0 !important;
   overflow: hidden !important;
   white-space: nowrap !important;
   text-overflow: ".." !important;
+}
+
+.tab-label-container::after {
+  content: "";
+  flex: none !important;
+  white-space: pre !important;
 }
 
 .tab-icon-stack {
@@ -1151,85 +1103,63 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 }
 
 .tab-icon-stack::before {
-  content: counter(lw-tab);
-  color: inherit !important;
+  content: counter(lw-tab) " ";
+  white-space: pre !important;
+  color: var(--faint) !important;
+}
+
+.tabbrowser-tab[visuallyselected] .tab-icon-stack::before {
+  color: var(--row-hot-soft) !important;
 }
 
 .tabbrowser-tab[usercontextid] .tab-icon-stack::before {
   color: var(--identity-tab-color) !important;
 }
 
-.tab-icon-stack::after {
-  content: ":";
-  width: 1ch !important;
+.tabbrowser-tab:is([pending], [discarded]) .tab-label {
   color: var(--divider-ink) !important;
 }
 
-.tabbrowser-tab[visuallyselected] .tab-icon-stack::after {
-  color: inherit !important;
-}
-
-.tabbrowser-tab[pinned] .tab-icon-stack::after {
-  content: "^";
+.tabbrowser-tab[soundplaying] .tab-label-container::after {
+  content: " audio";
   color: var(--soft) !important;
 }
 
-.tabbrowser-tab:is([pending], [discarded]) {
-  color: var(--divider-ink) !important;
+.tabbrowser-tab[soundplaying][visuallyselected] .tab-label-container::after {
+  color: var(--row-hot-soft) !important;
 }
 
-.tabbrowser-tab:is([pending], [discarded]) .tab-icon-stack::after {
-  content: ".";
-  color: var(--soft) !important;
+.tabbrowser-tab[muted] .tab-label-container::after {
+  content: " muted";
+  color: var(--faint) !important;
 }
 
-.tabbrowser-tab[titlechanged] .tab-icon-stack::after {
-  content: "#";
-  color: var(--surface-ink) !important;
+.tabbrowser-tab[muted][visuallyselected] .tab-label-container::after {
+  color: var(--row-hot-soft) !important;
 }
 
-.tabbrowser-tab[attention] .tab-icon-stack::after {
-  content: "!";
-  color: var(--surface-ink) !important;
+.tabbrowser-tab[attention] .tab-label-container::after {
+  content: " !";
+  color: var(--warn) !important;
 }
 
-.tabbrowser-tab[pictureinpicture] .tab-icon-stack::after {
-  content: "=";
-  color: var(--surface-ink) !important;
+.tabbrowser-tab[sharing] .tab-label-container::after {
+  content: " shared";
+  color: var(--warn) !important;
 }
 
-.tabbrowser-tab[activemedia-blocked] .tab-icon-stack::after {
-  content: ">";
-  color: var(--surface-ink) !important;
+.tabbrowser-tab[crashed] .tab-label-container::after {
+  content: " crashed";
+  color: var(--warn) !important;
 }
 
-.tabbrowser-tab[soundplaying] .tab-icon-stack::after {
-  content: "~";
-  color: var(--surface-ink) !important;
-}
-
-.tabbrowser-tab[muted] .tab-icon-stack::after {
-  content: "_";
-  color: var(--soft) !important;
-}
-
-.tabbrowser-tab[busy] .tab-icon-stack::after {
-  content: "-";
+.tabbrowser-tab[busy] .tab-label-container::after {
+  content: " -";
   color: var(--surface-ink) !important;
   animation: lw-spin 480ms step-end infinite !important;
 }
 
-.tabbrowser-tab[sharing] .tab-icon-stack::after {
-  content: "@";
-  color: var(--warn) !important;
-}
-
-.tabbrowser-tab[crashed] .tab-icon-stack::after {
-  content: "x";
-  color: var(--warn) !important;
-}
-
-.tabbrowser-tab[visuallyselected] .tab-icon-stack::after {
+.tabbrowser-tab:is([attention], [sharing], [crashed], [busy])[visuallyselected] .tab-label-container::after {
   color: inherit !important;
 }
 
