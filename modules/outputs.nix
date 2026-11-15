@@ -9,8 +9,10 @@ inputs: let
   # it as prose; the second patch drops foreign thinking for readers with that classifier.
   # A date/cwd reminder written into a turn that was already sent rewrites the whole provider
   # cache tail; the fourth patch appends a changed reminder after the last turn instead.
+  # A wait that gives up after seconds makes helpers poll; the fifth blocks until a result
+  # arrives, under one 30-minute dead-man and with no "waiting is not progress" nag.
   omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch];
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch];
   });
   inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 
