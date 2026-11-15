@@ -30,6 +30,8 @@
       not a commit. Never ask permission for what git or Nix undoes; ask first
       before deleting files git doesn't hold, rewriting pushed history, or
       anything another person sees.
+    - An edit made by script (Python, sed) checks that the old text occurs
+      exactly once and prints the change; a miss stops it with an error.
   '';
 
   hostFacts = ''

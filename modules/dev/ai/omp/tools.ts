@@ -12,7 +12,6 @@ const OFF: Record<string, true> = {
 	box: true,
 	context_check: true,
 	date: true,
-	zoom: true,
 	recent: true,
 	memories: true,
 	ast_edit: true,

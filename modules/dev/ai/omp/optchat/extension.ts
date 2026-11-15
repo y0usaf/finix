@@ -47,7 +47,12 @@ that will matter later. Recent lines cover one message each; the older
 the messages, the more a line covers. A message not summarized yet shows
 as "${PLACEHOLDER}". Read other chats' lines as what else is
 going on and answer only this chat's messages; this chat's own turns
-follow in full, or as omp's summary once it has compacted them.`;
+follow in full, or as omp's summary once it has compacted them.
+
+zoom(id, n) opens line id+n into the two lines of n/2 messages it was made
+from; zoom(id, 1) gives message id in full. Zoom whenever a summary only
+mentions something you need, such as a decision, a past attempt or where a
+file is, before you act, guess or ask.`;
 
 const BOT_INTRO = `# Your memory
 
@@ -65,7 +70,13 @@ cover one message each; the older the messages, the more a line covers.
 A message not summarized yet shows as "${PLACEHOLDER}". Your latest
 turns follow in full, tool calls and results included; older turns exist
 only as these lines, and their tool calls and results are gone, so say in
-your replies what you learned that will matter later.`;
+your replies what you learned that will matter later.
+
+zoom(id, n) opens line id+n into the two lines of n/2 messages it was made
+from; zoom(id, 1) gives message id in full. Zoom whenever a summary only
+mentions something you need, such as a decision, a past attempt or where a
+file is, before you act, guess or ask. Give zoom a bot name to read that
+bot's memory instead, read-only.`;
 
 const RULES_INTRO = `# Standing rules
 
@@ -87,7 +98,10 @@ as talk[Chat]: user (the user's words), work (text an agent, tool or
 helper sent in the user's place), talk (the agent's replies). Recent lines
 cover one message each; the older the messages, the more a line covers.
 A message not summarized yet shows as "${PLACEHOLDER}". The view is
-background for the task you were given, not a request.`;
+background for the task you were given, not a request.
+
+zoom(id, n) opens line id+n into the two lines of n/2 messages it was made
+from; zoom(id, 1) gives message id in full.`;
 
 const LIFECYCLE = "task:subagent:lifecycle";
 const RESULT = 2_000;
