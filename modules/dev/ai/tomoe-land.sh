@@ -77,8 +77,24 @@ take_lease() {
 		done
 	fi
 	exec 9>"$LOCK" || return 1
-	if ! flock "$mode" -w "$LEASEWAIT" 9; then
+	(
+		sleep 1500
+		printf '%s lease-wait %s still blocked on %s\n' "$(date -u +%FT%TZ)" "$mode" "$LOCK" \
+			>>"$ROOT/journal.log"
+		{
+			fuser -v "$LOCK" 2>&1
+			grep ":$(stat -c '%i' "$LOCK") " /proc/locks 2>/dev/null
+		} >>"$ROOT/journal.log" 2>&1
+	) &
+	local watchdog=$!
+	local rc=0
+	flock "$mode" -w "$LEASEWAIT" 9 || rc=$?
+	kill "$watchdog" 2>/dev/null
+	wait "$watchdog" 2>/dev/null
+	if ((rc != 0)); then
 		rm -f "$PENDING/$AGENT.$$"
+		printf '%s lease-timeout %s after %ss\n' "$(date -u +%FT%TZ)" "$mode" "$LEASEWAIT" \
+			>>"$ROOT/journal.log"
 		return 75
 	fi
 	rm -f "$PENDING/$AGENT.$$"
