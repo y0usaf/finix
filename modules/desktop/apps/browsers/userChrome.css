@@ -15,7 +15,6 @@
   --frame: var(--paper);
   --frame-ink: var(--ink);
   --dim: var(--soft);
-  --frame-dim: var(--soft);
   --faint: color-mix(in srgb, var(--ink) 78%, var(--paper));
   --edge: color-mix(in srgb, var(--ink) 30%, var(--paper));
   --wash: color-mix(in srgb, var(--ink) 10%, var(--paper));
@@ -28,6 +27,7 @@
   --quick: 140ms;
   --glide: 220ms;
   --snap: 90ms;
+  --rule: "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────";
 }
 
 :where(
@@ -82,7 +82,7 @@ body {
   min-width: 0 !important;
   min-height: 0 !important;
   padding: 0 !important;
-  border-bottom: 1px solid var(--edge) !important;
+  border-bottom: 0 !important;
 }
 
 #notifications-toolbar {
@@ -475,7 +475,7 @@ findbar .findbar-textbox::selection {
   position: relative !important;
   max-height: 60vh !important;
   overflow-y: auto !important;
-  border-top: 1px solid var(--edge) !important;
+  border-top: 0 !important;
   padding-block: 0.5ch !important;
 }
 
@@ -706,9 +706,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 }
 
 .tabbrowser-tab {
-  --tok-bg: var(--frame);
-  --lens-ink: var(--faint);
-  --tok-ink: var(--lens-ink);
   --w: var(--tab-width);
   display: flex !important;
   align-items: stretch !important;
@@ -719,55 +716,26 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   max-width: var(--w) !important;
   height: var(--line) !important;
   overflow: hidden !important;
-  background-color: var(--tok-bg) !important;
-  color: var(--tok-ink) !important;
-  transition:
-    max-width var(--snap) linear,
-    background-color var(--snap) linear,
-    color var(--snap) linear !important;
-}
-
-.tabbrowser-tab:is([visuallyselected] + .tabbrowser-tab, [visuallyselected] + .tabbrowser-tab + .tabbrowser-tab, :has(+ .tabbrowser-tab[visuallyselected]), :has(+ .tabbrowser-tab + .tabbrowser-tab[visuallyselected])) {
-  --lens-ink: var(--frame-dim);
-}
-
-.tabbrowser-tab:hover,
-.tabbrowser-tab[multiselected] {
-  --tok-bg: var(--frame-wash);
-  --tok-ink: var(--frame-ink);
+  margin-inline: 0.5ch !important;
+  color: var(--faint) !important;
 }
 
 .tabbrowser-tab[visuallyselected] {
-  --tok-bg: var(--frame);
-  --tok-ink: var(--frame-ink);
-  margin-inline: 1px !important;
-  scroll-margin-inline: calc(50vw - var(--tab-width) / 2 - 1px) !important;
+  color: var(--frame-ink) !important;
+  scroll-margin-inline: calc(50vw - var(--tab-width) / 2) !important;
   scroll-snap-align: center !important;
 }
 
 .tabbrowser-tab[visuallyselected] .tab-label {
+  font-weight: bold !important;
   text-decoration: underline !important;
   text-underline-offset: 2px !important;
-}
-
-.tabbrowser-tab[pinned] {
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
 }
 
 .tabbrowser-tab:not([pinned]):not([fadein]) {
   --w: 0.1px;
   position: absolute !important;
   visibility: hidden !important;
-}
-
-#tabbrowser-tabs[movingtab] .tabbrowser-tab {
-  position: relative !important;
-}
-
-#tabbrowser-tabs[movingtab] .tabbrowser-tab:is([fadein]:not(:active, [multiselected]), [multiselected-move-together], [tabdrop-samewindow]) {
-  transition: transform var(--quick) var(--ease) !important;
 }
 
 .tab-stack {
@@ -784,8 +752,17 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   flex: 1 1 auto !important;
   min-width: 0 !important;
   height: 100% !important;
-  padding-inline: 1ch !important;
   white-space: nowrap !important;
+}
+
+.tab-content::before {
+  content: "[";
+  flex: none !important;
+}
+
+.tab-content::after {
+  content: "]";
+  flex: none !important;
 }
 
 .tab-label-container {
@@ -803,31 +780,32 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   overflow: hidden !important;
   white-space: nowrap !important;
   text-align: center !important;
-  text-overflow: ".." !important;
+  text-overflow: ellipsis !important;
 }
 
-.tabbrowser-tab[pinned] .tab-label-container,
-.tabbrowser-tab[pinned] .tab-close-button {
+.tab-icon-stack {
+  display: none !important;
+  flex: none !important;
+  width: 1ch !important;
+  margin-inline-end: 1ch !important;
+  overflow: clip !important;
+}
+
+.tabbrowser-tab[busy] .tab-icon-stack {
+  display: block !important;
+}
+
+.tabbrowser-tab[busy] .tab-icon-stack::before {
+  content: "⠋";
+  display: block !important;
+  animation: lw-spin 800ms step-end infinite !important;
+}
+
+.tab-icon-stack > * {
   display: none !important;
 }
 
-.tabbrowser-tab[pinned] .tab-icon-stack {
-  display: flex !important;
-  align-items: center !important;
-  flex: none !important;
-}
-
-.tabbrowser-tab[pinned]:not(:has(.tab-icon-image[src])) .tab-icon-stack::before {
-  content: "*";
-}
-
-.tabbrowser-tab[pinned] .tab-icon-image[src] {
-  display: block !important;
-  width: 11px !important;
-  height: 11px !important;
-}
-
-.tabbrowser-tab:is([soundplaying], [muted], [activemedia-blocked]) .tab-audio-button {
+.tabbrowser-tab:is([soundplaying], [muted]) .tab-audio-button {
   display: flex !important;
   align-items: center !important;
   flex: none !important;
@@ -838,7 +816,11 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   overflow: clip !important;
 }
 
-.tab-audio-button::before {
+.tabbrowser-tab:is([soundplaying], [muted]) .tab-audio-button > * {
+  display: none !important;
+}
+
+.tabbrowser-tab:is([soundplaying], [muted]) .tab-audio-button::before {
   flex: none !important;
 }
 
@@ -848,59 +830,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
 
 .tabbrowser-tab[muted] .tab-audio-button::before {
   content: "<x";
-}
-
-.tabbrowser-tab[activemedia-blocked] .tab-audio-button::before {
-  content: "<!";
-}
-
-.tabbrowser-tab:is([attention], [titlechanged]):not([busy]) .tab-content::after {
-  content: "!";
-  flex: none !important;
-  order: 2 !important;
-  margin-inline-start: 1ch !important;
-}
-
-.tabbrowser-tab:is([busy], [titlechanged]:not([visuallyselected])) .tab-stack::before {
-  content: "";
-  position: absolute !important;
-  inset-inline: 1ch !important;
-  top: 0 !important;
-  height: 1px !important;
-  background-color: currentColor !important;
-  animation: lw-scan 1s var(--ease) infinite !important;
-}
-
-.tabbrowser-tab[titlechanged]:not([busy], [visuallyselected]) .tab-stack::before {
-  animation: lw-scan 900ms var(--ease) both !important;
-}
-
-.tabbrowser-tab[fadein]:not([pinned]) .tab-stack {
-  animation: lw-drop var(--glide) var(--ease) !important;
-}
-
-.tabbrowser-tab:not([pinned]):hover .tab-close-button {
-  display: block !important;
-  position: absolute !important;
-  inset-block: 0 !important;
-  inset-inline-end: 0 !important;
-  z-index: 1 !important;
-  width: 3ch !important;
-}
-
-.tabbrowser-tab:not([pinned]):hover .tab-stack::after {
-  content: "x";
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: absolute !important;
-  inset-block: 0 !important;
-  inset-inline-end: 0 !important;
-  z-index: 2 !important;
-  width: 3ch !important;
-  background-color: var(--tok-ink) !important;
-  color: var(--tok-bg) !important;
-  pointer-events: none !important;
 }
 
 toolbartabstop {
@@ -1118,7 +1047,7 @@ body:has(#toolbar-menubar:not([inactive])) {
   padding-inline: 1ch !important;
   background-color: var(--frame) !important;
   color: var(--frame-ink) !important;
-  border-bottom: 1px solid var(--edge) !important;
+  border-bottom: 0 !important;
 }
 
 #toolbar-menubar:not([inactive]) :is(#menubar-items, #main-menubar) {
@@ -1188,8 +1117,7 @@ body:has(#toolbar-menubar:not([inactive])) {
   border-radius: 0 !important;
   background-color: var(--glass) !important;
   backdrop-filter: var(--frost) !important;
-  outline: 1px solid var(--edge) !important;
-  outline-offset: -1px !important;
+  outline: 0 !important;
   box-shadow: none !important;
   font-size: var(--chrome-font-size) !important;
   --panel-background: transparent !important;
@@ -1199,13 +1127,21 @@ body:has(#toolbar-menubar:not([inactive])) {
   --arrowpanel-border-radius: 0 !important;
 }
 
+:is(#editBookmarkPanel, #appMenu-popup, #unified-extensions-panel, #downloadsPanel, #widget-overflow, #tab-preview-panel, #confirmation-hint, menupopup, .urlbarView)::before,
+:is(#appMenu-popup, #unified-extensions-panel, #downloadsPanel, #widget-overflow, menupopup)::after {
+  content: var(--rule);
+  display: block !important;
+  flex: none !important;
+  height: 0.6em !important;
+  line-height: 0.6em !important;
+  overflow: clip !important;
+  color: var(--edge) !important;
+  pointer-events: none !important;
+}
+
 #tab-preview-panel,
 #tab-preview-panel * {
   border-radius: 0 !important;
-}
-
-#tab-preview-panel .tab-preview-thumbnail-container {
-  outline: 1px solid var(--edge) !important;
 }
 
 .panel-viewstack,
@@ -1259,16 +1195,24 @@ body:has(#toolbar-menubar:not([inactive])) {
 
 toolbarseparator,
 menuseparator {
-  border-top: 1px solid var(--edge) !important;
-  border-bottom: 0 !important;
-  margin: 0.2em 0 !important;
+  display: block !important;
+  border: 0 !important;
+  margin: 0 !important;
   padding: 0 !important;
-  height: 0 !important;
+  height: var(--line) !important;
+  overflow: clip !important;
+  color: var(--edge) !important;
+}
+
+toolbarseparator::before,
+menuseparator::before {
+  content: var(--rule);
+  white-space: nowrap !important;
 }
 
 menupopup {
   appearance: none !important;
-  border: 1px solid var(--edge) !important;
+  border: 0 !important;
   border-radius: 0 !important;
   background-color: var(--paper) !important;
   color: var(--ink) !important;
@@ -1301,28 +1245,42 @@ menupopup > :is(menu, menuitem)[_moz-menuactive]:not([disabled]) {
 
 tooltip {
   appearance: none !important;
-  border: 1px solid var(--edge) !important;
-  border-radius: 0 !important;
+  border: 0 !important;
   background-color: var(--paper) !important;
   color: var(--ink) !important;
   padding: 0.15em 1ch !important;
 }
 
-@keyframes lw-scan {
-  from {
-    scale: 0 1;
-    opacity: 1;
+@keyframes lw-spin {
+  0% {
+    content: "⠋";
   }
-  to {
-    scale: 1 1;
-    opacity: 0;
+  10% {
+    content: "⠙";
   }
-}
-
-@keyframes lw-drop {
-  from {
-    translate: 0 calc(-1 * var(--line));
-    opacity: 0;
+  20% {
+    content: "⠹";
+  }
+  30% {
+    content: "⠸";
+  }
+  40% {
+    content: "⠼";
+  }
+  50% {
+    content: "⠴";
+  }
+  60% {
+    content: "⠦";
+  }
+  70% {
+    content: "⠧";
+  }
+  80% {
+    content: "⠇";
+  }
+  90% {
+    content: "⠏";
   }
 }
 
