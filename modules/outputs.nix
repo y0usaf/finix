@@ -40,6 +40,9 @@ inputs: let
           tectonic-unwrapped = prev.tectonic-unwrapped.overrideAttrs (old: {
             buildInputs = (old.buildInputs or []) ++ [prev.aws-lc];
           });
+          egl-wayland2 = prev.egl-wayland2.overrideAttrs (old: {
+            patches = (old.patches or []) ++ [./core/egl-wayland2-feedback-double-free.patch];
+          });
           obs-studio-plugins =
             prev.obs-studio-plugins
             // {

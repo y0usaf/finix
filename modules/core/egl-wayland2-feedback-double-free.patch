@@ -1,0 +1,11 @@
+--- a/src/wayland/wayland-dmabuf.c	2026-11-15 11:19:52.528463097 -0500
++++ b/src/wayland/wayland-dmabuf.c	2026-11-15 11:19:52.538156463 -0500
+@@ -169,7 +169,7 @@
+         if (tranche->target_device != state->base.main_device)
+         {
+             wl_array_release(&tranche->formats);
+-            tranche->formats.size = 0;
++            wl_array_init(&tranche->formats);
+             continue;
+         }
+ 
