@@ -1,3 +1,8 @@
+/* One design system for the whole chrome: the two bars, the URL pop-out and
+   its results, right-click menus, panels and tooltips. A surface is solid
+   paper and a row is one line of it; whatever a pointer or the keyboard lands
+   on becomes a block of ink, so the same row looks the same in every one of
+   them. Nothing here is translucent or blurred. */
 :root {
   --font-family: monospace;
   --chrome-font-size: 11px;
@@ -7,17 +12,28 @@
   --pop-width: min(clamp(560px, 42vw, 960px), calc(100vw - 4ch));
   --pop-top: 22vh;
   --pop-row: calc(2 * var(--line));
-  --pop-result: 22px;
-  --paper: var(--lwt-accent-color, -moz-dialog);
-  --ink: color-mix(in srgb, contrast-color(var(--paper)) 94%, var(--paper));
-  --soft: color-mix(in srgb, var(--ink) 86%, var(--paper));
-  --frame: var(--paper);
-  --frame-ink: var(--ink);
-  --dim: var(--soft);
-  --faint: color-mix(in srgb, var(--ink) 78%, var(--paper));
-  --edge: color-mix(in srgb, var(--ink) 30%, var(--paper));
-  --wash: color-mix(in srgb, var(--ink) 10%, var(--paper));
-  --frame-wash: var(--wash);
+
+  /* surface: the fill of every chrome surface and the ink on it. */
+  --surface: var(--lwt-accent-color, -moz-dialog);
+  --surface-ink: color-mix(in srgb, contrast-color(var(--surface)) 94%, var(--surface));
+  --soft: color-mix(in srgb, var(--surface-ink) 86%, var(--surface));
+  --faint: color-mix(in srgb, var(--surface-ink) 78%, var(--surface));
+
+  /* row: one menu entry, result or panel button. hot is that row under the
+     pointer or on the keyboard, and hot-ink is the solid ink it becomes. */
+  --row-h: calc(var(--line) + 8px);
+  --row-inset: 2ch;
+  --row-hot: var(--surface-ink);
+  --row-hot-ink: var(--surface);
+  --row-hot-soft: color-mix(in srgb, var(--row-hot-ink) 86%, var(--row-hot));
+
+  /* divider: every rule and every outline between surfaces. */
+  --divider-ink: color-mix(in srgb, var(--surface-ink) 30%, var(--surface));
+  --divider-h: 8px;
+
+  /* motion: row highlights change together, at one speed. */
+  --tint: var(--snap) linear;
+
   --accent: var(--focus-outline-color, AccentColor);
   --warn: light-dark(#8a0030, #ffc2ca);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -52,7 +68,7 @@ findbar,
 :root,
 panel,
 menupopup {
-  color: var(--ink) !important;
+  color: var(--surface-ink) !important;
 }
 
 #navigator-toolbox *:not(input):focus-visible,
@@ -64,7 +80,7 @@ findbar *:not(input):focus-visible {
 :root,
 #main-window,
 body {
-  background-color: var(--paper) !important;
+  background-color: var(--surface) !important;
   background-image: none !important;
 }
 
@@ -76,7 +92,7 @@ body {
 }
 
 #tabbrowser-tabpanels {
-  background-color: var(--paper) !important;
+  background-color: var(--surface) !important;
 }
 
 #navigator-toolbox {
@@ -104,8 +120,8 @@ body {
   min-width: 0 !important;
   height: var(--line) !important;
   padding-inline: 1ch !important;
-  background-color: var(--paper) !important;
-  color: var(--ink) !important;
+  background-color: var(--surface) !important;
+  color: var(--surface-ink) !important;
 }
 
 #nav-bar-customization-target {
@@ -154,10 +170,12 @@ body {
   height: 100% !important;
   min-width: 2ch !important;
   padding-inline: 0.5ch !important;
-  color: var(--dim) !important;
-  transition: color var(--snap) linear, background-color var(--snap) linear !important;
+  color: var(--soft) !important;
+  transition: color var(--tint), background-color var(--tint) !important;
 }
 
+/* Pointing at a control, or leaving one open or on, is the same row highlight
+   the rest of the chrome uses: a block of ink. */
 :is(
   #sidebar-button,
   #back-button,
@@ -169,34 +187,9 @@ body {
   #PanelUI-menu-button,
   #new-tab-button,
   #alltabs-button
-):not([disabled]):hover {
-  color: inherit !important;
-  background-color: var(--wash) !important;
-}
-
-:is(#new-tab-button, #alltabs-button):not([disabled]):hover {
-  background-color: var(--frame-wash) !important;
-}
-
-:is(
-  #sidebar-button,
-  #back-button,
-  #forward-button,
-  #reload-button,
-  #stop-button,
-  #unified-extensions-button,
-  #downloads-button,
-  #PanelUI-menu-button,
-  #new-tab-button,
-  #alltabs-button
-):is(:active, [open], [checked]):not([disabled]) {
-  color: var(--paper) !important;
-  background-color: var(--ink) !important;
-}
-
-:is(#new-tab-button, #alltabs-button):is(:active, [open]) {
-  color: var(--frame) !important;
-  background-color: var(--frame-ink) !important;
+):not([disabled]):is(:hover, :active, [open], [checked]) {
+  color: var(--row-hot-ink) !important;
+  background-color: var(--row-hot) !important;
 }
 
 :is(#back-button, #forward-button)[disabled] {
@@ -292,7 +285,8 @@ body {
 }
 
 .unified-extensions-item-action-button:hover {
-  background-color: var(--wash) !important;
+  color: var(--row-hot-ink) !important;
+  background-color: var(--row-hot) !important;
 }
 
 .unified-extensions-item .toolbarbutton-icon {
@@ -313,7 +307,7 @@ body {
   width: calc(100vw - 2 * var(--side)) !important;
   height: var(--line) !important;
   margin: 0 !important;
-  color: var(--ink) !important;
+  color: var(--surface-ink) !important;
   font-size: var(--chrome-font-size) !important;
   transition:
     top var(--glide) var(--ease),
@@ -351,8 +345,8 @@ body {
 }
 
 #urlbar:is([focused], [breakout-extend]) > .urlbar-background {
-  background-color: var(--paper) !important;
-  border-color: var(--edge) !important;
+  background-color: var(--surface) !important;
+  border-color: var(--divider-ink) !important;
 }
 
 #urlbar:is([focused], [breakout-extend]) > .urlbar-input-container {
@@ -416,12 +410,12 @@ moz-urlbar-slot {
 
 #urlbar-input::selection,
 findbar .findbar-textbox::selection {
-  background-color: var(--ink) !important;
-  color: var(--paper) !important;
+  background-color: var(--surface-ink) !important;
+  color: var(--surface) !important;
 }
 
 #urlbar-input::placeholder {
-  color: var(--dim) !important;
+  color: var(--soft) !important;
   opacity: 1 !important;
 }
 
@@ -438,7 +432,7 @@ findbar .findbar-textbox::selection {
   inset-inline-start: 0 !important;
   inset-block: 0 !important;
   flex: none !important;
-  color: var(--dim) !important;
+  color: var(--soft) !important;
 }
 
 .urlbar-input-container:not([pageproxystate="valid"]) #trust-icon-container {
@@ -469,7 +463,7 @@ findbar .findbar-textbox::selection {
   inset-block: 0 !important;
   gap: 1ch !important;
   flex: none !important;
-  color: var(--dim) !important;
+  color: var(--soft) !important;
   transition: opacity var(--snap) linear !important;
 }
 
@@ -481,7 +475,7 @@ findbar .findbar-textbox::selection {
   display: flex !important;
   align-items: center !important;
   height: 100% !important;
-  color: var(--dim) !important;
+  color: var(--soft) !important;
 }
 
 .urlbar-page-action:hover {
@@ -524,10 +518,15 @@ findbar .findbar-textbox::selection {
   width: 100% !important;
   max-height: 60vh !important;
   overflow-y: auto !important;
-  border: 0 !important;
-  padding-block: 0.5ch !important;
-  background-color: var(--paper) !important;
-  color: var(--ink) !important;
+  /* The results hang off the pop-out box as one object: its side and bottom
+     rules line up with the box's own, and its top rule is the box's border. */
+  border: 1px solid var(--divider-ink) !important;
+  border-top: 0 !important;
+  padding-block: 0 !important;
+  background-color: var(--surface) !important;
+  color: var(--surface-ink) !important;
+  scrollbar-color: var(--divider-ink) var(--surface) !important;
+  scrollbar-width: thin !important;
 }
 
 #urlbar:not([open]) > .urlbarView,
@@ -542,19 +541,18 @@ findbar .findbar-textbox::selection {
 .urlbarView-row {
   display: flex !important;
   align-items: center !important;
-  height: var(--pop-result) !important;
-  padding-inline: 2ch !important;
-  color: var(--ink) !important;
+  height: var(--row-h) !important;
+  padding-inline: var(--row-inset) !important;
+  color: var(--surface-ink) !important;
+  transition: background-color var(--tint), color var(--tint) !important;
 }
 
-.urlbarView-row:hover {
-  background-color: color-mix(in srgb, var(--ink) 10%, transparent) !important;
-}
-
-.urlbarView-row[selected] {
-  --soft: color-mix(in srgb, var(--paper) 86%, var(--ink));
-  background-color: var(--ink) !important;
-  color: var(--paper) !important;
+/* The row under the pointer and the row the keyboard is on are the same block
+   of ink that every menu and panel row uses. */
+.urlbarView-row:is(:hover, [selected]) {
+  --soft: var(--row-hot-soft);
+  background-color: var(--row-hot) !important;
+  color: var(--row-hot-ink) !important;
 }
 
 .urlbarView-row-inner {
@@ -640,8 +638,8 @@ findbar .findbar-textbox::selection {
   min-width: 0 !important;
   height: var(--line) !important;
   overflow: hidden !important;
-  background-color: var(--paper) !important;
-  color: var(--frame-ink) !important;
+  background-color: var(--surface) !important;
+  color: var(--surface-ink) !important;
 }
 
 :root[privatebrowsingmode="temporary"] #TabsToolbar::before {
@@ -653,7 +651,7 @@ findbar .findbar-textbox::selection {
   inset-inline-start: 0 !important;
   z-index: 3 !important;
   padding-inline: 1ch !important;
-  background-color: var(--paper) !important;
+  background-color: var(--surface) !important;
   color: inherit !important;
 }
 
@@ -678,7 +676,7 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   align-items: center !important;
   flex: none !important;
   padding-inline: 1ch !important;
-  background-color: var(--paper) !important;
+  background-color: var(--surface) !important;
 }
 
 #pinned-tabs-container:not(:has(> .tabbrowser-tab)) {
@@ -708,7 +706,7 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   inset-block: 0 !important;
   z-index: 2 !important;
   width: 3ch !important;
-  background-color: var(--paper) !important;
+  background-color: var(--surface) !important;
 }
 
 #new-tab-button {
@@ -730,7 +728,7 @@ tab-split-view-wrapper {
   flex: none !important;
   height: 100% !important;
   padding-inline: 1ch !important;
-  color: var(--tab-group-color, var(--frame-ink)) !important;
+  color: var(--tab-group-color, var(--surface-ink)) !important;
 }
 
 .tab-group-label-container::before {
@@ -762,10 +760,18 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   overflow: hidden !important;
   margin-inline: 0.5ch !important;
   color: var(--faint) !important;
+  transition: background-color var(--tint), color var(--tint) !important;
 }
 
 .tabbrowser-tab[visuallyselected] {
-  color: var(--frame-ink) !important;
+  color: var(--surface-ink) !important;
+}
+
+/* A tab is a row on the strip, so pointing at one is the same block of ink a
+   menu row or a result becomes. */
+.tabbrowser-tab:hover {
+  color: var(--row-hot-ink) !important;
+  background-color: var(--row-hot) !important;
 }
 
 .tabbrowser-tab[visuallyselected] .tab-label {
@@ -908,8 +914,8 @@ findbar {
   z-index: 8 !important;
   height: var(--line) !important;
   padding-inline: 1ch !important;
-  background-color: var(--paper) !important;
-  color: var(--ink) !important;
+  background-color: var(--surface) !important;
+  color: var(--surface-ink) !important;
   clip-path: inset(0) !important;
   transition: clip-path var(--quick) var(--ease), visibility 0s linear 0s !important;
 }
@@ -933,7 +939,7 @@ findbar::before {
   flex: none !important;
   order: -3 !important;
   padding-inline: 0.5ch 1ch !important;
-  color: var(--dim) !important;
+  color: var(--soft) !important;
 }
 
 findbar .findbar-container,
@@ -968,7 +974,7 @@ findbar .findbar-find-status {
   max-width: calc(var(--side) - 3ch) !important;
   white-space: nowrap !important;
   text-overflow: ".." !important;
-  color: var(--dim) !important;
+  color: var(--soft) !important;
 }
 
 findbar :is(.found-matches, .findbar-find-status)[hidden] {
@@ -983,7 +989,7 @@ findbar :is(.findbar-find-previous, .findbar-find-next, .findbar-closebutton, ch
   height: 100% !important;
   min-width: 2ch !important;
   padding-inline: 0.5ch !important;
-  color: var(--dim) !important;
+  color: var(--soft) !important;
   transition: color var(--snap) linear, background-color var(--snap) linear !important;
 }
 
@@ -1017,8 +1023,8 @@ findbar .findbar-closebutton {
 }
 
 findbar :is(.findbar-find-previous, .findbar-find-next, .findbar-closebutton, checkbox):not([disabled]):hover {
-  color: inherit !important;
-  background-color: var(--wash) !important;
+  color: var(--row-hot-ink) !important;
+  background-color: var(--row-hot) !important;
 }
 
 findbar :is(.findbar-find-previous, .findbar-find-next)[disabled] {
@@ -1026,8 +1032,8 @@ findbar :is(.findbar-find-previous, .findbar-find-next)[disabled] {
 }
 
 findbar checkbox[checked] {
-  color: var(--paper) !important;
-  background-color: var(--ink) !important;
+  color: var(--row-hot-ink) !important;
+  background-color: var(--row-hot) !important;
 }
 
 findbar .findbar-find-previous::before {
@@ -1069,7 +1075,7 @@ findbar .findbar-closebutton::before {
   max-width: calc(100% - 2 * var(--side)) !important;
   translate: -50% 0 !important;
   height: var(--line) !important;
-  color: var(--dim) !important;
+  color: var(--soft) !important;
   pointer-events: none !important;
   transition: opacity var(--snap) linear !important;
 }
@@ -1107,8 +1113,8 @@ body:has(#toolbar-menubar:not([inactive])) {
   align-items: center !important;
   height: var(--line) !important;
   padding-inline: 1ch !important;
-  background-color: var(--paper) !important;
-  color: var(--frame-ink) !important;
+  background-color: var(--surface) !important;
+  color: var(--surface-ink) !important;
   border-bottom: 0 !important;
 }
 
@@ -1126,8 +1132,8 @@ body:has(#toolbar-menubar:not([inactive])) {
 }
 
 #toolbar-menubar:not([inactive]) menu:is(:hover, [open]) {
-  color: var(--frame) !important;
-  background-color: var(--frame-ink) !important;
+  color: var(--row-hot-ink) !important;
+  background-color: var(--row-hot) !important;
 }
 
 #toolbar-menubar:not([inactive]) .menu-text {
@@ -1162,6 +1168,8 @@ body:has(#toolbar-menubar:not([inactive])) {
   pointer-events: none !important;
 }
 
+/* Every floating surface — panel, menu, tooltip, tab preview — is the same
+   object: the paper fill, one divider rule around it, rows of one height. */
 #notification-popup,
 #permission-popup,
 #identity-popup,
@@ -1176,29 +1184,19 @@ body:has(#toolbar-menubar:not([inactive])) {
 #confirmation-hint {
   margin: 0 !important;
   margin-block: 4px !important;
+  border: 1px solid var(--divider-ink) !important;
   border-radius: 0 !important;
-  background-color: var(--paper) !important;
+  background-color: var(--surface) !important;
   outline: 0 !important;
   box-shadow: none !important;
   font-size: var(--chrome-font-size) !important;
+  scrollbar-color: var(--divider-ink) var(--surface) !important;
+  scrollbar-width: thin !important;
   --panel-background: transparent !important;
   --panel-border-radius: 0 !important;
   --panel-shadow: none !important;
   --arrowpanel-background: transparent !important;
   --arrowpanel-border-radius: 0 !important;
-}
-
-:is(#editBookmarkPanel, #appMenu-popup, #unified-extensions-panel, #downloadsPanel, #widget-overflow, #tab-preview-panel, #confirmation-hint, menupopup, .urlbarView)::before,
-:is(#appMenu-popup, #unified-extensions-panel, #downloadsPanel, #widget-overflow, menupopup)::after {
-  content: "" !important;
-  display: block !important;
-  flex: none !important;
-  height: 0.6em !important;
-  background-image: linear-gradient(var(--edge), var(--edge)) !important;
-  background-size: 100% 1px !important;
-  background-position: 0 50% !important;
-  background-repeat: no-repeat !important;
-  pointer-events: none !important;
 }
 
 #tab-preview-panel,
@@ -1216,22 +1214,29 @@ body:has(#toolbar-menubar:not([inactive])) {
 .panel-header,
 .panel-footer {
   padding: 0 !important;
-  padding-block: 2px !important;
   border-radius: 0 !important;
+}
+
+.panel-header,
+.panel-footer {
+  padding-inline: var(--row-inset) !important;
 }
 
 .subviewbutton,
 .panel-banner-item,
 .toolbarbutton-1.subviewbutton {
-  min-height: 1.7em !important;
+  min-height: var(--row-h) !important;
   height: auto !important;
-  padding: 0.1em 1ch !important;
+  padding: 0 var(--row-inset) !important;
   margin: 0 !important;
   border-radius: 0 !important;
+  transition: background-color var(--tint), color var(--tint) !important;
 }
 
-.subviewbutton:not([disabled]):hover {
-  background-color: color-mix(in srgb, var(--ink) 12%, transparent) !important;
+.subviewbutton:not([disabled]):hover,
+.panel-banner-item:not([disabled]):hover {
+  color: var(--row-hot-ink) !important;
+  background-color: var(--row-hot) !important;
 }
 
 .panel-header,
@@ -1257,24 +1262,34 @@ body:has(#toolbar-menubar:not([inactive])) {
 
 toolbarseparator:not([hidden]),
 menuseparator:not([hidden]) {
+  appearance: none !important;
   display: block !important;
   border: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
-  height: var(--line) !important;
+  height: var(--divider-h) !important;
   overflow: clip !important;
-  background-image: linear-gradient(var(--edge), var(--edge)) !important;
+  background-image: linear-gradient(var(--divider-ink), var(--divider-ink)) !important;
   background-size: 100% 1px !important;
   background-position: 0 50% !important;
   background-repeat: no-repeat !important;
 }
 
+/* Firefox paints the account row's rule with its brand gradient; a separator
+   is only ever the divider ink, so nothing else draws a line there. */
+:is(menupopup, panel) :is(toolbarseparator, menuseparator)::before,
+:is(menupopup, panel) :is(toolbarseparator, menuseparator)::after {
+  border: 0 !important;
+  border-image: none !important;
+  background: none !important;
+}
+
 menupopup {
   appearance: none !important;
-  border: 0 !important;
+  border: 1px solid var(--divider-ink) !important;
   border-radius: 0 !important;
-  background-color: var(--paper) !important;
-  color: var(--ink) !important;
+  background-color: var(--surface) !important;
+  color: var(--surface-ink) !important;
   max-height: 90vh !important;
   --panel-border-radius: 0 !important;
   --panel-shadow: none !important;
@@ -1282,19 +1297,26 @@ menupopup {
 
 menupopup > :is(menu, menuitem) {
   appearance: none !important;
-  padding: 0.15em 2ch 0.15em 1ch !important;
+  min-height: var(--row-h) !important;
+  line-height: var(--row-h) !important;
+  padding: 0 var(--row-inset) !important;
   margin: 0 !important;
   border-radius: 0 !important;
+  transition: background-color var(--tint), color var(--tint) !important;
 }
 
 menupopup > :is(menu, menuitem)[_moz-menuactive]:not([disabled]) {
-  --soft: color-mix(in srgb, var(--paper) 86%, var(--ink));
-  background-color: var(--ink) !important;
-  color: var(--paper) !important;
+  --soft: var(--row-hot-soft);
+  background-color: var(--row-hot) !important;
+  color: var(--row-hot-ink) !important;
 }
 
 .menu-accel {
-  color: inherit !important;
+  color: var(--soft) !important;
+}
+
+menupopup > :is(menu, menuitem)[_moz-menuactive] .menu-accel {
+  color: var(--row-hot-soft) !important;
 }
 
 #unified-extensions-panel {
@@ -1304,10 +1326,11 @@ menupopup > :is(menu, menuitem)[_moz-menuactive]:not([disabled]) {
 
 tooltip {
   appearance: none !important;
-  border: 0 !important;
-  background-color: var(--paper) !important;
-  color: var(--ink) !important;
-  padding: 0.15em 1ch !important;
+  border: 1px solid var(--divider-ink) !important;
+  background-color: var(--surface) !important;
+  color: var(--surface-ink) !important;
+  line-height: var(--row-h) !important;
+  padding: 0 var(--row-inset) !important;
 }
 
 @keyframes lw-spin {
