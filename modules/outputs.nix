@@ -139,6 +139,7 @@ inputs: let
           inputs.finix.nixosModules.limine
           ./finix/static-net.nix
           ./hosts/wireguard.nix
+          ./dev/ai/tomoe-land.nix
         ]
         ++ graphicalModules
         ++ [
