@@ -112,11 +112,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1794717171,
-        "narHash": "sha256-XDjOjMFh/zzbUL+VYH6ubxx67Zm5jAfpCMijXIHE1Zk=",
+        "lastModified": 1794720315,
+        "narHash": "sha256-Lby1TXFRm6A79xMEuMoQ8xZlvzR6BvORr/+dnBXD9nM=",
         "ref": "refs/heads/main",
-        "rev": "200161b2ed79d18793cc6fab900da5ccfd6f154d",
-        "revCount": 36,
+        "rev": "aa0fa23921f195a9373b54890dc0ab465701fe26",
+        "revCount": 37,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/bolo.git"
       },
