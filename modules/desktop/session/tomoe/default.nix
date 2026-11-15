@@ -4221,7 +4221,7 @@ in {
         (let* ((shaders (getf +shader-wallpaper+ :shaders))
                (count (length shaders))
                (probe (getf +shader-wallpaper+ :mode)))
-          (destructuring-bind (&key index menu mode ticks) state
+          (destructuring-bind (&key index menu mode ticks &allow-other-keys) state
             (when (equal (getf event :owner) "shader-wallpaper")
               (let ((name (if (eq (getf event :type) :command)
                               (getf event :name)
