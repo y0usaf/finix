@@ -1966,11 +1966,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1794762837,
-        "narHash": "sha256-ACG6PPsNEuZAK6jUCH1RhAbiI7o1BSbo9kN565IijPc=",
+        "lastModified": 1794764704,
+        "narHash": "sha256-fBJ9tVluSGQVdnLocezWn8dk647AxRWbhsDbccWjZyQ=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "d74cf49a482ba9006e9c189ae91077953e95b53a",
+        "rev": "9ed0662446afbc57def11dc92e602fc64bd7c13c",
         "type": "github"
       },
       "original": {
