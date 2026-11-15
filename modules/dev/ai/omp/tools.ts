@@ -15,6 +15,7 @@ const OFF: Record<string, true> = {
 	recent: true,
 	memories: true,
 	ast_edit: true,
+	edit: true,
 	web_crawl: true,
 };
 

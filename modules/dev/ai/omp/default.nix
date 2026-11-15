@@ -821,7 +821,6 @@ in {
             softRequestBudget = 0;
             perCallModel = "on";
           };
-          edit.mode = "replace";
           eval = {
             # A steer backgrounds a running cell so a message lands at once; the hour keeps
             # omp from backgrounding long cells on its own.
