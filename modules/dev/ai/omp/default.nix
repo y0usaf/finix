@@ -518,7 +518,6 @@
         }: ({
           Api,
           Model,
-          registerCustomApi,
           streamSimple,
           ExtensionAPI,
           ExtensionContext,
@@ -534,7 +533,7 @@
           routed,
           crest,
         }: [
-          (import' [(typeOnly Api) (typeOnly Model) registerCustomApi streamSimple] (str "@oh-my-pi/pi-ai"))
+          (import' [(typeOnly Api) (typeOnly Model) streamSimple] (str "@oh-my-pi/pi-ai"))
           (import' (typeOnly [ExtensionAPI ExtensionContext]) (str "@oh-my-pi/pi-coding-agent"))
           blank
           (const (typed CHAT_KINDS (generic Readonly [(generic Record [string true])])) (obj [(prop "chat" true) (prop "tiny" true)]))
@@ -712,23 +711,6 @@
               (const api (tpl ["crest-" (sub provider)]))
               (const wire (infix [(call (dot WIRES "get") [provider]) "??" (new Map [])]))
               (const models (array [(spread (call (dot wire "values") []))]))
-              (call registerCustomApi [
-                api
-                ({
-                  model,
-                  context,
-                  options,
-                  target,
-                }: (arrow [model context options] [
-                  (const target (call (dot wire "get") [(dot model "id")]))
-                  (if' (infix [target "===" undefined]) (throw' (new Error [(tpl ["crest: " (sub provider) " has no model " (sub (dot model "id"))])])))
-                  (return (call streamSimple [
-                    target
-                    context
-                    (obj [(spread options) (prop "apiKey" (call credential [provider (dot target "id")])) (prop "fetch" (call routed [provider (dot target "id")]))])
-                  ]))
-                ]))
-              ])
               (call (dot pi "registerProvider") [
                 provider
                 (obj (rows [
@@ -736,6 +718,20 @@
                   (prop "apiKey" (call key [provider]))
                   api
                   (prop "models" (call (dot models "map") [({model}: (arrow [model] (ternary (call (dot Object "hasOwn") [CHAT_KINDS (infix [(dot model "kind") "??" (str "chat")])]) (obj [(spread model) api]) model)))]))
+                  (prop "streamSimple" ({
+                    model,
+                    context,
+                    options,
+                    target,
+                  }: (arrow [model context options] [
+                    (const target (call (dot wire "get") [(dot model "id")]))
+                    (if' (infix [target "===" undefined]) (throw' (new Error [(tpl ["crest: " (sub provider) " has no model " (sub (dot model "id"))])])))
+                    (return (call streamSimple [
+                      target
+                      context
+                      (obj [(spread options) (prop "apiKey" (call credential [provider (dot target "id")])) (prop "fetch" (call routed [provider (dot target "id")]))])
+                    ]))
+                  ])))
                 ]))
               ])
             ])))
