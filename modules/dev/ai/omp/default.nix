@@ -22,6 +22,7 @@
       "work-fold.ts" = ./work-fold.ts;
       "message-interrupts.ts" = ./message-interrupts.ts;
       "crest-reroute.ts" = ./crest-reroute.ts;
+      "tools.ts" = ./tools.ts;
       "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (({
           Array,
           Symbol,
@@ -830,8 +831,6 @@ in {
             };
             js = false;
           };
-          astGrep.enabled = true;
-          github.enabled = true;
           codexResets.autoRedeem = "no";
           title.icons = "nf+emoji";
           interruptMode = "immediate";
@@ -857,6 +856,7 @@ in {
             "crest-auth.ts"
             "crest-reroute.ts"
             "optchat/extension.ts"
+            "tools.ts"
           ];
         };
       };
