@@ -27,7 +27,6 @@
   --quick: 140ms;
   --glide: 220ms;
   --snap: 90ms;
-  --rule: "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────";
 }
 
 :where(
@@ -634,6 +633,24 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   display: none !important;
 }
 
+/* The group sits in the middle of the strip while it fits: the two auto margins
+   share the free space, and give it up entirely once the tabs overflow, so an
+   overflowing strip is laid out from the start and stock scrolling still brings
+   an off-screen selected tab into view. */
+#tabbrowser-arrowscrollbox > .tabbrowser-tab:nth-child(1 of .tabbrowser-tab[fadein], tab-group),
+#tabbrowser-arrowscrollbox > tab-group:nth-child(1 of .tabbrowser-tab[fadein], tab-group) > .tab-group-label-container {
+  margin-inline-start: auto !important;
+}
+
+#tabbrowser-arrowscrollbox > .tabbrowser-tab:nth-last-child(1 of .tabbrowser-tab[fadein], tab-group),
+#tabbrowser-arrowscrollbox > tab-group:nth-last-child(1 of .tabbrowser-tab[fadein], tab-group) > .tab-group-label-container {
+  margin-inline-end: auto !important;
+}
+
+:root[privatebrowsingmode="temporary"] #tabbrowser-tabs {
+  margin-inline-start: 11ch !important;
+}
+
 #TabsToolbar :is(#new-tab-button, #alltabs-button) {
   position: absolute !important;
   inset-block: 0 !important;
@@ -1103,13 +1120,14 @@ body:has(#toolbar-menubar:not([inactive])) {
 
 :is(#editBookmarkPanel, #appMenu-popup, #unified-extensions-panel, #downloadsPanel, #widget-overflow, #tab-preview-panel, #confirmation-hint, menupopup, .urlbarView)::before,
 :is(#appMenu-popup, #unified-extensions-panel, #downloadsPanel, #widget-overflow, menupopup)::after {
-  content: var(--rule);
+  content: "" !important;
   display: block !important;
   flex: none !important;
   height: 0.6em !important;
-  line-height: 0.6em !important;
-  overflow: clip !important;
-  color: var(--edge) !important;
+  background-image: linear-gradient(var(--edge), var(--edge)) !important;
+  background-size: 100% 1px !important;
+  background-position: 0 50% !important;
+  background-repeat: no-repeat !important;
   pointer-events: none !important;
 }
 
@@ -1167,21 +1185,18 @@ body:has(#toolbar-menubar:not([inactive])) {
   margin: 0 !important;
 }
 
-toolbarseparator,
-menuseparator {
+toolbarseparator:not([hidden]),
+menuseparator:not([hidden]) {
   display: block !important;
   border: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
   height: var(--line) !important;
   overflow: clip !important;
-  color: var(--edge) !important;
-}
-
-toolbarseparator::before,
-menuseparator::before {
-  content: var(--rule);
-  white-space: nowrap !important;
+  background-image: linear-gradient(var(--edge), var(--edge)) !important;
+  background-size: 100% 1px !important;
+  background-position: 0 50% !important;
+  background-repeat: no-repeat !important;
 }
 
 menupopup {
