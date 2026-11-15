@@ -3056,6 +3056,7 @@
       entry.mode
     ]) (map wallpaper cfg.wallpapers);
     mode = config.user.daylight.mode;
+    current = "${pkgs.dconf}/bin/dconf read /org/gnome/desktop/interface/color-scheme";
     preview = {
       width = 256;
       height = 144;
@@ -4232,11 +4233,16 @@ in {
                       (:select (setf index choice menu nil))
                       (:cancel (setf menu nil))
                       (:move (setf menu choice))))))
-            (flet ((follow (name)
-                     (let ((found (position name shaders :test #'equal
-                                                   :key (lambda (entry) (fourth entry)))))
-                       (when (and found (not (equal name mode)))
-                         (setf index found mode name)))))
+            (flet ((follow (sun current)
+                     (flet ((slot (name)
+                              (position name shaders :test #'equal
+                                                     :key (lambda (entry) (fourth entry)))))
+                       (cond ((null mode)
+                              (setf mode sun
+                                    index (or (slot current) (slot sun))))
+                             ((not (equal sun mode))
+                              (setf mode sun
+                                    index (or (slot sun) index)))))))
               (case (getf event :type)
                 (:timer
                  (when (equal (getf event :name) :shader-mode-poll)
@@ -4244,8 +4250,10 @@ in {
                 (:exec
                  (when (and (equal (getf event :name) :shader-mode)
                             (eql (getf event :code) 0))
-                   (follow (string-trim '(#\Space #\Tab #\Newline)
-                                        (or (getf event :stdout) "")))))))
+                   (let* ((out (or (getf event :stdout) ""))
+                          (cut (or (position #\Newline out) (length out)))
+                          (sun (string-trim '(#\Space #\Tab #\Newline) (subseq out 0 cut))))
+                     (follow sun (if (search "dark" out :start2 cut) "dark" "light")))))))
             (when index (setf index (mod index count)))
             (setf menu (and menu (mod menu count)))
             (let* ((slot (or menu index))
@@ -4262,7 +4270,7 @@ in {
                                                      :layer :background
                                                      :background (list :shader (first shown) :fps (second shown)))))
                               (when probe
-                                (list (exec-async :shader-mode (format nil "~A # ~D" probe (or ticks 0)))))
+                                (list (exec-async :shader-mode (format nil "~A; ~A # ~D" probe (getf +shader-wallpaper+ :current) (or ticks 0)))))
                               (when command (list (exec-async :theme command)))
                               (when menu
                                 (shader-wallpaper--menu shaders menu (context snapshot :outputs))))
