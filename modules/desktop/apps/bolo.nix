@@ -216,48 +216,6 @@ in {
                   (when (member name '("start-bolo" "stop-bolo") :test #'equal)
                     (list (launch "${bolo}/bin/bolo"
                                   (if (string= name "start-bolo") "start" "stop")))))))
-
-      ;; The daemon writes its state file on every transition; this watches it
-      ;; and shows a pill while a turn is in flight.
-      ;; Centring has to be a margin: opposing anchors stretch a layer
-      ;; surface, so the offset comes from the output's logical width.
-      (defun bolo--margin (outputs width)
-        (let* ((out (and (listp outputs) (car outputs)))
-               (scale (if (and (listp out) (integerp (getf out :scale-120)))
-                          (/ (getf out :scale-120) 120)
-                          1))
-               (logical (if (and (listp out) (integerp (getf out :width)))
-                            (/ (getf out :width) scale)
-                            width)))
-          ;; Margin reads top, right, bottom, left.
-          (list 44 0 0 (max 0 (round (- (/ logical 2) (/ width 2)))))))
-
-      (define-extension "bolo-state" (:reads (:outputs) :state (list :state "idle"))
-          (snapshot state event)
-        (let ((current (getf state :state)))
-          (when (eq (getf event :type) :watch)
-            (setf current (or (getf event :content) "idle")))
-          (when (string= current "") (setf current "idle"))
-          (values (list :state current)
-                  (append
-                    (list (watch-file :state "${runtimeDir}/bolo/state"))
-                    (unless (string= current "idle")
-                      (list (shell-surface :bolo
-                            (ui :row :padding '(5 10 5 10) :gap 4
-                                :background "#1e1e2e"
-                                :children
-                                (list (ui :icon
-                                          :name (cond ((string= current "listening") "audio-input-microphone")
-                                                      ((string= current "transcribing") "process-working")
-                                                      (t "media-record"))
-                                          :size 18
-                                          :color (if (string= current "recording") "#f38ba8" "#cdd6f4"))
-                                      (ui :text :text current :size 12 :color "#cdd6f4")))
-                              :width 148 :height 28 :anchors '(:top :left)
-                              :margin (bolo--margin (context snapshot :outputs) 148)
-                              :layer :overlay :exclusive-zone 0
-                              :background "#00000000"))))
-                  nil)))
     '';
   };
 }

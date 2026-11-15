@@ -143,8 +143,11 @@ this is a float or a fullscreen window, which the spine then sits beneath."
                                      :exclusive-zone (1- height)))))))
 
 (define-extension "bar" (:reads (:system :services :data :outputs :layout)
-                         :state (list :cpu nil :memory nil :gpu nil))
+                         :state (list :cpu nil :memory nil :gpu nil
+                                      :bolo-state nil :bolo-level 0))
     (snapshot state event)
+  (when (eq (getf event :type) :watch)
+    (cassette--bolo-watch state event))
   (when (and (eq (getf event :type) :timer) (eq (getf event :name) :sample))
     (let ((system (context snapshot :system)))
       (dolist (probe '(:cpu :memory :gpu))
@@ -157,13 +160,16 @@ this is a float or a fullscreen window, which the spine then sits beneath."
          (narrow (remove-if-not (lambda (o) (deck--narrow-p (list :output o))) (context snapshot :outputs)))
          (focal (state-value snapshot :focal-frame))
          (tray-height (spine--tray-height (state-value snapshot :shelf-tray)))
+         (bolo (cassette--bolo state))
          (items (when narrow
-                  (loop for module in (getf +cassette+ :modules)
-                        collect (cassette--module module state snapshot))))
+                  (append (when bolo (list (list bolo)))
+                          (loop for module in (getf +cassette+ :modules)
+                                collect (cassette--module module state snapshot)))))
          (hot (loop for probe in '(:cpu :gpu) thereis (cassette--hot-p (getf (getf state probe) :temp)))))
     (values state
             (append (list (interval :sample (getf +cassette+ :sample))
                           (publish-state :hud-hot (and hot t)))
+                    (cassette--bolo-watches)
                     (when (and output (plusp tray-height))
                       (list (publish-state :shelf-tray-rect
                                            (list :output (getf seam :output)
@@ -171,8 +177,9 @@ this is a float or a fullscreen window, which the spine then sits beneath."
                                                  :width (getf seam :width)
                                                  :height (round (* tray-height scale))))))
                     (when output
-                      (list (shell-surface :spine (spine--body (loop for module in (getf +cassette+ :modules)
-                                                                     collect (spine--module module state snapshot))
+                      (list (shell-surface :spine (spine--body (append (when bolo (list bolo))
+                                                                      (loop for module in (getf +cassette+ :modules)
+                                                                            collect (spine--module module state snapshot)))
                                                                tray-height)
                                            :output (getf output :name) :anchors '(:top :left)
                                            :width (round (getf seam :width) scale) :height (round (getf seam :height) scale)

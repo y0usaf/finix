@@ -395,6 +395,8 @@
   barLisp = let
     cassetteLisp = deck:
       "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
+      # Where bolo keeps the dictation state and level the bar reads.
+      + "(defparameter +bolo+ (list :state \"${config.user.runtimeDir}/bolo/state\" :level \"${config.user.runtimeDir}/bolo/level\"))\n"
       + source_probe
       + (generators.lisp.render (({
           and,
@@ -1049,6 +1051,7 @@
           ])
         ]))
         generators.lisp))
+      + builtins.readFile ./lisp/bolo.lisp
       + builtins.readFile deck;
   in {
     panels =
