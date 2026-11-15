@@ -334,7 +334,7 @@ run_smoke() {
 	set -m
 	timeout --signal=TERM --kill-after="$KILLWAIT" "$SMOKE_TIMEOUT" \
 		bash -c 'exec 9>&-; cd "$1" && LOGFILE=/dev/null nice -n 10 "$2/bin/nixos-test-driver" -o "$1/out"' _ \
-		"$ROOT/run/$id" "$driver" >>"$log" 2>&1 &
+		"$ROOT/run/$id" "$driver" 9>&- >>"$log" 2>&1 &
 	pid=$!
 	set +m
 	printf '%s\n' "$pid" >"$ACTIVE_FILE.pid"
@@ -471,7 +471,7 @@ run_timing() {
 	set -m
 	timeout --signal=TERM --kill-after="$KILLWAIT" "$limit" \
 		bash -c 'exec 9>&-; cd "$1" && LOGFILE=/dev/null nice -n 10 "$2/bin/nixos-test-driver" -o "$1/out"' _ \
-		"$ROOT/run/$id" "$driver" >>"$log/timing.log" 2>&1 &
+		"$ROOT/run/$id" "$driver" 9>&- >>"$log/timing.log" 2>&1 &
 	pid=$!
 	set +m
 	printf '%s\n' "$pid" >"$ACTIVE_FILE.pid"
