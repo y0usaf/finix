@@ -760,7 +760,7 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   overflow: hidden !important;
   margin-inline: 0.5ch !important;
   color: var(--faint) !important;
-  transition: background-color var(--tint), color var(--tint) !important;
+  transition: background-color var(--tint), color var(--tint), max-width 1ms !important;
 }
 
 .tabbrowser-tab:not([pinned]):not([fadein]) {
