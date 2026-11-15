@@ -8,6 +8,8 @@ PENDING=${TOMOE_PENDING:-$(dirname "$LOCK")/tomoe-vm.pending}
 AGENT=${TOMOE_AGENT:-tomoe-land}
 SYSTEM=${LAND_SYSTEM:-x86_64-linux}
 BASE=${LAND_BASE:-origin/main}
+FINIX=${LAND_FINIX:-$HOME/finix}
+FINIX_REV=""
 SMOKE=${LAND_SMOKE:-smoke}
 NIXCORES=${LAND_NIX_CORES:-4}
 LEASEWAIT=${LAND_LEASE_WAIT:-10800}
@@ -112,6 +114,8 @@ submit() {
 	printf '%s\t%s\t%s\t%s\n' "$type" "$ref" "$suite" "$timeout" >"$tmp" ||
 		die "cannot write the submission"
 	mv "$tmp" "$file" || die "cannot queue the submission"
+	printf '%s queued %s %s %s\n' "$(date -u +%FT%TZ)" "$id" "$type" "$ref" >>"$ROOT/journal.log"
+	say "queued $id in $file"
 	rm -f "$RESULTS/$id"
 	printf '%s\n' "$id"
 }
@@ -258,6 +262,11 @@ run_land() {
 		return 1
 		;;
 	esac
+	if pin_finix "$log/pin.log" "$tip"; then
+		note_step pin passed "$log/pin.log"
+	else
+		note_step pin failed "$log/pin.log"
+	fi
 	cleanup_tree "$repo" "$tree"
 	finish "$id" passed "$tip" "$tip" "" ""
 	return 0
@@ -318,6 +327,32 @@ run_smoke() {
 	return 1
 }
 
+pin_finix() {
+	local log=$1 tip=$2 rev
+	[[ -d $FINIX/.git ]] || {
+		printf 'no finix checkout at %s\n' "$FINIX" >"$log"
+		return 1
+	}
+	(
+		cd "$FINIX" || exit 1
+		nix flake update tomoe &&
+			git add flake.lock &&
+			git -c user.name=tomoe-land -c user.email=tomoe-land@localhost commit -q \
+				-m "finix: pin tomoe $(git -C "$REPO" rev-parse --short "$tip")"
+	) >"$log" 2>&1 || return 1
+	# The switch restarts this service, so it runs detached and the result is
+	# written before it lands; the queue resumes from disk when finit brings the
+	# daemon back.
+	(
+		cd "$FINIX" || exit 1
+		setsid nohup finix-switch >>"$log.switch" 2>&1 &
+	)
+	rev=$(git -C "$FINIX" rev-parse --short HEAD) || return 1
+	printf 'finix %s\n' "$rev" >>"$log"
+	FINIX_REV=$rev
+	return 0
+}
+
 push_landing() {
 	local id=$1 repo=$2 tip=$3 base=$4 ref=$5 log=$6 head
 	: >"$log"
@@ -349,24 +384,32 @@ push_landing() {
 }
 
 run_timing() {
-	local id=$1 suite=$2 limit=$3
-	local log=$LOGS/$id rc=0 repo tree driver pid
+	local id=$1 suite=$2 limit=$3 ref=$4
+	local log=$LOGS/$id rc=0 repo tree driver pid sha
 	mkdir -p "$log"
 	repo=$(repo_root) || {
 		finish "$id" failed "" "" resolve "$log/resolve.log"
 		return 1
 	}
 	git -C "$repo" fetch --quiet origin >/dev/null 2>&1 || true
+	sha=$(git -C "$repo" rev-parse --verify --quiet "refs/remotes/origin/$ref^{commit}")
+	[[ -n $sha ]] || sha=$(git -C "$repo" rev-parse --verify --quiet "$ref^{commit}")
+	[[ -n $sha ]] || {
+		printf '%s is not a commit here\n' "$ref" >"$log/resolve.log"
+		finish "$id" failed "" "" resolve "$log/resolve.log"
+		return 1
+	}
+	printf 'ref %s\nsha %s\n' "$ref" "$sha" >"$log/resolve.log"
 	tree=$ROOT/work/$id
 	rm -rf "$tree"
 	git -C "$repo" worktree prune >/dev/null 2>&1 || true
-	git -C "$repo" worktree add --quiet --detach "$tree" "$BASE" >"$log/resolve.log" 2>&1 || {
+	git -C "$repo" worktree add --quiet --detach "$tree" "$sha" >>"$log/resolve.log" 2>&1 || {
 		finish "$id" failed "" "" resolve "$log/resolve.log"
 		return 1
 	}
 	if ! take_lease -s; then
 		cleanup_tree "$repo" "$tree"
-		finish "$id" failed "$(git -C "$tree" rev-parse HEAD 2>/dev/null)" "" lease "$log/timing.log"
+		finish "$id" failed "$sha" "" lease "$log/timing.log"
 		return 75
 	fi
 	driver=$(
@@ -377,12 +420,12 @@ run_timing() {
 	release_lease
 	if [[ -z $driver ]]; then
 		cleanup_tree "$repo" "$tree"
-		finish "$id" failed "" "" driver "$log/timing.log"
+		finish "$id" failed "$sha" "" driver "$log/timing.log"
 		return 1
 	fi
 	if ! take_lease -x; then
 		cleanup_tree "$repo" "$tree"
-		finish "$id" failed "" "" lease "$log/timing.log"
+		finish "$id" failed "$sha" "" lease "$log/timing.log"
 		return 75
 	fi
 	mkdir -p "$ROOT/run/$id/out"
@@ -400,15 +443,15 @@ run_timing() {
 	case $rc in
 	124 | 137)
 		printf 'land: %s hit its %ss limit\n' "$suite" "$limit" >>"$log/timing.log"
-		finish "$id" failed "" "" timing "$log/timing.log"
+		finish "$id" failed "$sha" "" timing "$log/timing.log"
 		return 1
 		;;
 	esac
 	if grep -q 'tomoe suite passed:' "$log/timing.log"; then
-		finish "$id" passed "" "" timing "$log/timing.log"
+		finish "$id" passed "$sha" "$sha" timing "$log/timing.log"
 		return 0
 	fi
-	finish "$id" failed "" "" timing "$log/timing.log"
+	finish "$id" failed "$sha" "" timing "$log/timing.log"
 	return 1
 }
 
@@ -429,7 +472,7 @@ finish() {
 			printf '{"step":"%s","result":"%s","log":"%s"}' \
 				"$step" "$([[ $status == passed ]] && echo passed || echo failed)" "$log"
 		}
-		printf '],"finished":"%s"}\n' "$(date -u +%FT%TZ)"
+		printf '],"finix":"%s","finished":"%s"}\n' "${FINIX_REV:-}" "$(date -u +%FT%TZ)"
 	} >"$tmp"
 	mv "$tmp" "$RESULTS/$id"
 	printf '%s %s %s\n' "$id" "$status" "$(date -u +%FT%TZ)" >>"$ROOT/results.log"
@@ -440,12 +483,20 @@ daemon() {
 	rm -f "$PENDING/$AGENT."* 2>/dev/null
 	for leftover in "$ACTIVE"/*; do
 		[[ -e $leftover ]] || continue
+		case $leftover in
+		*.pid)
+			rm -f "$leftover"
+			continue
+			;;
+		esac
 		mv "$leftover" "$QUEUE/" 2>/dev/null || true
+		printf '%s requeued %s\n' "$(date -u +%FT%TZ)" "$(basename "$leftover")" \
+			>>"$ROOT/journal.log"
 	done
 	printf '%s daemon up pid %s\n' "$(date -u +%FT%TZ)" "$$" >>"$ROOT/daemon.log"
 	while :; do
 		local next id type ref suite timeout
-		next=$(ls "$QUEUE" 2>/dev/null | grep -v '\.tmp$' | sort | head -1)
+		next=$(ls "$QUEUE" 2>/dev/null | grep -v -e '\.tmp$' -e '\.pid$' | sort | head -1)
 		if [[ -z $next ]]; then
 			sleep 1
 			continue
@@ -454,6 +505,7 @@ daemon() {
 		mv "$QUEUE/$next" "$ACTIVE_FILE" 2>/dev/null || continue
 		: >"$ROOT/steps"
 		id=${next#*-}
+		printf '%s taken %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/journal.log"
 		IFS=$'\t' read -r type ref suite timeout <"$ACTIVE_FILE"
 		printf '%s start %s %s %s\n' "$(date -u +%FT%TZ)" "$id" "$type" "$ref" >>"$ROOT/daemon.log"
 		case $type in
@@ -461,11 +513,16 @@ daemon() {
 		timing)
 			[[ -n $timeout ]] || timeout=$TIMING_TIMEOUT
 			[[ -n $suite ]] || suite=timing
-			run_timing "$id" "$suite" "$timeout"
+			run_timing "$id" "$suite" "$timeout" "$ref"
 			;;
 		*) finish "$id" failed "" "" type "" ;;
 		esac
+		if [[ ! -f $RESULTS/$id ]]; then
+			finish "$id" failed "" "" lost "no result was written; the ticket is kept in done/"
+			printf '%s lost %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/journal.log"
+		fi
 		mv "$ACTIVE_FILE" "$DONE/$next" 2>/dev/null || rm -f "$ACTIVE_FILE"
+		printf '%s done %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/journal.log"
 		printf '%s done %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/daemon.log"
 	done
 }
