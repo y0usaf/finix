@@ -1,27 +1,16 @@
 (in-package #:tomoe-user)
 
-;;; KEYWAY
-;;;
-;;; The seam between the deck's two columns is a steel rail. Every carried card
-;;; rides it on two guide shoes, and one accent key clamps the focused card to
-;;; it: the key's lugs cover that card's shoes, a dog sits at the card's middle
-;;; and a bar joins them. Nothing else on the desktop marks focus.
-;;;
-;;; The rail body, the carriages and the key are three kinds of shell surface.
-;;; A carriage and the key are attached to their window, so the compositor adds
-;;; the window's in-flight move offset to them every frame: they cannot drift
-;;; from the card. Only the key's lane (x) ever slides, and it slides on the
-;;; card's own window-move spring because it is the same animation.
-
 (defvar *rail--palette* nil)
 (defvar *rail--mode* :dark)
 (defvar *rail--scale* 1)
 
-(defparameter +rail--plate+ 2)    ; end plate
-(defparameter +rail--way+ 2)      ; running surface down each long edge
-(defparameter +rail--clock-y+ 696)
-(defparameter +rail--air+ 22)
+(defparameter +rail--clock-inset+ 27)
+(defparameter +rail--clock-height+ 62)
+(defparameter +rail--air+ 32)
 (defparameter +rail--wave-rows+ 20)
+(defparameter +rail--slot+ 40)
+(defparameter +rail--plate-width+ 62)
+(defparameter +rail--radius+ 4)
 
 (defun rail--design (px)
   "PX of the design, in this output's logical units."
@@ -35,6 +24,43 @@ or counter when it has one, and the theme's published palette key otherwise."
         (getf *rail--palette* source)
         "#00000000")))
 
+(defun rail--value () (rail--c :ink))
+
+(defun rail--detail ()
+  (hud--fade (rail--c :ink) (if (eq *rail--mode* :dark) 0.62 0.66)))
+
+(defun rail--label ()
+  (hud--fade (rail--c :ink) (if (eq *rail--mode* :dark) 0.40 0.46)))
+
+(defun rail--outline ()
+  (hud--fade (rail--c :ink) 0.90))
+
+(defun rail--shade (fraction)
+  (hud--fade (if (eq *rail--mode* :dark) "#000000" (rail--c :ink)) fraction))
+
+(defun rail--paper () (hud--c *rail--palette* :bg))
+
+(defun rail--track ()
+  (if (eq *rail--mode* :dark)
+      (hud--mix (rail--paper) "#000000" 0.55)
+      (hud--mix (rail--paper) (rail--c :ink) 0.09)))
+
+(defun rail--face ()
+  (if (eq *rail--mode* :dark)
+      (hud--mix (rail--paper) (rail--c :ink) 0.11)
+      (hud--mix (rail--paper) "#FFFFFF" 0.75)))
+
+(defun rail--lip ()
+  (if (eq *rail--mode* :dark) (hud--fade "#FFFFFF" 0.14) "#FFFFFF"))
+
+(defun rail--press-hi ()
+  (hud--fade "#FFFFFF" (if (eq *rail--mode* :dark) 0.06 0.85)))
+
+(defun rail--press-lo ()
+  (if (eq *rail--mode* :dark)
+      (hud--fade "#000000" 0.55)
+      (hud--fade (rail--c :ink) 0.16)))
+
 (defun rail--parts (text)
   (loop with start = 0
         for i = (position-if (lambda (c) (member c '(#\: #\Space))) text :start start)
@@ -46,18 +72,31 @@ or counter when it has one, and the theme's published palette key otherwise."
   (ui :text :text text :size (rail--design size) :line-height (rail--design size)
       :height (rail--design height) :color color :font (getf +cassette+ :font)))
 
-(defun rail--bar (percent width)
-  "A horizontal meter: WIDTH wide and 2 tall, filled to PERCENT."
-  (let* ((percent (max 0 (min 100 (round (or percent 0)))))
-         (lit (round (* width percent) 100))
-         (color (cond ((> percent 84) (rail--c :red))
-                      ((> percent 60) (rail--c :hot))
-                      (t (rail--c :ink)))))
-    (ui :stack :width (rail--design width) :height (rail--design 2) :background (rail--c :track)
-        :children (list (ui :row :height (rail--design 2) :align :start
-                            :children (list (ui :rect :width (rail--design lit)
-                                                :height (rail--design 2)
-                                                :background color)))))))
+(defun rail--split-unit (text)
+  "TEXT as its number and its trailing percent sign, the sign drawn one tier
+below the number it belongs to."
+  (if (and (plusp (length text)) (char= (char text (1- (length text))) #\%))
+      (list (subseq text 0 (1- (length text))) "%")
+      (list text nil)))
+
+(defun rail--number (text &optional (height 22))
+  (destructuring-bind (number unit) (rail--split-unit text)
+    (ui :row :align :center
+        :children (append (list (rail--text number (rail--value) 22 height))
+                          (when unit (list (rail--text unit (rail--label) 22 height)))))))
+
+(defun rail--badge (node ground)
+  "NODE inside a one pixel ink outline: a warning without a hue."
+  (ui :column :align :center :padding '(3 4 0 4) :radius 3 :border 1
+      :border-color (rail--outline) :background ground
+      :children (list node)))
+
+(defun rail--meter (percent)
+  "A 36 wide, four tall rounded pill: the played fraction of the media, the
+one reading a percentage cannot carry."
+  (ui :progress :width (rail--design 36) :height (rail--design 4)
+      :radius (rail--design 2) :value (/ (max 0 (min 100 (round (or percent 0)))) 100)
+      :track (hud--fade (rail--c :ink) 0.12) :color (rail--value)))
 
 (defun rail--digits (mib)
   "Whole GiB from ten up, one decimal below, so a memory detail is four cells."
@@ -66,16 +105,19 @@ or counter when it has one, and the theme's published palette key otherwise."
         (if (>= gib 10) (format nil "~DG" (round gib)) (format nil "~,1FG" gib)))
       "--G"))
 
-(defun rail--gauge (label percent detail &optional hot)
-  (let ((percent (max 0 (min 100 (round (or percent 0))))))
+(defun rail--gauge (label percent detail hot ground)
+  (let* ((percent (max 0 (min 100 (round (or percent 0)))))
+         (value (format nil "~D%" percent)))
     (ui :column :align :center
         :children
-        (append (list (rail--text label (rail--c :dim) 22)
-                      (rail--text (format nil "~D%" percent) (rail--c :ink) 22)
-                      (rail--bar percent 50))
+        (append (list (rail--text label (rail--label) 22)
+                      (if (> percent 84)
+                          (rail--badge (rail--number value 19) ground)
+                          (rail--number value)))
                 (when detail
-                  (list (ui :rect :height (rail--design 8))
-                        (rail--text detail (if hot (rail--c :hot) (rail--c :dim)) 22 14)))))))
+                  (list (if hot
+                            (rail--badge (rail--number detail 19) ground)
+                            (rail--text detail (rail--detail) 22))))))))
 
 (defun rail--date ()
   (destructuring-bind (&optional day date month &rest rest)
@@ -83,16 +125,16 @@ or counter when it has one, and the theme's published palette key otherwise."
     (declare (ignore rest))
     (ui :column :align :center
         :children (remove nil
-                          (list (when day (rail--text day (rail--c :dim) 22))
-                                (when date (rail--text date (rail--c :ink) 22))
-                                (when month (rail--text month (rail--c :dim) 22 14)))))))
+                          (list (when day (rail--text day (rail--label) 22))
+                                (when date (rail--text date (rail--value) 22))
+                                (when month (rail--text month (rail--label) 22)))))))
 
 (defun rail--clock ()
   (destructuring-bind (&optional hours minutes)
       (rail--parts (clock-text (getf +cassette+ :time)))
     (ui :column :align :center
-        :children (list (rail--text (or hours "--") (rail--c :ink) 33 27)
-                        (rail--text (or minutes "--") (rail--c :ink) 33 21)))))
+        :children (list (rail--text (or hours "--") (rail--value) 33)
+                        (rail--text (or minutes "--") (rail--value) 33 29)))))
 
 (defun rail--media-played (snapshot)
   (let* ((service (service-state snapshot :mpris))
@@ -107,101 +149,102 @@ or counter when it has one, and the theme's published palette key otherwise."
 (defun rail--media (snapshot)
   (destructuring-bind (status played) (rail--media-played snapshot)
     (ui :column :align :center
-        :children (list (rail--text (if (equal status "Playing") ">" "||") (rail--c :ink) 22)
-                        (rail--bar (round (* 100 played)) 50)))))
+        :children (list (rail--text (if (equal status "Playing") ">" "||") (rail--value) 22)
+                        (rail--meter (round (* 100 played)))
+                        (ui :rect :height (rail--design 8))))))
 
 (defun rail--network (snapshot)
   (let ((online (getf (service-state snapshot :network) :connected)))
     (ui :column :align :center
-        :children (list (rail--text "NET" (rail--c :dim) 22)
-                        (rail--text (if online "ON" "OFF") (rail--c :ink) 22)))))
+        :children (list (rail--text "NET" (rail--label) 22)
+                        (rail--text (if online "ON" "OFF") (rail--value) 22)))))
 
 (defun rail--voice-row (level)
   (let ((level (max 0 (min 1 (or level 0)))))
     (if (> level 0.02)
-        (ui :rect :width (rail--design (max 1 (round (* 21 (sqrt level)))))
-            :height (rail--design 3) :background (rail--c :teal))
-        (ui :rect :width (rail--design 2) :height (rail--design 3)
-            :background (rail--c :dim)))))
+        (ui :rect :width (rail--design (max 2 (* 2 (round (* 18 (sqrt level))))))
+            :height (rail--design 2) :radius (rail--design 1) :background (rail--value))
+        (ui :column :align :center :padding '(1 0 0 0)
+            :children (list (ui :rect :width (rail--design 2) :height (rail--design 1)
+                                :radius (rail--design 1) :background (rail--label)))))))
 
 (defun rail--voice (state)
   "Bolo's turn at the top of the web: the elapsed time and its own level
-scrolling down as a waveform, then the tie that closes the block."
+scrolling down as a waveform."
   (let ((since (getf state :bolo-since)))
     (ui :column :align :center
         :children
-        (append (list (rail--text (cassette--bolo-clock
-                                   (and (realp since) (- (cassette--bolo-now) since)))
-                                  (rail--c :ink) 22)
-                      (ui :rect :height (rail--design 2))
-                      (ui :column :align :center :gap (rail--design 2)
-                          :children (loop for rest = (getf state :bolo-history) then (cdr rest)
-                                          repeat +rail--wave-rows+
-                                          collect (rail--voice-row (first rest))))
-                      (ui :rect :height (rail--design 12)))
-                (list (ui :rect :height (rail--design 1) :width (rail--design 52)
-                          :background (rail--c :tie)))))))
+        (list (rail--text (cassette--bolo-clock
+                           (and (realp since) (- (cassette--bolo-now) since)))
+                          (rail--value) 22)
+              (ui :rect :height (rail--design 4))
+              (ui :column :align :center :gap (rail--design 3)
+                  :children (loop for rest = (getf state :bolo-history) then (cdr rest)
+                                  repeat +rail--wave-rows+
+                                  collect (rail--voice-row (first rest))))))))
 
 (defun rail--height (module state snapshot)
   "The design height of MODULE's block, or NIL when it has nothing to show."
   (ecase module
-    (:time 48)
-    (:date 58)
-    (:media (when (rail--media-played snapshot) 24))
-    (:cpu 68)
-    (:memory 68)
-    (:gpu (when (probe--gpu-p (getf state :gpu)) 68))
-    (:vram (when (probe--gpu-p (getf state :gpu)) 68))
-    (:battery (when (getf (service-state snapshot :battery) :percent) 46))
+    (:time +rail--clock-height+)
+    (:date 66)
+    (:media (when (rail--media-played snapshot) 34))
+    (:cpu 66)
+    (:memory 66)
+    (:gpu (when (probe--gpu-p (getf state :gpu)) 66))
+    (:vram (when (probe--gpu-p (getf state :gpu)) 66))
+    (:battery (when (getf (service-state snapshot :battery) :percent) 44))
     (:network 44)
-    (:frame (when (getf (state-value snapshot :frame-battery) :percent) 46))))
+    (:frame (when (getf (state-value snapshot :frame-battery) :percent) 44))))
 
-(defun rail--block (module state snapshot)
+(defun rail--block (module state snapshot ground)
   (let ((cpu (getf state :cpu)) (memory (getf state :memory)) (gpu (getf state :gpu)))
     (ecase module
       (:time (rail--clock))
       (:date (rail--date))
       (:media (rail--media snapshot))
       (:cpu (rail--gauge "CPU" (getf cpu :percent) (cassette--degrees (getf cpu :temp))
-                         (cassette--hot-p (getf cpu :temp))))
-      (:memory (rail--gauge "MEM" (getf memory :percent) (rail--digits (getf memory :used))))
+                         (cassette--hot-p (getf cpu :temp)) ground))
+      (:memory (rail--gauge "MEM" (getf memory :percent) (rail--digits (getf memory :used))
+                            nil ground))
       (:gpu (rail--gauge "GPU" (getf gpu :percent) (cassette--degrees (getf gpu :temp))
-                         (cassette--hot-p (getf gpu :temp))))
+                         (cassette--hot-p (getf gpu :temp)) ground))
       (:vram (rail--gauge "VRAM" (if (plusp (or (getf gpu :total) 0))
                                      (round (* 100 (or (getf gpu :used) 0)) (getf gpu :total))
                                      0)
-                          (rail--digits (getf gpu :used))))
+                          (rail--digits (getf gpu :used)) nil ground))
       (:battery (let ((battery (service-state snapshot :battery)))
-                  (rail--gauge (if (getf battery :charging) "CHG" "BAT") (getf battery :percent) nil)))
+                  (rail--gauge (if (getf battery :charging) "CHG" "BAT")
+                               (getf battery :percent) nil nil ground)))
       (:network (rail--network snapshot))
       (:frame (let ((battery (state-value snapshot :frame-battery)))
                 (rail--gauge (if (equal (getf battery :status) "Discharging") "VR" "VR+")
-                             (getf battery :percent) nil))))))
+                             (getf battery :percent) nil nil ground))))))
 
-(defun rail--places (state snapshot)
-  "Where each block's top is on screen: the clock is pinned to the card's
-middle and the other blocks stack away from it, or the whole stack is centred on
-the middle when the module list has no clock."
+(defun rail--places (state snapshot middle)
+  "Where each block's top is in the web: the clock is pinned to MIDDLE and the
+other blocks stack away from it, or the whole stack is centred on MIDDLE when
+the module list has no clock."
   (let* ((entries (loop for module in (getf +rail+ :modules)
                         for height = (rail--height module state snapshot)
                         when height collect (cons module height)))
          (pin (position :time entries :key #'car)))
     (if (null pin)
         (let* ((total (+ (loop for entry in entries sum (cdr entry))
-                         (* 45 (max 0 (1- (length entries))))))
-               (top (- 720 (floor total 2))))
+                         (* +rail--air+ (max 0 (1- (length entries))))))
+               (top (- middle (floor total 2))))
           (loop for (module . height) in entries
-                for y = top then (+ y height 45)
+                for y = top then (+ y height +rail--air+)
                 collect (cons module y)))
-        (let* ((clock +rail--clock-y+)
+        (let* ((clock (- middle +rail--clock-inset+))
                (y clock)
                (above (loop for (module . height) in (reverse (subseq entries 0 pin))
-                            do (decf y (+ 45 height))
+                            do (decf y (+ +rail--air+ height))
                             collect (cons module y)))
-               (below (let ((start (+ clock 48)))
+               (below (let ((start (+ clock +rail--clock-height+ +rail--air+)))
                         (loop for (module . height) in (subseq entries (1+ pin))
-                              do (incf start 45)
-                              collect (prog1 (cons module start) (incf start height))))))
+                              collect (prog1 (cons module start)
+                                       (incf start (+ height +rail--air+)))))))
           (append (reverse above) (list (cons :time clock)) below)))))
 
 (defun rail--tray (snapshot)
@@ -210,10 +253,11 @@ the middle when the module list has no clock."
     (when (and tray (plusp (getf tray :count 0)) (plusp (getf tray :size 0)))
       (* (getf tray :count) (getf tray :size)))))
 
-(defun rail--web (state snapshot seam width)
-  "The readings, the voice block and the tray in the rail's web, top to bottom."
-  (let* ((base (+ (getf seam :y) +rail--plate+))
-         (height (- (getf seam :height) (* 2 +rail--plate+)))
+(defun rail--web (state snapshot seam ground)
+  "The readings, the voice block and the tray, in type over the plate."
+  (let* ((base (/ (getf seam :y) *rail--scale*))
+         (height (/ (getf seam :height) *rail--scale*))
+         (width (+ (* 2 (getf +rail+ :channel)) (getf +rail+ :width)))
          (tray (rail--tray snapshot))
          (voice (cassette--bolo-turn-p (getf state :bolo-state)))
          (parts nil)
@@ -221,82 +265,64 @@ the middle when the module list has no clock."
     (labels ((to (screen-y)
                (let ((y (- screen-y base)))
                  (when (> y cursor) (push (cons (- y cursor) nil) parts) (setf cursor y))))
-             (put (tall node) (push (cons tall node) parts) (incf cursor tall))
-             (tie (screen-y)
-               (to screen-y)
-               (put 1 (ui :rect :height (rail--design 1) :width (rail--design 52)
-                          :background (rail--c :tie)))))
+             (put (tall node) (push (cons tall node) parts) (incf cursor tall)))
       (when tray
-        (to 44)
-        (put (* tray *rail--scale*) (ui :rect :height (rail--design tray) :width (rail--design 52)
-                      :background (rail--c :tray))))
+        (to (+ base 36))
+        (put (/ tray *rail--scale*)
+             (ui :rect :height (rail--design tray) :width (rail--design 52)
+                 :background (rail--c :tray))))
       (when voice
-        (to (+ 44 (or tray 0)))
-        (put (+ 135) (rail--voice state)))
-      (let ((previous nil))
-        (dolist (entry (rail--places state snapshot))
-          (let ((top (cdr entry)))
-            (when previous (tie (- top (+ +rail--air+ 1))))
-            (to top)
-            (put (rail--height (car entry) state snapshot) (rail--block (car entry) state snapshot)))
-          (setf previous entry))))
+        (to (+ base 36 (or (/ tray *rail--scale*) 0)))
+        (put 123 (rail--voice state)))
+      (dolist (entry (rail--places state snapshot (+ base (floor height 2))))
+        (to (cdr entry))
+        (put (rail--height (car entry) state snapshot)
+             (rail--block (car entry) state snapshot ground))))
     (ui :column :align :center :width (rail--design width) :height (rail--design height)
         :children (loop for (tall . node) in (nreverse parts)
                         collect (or node (ui :rect :height (rail--design tall)))))))
 
-(defun rail--body (state snapshot seam)
-  (let ((width (getf +rail+ :width))
-        (height (getf seam :height)))
-    (ui :column :align :stretch
-        :children
-        (list (ui :rect :height (rail--design +rail--plate+) :background (rail--c :steel))
-              (ui :row :height (rail--design (- height (* 2 +rail--plate+)))
-                  :children
-                  (list (ui :rect :width (rail--design +rail--way+) :background (rail--c :steel))
-                        (rail--web state snapshot seam (- width (* 2 +rail--way+)))
-                        (ui :rect :width (rail--design +rail--way+) :background (rail--c :steel))))
-              (ui :rect :height (rail--design +rail--plate+) :background (rail--c :steel))))))
+(defun rail--track-body ()
+  "The recessed track: the whole open seam, one tone below the paper, with a
+lip of shadow along its top edge."
+  (ui :column :align :center :radius (rail--design +rail--radius+)
+      :background (rail--track)
+      :children (list (ui :rect :width (rail--design (- (+ (* 2 (getf +rail+ :channel))
+                                                           (getf +rail+ :width))
+                                                        8))
+                          :height (rail--design 1) :background (rail--press-lo)))))
 
 (defun rail--carriage (box)
-  "One card's two guide shoes, in the channel between its border and the rail."
-  (let ((shoe (getf +rail+ :shoe))
-        (height (getf box :height)))
-    (ui :column :align :stretch
-        :children (list (ui :rect :height (rail--design shoe) :background (rail--c :steel))
-                        (ui :rect :height (rail--design (- height (* 2 shoe))))
-                        (ui :rect :height (rail--design shoe) :background (rail--c :steel))))))
+  "One card's two pressed slots, in the channel between its border and the
+rail: a dark slot with its lit floor."
+  (let* ((height (getf box :height))
+         (slot +rail--slot+))
+    (ui :column :align :center
+        :children (list (ui :rect :height (rail--design 12))
+                        (ui :rect :width (rail--design 4) :height (rail--design slot)
+                            :radius (rail--design 2) :background (rail--press-lo))
+                        (ui :rect :width (rail--design 4) :height (rail--design 1)
+                            :background (rail--press-hi))
+                        (ui :rect :height (rail--design (- height 105)))
+                        (ui :rect :width (rail--design 4) :height (rail--design slot)
+                            :radius (rail--design 2) :background (rail--press-lo))
+                        (ui :rect :width (rail--design 4) :height (rail--design 1)
+                            :background (rail--press-hi))
+                        (ui :rect :height (rail--design 11))))))
 
-(defun rail--key (box)
-  "The clamp: two lugs over the card's shoes and a dog at its middle, joined by
-a bar down the channel. It is the only accent on the desktop."
-  (let* ((lug (getf +rail+ :shoe))
-         (dog (getf +rail+ :dog))
-         (bar (getf +rail+ :key-bar))
-         (channel (getf +rail+ :channel))
-         (height (getf box :height))
-         (middle (- height (* 2 lug)))
-         (side (max 0 (floor (- (+ channel (* 2 (getf +rail+ :bite))) bar) 2)))
-         (accent (rail--c :key))
-         (shoulders (max 0 (floor (- middle dog) 2))))
-    (ui :column :align :stretch
-        :children
-        (list (ui :rect :height (rail--design lug) :background accent)
-              (ui :stack :height (rail--design middle)
-                  :children
-                  (list (ui :row :height (rail--design middle) :align :start
-                            :children (list (ui :rect :width (rail--design side))
-                                            (ui :rect :width (rail--design bar)
-                                                :height (rail--design middle) :background accent)
-                                            (ui :rect :width (rail--design side))))
-                        (ui :column :align :stretch
-                            :children (remove nil
-                                              (list (ui :rect :height (rail--design shoulders))
-                                                    (when (plusp dog)
-                                                      (ui :rect :height (rail--design dog)
-                                                          :background accent))
-                                                    (ui :rect :height (rail--design
-                                                                       (- middle dog shoulders))))))))
-              (ui :rect :height (rail--design lug) :background accent)))))
+(defun rail--plate-x (seam side)
+  (+ (rail--lane seam :left) 1
+     (if (eq side :right) (getf +rail+ :channel) 0)))
+
+(defun rail--plate (box)
+  "The raised plate: the focused card's carriage fill with a lip of light."
+  (ui :column :align :center :radius (rail--design +rail--radius+)
+      :background (rail--face)
+      :children (list (ui :rect :width (rail--design (- +rail--plate-width+ 8))
+                          :height (rail--design 1) :background (rail--lip)))))
+
+(defun rail--plate-y (box seam)
+  (if (eq (getf +rail+ :key-motion) :dock) (+ (getf seam :y) 4) (+ (getf box :y) 4)))
 
 (defun rail--edge (seam) (- (getf seam :x) (getf +layout+ :gaps)))
 
@@ -310,8 +336,6 @@ a bar down the channel. It is the only accent on the desktop."
 (defun rail--lane (seam side)
   (+ (rail--edge seam) (rail--border)
      (if (eq side :right) (+ (getf +rail+ :channel) (getf +rail+ :width)) 0)))
-
-(defun rail--body-x (seam) (+ (rail--lane seam :left) (getf +rail+ :channel)))
 
 (defun rail--carried (columns layout)
   "Each carried window as (:ID :SIDE :BOX), nearest each column's front first."
@@ -339,7 +363,7 @@ this is a float or a fullscreen window, which the rail then sits beneath."
 
 (defun rail--plates (items output focal snapshot)
   "On a narrow output, where there is no seam to stand in, the modules hang as
-  two plates across the top and bottom of the focal frame."
+two plates across the top and bottom of the focal frame."
   (let ((split (or (cassette--split) (length items)))
         (layer (if (rail--fullscreen-p snapshot output) :bottom :top)))
     (loop for edge in '(:top :bottom)
@@ -401,6 +425,7 @@ this is a float or a fullscreen window, which the rail then sits beneath."
          (focus (context snapshot :focus))
          (key (and focus (find focus carried :key (lambda (entry) (getf entry :id)))))
          (layer (if (rail--covered-p snapshot seam) :bottom :top))
+         (ground (if key (rail--face) (rail--track)))
          (tray (rail--tray snapshot))
          (hot (loop for probe in '(:cpu :gpu)
                     thereis (cassette--hot-p (getf (getf state probe) :temp)))))
@@ -411,19 +436,20 @@ this is a float or a fullscreen window, which the rail then sits beneath."
                     (when (and output tray)
                       (list (publish-state :shelf-tray-rect
                                            (list :output (getf seam :output)
-                                                 :x (rail--body-x seam)
+                                                 :x (+ (rail--lane seam :left) (getf +rail+ :channel))
                                                  :y (getf seam :y)
                                                  :width (getf +rail+ :width)
                                                  :height tray))))
                     (when output
-                      (list (shell-surface :rail (rail--body state snapshot seam)
+                      (list (shell-surface :rail-track (rail--track-body)
                                            :output (getf output :name) :anchors '(:top :left)
-                                           :width (rail--design (getf +rail+ :width))
+                                           :width (rail--design (+ (* 2 (getf +rail+ :channel))
+                                                                   (getf +rail+ :width)))
                                            :height (rail--design (getf seam :height))
-                                           :margin (rail--surface-margin output (rail--body-x seam)
+                                           :margin (rail--surface-margin output (rail--lane seam :left)
                                                                          (getf seam :y))
-                                           :layer layer :background "#00000000" :blur t
-                                           :click-through t :slide t)))
+                                           :layer layer :background "#00000000"
+                                           :click-through t)))
                     (loop for entry in carried
                           for id = (getf entry :id)
                           for box = (getf entry :box)
@@ -439,25 +465,45 @@ this is a float or a fullscreen window, which the rail then sits beneath."
                                         :layer layer :background "#00000000"
                                         :click-through t :slide t
                                         :attach id :attach-axes '(:y))))
-                    (when key
-                      (let ((box (getf key :box)))
-                        (list (shell-surface
-                               :rail-key (rail--key box)
-                               :output (getf output :name) :anchors '(:top :left)
-                               :width (rail--design (+ (getf +rail+ :channel)
-                                                       (* 2 (getf +rail+ :bite))))
-                               :height (rail--design (getf box :height))
-                               :margin (rail--surface-margin
-                                        output (- (rail--lane seam (getf key :side))
-                                                  (getf +rail+ :bite))
-                                        (if (eq (getf +rail+ :key-motion) :dock)
-                                            (getf seam :y)
-                                            (getf box :y)))
-                               :layer layer :background "#00000000" :click-through t
-                               :slide (eq (getf +rail+ :throw) :slide)
-                               :attach (unless (eq (getf +rail+ :key-motion) :dock)
-                                         (getf key :id))
-                               :attach-axes '(:y)))))
+                    (when (and output key)
+                      (let* ((box (getf key :box))
+                             (x (rail--plate-x seam (getf key :side)))
+                             (y (rail--plate-y box seam))
+                             (height (- (getf box :height) 8)))
+                        (append
+                         (loop for margin in '(8 4)
+                               for index from 0
+                               collect (shell-surface
+                                        (intern (format nil "RAIL-SHADOW-~D-~D" (getf key :id) index)
+                                                :keyword)
+                                        (ui :column :radius (rail--design (+ +rail--radius+ margin))
+                                            :background (rail--shade (if (plusp index) 0.16 0.08)))
+                                        :output (getf output :name) :anchors '(:top :left)
+                                        :width (rail--design (+ +rail--plate-width+ (* 2 margin)))
+                                        :height (rail--design (+ height margin 6))
+                                        :margin (rail--surface-margin output (- x margin) y)
+                                        :layer layer :background "#00000000"
+                                        :click-through t :slide t
+                                        :attach (getf key :id) :attach-axes '(:y)))
+                         (list (shell-surface
+                                :rail-plate (rail--plate box)
+                                :output (getf output :name) :anchors '(:top :left)
+                                :width (rail--design +rail--plate-width+)
+                                :height (rail--design height)
+                                :margin (rail--surface-margin output x y)
+                                :layer layer :background "#00000000" :click-through t
+                                :slide (eq (getf +rail+ :throw) :slide)
+                                :attach (getf key :id) :attach-axes '(:y))))))
+                    (when output
+                      (list (shell-surface :rail-type (rail--web state snapshot seam ground)
+                                           :output (getf output :name) :anchors '(:top :left)
+                                           :width (rail--design (+ (* 2 (getf +rail+ :channel))
+                                                                   (getf +rail+ :width)))
+                                           :height (rail--design (getf seam :height))
+                                           :margin (rail--surface-margin output (rail--lane seam :left)
+                                                                         (getf seam :y))
+                                           :layer layer :background "#00000000"
+                                           :click-through t)))
                     (unless (getf +rail+ :focus-border)
                       (loop for entry in carried
                             collect (window-properties (getf entry :id)

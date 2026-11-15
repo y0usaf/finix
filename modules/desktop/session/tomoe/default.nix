@@ -338,16 +338,10 @@
     media-width = 34;
   };
 
-  # KEYWAY's rail: one static surface in the deck's seam, a carriage on every
-  # carried card and one accent key on the focused one.
   railParameters = {
     inherit (barParameters) modules time date;
     width = bar.rail.width;
     channel = bar.rail.channel;
-    shoe = bar.rail.shoe;
-    dog = bar.rail.dog;
-    bite = bar.rail.bite;
-    key-bar = bar.rail.keyBar;
     key-motion = keyword bar.rail.keyMotion;
     throw = keyword bar.rail.throwMode;
     carry-max = bar.rail.carryMax;
@@ -3197,7 +3191,7 @@ in {
       style = lib.mkOption {
         type = lib.types.enum ["panels" "gap" "cassette" "rail"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. rail: KEYWAY, the deck's seam as a steel rail: a frosted body with a way down each edge and a plate at each end, the readings, clock and bolo's voice stamped into its web, a guide shoe on every carried card and one orange key clamped to the focused card, which rides the rail on a scroll, is thrown across it on a focus change and crosses with its card on a swap. The rail widens the seam it stands in and never scales its type; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. rail: the deck's seam as a recessed track, one tone below the paper: the readings, clock and bolo's voice are type over it, every carried card presses two slots into its channel, and the focused card's carriage is a raised plate that stands in the track and leans into that card. The plate rides its card on a scroll, is thrown across on a focus change and crosses with its card on a swap; nothing is coloured to mean focus. The rail widens the seam it stands in and never scales its type; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
       };
 
       modules = lib.mkOption {
@@ -3227,47 +3221,27 @@ in {
         channel = lib.mkOption {
           type = lib.types.ints.positive;
           default = 8;
-          description = "Air between a window's border and the rail, where the carriages' shoes sit.";
-        };
-        shoe = lib.mkOption {
-          type = lib.types.ints.positive;
-          default = 24;
-          description = "Guide shoe and key lug height.";
-        };
-        dog = lib.mkOption {
-          type = lib.types.numbers.nonnegative;
-          default = 40;
-          description = "The key's centre dog height; 0 draws no dog.";
-        };
-        bite = lib.mkOption {
-          type = lib.types.ints.positive;
-          default = 2;
-          description = "How far a key lug overhangs the window frame and the rail's way.";
-        };
-        keyBar = lib.mkOption {
-          type = lib.types.ints.positive;
-          default = 4;
-          description = "Width of the bar joining the key's lugs.";
+          description = "Air between a window's border and the rail, where a carriage's pressed slots sit.";
         };
         keyMotion = lib.mkOption {
           type = lib.types.enum ["ride" "dock"];
           default = "ride";
-          description = "ride: a scroll attaches the key to the incoming card and it arrives with it. dock: the key stays at rest and the cards slide past under it.";
+          description = "ride: a scroll attaches the plate to the incoming card and it rises with it. dock: the plate stays at rest and the cards slide past under it.";
         };
         throwMode = lib.mkOption {
           type = lib.types.enum ["slide" "cut"];
           default = "slide";
-          description = "slide: a focus change throws the key across the rail on the window-move spring. cut: it appears on the other lane at once.";
+          description = "slide: a focus change throws the plate across the track on the window-move spring. cut: it appears on the other lane at once.";
         };
         carryMax = lib.mkOption {
           type = lib.types.ints.positive;
           default = 24;
-          description = "Most carriages emitted; past this only the cards nearest each column's front carry shoes.";
+          description = "Most carriages emitted; past this only the cards nearest each column's front press slots.";
         };
         focusBorder = lib.mkOption {
           type = lib.types.bool;
           default = false;
-          description = "Also keep Tomoe's own focused border on carried windows. Off, the key is the only focus indicator.";
+          description = "Also keep Tomoe's own focused border on carried windows. Off, the plate is the only focus indicator.";
         };
       };
     };
