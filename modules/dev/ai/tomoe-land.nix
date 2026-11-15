@@ -9,6 +9,7 @@ let
 in
 {
   config = {
+    environment.systemPackages = [ queue ];
     finit.services.tomoe-land = {
       description = "Tomoe landing queue: smoke gate, then push main";
       user = name;
