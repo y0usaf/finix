@@ -430,11 +430,12 @@ carry them. A grid keeps ordinary borders, so it publishes nothing either."
                                                        +deck--column-commands+ :test #'equal))
                                              +layout-bindings+)
                                   +layout-bindings+))
+                      (list (motion-contract :hover t))
                       (when area (deck--places windows state area))
                       (list (publish-state :deck-seam seam)
                             (publish-state :deck-columns (deck--columns state seam)))
                       (deck--raises state current)
                       +deck-commands+
-                      (list (focus (unless (member current quiet) current) :raise nil)))
+                      (list (focus (unless (member current quiet) current))))
               (when (and (equal command "terminal") (null terminal))
                 (list (apply #'launch (policy--launch "terminal"))))))))

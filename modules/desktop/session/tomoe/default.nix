@@ -131,7 +131,9 @@
     // lib.genAttrs ["discord" "steam" "obs"] (name: [name]);
 
   commandCall = command:
-    if launchCommands ? ${command}
+    if builtins.isAttrs command
+    then command
+    else if launchCommands ? ${command}
     then ["launch" (keyword "argv") launchCommands.${command}]
     else command;
 
@@ -172,12 +174,22 @@
       name = "brightness-down";
       description = "Lower the backlight by five percent.";
     }
+    {
+      name = "close-window";
+      description = "Ask a window to close.";
+      arguments = "'((:window :window :description \"Window to close.\"))";
+    }
   ];
 
   userCommandsLisp =
     "(defparameter +user-commands+\n  (list "
     + lib.concatStringsSep "\n        " (
-      map (entry: "(define-command \"${entry.name}\" :description \"${entry.description}\")") userCommands
+      map
+        (entry:
+          "(define-command \"${entry.name}\" :description \"${entry.description}\""
+          + lib.optionalString (entry ? arguments) " :arguments ${entry.arguments}"
+          + ")")
+        userCommands
     )
     + "))\n";
 
@@ -201,7 +213,9 @@
                     ((equal command "track-next") (list (media-control :next)))
                     ((equal command "track-prev") (list (media-control :previous)))
                     ((equal command "brightness-up") (list (adjust-brightness 5)))
-                    ((equal command "brightness-down") (list (adjust-brightness -5)))))))
+                    ((equal command "brightness-down") (list (adjust-brightness -5)))
+                    ((equal command "close-window")
+                     (list (close-window (getf (getf event :arguments) :window))))))))
     '';
 
   layouts = {
@@ -264,6 +278,9 @@
       (binding ["alt" "shift"] "e" "quit" null)
       (binding ["alt"] "g" "screenshot" "Screenshot")
       (binding ["alt" "shift"] "g" "screenshot-screen" "Screenshot Screen")
+      (binding ["super"] "q" "close-window" "Close Window")
+      (binding ["super" "shift"] "slash" "toggle-hotkeys" "Show Important Hotkeys")
+      (binding ["super" "shift"] "e" (mkLispInline "(invoke \"quit\" :confirm t)") "Exit")
     ]
     ++ lib.mapAttrsToList (key: command: binding [] key command null) {
       XF86AudioRaiseVolume = "volume-up";
@@ -3246,11 +3263,13 @@ in {
   config.user.files.".config/tomoe/init.lisp".text = lib.concatStringsSep "\n" [
     ''
       (in-package #:tomoe-user)
+      (load-policy "desktop" :only '("commands" "drag" "screenshot-theme" "notification-popups" "config-error" "screencast" "screenshot-clipboard"))
       (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ lib.concatLists (lib.mapAttrsToList (key: value: [(keyword key) value]) settings)) cfg.displays)})
       (defparameter +policy-settings+ ${toLisp ({
           honor-xdg-activation-with-invalid-serial = true;
           focus-follows-mouse = true;
           pointer-follows-focus = true;
+          mod = mkLispInline ":super";
         }
         // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;}
         // lib.optionalAttrs (bar.style == "rail") {animations = {focus-outline = false;};})})
@@ -3315,6 +3334,7 @@ in {
         policy-settings,
         policy-terminal,
         quote,
+        raise-window,
         rows,
         rules-for,
         second,
@@ -3519,7 +3539,7 @@ in {
                                       ]
                                     ])
                                   ]
-                                  [[list [window-properties id (kw "border") (quote [(kw "focused") (str "#00000000") (kw "unfocused") (str "#00000000")])] [focus id]]]
+                                  [[list [window-properties id (kw "border") (quote [(kw "focused") (str "#00000000") (kw "unfocused") (str "#00000000")])] [focus id] [raise-window id]]]
                                 ])
                                 nil
                               ])
@@ -3886,10 +3906,10 @@ in {
         or',
         parse-integer,
         plusp,
+        position,
         publish-state,
         push,
         quote,
-        read-line,
         repeat,
         return,
         reverse,
@@ -3910,7 +3930,6 @@ in {
         when,
         while,
         with',
-        with-input-from-string,
         ...
       }: ({
         theme--words,
@@ -3980,27 +3999,28 @@ in {
         ({css}:
           rows [
             [defun theme--palette [css]]
-            ({table}:
+            ({
+              table,
+              tail,
+            }:
               rows [
-                [let' [[table nil]]]
-                ({in'}:
+                [let' [[table nil] [tail css]]]
+                ({cut}:
                   rows [
-                    [with-input-from-string [in' css]]
-                    ({line}:
-                      rows [
-                        [loop for line "=" [read-line in' nil] while line]
-                        [
-                          do
-                          ({words}:
-                            rows [
-                              [let' [[words [theme--words line]]]]
-                              (rows [
-                                [when [and ["=" 3 [length words]] [equal [first words] (str "@define-color")]]]
-                                [[push [cons [second words] [third words]] table]]
-                              ])
-                            ])
-                        ]
-                      ])
+                    [loop while tail]
+                    [for cut "=" [position (char "Newline") tail]]
+                    [
+                      do
+                      ({words}:
+                        rows [
+                          [let' [[words [theme--words [subseq tail 0 [or' cut [length tail]]]]]]]
+                          (rows [
+                            [when [and ["=" 3 [length words]] [equal [first words] (str "@define-color")]]]
+                            [[push [cons [second words] [third words]] table]]
+                          ])
+                          [[setf tail [and cut [subseq tail ["1+" cut]]]]]
+                        ])
+                    ]
                   ])
                 ({
                   name,
