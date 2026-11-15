@@ -1928,11 +1928,11 @@
     "tern-scratch": {
       "flake": false,
       "locked": {
-        "lastModified": 1793734476,
-        "narHash": "sha256-4u46vtSbYMBD6ZJwt6S/uejjzCokcGp08MrrpnEf8NI=",
+        "lastModified": 1794716100,
+        "narHash": "sha256-uCE1+ed+/ODvxZQahn1i0I32au9pkn3Vpd8dP8MWUiM=",
         "ref": "refs/heads/main",
-        "rev": "c6fb304cdcc66705da0734d75ca304064cba3d85",
-        "revCount": 16,
+        "rev": "b81eed675a565f04845811df4c13c78ca27aa95c",
+        "revCount": 17,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-scratch"
       },
