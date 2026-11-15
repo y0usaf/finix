@@ -18,12 +18,6 @@
   --edge: color-mix(in srgb, var(--ink) 30%, var(--paper));
   --wash: color-mix(in srgb, var(--ink) 10%, var(--paper));
   --frame-wash: var(--wash);
-  /* The bands keep this much of the theme colour and hand the rest to the
-     compositor, which blurs the desktop through them. --paper stays opaque so
-     the ink mixed from it keeps its contrast. */
-  --band: transparent;
-  --glass: transparent;
-  --frost: blur(40px) saturate(1.4);
   --accent: var(--focus-outline-color, AccentColor);
   --warn: light-dark(#8a0030, #ffc2ca);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -67,13 +61,10 @@ findbar *:not(input):focus-visible {
   outline-offset: -1px !important;
 }
 
-/* Everything outside the page is see-through: the window keeps its alpha, the
-   compositor blurs the desktop behind it, and the bands paint the theme colour
-   at partial opacity on top. */
 :root,
 #main-window,
 body {
-  background-color: transparent !important;
+  background-color: var(--paper) !important;
   background-image: none !important;
 }
 
@@ -113,7 +104,7 @@ body {
   min-width: 0 !important;
   height: var(--line) !important;
   padding-inline: 1ch !important;
-  background-color: var(--band) !important;
+  background-color: var(--paper) !important;
   color: var(--ink) !important;
 }
 
@@ -360,8 +351,7 @@ body {
 }
 
 #urlbar:is([focused], [breakout-extend]) > .urlbar-background {
-  background-color: var(--glass) !important;
-  backdrop-filter: var(--frost) !important;
+  background-color: var(--paper) !important;
   border-color: var(--edge) !important;
 }
 
@@ -536,8 +526,7 @@ findbar .findbar-textbox::selection {
   overflow-y: auto !important;
   border: 0 !important;
   padding-block: 0.5ch !important;
-  background-color: var(--glass) !important;
-  backdrop-filter: var(--frost) !important;
+  background-color: var(--paper) !important;
   color: var(--ink) !important;
 }
 
@@ -651,7 +640,7 @@ findbar .findbar-textbox::selection {
   min-width: 0 !important;
   height: var(--line) !important;
   overflow: hidden !important;
-  background-color: var(--band) !important;
+  background-color: var(--paper) !important;
   color: var(--frame-ink) !important;
 }
 
@@ -664,7 +653,7 @@ findbar .findbar-textbox::selection {
   inset-inline-start: 0 !important;
   z-index: 3 !important;
   padding-inline: 1ch !important;
-  background-color: var(--band) !important;
+  background-color: var(--paper) !important;
   color: inherit !important;
 }
 
@@ -689,7 +678,7 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   align-items: center !important;
   flex: none !important;
   padding-inline: 1ch !important;
-  background-color: var(--band) !important;
+  background-color: var(--paper) !important;
 }
 
 #pinned-tabs-container:not(:has(> .tabbrowser-tab)) {
@@ -719,8 +708,7 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   inset-block: 0 !important;
   z-index: 2 !important;
   width: 3ch !important;
-  background-color: var(--band) !important;
-  backdrop-filter: var(--frost) !important;
+  background-color: var(--paper) !important;
 }
 
 #new-tab-button {
@@ -920,7 +908,7 @@ findbar {
   z-index: 8 !important;
   height: var(--line) !important;
   padding-inline: 1ch !important;
-  background-color: var(--band) !important;
+  background-color: var(--paper) !important;
   color: var(--ink) !important;
   clip-path: inset(0) !important;
   transition: clip-path var(--quick) var(--ease), visibility 0s linear 0s !important;
@@ -1119,7 +1107,7 @@ body:has(#toolbar-menubar:not([inactive])) {
   align-items: center !important;
   height: var(--line) !important;
   padding-inline: 1ch !important;
-  background-color: var(--band) !important;
+  background-color: var(--paper) !important;
   color: var(--frame-ink) !important;
   border-bottom: 0 !important;
 }
@@ -1189,8 +1177,7 @@ body:has(#toolbar-menubar:not([inactive])) {
   margin: 0 !important;
   margin-block: 4px !important;
   border-radius: 0 !important;
-  background-color: var(--glass) !important;
-  backdrop-filter: var(--frost) !important;
+  background-color: var(--paper) !important;
   outline: 0 !important;
   box-shadow: none !important;
   font-size: var(--chrome-font-size) !important;
