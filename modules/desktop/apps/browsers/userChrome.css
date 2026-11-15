@@ -1,10 +1,12 @@
 :root {
   --font-family: monospace;
   --chrome-font-size: 11px;
-  --line: 14px;
+  --line: 12px;
   --side: 20ch;
   --tab-width: 24ch;
   --pop-width: min(clamp(560px, 42vw, 960px), calc(100vw - 4ch));
+  --pop-top: 22vh;
+  --pop-row: calc(2 * var(--line));
   --pop-result: 22px;
   --paper: var(--lwt-accent-color, -moz-dialog);
   --ink: color-mix(in srgb, contrast-color(var(--paper)) 94%, var(--paper));
@@ -322,10 +324,19 @@ body {
   margin: 0 !important;
   color: var(--ink) !important;
   font-size: var(--chrome-font-size) !important;
+  transition:
+    top var(--glide) var(--ease),
+    left var(--glide) var(--ease),
+    width var(--glide) var(--ease),
+    height var(--glide) var(--ease) !important;
 }
 
 #urlbar > .urlbar-background {
-  display: none !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  border: 1px solid transparent !important;
+  transition: background-color var(--glide) linear, border-color var(--glide) linear !important;
 }
 
 #urlbar > .urlbar-input-container {
@@ -336,9 +347,26 @@ body {
   flex: none !important;
   gap: 1ch !important;
   width: 100% !important;
-  height: var(--line) !important;
+  height: 100% !important;
   padding: 0 !important;
-  transition: opacity var(--snap) linear !important;
+  transition: opacity var(--snap) linear, padding var(--glide) var(--ease) !important;
+}
+
+#urlbar:is([focused], [breakout-extend]) {
+  top: var(--pop-top) !important;
+  left: calc(50vw - var(--pop-width) / 2) !important;
+  width: var(--pop-width) !important;
+  height: var(--pop-row) !important;
+}
+
+#urlbar:is([focused], [breakout-extend]) > .urlbar-background {
+  background-color: var(--glass) !important;
+  backdrop-filter: var(--frost) !important;
+  border-color: var(--edge) !important;
+}
+
+#urlbar:is([focused], [breakout-extend]) > .urlbar-input-container {
+  padding-inline: 2ch !important;
 }
 
 moz-urlbar-slot {
@@ -360,8 +388,9 @@ moz-urlbar-slot {
 .urlbar-input-box::before,
 .urlbar-input-box::after {
   position: absolute !important;
-  inset-block-start: 0 !important;
-  line-height: var(--line) !important;
+  inset-block: 0 !important;
+  display: flex !important;
+  align-items: center !important;
   pointer-events: none !important;
 }
 
@@ -495,15 +524,14 @@ findbar .findbar-textbox::selection {
   pointer-events: none !important;
 }
 
-/* The suggestions open upward out of the row, as a panel of their own: the row
-   underneath keeps its size and its brackets. */
 #urlbar > .urlbarView {
   display: block !important;
   position: absolute !important;
-  inset-block-end: 100% !important;
-  left: 50% !important;
-  translate: -50% 0 !important;
-  width: var(--pop-width) !important;
+  inset-block-start: 100% !important;
+  inset-block-end: auto !important;
+  left: 0 !important;
+  translate: none !important;
+  width: 100% !important;
   max-height: 60vh !important;
   overflow-y: auto !important;
   border: 0 !important;
