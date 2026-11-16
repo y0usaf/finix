@@ -17,8 +17,8 @@ ELSEWHERE = re.compile(
 )
 PSEUDO = re.compile(r"::|:(?:before|after|first-line|first-letter)\b")
 
-binary, scope, keep, sheet = sys.argv[1:5]
-extra = sys.argv[5:]
+binary, target, scope, keep, sheet = sys.argv[1:6]
+extra = sys.argv[6:]
 data = open(binary, "rb").read()
 shoff = struct.unpack_from("<Q", data, 0x28)[0]
 shentsize, shnum = struct.unpack_from("<HH", data, 0x3A)
@@ -195,4 +195,5 @@ for name in SHEETS:
 for path in extra:
     out.append(emit(parse(open(path).read())[0]))
 out.append(emit(parse(own)[0]))
-sys.stdout.write("".join(out))
+open(target + "/dawn.css", "w").write("".join(out))
+open(target + "/dawn.boost", "w").write(BOOST + "\n")
