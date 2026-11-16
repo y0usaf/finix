@@ -325,7 +325,7 @@ the module list has no clock."
              (ui :rect :height (rail--design tray) :width (rail--design 52)
                  :background (rail--c :tray))))
       (when voice
-        (to (+ base 36 (or (/ tray *rail--scale*) 0)))
+        (to (+ base 36 (/ (or tray 0) *rail--scale*)))
         (put 123 (rail--voice state)))
       (dolist (entry (rail--places state snapshot (+ base (floor height 2))))
         (to (cdr entry))
