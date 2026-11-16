@@ -26,6 +26,17 @@
 (defparameter +rail-thread--width+ 34)
 (defparameter +rail-thread--settle+ 0.8d0)
 
+;; How far round the cards this theme's shader is told it may repaint. The rail
+;; stands in the seam, not on a card: the band's far side is the 76 px seam less
+;; its two window gaps away from the card beside it -- 68 px, the way a narrow
+;; output's focal frame lays it out -- and the readout and the thread's own glass
+;; reach another 26 beyond the band's middle. A ring narrower than that leaves
+;; the outer half of the readings out of the picture whenever the compositor
+;; repaints only the rings (a switch in flight) or hands the surface a new
+;; buffer (an output mode change), which is how the labels came out cut at the
+;; screen's edge.
+(defparameter +rail-thread--reach+ 80)
+
 ;; Each bead in the mock's 1412 px card: its kind, how far above the weld its
 ;; centre hangs (negative below it), and half its height. The order is the
 ;; shader's -- clock, date, cpu, memory, voice, gpu, vram -- and the voice bead
@@ -146,7 +157,7 @@ focused card's rim, all in one shader over the output."
                 (rail-thread--layout (rail-thread--strip context))
                 (getf context :state))))
     (if (getf context :windows)
-        (kit--frames look context theme :reach 44)
+        (kit--frames look context theme :reach +rail-thread--reach+)
         (rail-thread--whole look context theme))))
 
 (defparameter +rail-thread+

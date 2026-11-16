@@ -116,12 +116,14 @@ float rim_pres(vec2 p, vec4 b, float progress, out float s, out float per) {
     return clamp((progress * per * 0.5 - s) / 60.0 + (progress >= 1.0 ? 1.0 : 0.0), 0.0, 1.0);
 }
 
-// the rim's thickness at rim distance S of PER: five pixels, and as much again
-// where the voice is loud now -- the whole rim thickens at once, so no side of
-// the frame waits for a wave to arrive
+// the rim's thickness at rim distance S of PER: five pixels, and a little more
+// where the voice is loud now -- the whole rim answers at once, so no side of
+// the frame waits for a wave to arrive. The swell is the string's shape, not its
+// bulk: it never thins the rim below its five, and it tops out at eleven, so a
+// loud turn reads as the frame breathing rather than as a wide white band.
 float rim_width(float s, float per) {
     float lev = voice_env() * min(1.0, voice_around(s, per));
-    return D(T_RIM) + 12.0 * lev * (0.45 + 0.55 * sin(s * 0.030 - iTime * 26.0));
+    return D(T_RIM) + 6.0 * lev * (0.55 + 0.45 * sin(s * 0.030 - iTime * 26.0));
 }
 
 // the whole glass: the thread, its beads, the focused card's rim welded to the
@@ -287,12 +289,16 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
                 hlight = max(hlight, 0.16 * clamp(1.0 - abs(d - 1.6), 0.0, 1.0));
         }
     }
-    // the focused card's soft halo, only where the rail asks for one: a wide
-    // falloff outside its rim, in the ink that reads on what lies there
+    // The focused card's shadow, only where the rail asks for one: a low, wide
+    // contact shadow in the ink that reads on what lies there, so the card sits
+    // on the wallpaper instead of wearing a band of it. It is cast six pixels
+    // down from the rim, where a light above the screen would throw it, falls
+    // away over twenty-two pixels rather than twelve, and is two-fifths the
+    // alpha the old halo carried.
     float glow = 0.0;
     if (style == 3 && g_f) {
-        float drim = sd_rbox(p, g_fbox, D(T_CORNER)) - D(T_RIM);
-        if (drim > 0.0) glow = 0.45 * exp(-drim / 12.0);
+        float drim = sd_rbox(p - vec2(0.0, 6.0), g_fbox, D(T_CORNER)) - D(T_RIM);
+        if (drim > 0.0) glow = 0.18 * exp(-drim / 22.0);
     }
 
     float f = field(p);
