@@ -11,7 +11,11 @@
 ;;; bar.rail.themes names into +RAIL-THEMES+ with each one's shader. A theme
 ;;; whose frames need more room than a window gap names it as :FRAME -- :EDGE
 ;;; pixels between the columns and the screen's edges, :TITLE pixels of title row
-;;; above each card -- and the deck lays the columns out by it. The theme is
+;;; above each card -- and the deck lays the columns out by it; the bar publishes
+;;; that with the seam's width as :RAIL-FRAME. On a narrow output, the headset's,
+;;; the deck has no seam: the rail stands beside the card in the focal frame the
+;;; headset's layout publishes, as the seam stands beside the deck's right column,
+;;; and carries every card shown there, so the same theme draws it. The theme is
 ;;; the bar's own state, the first one until Alt+Shift+T steps to the next, so a
 ;;; config reload keeps it. The rest of this file is what every theme shares --
 ;;; the readings, the switch and the voice -- and the first theme, morph.
@@ -632,48 +636,50 @@ this is a float or a fullscreen window, which the rail then sits beneath."
                           (< (getf entry :y) (+ (getf box :y) (getf box :height)))
                           (< (getf box :y) (+ (getf entry :y) (getf entry :height)))))))
 
-(defun rail--fullscreen-p (snapshot output)
-  (loop for entry in (context snapshot :layout)
-        thereis (and (getf entry :visible) (getf entry :fullscreen)
-                     (<= (getf entry :x) (getf output :x) (+ (getf entry :x) (getf entry :width) -1))
-                     (<= (getf entry :y) (getf output :y) (+ (getf entry :y) (getf entry :height) -1)))))
-
-(defun rail--plates (items output focal snapshot)
-  "On a narrow output, where there is no seam to stand in, the modules hang as
-two plates across the top and bottom of the focal frame."
-  (let ((split (or (cassette--split) (length items)))
-        (layer (if (rail--fullscreen-p snapshot output) :bottom :top)))
-    (loop for edge in '(:top :bottom)
-          for plate = (cassette--plate (if (eq edge :top) (subseq items 0 split) (nthcdr split items))
-                                       :both edge)
-          for height = (cassette--height edge)
-          when plate
-            collect (apply #'shell-surface (intern (format nil "~A-~A" edge (getf output :name)) :keyword) plate
-                           :output (getf output :name) :layer layer
-                           :background "#00000000" :blur t :click-through t
-                           (if focal
-                               (list :anchors '(:top)
-                                     :margin (list (- (+ (getf focal :top) (if (eq edge :top) 0 (getf focal :height)))
-                                                      (round height 2))
-                                                   0 0 0))
-                               (list :anchors (list edge) :margin (if (eq edge :top) '(-1 0 0 0) '(0 0 -1 0))
-                                     :exclusive-zone (1- height)))))))
-
 (defun rail--surface-margin (output x y)
   (list (rail--design (- y (getf output :y))) 0 0 (rail--design (- x (getf output :x)))))
 
-(defun rail--narrow (snapshot state)
-  (let* ((outputs (remove-if-not (lambda (o) (deck--narrow-p (list :output o)))
-                                 (context snapshot :outputs)))
-         (focal (state-value snapshot :focal-frame))
-         (modules (loop for module in (getf +rail+ :modules)
-                        for node = (when (rail--height module state snapshot)
-                                     (cassette--module module state snapshot))
-                        when node collect node)))
-    (loop for output in outputs
-          append (rail--plates modules output
-                               (and (equal (getf focal :output) (getf output :name)) focal)
-                               snapshot))))
+(defun rail--focal (snapshot)
+  "On a narrow output, where the deck has no seam, the focal frame a headset
+layout publishes, in output pixels, with its :OUTPUT; NIL when there is none."
+  (let* ((frame (state-value snapshot :focal-frame))
+         (output (and frame (find (getf frame :output) (context snapshot :outputs)
+                                  :key (lambda (o) (getf o :name)) :test #'equal))))
+    (when (and output (deck--narrow-p (list :output output)))
+      (let ((scale (/ (getf output :scale-120 120) 120)))
+        (flet ((px (key) (round (* scale (getf frame key)))))
+          (list :output output :x (+ (getf output :x) (px :left)) :y (+ (getf output :y) (px :top))
+                :width (px :width) :height (px :height)))))))
+
+(defun rail--focal-cards (snapshot focal)
+  "The seam a narrow output's rail stands in, beside the card in FOCAL as the
+deck's seam stands beside its right column, and every card shown on that output
+on the side of it its middle falls, the one in the frame first: (SEAM CARRIED)."
+  (let* ((output (getf focal :output))
+         (shown (loop for entry in (context snapshot :layout)
+                      when (and (getf entry :visible) (not (getf entry :fullscreen))
+                                (<= (getf output :x) (+ (getf entry :x) (floor (getf entry :width) 2))
+                                    (+ (getf output :x) (getf output :width))))
+                        collect entry))
+         (inner (find-if (lambda (entry)
+                           (let ((cx (+ (getf entry :x) (floor (getf entry :width) 2)))
+                                 (cy (+ (getf entry :y) (floor (getf entry :height) 2))))
+                             (and (<= (getf focal :x) cx (+ (getf focal :x) (getf focal :width)))
+                                  (<= (getf focal :y) cy (+ (getf focal :y) (getf focal :height))))))
+                         shown))
+         (box (or inner focal))
+         (gaps (getf +layout+ :gaps))
+         (edge (getf box :x))
+         (seam (list :output (getf output :name)
+                     :x (+ (- edge (getf +layout+ :seam)) gaps) :y (getf box :y)
+                     :width (- (getf +layout+ :seam) (* 2 gaps)) :height (getf box :height))))
+    (list seam
+          (loop for entry in (if inner (cons inner (remove inner shown)) shown)
+                repeat (getf +rail+ :carry-max)
+                collect (list :id (getf entry :id)
+                              :side (if (< (+ (getf entry :x) (floor (getf entry :width) 2)) edge)
+                                        :left :right)
+                              :box entry)))))
 
 ;;; morph's surfaces
 
@@ -800,12 +806,17 @@ readings it holds, and the readings set into it, all from CONTEXT."
          (*cassette-mode* (state-value snapshot :theme-mode :dark))
          (*rail--mode* *cassette-mode*)
          (*rail--palette* (state-value snapshot :hud-palette))
-         (seam (state-value snapshot :deck-seam))
+         (deck (state-value snapshot :deck-seam))
+         (focal (and (null deck) (rail--focal snapshot)))
+         (cards (and focal (rail--focal-cards snapshot focal)))
+         (seam (or deck (first cards)))
          (output (and seam (find (getf seam :output) (context snapshot :outputs)
                                  :key (lambda (o) (getf o :name)) :test #'equal)))
          (*rail--scale* (or (and output (max 1/4 (/ (getf output :scale-120 120) 120))) 1))
-         (columns (and seam (state-value snapshot :deck-columns)))
-         (carried (and columns (rail--carried columns (context snapshot :layout))))
+         (columns (and deck (state-value snapshot :deck-columns)))
+         (carried (if deck
+                      (and columns (rail--carried columns (context snapshot :layout)))
+                      (second cards)))
          (focus (context snapshot :focus))
          (key (and focus (find focus carried :key (lambda (entry) (getf entry :id)))))
          (side (and key (getf key :side)))
@@ -839,7 +850,8 @@ readings it holds, and the readings set into it, all from CONTEXT."
       (values state
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t))
-                            (publish-state :rail-frame (getf *rail--look* :frame))
+                            (publish-state :rail-frame (list* :seam (getf +layout+ :seam)
+                                                              (getf *rail--look* :frame)))
                             (define-command "rail-theme"
                               :description "Step the rail to its next theme.")
                             (apply #'bind-key (getf +rail+ :theme-bind)))
@@ -869,6 +881,5 @@ readings it holds, and the readings set into it, all from CONTEXT."
                                        :switch switch :switching switching :cut cut :old old
                                        :windows windows :voice voice :voicing voicing
                                        :levels levels :fade fade :settling settling
-                                       :layer layer :tray tray :hot hot)))
-                      (rail--narrow snapshot state))
+                                       :layer layer :tray tray :hot hot))))
               nil))))
