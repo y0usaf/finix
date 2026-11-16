@@ -231,93 +231,37 @@ the next sample."
          (left (- (rail-halo--hop-time switch) age)))
     (list (interval :halo-land (max 16 (ceiling (* 1000 (+ left 0.03d0))))))))
 
-(defparameter +rail-halo--strip-height+ 40)
-
-(defun rail-halo--bar-numbers (context strip)
-  "HALO's numbers for a bar: main's crown numbers, then the flag that says which
-bar this is, its rect and the blocks its gauges stand in."
-  (let ((readings (kit--readings (getf context :state))))
-    (append (rail-halo--numbers readings 0 0 0 0 *rail--scale*)
-            (list (if (eq (getf strip :place) :top) 1d0 2d0))
-            (rail--shader-rect (getf context :output) strip)
-            (rail--block-data strip (rail--bar-blocks (getf context :state)
-                                                      (getf context :snapshot) strip)))))
-
 (defun rail-halo--draw (look context)
   "HALO: the frames, the crown and the voice in one shader over the output, the
-crown's type on a surface of its own at the crown's seated place -- and, on an
-output the deck gives no seam, a crown along each bar."
-  (destructuring-bind (&key state snapshot output layer now strips carried
-                        &allow-other-keys)
-      context
+crown's type on a surface of its own at the crown's seated place."
+  (destructuring-bind (&key state output layer now &allow-other-keys) context
     (let* ((scale *rail--scale*)
            (readings (kit--readings state))
            (cw (* scale (rail-halo--crown-width readings)))
            (ink (or (rail--material :ink) (rail--ink)))
-           (dim (or (rail--material :dim) (rail--label)))
-           (seam (find :seam strips :key (lambda (strip) (getf strip :place)))))
-      (if seam
-          (destructuring-bind (sx sy ex ey hop) (rail-halo--anchors context cw scale)
-            ;; with no card holding focus -- the peek, an empty desktop -- the
-            ;; readings stand at the top centre; the type brings its own capsule so
-            ;; they read even when no card leaves the shader a ring to draw in
-            (let* ((rests (and (getf context :key) t))
-                   ;; the flag that says this surface is the card's crown
-                   (theme (append (rail-halo--numbers readings sx sy ex ey scale)
-                                  (list 0d0))))
-              (append
-               (kit--frames look context theme :reach 56)
-               (list (shell-surface
-                      :rail-halo-type (rail-halo--type readings ink dim
-                                                       (unless rests (rail--material :material)))
-                      :output (getf output :name) :anchors '(:top :left)
-                      :width (rail--design cw)
-                      :height (rail--design (* scale +rail-halo--crown-height+))
-                      :margin (rail--surface-margin
-                               output (- ex (/ cw 2))
-                               (- ey (* scale (/ +rail-halo--crown-height+ 2))))
-                      :layer layer :background "#00000000" :click-through t
-                      :visible (not hop)))
-                     (when hop (rail-halo--reveal context now)))))
-          ;; on a bar the crown is the bar: one capsule along each strip, a bump
-          ;; welded into its free edge over each gauge
+           (dim (or (rail--material :dim) (rail--label))))
+      (destructuring-bind (sx sy ex ey hop) (rail-halo--anchors context cw scale)
+        ;; with no card holding focus -- the peek, an empty desktop -- the
+        ;; readings stand at the top centre; the type brings its own capsule so
+        ;; they read even when no card leaves the shader a ring to draw in
+        (let* ((rests (and (getf context :key) t))
+               (theme (rail-halo--numbers readings sx sy ex ey scale)))
           (append
-           (kit--frames look context
-                        (append (rail-halo--numbers readings 0 0 0 0 scale) (list 3d0))
-                        :reach 56)
-           (loop for strip in strips
-                 for blocks = (rail--bar-blocks state snapshot strip)
-                 for tag = (format nil "-~A" (string-upcase (symbol-name (getf strip :place))))
-                 when blocks
-                   append
-                   (list
-                    (shell-surface
-                     (intern (format nil "RAIL-HALO-BAR~A" tag) :keyword)
-                     (ui :stack)
-                     :output (getf output :name)
-                     :anchors (list (getf strip :place))
-                     :width (rail--design (getf strip :width))
-                     :height (rail--design (getf strip :height))
-                     :margin 0
-                     :layer layer :click-through t
-                     :exclusive-zone (rail--design (getf strip :height))
-                     :background (list :shader (getf look :shader)
-                                       :data (rail-halo--bar-numbers context strip)
-                                       :clock (rail--epoch now)
-                                       :until (kit--until look context)))
-                    (shell-surface
-                     (intern (format nil "RAIL-HALO-TYPE~A" tag) :keyword)
-                     (rail--web state snapshot strip blocks ink)
-                     :output (getf output :name)
-                     :anchors (list (getf strip :place))
-                     :width (rail--design (getf strip :width))
-                     :height (rail--design (getf strip :height))
-                     :margin 0
-                     :layer layer :background "#00000000" :click-through t
-                     :slide t))))))))
+           (kit--frames look context theme :reach 56)
+           (list (shell-surface
+                  :rail-halo-type (rail-halo--type readings ink dim
+                                                   (unless rests (rail--material :material)))
+                  :output (getf output :name) :anchors '(:top :left)
+                  :width (rail--design cw)
+                  :height (rail--design (* scale +rail-halo--crown-height+))
+                  :margin (rail--surface-margin
+                           output (- ex (/ cw 2))
+                           (- ey (* scale (/ +rail-halo--crown-height+ 2))))
+                  :layer layer :background "#00000000" :click-through t
+                  :visible (not hop)))
+                 (when hop (rail-halo--reveal context now))))))))
 
 (defparameter +rail-halo+
   (list :draw #'rail-halo--draw :cast +rail-halo--cast+
         :font "IBM Plex Mono Medium" :settle +rail-halo--settle+ :radius 14
-        :strip-height +rail-halo--strip-height+
         :frame (list :edge 14 :title 30 :seam 20)))

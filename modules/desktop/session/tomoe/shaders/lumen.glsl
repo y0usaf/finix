@@ -34,7 +34,6 @@
 // item, and no copy of the readout per neighbour, which is what makes this
 // shader quick to compile as well as to draw.
 
-const int L_MODE = THEME + 34, L_BOX = THEME + 35;
 const int TH_ON = THEME, TH_OFF = THEME + 3, TH_GLOW = THEME + 6, TH_HOT = THEME + 9;
 const int TH_OUT = THEME + 12, TH_PITCH = THEME + 13, TH_DOT = THEME + 14;
 const int TH_CHASE = THEME + 15, TH_VU = THEME + 16, TH_HALO = THEME + 17;
@@ -420,14 +419,6 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     g_hasua = D(K_TSW) > -1e5 && sw_age() >= 0.0 && sw_age() < D(K_SETTLE);
     g_age = move_age(DESIGN);
     g_env = voice_env();
-    if (D(L_MODE) > 0.5) {
-        // a bar: the readout's own dots, laid along the strip
-        vec4 b = vec4(D(L_BOX), D(L_BOX + 1), D(L_BOX + 2), D(L_BOX + 3));
-        vec4 acc = lumen_frame(p, b, 8, true, 1.0);
-        if (acc.a <= 0.002) discard;
-        color = acc;
-        return;
-    }
     g_ua = 0.0;
     g_per = 1.0;
     if (card_shown(g_f)) {

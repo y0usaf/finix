@@ -29,24 +29,9 @@ const int SEAM = 25, SEAMW = 26, SIDE = 27, PREV = 28, TSW = 29, FLOW = 30, HOLD
 const int SETTLE = 33, CURVE = 34, FOCUS = 35, OLD = 36, METERS = 37, EXTENT = 38;
 const int LEAD = 40, TRAIL = 44, WOB = 47, SQUASH = 50, POUR = 51, SIPHON = 57, HEIGHT = 65;
 const int VOICE = 66, BANDS = 86, LEVELS = 89, GAUGES = 137, SWELL = 152, GHOST = 153, PANE = 157;
-// the strip: which way it runs, its rect, whether this surface draws the slab,
-// which side of the focused card it stands on and which way a bar's free edge
-// faces -- after the pane's eight numbers and the readings' ink
-const int M_AXIS = 168, M_RECT = 169, M_SLAB = 173, M_RAIL = 174, M_FREE = 175;
 
 vec2 g_origin;
 float g_h;
-
-float g_axis;      // 0: the strip runs down y; 1: across x
-vec4 g_strip;      // the strip's rect in the output's y-up pixels
-bool g_slab_on;    // whether this surface draws the slab
-int g_rail;        // 0 the rail is to the card's right, 1 left, 2 above, 3 below
-float g_free;      // which way a bar's free edge faces, +1 along +across
-
-float acr(vec2 p) { return g_axis < 0.5 ? p.x : p.y; }
-float alt(vec2 p) { return g_axis < 0.5 ? p.y : p.x; }
-float acr_lo() { return g_axis < 0.5 ? g_strip.x : g_strip.y; }
-float acr_hi() { return g_axis < 0.5 ? g_strip.z : g_strip.w; }
 
 float sm(float a, float b, float x) {
     float u = clamp((x - a) / (b - a), 0.0, 1.0);
@@ -133,19 +118,6 @@ void perim(vec2 p, vec4 box, bool rail_right, out float q, out float b, out floa
     qmax = 2.0 * a + 2.0 * ix + iy;
 }
 
-// The perimeter of a card as the rail's side of it sees it: a quarter turn puts
-// the bar's own edge where the seam's side edge is, so one set of coordinates
-// serves a strip of either axis.
-void perim_rail(vec2 p, vec4 box, out float q, out float b, out float qmax, out float iy) {
-    if (g_rail < 2) { perim(p, box, g_rail == 0, q, b, qmax, iy); return; }
-    vec2 c = 0.5 * (box.xy + box.zw);
-    vec2 d = p - c;
-    vec2 h = 0.5 * (box.zw - box.xy);
-    vec2 rd = g_rail == 2 ? vec2(-d.y, d.x) : vec2(d.y, -d.x);
-    vec4 rb = vec4(c - h.yx, c + h.yx);
-    perim(c + rd, rb, true, q, b, qmax, iy);
-}
-
 float seam_mid() { return D(SEAM) + D(SEAMW) * 0.5; }
 
 // ---- the voice on the focused frame
@@ -196,7 +168,7 @@ float voiced_ring(float b, float w, vec3 v) {
 // switch is filling, 3 the card it is draining. The voice rides the first two.
 float frame_field(vec2 p, vec4 box, int role, float dt) {
     float q, b, qmax, iy;
-    perim_rail(p, box, q, b, qmax, iy);
+    perim(p, box, (box.x + box.z) * 0.5 < seam_mid(), q, b, qmax, iy);
     float w0 = D(WF);
     vec3 v = role == 3 ? vec3(0.0) : frame_voice(q, qmax, iy);
     if (role == 1) return voiced_ring(b, w0, v);
@@ -274,13 +246,6 @@ float gauges(float y) {
 // ---- the slab
 
 vec2 rest_edges(float side) {
-    if (g_axis > 0.5) {
-        // a bar: the slab fills the strip against its outer edge, its free edge
-        // facing the cards, and gives the gauges' swell its air
-        float lo = acr_lo(), hi = acr_hi();
-        if (g_free > 0.0) return vec2(lo + 2.0, hi - 12.0);
-        return vec2(lo + 12.0, hi - 2.0);
-    }
     if (side == 0.0) return seam_mid() + vec2(-0.5, 0.5) * D(SW);
     if (side < 0.0) {
         float left = D(SEAM) + D(WF);
@@ -326,41 +291,29 @@ vec2 slab_edges(float y) {
 
 // The slab at p from edges already worked out: i is where p.y sits in g_edge.
 float slab_edges_field(vec2 p, vec2 e, vec2 up, vec2 down) {
-    float a = acr(p), l = alt(p);
     vec2 slope = (down - up) * 0.5;
-    float dl = (e.x - a) / sqrt(1.0 + slope.x * slope.x);
-    float dr = (a - e.y) / sqrt(1.0 + slope.y * slope.y);
+    float dl = (e.x - p.x) / sqrt(1.0 + slope.x * slope.x);
+    float dr = (p.x - e.y) / sqrt(1.0 + slope.y * slope.y);
     float rs = D(RS);
     float qx = max(dl, dr) + rs;
-    float qy = max(g_top - l, l - g_bottom) + rs;
+    float qy = max(g_top - p.y, p.y - g_bottom) + rs;
     return length(max(vec2(qx, qy), 0.0)) + min(max(qx, qy), 0.0) - rs;
 }
 
-// Far from the strip the slab cannot reach within a weld of p: a lower bound
-// past the weld's reach leaves the smooth minimum exactly the frame's own.
-float slab_far(vec2 p) {
-    float a = acr(p), l = alt(p);
-    float mid = g_axis < 0.5 ? seam_mid() : 0.5 * (acr_lo() + acr_hi());
-    float span = g_axis < 0.5 ? D(SEAMW) * 0.5 : 0.5 * (acr_hi() - acr_lo());
-    float dx = abs(a - mid) - span;
-    if (dx > 60.0) return dx - 20.0;
-    if (g_axis > 0.5 && (l < g_top - 40.0 || l > g_bottom + 40.0)) return 60.0;
-    return -1e4;
-}
-
 float slab_field(vec2 p, int i) {
-    float far = slab_far(p);
-    if (far > -1e3) return far;
+    // Far from the seam the slab cannot reach within a weld of p: a lower bound
+    // past the weld's reach leaves the smooth minimum exactly the frame's own.
+    float dx = abs(p.x - seam_mid()) - D(SEAMW) * 0.5;
+    if (dx > 60.0) return dx - 20.0;
     return slab_edges_field(p, g_edge[i], g_edge[i - 1], g_edge[i + 1]);
 }
 
 // The slab at a sample off those six: the glass bends its probe point by up to
 // its bevel, so it works its own edges out.
 float slab_field_at(vec2 p) {
-    float far = slab_far(p);
-    if (far > -1e3) return far;
-    float l = alt(p);
-    return slab_edges_field(p, slab_edges(l), slab_edges(l - 1.0), slab_edges(l + 1.0));
+    float dx = abs(p.x - seam_mid()) - D(SEAMW) * 0.5;
+    if (dx > 60.0) return dx - 20.0;
+    return slab_edges_field(p, slab_edges(p.y), slab_edges(p.y - 1.0), slab_edges(p.y + 1.0));
 }
 
 // ---- the whole material
@@ -458,14 +411,9 @@ vec3 glass(vec2 p, float f, vec2 dir) {
 
 void mainImage(out vec4 color, in vec2 fragCoord) {
     g_origin = vec2(D(ORIGIN), D(ORIGIN + 1));
-    g_h = D(HEIGHT);
-    g_axis = D(M_AXIS);
-    g_strip = vec4(D(M_RECT), D(M_RECT + 1), D(M_RECT + 2), D(M_RECT + 3));
-    g_slab_on = D(M_SLAB) > 0.5;
-    g_rail = int(D(M_RAIL) + 0.5);
-    g_free = D(M_FREE);
+    g_h = iResolution.y;
     vec2 p = vec2(fragCoord.x, iResolution.y - fragCoord.y) + g_origin;
-    if (D(SKIP + 1) > D(SKIP) && acr(p) >= D(SKIP) && acr(p) < D(SKIP + 1)) discard;
+    if (D(SKIP + 1) > D(SKIP) && p.x >= D(SKIP) && p.x < D(SKIP + 1)) discard;
 
     // The thin line round every carried card, and how near any of them p is.
     float rec = 1e4, near = 1e4;
@@ -488,7 +436,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         g_has_old = true;
         near = min(near, abs(box_b(p, g_old) - 8.0));
     }
-    g_slab = g_slab_on && (D(SIDE) == 0.0 || card_shown(focus));
+    g_slab = D(SIDE) == 0.0 || card_shown(focus);
     g_amp = voice_amp(g_now);
     g_vamp = card_shown(focus) ? g_amp : 0.0;
     if (g_slab) {
@@ -505,11 +453,8 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         g_top = y0 - D(INSET) + squash + bob;
         g_bottom = y1 + D(INSET) - squash + bob;
         g_kold = g_flow ? D(WELD) * (1.0 - sm(D(HOLD) * 0.6, D(HOLD) + 0.03, g_dt)) : 0.0;
-        float al = alt(p), ac = acr(p);
-        float smid = g_axis < 0.5 ? seam_mid() : 0.5 * (acr_lo() + acr_hi());
-        float shalf = g_axis < 0.5 ? D(SEAMW) * 0.5 : 0.5 * (acr_hi() - acr_lo());
-        if (al > g_top - 40.0 && al < g_bottom + 40.0)
-            near = min(near, max(abs(ac - smid) - shalf - 10.0, 0.0));
+        if (p.y > g_top - 40.0 && p.y < g_bottom + 40.0)
+            near = min(near, max(abs(p.x - seam_mid()) - D(SEAMW) * 0.5 - 10.0, 0.0));
     }
 
     float cr = clamp(0.5 - rec, 0.0, 1.0);
@@ -527,7 +472,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
 
     // The edges slab_field() would work out for each sample, worked out once.
     if (g_slab)
-        for (int k = 0; k < 6; k++) g_edge[k] = slab_edges(alt(p) - 3.0 + float(k));
+        for (int k = 0; k < 6; k++) g_edge[k] = slab_edges(p.y - 3.0 + float(k));
 
     float f = field(p, 3);
     // The other five samples the fragment reads -- the shadow's, and the four the
@@ -551,7 +496,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     if (g_vamp > 0.0 && f < 0.5) {
         vec4 box = card(focus);
         float q, b, qmax, iy;
-        perim_rail(p, box, q, b, qmax, iy);
+        perim(p, box, (box.x + box.z) * 0.5 < seam_mid(), q, b, qmax, iy);
         shine = frame_voice(q, qmax, iy).z * exp(-max(b - D(WF) - D(VOICE + 14), 0.0) / 4.0);
     }
     float sh = fs < 14.0 ? D(SA) * exp(-max(fs, 0.0) / 5.0) * (1.0 - cov) : 0.0;

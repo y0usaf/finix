@@ -36,9 +36,6 @@ const int T_HH = THEME + 30, T_PAD = THEME + 31, T_CLOCKW = THEME + 32, T_DATEW 
 const int T_GW = THEME + 34, T_INSET = THEME + 38, T_TRACE = THEME + 39, T_BUMP = THEME + 40;
 const int T_SX = THEME + 41, T_SY = THEME + 42, T_EX = THEME + 43, T_EY = THEME + 44;
 const int T_HAIR = THEME + 45, T_SHADE = THEME + 46;
-// a bar: which one this surface is (0 the card's crown, 1 the top bar, 2 the
-// bottom, 3 the frames alone), its rect and the blocks it carries
-const int H_MODE = THEME + 47, H_RECT = THEME + 48, H_BLOCKS = THEME + 52;
 
 const float DESIGN = 0.46;       // seconds the siphon was drawn for
 const float CROWN_WELD = 9.0;    // px the crown welds to its frame
@@ -172,77 +169,14 @@ float field(vec2 p, out float lv) {
     lv = 0.0;
     if (g_focus_shown) f = focus_field(p, lv);
     f = min(f, old_field(p));
-    if (D(H_MODE) > 2.5) return f;
     return smin(f, crown_field(p), CROWN_WELD);
 }
 
+// a bounded rectangle's coverage at P, anti-aliased over a pixel
 float rect_cov(vec2 p, vec4 b) {
     vec2 q = vec2(max(b.x - p.x, p.x - b.z), max(b.y - p.y, p.y - b.w));
     return clamp(0.5 - max(q.x, q.y), 0.0, 1.0);
 }
-
-bool bar_gauge(int kind) {
-    return kind == 2 || kind == 3 || kind == 4 || kind == 5 ||
-           kind == 8 || kind == 9 || kind == 10 || kind == 11;
-}
-
-// the gauge's slot among the readings, counted from the blocks before it
-int bar_slot(int upto) {
-    int k = 0;
-    for (int j = 0; j < upto; j++)
-        if (bar_gauge(int(D(H_BLOCKS + 1 + j * 5)))) k++;
-    return k;
-}
-
-// HALO on a bar: the crown is the bar, one capsule along the strip's outer
-// edge, each gauge's load welding a bump into its free edge and running a
-// filled hairline of its own under its number
-vec4 halo_bar(vec2 p) {
-    vec4 r = vec4(D(H_RECT), D(H_RECT + 1), D(H_RECT + 2), D(H_RECT + 3));
-    if (p.x < r.x || p.x >= r.z || p.y < r.y || p.y >= r.w) return vec4(0.0);
-    bool top = D(H_MODE) < 1.5;
-    float inner = top ? r.w - 12.0 : r.y + 12.0;
-    vec4 crown = top ? vec4(r.x + 2.0, r.y + 2.0, r.z - 2.0, r.w - 12.0)
-                     : vec4(r.x + 2.0, r.y + 12.0, r.z - 2.0, r.w - 2.0);
-    float f = sd_rbox(p, crown, min(0.5 * (crown.w - crown.y), g_rad));
-    int nb = int(D(H_BLOCKS));
-    for (int i = 0; i < 8; i++) {
-        if (i >= nb) break;
-        int b0 = H_BLOCKS + 1 + i * 5;
-        vec4 br = vec4(D(b0 + 1), D(b0 + 2), D(b0 + 3), D(b0 + 4));
-        if (br.z <= br.x) break;
-        if (!bar_gauge(int(D(b0)))) continue;
-        int slot = bar_slot(i);
-        if (slot > 3) continue;
-        float bh = 2.0 + g_bump * clamp(gauge_pct(slot) / 100.0, 0.0, 1.0);
-        vec4 bump = top ? vec4(br.x + 10.0, inner - bh, br.z - 10.0, inner)
-                        : vec4(br.x + 10.0, inner, br.z - 10.0, inner + bh);
-        f = smin(f, sd_rbox(p, bump, 4.0), 5.0);
-    }
-    float cov = clamp(0.5 - f, 0.0, 1.0);
-    if (cov <= 0.0) return vec4(0.0);
-    float lit = clamp((p.y - crown.y) / max(1.0, crown.w - crown.y), 0.0, 1.0);
-    vec3 m = mix(g_mat, g_shine, 0.10 * (1.0 - lit));
-    m = mix(m, g_lo, lit * 0.18);
-    float yy = top ? crown.y + 6.0 : crown.w - 8.0;
-    for (int i = 0; i < 8; i++) {
-        if (i >= nb) break;
-        int b0 = H_BLOCKS + 1 + i * 5;
-        vec4 br = vec4(D(b0 + 1), D(b0 + 2), D(b0 + 3), D(b0 + 4));
-        if (br.z <= br.x) break;
-        if (!bar_gauge(int(D(b0)))) continue;
-        int slot = bar_slot(i);
-        if (slot > 3) continue;
-        float x0 = br.x + 12.0, x1 = br.z - 12.0;
-        m = mix(m, g_track, rect_cov(p, vec4(x0, yy, x1, yy + 2.0)));
-        float fx = mix(x0, x1, clamp(gauge_pct(slot) / 100.0, 0.0, 1.0));
-        m = mix(m, g_ink, rect_cov(p, vec4(x0, yy, fx, yy + 2.0)));
-    }
-    return vec4(m, cov);
-}
-
-// a bounded rectangle's coverage at P, anti-aliased over a pixel
-
 
 void mainImage(out vec4 color, in vec2 fragCoord) {
     kit_begin();
@@ -259,12 +193,6 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     g_shade = D(T_SHADE);
     g_start = vec2(D(T_SX), D(T_SY));
     g_end = vec2(D(T_EX), D(T_EY));
-
-    if (D(H_MODE) > 0.5 && D(H_MODE) < 2.5) {
-        color = halo_bar(p);
-        if (color.a <= 0.0) discard;
-        return;
-    }
 
     g_focus = int(D(K_FOCUS));
     g_old = int(D(K_OLD));

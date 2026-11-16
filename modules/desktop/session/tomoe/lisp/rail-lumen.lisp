@@ -100,11 +100,9 @@ this is the fallback band rather than a card's ring, and the walk's bounds."
           (list (getf +rail-lumen--shape+ :rad))))
 
 (defun rail-lumen--theme (free context)
-  "RAIL-LUMEN--NUMBERS for CONTEXT, drawn for the fallback band when FREE, and
-the flag that says this surface is not a bar."
-  (append (rail-lumen--numbers free (getf context :state) (getf context :snapshot)
-                               (getf context :windows))
-          (list 0d0)))
+  "RAIL-LUMEN--NUMBERS for CONTEXT, drawn for the fallback band when FREE."
+  (rail-lumen--numbers free (getf context :state) (getf context :snapshot)
+                       (getf context :windows)))
 
 (defun rail-lumen--free (look context)
   "The band the readings stand as with no card in focus -- a peek, an empty
@@ -127,53 +125,16 @@ no card and exactly as wide as its dots, held at the top centre of the output."
                          :data (kit--data look context (rail-lumen--theme t context))
                          :clock epoch :until (kit--until look context))))))
 
-(defparameter +rail-lumen--strip-height+ 48)
-
-(defun rail-lumen--bar (look context strip)
-  "LUMEN on a bar: the readout's dots laid along the strip, its items in their
-own places from the shared block rects."
-  (destructuring-bind (&key output epoch layer &allow-other-keys) context
-    (let* ((top (eq (getf strip :place) :top))
-           (pitch (getf +rail-lumen--shape+ :pitch))
-           (x0 (+ (getf strip :x) 8))
-           (x1 (- (+ (getf strip :x) (getf strip :width)) 8))
-           (y (+ (getf strip :y) (getf strip :height) (if top -4 0)))
-           (nx (max 1 (floor (+ (/ (- x1 x0) pitch) 0.5)))))
-      (shell-surface
-       (intern (format nil "RAIL-LUMEN-~A" (string-upcase (symbol-name (getf strip :place))))
-               :keyword)
-       (ui :stack)
-       :output (getf output :name)
-       :anchors (list (getf strip :place))
-       :width (rail--design (getf strip :width))
-       :height (rail--design (getf strip :height))
-       :margin 0
-       :layer layer :click-through t
-       :exclusive-zone (rail--design (getf strip :height))
-       :background (list :shader (getf look :shader)
-                         :data (append (rail-lumen--numbers t (getf context :state)
-                                                           (getf context :snapshot)
-                                                           (getf context :windows))
-                                       (list 1d0 x0 y (+ x0 (* nx pitch)) (+ y 1)))
-                         :clock epoch
-                         :until (kit--until look context))))))
-
 (defun rail-lumen--draw (look context)
   "lumen: the ring of LED dots round every card the rail carries, the focused
 card's dot-matrix readout over its top edge, and -- with no card in focus -- the
-readings as one band at the top centre; on an output the deck gives no seam the
-readings stand along each bar instead, from the shared block rects."
-  (let ((bars (remove :seam (getf context :strips)
-                      :key (lambda (strip) (getf strip :place)))))
-    (append
-     (kit--frames look context (rail-lumen--theme nil context) :reach +rail-lumen--reach+)
-     (when (and (not (getf context :key)) (null bars))
-       (list (rail-lumen--free look context)))
-     (loop for strip in bars
-           append (list (rail-lumen--bar look context strip))))))
+readings as one band at the top centre, all from CONTEXT."
+  (append
+   (kit--frames look context (rail-lumen--theme nil context) :reach +rail-lumen--reach+)
+   (unless (getf context :key)
+     (list (rail-lumen--free look context)))))
 
 (defparameter +rail-lumen+
   (list :draw #'rail-lumen--draw :cast +rail-lumen--cast+ :settle 0.6d0
         :radius (round (getf +rail-lumen--shape+ :rad))
-        :strip-height +rail-lumen--strip-height+
         :frame (list :edge 20 :title 20 :seam 20)))
