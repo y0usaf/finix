@@ -49,13 +49,16 @@ box_target() {
 target_user=${target%@*}
 
 apply_host() {
-  local name=$1 path=$2 mode=$3
+  local name=$1 path=$2 mode=$3 who=${4:-$target_user} fresh=0
   mkdir -p "$shares/$name"
   case $mode in
-    copy) cp -au "$path/." "$shares/$name/" ;;
-    bind) findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1 || /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name" ;;
-    ro) findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1 || /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; if test -w "$shares/$name"; then /run/wrappers/bin/sudo -n mount -o remount,bind,ro "$shares/$name"; fi ;;
+    copy) cp -au "$path/." "$shares/$name/"; fresh=1 ;;
+    bind) if ! findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1; then /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; fresh=1; fi ;;
+    ro) if ! findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1; then /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; fresh=1; fi; if test -w "$shares/$name"; then /run/wrappers/bin/sudo -n mount -o remount,bind,ro "$shares/$name"; fi ;;
   esac
+  # What is shared here is the user's own files, and a bot in the box is another Unix user, so what the bot is given
+  # is made writable by the group they both have: cheap to walk here, and slow to walk from inside the box.
+  if [ "$fresh" = 1 ] && [ "$who" != "$target_user" ] && [ "$mode" != ro ]; then chmod -R g+rwX -- "$shares/$name" || fail "could not open $shares/$name to the group"; fi
 }
 
 # What each user gets, one `user grant target flags` line per grant, read by the box's own root-run service: the
@@ -112,7 +115,7 @@ cmd_add() {
   [ -n "$name" ] || fail "the grant needs a name of letters, digits, '.', '_' or '-'"
   [ -e "$grants/$name" ] && fail "grant '$name' already exists (rm it first)"
   mkdir -p "$grants" "$shares"
-  apply_host "$name" "$path" "$mode"
+  apply_host "$name" "$path" "$mode" "$who"
   printf '%s\t%s\t%s\n' "$path" "$mode" "$who" > "$grants/$name"
   write_manifest
   printf '%s  %s  %s  %s\n' "$name" "$mode" "$who" "$path"
@@ -167,7 +170,7 @@ cmd_reconcile() {
     IFS=$'\t' read -r path mode who < "$f"
     [ -d "$path" ] || continue
     name=$(basename -- "$f")
-    apply_host "$name" "$path" "$mode" || {
+    apply_host "$name" "$path" "$mode" "$who" || {
       printf 'omp-box: grant %s (%s) did not apply\n' "$name" "$path" >&2
       failed=1
     }

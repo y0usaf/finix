@@ -111,9 +111,6 @@
           status=1
           return
         }
-        # Only the host user ever owns these files, so the folder's group is what lets the bot write what is
-        # already there; what it creates afterwards is group-writable too (omp-bot-box runs it with umask 002).
-        [ "$admin" = 1 ] || chmod -R g+rwX -- "$target" 2>/dev/null || true
       fi
       case "$flags" in
         *ro*) mount -o remount,bind,ro -- "$target" || status=1 ;;
