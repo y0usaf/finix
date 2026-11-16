@@ -690,3 +690,6 @@
 		opacity: 1;
 	}
 }
+section.tn-pane:has(.sf-chat-reader.sf-main) > .tn-body {
+	background: var(--tv-bg);
+}
