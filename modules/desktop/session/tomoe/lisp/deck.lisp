@@ -95,9 +95,14 @@ gone window left behind, or the keys go dead."
     (when area
       (list* :output output area))))
 
+(defun deck--seam-width (state)
+  "How wide the seam between the two columns is: the rail theme's own when its
+frame names one, the layout's otherwise."
+  (getf (getf state :frame) :seam (getf +layout+ :seam)))
+
 (defun deck--left-width (state width)
   "How wide the left column is, out of WIDTH less the seam between the columns."
-  (floor (* (- width (getf +layout+ :seam)) (nth (1- (getf state :ratio)) (getf +layout+ :ratios)))))
+  (floor (* (- width (deck--seam-width state)) (nth (1- (getf state :ratio)) (getf +layout+ :ratios)))))
 
 (defun deck--grid-columns (state)
   (ceiling (sqrt (count-if (lambda (id) (deck--manageable-p state id)) (deck--windows state)))))
@@ -137,7 +142,7 @@ odd number of columns, or when the seam is no wider than two gaps."
          (edge (deck--edge state))
          (x (and area (+ (getf area :x) edge)))
          (split (and area (deck--split state (- (getf area :width) (* 2 edge)))))
-         (inner (- (getf +layout+ :seam) (* 2 gaps))))
+         (inner (- (deck--seam-width state) (* 2 gaps))))
     (unless (or (null split) (getf state :fullscreen) (deck--narrow-p area) (not (plusp inner)))
       (list :output (getf (getf area :output) :name)
             :x (+ x split gaps) :y (+ (getf area :y) edge)
@@ -182,7 +187,7 @@ carry them. A grid keeps ordinary borders, so it publishes nothing either."
          (when index
            (list x (+ y (* (- index front) (+ height gaps))) width height))))
       (t
-       (let* ((seam (getf +layout+ :seam))
+       (let* ((seam (deck--seam-width state))
               (edge (deck--edge state))
               (title (deck--title state))
               (x (+ (getf area :x) edge))

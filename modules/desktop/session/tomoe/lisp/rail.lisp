@@ -869,8 +869,8 @@ readings it holds, and the readings set into it, all from CONTEXT."
       (values state
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t))
-                            (publish-state :rail-frame (list* :seam (getf +layout+ :seam)
-                                                              (getf *rail--look* :frame)))
+                            (publish-state :rail-frame (append (getf *rail--look* :frame)
+                                                               (list :seam (getf +layout+ :seam))))
                             (define-command "rail-theme"
                               :description "Step the rail to its next theme.")
                             (apply #'bind-key (getf +rail+ :theme-bind)))
