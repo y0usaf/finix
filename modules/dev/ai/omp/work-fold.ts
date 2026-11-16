@@ -12,7 +12,8 @@ import { SkillMessageComponent } from "@oh-my-pi/pi-tui/chat/skill-message";
 import { ToolExecutionComponent } from "@oh-my-pi/pi-tui/chat/tool-execution";
 import { CollapsedSyntheticMessageComponent, UserMessageComponent } from "@oh-my-pi/pi-tui/chat/user-message";
 import { TranscriptContainer } from "@oh-my-pi/pi-tui/chrome";
-import { col, elapsed, node, span, text } from "@oh-my-pi/pi-tui/native/describe";
+import { chatTranscriptDisplayPreferences } from "@oh-my-pi/pi-tui/chat/display-preferences";
+import { col, elapsed, node, span, text, withHidden } from "@oh-my-pi/pi-tui/native/describe";
 import { isNativeSettled, settleNative } from "@oh-my-pi/pi-tui/native/settle";
 
 const STATE = Symbol.for("finix.omp-work-fold.state");
@@ -197,7 +198,8 @@ function install(state) {
 				this.startedAt !== undefined && this.endedAt !== undefined ? this.endedAt - this.startedAt : undefined;
 			const time = this.live ? undefined : (wall ?? spent(this.blocks, cx));
 			const shown = collapsed && this.ended ? failed : [];
-			const key = [...this.blocks, ...failed, collapsed, this.live, this.ended, time];
+			const hidden = chatTranscriptDisplayPreferences.hideToolActivity;
+			const key = [...this.blocks, ...failed, collapsed, this.live, this.ended, time, hidden];
 			if (this.key && same(this.key, key)) return this.node;
 			this.key = key;
 			const steps = this.blocks.filter(isTool).length;
@@ -209,12 +211,15 @@ function install(state) {
 			if (failed.length > 0) label.push(node("badge", { text: `${failed.length} failed`, tone: "error" }));
 			const head = node("row", { gap: "sm", align: collapsed ? "center" : "baseline" }, label, "head");
 			const body = this.blocks.filter(block => !shown.includes(block));
-			this.node = col(
-				[
-					node("section", { role: "omp.notice.work", collapsible: true, collapsed }, [head, ...body], "work"),
-					...shown.map(folded),
-				],
-				{ gap: "sm" },
+			this.node = withHidden(
+				col(
+					[
+						node("section", { role: "omp.notice.work", collapsible: true, collapsed }, [head, ...body], "work"),
+						...shown.map(folded),
+					],
+					{ gap: "sm" },
+				),
+				hidden,
 			);
 			return this.node;
 		}
