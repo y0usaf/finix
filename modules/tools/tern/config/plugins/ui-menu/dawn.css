@@ -153,6 +153,7 @@
 		border-radius: 1.2em;
 		-webkit-backdrop-filter: var(--dawn-blur);
 		backdrop-filter: var(--dawn-blur);
+		box-shadow: var(--dawn-lift), inset 0 0 0 1px var(--dawn-line);
 	}
 	& .sf-card[data-role^='omp.user'] .sf-md {
 		background: var(--dawn-you);
@@ -166,6 +167,79 @@
 		max-width: min(100%, 42em);
 		background: var(--dawn-wash);
 	}
+	& .sf-card[data-role^='omp.custom'],
+	& .sf-card[data-role^='omp.hook'] {
+		align-self: stretch;
+		flex: none;
+		margin: 0.35em 0;
+		border-radius: 1.1em;
+		background: var(--dawn-wash);
+		-webkit-backdrop-filter: var(--dawn-blur);
+		backdrop-filter: var(--dawn-blur);
+		box-shadow: var(--dawn-lift), inset 0 0 0 1px var(--dawn-line);
+		overflow: hidden;
+	}
+	& .sf-card[data-role^='omp.custom'] > .sf-card-head,
+	& .sf-card[data-role^='omp.hook'] > .sf-card-head {
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+		min-height: 2.2em;
+		padding: 0.45em 0.85em;
+		color: var(--dawn-ink-2);
+		transition: background-color var(--dawn-quick);
+	}
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']).collapsible > .sf-card-head {
+		cursor: pointer;
+	}
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']).collapsible > .sf-card-head:hover {
+		background: var(--dawn-wash-2);
+	}
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']) > .sf-card-head > .sf-head {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		gap: 0.4em;
+		min-width: 0;
+	}
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']) > .sf-card-head .sf-t-strong {
+		font-size: 0.85em;
+		font-weight: 600;
+	}
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']) > .sf-card-head > .sf-chev {
+		flex: none;
+		margin-left: auto;
+		color: var(--dawn-ink-4);
+		transition: transform var(--dawn-quick);
+	}
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']).collapsed > .sf-card-head > .sf-chev {
+		transform: rotate(-90deg);
+	}
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']) > .sf-card-body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5em;
+		min-width: 0;
+		padding: 0 0.85em 0.8em 2.6em;
+	}
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']).nohead > .sf-card-body,
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']).inset > .sf-card-body {
+		padding: 0.85em;
+	}
+	& :is(.sf-card[data-role^='omp.custom'], .sf-card[data-role^='omp.hook']).clamped > .sf-card-body {
+		max-height: var(--sf-clamp);
+		overflow: hidden;
+	}
+	& .sf-card-ic {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		width: 1.2em;
+		height: 1.2em;
+		color: var(--dawn-ink-3);
+	}
+	& .sf-card-ic svg.ico { width: 0.95em; height: 0.95em; }
 	& .sf-card:not(.clamped) > .sf-more { display: none; }
 	& .sf-more {
 		align-self: flex-end;
@@ -695,6 +769,7 @@ html.tn-themed:not(#dawn) {
 	--dawn-pick: light-dark(rgb(58 120 238 / 22%), rgb(98 156 255 / 34%));
 	--dawn-bad: light-dark(#cf3a33, #ff7a71);
 	--dawn-blur: blur(2em) saturate(150%);
+	--dawn-lift: 0 0.35em 1.1em -0.55em light-dark(rgb(23 23 27 / 24%), rgb(0 0 0 / 62%));
 	--dawn-quick: 0.12s ease-out;
 	--grok-page: var(--dawn-page);
 	--grok-chrome: var(--dawn-card);
@@ -742,4 +817,13 @@ html.tn-themed:not(#dawn) {
 }
 :root:not(#dawn):not(#dawn-b) #tabbar .tt.on :is(.sub, .mk.keys, .kbd) {
 	color: var(--dawn-ink-3) !important;
+}
+
+/* A chat's pane takes the terminal view's own background. Tern's glass modes
+   paint the page with an alpha, so a bare pane lets the desktop through along
+   its edges: the wallpaper's grid across the chat and its green lawn as a band
+   under the composer. Grok's opaque page hid that; Dawn paints the pane the
+   stock --tv-bg and keeps only the bubbles and the composer translucent. */
+section.tn-pane:has(.sf-chat-reader.sf-main) > .tn-body {
+	background: var(--tv-bg);
 }

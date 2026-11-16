@@ -1,0 +1,170 @@
+// Mounts the folders omp-box granted one box user, without ever trusting a path the user can change.
+//
+// The box grants land inside a bot's own home, which that bot owns and can rewrite at any moment: it can replace
+// ~/.local with a symlink to /etc, and a root process that walks the path with mkdir/chown/mount would follow it.
+// So every step here works on directory fds opened with RESOLVE_NO_SYMLINKS and never on a path: components are
+// created with mkdirat on the parent fd, ownership is set through the fd, and the bind mount names the target as
+// /proc/self/fd/N, which the kernel resolves to the already-opened directory. A symlink anywhere in the way is a
+// refusal, never a follow, and a path that changes between the check and the mount is the same opened directory.
+#define _GNU_SOURCE
+
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <linux/openat2.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+static int complain(const char *what, const char *arg) {
+	fprintf(stderr, "omp-share-mount: %s %s: %s\n", what, arg ? arg : "", strerror(errno));
+	return 1;
+}
+
+static int beneath(int dirfd, const char *path, int flags, int absolute) {
+	struct open_how how = {
+		.flags = flags,
+		.resolve = RESOLVE_NO_SYMLINKS | (absolute ? 0 : RESOLVE_BENEATH),
+	};
+	return syscall(SYS_openat2, dirfd, path, &how, sizeof how);
+}
+
+static int as_dir(int dirfd, const char *path, int absolute) {
+	return beneath(dirfd, path, O_PATH | O_DIRECTORY | O_NOFOLLOW, absolute);
+}
+
+// Hands the user a folder it has to be able to write, through the fd that was opened without following anything.
+static int own(int fd, uid_t uid, gid_t gid) {
+	if (fchownat(fd, "", uid, gid, AT_EMPTY_PATH) == 0) return 0;
+	return -1;
+}
+
+// One component under dirfd: reuse it if it is a directory, create it if it is not there, and refuse a symlink or a
+// file, which is what a bot plants in the hope that root follows it somewhere else.
+static int descend(int *dirfd, const char *component, uid_t uid, gid_t gid) {
+	int next = as_dir(*dirfd, component, 0);
+	if (next < 0 && errno == ENOENT) {
+		if (mkdirat(*dirfd, component, 0755) < 0 && errno != EEXIST) return -1;
+		next = as_dir(*dirfd, component, 0);
+	}
+	if (next < 0) return -1;
+	if (own(next, uid, gid) < 0) {
+		// The folder exists and root could not chown it: refuse rather than mount into something it does not own.
+		close(next);
+		return -1;
+	}
+	close(*dirfd);
+	*dirfd = next;
+	return 0;
+}
+
+static int mounted(int fd) {
+	struct stat here, up;
+	if (fstat(fd, &here) < 0) return -1;
+	int parent = openat(fd, "..", O_PATH | O_DIRECTORY);
+	if (parent < 0) return -1;
+	int r = fstat(parent, &up);
+	close(parent);
+	if (r < 0) return -1;
+	return here.st_dev != up.st_dev;
+}
+
+static int show(int fd, char *out, size_t size) {
+	char proc[64];
+	snprintf(proc, sizeof proc, "/proc/self/fd/%d", fd);
+	ssize_t n = readlink(proc, out, size - 1);
+	if (n < 0) return -1;
+	out[n] = 0;
+	return 0;
+}
+
+// apply HOME REL|PATH UID GID ro|rw SOURCE - mount SOURCE where the user sees REL under HOME (or PATH, absolute),
+// creating the folders on the way as that user, and print the resolved place so it can be unmounted by name later.
+static int apply(char **argv) {
+	const char *home = argv[0], *path = argv[1], *source = argv[5];
+	uid_t uid = (uid_t) strtoul(argv[2], NULL, 10);
+	gid_t gid = (gid_t) strtoul(argv[3], NULL, 10);
+	int ro = strcmp(argv[4], "ro") == 0;
+	int absolute = path[0] == '/';
+	char *walk = strdup(path);
+	if (!walk) return complain("out of memory", "");
+
+	int target;
+	if (absolute) {
+		target = as_dir(AT_FDCWD, "/", 1);
+	} else {
+		target = as_dir(AT_FDCWD, home, 1);
+	}
+	if (target < 0) return complain("open the user's home", absolute ? "/" : home);
+
+	char *save = NULL;
+	// Absolute paths keep their first component as what is under /; relative ones are walked from the home.
+	if (absolute) {
+		while (*walk == '/') walk++;
+	}
+	for (char *part = strtok_r(walk, "/", &save); part; part = strtok_r(NULL, "/", &save)) {
+		if (part[0] == 0 || strcmp(part, ".") == 0) continue;
+		if (strcmp(part, "..") == 0) {
+			close(target);
+			fprintf(stderr, "omp-share-mount: %s is not a plain path\n", path);
+			return 1;
+		}
+		if (descend(&target, part, uid, gid) < 0) {
+			int e = errno;
+			close(target);
+			errno = e;
+			return complain("descend", path);
+		}
+	}
+
+	char place[PATH_MAX];
+	if (show(target, place, sizeof place) < 0) return complain("name the target", path);
+	int ismounted = mounted(target);
+	if (ismounted < 0) return complain("check the target", path);
+	if (!ismounted) {
+		int from = as_dir(AT_FDCWD, source, 1);
+		if (from < 0) return complain("open the share", source);
+		char fromplace[64];
+		snprintf(fromplace, sizeof fromplace, "/proc/self/fd/%d", from);
+		char topath[64];
+		snprintf(topath, sizeof topath, "/proc/self/fd/%d", target);
+		if (mount(fromplace, topath, NULL, MS_BIND, NULL) < 0) {
+			close(from);
+			return complain("bind", path);
+		}
+		close(from);
+		if (ro && mount(NULL, topath, NULL, MS_BIND | MS_REMOUNT | MS_RDONLY, NULL) < 0) return complain("bind read-only", path);
+	}
+	close(target);
+	printf("%s\n", place);
+	return 0;
+}
+
+// remove PATH - unmount the place a previous pass printed, but only if it still resolves without a symlink and is
+// still a mount; a path a bot can no longer be trusted with is left alone rather than followed.
+static int remove_place(char **argv) {
+	const char *path = argv[0];
+	int fd = as_dir(AT_FDCWD, path, 1);
+	if (fd < 0) {
+		if (errno == ENOENT) return 0;
+		return complain("open", path);
+	}
+	int ismounted = mounted(fd);
+	char place[PATH_MAX];
+	int named = show(fd, place, sizeof place);
+	close(fd);
+	if (ismounted != 1 || named < 0) return 0;
+	if (umount2(place, MNT_DETACH) < 0 && errno != EINVAL && errno != ENOENT) return complain("unmount", place);
+	return 0;
+}
+
+int main(int argc, char **argv) {
+	if (argc == 8 && strcmp(argv[1], "apply") == 0) return apply(argv + 2);
+	if (argc == 3 && strcmp(argv[1], "remove") == 0) return remove_place(argv + 2);
+	fprintf(stderr, "usage: omp-share-mount apply HOME PATH UID GID ro|rw SOURCE | remove PATH\n");
+	return 2;
+}

@@ -56,12 +56,20 @@
         } ;;''
     )
     people;
+  # Mounting runs in a helper of its own: a grant's target lives inside a home the bot owns, so every step has to
+  # work on directory fds opened without following symlinks (see the comment at the top of share-mount.c).
+  shareMount = pkgs.stdenv.mkDerivation {
+    name = "omp-share-mount";
+    dontUnpack = true;
+    buildPhase = "${pkgs.stdenv.cc}/bin/cc -O2 -Wall -Wextra -o omp-share-mount ${./share-mount.c}";
+    installPhase = "install -Dm755 omp-share-mount $out/bin/omp-share-mount";
+  };
   # Applies the grants the host wrote for one user: the share tree is mounted once as root, and each grant is bind
   # mounted where that user's own paths live, inside its home and nowhere else. omp-shares runs this as root at
   # boot and whenever the host writes a new list, so no box user ever needs a way to mount anything.
   shareApply = pkgs.writeShellScript "omp-shares-apply" ''
     set -u
-    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.gnugrep]}
+    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep]}
     wanted=$1
     case "$wanted" in
     ${userTable}
@@ -74,7 +82,7 @@
     : >"$list.new"
     status=0
     apply() {
-      local name=$1 target=$2 flags=$3 parent p
+      local name=$1 target=$2 flags=$3 how=rw home rel place
       case "$target" in
         '~') target=$uhome ;;
         '~/'*) target="$uhome/''${target#'~/'}" ;;
@@ -92,30 +100,23 @@
         echo "omp-shares: $name is not in the box's share tree yet" >&2
         return
       fi
-      parent=$(dirname -- "$target")
-      mkdir -p -- "$parent" || {
+      case "$flags" in
+        *ro*) how=ro ;;
+      esac
+      if [ "$target" = "$uhome" ]; then
+        home=$uhome rel=.
+      elif [ "''${target#"$uhome"/}" != "$target" ]; then
+        home=$uhome rel="''${target#"$uhome"/}"
+      else
+        home=/ rel=$target
+      fi
+      # The helper resolves every component without following a symlink and mounts on the fd it opened, so a bot
+      # that replaces a folder with a link gets a refusal instead of root acting wherever the link points.
+      if ! place=$(${shareMount}/bin/omp-share-mount apply "$home" "$rel" "$uuid" "$ugid" "$how" "/run/omp-shares/$name"); then
         status=1
         return
-      }
-      # The folders between the home and the mount belong to the user, so it can write beside the mount.
-      if [ "$admin" = 0 ]; then
-        p=$parent
-        while [ "$p" != "$uhome" ] && [ "$p" != / ]; do
-          chown "$uuid:$ugid" -- "$p" 2>/dev/null || true
-          p=$(dirname -- "$p")
-        done
       fi
-      [ -d "$target" ] || mkdir -p -- "$target" || return
-      if ! mountpoint -q -- "$target"; then
-        mount --bind "/run/omp-shares/$name" "$target" || {
-          status=1
-          return
-        }
-      fi
-      case "$flags" in
-        *ro*) mount -o remount,bind,ro -- "$target" || status=1 ;;
-      esac
-      printf '%s\n' "$target" >>"$list.new"
+      printf '%s\n' "$place" >>"$list.new"
     }
     if [ -r "$manifest" ]; then
       while IFS=$'\t' read -r line_user name target flags; do
@@ -129,7 +130,7 @@
       while IFS= read -r old; do
         [ -n "$old" ] || continue
         grep -Fxq -- "$old" "$list.new" && continue
-        umount -l -- "$old" 2>/dev/null || umount -- "$old" 2>/dev/null || true
+        ${shareMount}/bin/omp-share-mount remove "$old" || true
       done <"$list"
     fi
     mv -f "$list.new" "$list"
@@ -167,7 +168,7 @@
     environment.HOME = browserPath name home;
     serviceConfig = {
       User = runAs;
-      Group = if bot == null then "users" else bot.user;
+      Group = "users";
       Restart = "always";
       RestartSec = 5;
     };
