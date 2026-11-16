@@ -445,14 +445,17 @@ it: full against the frame, gone once the edge has let go by two pixels."
 
 (defun rail--voice-envelope (voice since fade now)
   "How much of the voice the slab draws: it comes up as a turn opens and dies
-away over :settle once the turn has closed, so the slab calms like water rather
-than snapping flat."
-  (cond
-    (voice (rail--smoothstep (/ (- now (or since now))
-                                (max 0.01d0 (getf +rail--voice+ :rise)))))
-    ((realp fade) (- 1d0 (rail--smoothstep (/ (- now fade)
-                                              (max 0.01d0 (getf +rail--voice+ :settle))))))
-    (t 0d0)))
+away over :settle once the turn has closed -- from wherever the rise had reached,
+so a turn that closes before it opens still calms instead of jumping to full --
+so the slab calms like water rather than snapping flat."
+  (let ((rise (max 0.01d0 (getf +rail--voice+ :rise))))
+    (cond
+      (voice (rail--smoothstep (/ (- now (or since now)) rise)))
+      ((realp fade)
+       (* (if (realp since) (rail--smoothstep (/ (- fade since) rise)) 1d0)
+          (- 1d0 (rail--smoothstep (/ (- now fade)
+                                      (max 0.01d0 (getf +rail--voice+ :settle)))))))
+      (t 0d0))))
 
 (defun rail--voice-bob (now levels amp)
   "How far the whole slab heaves this instant, in pixels."
