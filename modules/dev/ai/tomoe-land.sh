@@ -10,6 +10,7 @@ SYSTEM=${LAND_SYSTEM:-x86_64-linux}
 BASE=${LAND_BASE:-origin/main}
 FINIX=${LAND_FINIX:-$HOME/finix}
 FINIX_REV=""
+GATED_FINIX=""
 SMOKE=${LAND_SMOKE:-smoke}
 NIXCORES=${LAND_NIX_CORES:-4}
 LEASEWAIT=${LAND_LEASE_WAIT:-10800}
@@ -284,12 +285,12 @@ run_land() {
 	0)
 		note_step push passed "$log/push.log"
 		note_step forgejo passed "$log/push.log.forgejo"
-		printf '%s\n' "$tip" >"$ROOT/undeployed"
+		printf '%s %s\n' "$tip" "$GATED_FINIX" >"$ROOT/undeployed"
 		;;
 	2)
 		note_step push passed "$log/push.log"
 		note_step forgejo failed "$log/push.log.forgejo"
-		printf '%s\n' "$tip" >"$ROOT/undeployed"
+		printf '%s %s\n' "$tip" "$GATED_FINIX" >"$ROOT/undeployed"
 		;;
 	*)
 		cleanup_tree "$repo" "$tree"
@@ -297,7 +298,7 @@ run_land() {
 		return 1
 		;;
 	esac
-	if pin_finix "$log/pin.log" "$tip"; then
+	if pin_finix "$log/pin.log" "$tip" "$GATED_FINIX"; then
 		note_step pin passed "$log/pin.log"
 	else
 		note_step pin failed "$log/pin.log"
@@ -313,20 +314,45 @@ cleanup_tree() {
 	git -C "$1" worktree prune >/dev/null 2>&1 || true
 }
 
+# run_gate TREE TIP LOG [FINIX_REV]: gate TIP against the config that finix revision
+# (default its HEAD now) generates; on a pass GATED_FINIX names that revision.
 run_gate() {
-	local tree=$1 tip=$2 log=$3 rc=0
+	local tree=$1 tip=$2 log=$3 finix=${4:-} rc=0
+	GATED_FINIX=""
 	[[ -x $tree/gate.sh ]] || {
 		printf 'land: %s has no gate.sh\n' "$tip" >"$log"
 		return 1
 	}
+	[[ -n $finix ]] || finix=$(git -C "$FINIX" rev-parse HEAD) || return 1
 	(
 		cd "$tree" || exit 1
-		GATE_FINIX=$FINIX timeout --signal=TERM --kill-after="$KILLWAIT" "$GATE_TIMEOUT" \
-			nice -n 10 ./gate.sh "$tip"
+		GATE_FINIX=$FINIX GATE_FINIX_REV=$finix timeout --signal=TERM --kill-after="$KILLWAIT" \
+			"$GATE_TIMEOUT" nice -n 10 ./gate.sh "$tip"
 	) >"$log" 2>&1 || rc=$?
-	((rc == 0)) && return 0
+	if ((rc == 0)); then
+		GATED_FINIX=$finix
+		return 0
+	fi
 	printf 'land: the gate failed (exit %s)\n' "$rc" >>"$log"
 	return 1
+}
+
+# gated_pair GATED PIN: the pin commit deploys exactly what the gate ran, the gated finix
+# revision with only the tomoe input moved; anything else in between was never gated.
+gated_pair() {
+	local gated=$1 pin=$2 sans='.nodes as $n | $n.root.inputs | del(.tomoe) | map_values(if type == "string" then $n[.].locked else . end)'
+	[[ -n $gated ]] || return 1
+	git -C "$FINIX" diff --quiet "$gated" "$pin" -- . ':(exclude)flake.lock' || return 1
+	[[ $(git -C "$FINIX" show "$gated:flake.lock" | jq -S "$sans") == $(git -C "$FINIX" show "$pin:flake.lock" | jq -S "$sans") ]]
+}
+
+# gate_pin TIP PIN LOG: gate the pin commit itself, from a worktree of TIP.
+gate_pin() {
+	local tip=$1 pin=$2 log=$3 tree=$ROOT/work/pin-$$ rc=0
+	git -C "$REPO" worktree add --quiet --detach "$tree" "$tip" >>"$log" 2>&1 || return 1
+	run_gate "$tree" "$tip" "$log.gate" "$pin" || rc=1
+	cleanup_tree "$REPO" "$tree"
+	return $rc
 }
 
 run_smoke() {
@@ -382,8 +408,12 @@ run_smoke() {
 	return 1
 }
 
+# pin_finix LOG TIP [GATED]: commit a finix pin of TIP, push that commit and queue a
+# switch to it. GATED is the finix revision TIP's gate ran with; when the pin is not
+# that revision plus the tomoe input (finix moved since), the pin commit is gated
+# itself, and dropped again if it fails, so what is deployed is always what was gated.
 pin_finix() {
-	local log=$1 tip=$2 rev short full locked src remote=github
+	local log=$1 tip=$2 gated=${3:-} rev short full remote=github
 	[[ -d $FINIX/.git ]] || {
 		printf 'no finix checkout at %s\n' "$FINIX" >"$log"
 		return 1
@@ -399,6 +429,7 @@ pin_finix() {
 	full=$(git -C "$REPO" rev-parse "$tip") || return 1
 	short=$(git -C "$REPO" rev-parse --short "$tip") || return 1
 	git -C "$FINIX" remote 2>/dev/null | grep -qx "$remote" || remote=origin
+	rm -f "$log.rev"
 	(
 		cd "$FINIX" || exit 1
 		exec 8>"${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/agent/finix-switch.lock"
@@ -415,16 +446,33 @@ pin_finix() {
 		git add flake.lock || exit 1
 		git -c user.name=tomoe-land -c user.email=tomoe-land@localhost commit --quiet \
 			-m "finix: pin tomoe $short" -- flake.lock || exit 1
-		locked=$(git show HEAD:flake.lock | jq -r .nodes.tomoe.locked.rev) || exit 1
+		pin=$(git rev-parse HEAD) || exit 1
+		locked=$(git show "$pin:flake.lock" | jq -r .nodes.tomoe.locked.rev) || exit 1
 		[[ $locked == "$full" ]] || {
 			printf 'committed flake.lock pins %s, not %s; not pushing\n' "$locked" "$full"
 			exit 1
 		}
-		git push "$remote" HEAD:main || exit 1
+		if gated_pair "$gated" "$pin"; then
+			printf 'pin %s is the gated finix %s with tomoe %s\n' "$pin" "$gated" "$short"
+		else
+			printf 'pin %s is not the gated finix %s with tomoe %s; gating the pin itself\n' \
+				"$pin" "${gated:-(none recorded)}" "$short"
+			if ! gate_pin "$full" "$pin" "$log"; then
+				printf 'the gate failed on pin %s (%s.gate); dropping it\n' "$pin" "$log"
+				if [[ $(git rev-parse HEAD) == "$pin" ]]; then
+					git reset --quiet --soft HEAD^ && git restore --quiet --staged --worktree -- flake.lock
+				else
+					git -c user.name=tomoe-land -c user.email=tomoe-land@localhost revert --no-edit "$pin"
+				fi
+				exit 1
+			fi
+		fi
+		git push "$remote" "$pin:refs/heads/main" || exit 1
+		printf '%s\n' "$pin" >"$log.rev"
 	) >"$log" 2>&1 || return 1
-	rev=$(git -C "$FINIX" rev-parse --short HEAD) || return 1
+	rev=$(cat "$log.rev") || return 1
 	printf 'finix %s\n' "$rev" >>"$log"
-	FINIX_REV=$rev
+	FINIX_REV=$(git -C "$FINIX" rev-parse --short "$rev")
 	printf '%s\n' "$rev" >"$ROOT/switch-pending"
 	return 0
 }
@@ -570,8 +618,8 @@ print(d["nodes"]["tomoe"]["locked"].get("rev", ""))' "$FINIX/flake.lock" 2>/dev/
 }
 
 retry_pin() {
-	local sha pinned to now
-	sha=$(cat "$ROOT/undeployed" 2>/dev/null)
+	local sha gated pinned to now
+	read -r sha gated <"$ROOT/undeployed" 2>/dev/null
 	[[ -n $sha ]] || {
 		rm -f "$ROOT/undeployed"
 		return 0
@@ -587,7 +635,7 @@ retry_pin() {
 			return 0
 		fi
 	fi
-	pin_finix "$ROOT/pin-retry.log" "$sha" || true
+	pin_finix "$ROOT/pin-retry.log" "$sha" "$gated" || true
 	return 0
 }
 
@@ -685,7 +733,7 @@ daemon() {
 					>>"$ROOT/journal.log"
 				(
 					cd "$FINIX" || exit 1
-					setsid nohup finix-switch >>"$ROOT/switch.log" 2>&1 &
+					setsid nohup finix-switch "$rev" >>"$ROOT/switch.log" 2>&1 &
 				)
 				sleep 30
 			fi

@@ -3181,7 +3181,7 @@
     close-gain = -6;
   };
 in {
-  config.user.dev.prompts.host = ["`TOMOE_SOCKET`, `WAYLAND_DISPLAY` and `DBUS_SESSION_BUS_ADDRESS` in your environment point at the live tomoe session and its bus."];
+  config.user.dev.prompts.host = ["`TOMOE_SOCKET`, `WAYLAND_DISPLAY` and `DBUS_SESSION_BUS_ADDRESS` in your environment point at the live tomoe session and its bus. Run private Tomoe instances, test clients and anything that injects input only through tomoe's `tools/isolate` (it refuses while those are set: `env -u DISPLAY -u WAYLAND_DISPLAY -u WAYLAND_SOCKET -u TOMOE_SOCKET tools/isolate DIR COMMAND`); never kernel fake input devices or `DISPLAY=:0`."];
 
   config.user.ui.tomoe.extraConfig = ''
     (define-extension "cursor-trail" (:reads () :state nil) (snapshot state event)

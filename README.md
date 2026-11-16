@@ -19,11 +19,11 @@ Every finix host boots with a tmpfs root: only paths on the persistence allowlis
 ## Build and switch
 
 ```sh
-nhs                    # build this host with iets, then nh os switch
+nhs                    # build this host's committed HEAD with iets, then nh os switch
 nhs --nix              # same, evaluating with nix instead of iets
-nhs -u                 # nix flake update first; -d for a dry run
-nh os switch .         # plain nh, from ~/finix
-finix-switch           # build the committed HEAD, switch under the shared agent lock, print JSON
+nhs -u                 # nix flake update and commit flake.lock first; -d for a dry run
+finix-switch [REV]     # build the committed REV (default HEAD), switch under the shared agent lock, print JSON
+finix-switch --dry REV # the same without switching: which system REV is
 nix build --no-link .#nixosConfigurations.y0usaf-desktop.config.system.build.toplevel
 nix flake check        # builds every host, plus the lint and codegen checks
 nix run .#lint         # strictix lint; `nix run .#lint -- fix` applies fixes
@@ -31,6 +31,19 @@ nix fmt                # alejandra
 ```
 
 `nhs`, `nhd`, `nhu` and `nhc` are shell functions from `modules/tools/nh.nix`. Build with `--no-link` so no `result` link lands in the repo.
+
+Every switch builds a commit, never the working tree, so edits another helper has not committed are never deployed. `tomoe-land` deploys the exact finix commit it gated: when finix moved between the gate and the pin, it gates the pin commit itself before pushing it, and switches to that commit by name.
+
+### When Tomoe breaks
+
+`tomoe-stable` is a second Tomoe installed beside the daily one: the last known-good build, started with the config that build was made with (never `~/.config/tomoe/init.lisp`), so the pair always loads together. When `tomoe` crashes you are back at the TTY shell that started it; when it hangs or comes up black, press Ctrl+Alt+F2 and log in. Then:
+
+```sh
+pkill -KILL -x tomoe   # only if the daily one is still holding the screen
+tomoe-stable
+```
+
+It takes over the screen like `tomoe` does, and `tomoe` starts the daily one again next time. It is the `tomoe-stable` flake input: a finix revision whose lock pins that Tomoe and whose config was generated for it, today finix `add5ffdb` with Tomoe `259c8ac`, the SBCL build that ran this desktop until the C core replaced it. Tomoe's `nix run .#release -- promote` moves both lines to a release once it has soaked; nothing else touches them. `nix build .#tomoe-stable` builds the launcher on its own.
 
 Other machines:
 

@@ -3,12 +3,22 @@
   lib,
   pkgs,
   inputPackages,
+  flakeInputs,
   ...
 }: let
   userName = config.user.name;
 
   tomoePkg = inputPackages.tomoe.default;
+
+  # The known-good pair: the Tomoe the tomoe-stable revision of finix pins, with the
+  # config that revision generates for this host, never the one in ~/.config.
+  stableConfig = flakeInputs.tomoe-stable.nixosConfigurations.${config.networking.hostName}.config;
+  tomoeStable = pkgs.writeShellScriptBin "tomoe-stable" ''
+    exec ${inputPackages.tomoe-stable.tomoe}/bin/tomoe --config ${stableConfig.manzil.users.${userName}.files.".config/tomoe/init.lisp".source} "$@"
+  '';
 in {
+  system.build.tomoeStable = tomoeStable;
+
   finit.services.seatd.runlevels = lib.mkForce "234";
 
   xdg.portal.portals = [
@@ -58,6 +68,7 @@ in {
     '';
     systemPackages = [
       tomoePkg
+      tomoeStable
       pkgs.xwayland
       pkgs.xwayland-satellite
     ];

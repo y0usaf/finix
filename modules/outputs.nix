@@ -305,6 +305,7 @@ in {
     omp-box-selftest = hosts.y0usaf-desktop.config.system.build.ompBoxSelftest;
     boot-screen-vm = import ./finix/bootvine-vm.nix {inherit inputs pkgs lib;};
     tomoe = inputPackages.tomoe.default;
+    tomoe-stable = hosts.y0usaf-desktop.config.system.build.tomoeStable;
     glsl-gate = lint.glslGate;
   };
 

@@ -249,6 +249,7 @@
         "autolith"
         "emeraldian"
         "tomoe"
+        "tomoe-stable"
         "mado"
         "frame-charge"
         "steam-frame-nixos"
