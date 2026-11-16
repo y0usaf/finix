@@ -37,21 +37,11 @@ local TWEAKS = {
 		requires = { "ozette", "answer-bubbles" },
 	},
 	{
-		id = "ozette-bot-you",
-		requires = { "ozette", "bot-you" },
-	},
-	{
 		id = "yorha",
 		label = "YoRHa",
 		group = "Look layers",
 		default = false,
 		layer = true,
-	},
-	{
-		id = "bot-yorha-labels",
-		label = "YoRHa labels",
-		parent = "yorha",
-		requires = { "yorha" },
 	},
 	{
 		id = "grok",
@@ -194,10 +184,6 @@ local TWEAKS = {
 		requires = { "frost" },
 	},
 	{
-		id = "bot-you-frost",
-		requires = { "frost", "bot-you" },
-	},
-	{
 		id = "reply-frost",
 		label = "frosted replies",
 		parent = "frost",
@@ -206,10 +192,6 @@ local TWEAKS = {
 	{
 		id = "answer-frost",
 		requires = { "reply-frost", "answer-bubbles" },
-	},
-	{
-		id = "bot-answer-frost",
-		requires = { "reply-frost", "bot-answer-bubbles" },
 	},
 	{
 		id = "width",
@@ -267,68 +249,13 @@ local TWEAKS = {
 		group = "omp",
 	},
 	{
-		id = "bot-answer-bubbles",
-		label = "answer bubbles",
+		id = "bot-view",
+		label = "chat look",
 		group = "omp bots",
 	},
 	{
 		id = "bot-turn-stats",
 		label = "hide the working timer",
-		group = "omp bots",
-	},
-	{
-		id = "bot-tints",
-		label = "tint colours and font",
-		group = "omp bots",
-	},
-	{
-		id = "bot-layout",
-		label = "header, hero and placeholders",
-		group = "omp bots",
-	},
-	{
-		id = "bot-spacing",
-		label = "tight message spacing",
-		group = "omp bots",
-	},
-	{
-		id = "bot-you",
-		label = "your message bubbles",
-		group = "omp bots",
-	},
-	{
-		id = "bot-text",
-		label = "message text spacing",
-		group = "omp bots",
-	},
-	{
-		id = "bot-dock",
-		label = "hide composer meters",
-		group = "omp bots",
-	},
-	{
-		id = "bot-time",
-		label = "timestamps",
-		group = "omp bots",
-	},
-	{
-		id = "bot-events",
-		label = "event rows",
-		group = "omp bots",
-	},
-	{
-		id = "bot-ask",
-		label = "question cards",
-		group = "omp bots",
-	},
-	{
-		id = "bot-names",
-		label = "names and status line",
-		group = "omp bots",
-	},
-	{
-		id = "bot-stop",
-		label = "stop button",
 		group = "omp bots",
 	},
 	{
@@ -346,28 +273,12 @@ local TWEAKS = {
 		requires = { "yorha", "answer-bubbles" },
 	},
 	{
-		id = "yorha-bot-answer-bubbles",
-		requires = { "yorha", "bot-answer-bubbles" },
-	},
-	{
-		id = "yorha-bot-you",
-		requires = { "yorha", "bot-you" },
-	},
-	{
 		id = "grok-answer-bubbles",
 		requires = { "grok", "answer-bubbles" },
 	},
 	{
 		id = "grok-user-bubbles",
 		requires = { "grok" },
-	},
-	{
-		id = "grok-bot-answer-bubbles",
-		requires = { "grok", "bot-answer-bubbles" },
-	},
-	{
-		id = "grok-bot-you",
-		requires = { "grok", "bot-you" },
 	},
 	{
 		id = "carbon-user-frost",

@@ -6,6 +6,20 @@
   ...
 }: let
   inherit (config.user.ui) fonts;
+  pixelify-sans = pkgs.stdenvNoCC.mkDerivation {
+    pname = "pixelify-sans";
+    version = "1.0-unstable-2023-10-12";
+    src = pkgs.fetchFromGitHub {
+      owner = "eifetx";
+      repo = "Pixelify-Sans";
+      rev = "39df74aba80df8157546034b878e8be1eb565ced";
+      hash = "sha256-B8WlQsgzJ/pZJ4CtfrEwpQSp9v7AcBR9EBrkOYIL3NI=";
+    };
+    installPhase = ''
+      install -Dm644 fonts/ttf/*.ttf -t $out/share/fonts/truetype
+      install -Dm644 OFL.txt -t $out/share/licenses/pixelify-sans
+    '';
+  };
 in {
   options.user.ui.fonts = {
     mainFontName = lib.mkOption {
@@ -33,6 +47,8 @@ in {
       pkgs.nerd-fonts.symbols-only
       pkgs.crimson-pro
       pkgs.ibm-plex
+      pkgs.geist-font
+      pixelify-sans
     ];
 
     user.files.".config/fontconfig/fonts.conf".text = ''
@@ -81,6 +97,21 @@ in {
             <pattern>
               <patelt name="family">
                 <string>IBM Plex Sans</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Geist</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Geist Mono</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>Pixelify Sans</string>
               </patelt>
             </pattern>
             <pattern>

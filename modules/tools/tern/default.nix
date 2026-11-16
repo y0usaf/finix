@@ -2244,221 +2244,11 @@
           ];
         }
       ]);
-      "plugins/ui-menu/snippets/bot-answer-bubbles.css" = generators.sourceFile "bot-answer-bubbles.css" (generators.cssSource [
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
-          set = [
-            ["align-self" "flex-start"]
-            ["max-width" "var(--omp-answer-max, min(80%, 560px))"]
-            ["margin" "0"]
-            ["padding" "var(--omp-answer-pad, 7px 12px)"]
-            ["border-radius" "var(--omp-answer-radius, var(--r-card))"]
-            ["background" "var(--omp-bot-answer-bg, rgb(from var(--t1) r g b / 6%))"]
-            ["box-shadow" "var(--omp-bot-answer-edge, none)"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-answer-frost.css" = generators.sourceFile "bot-answer-frost.css" (generators.cssSource [
-        {
-          select = ":root:not(#s0):not(#s1) [data-role='omp.bot.reply'] > :is([data-role='omp.assistant'], [data-role='omp.assistant.rewound'])";
-          set = [
-            ["background" "var(--frost-reply-fill, var(--frost-fill))"]
-            ["-webkit-backdrop-filter" "var(--frost) !important"]
-            ["backdrop-filter" "var(--frost) !important"]
-            ["box-shadow" "var(--frost-edge)"]
-            ["--t1" "var(--frost-reply-ink, var(--frost-ink))"]
-            ["color" "var(--frost-reply-ink, var(--frost-ink))"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-ask.css" = generators.sourceFile "bot-ask.css" (generators.cssSource [
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.editor.ask']";
-          set = [
-            ["width" "min(100%, 720px)"]
-            ["margin" "8px auto"]
-            ["padding" "16px"]
-            ["border-radius" "var(--r-card)"]
-          ];
-        }
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.question']";
-          set = [
-            ["font-weight" "600"]
-          ];
-        }
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.dock'] [data-role='omp.ask.options']";
-          set = [
-            ["margin-top" "8px"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-dock.css" = generators.sourceFile "bot-dock.css" (generators.cssSource [
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.dock'] :is([data-role='omp.composer.context'], [data-role='omp.composer.usage'], [data-role='omp.composer.extras'])";
-          set = [
-            ["display" "none !important"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-events.css" = generators.sourceFile "bot-events.css" (generators.cssSource [
-        {
-          select = "[data-role='omp.bot.event.row']";
-          set = [
-            ["align-self" "center"]
-            ["max-width" "100%"]
-            ["min-height" "24px"]
-            ["margin-top" "2px"]
-            ["padding" "2px 6px"]
-            ["color" "var(--t3)"]
-            ["font-size" "12px"]
-            ["cursor" "pointer"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.event.row']:hover";
-          set = [
-            ["color" "var(--t2)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.event.action'], [data-role='omp.bot.event.more']";
-          set = [
-            ["flex" "none"]
-            ["color" "var(--t3)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.event.name']";
-          set = [
-            ["max-width" "min(60vw, 360px)"]
-            ["color" "var(--t2)"]
-            ["font-weight" "500"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.event.avatar']";
-          set = [
-            ["--p" "1px"]
-            ["flex" "none"]
-            ["width" "32px"]
-            ["height" "26px"]
-            ["overflow" "hidden"]
-            ["align-items" "center"]
-            ["justify-content" "center"]
-            ["pointer-events" "none"]
-          ];
-        }
-        {
-          select = ":is([data-role='omp.bot.event.avatar']) *";
-          set = [
-            ["pointer-events" "none"]
-          ];
-        }
-        {
-          select = ":is([data-role='omp.bot.event.avatar']) :is([data-role='omp.bot.emote'], [data-role='omp.bot.chao.idle'] > [data-role='omp.bot.line']:empty)";
-          set = [
-            ["display" "none !important"]
-          ];
-        }
-        {
-          select = ":is([data-role='omp.bot.event.avatar']) :is([data-role^='omp.bot.glyph.'], [data-role='omp.bot.blink'] [data-role^='omp.bot.px.'], [data-role^='omp.bot.chao.'])";
-          set = [
-            ["animation" "none !important"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.event.detail']";
-          set = [
-            ["align-self" "center"]
-            ["width" "min(100%, 720px)"]
-            ["margin" "4px auto 10px"]
-          ];
-        }
-      ]);
       "plugins/ui-menu/snippets/bot-jobs.css" = generators.sourceFile "bot-jobs.css" (generators.cssSource [
         {
           select = "[data-role='omp.bot.notice']";
           set = [
             ["display" "none !important"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-layout.css" = generators.sourceFile "bot-layout.css" (generators.cssSource [
-        {
-          select = "[data-role^='omp.bot.chat.']";
-          set = [
-            ["padding" "2px 4px 10px 6px"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.hero.']";
-          set = [
-            ["--p" "5px"]
-            ["padding" "48px 0 20px 0"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.top.']";
-          set = [
-            ["--p" "1px"]
-            ["padding" "2px 4px 10px 2px"]
-            ["box-shadow" "0 1px 0 var(--l1)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.floor']";
-          set = [
-            ["height" "34vh"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.'].sf-void";
-          set = [
-            ["display" "flex !important"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.none'], [data-role='omp.bot.none'].sf-void, [data-role='omp.bot.more'], [data-role='omp.bot.more'].sf-void";
-          set = [
-            ["display" "none !important"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-names.css" = generators.sourceFile "bot-names.css" (generators.cssSource [
-        {
-          select = "[data-role='omp.bot.words']";
-          set = [
-            ["min-width" "0"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.name']";
-          set = [
-            ["font-weight" "600"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.say']";
-          set = [
-            ["position" "relative"]
-            ["opacity" "0.58"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.top.'] [data-role='omp.bot.name']";
-          set = [
-            ["margin-left" "2px"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.hello']";
-          set = [
-            ["margin-top" "14px"]
-            ["font-size" "1.5em"]
-            ["line-height" "1.3"]
-            ["font-weight" "600"]
           ];
         }
       ]);
@@ -2634,135 +2424,6 @@
           ];
         }
       ]);
-      "plugins/ui-menu/snippets/bot-spacing.css" = generators.sourceFile "bot-spacing.css" (generators.cssSource [
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.reply'], :root:not(#ob) [data-role='omp.bot.you'], :root:not(#ob) [data-role^='omp.bot.eventbox.']";
-          set = [
-            ["margin" "-4px 0"]
-          ];
-        }
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.more'] + [data-role='omp.bot.reply']";
-          set = [
-            ["margin-top" "-12px"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-stop.css" = generators.sourceFile "bot-stop.css" (generators.cssSource [
-        {
-          select = "[data-role='omp.bot.stop']";
-          set = [
-            ["margin-left" "auto"]
-            ["padding" "2px 8px"]
-            ["border-radius" "9px"]
-            ["font-size" "0.85em"]
-            ["box-shadow" "0 0 0 1px var(--l2)"]
-            ["opacity" "0.75"]
-            ["cursor" "pointer"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.stop']:hover";
-          set = [
-            ["opacity" "1"]
-            ["background" "var(--l1)"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-text.css" = generators.sourceFile "bot-text.css" (generators.cssSource [
-        {
-          select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md";
-          set = [
-            ["line-height" "1.45"]
-          ];
-        }
-        {
-          select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md > :first-child";
-          set = [
-            ["margin-top" "0"]
-          ];
-        }
-        {
-          select = ":root:not(#ob) :is([data-role='omp.bot.reply'], [data-role='omp.bot.you']) .md > :last-child";
-          set = [
-            ["margin-bottom" "0"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-time.css" = generators.sourceFile "bot-time.css" (generators.cssSource [
-        {
-          select = "[data-role^='omp.bot.time.']";
-          set = [
-            ["align-self" "stretch"]
-            ["margin" "-2px 0 -8px"]
-            ["text-align" "center"]
-            ["font-size" "12px"]
-            ["line-height" "16px"]
-            ["color" "var(--t2)"]
-            ["font-family" "var(--sans)"]
-          ];
-        }
-        {
-          select = "[data-role='omp.bot.took']";
-          set = [
-            ["opacity" "0.45"]
-            ["font-size" "0.85em"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-tints.css" = generators.sourceFile "bot-tints.css" (generators.cssSource [
-        {
-          select = "[data-role^='omp.bot.chat.'], [data-role^='omp.bot.hero.'], [data-role^='omp.bot.top.'], [data-role^='omp.bot.eventbox.']";
-          set = [
-            ["--t" "#8f6bff"]
-            ["--p" "2px"]
-            ["position" "relative"]
-            ["font-family" "var(--sans)"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.'][data-role$='.red']";
-          set = [
-            ["--t" "#ff4d5e"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.'][data-role$='.orange']";
-          set = [
-            ["--t" "#ff8a3d"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.'][data-role$='.yellow']";
-          set = [
-            ["--t" "#f2b705"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.'][data-role$='.green']";
-          set = [
-            ["--t" "#2fbf71"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.'][data-role$='.teal']";
-          set = [
-            ["--t" "#19b8c4"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.'][data-role$='.blue']";
-          set = [
-            ["--t" "#3d7bff"]
-          ];
-        }
-        {
-          select = "[data-role^='omp.bot.'][data-role$='.pink']";
-          set = [
-            ["--t" "#ff5fa8"]
-          ];
-        }
-      ]);
       "plugins/ui-menu/snippets/bot-turn-stats.css" = generators.sourceFile "bot-turn-stats.css" (generators.cssSource [
         {
           select = ":root:not(#b0) [data-role='omp.bot.took']";
@@ -2771,126 +2432,12 @@
           ];
         }
       ]);
-      "plugins/ui-menu/snippets/bot-yorha-labels.css" = generators.sourceFile "bot-yorha-labels.css" (generators.cssSource [
-        {
-          select = ":root:not(#oz) [data-role^='omp.bot.time.']";
-          set = [
-            ["font" "400 11px/1 var(--sans)"]
-            ["letter-spacing" "1.5px"]
-            ["text-transform" "uppercase"]
-            ["color" "var(--t3)"]
-          ];
-        }
-        {
-          select = ":root:not(#oz) [data-role^='omp.bot.top.']";
-          set = [
-            ["box-shadow" "0 1px 0 var(--l3)"]
-          ];
-        }
-        {
-          select = ":root:not(#oz) [data-role^='omp.bot.top.'] [data-role='omp.bot.name']";
-          set = [
-            ["font" "400 16.5px/24px var(--sans)"]
-            ["letter-spacing" "2.5px"]
-            ["text-transform" "uppercase"]
-            ["color" "var(--ink)"]
-          ];
-        }
-        {
-          select = ":root:not(#oz) [data-role='omp.bot.event.row']";
-          set = [
-            ["font" "400 11px/16px var(--sans)"]
-            ["letter-spacing" "1.5px"]
-            ["text-transform" "uppercase"]
-            ["color" "var(--t3)"]
-          ];
-        }
-        {
-          select = ":root:not(#oz) [data-role='omp.bot.event.name']";
-          set = [
-            ["font" "inherit"]
-            ["color" "var(--ink)"]
-          ];
-        }
-        {
-          select = ":root:not(#oz) [data-role='omp.bot.hello']";
-          set = [
-            ["font" "400 22px/30px var(--sans)"]
-            ["letter-spacing" "2.5px"]
-            ["text-transform" "uppercase"]
-          ];
-        }
-        {
-          select = ":root:not(#oz) [data-role='omp.bot.say']";
-          set = [
-            ["font" "400 11px/16px var(--sans)"]
-            ["letter-spacing" "0"]
-            ["color" "var(--t2)"]
-            ["opacity" "1"]
-          ];
-        }
-        {
-          select = ":root:not(#oz) [data-role='omp.bot.say']::after";
-          set = [
-            ["content" "\"\""]
-            ["display" "inline-block"]
-            ["width" "7px"]
-            ["height" "12px"]
-            ["margin-left" "6px"]
-            ["vertical-align" "-2px"]
-            ["background" "var(--ink)"]
-            ["animation" "yh-blink calc(1000ms * var(--yh-t)) steps(1, end) 4"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-you-frost.css" = generators.sourceFile "bot-you-frost.css" (generators.cssSource [
-        {
-          select = ":root:not(#s0):not(#s1) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
-          set = [
-            ["background" "var(--frost-you-fill, var(--frost-fill))"]
-            ["-webkit-backdrop-filter" "var(--frost) !important"]
-            ["backdrop-filter" "var(--frost) !important"]
-            ["box-shadow" "var(--frost-edge)"]
-            ["--t1" "var(--frost-you-ink, var(--frost-ink))"]
-            ["color" "var(--frost-you-ink, var(--frost-ink))"]
-          ];
-        }
-      ]);
-      "plugins/ui-menu/snippets/bot-you.css" = generators.sourceFile "bot-you.css" (generators.cssSource [
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user']";
-          set = [
-            ["align-self" "flex-end"]
-            ["width" "auto"]
-            ["max-width" "var(--omp-you-max, min(80%, 560px))"]
-            ["margin" "0 0 0 auto"]
-          ];
-        }
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body";
-          set = [
-            ["align-self" "stretch"]
-            ["align-items" "flex-end"]
-            ["width" "auto"]
-            ["max-width" "none"]
-            ["margin" "0"]
-            ["padding" "0"]
-            ["border" "0"]
-            ["border-radius" "0"]
-            ["background" "none"]
-            ["box-shadow" "none"]
-          ];
-        }
-        {
-          select = ":root:not(#ob) [data-role='omp.bot.you'] .sf-card[data-role^='omp.user'] > .sf-card-body > .sf-md";
-          set = [
-            ["padding" "var(--omp-you-pad, 7px 12px)"]
-            ["border-radius" "var(--omp-you-radius, var(--r-card))"]
-            ["background" "var(--omp-you-bg, var(--l2))"]
-            ["box-shadow" "var(--omp-you-edge, none)"]
-          ];
-        }
-      ]);
+      "plugins/ui-menu/snippets/bot-view.css" = "${pkgs.runCommand "bot-view.css" {nativeBuildInputs = [pkgs.python3];} ''
+        python3 ${./config/plugins/ui-menu/bot-view.py} ${tern}/bin/.tern-wrapped \
+          ${lib.escapeShellArg ":root:not(#bot-a):not(#bot-b):not(#bot-c) :where(section.tn-pane:has([data-role^='omp.bot.']) .sf-chat-reader:not(.sf-layer))"} \
+          ${lib.escapeShellArg "[data-role^='omp.bot.chao.'], [data-role^='omp.bot.chao.'] *, svg *"} \
+          ${./config/plugins/ui-menu/bot-view.css} > $out
+      ''}";
       "plugins/ui-menu/snippets/bottom.css" = generators.sourceFile "bottom.css" (generators.cssSource [
         {
           select = "html.lay-rail.tabs-h #tabbar > .tb-in > .tn-peers";
@@ -3040,7 +2587,6 @@
       ]);
       "plugins/ui-menu/snippets/mini.css" = "${flakeInputs.tern-ozette}/mini.css";
       "plugins/ui-menu/snippets/ozette-answer-bubbles.css" = "${flakeInputs.tern-ozette}/ozette-answer-bubbles.css";
-      "plugins/ui-menu/snippets/ozette-bot-you.css" = "${flakeInputs.tern-ozette}/ozette-bot-you.css";
       "plugins/ui-menu/snippets/ozette-cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
       "plugins/ui-menu/snippets/ozette-motion.css" = "${flakeInputs.tern-ozette}/motion.css";
       "plugins/ui-menu/snippets/ozette.css" = "${flakeInputs.tern-ozette}/ozette.css";
@@ -4847,7 +4393,7 @@
       ]);
       "plugins/ui-menu/snippets/composer-frost.css" = generators.sourceFile "composer-frost.css" (generators.cssSource [
         {
-          select = ":root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor'], :root:not(#s0):not(#s1) [data-role='omp.bot.dock'] .sf-col[data-role^='omp.editor']";
+          select = ":root:not(#s0):not(#s1) [data-role='omp.chat.dock'] .sf-col[data-role^='omp.editor']";
           set = [
             ["background" "var(--frost-fill)"]
             ["-webkit-backdrop-filter" "var(--frost) !important"]
@@ -4909,14 +4455,10 @@
         }
       ]);
       "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
-      "plugins/ui-menu/snippets/yorha-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/yorha-bot-you.css" = "${flakeInputs.tern-ozette}/yorha-bot-you.css";
       "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
       "plugins/ui-menu/snippets/grok.css" = "${flakeInputs.tern-ozette}/grok.css";
       "plugins/ui-menu/snippets/grok-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-answer-bubbles.css";
       "plugins/ui-menu/snippets/grok-user-bubbles.css" = "${flakeInputs.tern-ozette}/grok-user-bubbles.css";
-      "plugins/ui-menu/snippets/grok-bot-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-bot-answer-bubbles.css";
-      "plugins/ui-menu/snippets/grok-bot-you.css" = "${flakeInputs.tern-ozette}/grok-bot-you.css";
       "plugins/ui-menu/snippets/departure.css" = "${flakeInputs.tern-ozette}/departure.css";
       "plugins/ui-menu/snippets/automata.css" = "${flakeInputs.tern-ozette}/automata.css";
       "plugins/ui-menu/snippets/botanical.css" = "${flakeInputs.tern-ozette}/botanical.css";
