@@ -223,14 +223,14 @@ draws, or NIL when it already draws what TO does."
 (defun rail--glide (state now)
   "Step every gauge toward its last sample: an exponential approach over the time
 since the last step, landing on the sample once it draws the same. Leaves how
-long until a drawn number next changes in the state's :RAIL-DUE, NIL once none
+long until a drawn number next changes in the state's :RAIL-GLIDE, NIL once none
 will, so the rail ticks only when there is a different number to draw."
   (let* ((targets (rail--meter-targets state))
          (shown (getf state :rail-meter))
          (last (getf state :rail-step))
          ;; a glide that had stopped starts from where it stood, not from when
          ;; the rail last happened to look
-         (elapsed (if (and last (getf state :rail-due))
+         (elapsed (if (and last (getf state :rail-glide))
                       (max 0d0 (min 1d0 (- now last)))
                       0d0))
          (grip (- 1d0 (expt 2.718281828459045 (- (/ elapsed (getf +rail--glide+ :tau))))))
@@ -249,7 +249,7 @@ will, so the rail ticks only when there is a different number to draw."
                       due (if due (min due next) next))
                 (setf (getf shown key) to)))))
     (setf (getf state :rail-meter) shown
-          (getf state :rail-due) due)))
+          (getf state :rail-glide) due)))
 
 (defun rail--gauge (label percent detail hot ground)
   (let* ((percent (max 0 (min 100 (round (or percent 0)))))
@@ -696,7 +696,7 @@ is beside it."
                                       :bolo-since nil :bolo-history nil :bolo-fade nil
                                       :rail-side nil :rail-edges nil :rail-hop nil
                                       :rail-focus nil :rail-box nil
-                                      :rail-meter nil :rail-step nil :rail-due nil))
+                                      :rail-meter nil :rail-step nil :rail-glide nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
     (cassette--bolo-watch state event))
@@ -790,9 +790,9 @@ is beside it."
                       ;; focus and tiling with it.
                       (let ((beat (cond (hop :refresh)
                                         (voicing 16)
-                                        ((getf state :rail-due)
+                                        ((getf state :rail-glide)
                                          (max (getf +rail--glide+ :tick)
-                                              (ceiling (* 1000 (getf state :rail-due))))))))
+                                              (ceiling (* 1000 (getf state :rail-glide))))))))
                         (when beat (list (interval :hop beat))))
                       (cassette--bolo-watches)
                       (when (and output tray)
