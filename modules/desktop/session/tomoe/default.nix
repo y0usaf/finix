@@ -376,6 +376,12 @@
       lisp = ./lisp/rail-fused.lisp;
       description = "a pixel HUD cast in sand: a bevelled thirteen-art-pixel slab down the seam, its compartments recessed into the material with grooves between them and bolted to the focused card's frame by clamps; the focused card wears a double line whose top rules open round its name, every other card one light line with its name set into it, and both frames run into the slab. A focus switch turns the frame to sand -- the old one lets go from the rail outward, its grains falling and draining into the slab, the new one poured out of the slab cell by cell while its name types itself in. The gauges, the clock and bolo's voice are all grains in the slab's compartments, in morph's slate and cream. Drawn by one GPU shader that rests once the pour has settled and the voice has calmed.";
     }
+    {
+      name = "sand";
+      shader = ./shaders/sand.glsl;
+      lisp = ./lisp/rail-sand.lisp;
+      description = "pixels as matter: every card's frame is three rows of packed four pixel grains in SAND's warm ground tones, each grain its own shade with a few catching the light, and a card out of focus keeps only a dusting of loose grains along its inner edge. Focus is poured -- the old frame's grains drop, drift and run along its bottom edge into the seam's glass tube while the new frame is poured out of it, its top edge filling behind a spray, its sides filling from the bottom up, its bottom running in from both corners. The tube holds the date and clock cast in grains and the readings as sand levels in glass compartments, mounded while they climb and dented while they fall, with a stream falling in as they rise; bolo's voice is a bed of grains that hops with the level history and dies away over the settle. Every grain is a closed form of its cell, the switch time and a hash, drawn by one GPU shader that stops once the sand has landed; geometry, speeds and the palette are +rail-sand--...+ in lisp/rail-sand.lisp.";
+    }
   ];
 
   railThemeNames = map (theme: theme.name) railThemes;
