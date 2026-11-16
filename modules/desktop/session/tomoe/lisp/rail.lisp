@@ -714,7 +714,7 @@ knocked out of it, all from CONTEXT."
   (let ((rest (cddr (member name +rail-themes+))))
     (if rest (first rest) (first +rail-themes+))))
 
-(define-extension "bar" (:reads (:system :services :data :outputs :layout :focus :command)
+(define-extension "bar" (:reads (:system :services :data :outputs :layout :focus :command :windows)
                          :state (list :cpu nil :memory nil :gpu nil
                                       :bolo-state nil :bolo-level 0
                                       :bolo-since nil :bolo-history nil :bolo-fade nil
