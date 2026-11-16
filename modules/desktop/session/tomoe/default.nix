@@ -3112,11 +3112,13 @@
       name = "llama-herd";
       path = "${./shaders/llama-herd.glsl}";
       mode = "light";
+      family = "llama-herd";
     }
     {
       name = "llama-herd-night";
       path = "${./shaders/llama-herd-night.glsl}";
       mode = "dark";
+      family = "llama-herd";
     }
     {
       name = "liquify";
@@ -3181,9 +3183,8 @@
       0
       (config.user.theme.apply entry.mode)
       entry.mode
+      (entry.family or entry.name)
     ]) (map wallpaper cfg.wallpapers);
-    mode = config.user.daylight.mode;
-    current = "${pkgs.dconf}/bin/dconf read /org/gnome/desktop/interface/color-scheme";
     preview = {
       width = 256;
       height = 144;
@@ -3295,7 +3296,7 @@ in {
     wallpapers = lib.mkOption {
       type = lib.types.listOf (lib.types.enum wallpaperNames);
       default = wallpaperNames;
-      description = "Shader wallpapers in menu order: what the wallpaper menu offers and what a session may pick for the sun's mode. Each one carries the colour scheme it applies, so a session that starts at night picks the dark one by itself.";
+      description = "Shader wallpapers in menu order: what the wallpaper menu offers and what a session may pick for the theme's mode. Each one carries the colour scheme it applies when picked by hand, and the shaders that share a family are the light and dark versions of one wallpaper, so a session follows the theme from one to the other.";
     };
 
     bar = {
@@ -4426,11 +4427,11 @@ in {
                                               :width tile-width :height tile-height :layer :overlay
                                               :background (list :shader path :fps fps))))))))
 
-      (define-extension "shader-wallpaper" (:reads (:command :ui :outputs) :state nil) (snapshot state event)
+      (define-extension "shader-wallpaper" (:reads (:command :ui :outputs :data) :state nil) (snapshot state event)
         (let* ((shaders (getf +shader-wallpaper+ :shaders))
                (count (length shaders))
-               (probe (getf +shader-wallpaper+ :mode)))
-          (destructuring-bind (&key index menu mode ticks &allow-other-keys) state
+               (theme (state-value snapshot :theme-mode)))
+          (destructuring-bind (&key index menu family mode apply command &allow-other-keys) state
             (when (equal (getf event :owner) "shader-wallpaper")
               (let ((name (if (eq (getf event :type) :command)
                               (getf event :name)
@@ -4440,49 +4441,45 @@ in {
                       (t
                        (multiple-value-bind (action choice) (and menu (menu-choice event menu count))
                          (case action
-                           (:select (setf index choice menu nil))
+                           (:select
+                            (setf index choice menu nil
+                                  family (fifth (nth choice shaders))
+                                  command (third (nth choice shaders))
+                                  apply (1+ (or apply 0))))
                            (:cancel (setf menu nil))
                            (:move (setf menu choice))))))))
-            (flet ((follow (sun current)
-                     (flet ((pick (name)
-                              (position name shaders :test #'equal
-                                                     :key (lambda (entry) (fourth entry)))))
-                       (cond ((null mode)
-                              (setf mode sun
-                                    index (or (pick current) (pick sun))))
-                             ((not (equal sun mode))
-                              (setf mode sun
-                                    index (or (pick sun) index)))))))
-              (case (getf event :type)
-                (:timer
-                 (when (equal (getf event :name) :shader-mode-poll)
-                   (setf ticks (1+ (or ticks 0)))))
-                (:exec
-                 (when (and (equal (getf event :name) :shader-mode)
-                            (eql (getf event :code) 0))
-                   (let* ((out (or (getf event :stdout) ""))
-                          (cut (or (position #\Newline out) (length out)))
-                          (sun (string-trim '(#\Space #\Tab #\Newline) (subseq out 0 cut))))
-                     (follow sun (cond ((search "dark" out :start2 cut) "dark")
-                                       ((search "light" out :start2 cut) "light"))))))))
+            (flet ((first-of (name)
+                     (position name shaders :test #'equal
+                                            :key (lambda (entry) (fourth entry))))
+                   (variant (name)
+                     (loop for entry in shaders
+                           for slot from 0
+                           when (and (equal name (fourth entry))
+                                     (equal family (fifth entry)))
+                             return slot)))
+              (let ((now (and theme (string-downcase (symbol-name theme)))))
+                (when (and now (not (equal now mode)))
+                  (setf mode now)
+                  (let ((slot (or (variant now) (first-of now))))
+                    (when slot
+                      (setf index slot
+                            family (fifth (nth slot shaders))))))))
             (when index (setf index (mod index count)))
             (setf menu (and menu (mod menu count)))
             (let* ((slot (or menu index))
-                   (shown (and slot (nth slot shaders)))
-                   (command (and index (third (nth index shaders)))))
-              (values (list :index index :menu menu :mode mode :ticks ticks)
+                   (shown (and slot (nth slot shaders))))
+              (values (list :index index :menu menu :family family :mode mode
+                            :apply apply :command command)
                       (append (list (define-command "shader-wallpaper-menu"
                                       :description "Choose the shader wallpaper.")
-                                    (apply #'bind-key (getf +shader-wallpaper+ :bind))
-                                    (interval :shader-mode-poll 30000))
+                                    (apply #'bind-key (getf +shader-wallpaper+ :bind)))
                               (when (and index shown)
                                 (list (shell-surface :shader-wallpaper (ui :stack)
                                                      :anchors '(:top :right :bottom :left)
                                                      :layer :background
                                                      :background (list :shader (first shown) :fps (second shown)))))
-                              (when probe
-                                (list (exec-async :shader-mode (format nil "~A; ~A # ~D" probe (getf +shader-wallpaper+ :current) (or ticks 0)))))
-                              (when command (list (exec-async :theme command)))
+                              (when (and command (plusp (or apply 0)))
+                                (list (exec-async :theme (format nil "~A # ~D" command apply))))
                               (when menu
                                 (shader-wallpaper--menu shaders menu (context snapshot :outputs))))
                       nil)))))
