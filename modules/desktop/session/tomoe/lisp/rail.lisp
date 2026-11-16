@@ -1,6 +1,6 @@
 (in-package #:tomoe-user)
 
-;;; MORPH
+;;; morph
 ;;;
 ;;; The seam between the deck's two columns is filled by one slab, and the
 ;;; focused card's frame is the same material: one colour, one thickness, the two

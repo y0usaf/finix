@@ -1,4 +1,4 @@
-// MORPH: the rail's slab and the focused card's frame as one cast material.
+// morph: the rail's slab and the focused card's frame as one cast material.
 //
 // One signed field covers the slab in the seam and the frame round every card
 // the rail carries. The focused frame is the slab's own material, as thick as
