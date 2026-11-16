@@ -464,9 +464,16 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     c = D3(SHADOW_C) * sh + c * (1.0 - sh);
     a = sh + a * (1.0 - sh);
     g_shine = shine;
+    // The material is one field, so the direction its shading reads off it is the
+    // field's own screen-space derivative. Four more evaluations would say the
+    // same thing, and with the other two they made the shader compile for 1.5 s
+    // -- past the 1 s a policy evaluation gets, so the first Alt+Shift+T onto
+    // this theme was dropped -- where this says it in 0.4 s. Only the direction
+    // is used, so nothing the look reads off it changed: the 2 px spread the
+    // difference took was smoothing, not data. Taken outside the COV test so a
+    // quad half on the material still has both its samples.
+    vec2 g = vec2(dFdx(f), dFdy(f));
     if (cov > 0.0) {
-        vec2 g = vec2(field(p + vec2(1.0, 0.0)) - field(p - vec2(1.0, 0.0)),
-                      field(p + vec2(0.0, 1.0)) - field(p - vec2(0.0, 1.0))) * 0.5;
 #ifdef GLASS
         vec3 m = glass(p, f, g / (length(g) + 1e-6));
 #else
