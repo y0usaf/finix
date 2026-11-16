@@ -153,7 +153,7 @@
 		border-radius: 1.2em;
 		-webkit-backdrop-filter: var(--dawn-blur);
 		backdrop-filter: var(--dawn-blur);
-		box-shadow: var(--dawn-lift), inset 0 0 0 1px var(--dawn-line);
+		box-shadow: var(--dawn-lift), inset 0 0 0 1px var(--dawn-line), inset 0 1px 0 var(--dawn-hi);
 	}
 	& .sf-card[data-role^='omp.user'] .sf-md {
 		background: var(--dawn-you);
@@ -176,7 +176,7 @@
 		background: var(--dawn-wash);
 		-webkit-backdrop-filter: var(--dawn-blur);
 		backdrop-filter: var(--dawn-blur);
-		box-shadow: var(--dawn-lift), inset 0 0 0 1px var(--dawn-line);
+		box-shadow: var(--dawn-lift), inset 0 0 0 1px var(--dawn-line), inset 0 1px 0 var(--dawn-hi);
 		overflow: hidden;
 	}
 	& .sf-card[data-role^='omp.custom'] > .sf-card-head,
@@ -784,6 +784,7 @@ html.tn-themed:not(#dawn) {
 	--dawn-bad: light-dark(#cf3a33, #ff7a71);
 	--dawn-blur: blur(2em) saturate(150%);
 	--dawn-lift: 0 0.35em 1.1em -0.55em light-dark(rgb(23 23 27 / 24%), rgb(0 0 0 / 62%));
+	--dawn-hi: light-dark(rgb(255 255 255 / 55%), rgb(255 255 255 / 7%));
 	--dawn-quick: 0.12s ease-out;
 	--grok-page: var(--dawn-page);
 	--grok-chrome: var(--dawn-card);
