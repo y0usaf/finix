@@ -382,6 +382,12 @@
       lisp = ./lisp/rail-sand.lisp;
       description = "pixels as matter: every card's frame is three rows of packed four pixel grains in SAND's warm ground tones, each grain its own shade with a few catching the light, and a card out of focus keeps only a dusting of loose grains along its inner edge. Focus is poured -- the old frame's grains drop, drift and run along its bottom edge into the seam's glass tube while the new frame is poured out of it, its top edge filling behind a spray, its sides filling from the bottom up, its bottom running in from both corners. The tube holds the date and clock cast in grains and the readings as sand levels in glass compartments, mounded while they climb and dented while they fall, with a stream falling in as they rise; bolo's voice is a bed of grains that hops with the level history and dies away over the settle. Every grain is a closed form of its cell, the switch time and a hash, drawn by one GPU shader that stops once the sand has landed; geometry, speeds and the palette are +rail-sand--...+ in lisp/rail-sand.lisp.";
     }
+    {
+      name = "sprite";
+      shader = ./shaders/sprite.glsl;
+      lisp = ./lisp/rail-sprite.lisp;
+      description = "the deck as a game HUD on four-pixel art pixels: a bevelled, notched nine-slice frame round every card with the focused one drawn in a warm sand bevel and a sky-blue selection cursor; the rail is a cabinet panel with a keyline, cut grooves, a two-channel VU tower of pips for bolo's voice that holds its peaks and lets them fall, and sixteen-pip gauges whose values run up like a score, with three clamps bolting the panel to the focused card. Focus moves as a sprite: the corner brackets pull in and go white, fly to the new card over two stepped eased frames leaving a dithered afterimage and a dashed smear, land white with a spark at each corner and settle in the accent, all at twenty frames a second. Drawn on the GPU on one art grid; the art is +rail-sprite--cast+ with its two palettes, the panel's rhythm +rail-sprite--panel+ and the sprite's cadence +rail-sprite--switch+ in lisp/rail-sprite.lisp, and every surface rests once its motion has settled.";
+    }
   ];
 
   railThemeNames = map (theme: theme.name) railThemes;
