@@ -370,6 +370,12 @@
       lisp = ./lisp/rail-glass.lisp;
       description = "morph in liquid glass: the same slab, frames, gauges, motion and voice, but the slab and the focused frame refract, frost and tint what lies beneath them, with light caught along their rims; the material and its glass are +rail-glass+ in lisp/rail-glass.lisp.";
     }
+    {
+      name = "fused";
+      shader = ./shaders/fused.glsl;
+      lisp = ./lisp/rail-fused.lisp;
+      description = "a pixel HUD cast in sand: a bevelled thirteen-art-pixel slab down the seam, its compartments recessed into the material with grooves between them and bolted to the focused card's frame by clamps; the focused card wears a double line whose top rules open round its name, every other card one light line with its name set into it, and both frames run into the slab. A focus switch turns the frame to sand -- the old one lets go from the rail outward, its grains falling and draining into the slab, the new one poured out of the slab cell by cell while its name types itself in. The gauges, the clock and bolo's voice are all grains in the slab's compartments, in morph's slate and cream. Drawn by one GPU shader that rests once the pour has settled and the voice has calmed.";
+    }
   ];
 
   railThemeNames = map (theme: theme.name) railThemes;
