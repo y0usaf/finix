@@ -56,7 +56,6 @@
 (defparameter +rail-grain--pour+ 10400d0)    ; pixels a second the pour runs (2600 art px)
 (defparameter +rail-grain--crumble+ 12000d0) ; and the old frame's rules run back (3000)
 (defparameter +rail-grain--fall+ 1200d0)     ; pixels a second squared its type and sand drop (300)
-(defparameter +rail-grain--voice+ 4800d0)    ; pixels a second the voice runs round the frame (1200)
 
 (defun rail-grain--tone (key)
   "KEY of the cast in the current mode, its four tones as twelve reals."
@@ -65,12 +64,12 @@
 (defun rail-grain--theme ()
   "Every colour and speed grain's shader reads, after the kit's own numbers:
 the line, the unfocused title's ink, the glint, the dim and the compartments'
-frames, then the frame's four tones and the ink's four, then the speeds."
+frames, then the frame's four tones and the ink's four, then the pour's speed,
+the crumble and the fall."
   (append (kit--colors '(:line :name :glint :dim :box))
           (rail-grain--tone :frame)
           (rail-grain--tone :ink)
-          (list +rail-grain--pour+ +rail-grain--crumble+
-                +rail-grain--fall+ +rail-grain--voice+)))
+          (list +rail-grain--pour+ +rail-grain--crumble+ +rail-grain--fall+)))
 
 (defun rail-grain--draw (look context)
   "grain: the rules over the output, the focused frame's furniture in its top

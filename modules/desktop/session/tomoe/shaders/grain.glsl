@@ -25,19 +25,20 @@
 // cell: nothing is integrated, nothing is simulated, and once the motion has
 // landed the surface holds its last picture and draws nothing.
 //
-// Bolo's voice jumps every grain of the focused double rule off the frame by
-// the level it had when the voice ran that far round from the title, hot grains
-// glinting, and the bed in the compartment beside the title hops with the level
-// history. Only the focused card's rules move. Coordinates are the output's,
+// Bolo's voice jumps every grain of the focused double rule off the frame at
+// once, each grain by its own share of the level, so the whole frame is the
+// waveform and no side waits for a wave to run round to it, hot grains glinting;
+// the bed in the compartment beside the title scrolls the level history. Only the focused card's rules move. Coordinates are the output's,
 // y down.
 
 const float A = 4.0;                       // the art pixel, in output pixels
-const float SETTLE = 0.65;                 // seconds the pour takes to land
+const int TITLE_CHARS = 18;                // characters of a card's title the kit packs
+const float DESIGN = 0.65;                 // seconds the pour was drawn for
 
 const int T_LINE = THEME, T_NAME = THEME + 3, T_GLINT = THEME + 6;
 const int T_DIM = THEME + 9, T_BOX = THEME + 12;
 const int T_FRAME = THEME + 15, T_INK = THEME + 27;
-const int T_POUR = THEME + 39, T_CRUMBLE = THEME + 40, T_FALL = THEME + 41, T_VOICE = THEME + 42;
+const int T_POUR = THEME + 39, T_CRUMBLE = THEME + 40, T_FALL = THEME + 41;
 
 const vec2 OUT[4] = vec2[4](vec2(0.0, -1.0), vec2(1.0, 0.0), vec2(0.0, 1.0), vec2(-1.0, 0.0));
 
@@ -123,8 +124,9 @@ vec2 nearest_on(vec4 box, vec2 q) {
 int g_host;
 bool g_anim;
 bool g_double;
-float g_pour, g_crumble, g_fall, g_voice;
+float g_pour, g_crumble, g_fall;
 float g_ropen;
+bool g_voiced;                   // bolo has the turn this instant
 
 // when the pour that starts at UA reaches the art column at X
 float arrive_at(float x, vec4 ubox, float ua, float per) {
@@ -167,7 +169,7 @@ int grain_char(int base, int i) {
 // how many characters of the text at BASE, up to N, before its trailing spaces
 int grain_len(int base, int n) {
     int nums = (n + 2) / 3;
-    for (int i = 4; i > 0; i--) {
+    for (int i = 6; i > 0; i--) {
         int j = i - 1;
         if (j >= nums) continue;
         float v = D(base + j);
@@ -197,11 +199,11 @@ bool grain_text(vec2 p, vec2 at, float s, int base, int n, out int idx) {
 // whether pixel p is a lit cell of I's title, and which character it belongs to
 bool title_hit(vec2 p, vec4 b, int i, out int idx) {
     idx = -1;
-    if (p.x < b.x + 2.0 * A || p.x > b.x + 52.0 * A) return false;
+    if (p.x < b.x + 2.0 * A || p.x > b.x + 74.0 * A) return false;
     if (p.y < b.y - 6.0 * A || p.y >= b.y - A) return false;
-    int n = grain_len(title_base(i), 12);
+    int n = grain_len(title_base(i), TITLE_CHARS);
     if (n <= 0) return false;
-    return grain_text(p, vec2(b.x + 3.0 * A, b.y - 6.0 * A), A, title_base(i), 12, idx);
+    return grain_text(p, vec2(b.x + 3.0 * A, b.y - 6.0 * A), A, title_base(i), TITLE_CHARS, idx);
 }
 
 // ---------------------------------------------------------------- the furniture
@@ -223,13 +225,13 @@ float readings_open(float AW) {
 // round the host's bolo compartment and readings as far as the pour has reached.
 bool rule_open(vec2 p, vec4 b, int i, float x, float dt, bool anim) {
     if (p.y < b.y - 24.0 || p.y >= b.y - 4.0) return false;
-    int n = grain_len(title_base(i), 12);
+    int n = grain_len(title_base(i), TITLE_CHARS);
     if (n <= 0) return false;
     float t1 = 4.0 * float(n) + 2.0;
     if (x >= 1.0 && x < t1 + 1.0) return true;
     if (i != g_host) return false;
     float vx0 = t1 + 3.0;
-    bool span = (x >= 1.0 && x < vx0 + 28.0);
+    bool span = g_voiced && (x >= 1.0 && x < vx0 + 28.0);
     if (!span) {
         float AW = ceil((b.z - b.x) / A);
         span = (x >= g_ropen - 2.0 && x < AW - 1.0);
@@ -263,18 +265,20 @@ bool furn(vec2 p, vec4 b, int i, float dt, bool typed, bool voiced, out vec4 col
     float bw = b.z - b.x;
     float AW = ceil(bw / A);
     int base = title_base(i);
-    int n = grain_len(base, 12);
+    int n = grain_len(base, TITLE_CHARS);
     float t1 = 4.0 * float(n) + 2.0;
     float vx0 = t1 + 3.0;
     int idx = -1;
-    if (n > 0 && grain_text(p, vec2(b.x + 3.0 * A, b.y - 6.0 * A), A, base, 12, idx)) {
+    if (n > 0 && grain_text(p, vec2(b.x + 3.0 * A, b.y - 6.0 * A), A, base, TITLE_CHARS, idx)) {
         if (typed && !furn_live(3.0 + 4.0 * float(idx), b, dt, true)) return false;
         col = vec4(grain_tone(vec2(cx, cy), 9u, false, false), 1.0);
         return true;
     }
     // bolo's compartment: an outline of grains beside the title, and inside it a
-    // bed of the last three quarters of a second of the voice
-    if (cx >= vx0 && cx < vx0 + 26.0 && cy >= -6.0 && cy <= -2.0) {
+    // bed of the last three quarters of a second of the voice. It is only there
+    // while bolo has the turn -- a still rail shows the rule running on, not an
+    // empty box beside the title.
+    if (g_voiced && cx >= vx0 && cx < vx0 + 26.0 && cy >= -6.0 && cy <= -2.0) {
         if (typed && !furn_live(vx0, b, dt, true)) return false;
         bool border = cx < vx0 + 1.0 || cx >= vx0 + 25.0 || cy <= -6.0 || cy >= -2.0;
         if (border) {
@@ -409,11 +413,13 @@ vec4 plain_card(vec2 p, vec4 b, int i, float dt) {
         bool open = false;
         if (r.sd == 0) {
             float xc = floor((p.x - b.x) / A);
-            int tn = grain_len(title_base(i), 12);
+            int tn = grain_len(title_base(i), TITLE_CHARS);
             open = tn > 0 && xc >= 1.0 && xc < 4.0 * float(tn) + 3.0;
             if (!open && i == g_host) open = rule_open(p, b, i, xc, dt, g_anim);
         }
-        if (!open) col = vec4(D3(T_LINE), 1.0);
+        // a card out of focus keeps a dimmer rule, so the focused card's
+        // doubled one is the frame the eye lands on
+        if (!open) col = vec4(D3(T_LINE), i == g_host ? 1.0 : 0.55);
     }
     int idx;
     if (title_hit(p, b, i, idx)) col = vec4(D3(T_NAME), 1.0);
@@ -480,7 +486,7 @@ vec4 focused_over(vec2 p, vec4 b, int i, float dt, float ua, float per, vec4 ubo
                     if (col.a > 0.0) break;
                 }
             } else {
-                float lev = env * voice_level(max(0.0, pdist(u, 12.0, per) / g_voice));
+                float lev = env * min(1.0, voice_around(u, per));
                 float hop = floor(lev * 3.99 *
                                   (0.3 + 0.7 * hf(hu(int(lc.x), int(lc.y),
                                                      uint(int(iTime * 20.0) & 63)))));
@@ -531,8 +537,8 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     vec2 p = kit_point(fragCoord);
     int F = int(D(K_FOCUS));
     int O = int(D(K_OLD));
-    float dt = D(K_TSW) > -1e5 ? max(0.0, sw_age()) : 0.0;
-    g_anim = D(K_FLOW) >= 0.0 && dt < SETTLE;
+    float dt = D(K_TSW) > -1e5 ? move_age(DESIGN) : 0.0;
+    g_anim = D(K_FLOW) >= 0.0 && sw_age() >= 0.0 && sw_age() < D(K_SETTLE);
     int first = -1;
     for (int i = 0; i < 8; i++) {
         if (card_shown(i)) {
@@ -543,10 +549,10 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     if (first < 0) discard;
     g_host = F >= 0 ? F : first;
     g_double = F >= 0;
+    g_voiced = F >= 0 && voice_env() > 0.002;
     g_pour = max(1.0, D(T_POUR));
     g_crumble = D(T_CRUMBLE);
     g_fall = D(T_FALL);
-    g_voice = max(1.0, D(T_VOICE));
     vec4 hb = card(g_host);
     // where the readings' rule opens, for the host's own top rule
     g_ropen = 1e9;

@@ -7,8 +7,9 @@
 ;;; rings meet in a single shared column of dots down the middle of the seam and
 ;;; the corners of every ring land on a dot. A card out of focus is unlit dots --
 ;;; slate in the dark, warm grey on paper -- with its title lit dim; the focused
-;;; card's ring is lit, warm white with a halo in the dark and ink with a faint
-;;; darkening one on paper, and its top edge carries a five-row dot-matrix
+;;; card's ring is lit, warm white with a wide halo in the dark and ink with a
+;;; faint darkening one on paper, so the two rings are never a shade apart, and
+;;; its top edge carries a five-row dot-matrix
 ;;; readout: the title at the left, a scope for bolo's voice beside it, then
 ;;; CPU, MEM, GPU and VRAM each as a label, a twelve-dot bar and its value, and
 ;;; the clock and the date at the right, three dots by five a character, so the
@@ -35,15 +36,16 @@
 
 (defparameter +rail-lumen--cast+
   (list :dark (list :on "#F0EADC" :off "#282A3C" :glow "#969CD2" :hot "#FFFFFF"
-                    :halo 0.42d0)
+                    :halo 0.60d0)
         :light (list :on "#262628" :off "#CECAC2" :glow "#3C3A46" :hot "#000000"
-                     :halo 0.13d0)))
+                     :halo 0.24d0)))
 
 ;; SHAPE: the ring's distance outside its card (:OUT), the spacing of the dots
-;; (:PITCH) and a dot's radius (:DOT), and the pixels a second the marquee
-;; (:CHASE) and the voice (:VU) run round a frame.
+;; (:PITCH) and a dot's radius (:DOT), the card's own corner radius (:RAD, which
+;; the ring follows round its corners), and the pixels a second the marquee
+;; (:CHASE) runs round a frame.
 (defparameter +rail-lumen--shape+
-  (list :out 10d0 :pitch 5d0 :dot 2.1d0 :chase 9000d0 :vu 4200d0))
+  (list :out 10d0 :pitch 5d0 :dot 2.1d0 :rad 14d0 :chase 9000d0 :vu 4200d0))
 
 ;; The readout stands five rows above the ring, so the frame asks for 20 pixels
 ;; of title row above every card as well as 20 at the sides (the ring's ten and
@@ -69,11 +71,12 @@ so it need not measure them for itself."
         collect (if reading (min 4 (length (getf reading :value))) 0)))
 
 (defun rail-lumen--title-lengths (snapshot windows)
-  "How many characters each of the railed cards' titles has, in the order the
-shader's walk reads them, so it need not measure them itself."
+  "How many characters each of the railed cards' titles has, up to the eighteen
+the kit packs, in the order the shader's walk reads them, so it need not measure
+them itself."
   (loop for i below 8
         for id = (nth i windows)
-        collect (if id (min 12 (length (kit--title snapshot id))) 0)))
+        collect (if id (min 18 (length (kit--title snapshot id))) 0)))
 
 (defun rail-lumen--numbers (free state snapshot windows)
   "Every number the shader reads after the kit's: the palette, the shape, whether
@@ -93,7 +96,8 @@ this is the fallback band rather than a card's ring, and the walk's bounds."
           (mapcar (lambda (n) (coerce n 'double-float))
                   (rail-lumen--value-lengths state))
           (mapcar (lambda (n) (coerce n 'double-float))
-                  (rail-lumen--title-lengths snapshot windows))))
+                  (rail-lumen--title-lengths snapshot windows))
+          (list (getf +rail-lumen--shape+ :rad))))
 
 (defun rail-lumen--theme (free context)
   "RAIL-LUMEN--NUMBERS for CONTEXT, drawn for the fallback band when FREE."
@@ -131,5 +135,6 @@ readings as one band at the top centre, all from CONTEXT."
      (list (rail-lumen--free look context)))))
 
 (defparameter +rail-lumen+
-  (list :draw #'rail-lumen--draw :cast +rail-lumen--cast+ :settle 0.6d0 :radius 14
+  (list :draw #'rail-lumen--draw :cast +rail-lumen--cast+ :settle 0.6d0
+        :radius (round (getf +rail-lumen--shape+ :rad))
         :frame (list :edge 20 :title 20 :seam 20)))

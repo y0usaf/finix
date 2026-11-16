@@ -1,6 +1,8 @@
 // sand: pixels as matter. The rail's seam is a glass tube with the date and the
 // clock cast in grains, the readings piled as sand in glass compartments, and
-// bolo's voice a bed of grains that hops with the level history. Every card the
+// bolo's voice a bed of grains that hops with the level history and a frame of
+// grains that all jump at once, the frame's own grains by their own share of the
+// level so the whole border is the waveform. Every card the
 // rail carries has a frame of packed four-pixel grains, three rows deep, each
 // grain its own tone and a few catching the light; a card out of focus keeps
 // only a dusting of loose grains along its inner edge.
@@ -30,6 +32,7 @@ const int INSIDE = 30, INK = 33, DIM = 36, RED = 39;
 const int GRAV = 42, VTOP = 43, VFLOW = 44;
 const int VOICE = 45, LEVELS = 51;
 const int TSW = 99, SETTLE = 100, FOCUS = 101, OLD = 102, ANIM = 103;
+const float DESIGN = 0.7;      // seconds the pour was drawn for
 const int TX0 = 99, TX1 = 100, TY0 = 101, TY1 = 102, VY1 = 103;
 const int DATEY = 104, DATE2Y = 105, CLK1 = 106, CLK2 = 107;
 const int GY = 108, GN = 109, GH = 110;
@@ -143,6 +146,37 @@ vec4 grain_colour(uint h3, uint h4, bool fresh) {
     return vec4(tonef(hf(h3)), 1.0);
 }
 
+// The voice's three bands, read out of the history the rail already packs: the
+// swell of the last third of a second, the level now, and how fast it is moving.
+float vo_lo() {
+    int n = max(1, int(D(VOICE + 5)));
+    float m = 0.0;
+    for (int i = 0; i < 9; i++) m = max(m, D(LEVELS + min(i, n - 1)));
+    return m;
+}
+
+float vo_hi() {
+    int n = int(D(VOICE + 5));
+    if (n < 2) return 0.0;
+    float s = 0.0;
+    for (int i = 0; i < 6; i++)
+        s += abs(D(LEVELS + min(i, n - 1)) - D(LEVELS + min(i + 1, n - 1)));
+    return min(1.0, s * 0.5);
+}
+
+// How far the voice reaches at perimeter point D of PER right now: a standing
+// pattern, fixed in space and filled by the three bands, so the whole frame
+// moves at once and the far corner is as loud as the near one.
+float voice_here(float d, float per) {
+    float th = 6.2832 * d / max(1.0, per);
+    float stand = 0.58 + 0.42 * (0.62 * sin(3.0 * th + 0.7) + 0.38 * sin(5.0 * th - 1.3));
+    float beat = 0.55 + 0.45 * sin(iTime * 12.0);
+    float spark = fract(sin(floor(d / 8.0) * 12.9898 + floor(iTime * 26.0) * 78.233) * 43758.5453);
+    return vo_lo() * (0.60 + 0.40 * stand)
+         + D(LEVELS) * (0.30 + 0.70 * beat) * (0.55 + 0.45 * stand)
+         + vo_hi() * (0.20 + 0.80 * spark);
+}
+
 vec4 packed_shot(vec2 p, vec4 box, bool rail_right, bool voicing) {
     float g = D(GRAIN), ring = D(RING);
     float bw = box.z - box.x, bh = box.w - box.y;
@@ -177,8 +211,8 @@ vec4 packed_shot(vec2 p, vec4 box, bool rail_right, bool voicing) {
                 float tl = iTime - d / 7200.0;
                 float kk = floor((tl + ph) / per);
                 float u = (tl + ph) / per - kk;
-                float lv = level_age(max(0.0, d / 7200.0 + u * per));
-                float m = amp0 * lv * (1.0 + 3.5 * hh) * exp(-d / 3600.0) * 16.0 * u * (1.0 - u);
+                float lv = voice_here(d, 2.0 * (bw + bh));
+                float m = amp0 * min(1.0, lv) * (1.0 + 3.5 * hh) * 16.0 * u * (1.0 - u);
                 vec2 sc = (vec2(float(sx), float(sy)) + 0.5) * g;
                 bool hit;
                 if (edge == 0) hit = abs(cc.y - (sc.y - m)) < g * 0.5 && abs(cc.x - sc.x) < g * 0.5;
@@ -317,8 +351,9 @@ vec4 collapse_shot(vec2 p, vec4 box, bool rail_right, float dt) {
 }
 
 vec4 frames_shot(vec2 p) {
-    float dt = iTime - D(TSW);
-    bool anim = D(ANIM) > 0.5 && dt >= 0.0;
+    float raw = iTime - D(TSW);
+    float dt = DESIGN * max(raw, 0.0) / max(D(SETTLE), 0.02);
+    bool anim = D(ANIM) > 0.5 && raw >= 0.0;
     int focus = int(D(FOCUS));
     int old = int(D(OLD));
     vec4 hit = miss();

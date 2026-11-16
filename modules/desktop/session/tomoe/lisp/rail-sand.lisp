@@ -49,6 +49,8 @@
 
 (defparameter +rail-sand--grain+ 4)
 (defparameter +rail-sand--ring+ 12)
+;; seconds the pour was drawn for: sand's own choreography, which the rail now
+;; times (shaders/sand.glsl DESIGN uses the same number)
 (defparameter +rail-sand--settle+ 0.7d0)
 (defparameter +rail-sand--gravity+ 36000d0)
 (defparameter +rail-sand--top+ 16800d0)
@@ -158,7 +160,7 @@
 
 (defun rail-sand--motion (switch clock focus old moving)
   (list (if switch (- (getf switch :at) clock) -1d9)
-        +rail-sand--settle+
+        (rail--settle switch)
         (or focus -1) (or old -1) (if moving 1 0)))
 
 (defun rail-sand--gauge-data (section)
@@ -214,10 +216,10 @@
            (focus (and key (position (getf key :id) windows)))
            (oldi (and old (position old windows)))
            (at (and switch (getf switch :at)))
-           (moving (and at (not cut) (<= 0 (- now at)) (< (- now at) +rail-sand--settle+)))
+           (moving (and at (not cut) (<= 0 (- now at)) (< (- now at) (rail--settle switch))))
            (vopen (and voice (cassette--bolo-turn-p (getf state :bolo-state))))
            (end (cond (vopen (+ now 3600d0))
-                      (moving (+ at +rail-sand--settle+))
+                      (moving (+ at (rail--settle switch)))
                       ((and (not voice) (realp fade)) (+ fade (getf +rail--voice+ :settle)))
                       (t nil)))
            (until (if end (- end clock) 0d0))

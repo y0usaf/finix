@@ -33,12 +33,14 @@ const int T_BHZ = THEME + 12, T_BSIG = THEME + 13, T_FDELAY = THEME + 14, T_FDUR
 const int T_DDUR = THEME + 16, T_X = THEME + 17, T_TOP = THEME + 18, T_BOT = THEME + 19;
 const int T_WY = THEME + 20, T_BEADS = THEME + 21, T_VLEN = THEME + 42, T_FSTYLE = THEME + 46;
 
+const float DESIGN = 0.8;         // seconds the siphon was drawn for
+
 const int NBEADS = 7;
 const int B_CLOCK = 0, B_DATE = 1, B_CPU = 2, B_MEM = 3, VOICE_BEAD = 4, B_GPU = 5, B_VRAM = 6;
 
 float g_mid, g_top, g_bot, g_wy;
 vec4 g_fbox;
-float g_dt, g_fill, g_drain;
+float g_dt, g_fill, g_drain, g_raw;
 bool g_f;
 
 // the backdrop under a point of the output, as the surface beneath it holds it
@@ -75,7 +77,7 @@ float thread_off(float y) {
     float pluck = D(T_AMP) * lev * sin(dy * D(T_PLUCK) - iTime * D(T_PHZ))
         * (0.4 + 0.6 * exp(-dy * D(T_ENV)));
     float bend = 0.0;
-    if (g_dt >= 0.0 && g_dt < D(K_SETTLE) && D(K_FLOW) > -0.5
+    if (g_raw >= 0.0 && g_raw < D(K_SETTLE) && D(K_FLOW) > -0.5
             && D(K_FROM) != 0.0 && D(K_SIDE) != 0.0 && D(K_FROM) != D(K_SIDE))
         bend = D(K_SIDE) * D(T_BEND) * exp(-g_dt / D(T_BDEC)) * sin(g_dt * D(T_BHZ) + 0.4)
             * exp(-pow((y - g_wy) / D(T_BSIG), 2.0));
@@ -114,10 +116,11 @@ float rim_pres(vec2 p, vec4 b, float progress, out float s, out float per) {
     return clamp((progress * per * 0.5 - s) / 60.0 + (progress >= 1.0 ? 1.0 : 0.0), 0.0, 1.0);
 }
 
-// the rim's thickness at rim distance S: five pixels, and as much again where
-// the voice was loud when the ripple passed, the crests of a wave running round
-float rim_width(float s) {
-    float lev = voice_env() * voice_level(s / max(1.0, D(T_VW)));
+// the rim's thickness at rim distance S of PER: five pixels, and as much again
+// where the voice is loud now -- the whole rim thickens at once, so no side of
+// the frame waits for a wave to arrive
+float rim_width(float s, float per) {
+    float lev = voice_env() * min(1.0, voice_around(s, per));
     return D(T_RIM) + 12.0 * lev * (0.45 + 0.55 * sin(s * 0.030 - iTime * 26.0));
 }
 
@@ -138,7 +141,7 @@ float field(vec2 p) {
         float pres = rim_pres(p, g_fbox, g_fill, s, per);
         if (pres > 0.01) {
             float d = sd_rbox(p, g_fbox, D(T_CORNER));
-            float ring = max(d - rim_width(s) * pres, -d);
+            float ring = max(d - rim_width(s, per) * pres, -d);
             float k = D(T_WELD) * exp(-pow((p.y - g_wy) / D(T_WSIG), 2.0))
                 * min(g_fill * 1.5, 1.0);
             f = smin(f, ring, k);
@@ -252,13 +255,14 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     g_top = D(T_TOP);
     g_bot = D(T_BOT);
     g_wy = D(T_WY);
-    g_dt = iTime - D(K_TSW);
+    g_raw = iTime - D(K_TSW);
+    g_dt = move_age(DESIGN);
     int focus = int(D(K_FOCUS)), old = int(D(K_OLD));
     g_f = card_shown(focus);
     if (g_f) g_fbox = card(focus);
     g_fill = 1.0;
     g_drain = 0.0;
-    if (D(K_TSW) > -1e5 && g_dt >= 0.0 && g_dt < D(K_SETTLE) && D(K_FLOW) > -0.5) {
+    if (D(K_TSW) > -1e5 && g_raw >= 0.0 && g_raw < D(K_SETTLE) && D(K_FLOW) > -0.5) {
         g_fill = ease_out((g_dt - D(T_FDELAY)) / max(0.01, D(T_FDUR)));
         if (card_shown(old) && old != focus)
             g_drain = 1.0 - pow(ease_out(g_dt / max(0.01, D(T_DDUR))), 1.7);
@@ -303,7 +307,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         float s, per;
         float pres = rim_pres(p, g_fbox, g_fill, s, per);
         if (pres > 0.01)
-            shine = voice_env() * voice_level(s / max(1.0, D(T_VW))) * pres;
+            shine = voice_env() * min(1.0, voice_around(s, per)) * pres;
     }
 
     vec3 c = vec3(0.0);

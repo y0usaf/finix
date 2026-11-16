@@ -438,6 +438,10 @@
     carry-max = bar.rail.carryMax;
     focus-border = bar.rail.focusBorder;
     focus = keyword bar.rail.focus;
+    motion = {
+      duration-ms = bar.rail.motion.durationMs;
+      curve = keyword bar.rail.motion.curve;
+    };
     theme-bind = binding ["alt" "shift"] "t" "rail-theme" "Next Rail Theme";
     sample = 1000;
     colors = lib.mapAttrs (_: keyword) {
@@ -3340,6 +3344,18 @@ in {
           type = lib.types.bool;
           default = false;
           description = "Also keep Tomoe's own borders and square corners on carried windows. Off, the cast frame is the only focus indicator.";
+        };
+        motion = {
+          durationMs = lib.mkOption {
+            type = lib.types.ints.positive;
+            default = 300;
+            description = "How long a focus change takes to draw, in milliseconds: the old frame draining, the slab hopping across the seam, the new frame filling, the crown landing, the marquee running round a ring. Every theme keeps the choreography it was drawn with and plays it over this time, so a shorter duration compresses a move instead of cutting it off. A switch that lands while a move is still being drawn retargets that move -- it keeps the card the move started from and runs for the quick time, 40% of this -- so switching quickly across several windows shows one move to the newest card, not one transition per window.";
+          };
+          curve = lib.mkOption {
+            type = lib.types.enum ["linear" "ease-out-quad" "ease-out-cubic" "ease-out-expo"];
+            default = "ease-out-cubic";
+            description = "The shape of a focus change's clock: linear moves at one pace, the ease-out curves put the movement at the front and settle it at the end. halo, thread, grain and lumen move on this clock; morph, glass and sand move on their own springs and take only the duration.";
+          };
         };
         focus = lib.mkOption {
           type = lib.types.enum ["hairline" "dim" "recede" "glow"];

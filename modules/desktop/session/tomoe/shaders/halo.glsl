@@ -19,9 +19,9 @@
 // thinning as the other swells in.
 //
 // bolo's turn is the centrepiece: the whole focused frame is the speech
-// waveform. Spikes stand off its outer edge, their reach at each point the level
-// the voice had when it ran that far round from the crown (+-3600 px/s) over a
-// slower swell, the material brightening toward its glow colour with the level,
+// waveform. Spikes stand off its outer edge at once all the way round, their
+// reach the level being spoken over a slower swell, the material brightening
+// toward its glow colour with the level,
 // and the crown's head a small live trace. It dies away over the settle when the
 // turn ends. Only the focused frame moves.
 //
@@ -37,9 +37,8 @@ const int T_GW = THEME + 34, T_INSET = THEME + 38, T_TRACE = THEME + 39, T_BUMP 
 const int T_SX = THEME + 41, T_SY = THEME + 42, T_EX = THEME + 43, T_EY = THEME + 44;
 const int T_HAIR = THEME + 45, T_SHADE = THEME + 46;
 
-const float VWAVE = 3600.0;      // px/s the voice runs round the frame
+const float DESIGN = 0.46;       // seconds the siphon was drawn for
 const float CROWN_WELD = 9.0;    // px the crown welds to its frame
-const float BUMP_WELD = 5.0;     // px each gauge's bump welds to the crown
 const float CROWN_SPRING = 0.10; // s the crown waits before it hops
 const float TRACE_BARS = 34.0;   // bars in the crown's live trace
 
@@ -48,7 +47,8 @@ float g_frame, g_linew, g_rad, g_hh, g_pad, g_clockw, g_datew, g_gw[4];
 float g_inset, g_trace, g_bump, g_hair, g_shade;
 vec2 g_start, g_end;
 float g_vo;                      // the voice's level right now, envelope and all
-float g_dt;                      // seconds since the switch, 0 before one
+float g_dt;                      // the move's age in the theme's own seconds
+float g_raw;                     // seconds since the switch, 0 before one
 bool g_switch;                   // a switch is in flight
 int g_focus, g_old;
 
@@ -72,7 +72,7 @@ vec4 crown_seated(vec4 b, float side) {
     float hh = g_hh + 2.5 * g_vo;
     // the crown's middle sits a frame and a half-height above the card's top
     // edge, less the six it laps back into the frame
-    float cy = b.y - g_frame - g_hh + 6.0;
+    float cy = b.y - g_frame - g_hh + 8.0;
     if (side > 0.0) {
         float x0 = b.x + g_inset;
         return vec4(x0, cy - hh, x0 + w, cy + hh);
@@ -96,28 +96,34 @@ vec4 crown_flying() {
     return vec4(x0, cy - hh, x1, cy + hh);
 }
 
-// the crown itself: the capsule and a welded bump over each gauge, as tall as
-// its load
+// The crown itself: one capsule whose rim swells smoothly over each gauge by as
+// much as the gauge carries, so its shape is round everywhere -- the ends round,
+// the swell round, nothing squared off against anything else.
 float crown_field(vec2 p) {
-    float c = sd_rbox(p, g_crown, 0.5 * (g_crown.w - g_crown.y));
     float x = g_crown.x + g_pad + g_clockw + g_datew;
-    float cy = 0.5 * (g_crown.y + g_crown.w);
+    float swell = 0.0;
     for (int k = 0; k < 4; k++) {
         if (!gauge_shown(k)) continue;
         float w = (k == 3) ? g_gw[3] : g_gw[0];
+        float t = clamp((p.x - (x + 6.0)) / max(1.0, w - 12.0), 0.0, 1.0);
+        float hump = sin(PI * t);
         float bh = 2.0 + g_bump * clamp(gauge_pct(k) / 100.0, 0.0, 1.0);
-        vec4 bump = vec4(x + 10.0, g_crown.y - bh, x + w - 10.0, cy);
-        c = smin(c, sd_rbox(p, bump, 4.0), BUMP_WELD);
+        swell = max(swell, hump * bh);
         x += w;
     }
-    return c;
+    float hh = 0.5 * (g_crown.w - g_crown.y) + swell;
+    vec2 c0 = 0.5 * (g_crown.xy + g_crown.zw);
+    vec2 q = abs(p - c0) - vec2(0.5 * (g_crown.z - g_crown.x) - hh, hh);
+    return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - hh;
 }
 
 // ---- the frames
 
 // the focused card's frame at P: a ring hugging the card, its outer edge the
-// voice laid along the perimeter from the crown both ways, present where the
-// fill's front has reached. LV is how loud the voice is there.
+// voice, present where the fill's front has reached. The voice moves the whole
+// frame at once -- louder speech standing further off every side, its crests
+// where they are -- so a far corner is as loud as the near one. LV is how loud
+// the voice is there.
 float focus_field(vec2 p, out float lv) {
     lv = 0.0;
     vec4 box = card(g_focus);
@@ -130,7 +136,7 @@ float focus_field(vec2 p, out float lv) {
     if (g_switch) fill = D(K_FLOW) < 0.5 ? ease_out((g_dt - 0.05) / 0.12)
                                          : ease_out((g_dt - 0.16) / 0.24);
     float pres = clamp((fill * pc.y * 0.5 - s) / 60.0 + (fill >= 1.0 ? 1.0 : 0.0), 0.0, 1.0);
-    float level = voice_env() * voice_level(s / VWAVE);
+    float level = voice_env() * min(1.0, voice_around(s, pc.y));
     float spk = abs(sin(s / 7.0 + sin(s / 31.0 - iTime * 9.0) * 2.0));
     float reach = 6.0 + 15.0 * spk * (0.55 + 0.45 * sin(s / 47.0 - iTime * 23.0));
     float w = (g_frame + level * reach) * pres;
@@ -192,8 +198,9 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     g_old = int(D(K_OLD));
     g_focus_shown = card_shown(g_focus);
     g_old_shown = card_shown(g_old) && g_old != g_focus;
-    g_dt = iTime - D(K_TSW);
-    g_switch = D(K_TSW) > -1e5 && g_dt >= 0.0 && g_dt < D(K_SETTLE) && D(K_FLOW) > -0.5;
+    g_raw = iTime - D(K_TSW);
+    g_dt = move_age(DESIGN);
+    g_switch = D(K_TSW) > -1e5 && g_raw >= 0.0 && g_raw < D(K_SETTLE) && D(K_FLOW) > -0.5;
     g_changed = g_switch && g_old >= 0 && g_old != g_focus;
     g_vo = voice_env() * voice_level(0.0);
     g_stretch = 0.0;
@@ -211,6 +218,10 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     else if (g_focus_shown) g_crown = crown_seated(card(g_focus), side);
     else g_crown = vec4(g_end.x - 0.5 * crown_width(), g_end.y - g_hh,
                         g_end.x + 0.5 * crown_width(), g_end.y + g_hh);
+    // never let the crown run off the top of the screen: a card against the top
+    // edge gets its crown a few pixels lower, still welded to its frame
+    float top = k_origin.y + 0.5 - (g_crown.y - g_bump - 2.0);
+    if (top > 0.0) { g_crown.y += top; g_crown.w += top; }
 
     // the thin line round every card the cast does not cover
     float line = 0.0;

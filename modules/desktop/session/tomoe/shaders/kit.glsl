@@ -10,13 +10,14 @@ float D(int i) { return iData[i >> 2][i & 3]; }
 vec3 D3(int i) { return vec3(D(i), D(i + 1), D(i + 2)); }
 
 const int K_OX = 0, K_OY = 1, K_FOCUS = 2, K_OLD = 3, K_SIDE = 4;
-const int K_TSW = 5, K_FLOW = 6, K_FROM = 7, K_SETTLE = 8;
-const int K_VSINCE = 9, K_VFADE = 10, K_VOPEN = 11, K_VRISE = 12, K_VSETTLE = 13, K_VN = 14;
-const int K_LEVELS = 15, K_NLEVELS = 32;
-const int K_GAUGES = 47, K_GAUGE = 5;
-const int K_CLOCK = 67, K_DAY = 69, K_DATE = 70;
-const int K_CARDS = 72, K_CARD = 5;
-const int THEME = 112;
+const int K_TSW = 5, K_FLOW = 6, K_FROM = 7, K_SETTLE = 8, K_CURVE = 9;
+const int K_VSINCE = 10, K_VFADE = 11, K_VOPEN = 12, K_VRISE = 13, K_VSETTLE = 14, K_VN = 15;
+const int K_BANDS = 16, K_NBANDS = 3;
+const int K_LEVELS = 19, K_NLEVELS = 32;
+const int K_GAUGES = 51, K_GAUGE = 5;
+const int K_CLOCK = 71, K_DAY = 73, K_DATE = 74;
+const int K_CARDS = 76, K_CARD = 7;
+const int THEME = 132;
 
 #define PI 3.14159265358979
 
@@ -103,8 +104,30 @@ float pdist(float u, float ua, float per) {
     return min(d, per - d);
 }
 
-// ---------------------------------------------------------------- switch
+// ---------------------------------------------------------------- the move
+// The rail names how long a focus move is drawn for (K_SETTLE) and which curve
+// shapes its clock (K_CURVE), and every theme keeps the choreography it was
+// drawn with by playing that choreography on this clock: a theme's own DESIGN
+// seconds of it, stretched over the duration the rail asks for. A move that
+// arrives mid-flight is retargeted and drawn for a shorter time, so a run of
+// quick switches reads as one move and not one transition per window.
 float sw_age() { return iTime - D(K_TSW); }
+
+float ease_code(float u, int c) {
+    u = clamp(u, 0.0, 1.0);
+    if (c == 1) return 1.0 - (1.0 - u) * (1.0 - u);
+    if (c == 2) return 1.0 - pow(1.0 - u, 3.0);
+    if (c == 3) return u >= 1.0 ? 1.0 : 1.0 - pow(2.0, -10.0 * u);
+    return u;
+}
+
+// AGE seconds of the theme's own choreography, DESIGN being how long it was
+// drawn for before the rail timed it
+float move_age(float design) {
+    float dur = max(D(K_SETTLE), 1.0 / 240.0);
+    return design * ease_code(max(sw_age(), 0.0) / dur, int(D(K_CURVE)));
+}
+
 bool sw_on() { return D(K_TSW) > -1e5 && sw_age() >= 0.0 && sw_age() < D(K_SETTLE) + 0.5; }
 
 // ---------------------------------------------------------------- voice
@@ -116,6 +139,29 @@ float voice_env() {
     if (fade > -1e8)
         return sm(0.0, 1.0, (fade - since) / rise) * (1.0 - sm(0.0, 1.0, (iTime - fade) / settle));
     return 0.0;
+}
+
+// The voice's three bands, packed by rail-kit.lisp: the swell the turn is
+// riding, the level it has now, and how fast it is moving. The border of the
+// focused card moves with all three at once -- there is no origin and nothing
+// travels round it, so a far corner is as loud as a near one the same instant,
+// and the three bands give the border a shape, a beat and an attack instead of
+// one uniform pump.
+float v_lo() { return D(K_BANDS); }
+float v_mid() { return D(K_BANDS + 1); }
+float v_hi() { return D(K_BANDS + 2); }
+
+// how far the voice reaches at perimeter point U of PER right now: a standing
+// pattern, fixed in space and filled by the level, so every side of the frame
+// moves together
+float voice_around(float u, float per) {
+    float th = 6.2832 * u / max(1.0, per);
+    float stand = 0.58 + 0.42 * (0.62 * sin(3.0 * th + 0.7) + 0.38 * sin(5.0 * th - 1.3));
+    float beat = 0.55 + 0.45 * sin(iTime * 12.0);
+    float spark = hf(hu(int(u / 6.0), int(iTime * 26.0), 7u));
+    return v_lo() * (0.60 + 0.40 * stand)
+         + v_mid() * (0.30 + 0.70 * beat) * (0.55 + 0.45 * stand)
+         + v_hi() * (0.20 + 0.80 * spark);
 }
 
 // the level the voice had AGE seconds ago (bolo writes about 30 a second)

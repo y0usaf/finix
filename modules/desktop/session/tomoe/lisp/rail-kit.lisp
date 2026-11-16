@@ -10,17 +10,22 @@
 ;;;
 ;;;   0-1     the surface's corner in output pixels
 ;;;   2-4     the focused card's index in :WINDOWS, the old one's, its side
-;;;   5-8     the switch: when (iTime), pour 0 / siphon 1 / none -1, the side it
-;;;           came from, the seconds it moves for
-;;;   9-46    bolo's turn: opened, closed (iTime), open, rise, settle, how many
-;;;           levels, then +KIT--LEVELS+ levels newest first
-;;;   47-66   four readings -- cpu, memory, gpu, video memory -- each its glided
+;;;   5-9     the switch: when (iTime), pour 0 / siphon 1 / none -1, the side it
+;;;           came from, the seconds it moves for, and which curve shapes its
+;;;           clock
+;;;   10-15   bolo's turn: opened, closed (iTime), open, rise, settle, how many
+;;;           levels
+;;;   16-18   the voice's three bands -- lo, mid, hi -- the swell it is riding,
+;;;           the level now and how fast it is moving, which the focused frame's
+;;;           whole border moves with at once
+;;;   19-50   +KIT--LEVELS+ levels newest first
+;;;   51-70   four readings -- cpu, memory, gpu, video memory -- each its glided
 ;;;           percent (-1 when there is no such probe), which way it is heading,
 ;;;           its value as six characters and its label as three
-;;;   67-71   the clock as six characters, the day as three, the date as six
-;;;   72-111  each of the eight :WINDOWS: its side and its title as twelve
+;;;   71-75   the clock as six characters, the day as three, the date as six
+;;;   76-131  each of the eight :WINDOWS: its side and its title as eighteen
 ;;;           characters
-;;;   112-    the theme's own numbers: its palette and its shape
+;;;   132-    the theme's own numbers: its palette and its shape
 ;;;
 ;;; Text travels as character codes, three to a number, upper case, so each
 ;;; shader sets it in its own type. Every time is in the shader's own clock,
@@ -28,7 +33,8 @@
 ;;; once its :UNTIL has passed and nothing it draws moves.
 
 (defparameter +kit--levels+ 32)
-(defparameter +kit--theme+ 112)
+(defparameter +kit--bands+ 16)
+(defparameter +kit--theme+ 132)
 
 (defun kit--code (text i)
   (if (< i (length text))
@@ -98,6 +104,7 @@ machine lacks, each drawing the rail's glided reading."
                   (if (and voicing (realp fade)) (- fade epoch) -1d9)
                   (if (and voicing (cassette--bolo-turn-p (getf state :bolo-state))) 1 0)
                   (getf +rail--voice+ :rise) (getf +rail--voice+ :settle) (length levels))
+            (or (rail--bands levels) (list 0 0 0))
             levels
             (make-list (- +kit--levels+ (length levels)) :initial-element 0))))
 
@@ -106,16 +113,20 @@ machine lacks, each drawing the rail's glided reading."
         for id = (nth i windows)
         for entry = (and id (find id carried :key (lambda (e) (getf e :id))))
         append (cons (rail--side-sign (and entry (getf entry :side)))
-                     (kit--pack (if id (kit--title snapshot id) "") 4))))
+                     (kit--pack (if id (kit--title snapshot id) "") 6))))
 
-(defun kit--settle (look) (getf look :settle 0.6d0))
+(defun kit--settle (look context)
+  "How long this draw's switch is drawn for: the rail's own clock for it, which
+is the theme's own when the config names none."
+  (let ((switch (getf context :switch)))
+    (if switch (rail--settle switch) (getf look :settle 0.6d0))))
 
 (defun kit--until (look context)
   "The iTime the theme's surface moves until: the switch's settle, an open
 turn, a closed turn's calming; before then it draws every refresh, after it
 holds its picture."
   (destructuring-bind (&key state epoch switch cut voice fade &allow-other-keys) context
-    (max (if (and switch (not cut)) (+ (- (getf switch :at) epoch) (kit--settle look)) 0d0)
+    (max (if (and switch (not cut)) (+ (- (getf switch :at) epoch) (kit--settle look context)) 0d0)
          (cond ((and voice (cassette--bolo-turn-p (getf state :bolo-state))) 1d6)
                ((realp fade) (+ (- fade epoch) (getf +rail--voice+ :settle)))
                (t 0d0)))))
@@ -133,7 +144,8 @@ theme's own numbers."
                   (if (and switch (not cut)) (- (getf switch :at) epoch) -1d6)
                   (case (and switch (not cut) (getf switch :flow)) (:siphon 1) (:pour 0) (t -1))
                   (rail--side-sign (and switch (getf switch :from)))
-                  (kit--settle look))
+                  (kit--settle look context)
+                  (rail--curve))
             (kit--voice state voicing epoch)
             (kit--gauges state)
             (kit--clock)

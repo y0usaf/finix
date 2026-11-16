@@ -26,9 +26,9 @@ vec3 D3(int i) { return vec3(D(i), D(i + 1), D(i + 2)); }
 const int ORIGIN = 0, SKIP = 2, MAT = 4, REC_C = 7, SHADOW_C = 10, SPEC_C = 13, KS = 16, SA = 17;
 const int RAD = 18, WF = 19, RECW = 20, SW = 21, INSET = 22, RS = 23, WELD = 24;
 const int SEAM = 25, SEAMW = 26, SIDE = 27, PREV = 28, TSW = 29, FLOW = 30, HOLD = 31, GULP = 32;
-const int FOCUS = 33, OLD = 34, METERS = 35, EXTENT = 36, SETTLE = 38;
-const int LEAD = 39, TRAIL = 43, WOB = 46, SQUASH = 49, POUR = 50, SIPHON = 56, HEIGHT = 64;
-const int VOICE = 65, LEVELS = 85, GAUGES = 133, SWELL = 148, GHOST = 149, PANE = 153;
+const int SETTLE = 33, CURVE = 34, FOCUS = 35, OLD = 36, METERS = 37, EXTENT = 38;
+const int LEAD = 40, TRAIL = 44, WOB = 47, SQUASH = 50, POUR = 51, SIPHON = 57, HEIGHT = 65;
+const int VOICE = 66, BANDS = 86, LEVELS = 89, GAUGES = 137, SWELL = 152, GHOST = 153, PANE = 157;
 
 vec2 g_origin;
 float g_h;
@@ -54,6 +54,19 @@ float pulse(float t, float w, float z) {
     if (t <= 0.0) return 0.0;
     float wd = w * sqrt(1.0 - z * z);
     return exp(-z * w * t) * sin(wd * t) * 1.6;
+}
+
+// The rail names how long a focus move is drawn for (SETTLE) and which curve
+// shapes its clock (CURVE); this theme's choreography was drawn for DESIGN
+// seconds, so it is played on that clock and keeps its shape at any duration.
+// A move that arrives mid-flight is retargeted and drawn for less time, so a run
+// of quick switches reads as one move rather than one transition per window.
+float ease_code(float u, int c) {
+    u = clamp(u, 0.0, 1.0);
+    if (c == 1) return 1.0 - (1.0 - u) * (1.0 - u);
+    if (c == 2) return 1.0 - pow(1.0 - u, 3.0);
+    if (c == 3) return u >= 1.0 ? 1.0 : 1.0 - pow(2.0, -10.0 * u);
+    return u;
 }
 
 float smin(float a, float b, float k) {
@@ -109,28 +122,36 @@ float seam_mid() { return D(SEAM) + D(SEAMW) * 0.5; }
 
 // ---- the voice on the focused frame
 
-float g_vamp, g_now;
+float g_vamp, g_now, g_raw;
 
-float frame_level(float s, float smax) {
-    int rows = int(D(VOICE + 13));
-    if (rows < 1) return 0.0;
-    float key = float(rows) * clamp(s / max(1.0, smax), 0.0, 1.0);
-    int i = min(rows - 1, int(floor(key)));
-    int j = min(rows - 1, i + 1);
-    return mix(D(LEVELS + i), D(LEVELS + j), key - floor(key));
+// The voice's three bands, packed by rail.lisp: the swell the turn is riding,
+// the level it has now and how fast it is moving. The bulk of the border moves
+// with all three at once, so every side of the focused frame answers together
+// and no corner waits for a wave to reach it.
+float band(float k) { return D(BANDS + int(k)); }
+
+float voice_around(float u, float per) {
+    float th = 6.2832 * u / max(1.0, per);
+    float stand = 0.58 + 0.42 * (0.62 * sin(3.0 * th + 0.7) + 0.38 * sin(5.0 * th - 1.3));
+    float beat = 0.55 + 0.45 * sin(g_now * 12.0);
+    float spark = fract(sin(floor(u / 6.0) * 12.9898 + floor(g_now * 26.0) * 78.233) * 43758.5453);
+    return band(0.0) * (0.60 + 0.40 * stand)
+         + band(1.0) * (0.30 + 0.70 * beat) * (0.55 + 0.45 * stand)
+         + band(2.0) * (0.20 + 0.80 * spark);
 }
 
 // The voice at perimeter coordinate q round the focused frame: how far its
 // outer edge moves out (a trough pulls it in), how far its inner edge laps over
-// the card, and how brightly it catches the light. The ripple leaves the
-// middle of the rail-side edge and runs both ways round, so the level history
-// lies along the frame newest at the weld.
+// the card, and how brightly it catches the light. The border is the waveform of
+// the sentence: its whole perimeter moves at once, as loud at the far corner as
+// at the weld, the crests standing where they are instead of running out from
+// the slab, so a glance at any side of the frame reads the voice.
 vec3 frame_voice(float q, float qmax, float iy) {
     if (g_vamp <= 0.0) return vec3(0.0);
     float s = q + iy, smax = qmax + iy;
-    float drive = g_vamp * min(1.0, 0.12 + 1.4 * frame_level(s, smax));
-    float k = D(VOICE + 18), hz = D(VOICE + 19);
-    float crest = 0.5 + 0.5 * (0.65 * sin(s * k - g_now * hz) + 0.35 * sin(s * k * 2.3 + g_now * hz * 1.7));
+    float drive = g_vamp * min(1.0, 0.20 + 1.15 * voice_around(s, smax));
+    float k = D(VOICE + 18);
+    float crest = 0.5 + 0.5 * (0.65 * sin(s * k + 0.7) + 0.35 * sin(s * k * 2.3 - 1.3));
     float out_edge = drive * (D(VOICE + 14) * crest - D(VOICE + 15) * (1.0 - crest));
     return vec3(out_edge, drive * D(VOICE + 16) * crest * crest,
                 drive * D(VOICE + 17) * crest * crest * crest);
@@ -382,8 +403,9 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         near = min(near, abs(b - 8.0));
     }
     g_now = iTime;
-    g_dt = iTime - D(TSW);
-    g_flow = g_dt < D(SETTLE) && D(FLOW) > -0.5;
+    g_raw = iTime - D(TSW);
+    g_dt = 0.7 * ease_code(max(g_raw, 0.0) / max(D(SETTLE), 0.02), int(D(CURVE)));
+    g_flow = g_raw >= 0.0 && g_raw < D(SETTLE) && D(FLOW) > -0.5;
     g_hop = g_flow && D(PREV) != D(SIDE);
     int focus = int(D(FOCUS)), old = int(D(OLD));
     g_has_old = card_shown(old);

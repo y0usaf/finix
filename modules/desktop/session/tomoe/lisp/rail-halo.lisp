@@ -43,6 +43,14 @@
 (defparameter +rail-halo--settle+ 0.46d0)
 (defparameter +rail-halo--hop+ 0.28d0)
 
+(defun rail-halo--hop-time (switch)
+  "How long this switch's crown is in the air for: the hop takes its share of the
+move, so a shorter move -- a retargeted one -- still lands its crown before the
+move is over."
+  (if switch
+      (* +rail-halo--hop+ (/ (rail--settle switch) +rail-halo--settle+))
+      +rail-halo--hop+))
+
 ;; morph's cast in the mock's halo palette: the same material, corner radius and
 ;; frame thickness, plus the darker low light and the glow the waveform brightens
 ;; toward, the ink and dim of the crown's type and the track its hairlines run in.
@@ -59,17 +67,20 @@
 ;; (the frame's five and its own fifteen less the six it laps back), its seam-side
 ;; end 40 in from the card's seam edge. Its type is set at the mock's sizes in IBM
 ;; Plex Mono, whose advance is 600/1000 of its size, so every segment's width is
-;; known exactly here and the shader puts the bumps and hairlines in the same
+;; known exactly here and the shader puts the swells and hairlines in the same
 ;; places. The gauges' values are 4 cells ("100%") and the VRAM's 5 ("16.3G"),
 ;; held for the widest reading so the crown never changes width under a load.
-(defparameter +rail-halo--crown-height+ 30)
-(defparameter +rail-halo--crown-inset+ 40)
-(defparameter +rail-halo--pad+ 8)
-(defparameter +rail-halo--trace+ 150)
-(defparameter +rail-halo--bump+ 9)
-(defparameter +rail-halo--clock-segment+ (list :size 17 :chars 5 :lead 12 :trail 14))
-(defparameter +rail-halo--date-segment+ (list :size 14 :chars 6 :lead 12 :trail 12))
-(defparameter +rail-halo--gauge-segment+ (list :label 12 :value 16 :lead 12 :gap 8 :trail 14))
+;; It is 26 tall rather than 30, stands 25 above its card rather than 29, and asks
+;; the deck for the same 30 pixels of title row: any less and the crown's own
+;; swell would be clipped by the top of the screen.
+(defparameter +rail-halo--crown-height+ 26)
+(defparameter +rail-halo--crown-inset+ 30)
+(defparameter +rail-halo--pad+ 7)
+(defparameter +rail-halo--trace+ 130)
+(defparameter +rail-halo--bump+ 5)
+(defparameter +rail-halo--clock-segment+ (list :size 15 :chars 5 :lead 10 :trail 12))
+(defparameter +rail-halo--date-segment+ (list :size 12 :chars 6 :lead 10 :trail 10))
+(defparameter +rail-halo--gauge-segment+ (list :label 11 :value 14 :lead 10 :gap 7 :trail 12))
 (defparameter +rail-halo--value-cells+ (list :percent 4 :vram 5))
 
 (defun rail-halo--advance (size)
@@ -110,9 +121,9 @@ it holds, the VRAM the long one."
               (- (+ (getf box :x) (getf box :width)) (* scale +rail-halo--crown-inset+) (/ cw 2))
               (+ (getf box :x) (* scale +rail-halo--crown-inset+) (/ cw 2)))
           ;; a frame and a crown half-height above the card's top edge, less the
-          ;; six the capsule laps back into the frame: 5 + 15 - 6
+          ;; eight the capsule laps back into the frame: 5 + 13 - 8
           (- (getf box :y)
-             (* scale (- (+ (getf +rail-halo--cast+ :frame) (/ +rail-halo--crown-height+ 2)) 6)))))
+             (* scale (- (+ (getf +rail-halo--cast+ :frame) (/ +rail-halo--crown-height+ 2)) 8)))))
 
 (defun rail-halo--top-anchor (seam output scale)
   (values (if seam
@@ -133,7 +144,7 @@ crown hops across the seam, so its type must wait for it."
            (old-entry (and old (find old carried :key (lambda (entry) (getf entry :id)))))
            (old-box (and old-entry (getf old-entry :box)))
            (from (and switch (getf switch :from)))
-           (moving (and switch (not cut) (< (- now (getf switch :at)) +rail-halo--settle+))))
+           (moving (and switch (not cut) (< (- now (getf switch :at)) (rail--settle switch)))))
       (multiple-value-bind (ex ey)
           (if (and focus-box side)
               (rail-halo--anchor focus-box side cw scale)
@@ -152,7 +163,7 @@ crown hops across the seam, so its type must wait for it."
                (rail-halo--top-anchor seam output scale))
               (t (values ex ey)))
           (list sx sy ex ey
-                (and moving (< (- now (getf switch :at)) +rail-halo--hop+)
+                (and moving (< (- now (getf switch :at)) (rail-halo--hop-time switch))
                      (not (eq from side)))))))))
 
 (defun rail-halo--numbers (readings sx sy ex ey scale)
@@ -189,7 +200,7 @@ card to hang the crown on: a flat capsule of the cast material instead."
              (ui :row :width (rail--design width)
                  :height (rail--design +rail-halo--crown-height+)
                  :align :center :justify :start
-                 :padding (list 0 0 0 (rail--design 12))
+                 :padding (list 0 0 0 (rail--design 10))
                  :children children))
            (gap (width) (ui :rect :width (rail--design width) :height 1)))
     (ui :row :height (rail--design +rail-halo--crown-height+) :align :center
@@ -199,16 +210,16 @@ card to hang the crown on: a flat capsule of the cast material instead."
         (append
          (list (gap +rail-halo--pad+)
                (cell (rail-halo--clock-width)
-                     (rail--text (clock-text "%H:%M") ink 17 17))
+                     (rail--text (clock-text "%H:%M") ink 15 15))
                (cell (rail-halo--date-width)
-                     (rail--text (string-upcase (clock-text "%a %d")) dim 14 14)))
+                     (rail--text (string-upcase (clock-text "%a %d")) dim 12 12)))
          (loop for reading in readings
                for k from 0
                when reading
                  append (list (cell (rail-halo--gauge-width (= k 3))
-                                    (rail--text (getf reading :label) dim 12 12)
-                                    (gap 8)
-                                    (rail--text (getf reading :value) ink 16 16))))
+                                    (rail--text (getf reading :label) dim 11 11)
+                                    (gap 7)
+                                    (rail--text (getf reading :value) ink 14 14))))
          (list (gap +rail-halo--pad+))))))
 
 (defun rail-halo--reveal (context now)
@@ -217,7 +228,7 @@ crown's type, hidden for the hop across the seam, comes back without waiting for
 the next sample."
   (let* ((switch (getf context :switch))
          (age (- now (getf switch :at)))
-         (left (- +rail-halo--hop+ age)))
+         (left (- (rail-halo--hop-time switch) age)))
     (list (interval :halo-land (max 16 (ceiling (* 1000 (+ left 0.03d0))))))))
 
 (defun rail-halo--draw (look context)

@@ -134,6 +134,40 @@
 ;; pixels riding the drain), swells the slab by :GULP pixels as it arrives, and
 ;; fills the new frame from :FILL-AT over :FILL with a :HEAD of material at its
 ;; front, a :RIPPLE behind it and a :MEET pulse where the two fronts join.
+;; MOTION: how long a focus switch is drawn for and the shape of its clock.
+;; :DURATION is the seconds the whole move takes, :QUICK the shorter time a move
+;; that arrives mid-flight takes -- it retargets from the card the flight started
+;; at, straight to the newest, so a run of quick switches shows one move and not
+;; one per window -- and :CURVES the clocks the rail knows, which the config
+;; picks one of. Every theme keeps the choreography it was drawn with and plays
+;; it on this clock: the kit's four count the move's own seconds, morph, glass
+;; and sand theirs, so a shorter duration compresses the move instead of cutting
+;; it off.
+(defparameter +rail--motion+
+  (list :duration 0.30d0 :quick 0.12d0
+        :curves '(:linear :ease-out-quad :ease-out-cubic :ease-out-expo)))
+
+(defun rail--curve ()
+  "Which clock the config asks for: its index in +RAIL--MOTION+ :CURVES."
+  (or (position (getf (getf +rail+ :motion) :curve) (getf +rail--motion+ :curves))
+      (position :ease-out-cubic (getf +rail--motion+ :curves))))
+
+(defun rail--duration ()
+  "The seconds a focus switch takes, from the config's bar.rail.motion."
+  (let ((ms (getf (getf +rail+ :motion) :duration-ms)))
+    (if (and (realp ms) (plusp ms))
+        (/ ms 1000d0)
+        (getf +rail--motion+ :duration))))
+
+(defun rail--quick ()
+  "The seconds a switch that lands mid-move takes: short enough to read as the
+move retargeting rather than a second transition of its own."
+  (max (/ 1d0 60) (min (getf +rail--motion+ :quick) (* 0.4d0 (rail--duration)))))
+
+(defun rail--settle (switch)
+  "How long SWITCH is drawn for."
+  (or (and switch (getf switch :settle)) (rail--duration)))
+
 (defparameter +rail--tide+
   (list :gap 0.6 :settle 0.7
         :lead (list :omega 78 :damping 0.72 :launch 60 :lag 0.03)
@@ -526,21 +560,34 @@ its time stays small enough for a float to keep the motion smooth."
 seam or along its column, or between a card and :FREE, the deck holding no
 focus, siphoning after a pause and pouring on the heels of the last one, from
 the card that held focus before. A cut throw notes none, so nothing animates or
-redraws."
+redraws.
+
+A switch that arrives while the last move is still being drawn retargets it:
+the move keeps the card and side it started from, so the window focus passed
+through is never animated on its own, and it is drawn for the quick time. A run
+of switches across four windows is therefore one move, from where the run began
+to where it ends."
   (let ((was (getf state :rail-side))
-        (old (getf state :rail-focus)))
+        (old (getf state :rail-focus))
+        (prev (getf state :rail-switch)))
     (when (and side was (not (and (eql side was) (eql id old)))
                (eq (getf +rail+ :throw) :slide))
-      (let* ((last (getf state :rail-switched))
+      (let* ((moving (and prev (< (- now (getf prev :at)) (rail--settle prev))))
+             (last (getf state :rail-switched))
              (pour (and last (< (- now last) (getf +rail--tide+ :gap)))))
         (setf (getf state :rail-switch)
-              (list :at now :from was :flow (if pour :pour :siphon) :old old)
+              (list :at now
+                    :from (if moving (getf prev :from) was)
+                    :flow (if moving :pour (if pour :pour :siphon))
+                    :old (if moving (getf prev :old) old)
+                    :settle (if moving (rail--quick) (rail--duration)))
               (getf state :rail-switched) now)))
     (setf (getf state :rail-side) side
           (getf state :rail-focus) id)))
 
 (defun rail--motion (switch side epoch)
-  "The switch as the shader reads it: side, previous side, start, flow, hold, gulp."
+  "The switch as the shader reads it: side, previous side, start, flow, hold,
+gulp, how long it is drawn for and the clock its shape runs on."
   (let* ((flow (and switch (getf switch :flow)))
          (tide (getf +rail--tide+ (or flow :pour))))
     (list (rail--side-sign side)
@@ -548,7 +595,26 @@ redraws."
           (if switch (- (getf switch :at) epoch) -1d6)
           (case flow (:pour 0) (:siphon 1) (t -1))
           (getf tide :hold)
-          (if (eq flow :siphon) (getf tide :gulp) 0))))
+          (if (eq flow :siphon) (getf tide :gulp) 0)
+          (rail--settle switch)
+          (rail--curve))))
+
+(defun rail--bands (levels)
+  "Three bands of the voice from its level history, newest first: LO the swell it
+is riding (the loudest of the last third of a second), MID the level now, and HI
+the fast edge, how much the level is moving from sample to sample. They are what
+the focused frame moves with, so its whole border answers at once and the three
+of them give the border a shape and an attack rather than one uniform pump."
+  (when levels
+    (let* ((window (subseq levels 0 (min 9 (length levels))))
+           (lo (reduce #'max window))
+           (now (first levels))
+           (moves (loop for (a b) on levels while b collect (abs (- a b))))
+           (steps (subseq moves 0 (min 6 (length moves))))
+           (hi (if steps
+                   (min 1d0 (* 3d0 (/ (reduce #'+ steps) (length steps))))
+                   0d0)))
+      (list lo now hi))))
 
 (defun rail--voice-data (state voicing epoch)
   "The voice as the shader reads it: when the turn opened and closed, whether it
@@ -567,6 +633,7 @@ is open, the shape's numbers, and the level history, newest first."
                   (length levels)
                   (getf v :frame) (getf v :ebb) (getf v :lap) (getf v :glow)
                   (getf v :ripple) (getf v :ripple-hz))
+            (or (rail--bands levels) (list 0 0 0))
             levels
             (make-list (- 48 (length levels)) :initial-element 0))))
 
@@ -590,7 +657,6 @@ in when it is no longer shown, for its frame to drain from."
                   (rail--edge seam) (getf +layout+ :seam))
             motion
             (list (or focus -1) (or old -1) (length gauges) (first extent) (second extent)
-                  (getf tide :settle)
                   (getf lead :omega) (getf lead :damping) (getf lead :launch) (getf lead :lag)
                   (getf trail :omega) (getf trail :damping) (getf trail :delay)
                   (getf ring :reach) (getf ring :decay) (getf ring :rate)
@@ -722,7 +788,7 @@ readings it holds, and the readings set into it, all from CONTEXT."
            (ghost (rail--ghost snapshot old))
            (motion (rail--motion switch side epoch))
            (voice (cassette--bolo-turn-p (getf state :bolo-state)))
-           (moved (if switch (max 0d0 (+ (- (getf switch :at) epoch) (getf +rail--tide+ :settle))) 0d0))
+           (moved (if switch (max 0d0 (+ (- (getf switch :at) epoch) (rail--settle switch))) 0d0))
            (calmed (cond (voice 1d6)
                          ((realp fade) (max 0d0 (+ (- fade epoch) (getf +rail--voice+ :settle))))
                          (t 0d0)))
@@ -860,7 +926,7 @@ readings it holds, and the readings set into it, all from CONTEXT."
             (getf state :bolo-fade) nil))
     (let* ((switch (getf state :rail-switch))
            (cut (not (eq (getf +rail+ :throw) :slide)))
-           (switching (and switch (< (- now (getf switch :at)) (getf +rail--tide+ :settle))))
+           (switching (and switch (< (- now (getf switch :at)) (rail--settle switch))))
            (old (and switching (getf switch :old)))
            (shown (and output (rail--shown carried output)))
            (windows (let ((ids (remove-duplicates (remove nil (list* (getf key :id) old shown))
@@ -869,7 +935,6 @@ readings it holds, and the readings set into it, all from CONTEXT."
       (values state
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t))
-                            (publish-state :rail-theme theme)
                             (publish-state :rail-frame (append (getf *rail--look* :frame)
                                                                (list :seam (getf +layout+ :seam))))
                             (define-command "rail-theme"
