@@ -33,11 +33,11 @@ const int GRAV = 42, VTOP = 43, VFLOW = 44;
 const int VOICE = 45, LEVELS = 51;
 const int TSW = 99, SETTLE = 100, FOCUS = 101, OLD = 102, ANIM = 103;
 const float DESIGN = 0.7;      // seconds the pour was drawn for
-const int TX0 = 99, TX1 = 100, TY0 = 101, TY1 = 102, VY1 = 103;
-const int DATEY = 104, DATE2Y = 105, CLK1 = 106, CLK2 = 107;
-const int GY = 108, GN = 109, GH = 110;
-const int DAY = 111, DATE = 113, HOUR = 115, MINUTE = 117, TIMER = 119, VKIND = 121;
-const int GAUGES = 122, GSLOT = 10;
+const int TX0 = 99, TX1 = 100, TY0 = 101, TY1 = 102, TAXIS = 103;
+// the compartments as blocks: how many, then each one's kind and its rect
+const int SB_N = 104, SB = 105;
+const int DAY = 145, DATE = 147, HOUR = 149, MINUTE = 151, TIMER = 153, VKIND = 155;
+const int GAUGES = 156, GSLOT = 10;
 
 #define PI 3.14159265358979
 
@@ -373,128 +373,157 @@ vec4 frames_shot(vec2 p) {
     return hit;
 }
 
+// How many compartments stand before block UPTO: each reading's slot in the
+// numbers the rail sends.
+int gauge_slot(int upto) {
+    int k = 0;
+    for (int j = 0; j < upto; j++) {
+        int kind = int(D(SB + j * 5));
+        if (kind == 2 || kind == 3 || kind == 4 || kind == 5 ||
+            kind == 8 || kind == 9 || kind == 10 || kind == 11) k++;
+    }
+    return k;
+}
+
 vec4 tube_shot(vec2 p) {
     float x0 = D(TX0), x1 = D(TX1), y0 = D(TY0), y1 = D(TY1);
     if (p.x < x0 || p.x >= x1 || p.y < y0 || p.y >= y1) return miss();
     float g = D(GRAIN);
-    float cx = (x0 + x1) * 0.5;
-    float vy1 = D(VY1);
     vec3 c = D3(INSIDE);
     if (p.x < x0 + 2.0 || p.x >= x1 - 2.0 || p.y < y0 + 2.0 || p.y >= y1 - 2.0) c = D3(GLASS);
     if (p.x >= x0 && p.x < x0 + 2.0 && mod(floor((p.y - y0) / g), 2.0) < 0.5)
         c = D3(GLASSHI);
-    if (p.y >= vy1 - 2.0 && p.y < vy1) c = D3(GLASS);
     float amp = voice_amp();
-    if (p.y > vy1 - 380.0 && p.y < vy1 - 2.0) {
-        ivec2 ci = ivec2(floor(p / g));
-        vec2 cc = (vec2(ci) + 0.5) * g;
-        if (cc.x > x0 + 2.0 && cc.x < x1 - 2.0) {
-            for (int row = 0; row < 7; row++) {
-                float depth = float(row);
-                int sy = int(floor((vy1 - 2.0 - float(row) * g) / g));
-                if (!(depth < 0.5 || hf(hu(ci.x, sy, 11u)) < 0.75 - 0.12 * depth)) continue;
-                vec2 sc = (vec2(float(ci.x), float(sy)) + 0.5) * g;
-                float hh = hf(hu(ci.x, sy, 13u));
-                float per = 0.12 + 0.07 * hh;
-                float ph = hf(hu(ci.x, sy, 12u)) * per;
-                float tl = iTime + ph;
-                float kk = floor(tl / per);
-                float u = tl / per - kk;
-                float lv = level_age(max(0.0, u * per));
-                float hop = amp * lv * (0.3 + 0.7 * hh) * exp(-max(depth, 0.0) / 4.0)
-                    * (0.6 + 0.4 * cos((cc.x - cx) / 20.0)) * 340.0 * u * (1.0 - u);
-                if (abs(cc.y - (sc.y - hop)) < g * 0.5)
-                    c = tonef(hf(hu(ci.x, sy, 14u)));
-            }
-        }
-    }
-    float s = 4.0;
-    float a0 = D(DAY), a1 = D(DAY + 1);
-    int n = text_len(a0, a1, 3);
-    if (n > 0 && text_hit(p, vec2(cx - text_width(s, n) * 0.5, D(DATEY)), s, 3, a0, a1))
-        c = D3(DIM);
-    a0 = D(DATE);
-    a1 = D(DATE + 1);
-    n = text_len(a0, a1, 2);
-    if (n > 0 && text_hit(p, vec2(cx - text_width(s, n) * 0.5, D(DATE2Y)), s, 2, a0, a1))
-        c = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 21u)) * 0.5);
-    float cs = 8.0;
-    a0 = D(HOUR);
-    a1 = D(HOUR + 1);
-    n = text_len(a0, a1, 2);
-    if (n > 0 && text_hit(p, vec2(cx - text_width(cs, n) * 0.5, D(CLK1)), cs, 2, a0, a1))
-        c = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 21u)));
-    a0 = D(MINUTE);
-    a1 = D(MINUTE + 1);
-    n = text_len(a0, a1, 2);
-    if (n > 0 && text_hit(p, vec2(cx - text_width(cs, n) * 0.5, D(CLK2)), cs, 2, a0, a1))
-        c = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 21u)));
-    a0 = D(TIMER);
-    a1 = D(TIMER + 1);
-    n = text_len(a0, a1, 4);
-    if (n > 0 && text_hit(p, vec2(cx - text_width(s, n) * 0.5, y0 + 16.0), s, 4, a0, a1))
-        c = D(VKIND) > 0.5 ? D3(INK) : D3(DIM);
-    int gn = int(D(GN));
-    float gy = D(GY), gh = D(GH);
-    for (int i = 0; i < 6; i++) {
-        if (i >= gn) break;
-        float top = gy + float(i) * gh;
-        float bot = top + gh;
-        int b = GAUGES + i * GSLOT;
-        if (p.y < top || p.y >= bot) continue;
-        if (p.y >= bot - 2.0) {
-            c = D3(GLASS);
-        } else {
-            float s_top = top + 88.0;
-            if (p.y >= s_top) {
-                float kind = D(b + 7);
-                float pct = clamp(D(b + 8), 0.0, 100.0);
-                if (kind > 0.5) {
-                    if (p.y > bot - 16.0) {
-                        float fillx = x0 + 4.0 + (x1 - x0 - 8.0) * pct / 100.0;
-                        if (p.x >= x0 + 4.0 && p.x < fillx)
-                            c = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 31u)));
+    float s = 4.0, cs = 8.0;
+    int nb = int(D(SB_N));
+    // The compartments are blocks now, so a bar's run along its length and a
+    // seam's down it; the painter inside each one is the same.
+    for (int i = 0; i < 8; i++) {
+        if (i >= nb) break;
+        int b0 = SB + i * 5;
+        int kind = int(D(b0));
+        vec4 r = vec4(D(b0 + 1), D(b0 + 2), D(b0 + 3), D(b0 + 4));
+        if (r.z <= r.x) break;
+        if (p.x < r.x || p.x >= r.z || p.y < r.y || p.y >= r.w) continue;
+        float bcx = (r.x + r.z) * 0.5;
+        if (kind == 6) {
+            // bolo's bed: grains at the foot of the chamber, hopping with the
+            // level history, and the clock of the turn cast at its head
+            if (p.y >= r.w - 2.0) c = D3(GLASS);
+            float a0 = D(TIMER), a1 = D(TIMER + 1);
+            int n = text_len(a0, a1, 4);
+            if (n > 0 && text_hit(p, vec2(bcx - text_width(s, n) * 0.5, r.y + 16.0), s, 4, a0, a1))
+                c = D(VKIND) > 0.5 ? D3(INK) : D3(DIM);
+            if (p.y > r.y + 24.0 && p.y < r.w - 2.0) {
+                ivec2 ci = ivec2(floor(p / g));
+                vec2 cc = (vec2(ci) + 0.5) * g;
+                if (cc.x > r.x + 2.0 && cc.x < r.z - 2.0) {
+                    for (int row = 0; row < 7; row++) {
+                        float depth = float(row);
+                        int sy = int(floor((r.w - 2.0 - float(row) * g) / g));
+                        if (!(depth < 0.5 || hf(hu(ci.x, sy, 11u)) < 0.75 - 0.12 * depth)) continue;
+                        vec2 sc = (vec2(float(ci.x), float(sy)) + 0.5) * g;
+                        float hh = hf(hu(ci.x, sy, 13u));
+                        float per = 0.12 + 0.07 * hh;
+                        float ph = hf(hu(ci.x, sy, 12u)) * per;
+                        float tl = iTime + ph;
+                        float u = tl / per - floor(tl / per);
+                        float lv = level_age(max(0.0, u * per));
+                        float hop = amp * lv * (0.3 + 0.7 * hh) * exp(-max(depth, 0.0) / 4.0)
+                            * (0.6 + 0.4 * cos((cc.x - bcx) / 20.0)) * 340.0 * u * (1.0 - u);
+                        if (abs(cc.y - (sc.y - hop)) < g * 0.5)
+                            c = tonef(hf(hu(ci.x, sy, 14u)));
                     }
-                } else {
-                    float level = pct / 100.0 * (bot - 2.0 - s_top);
-                    float mound = clamp(1.0 - abs(p.x - cx) / 28.0, 0.0, 1.0);
-                    float trend = D(b + 9);
-                    float surf = level + (trend > 0.5 ? mound * 4.0 : (trend < -0.5 ? -mound * 6.0 : 0.0));
-                    surf += (hf(hu(int(floor(p.x / g)), 7, 30u + uint(i))) - 0.5) * 4.0;
-                    surf = floor(surf / g) * g;
-                    float depth = (bot - 2.0) - p.y;
-                    bool hot = D(b + 6) > 0.5;
-                    if (depth <= surf) {
-                        vec3 sc = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 31u)));
-                        if (hot && depth > surf - 12.0) sc = D3(RED);
-                        if (trend != 0.0 && abs(depth - surf) <= 4.0 &&
-                            hf(hu(int(floor(p.x / g)), int(floor(p.y / g)),
-                                  40u + uint(int(iTime * 30.0)) % 97u)) < 0.12)
-                            sc = hot ? D3(RED) : D3(GLINT);
-                        c = sc;
-                    }
-                    if (trend > 0.5 && depth > surf && abs(p.x - cx) < 4.0 &&
-                        hf(hu(int(floor(p.x / g)), int(floor(p.y / g)) + int(iTime * 240.0) % 997,
-                              50u)) < 0.45)
-                        c = D3(TONE);
                 }
             }
+            continue;
         }
-        a0 = D(b);
-        a1 = D(b + 1);
-        n = text_len(a0, a1, 4);
-        if (n > 0 && text_hit(p, vec2(cx - text_width(s, n) * 0.5, top + 12.0), s, 4, a0, a1))
+        if (kind == 1) {
+            // the day above the date, cast in grains
+            float a0 = D(DAY), a1 = D(DAY + 1);
+            int n = text_len(a0, a1, 3);
+            if (n > 0 && text_hit(p, vec2(bcx - text_width(s, n) * 0.5, r.y), s, 3, a0, a1))
+                c = D3(DIM);
+            a0 = D(DATE);
+            a1 = D(DATE + 1);
+            n = text_len(a0, a1, 2);
+            if (n > 0 && text_hit(p, vec2(bcx - text_width(s, n) * 0.5, r.y + 28.0), s, 2, a0, a1))
+                c = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 21u)) * 0.5);
+            continue;
+        }
+        if (kind == 0) {
+            // the clock: the hour over the minute
+            float a0 = D(HOUR), a1 = D(HOUR + 1);
+            int n = text_len(a0, a1, 2);
+            if (n > 0 && text_hit(p, vec2(bcx - text_width(cs, n) * 0.5, r.y), cs, 2, a0, a1))
+                c = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 21u)));
+            a0 = D(MINUTE);
+            a1 = D(MINUTE + 1);
+            n = text_len(a0, a1, 2);
+            if (n > 0 && text_hit(p, vec2(bcx - text_width(cs, n) * 0.5, r.y + 52.0), cs, 2, a0, a1))
+                c = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 21u)));
+            continue;
+        }
+        // a reading's compartment: its glass floor, its label, its value and the
+        // sand piled to its load, mounded while the reading climbs and dented
+        // while it falls
+        float top = r.y, bot = r.w;
+        int b = GAUGES + gauge_slot(i) * GSLOT;
+        bool tight = (bot - top) < 140.0;
+        if (p.y >= bot - 2.0) {
+            c = D3(GLASS);
+        } else if (p.y >= top + (tight ? 44.0 : 88.0)) {
+            float s_top = top + (tight ? 44.0 : 88.0);
+            float kindg = D(b + 7);
+            float pct = clamp(D(b + 8), 0.0, 100.0);
+            if (kindg > 0.5) {
+                if (p.y > bot - 16.0) {
+                    float fillx = r.x + 4.0 + (r.z - r.x - 8.0) * pct / 100.0;
+                    if (p.x >= r.x + 4.0 && p.x < fillx)
+                        c = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 31u)));
+                }
+            } else {
+                float level = pct / 100.0 * (bot - 2.0 - s_top);
+                float mound = clamp(1.0 - abs(p.x - bcx) / 28.0, 0.0, 1.0);
+                float trend = D(b + 9);
+                float surf = level + (trend > 0.5 ? mound * 4.0 : (trend < -0.5 ? -mound * 6.0 : 0.0));
+                surf += (hf(hu(int(floor(p.x / g)), 7, 30u + uint(i))) - 0.5) * 4.0;
+                surf = floor(surf / g) * g;
+                float depth = (bot - 2.0) - p.y;
+                bool hot = D(b + 6) > 0.5;
+                if (depth <= surf) {
+                    vec3 sc = tonef(hf(hu(int(floor(p.x / g)), int(floor(p.y / g)), 31u)));
+                    if (hot && depth > surf - 12.0) sc = D3(RED);
+                    if (trend != 0.0 && abs(depth - surf) <= 4.0 &&
+                        hf(hu(int(floor(p.x / g)), int(floor(p.y / g)),
+                              40u + uint(int(iTime * 30.0)) % 97u)) < 0.12)
+                        sc = hot ? D3(RED) : D3(GLINT);
+                    c = sc;
+                }
+                if (trend > 0.5 && depth > surf && abs(p.x - bcx) < 4.0 &&
+                    hf(hu(int(floor(p.x / g)), int(floor(p.y / g)) + int(iTime * 240.0) % 997,
+                          50u)) < 0.45)
+                    c = D3(TONE);
+            }
+        }
+        float a0 = D(b), a1 = D(b + 1);
+        int n = text_len(a0, a1, 4);
+        if (n > 0 && text_hit(p, vec2(bcx - text_width(s, n) * 0.5, top + (tight ? 6.0 : 12.0)),
+                              s, 4, a0, a1))
             c = D3(DIM);
         a0 = D(b + 2);
         a1 = D(b + 3);
         n = text_len(a0, a1, 4);
-        if (n > 0 && text_hit(p, vec2(cx - text_width(s, n) * 0.5, top + 36.0), s, 4, a0, a1))
+        if (n > 0 && text_hit(p, vec2(bcx - text_width(s, n) * 0.5, top + (tight ? 24.0 : 36.0)),
+                              s, 4, a0, a1))
             c = D3(INK);
-        a0 = D(b + 4);
-        a1 = D(b + 5);
-        n = text_len(a0, a1, 4);
-        if (n > 0 && text_hit(p, vec2(cx - text_width(s, n) * 0.5, top + 60.0), s, 4, a0, a1))
-            c = D(b + 6) > 0.5 ? D3(RED) : D3(DIM);
+        if (!tight) {
+            a0 = D(b + 4);
+            a1 = D(b + 5);
+            n = text_len(a0, a1, 4);
+            if (n > 0 && text_hit(p, vec2(bcx - text_width(s, n) * 0.5, top + 60.0), s, 4, a0, a1))
+                c = D(b + 6) > 0.5 ? D3(RED) : D3(DIM);
+        }
     }
     return vec4(c, 1.0);
 }

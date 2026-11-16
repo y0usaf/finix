@@ -39,6 +39,9 @@ const int T_LINE = THEME, T_NAME = THEME + 3, T_GLINT = THEME + 6;
 const int T_DIM = THEME + 9, T_BOX = THEME + 12;
 const int T_FRAME = THEME + 15, T_INK = THEME + 27;
 const int T_POUR = THEME + 39, T_CRUMBLE = THEME + 40, T_FALL = THEME + 41;
+// a bar: which edge its rule stands on (1 the top bar's, 2 the bottom's), and
+// the strip's rect
+const int G_MODE = THEME + 42, G_RECT = THEME + 43;
 
 const vec2 OUT[4] = vec2[4](vec2(0.0, -1.0), vec2(1.0, 0.0), vec2(0.0, 1.0), vec2(-1.0, 0.0));
 
@@ -532,9 +535,26 @@ vec4 focused_over(vec2 p, vec4 b, int i, float dt, float ua, float per, vec4 ubo
     return col;
 }
 
+// GRAIN on a bar: the strip's inner edge carries one rule of four-pixel grains,
+// as a card's top rule does, with the readings set in grain's ink above it
+vec4 grain_bar(vec2 p) {
+    vec4 r = vec4(D(G_RECT), D(G_RECT + 1), D(G_RECT + 2), D(G_RECT + 3));
+    if (p.x < r.x || p.x >= r.z || p.y < r.y || p.y >= r.w) return vec4(0.0);
+    bool top = D(G_MODE) < 1.5;
+    float ry = top ? r.w : r.y + 4.0;
+    if (p.y < ry - 4.0 * A || p.y >= ry) return vec4(0.0);
+    vec2 cell = vec2(floor((p.x - r.x) / A), floor((p.y - ry) / A));
+    return vec4(grain_tone(cell, 9u, true, false), 1.0);
+}
+
 void mainImage(out vec4 color, in vec2 fragCoord) {
     kit_begin();
     vec2 p = kit_point(fragCoord);
+    if (D(G_MODE) > 0.5) {
+        color = grain_bar(p);
+        if (color.a <= 0.0) discard;
+        return;
+    }
     int F = int(D(K_FOCUS));
     int O = int(D(K_OLD));
     float dt = D(K_TSW) > -1e5 ? move_age(DESIGN) : 0.0;

@@ -71,11 +71,57 @@ the crumble and the fall."
           (rail-grain--tone :ink)
           (list +rail-grain--pour+ +rail-grain--crumble+ +rail-grain--fall+)))
 
+(defparameter +rail-grain--strip-height+ 48)
+
+(defun rail-grain--bar (look context strip)
+  "GRAIN on a bar: one rule of grains along the strip's inner edge, the readings
+set above it in the theme's own ink."
+  (destructuring-bind (&key state snapshot output epoch layer &allow-other-keys) context
+    (let ((blocks (rail--bar-blocks state snapshot strip)))
+      (append
+       (list (shell-surface
+              (intern (format nil "RAIL-GRAIN-~A"
+                              (string-upcase (symbol-name (getf strip :place))))
+                      :keyword)
+              (ui :stack)
+              :output (getf output :name)
+              :anchors (list (getf strip :place))
+              :width (rail--design (getf strip :width))
+              :height (rail--design (getf strip :height))
+              :margin 0
+              :layer layer :click-through t
+              :exclusive-zone (rail--design (getf strip :height))
+              :background (list :shader (getf look :shader)
+                                :data (append (rail-grain--theme)
+                                              (list (if (eq (getf strip :place) :top) 1d0 2d0))
+                                              (rail--shader-rect output strip))
+                                :clock epoch
+                                :until (kit--until look context)))
+             (shell-surface
+              (intern (format nil "RAIL-GRAIN-TYPE-~A"
+                              (string-upcase (symbol-name (getf strip :place))))
+                      :keyword)
+              (rail--web state snapshot strip blocks (rail--material :ink))
+              :output (getf output :name)
+              :anchors (list (getf strip :place))
+              :width (rail--design (getf strip :width))
+              :height (rail--design (getf strip :height))
+              :margin 0
+              :layer layer :background "#00000000" :click-through t :slide t))))))
+
 (defun rail-grain--draw (look context)
   "grain: the rules over the output, the focused frame's furniture in its top
-rule, the pour between them and bolo's voice on the focused frame."
-  (kit--frames look context (rail-grain--theme) :reach 60))
+rule, the pour between them and bolo's voice on the focused frame; on an output
+the deck gives no seam, a rule along each bar with the readings above it."
+  (let ((bars (remove :seam (getf context :strips)
+                      :key (lambda (strip) (getf strip :place)))))
+    (append
+     (if bars
+         (kit--frames look context (append (rail-grain--theme) (list 0d0)) :reach 60)
+         (kit--frames look context (rail-grain--theme) :reach 60))
+     (loop for strip in bars append (rail-grain--bar look context strip)))))
 
 (defparameter +rail-grain+
   (list :draw #'rail-grain--draw :cast +rail-grain--cast+ :settle 0.65d0
+        :strip-height +rail-grain--strip-height+
         :frame (list :edge 20 :title 12 :seam 20)))

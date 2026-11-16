@@ -105,14 +105,12 @@
                                 (t "BAT"))
                           (getf battery :percent) "" nil 0 nil))))
 
-(defun rail-sand--sections (state snapshot)
+(defun rail-sand--section-of (module state snapshot)
   (let ((meter (getf state :rail-meter))
         (targets (rail--meter-targets state))
         (cpu (getf state :cpu))
         (gpu (getf state :gpu)))
-    (loop for module in (getf +rail+ :modules)
-          for section
-            = (case module
+    (case module
                 (:media (rail-sand--media snapshot))
                 (:cpu (rail-sand--section "CPU" (getf meter :cpu)
                                           (cassette--degrees (getf cpu :temp))
@@ -130,8 +128,17 @@
                                              nil 0 (getf targets :vram))))
                 (:battery (rail-sand--battery snapshot :battery))
                 (:frame (rail-sand--battery snapshot :frame-battery))
-                (t nil))
-          when section collect section)))
+      (t nil))))
+
+(defun rail-sand--sections (state snapshot)
+  (loop for module in (getf +rail+ :modules)
+        for section = (rail-sand--section-of module state snapshot)
+        when section collect section))
+
+(defun rail-sand--modules (state snapshot)
+  "The modules sand draws a compartment for, in the bar's order."
+  (loop for module in (getf +rail+ :modules)
+        when (rail-sand--section-of module state snapshot) collect module))
 
 (defun rail-sand--head (mode origin mid state clock voicing fade)
   (let* ((cast (getf +rail-sand--cast+ *rail--mode*))
@@ -172,28 +179,24 @@
                 (getf section :pct 0)
                 (getf section :trend 0))))
 
-(defun rail-sand--tube-data (state snapshot seam clock voicing fade)
-  (let* ((x0 (getf seam :x))
-         (x1 (+ x0 (getf seam :width)))
-         (y0 (getf seam :y))
-         (y1 (+ y0 (getf seam :height)))
-         (vy1 (+ y0 (round (* (- y1 y0) +rail-sand--voice-height+))))
+(defun rail-sand--tube-data (state snapshot strip blocks clock voicing fade)
+  "The tube's numbers: the palette and bolo's turn, the tube's rect and axis, the
+compartment blocks, then the text and the readings."
+  (let* ((x0 (getf strip :x))
+         (y0 (getf strip :y))
+         (x1 (+ x0 (getf strip :width)))
+         (y1 (+ y0 (getf strip :height)))
+         (mid (+ x0 (floor (getf strip :width) 2)))
          (found (rail-sand--sections state snapshot))
          (sections (subseq found 0 (min +rail-sand--slots+ (length found))))
-         (gy (+ vy1 +rail-sand--gauges+))
-         (gn (length sections))
-         (gh (if (plusp gn) (floor (- y1 gy) gn) 0))
          (day (string-upcase (clock-text "%a")))
          (date (clock-text "%d"))
          (hour (clock-text "%H"))
          (minute (clock-text "%M"))
          (voice (cassette--bolo-turn-p (getf state :bolo-state))))
-    (append (rail-sand--head 1 (list x0 y0) (+ x0 (floor (- x1 x0) 2))
-                             state clock voicing fade)
-            (list x0 x1 y0 y1 vy1
-                  (+ vy1 +rail-sand--date+) (+ vy1 +rail-sand--date2+)
-                  (+ vy1 +rail-sand--clock+) (+ vy1 +rail-sand--clock2+)
-                  gy gn gh)
+    (append (rail-sand--head 1 (list x0 y0) mid state clock voicing fade)
+            (list x0 x1 y0 y1 (if (eq (getf strip :axis) :y) 0d0 1d0))
+            (rail--block-data strip blocks)
             (rail-sand--pack day)
             (rail-sand--pack date)
             (rail-sand--pack hour)
@@ -206,11 +209,48 @@
             (list (if voice 1 0))
             (loop for section in sections append (rail-sand--gauge-data section)))))
 
+(defparameter +rail-sand--strip-height+ 96)
+
+(defun rail-sand--seam-blocks (state snapshot strip)
+  "The seam's compartments as blocks from STRIP's corner: bolo's bed over the top
+three tenths, the day and the date, the clock, then a compartment for each
+reading, in the tube's own proportions."
+  (let* ((height (getf strip :height))
+         (voice (round (* height +rail-sand--voice-height+)))
+         (modules (rail-sand--modules state snapshot))
+         (n (min (length modules) +rail-sand--slots+))
+         (compartment (if (plusp n) (floor (- height voice 200) n) 0))
+         (specs (append (list (list :voice voice 0)
+                              (list :date 48 20)
+                              (list :time 92 20))
+                        (loop for module in (subseq modules 0 n)
+                              for i from 0
+                              collect (list module compartment (if (zerop i) 20 0))))))
+    (rail--strip-blocks state snapshot strip specs (cons :voice 0))))
+
+(defun rail-sand--bar-modules (state snapshot place)
+  "The blocks a bar at PLACE carries: the clock and the date along the top bar,
+the compartments and bolo's bed along the bottom."
+  (if (eq place :top)
+      (loop for module in '(:time :date)
+            when (rail--height module state snapshot) collect module)
+      (append (rail-sand--modules state snapshot)
+              (when (cassette--bolo-turn-p (getf state :bolo-state)) (list :voice)))))
+
+(defun rail-sand--blocks (state snapshot strip)
+  "STRIP's blocks: the tube's own compartments in a seam, one equal slot each
+along a bar."
+  (if (eq (getf strip :place) :seam)
+      (rail-sand--seam-blocks state snapshot strip)
+      (rail--bar-blocks state snapshot strip
+                        (rail-sand--bar-modules state snapshot (getf strip :place)))))
+
 (defun rail-sand--draw (look context)
-  "sand: the poured frames over the output and the glass tube down the seam."
+  "sand: the poured frames over the output and the glass tube down the seam, or
+along each bar."
   (declare (ignore look))
   (destructuring-bind (&key state snapshot epoch now seam output carried key switch old
-                         windows voice voicing fade layer cut &allow-other-keys)
+                         windows voice voicing fade layer cut strips &allow-other-keys)
       context
     (let* ((clock (rail--epoch now))
            (focus (and key (position (getf key :id) windows)))
@@ -224,41 +264,57 @@
                       (t nil)))
            (until (if end (- end clock) 0d0))
            (shader (getf look :shader))
-           (mid (+ (getf seam :x) (floor (getf seam :width) 2))))
-      (append
-       (list (shell-surface
-              :rail-frames (ui :stack)
-              :output (getf output :name) :anchors '(:top :left)
-              :width (rail--design (getf output :width))
-              :height (rail--design (getf output :height))
-              :layer layer :click-through t
-              :background (list :shader shader
-                                :data (append (rail-sand--head 0
-                                                               (list (getf output :x) (getf output :y))
-                                                               mid state clock voicing fade)
-                                              (rail-sand--motion switch clock focus oldi moving))
-                                :windows windows :clock clock
-                                :until until
-                                :reach (unless moving (rail--design 40))))
-             (shell-surface
-              :rail-slab (ui :stack)
-              :output (getf output :name) :anchors '(:top :left)
-              :width (rail--design (getf seam :width))
-              :height (rail--design (getf seam :height))
-              :margin (rail--surface-margin output (getf seam :x) (getf seam :y))
-              :layer layer :click-through t
-              :background (list :shader shader
-                                :data (rail-sand--tube-data state snapshot seam clock voicing fade)
-                                :clock clock
-                                :until until)))
-       (unless (getf +rail+ :focus-border)
-         (loop for entry in carried
-               collect (window-properties
-                        (getf entry :id)
-                        :radius (rail--design 0)
-                        :border (list :focused "#00000000"
-                                      :unfocused "#00000000"))))))))
+           (probe (first strips))
+           (mid (if probe
+                    (+ (getf probe :x) (floor (getf probe :width) 2))
+                    (+ (getf output :x) (floor (getf output :width) 2)))))
+      (when probe
+        (append
+         (list (shell-surface
+                :rail-frames (ui :stack)
+                :output (getf output :name) :anchors '(:top :left)
+                :width (rail--design (getf output :width))
+                :height (rail--design (getf output :height))
+                :layer layer :click-through t
+                :background (list :shader shader
+                                  :data (append (rail-sand--head 0
+                                                                 (list (getf output :x) (getf output :y))
+                                                                 mid state clock voicing fade)
+                                                (rail-sand--motion switch clock focus oldi moving))
+                                  :windows windows :clock clock
+                                  :until until
+                                  :reach (unless moving (rail--design 40)))))
+         (loop for strip in strips
+               for seam-p = (eq (getf strip :place) :seam)
+               for tag = (if seam-p "" (format nil "-~A" (string-upcase (symbol-name (getf strip :place)))))
+               for blocks = (rail-sand--blocks state snapshot strip)
+               append
+               (list (shell-surface
+                      (intern (format nil "RAIL-SAND~A" tag) :keyword)
+                      (ui :stack)
+                      :output (getf output :name)
+                      :anchors (if seam-p (list :top :left) (list (getf strip :place)))
+                      :width (rail--design (getf strip :width))
+                      :height (rail--design (getf strip :height))
+                      :margin (if seam-p
+                                  (rail--surface-margin output (getf strip :x) (getf strip :y))
+                                  0)
+                      :layer layer :click-through t
+                      :exclusive-zone (if seam-p 0 (rail--design (getf strip :height)))
+                      :background (list :shader shader
+                                        :data (rail-sand--tube-data
+                                               state snapshot strip blocks clock voicing fade)
+                                        :clock clock
+                                        :until until))))
+         (unless (getf +rail+ :focus-border)
+           (loop for entry in carried
+                 collect (window-properties
+                          (getf entry :id)
+                          :radius (rail--design 0)
+                          :border (list :focused "#00000000"
+                                        :unfocused "#00000000")))))))))
 
 (defparameter +rail-sand+
   (list :draw #'rail-sand--draw :cast +rail-sand--cast+
+        :strip-height +rail-sand--strip-height+
         :frame (list :edge 12 :title 0)))
