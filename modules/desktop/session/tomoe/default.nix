@@ -3199,8 +3199,8 @@ in {
     motion = {
       durationMs = lib.mkOption {
         type = lib.types.ints.positive;
-        default = 300;
-        description = "How long a window takes to glide to a new place: a deck scroll bringing the next card forward, a swap, a move between columns, and the rail's readings sliding across the seam with them. 300 ms runs alongside the rail's frame filling round the new card.";
+        default = 160;
+        description = "How long a window takes to glide to a new place: a deck scroll bringing the next card forward, a swap, a move between columns, and the rail's readings sliding across the seam with them.";
       };
       curve = lib.mkOption {
         type = lib.types.enum ["linear" "ease-out-quad" "ease-out-cubic" "ease-out-expo"];
