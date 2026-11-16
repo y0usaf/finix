@@ -5,7 +5,7 @@ const USAGE = `usage: omp-secret [COMMAND]
   NAME [--bot BOT | --user] [--ttl TTL]  enter NAME's value, masked, for the bot that asked, else shared (--user): every bot without its own NAME and your own chats read it (TTL: 30m, 12h, 7d or never; default the ask's, else 24h)
   list [--bot BOT | --user]              set secrets: scope, name, when set, when they expire; never values
   forget NAME [--bot BOT | --user]       delete a secret now
-  sync [--bot BOT]                       copy the shared secrets into boxed bots' own stores (omp-bot-box runs it before a boxed bot starts)
+  sync [--bot BOT]                       copy the shared secrets each boxed bot's roster entry allows into its own store (omp-bot-box runs it before a boxed bot starts)
   run                                    run the command on stdin with its $SECRET_ names set (the bot's own, else the shared one) and their values redacted (omp's bash hook uses it)`;
 
 function fail(message: string): never {

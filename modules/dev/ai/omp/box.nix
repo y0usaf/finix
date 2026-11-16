@@ -12,6 +12,30 @@
   home = config.users.users.${user}.home;
   catalog = config.user.dev.modelCatalog;
   shares = [];
+  # The bots that run inside the box, one Unix user each (guest.nix). A bot only reaches the folders granted to
+  # it, and omp-bot-box refuses to box a bot that is not named here, so nothing gets in by accident. `folders` are
+  # the host folders inside the user's home that bot gets besides its own state, mapped to the same place in its
+  # guest home.
+  bots = [
+    {
+      name = "CU-Bot";
+      user = "cubot";
+      uid = 2001;
+      folders = ["cu-workbench"];
+    }
+    {
+      name = "baobot";
+      user = "baobot";
+      uid = 2002;
+      folders = [];
+    }
+    {
+      name = "Regal";
+      user = "regal";
+      uid = 2003;
+      folders = [];
+    }
+  ];
   json = lib.generators.toJSON {};
 
   proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.python.render (({
@@ -731,9 +755,11 @@
   }: let
     guest = flakeInputs.nixpkgs.lib.nixosSystem {
       specialArgs.ompBox = {
-        inherit user port seedMount;
+        inherit user port seedMount bots;
         # The seed share's host side, which omp-box-seed fills.
         seedDir = "${state}/seed";
+        # The grants each guest user gets, one `user grant target ro|rw` line per grant, which omp-box writes.
+        metaDir = "${state}/meta";
         inherit shares;
         # Headless Chromium the box keeps running, each with its DevTools on 127.0.0.1:PORT inside the box
         # for a boxed bot's browser.cdpUrl. A profile lives on a share (a bot's persist path), and its browser
@@ -821,7 +847,8 @@
       previous=$(recorded_failures)
       trap 'fail "setup failed at line $LINENO: $BASH_COMMAND (exit $?)"' ERR
 
-      mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${state}/seed ${home}/.omp/natives
+      mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${state}/seed ${state}/meta ${home}/.omp/natives
+      [ -e ${state}/meta/manifest ] || : >${state}/meta/manifest
       rm -f ${state}/id_ed25519
       [ -f ${state}/ssh-key ] || ssh-keygen -q -t ed25519 -N "" -C omp-box -f ${state}/ssh-key
       cp ${state}/ssh-key.pub ${state}/auth/authorized_keys
@@ -853,7 +880,7 @@
           if timeout 10 ssh -q -p ${toString port} -i ${state}/ssh-key \
                -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
                -o BatchMode=yes -o ConnectTimeout=1 -o ServerAliveInterval=2 -o ServerAliveCountMax=1 ${user}@127.0.0.1 \
-               mountpoint -q /mnt/shares 2>/dev/null; then
+               test -e /run/omp-box/ready 2>/dev/null; then
             up=1
             record up "" "$previous"
           elif [ "$lived" -ge 300 ] && [ "$timedout" = 0 ]; then
@@ -969,8 +996,16 @@
       if [ "$(field runner)" = ${selftestBox.runner} ]; then pass "status.json names the runner"; else flunk "status.json runner is $(field runner)"; fi
       if box true; then pass "ssh into the box works"; else flunk "ssh into the box failed"; fi
       for mount in ${lib.escapeShellArgs (map (s: s.mountPoint) selftestBox.guest.config.microvm.shares)}; do
-        if box mountpoint -q "$mount"; then pass "share mounted at $mount"; else flunk "share not mounted at $mount"; fi
+        # The share views are root-only, so read the mount table instead of stat-ing the paths.
+        if box grep -q " $mount " /proc/self/mountinfo; then pass "share mounted at $mount"; else flunk "share not mounted at $mount"; fi
       done
+      if box test -e /run/omp-box/ready; then pass "the box is ready (/run/omp-box/ready)"; else flunk "the box never became ready"; fi
+      if [ "$(box id -u cubot 2>/dev/null)" = "2001" ]; then pass "cubot is the box's own Unix user"; else flunk "cubot is not uid 2001 in the box"; fi
+      if box sudo -n -u cubot sudo -n true 2>/dev/null; then flunk "cubot can sudo in the box"; else pass "cubot cannot sudo in the box"; fi
+      if [ "$(box id -u baobot 2>/dev/null)" = "2002" ]; then pass "baobot is the box's own Unix user"; else flunk "baobot is not uid 2002 in the box"; fi
+      if box sudo -n -u baobot sudo -n true 2>/dev/null; then flunk "baobot can sudo in the box"; else pass "baobot cannot sudo in the box"; fi
+      if [ "$(box id -u regal 2>/dev/null)" = "2003" ]; then pass "regal is the box's own Unix user"; else flunk "regal is not uid 2003 in the box"; fi
+      if box sudo -n -u regal sudo -n true 2>/dev/null; then flunk "regal can sudo in the box"; else pass "regal cannot sudo in the box"; fi
       kill -TERM "$pid"
       rc=0
       wait "$pid" || rc=$?
@@ -1052,6 +1087,12 @@ in {
       export OMP_BOT_BOX_STATUS=${box.state}/status.json
       export OMP_BOT_BOX_EXT=${seedMount}/current/ext
       export OMP_BOT_BOX_PATH=${seedMount}/current/bin
+      # Which guest user each boxed bot runs as, and the folders inside the user's home that bot also gets;
+      # omp-bot-box refuses a bot this list leaves out, so every bot user the box has is named in finix.
+      export OMP_BOT_BOX_USERS=${lib.escapeShellArg (builtins.toJSON (lib.listToAttrs (map (bot: lib.nameValuePair bot.name {
+        inherit (bot) user folders;
+        home = "/home/${bot.user}";
+      }) bots)))}
       unset OMP_BOT_EXTENSION
     '';
 
@@ -1072,7 +1113,7 @@ in {
           if ssh -q -p ${toString box.port} -i ${box.state}/ssh-key \
                -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
                -o BatchMode=yes -o ConnectTimeout=1 -o ServerAliveInterval=2 -o ServerAliveCountMax=1 ${user}@127.0.0.1 \
-               mountpoint -q /mnt/shares 2>/dev/null; then
+               test -e /run/omp-box/ready 2>/dev/null; then
             if ${pkg}/bin/omp-box reconcile; then
               sleep 30
             else

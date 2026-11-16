@@ -4,26 +4,178 @@
   ompBox,
   ...
 }: let
-  inherit (ompBox) user;
+  inherit (ompBox) user bots;
   home = "/home/${user}";
+  # Every Unix user the box has: the user's own sessions (the admin, which may reach any granted path the way it
+  # always could) and one user per boxed bot. A bot's grants only ever land inside its own home, and the home is
+  # 0700, so another bot or the user's sessions cannot even walk to them.
+  people =
+    [
+      {
+        name = user;
+        uid = 1001;
+        gid = 100;
+        home = home;
+        admin = true;
+      }
+    ]
+    ++ map (bot: {
+      name = bot.user;
+      uid = bot.uid;
+      gid = 100;
+      home = "/home/${bot.user}";
+      admin = false;
+    })
+    bots;
+  botNames = map (bot: bot.user) bots;
+  botsOf = name: lib.findFirst (bot: bot.name == name) null bots;
+  browserUser = name: let
+    found = botsOf name;
+  in
+    if found == null
+    then user
+    else found.user;
+  # A host path as the same user sees it in the box: the bot users have a home of their own, so their state and
+  # their folders keep their relative place under it.
+  browserPath = name: path: let
+    u = browserUser name;
+    guestHome = if u == user then home else "/home/${u}";
+  in
+    if path == home
+    then guestHome
+    else if lib.hasPrefix "${home}/" path
+    then guestHome + lib.removePrefix home path
+    else path;
+  userTable =
+    lib.concatMapStringsSep "\n" (
+      person: ''
+        ${person.name}) uhome=${person.home} uuid=${toString person.uid} ugid=${toString person.gid} admin=${
+          if person.admin
+          then "1"
+          else "0"
+        } ;;''
+    )
+    people;
+  # Applies the grants the host wrote for one user: the share tree is mounted once as root, and each grant is bind
+  # mounted where that user's own paths live, inside its home and nowhere else. omp-shares runs this as root at
+  # boot and whenever the host writes a new list, so no box user ever needs a way to mount anything.
+  shareApply = pkgs.writeShellScript "omp-shares-apply" ''
+    set -u
+    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux pkgs.gnugrep]}
+    wanted=$1
+    case "$wanted" in
+    ${userTable}
+    *) echo "omp-shares: $wanted is not a box user" >&2; exit 1 ;;
+    esac
+    manifest=/etc/omp-box/manifest
+    run=/run/omp-box
+    mkdir -p "$run"
+    list="$run/$wanted.applied"
+    : >"$list.new"
+    status=0
+    apply() {
+      local name=$1 target=$2 flags=$3 parent p
+      case "$target" in
+        '~') target=$uhome ;;
+        '~/'*) target="$uhome/''${target#'~/'}" ;;
+        /*) ;;
+        *) echo "omp-shares: $name has no target path, skipped" >&2; status=1; return ;;
+      esac
+      # A bot only ever sees paths below its own home; only the user's own sessions may reach further out.
+      if [ "$admin" = 0 ]; then
+        case "$target/" in
+          "$uhome/"*) ;;
+          *) echo "omp-shares: $name for $wanted points outside $uhome, refused" >&2; status=1; return ;;
+        esac
+      fi
+      if [ ! -d "/run/omp-shares/$name" ]; then
+        echo "omp-shares: $name is not in the box's share tree yet" >&2
+        return
+      fi
+      parent=$(dirname -- "$target")
+      mkdir -p -- "$parent" || {
+        status=1
+        return
+      }
+      # The folders between the home and the mount belong to the user, so it can write beside the mount.
+      if [ "$admin" = 0 ]; then
+        p=$parent
+        while [ "$p" != "$uhome" ] && [ "$p" != / ]; do
+          chown "$uuid:$ugid" -- "$p" 2>/dev/null || true
+          p=$(dirname -- "$p")
+        done
+      fi
+      [ -d "$target" ] || mkdir -p -- "$target" || return
+      if ! mountpoint -q -- "$target"; then
+        mount --bind "/run/omp-shares/$name" "$target" || {
+          status=1
+          return
+        }
+        # Only the host user ever owns these files, so the folder's group is what lets the bot write what is
+        # already there; what it creates afterwards is group-writable too (omp-bot-box runs it with umask 002).
+        [ "$admin" = 1 ] || chmod -R g+rwX -- "$target" 2>/dev/null || true
+      fi
+      case "$flags" in
+        *ro*) mount -o remount,bind,ro -- "$target" || status=1 ;;
+      esac
+      printf '%s\n' "$target" >>"$list.new"
+    }
+    if [ -r "$manifest" ]; then
+      while IFS=$'\t' read -r line_user name target flags; do
+        [ -n "$line_user" ] || continue
+        [ "$line_user" = "$wanted" ] || continue
+        apply "$name" "$target" "$flags"
+      done <"$manifest"
+    fi
+    # Grants the host revoked: unmount them, so a bot stops seeing a folder the moment the host takes it back.
+    if [ -f "$list" ]; then
+      while IFS= read -r old; do
+        [ -n "$old" ] || continue
+        grep -Fxq -- "$old" "$list.new" && continue
+        umount -l -- "$old" 2>/dev/null || umount -- "$old" 2>/dev/null || true
+      done <"$list"
+    fi
+    mv -f "$list.new" "$list"
+    exit "$status"
+  '';
+  # pam_namespace reads its configuration out of the PAM store path it was built with, and a plain NixOS /etc
+  # never reaches it, so the box builds the PAM it loads the module from and bakes the file in. Only the box's bot
+  # users are polyinstantiated: a bot session gets a private /tmp and /var/tmp of its own, while the user's own
+  # sessions keep the box's shared one.
+  namespaceConf = ''
+    /tmp      /tmp-inst/$USER      tmpfs:noinit:mntopts=size=256M,nosuid,nodev    ~${lib.concatStringsSep "," botNames}
+    /var/tmp  /var/tmp-inst/$USER  tmpfs:noinit:mntopts=size=64M,nosuid,nodev     ~${lib.concatStringsSep "," botNames}
+  '';
+  pamNamespaces = pkgs.pam.overrideAttrs (old: {
+    postInstall =
+      (old.postInstall or "")
+      + ''
+        printf '%s' ${lib.escapeShellArg namespaceConf} >$out/etc/security/namespace.conf
+        chmod 0644 $out/etc/security/namespace.conf
+      '';
+  });
   # Headless Chromium says HeadlessChrome in its user agent, which shops turn away; claim the same version as Chrome.
   userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${lib.versions.major pkgs.ungoogled-chromium.version}.0.0.0 Safari/537.36";
   browser = name: {
     profile,
     port,
-  }: {
+  }: let
+    bot = botsOf name;
+    runAs = browserUser name;
+    asHome = browserPath name profile;
+  in {
     description = "Chromium on a virtual screen for ${name}, DevTools on 127.0.0.1:${toString port}";
     wantedBy = ["multi-user.target"];
     startLimitIntervalSec = 0;
-    environment.HOME = home;
+    environment.HOME = browserPath name home;
     serviceConfig = {
-      User = user;
-      Group = "users";
+      User = runAs;
+      Group = if bot == null then "users" else bot.user;
       Restart = "always";
       RestartSec = 5;
     };
     script = ''
-      profile=${lib.escapeShellArg profile}
+      profile=${lib.escapeShellArg asHome}
       if [ "$(${pkgs.util-linux}/bin/findmnt -n -o FSTYPE --target "$(dirname "$profile")")" != 9p ]; then
         echo "$(dirname "$profile") is not shared into the box yet"
         exit 1
@@ -73,11 +225,17 @@ in {
         {
           tag = "shares";
           source = ompBox.sharesDir;
-          mountPoint = "/mnt/shares";
+          mountPoint = "/run/omp-shares";
           proto = "9p";
         }
-      ]
-      ++ [
+        # What the host granted each user, one `user grant target ro|rw` line per grant, written by omp-box.
+        {
+          tag = "meta";
+          source = ompBox.metaDir;
+          mountPoint = "/etc/omp-box";
+          proto = "9p";
+          readOnly = true;
+        }
         {
           tag = "auth";
           source = ompBox.authDir;
@@ -147,27 +305,55 @@ in {
     };
   };
 
-  users.groups.users.gid = 100;
-  users.users.${user} = {
-    isNormalUser = true;
-    uid = 1001;
-    group = "users";
-    extraGroups = ["wheel"];
-  };
+  users.groups = {users = {gid = 100;};};
+  users.users =
+    {
+      ${user} = {
+        isNormalUser = true;
+        uid = 1001;
+        group = "users";
+        extraGroups = ["wheel"];
+      };
+    }
+    // lib.listToAttrs (map (bot: lib.nameValuePair bot.user {
+        isNormalUser = true;
+        uid = bot.uid;
+        # The user's group, so a folder shared in from the host keeps the modes and ownership it has there.
+        group = "users";
+        home = "/home/${bot.user}";
+        homeMode = "0700";
+      })
+      bots);
+  # No bot is in wheel: the box mounts every shared folder as root when it boots (omp-shares), so nothing has to
+  # hand a bot a way to mount or to become root.
   security.sudo.wheelNeedsPassword = false;
 
-  fileSystems = {
-    "${home}/.omp/run" = {
-      device = "tmpfs";
-      fsType = "tmpfs";
-      options = ["mode=0700" "uid=1001" "gid=100" "size=512M"];
-    };
-    "${home}/.omp/agent" = {
-      device = "tmpfs";
-      fsType = "tmpfs";
-      options = ["mode=0700" "uid=1001" "gid=100" "size=2G"];
-    };
-  };
+  fileSystems =
+    {
+      "${home}/.omp/run" = {
+        device = "tmpfs";
+        fsType = "tmpfs";
+        options = ["mode=0700" "uid=1001" "gid=100" "size=512M"];
+      };
+      "${home}/.omp/agent" = {
+        device = "tmpfs";
+        fsType = "tmpfs";
+        options = ["mode=0700" "uid=1001" "gid=100" "size=2G"];
+      };
+    }
+    // lib.listToAttrs (lib.concatMap (person: [
+        (lib.nameValuePair "${person.home}/.omp/run" {
+          device = "tmpfs";
+          fsType = "tmpfs";
+          options = ["mode=0700" "uid=${toString person.uid}" "gid=${toString person.gid}" "size=512M"];
+        })
+        (lib.nameValuePair "${person.home}/.omp/agent" {
+          device = "tmpfs";
+          fsType = "tmpfs";
+          options = ["mode=0700" "uid=${toString person.uid}" "gid=${toString person.gid}" "size=2G"];
+        })
+      ])
+      people);
 
   systemd = {
     oomd.enable = false;
@@ -181,8 +367,12 @@ in {
       };
     };
 
-    # Shares mount with sudo and would leave these root-owned, so the user's own programs couldn't write their caches and state beside them.
-    tmpfiles.rules = map (dir: "d ${home}/${dir} 0755 ${user} users -") [".cache" ".config" ".local" ".local/share" ".local/state" ".local/state/omp-bot"];
+    # The instance directories pam_namespace gives each bot session, and the empty parents it needs.
+    tmpfiles.rules = [
+      "d /tmp-inst 0000 root root -"
+      "d /var/tmp-inst 0000 root root -"
+      "d /run/omp-box 0755 root root -"
+    ];
 
     services =
       lib.mapAttrs' (name: settings: lib.nameValuePair "browser-${name}" (browser name settings)) ompBox.browsers
@@ -190,27 +380,84 @@ in {
         "getty@tty1".enable = false;
         "autovt@".enable = false;
         "serial-getty@ttyS0".enable = false;
-        omp-natives = {
+        # One user's processes stay out of another's sight, which is what makes a bot unix user worth anything.
+        omp-proc = {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
-          unitConfig.RequiresMountsFor = ["/mnt/omp-natives" "${home}/.omp/run"];
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
           };
           script = ''
-            mkdir -p /run/omp-natives/upper /run/omp-natives/work ${home}/.omp/natives
-            chown ${user}:users /run/omp-natives/upper
-            ${pkgs.util-linux}/bin/mount -t overlay overlay \
-              -o lowerdir=/mnt/omp-natives,upperdir=/run/omp-natives/upper,workdir=/run/omp-natives/work \
-              ${home}/.omp/natives
+            ${pkgs.util-linux}/bin/mount -o remount,hidepid=2 /proc
+          '';
+        };
+        # sshd only trusts a key file owned by root or by the user it lets in, and every file on a share reads as
+        # the host user's, so each user gets the box key copied into its own home before sshd starts.
+        omp-keys = {
+          wantedBy = ["multi-user.target"];
+          before = ["sshd.service"];
+          unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+          script = ''
+            set -eu
+            ${lib.concatMapStringsSep "\n" (person: ''
+              install -d -m 700 -o ${toString person.uid} -g ${toString person.gid} ${person.home}/.ssh
+              install -m 600 -o ${toString person.uid} -g ${toString person.gid} /etc/ssh/omp-box/authorized_keys ${person.home}/.ssh/authorized_keys
+            '')
+            people}
+          '';
+        };
+        # The shared tree is mounted as root at boot, and every grant the host wrote is bind mounted from here into
+        # the one user's paths it names. Grants added while the box runs land within a couple of seconds.
+        omp-shares = {
+          wantedBy = ["multi-user.target"];
+          before = ["sshd.service"];
+          unitConfig.RequiresMountsFor = ["/run/omp-shares" "/etc/omp-box"];
+          serviceConfig.Restart = "always";
+          script = ''
+            set -u
+            mkdir -p /run/omp-box
+            # The share tree itself is root's: a bot reaches its own view through the folders omp-box granted it.
+            chmod 0700 /run/omp-shares 2>/dev/null || true
+            while :; do
+              for person in ${lib.concatMapStringsSep " " (person: lib.escapeShellArg person.name) people}; do
+                ${shareApply} "$person" || echo "omp-shares: a grant for $person did not apply" >&2
+              done
+              : >/run/omp-box/ready
+              sleep 2
+            done
+          '';
+        };
+        omp-natives = {
+          wantedBy = ["multi-user.target"];
+          before = ["sshd.service"];
+          unitConfig.RequiresMountsFor = ["/mnt/omp-natives"];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+          script = ''
+            set -eu
+            mkdir -p /run/omp-natives
+            ${lib.concatMapStringsSep "\n" (person: ''
+              mkdir -p /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name} ${person.home}/.omp/natives
+              chown ${toString person.uid}:${toString person.gid} /run/omp-natives/upper-${person.name} ${person.home}/.omp/natives
+              ${pkgs.util-linux}/bin/mount -t overlay overlay \
+                -o lowerdir=/mnt/omp-natives,upperdir=/run/omp-natives/upper-${person.name},workdir=/run/omp-natives/work-${person.name} \
+                ${person.home}/.omp/natives
+            '')
+            people}
           '';
         };
         # The omp config, read from the seed share's current generation at boot and again by the host's
         # omp-box-seed whenever it puts a new one there; at boot it waits for omp-box-seed's first copy.
         omp-seed = {
           wantedBy = ["multi-user.target"];
-          unitConfig.RequiresMountsFor = ompBox.seedMount;
+          unitConfig.RequiresMountsFor = [ompBox.seedMount] ++ map (person: "${person.home}/.omp/agent") people;
           serviceConfig = {
             Type = "oneshot";
             TimeoutStartSec = "infinity";
@@ -219,14 +466,23 @@ in {
             set -eu
             src=${ompBox.seedMount}/current
             until [ -e "$src/config.yml" ]; do sleep 1; done
-            dst=${home}/.omp/agent
-            install -d -o 1001 -g 100 -m 755 ${home}/.omp
-            install -d -o 1001 -g 100 -m 700 "$dst"
-            for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md; do
-              install -o 1001 -g 100 -m 600 "$src/$file" "$dst/$file"
+            for spec in ${lib.concatMapStringsSep " " (person: lib.escapeShellArg "${toString person.uid}:${toString person.gid}:${person.home}") people}; do
+              IFS=: read -r uid gid dst <<<"$spec"
+              install -d -m 755 "$dst/.omp"
+              install -d -m 700 "$dst/.omp/agent"
+              for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md; do
+                install -m 600 "$src/$file" "$dst/.omp/agent/$file"
+              done
+              chown -R "$uid:$gid" "$dst/.omp/agent"
             done
           '';
         };
       };
+  };
+
+  security.pam.services.sshd.rules.session.namespace = {
+    control = "required";
+    order = 90000;
+    modulePath = "${pamNamespaces}/lib/security/pam_namespace.so";
   };
 }

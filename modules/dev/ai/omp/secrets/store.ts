@@ -66,9 +66,11 @@ export function ttl(text: string | undefined): number | null {
 	return Number(match[1]) * { m: 60_000, h: 3_600_000, d: 86_400_000 }[match[2] as "m" | "h" | "d"];
 }
 
+// A boxed bot reads its store from inside the box, as a Unix user of its own, so the store keeps the user's own
+// group readable: who it belongs to is still only the user and the bots, and a bot reaches nothing but its own.
 function own(path: string) {
-	mkdirSync(path, { recursive: true, mode: 0o700 });
-	chmodSync(path, 0o700);
+	mkdirSync(path, { recursive: true, mode: 0o750 });
+	chmodSync(path, 0o750);
 }
 
 function readJson<T>(path: string, fallback: T): T {
@@ -81,7 +83,7 @@ function readJson<T>(path: string, fallback: T): T {
 
 function writeJson(path: string, value: unknown) {
 	const tmp = `${path}.${process.pid}.tmp`;
-	writeFileSync(tmp, `${JSON.stringify(value, null, "\t")}\n`, { mode: 0o600 });
+	writeFileSync(tmp, `${JSON.stringify(value, null, "\t")}\n`, { mode: 0o640 });
 	renameSync(tmp, path);
 }
 
@@ -138,7 +140,7 @@ async function key(base: string) {
 	const child = Bun.spawn(["age-keygen", "-o", keyFile(base)], { stdout: "ignore", stderr: "pipe" });
 	const [stderr, code] = await Promise.all([new Response(child.stderr).text(), child.exited]);
 	if (code !== 0) throw new Error(`age-keygen: ${stderr.trim()}`);
-	chmodSync(keyFile(base), 0o600);
+	chmodSync(keyFile(base), 0o640);
 }
 
 export async function reveal(bot: Scope, name: string): Promise<string | undefined> {
@@ -159,7 +161,7 @@ async function seal(base: string, folder: string, found: Meta, value: string) {
 	own(folder);
 	const file = join(folder, found.name);
 	const cipher = await age(["-e", "-a", "-i", keyFile(base)], value);
-	writeFileSync(`${file}.age.tmp`, cipher, { mode: 0o600 });
+	writeFileSync(`${file}.age.tmp`, cipher, { mode: 0o640 });
 	renameSync(`${file}.age.tmp`, `${file}.age`);
 	writeJson(`${file}.json`, found);
 }
@@ -174,18 +176,28 @@ export async function store(bot: Scope, name: string, value: string, expiry: str
 	return found;
 }
 
-// Copies the shared secrets into each boxed bot's store (or only BOT's), sealed with that store's own key, and drops
-// copies no longer shared, so a bot in a box reads them without the host's key. Store and forget keep it in step;
-// omp-bot-box runs it before a boxed bot starts.
+// The shared secrets a boxed bot may read: the names its roster entry lists in "secrets". A bot without a list
+// gets none, so sharing a secret never quietly hands it to every bot in a box.
+function allowed(bot: string): Set<string> {
+	const roster = readJson<{ name?: unknown; secrets?: unknown }[]>(join(BOTS, "bots.json"), []);
+	const entry = Array.isArray(roster) ? roster.find(candidate => candidate?.name === bot) : undefined;
+	const names = entry?.secrets;
+	return new Set(Array.isArray(names) ? names.filter((name): name is string => typeof name === "string") : []);
+}
+
+// Copies the shared secrets a boxed bot allows into its store (or only BOT's), sealed with that store's own key,
+// and drops copies that are no longer shared or no longer allowed, so a bot in a box reads them without the host's
+// key and reads nothing else. Store and forget keep it in step; omp-bot-box runs it before a boxed bot starts.
 export async function share(only?: string) {
 	const shared = list(undefined);
 	for (const bot of boxed()) {
 		if (only !== undefined && bot !== only) continue;
 		const base = root(bot);
 		const folder = join(base, "user");
-		const keep = new Set(shared.map(found => found.name));
+		const pick = shared.filter(found => allowed(bot).has(found.name));
+		const keep = new Set(pick.map(found => found.name));
 		if (existsSync(folder)) for (const file of readdirSync(folder)) if (file.endsWith(".age") && !keep.has(file.slice(0, -4))) remove(join(folder, file.slice(0, -4)));
-		for (const found of shared) {
+		for (const found of pick) {
 			const copy = readJson<Meta | undefined>(join(folder, `${found.name}.json`), undefined);
 			if (copy?.set === found.set && existsSync(join(folder, `${found.name}.age`))) continue;
 			const value = await reveal(undefined, found.name);
