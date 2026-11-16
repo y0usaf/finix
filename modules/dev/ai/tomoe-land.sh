@@ -339,11 +339,15 @@ run_gate() {
 
 # gated_pair GATED PIN: the pin commit deploys exactly what the gate ran, the gated finix
 # revision with only the tomoe input moved; anything else in between was never gated.
+# Every other input is compared as its whole resolved graph, nested locks included.
 gated_pair() {
-	local gated=$1 pin=$2 sans='.nodes as $n | $n.root.inputs | del(.tomoe) | map_values(if type == "string" then $n[.].locked else . end)'
+	local gated=$1 pin=$2 sans
+	sans='def resolve($n): if type == "string" then $n[.] as $node
+	        | {locked: $node.locked, inputs: (($node.inputs // {}) | map_values(resolve($n)))} else . end;
+	      .nodes as $n | $n.root.inputs | del(.tomoe) | map_values(resolve($n))'
 	[[ -n $gated ]] || return 1
 	git -C "$FINIX" diff --quiet "$gated" "$pin" -- . ':(exclude)flake.lock' || return 1
-	[[ $(git -C "$FINIX" show "$gated:flake.lock" | jq -S "$sans") == $(git -C "$FINIX" show "$pin:flake.lock" | jq -S "$sans") ]]
+	[[ "$(git -C "$FINIX" show "$gated:flake.lock" | jq -S "$sans")" == "$(git -C "$FINIX" show "$pin:flake.lock" | jq -S "$sans")" ]]
 }
 
 # gate_pin TIP PIN LOG: gate the pin commit itself, from a worktree of TIP.
