@@ -3,9 +3,18 @@
   lib,
   pkgs,
   inputPackages,
+  flakeInputs,
   generators,
   ...
 }: let
+  # What the Tomoe this config is built for reads: a policy setting goes in only
+  # when that build knows it. A build that does not know one refuses the whole
+  # session extension ("Unknown setting :X"), so the config and the pin cannot
+  # drift apart -- and the landing gate can run this config against either side.
+  tomoeKnows = name: let
+    api = "${flakeInputs.tomoe.outPath}/lisp/api.lisp";
+  in builtins.pathExists api && lib.hasInfix ":${name}" (builtins.readFile api);
+
   source_probe = generators.lisp.render (({
       and,
       cond,
@@ -3376,6 +3385,8 @@ in {
           focus-follows-mouse = true;
           pointer-follows-focus = true;
           mod = mkLispInline ":super";
+        }
+        // lib.optionalAttrs (tomoeKnows "cursor-glass") {
           cursor-glass = {
             enabled = true;
             delay-ms = 120;
