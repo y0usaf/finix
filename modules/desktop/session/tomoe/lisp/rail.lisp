@@ -696,7 +696,10 @@ two plates across the top and bottom of the focal frame."
                                                           (list band-x (+ band-x band-width))
                                                           seam output motion focus-index old-index
                                                           (rail--voice-data state nil epoch))
-                                                   :windows windows :clock epoch :until moved))
+                                                   :windows windows :clock epoch :until moved
+                                                   ;; only the rings round the cards are
+                                                   ;; ever drawn or repainted
+                                                   :reach (rail--design 40)))
                                 (shell-surface
                                  :rail-slab (ui :stack)
                                  :output (getf output :name) :anchors '(:top :left)
