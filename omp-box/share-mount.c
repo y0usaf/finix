@@ -149,7 +149,9 @@ static int apply(char **argv) {
 			return complain("bind", path);
 		}
 		close(from);
-		if (ro && mount(NULL, topath, NULL, MS_BIND | MS_REMOUNT | MS_RDONLY, NULL) < 0) return complain("bind read-only", path);
+		// A remount has to name the mount by path; the place came out of the fd we opened and is a mount point now,
+		// so it cannot be swapped for a link underneath us the way the folders on the way here could be.
+		if (ro && mount(NULL, place, NULL, MS_BIND | MS_REMOUNT | MS_RDONLY, NULL) < 0) return complain("bind read-only", path);
 	}
 	close(target);
 	printf("%s\n", place);

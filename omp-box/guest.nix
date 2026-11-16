@@ -183,6 +183,8 @@
       Group = "users";
       Restart = "always";
       RestartSec = 5;
+      # "+" runs the prep as root, before the browser itself drops to the bot.
+      ExecStartPre = ["+${browserPrep asHome}"];
     };
     script = ''
       profile=${lib.escapeShellArg asHome}
@@ -190,6 +192,8 @@
         echo "$(dirname "$profile") is not shared into the box yet"
         exit 1
       fi
+      # What the browser writes is the host user's file on the host, so it writes with no umask of its own.
+      umask 000
       mkdir -p "$profile"
       rm -f "$profile/SingletonLock" "$profile/SingletonCookie" "$profile/SingletonSocket"
       display=$((${toString port} - 9200))
@@ -197,12 +201,30 @@
       ${pkgs.xvfb}/bin/Xvfb ":$display" -screen 0 1920x1080x24 -nolisten tcp &
       while [ ! -e "/tmp/.X11-unix/X$display" ]; do sleep 0.1; done
       export DISPLAY=":$display"
-      exec ${pkgs.ungoogled-chromium}/bin/ungoogled-chromium --ozone-platform=x11 --user-data-dir="$profile" --password-store=basic \
+      # The box is the sandbox around this browser: chromium's own sandbox has no setuid helper here and its zygote
+      # cannot hand off the renderer, so it runs without one, and the DevTools port is open to its own user alone.
+      exec ${pkgs.ungoogled-chromium}/bin/chromium --ozone-platform=x11 --no-sandbox --no-zygote --user-data-dir="$profile" --password-store=basic \
         --no-first-run --no-default-browser-check --disable-sync --noerrdialogs \
         --remote-debugging-address=127.0.0.1 --remote-debugging-port=${toString port} \
         --window-size=1920,1080 --user-agent=${lib.escapeShellArg userAgent}
     '';
   };
+  # The profile lives on a share, so its files belong to the host user and carry the group the box's 9p server
+  # had, which is not the group the browser runs as; root puts them right before every start of the browser.
+  browserPrep = profile:
+    pkgs.writeShellScript "browser-profile-prep" ''
+      set -eu
+      profile=${lib.escapeShellArg profile}
+      for _ in $(seq 1 60); do
+        [ "$(${pkgs.util-linux}/bin/findmnt -n -o FSTYPE --target "$(dirname "$profile")" 2>/dev/null)" = 9p ] && break
+        sleep 0.5
+      done
+      [ "$(${pkgs.util-linux}/bin/findmnt -n -o FSTYPE --target "$(dirname "$profile")" 2>/dev/null)" = 9p ] || exit 0
+      mkdir -p "$profile"
+      chgrp -R users "$profile" 2>/dev/null || true
+      chmod -R g+rwX "$profile" 2>/dev/null || true
+      rm -f "$profile/SingletonLock" "$profile/SingletonCookie" "$profile/SingletonSocket"
+    '';
 in {
   system.stateVersion = "24.05";
 
