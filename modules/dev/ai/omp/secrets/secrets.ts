@@ -4,7 +4,7 @@ import { boundKeys, editorKey, interruptKey, OverlayPanel } from "@oh-my-pi/pi-t
 import { formTheme } from "@oh-my-pi/pi-tui/chrome/form-theme";
 import { matchesAppInterrupt } from "@oh-my-pi/pi-tui/keybinding-matchers";
 import { actionBar, actionButton } from "@oh-my-pi/pi-tui/native/overlay";
-import { current, dir, forget, held, label, list, meta, modified, NAME, names, pending, request, reveal, type Scope, store, ttl } from "./store";
+import { current, dir, forget, held, label, list, meta, modified, NAME, names, pending, request, reveal, type Scope, settle, store, ttl } from "./store";
 
 const WAIT_MS = Number(process.env.OMP_SECRET_WAIT_MS) || 600_000;
 
@@ -156,7 +156,10 @@ export default function secrets(pi) {
 							await store(scope, name, value, expiry, reason);
 							done(undefined);
 						},
-						() => done(undefined),
+						() => {
+							settle(scope, name);
+							done(undefined);
+						},
 						() => tui.requestRender(),
 					),
 				{ signal: stop.signal },
@@ -211,12 +214,14 @@ export default function secrets(pi) {
 			if (ctx?.mode === "tui") {
 				await enter(ctx, scope, name, reason, params.ttl, signal);
 				if (held(bot, name)) return text(set);
-				return text(`The user closed the box without entering ${name}; the request stays open and the box opens again when this chat restarts. Don't ask again unless they say so.`);
+				if (pending().some(ask => ask.bot === scope && ask.name === name)) return text(`The box for ${name} closed before the user answered; the request stays open and the box opens again when this chat restarts.`);
+				return text(`The user cancelled ${name}; the request is closed. Don't ask for it again unless they say so.`);
 			}
 			onUpdate?.(text(`Waiting for the user to enter ${name} in the masked box, which opens when this chat is open in a terminal`));
 			const deadline = Date.now() + WAIT_MS;
 			while (Date.now() < deadline && !signal?.aborted) {
 				if (held(bot, name)) return text(set);
+				if (!pending().some(ask => ask.bot === scope && ask.name === name)) return text(`The user cancelled ${name}; the request is closed. Don't ask for it again unless they say so.`);
 				await Bun.sleep(1000);
 			}
 			return text(`The user hasn't entered ${name} yet; the request stays open, and the masked box opens when they open this chat in a terminal. Tell them so.`);
