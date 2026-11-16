@@ -2002,12 +2002,13 @@
         "nixpkgs": "nixpkgs_12"
       },
       "locked": {
-        "lastModified": 1794812002,
-        "narHash": "sha256-7BG2xaGWvgkVQiGBm1koMolOdGmbxjPJxZjMKB/TuWw=",
-        "owner": "y0usaf",
-        "repo": "tomoe",
-        "rev": "27183234ccd9141c32e0c0e804959560b5e73224",
-        "type": "github"
+        "lastModified": 1794813150,
+        "narHash": "sha256-Lp8fWY5FAdfsk1dgIo8FUz3sCZX+8J+ySserzhunl5I=",
+        "ref": "refs/heads/main",
+        "rev": "1358d4622c85e592bb8e6529fd340875ccd86ab2",
+        "revCount": 926,
+        "type": "git",
+        "url": "https://github.com/y0usaf/tomoe"
       },
       "original": {
         "owner": "y0usaf",
