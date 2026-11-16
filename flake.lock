@@ -62,6 +62,25 @@
         "type": "github"
       }
     },
+    "baseline": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_11"
+      },
+      "locked": {
+        "lastModified": 1794667509,
+        "narHash": "sha256-j7uXheIewijC7V0FzrVlZhR7xnt3tmID1etcUR5DWHY=",
+        "owner": "y0usaf",
+        "repo": "tomoe",
+        "rev": "e3f69434a6e913af5c014d385f293dcf024d10ed",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "tomoe",
+        "rev": "e3f69434a6e913af5c014d385f293dcf024d10ed",
+        "type": "github"
+      }
+    },
     "boar-go": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
@@ -797,11 +816,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1794613052,
-        "narHash": "sha256-iNq9GiykSEXsEGTyFw4zfUcktdptUJJuffI2eRjJFy0=",
+        "lastModified": 1794763774,
+        "narHash": "sha256-pmcrBVS6O2nXblkoSEe0rs1PHhhw2VXsG/2Y6w8d6aI=",
         "ref": "refs/heads/main",
-        "rev": "47afdc63037440ac0e8d19de74004dbe13b177c5",
-        "revCount": 113,
+        "rev": "1dc87a9bfd71e8067f78771cb098a39b552b8206",
+        "revCount": 114,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/mado.git"
       },
@@ -1123,6 +1142,22 @@
       }
     },
     "nixpkgs_11": {
+      "locked": {
+        "lastModified": 1782821651,
+        "narHash": "sha256-D5jO0ME1lA9bDHnd5kVawBwItG/N4oZr3FlXmMzLec8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e52c192be9d7b2c4bd4aed326c8731b35f8bb75c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e52c192be9d7b2c4bd4aed326c8731b35f8bb75c",
+        "type": "github"
+      }
+    },
+    "nixpkgs_12": {
       "locked": {
         "lastModified": 1782821651,
         "narHash": "sha256-D5jO0ME1lA9bDHnd5kVawBwItG/N4oZr3FlXmMzLec8=",
@@ -1963,14 +1998,15 @@
     },
     "tomoe": {
       "inputs": {
-        "nixpkgs": "nixpkgs_11"
+        "baseline": "baseline",
+        "nixpkgs": "nixpkgs_12"
       },
       "locked": {
-        "lastModified": 1794770502,
-        "narHash": "sha256-BNUihNbjGFZgSnKytRbXiWub/x9mDUHYuiRCMcaPxNY=",
+        "lastModified": 1794789929,
+        "narHash": "sha256-64WcHfi0HzM5sDh8NRh1StYQgxXlbURb9OvbbIX0koU=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "259c8ac4be5bc9d598ea8f8a2bbf38559327d7ad",
+        "rev": "3c4af7283e442f3608517e79c7a06e70bbd99f92",
         "type": "github"
       },
       "original": {
