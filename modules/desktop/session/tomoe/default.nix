@@ -355,10 +355,9 @@
     media-width = 34;
   };
 
-  # LAMP's rail: a track one step below the paper in the deck's seam, the light
-  # of the focused card falling across it, and a stub at each end of every other
-  # carried card. One surface for the track, one for the light, one for each
-  # card's stubs and one for the readings' type.
+  # MERIDIAN's rail: one solid slab in the deck's seam, welded to the focused
+  # card's frame and standing off the other one, with the readings knocked out of
+  # it in ink. One surface for the slab and one for the readings' type.
   railParameters = {
     inherit (barParameters) modules time date;
     width = bar.rail.width;
@@ -3204,7 +3203,7 @@ in {
       style = lib.mkOption {
         type = lib.types.enum ["panels" "gap" "cassette" "rail"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. rail: LAMP, the deck's seam as a track one step below the paper that carries nothing but light: the focused card's rail edge is a filament and its light falls across the track, the readings, clock and bolo's voice are type over it, and every other carried card keeps a stub at each end. The light rides its card on a scroll; when focus crosses the rail the old light converges on the seam's midpoint and dies there while the new light blooms out of that same midpoint on the other side, the filament crossing with it. The rail widens the seam it stands in and never scales its type; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. rail: MERIDIAN, the deck's seam filled by one solid slab in the mode's own tone -- the paper dropped a step in the dark and lifted a step in the light -- with the readings, clock and bolo's voice knocked out of it in ink. The slab stands flush against the focused card, its ends welded to that card's frame by the meniscus the two straight edges make, and it stands off the other card with the wallpaper visible in between; bolo's turn ripples its free edge with a sliding window of the level history. When focus crosses the rail the slab hops: its leading edge leaps to the new frame on a stiff spring, its trailing edge lets go 25ms later on a looser one, so it stretches across both frames, the welds stretch and break, and it snaps back to width and settles while the new frame takes a thicker stroke that relaxes as it lands. The rail widens the seam it stands in and never scales its type; on outputs narrower than 21:9, where the deck has one column, the modules hang as two plates instead, across the top and bottom of a published focal frame or else at the screen edges.";
       };
 
       modules = lib.mkOption {
@@ -3239,12 +3238,12 @@ in {
         keyMotion = lib.mkOption {
           type = lib.types.enum ["ride" "dock"];
           default = "ride";
-          description = "ride: a scroll attaches the light to the incoming card and it rises with it. dock: the light stays at the height the seam starts at and the cards slide past under it.";
+          description = "ride: a scroll attaches the slab to the incoming card and it rises with it. dock: the slab stays at the height the seam starts at and the cards slide past under it.";
         };
         throwMode = lib.mkOption {
           type = lib.types.enum ["slide" "cut"];
           default = "slide";
-          description = "slide: a focus change across the rail converges the old light on the midpoint and blooms the new one out of it, taking 150ms. cut: the light appears on the other side at once.";
+          description = "slide: a focus change across the rail hops the slab over, one edge on a stiff spring and the other 25ms behind it, taking 220ms. cut: the slab appears on the other side at once.";
         };
         carryMax = lib.mkOption {
           type = lib.types.ints.positive;
@@ -3254,7 +3253,7 @@ in {
         focusBorder = lib.mkOption {
           type = lib.types.bool;
           default = false;
-          description = "Also keep Tomoe's own focused border on carried windows. Off, the light is the only focus indicator.";
+          description = "Also keep Tomoe's own focused border on carried windows. Off, the slab's frame is the only focus indicator.";
         };
       };
     };
