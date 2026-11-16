@@ -232,7 +232,7 @@ index 7ae5d42a1e..df9a845f2e 100644
  		// Malformed and truncated records are skipped in-band by the stream
  		// visitor, so the only errors reaching this catch are filesystem
 diff --git a/packages/coding-agent/src/session/exit-diagnostics.ts b/packages/coding-agent/src/session/exit-diagnostics.ts
-index fa75c9daa5..597c618200 100644
+index fa75c9daa5..26c54db6b5 100644
 --- a/packages/coding-agent/src/session/exit-diagnostics.ts
 +++ b/packages/coding-agent/src/session/exit-diagnostics.ts
 @@ -198,6 +198,49 @@ export function hasRestorableTurn(entries: readonly SessionEntry[]): boolean {
@@ -251,10 +251,10 @@ index fa75c9daa5..597c618200 100644
 +	// A recorded normal exit with nothing pending closes the session: hasRestorableTurn
 +	// stops at it too, whatever the conversation tail looks like.
 +	for (let index = entries.length - 1; index >= 0; index--) {
-+		const exit = readSessionExit(entries[index]!);
-+		if (!exit) continue;
-+		if (exit.kind === "normal" && !exit.pendingToolCalls?.length) return false;
-+		break;
++		const entry = entries[index]!;
++		const exit = readSessionExit(entry);
++		if (exit?.kind === "normal" && !exit.pendingToolCalls?.length) return false;
++		if (exit || entry.type === "message") break;
 +	}
 +	let tailIndex = -1;
 +	for (let index = entries.length - 1; index >= 0; index--) {
