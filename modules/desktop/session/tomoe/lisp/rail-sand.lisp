@@ -28,10 +28,13 @@
 ;;; thin stream falling into it while it rises, and the top rows red when the
 ;;; probe runs hot. The levels draw the rail's glided readings, so they move with
 ;;; the numbers rather than jumping once a second. Bolo's voice is the bed of
-;;; grains at the bottom of the voice chamber: the grains hop with the level
-;;; history, a wave travelling out along the focused card's frame from the rail
-;;; and across the bed, and when the turn closes the hops shrink with the same
-;;; envelope the rest of the bar uses instead of snapping flat.
+;;; grains at the bottom of the voice chamber and the focused card's frame: the
+;;; grains hop with the level history, a wave travelling out round the frame
+;;; from the rail and across the bed. Only that card's own ring of grains hops,
+;;; so the frame shows which card is being spoken into; every other card's
+;;; dusting stays still, and with no card in focus the bed alone speaks. When
+;;; the turn closes the hops shrink with the same envelope the rest of the bar
+;;; uses instead of snapping flat.
 ;;;
 ;;; The palette is SAND's: warm ground tones on near black in dark, dark grains
 ;;; on warm paper in light, one red for a hot probe.

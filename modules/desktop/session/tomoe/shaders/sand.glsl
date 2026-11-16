@@ -152,18 +152,25 @@ vec4 packed_shot(vec2 p, vec4 box, bool rail_right, bool voicing) {
     bool inside = rx > 0.0 && rx < bw && ry > 0.0 && ry < bh;
     float amp0 = voicing ? voice_amp() : 0.0;
     if (amp0 > 0.001) {
+        // The frame's own grains, each hopping out off its edge by at most five
+        // grains: the top and bottom rows run the card's width and its corners,
+        // the sides its height, so nothing past this card's own ring moves.
+        float hop = ring + 5.0 * g;
+        if (inside || rx <= -hop || rx >= bw + hop || ry <= -hop || ry >= bh + hop) return miss();
         for (int edge = 0; edge < 4; edge++) {
+            float along = edge < 2 ? rx : ry;
+            if (edge < 2 ? (along <= -ring || along >= bw + ring) : (along <= 0.0 || along >= bh))
+                continue;
             for (int row = 0; row < 3; row++) {
                 float off = 0.5 * g + float(row) * g;
                 int sx = ci.x, sy = ci.y;
-                float along = 0.0;
-                if (edge == 0) { sy = int(floor((box.y - off) / g)); along = rx; }
-                else if (edge == 1) { sy = int(floor((box.y + bh + off) / g)); along = rx; }
-                else if (edge == 2) { sx = int(floor((box.x - off) / g)); along = ry; }
-                else { sx = int(floor((box.x + bw + off) / g)); along = ry; }
-                float d = edge == 0 ? (rail_right ? bw - along : along)
+                if (edge == 0) sy = int(floor((box.y - off) / g));
+                else if (edge == 1) sy = int(floor((box.y + bh + off) / g));
+                else if (edge == 2) sx = int(floor((box.x - off) / g));
+                else sx = int(floor((box.x + bw + off) / g));
+                float d = max(0.0, edge == 0 ? (rail_right ? bw - along : along)
                         : edge == 1 ? (bh + (rail_right ? bw - along : along))
-                        : edge == 2 ? along : (bw + along);
+                        : edge == 2 ? along : (bw + along));
                 float hh = hf(hu(sx, sy, 2u));
                 float per = 0.11 + 0.06 * hh;
                 float ph = hh * per;

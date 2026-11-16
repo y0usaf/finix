@@ -43,7 +43,13 @@
 ;;; work stays calm. While bolo has the turn the slab is the voice: its free edge is a
 ;;; level history, a wave whose reach at each row is the level the voice had when
 ;;; it passed, newest at the top, with a belly that leans out with the level being
-;;; spoken and a heave of the whole slab; when the turn closes it calms.
+;;; spoken and a heave of the whole slab. The focused frame -- the card being
+;;; spoken into -- comes alive with it: a ripple runs out of the weld both ways
+;;; round its whole perimeter, the level history laid along it newest at the
+;;; slab, each crest swelling the frame out, lapping a little over the card and
+;;; catching the light, each trough thinning it. Every other card's line stays
+;;; still, and with no card in focus the slab alone speaks. When the turn closes
+;;; it calms.
 ;;;
 ;;; All of that is one shader (shaders/morph.glsl) drawn on the GPU over two
 ;;; surfaces: a band down the seam and the frames over the rest of the output. The
@@ -52,7 +58,7 @@
 ;;; and the times of the last switch and of bolo's turn; the shader animates from
 ;;; those on its own. Each surface draws every refresh only until its last motion
 ;;; has settled and then holds that picture, so a still rail costs nothing, and
-;;; the voice band repaints alone while the frames stay put.
+;;; while bolo has the turn the slab and the focused frame's ring repaint with it.
 ;;;
 ;;; The readings are sampled, not streamed: a CPU percentage is two reads of
 ;;; /proc/stat and a GPU is a polled counter, so a number only ever changes when
@@ -77,7 +83,9 @@
 ;; shape. While the turn is open the free edge is a wave over its whole height,
 ;; its reach at each row the level the voice had when it passed (newest at the
 ;; top), plus a belly that leans out with the level being spoken; the whole slab
-;; heaves with it. Every number the shape follows is here.
+;; heaves with it, and a ripple runs out of the weld round the focused frame,
+;; the same history laid along its perimeter. Every number the shape follows is
+;; here.
 (defparameter +rail--voice+
   (list :rest 1d0        ; the free edge's wave in the quiet of a turn
         :level 12d0      ; and how much more the voice adds to it
@@ -88,7 +96,13 @@
         :bob-hz 9d0      ; radians per second it heaves
         :rise 0.25d0     ; seconds the shape takes to come up as a turn opens
         :settle 0.8d0    ; seconds it takes to calm once the turn has closed
-        :fade 48))       ; pixels the wave takes to reach full strength at each end
+        :fade 48         ; pixels the wave takes to reach full strength at each end
+        :frame 3d0       ; pixels a crest swells the focused frame out at full voice
+        :ebb 3d0         ; and a trough thins it
+        :lap 5d0         ; pixels a crest laps in over the card
+        :glow 0.8d0      ; how much of the highlight a crest catches
+        :ripple 0.016d0  ; radians per pixel round the frame, with a chop at 2.3 times it
+        :ripple-hz 16d0)) ; radians per second the ripple runs out of the weld
 
 ;; CAST: the material and its geometry, in physical pixels. The slab fills
 ;; :SLAB of the seam and reaches :INSET past the rail's first and last blocks, so
@@ -550,7 +564,9 @@ is open, the shape's numbers, and the level history, newest first."
                   (if (and voicing (cassette--bolo-turn-p (getf state :bolo-state))) 1 0)
                   (getf v :rest) (getf v :level) (getf v :swell) (getf v :wave) (getf v :hz)
                   (getf v :bob) (getf v :bob-hz) (getf v :rise) (getf v :settle) (getf v :fade)
-                  (length levels) 0)
+                  (length levels)
+                  (getf v :frame) (getf v :ebb) (getf v :lap) (getf v :glow)
+                  (getf v :ripple) (getf v :ripple-hz))
             levels
             (make-list (- 48 (length levels)) :initial-element 0))))
 
@@ -731,8 +747,8 @@ readings it holds, and the readings set into it, all from CONTEXT."
                                        (list left top)
                                        (list band-x (+ band-x band-width))
                                        seam extent output motion focus-index old-index
-                                       (rail--voice-data state nil epoch) nil ghost)
-                                :windows windows :clock epoch :until moved
+                                       (rail--voice-data state voicing epoch) nil ghost)
+                                :windows windows :clock epoch :until (max moved calmed)
                                 ;; only the rings round the cards are
                                 ;; ever drawn or repainted
                                 :reach (unless ghost (rail--design 40))))
@@ -792,17 +808,14 @@ readings it holds, and the readings set into it, all from CONTEXT."
                                       :rail-theme nil
                                       :rail-side nil :rail-focus nil
                                       :rail-switch nil :rail-switched nil
-                                      :rail-meter nil :rail-step nil :rail-glide nil
-                                      :rail-history nil))
+                                      :rail-meter nil :rail-step nil :rail-glide nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
     (cassette--bolo-watch state event))
   (when (and (eq (getf event :type) :timer) (eq (getf event :name) :sample))
     (let ((system (context snapshot :system)))
       (dolist (probe '(:cpu :memory :gpu))
-        (setf (getf state probe) (probe--sample probe (getf state probe) system)))
-      (let ((history (cons (rail--meter-targets state) (getf state :rail-history))))
-        (setf (getf state :rail-history) (subseq history 0 (min 4 (length history)))))))
+        (setf (getf state probe) (probe--sample probe (getf state probe) system)))))
   (when (and (eq (getf event :type) :command) (equal (getf event :owner) "bar")
              (equal (getf event :name) "rail-theme"))
     (setf (getf state :rail-theme) (rail--next-theme (rail--theme state))))

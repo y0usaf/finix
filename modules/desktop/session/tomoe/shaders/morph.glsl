@@ -8,7 +8,10 @@
 // Either moves the frame: after a pause the old frame drains back into the slab
 // and the new one fills out of it (siphon), a rapid switch only swaps the two
 // frames under a quick slide (pour). While bolo has the turn the slab's free
-// edge is the voice.
+// edge is the voice, and the focused frame comes alive with it: its whole
+// perimeter swells and thins in a ripple that runs out from the weld, each
+// stretch as loud as the voice was when the ripple left the slab, its crests
+// catching the light -- so the frame says which card is being spoken into.
 //
 // Every number comes from iData (laid out by rail.lisp's rail--tide-data), the
 // cards from iWindow, and time from iTime, which the rail counts from its own
@@ -25,7 +28,7 @@ const int RAD = 18, WF = 19, RECW = 20, SW = 21, INSET = 22, RS = 23, WELD = 24;
 const int SEAM = 25, SEAMW = 26, SIDE = 27, PREV = 28, TSW = 29, FLOW = 30, HOLD = 31, GULP = 32;
 const int FOCUS = 33, OLD = 34, METERS = 35, EXTENT = 36, SETTLE = 38;
 const int LEAD = 39, TRAIL = 43, WOB = 46, SQUASH = 49, POUR = 50, SIPHON = 56, HEIGHT = 64;
-const int VOICE = 65, LEVELS = 80, GAUGES = 128, SWELL = 143, GHOST = 144, PANE = 148;
+const int VOICE = 65, LEVELS = 85, GAUGES = 133, SWELL = 148, GHOST = 149, PANE = 153;
 
 vec2 g_origin;
 float g_h;
@@ -104,18 +107,55 @@ void perim(vec2 p, vec4 box, bool rail_right, out float q, out float b, out floa
 
 float seam_mid() { return D(SEAM) + D(SEAMW) * 0.5; }
 
+// ---- the voice on the focused frame
+
+float g_vamp, g_now;
+
+float frame_level(float s, float smax) {
+    int rows = int(D(VOICE + 13));
+    if (rows < 1) return 0.0;
+    float key = float(rows) * clamp(s / max(1.0, smax), 0.0, 1.0);
+    int i = min(rows - 1, int(floor(key)));
+    int j = min(rows - 1, i + 1);
+    return mix(D(LEVELS + i), D(LEVELS + j), key - floor(key));
+}
+
+// The voice at perimeter coordinate q round the focused frame: how far its
+// outer edge moves out (a trough pulls it in), how far its inner edge laps over
+// the card, and how brightly it catches the light. The ripple leaves the
+// middle of the rail-side edge and runs both ways round, so the level history
+// lies along the frame newest at the weld.
+vec3 frame_voice(float q, float qmax, float iy) {
+    if (g_vamp <= 0.0) return vec3(0.0);
+    float s = q + iy, smax = qmax + iy;
+    float drive = g_vamp * min(1.0, 0.12 + 1.4 * frame_level(s, smax));
+    float k = D(VOICE + 18), hz = D(VOICE + 19);
+    float crest = 0.5 + 0.5 * (0.65 * sin(s * k - g_now * hz) + 0.35 * sin(s * k * 2.3 + g_now * hz * 1.7));
+    float out_edge = drive * (D(VOICE + 14) * crest - D(VOICE + 15) * (1.0 - crest));
+    return vec3(out_edge, drive * D(VOICE + 16) * crest * crest,
+                drive * D(VOICE + 17) * crest * crest * crest);
+}
+
+// The focused frame's ring: W thick outside the card, with the voice's swell
+// on its outer edge and its lap over the card on the inner one.
+float voiced_ring(float b, float w, vec3 v) {
+    float outer = max(w + v.x, 0.0), lap = v.y;
+    return ring(b, outer + lap, (outer - lap) * 0.5);
+}
+
 // The material round card i: role 1 the focused card at rest, 2 the card a
-// switch is filling, 3 the card it is draining.
+// switch is filling, 3 the card it is draining. The voice rides the first two.
 float frame_field(vec2 p, vec4 box, int role, float dt) {
     float q, b, qmax, iy;
     perim(p, box, (box.x + box.z) * 0.5 < seam_mid(), q, b, qmax, iy);
     float w0 = D(WF);
-    if (role == 1) return ring(b, w0);
+    vec3 v = role == 3 ? vec3(0.0) : frame_voice(q, qmax, iy);
+    if (role == 1) return voiced_ring(b, w0, v);
     if (D(FLOW) < 0.5) {
         if (role == 2) {
             float s = sm(0.0, D(POUR), dt);
             float imp = D(POUR + 1) * exp(-max(dt - D(POUR + 2), 0.0) / D(POUR + 3)) * sm(0.0, D(POUR + 2), dt);
-            return ring(b, (w0 + 1.0) * s - 1.0 + imp);
+            return voiced_ring(b, (w0 + 1.0) * s - 1.0 + imp, v * s);
         }
         float s = 1.0 - sm(D(POUR + 4), D(POUR + 5), dt);
         return ring(b, (w0 + 1.0) * s - 1.0);
@@ -136,6 +176,7 @@ float frame_field(vec2 p, vec4 box, int role, float dt) {
         + D(SIPHON + 6) * (1.0 - u) * exp(-behind / 260.0) * sin(behind / 30.0);
     float meet = delay + fill * 0.8;
     w += D(SIPHON + 7) * max(pulse(dt - meet, 40.0, 0.35), -0.4) * exp(-pow((q - qmax) / 50.0, 2.0));
+    w = max(w + v.x, 0.0);
     return ring(b, cap(w, q, qf, 14.0), w0 * 0.5);
 }
 
@@ -193,7 +234,7 @@ vec2 rest_edges(float side) {
     return vec2(right - D(SW), right + 2.0);
 }
 
-float g_cy, g_hh, g_top, g_bottom, g_amp, g_now, g_dt;
+float g_cy, g_hh, g_top, g_bottom, g_amp, g_dt;
 bool g_hop, g_flow;
 
 float free_left(float side) { return 0.5 + 0.5 * side; }
@@ -259,6 +300,8 @@ float field(vec2 p) {
     return f;
 }
 
+float g_shine;
+
 #ifdef GLASS
 vec3 under(vec2 q) { return beneath(vec2(q.x - g_origin.x, g_h - (q.y - g_origin.y))).rgb; }
 
@@ -293,6 +336,7 @@ vec3 glass(vec2 p, float f, vec2 dir) {
     float rim = D(PANE + 4);
     body += D3(SPEC_C) * lip * (pow(max(facing, 0.0), 1.5) + 0.45 * pow(max(-facing, 0.0), 2.0)) * rim;
     body += D3(SPEC_C) * 0.12 * rim * edge * max(facing, 0.0);
+    body += (D3(SPEC_C) - body) * g_shine;
     return min(body, vec3(1.0));
 }
 #endif
@@ -324,11 +368,12 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         near = min(near, abs(box_b(p, g_old) - 8.0));
     }
     g_slab = D(SIDE) == 0.0 || card_shown(focus);
+    g_amp = voice_amp(g_now);
+    g_vamp = card_shown(focus) ? g_amp : 0.0;
     if (g_slab) {
         float y0 = D(EXTENT), y1 = D(EXTENT + 1);
         g_cy = (y0 + y1) * 0.5;
         g_hh = max(1.0, (y1 - y0) * 0.5);
-        g_amp = voice_amp(g_now);
         float bob = 0.0;
         if (g_amp > 0.0)
             bob = g_amp * D(VOICE + 8) * D(LEVELS) * sin(g_now * D(VOICE + 9));
@@ -354,10 +399,19 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
 
     float f = field(p);
     float fs = field(p - vec2(1.0, 2.0));
+    // How brightly the voice's crests light the focused frame at p.
+    float shine = 0.0;
+    if (g_vamp > 0.0 && f < 0.5) {
+        vec4 box = card(focus);
+        float q, b, qmax, iy;
+        perim(p, box, (box.x + box.z) * 0.5 < seam_mid(), q, b, qmax, iy);
+        shine = frame_voice(q, qmax, iy).z * exp(-max(b - D(WF) - D(VOICE + 14), 0.0) / 4.0);
+    }
     float cov = clamp(0.5 - f, 0.0, 1.0);
     float sh = fs < 14.0 ? D(SA) * exp(-max(fs, 0.0) / 5.0) * (1.0 - cov) : 0.0;
     c = D3(SHADOW_C) * sh + c * (1.0 - sh);
     a = sh + a * (1.0 - sh);
+    g_shine = shine;
     if (cov > 0.0) {
         vec2 g = vec2(field(p + vec2(1.0, 0.0)) - field(p - vec2(1.0, 0.0)),
                       field(p + vec2(0.0, 1.0)) - field(p - vec2(0.0, 1.0))) * 0.5;
@@ -374,6 +428,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         float tone = (0.80 + 0.33 * lam) * (1.0 + 0.035 * (D(HEIGHT) * 0.5 - p.y) / 720.0);
         vec3 m = D3(MAT) * tone;
         m += (D3(SPEC_C) - m) * spec;
+        m += (D3(SPEC_C) - m) * shine;
 #endif
         c = m * cov + c * (1.0 - cov);
         a = cov + a * (1.0 - cov);
