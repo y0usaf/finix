@@ -417,10 +417,16 @@ in {
             RemainAfterExit = true;
           };
           script = ''
-            set -eu
+            set -u
+            # A bot's home is the bot's to rewrite, so root must not walk a path under it: each write runs as the
+            # user the file belongs to, and a link the bot plants there can only be followed with its own rights.
             ${lib.concatMapStringsSep "\n" (person: ''
-              install -d -m 700 -o ${toString person.uid} -g ${toString person.gid} ${person.home}/.ssh
-              install -m 600 -o ${toString person.uid} -g ${toString person.gid} /etc/ssh/omp-box/authorized_keys ${person.home}/.ssh/authorized_keys
+              if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.ssh &&
+                 ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 /etc/ssh/omp-box/authorized_keys ${person.home}/.ssh/authorized_keys; then
+                :
+              else
+                echo "omp-keys: cannot prepare ${person.home}/.ssh; ssh will refuse it" >&2
+              fi
             '')
             people}
           '';
@@ -455,14 +461,16 @@ in {
             RemainAfterExit = true;
           };
           script = ''
-            set -eu
+            set -u
             mkdir -p /run/omp-natives
             ${lib.concatMapStringsSep "\n" (person: ''
-              mkdir -p /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name} ${person.home}/.omp/natives
-              chown ${toString person.uid}:${toString person.gid} /run/omp-natives/upper-${person.name} ${person.home}/.omp/natives
-              ${pkgs.util-linux}/bin/mount -t overlay overlay \
-                -o lowerdir=/mnt/omp-natives,upperdir=/run/omp-natives/upper-${person.name},workdir=/run/omp-natives/work-${person.name} \
-                ${person.home}/.omp/natives
+              mkdir -p /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name}
+              # The mount point lives under a home the bot can rename, so the helper opens it a component at a
+              # time without following a link and mounts on the fd; the upper and work folders are root's.
+              if ! ${shareMount}/bin/omp-share-mount overlay ${person.home} .omp/natives /mnt/omp-natives \
+                /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name}; then
+                echo "omp-natives: cannot mount ${person.home}/.omp/natives" >&2
+              fi
             '')
             people}
           '';
@@ -477,18 +485,26 @@ in {
             TimeoutStartSec = "infinity";
           };
           script = ''
-            set -eu
+            set -u
             src=${ompBox.seedMount}/current
             until [ -e "$src/config.yml" ]; do sleep 1; done
-            for spec in ${lib.concatMapStringsSep " " (person: lib.escapeShellArg "${toString person.uid}:${toString person.gid}:${person.home}") people}; do
-              IFS=: read -r uid gid dst <<<"$spec"
-              install -d -m 755 "$dst/.omp"
-              install -d -m 700 "$dst/.omp/agent"
-              for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md; do
-                install -m 600 "$src/$file" "$dst/.omp/agent/$file"
-              done
-              chown -R "$uid:$gid" "$dst/.omp/agent"
-            done
+            # Every write below is the bot's own: the seed is world-readable, and running install as the user
+            # means a path the bot swapped for a link can only be followed with the bot's rights, never root's.
+            ${lib.concatMapStringsSep "\n" (person: ''
+              if [ ! -d ${person.home}/.omp ]; then
+                ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 755 ${person.home}/.omp ||
+                  echo "omp-seed: cannot create ${person.home}/.omp" >&2
+              fi
+              if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent; then
+                for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md; do
+                  ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$file" ${person.home}/.omp/agent/$file ||
+                    echo "omp-seed: cannot install $file for ${person.name}" >&2
+                done
+              else
+                echo "omp-seed: cannot prepare ${person.home}/.omp/agent" >&2
+              fi
+            '')
+            people}
           '';
         };
       };

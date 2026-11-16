@@ -92,6 +92,77 @@ static int show(int fd, char *out, size_t size) {
 	return 0;
 }
 
+// Opens HOME/PATH the same way a grant's target is opened: every component is a directory opened with
+// RESOLVE_NO_SYMLINKS from the home down, and a component that is missing is created as root through the parent
+// fd. Nothing here follows a link or chowns anything: the caller only gets the directory it opened.
+static int under_home(const char *home, const char *path) {
+	int fd = as_dir(AT_FDCWD, home, 1);
+	if (fd < 0) return -1;
+	char *walk = strdup(path);
+	if (!walk) {
+		int e = errno;
+		close(fd);
+		errno = e;
+		return -1;
+	}
+	char *save = NULL;
+	for (char *part = strtok_r(walk, "/", &save); part; part = strtok_r(NULL, "/", &save)) {
+		if (part[0] == 0 || strcmp(part, ".") == 0) continue;
+		if (strcmp(part, "..") == 0) {
+			close(fd);
+			free(walk);
+			errno = EINVAL;
+			return -1;
+		}
+		if (descend(&fd, part, 0, 0, 1) < 0) {
+			int e = errno;
+			close(fd);
+			free(walk);
+			errno = e;
+			return -1;
+		}
+	}
+	free(walk);
+	return fd;
+}
+
+// overlay HOME REL LOWER UPPER WORK - mount an overlay on HOME/REL, naming the target by the fd opened without
+// following a symlink. A bot can rename its own home around; only the directory root actually opened is mounted,
+// so a link planted on the way is a refusal, never a root mount over what it names.
+static int overlay(char **argv) {
+	const char *home = argv[0], *path = argv[1], *lower = argv[2], *upper = argv[3], *work = argv[4];
+	int target = under_home(home, path);
+	if (target < 0) return complain("open the overlay mount point", path);
+	int ismounted = mounted(target);
+	if (ismounted < 0) {
+		int e = errno;
+		close(target);
+		errno = e;
+		return complain("check the overlay mount point", path);
+	}
+	if (ismounted) {
+		close(target);
+		return 0;
+	}
+	char options[PATH_MAX * 3 + 64];
+	int n = snprintf(options, sizeof options, "lowerdir=%s,upperdir=%s,workdir=%s", lower, upper, work);
+	if (n < 0 || (size_t) n >= sizeof options) {
+		close(target);
+		errno = ENAMETOOLONG;
+		return complain("overlay options", path);
+	}
+	char topath[64];
+	snprintf(topath, sizeof topath, "/proc/self/fd/%d", target);
+	if (mount("overlay", topath, "overlay", 0, options) < 0) {
+		int e = errno;
+		close(target);
+		errno = e;
+		return complain("overlay", path);
+	}
+	close(target);
+	return 0;
+}
+
 // apply HOME REL|PATH UID GID ro|rw SOURCE - mount SOURCE where the user sees REL under HOME (or PATH, absolute),
 // creating the folders on the way as that user, and print the resolved place so it can be unmounted by name later.
 static int apply(char **argv) {
@@ -185,6 +256,7 @@ static int remove_place(char **argv) {
 int main(int argc, char **argv) {
 	if (argc == 8 && strcmp(argv[1], "apply") == 0) return apply(argv + 2);
 	if (argc == 3 && strcmp(argv[1], "remove") == 0) return remove_place(argv + 2);
-	fprintf(stderr, "usage: omp-share-mount apply HOME PATH UID GID ro|rw SOURCE | remove PATH\n");
+	if (argc == 7 && strcmp(argv[1], "overlay") == 0) return overlay(argv + 2);
+	fprintf(stderr, "usage: omp-share-mount apply HOME PATH UID GID ro|rw SOURCE | remove PATH | overlay HOME PATH LOWER UPPER WORK\n");
 	return 2;
 }
