@@ -3027,15 +3027,11 @@
       name = "llama-herd";
       path = "${./shaders/llama-herd.glsl}";
       mode = "light";
-      # its llamas step an art pixel every 25ms: 40 pictures a second show every step
-      fps = 40;
     }
     {
       name = "llama-herd-night";
       path = "${./shaders/llama-herd-night.glsl}";
       mode = "dark";
-      # its llamas step an art pixel every 25ms: 40 pictures a second show every step
-      fps = 40;
     }
     {
       name = "liquify";
@@ -3097,7 +3093,7 @@
   shaderWallpaperParameters = {
     shaders = map (entry: [
       entry.path
-      (entry.fps or 0)
+      0
       (config.user.theme.apply entry.mode)
       entry.mode
     ]) (map wallpaper cfg.wallpapers);
