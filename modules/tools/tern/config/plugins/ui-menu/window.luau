@@ -44,6 +44,13 @@ local TWEAKS = {
 		layer = true,
 	},
 	{
+		id = "dawn",
+		label = "Dawn",
+		group = "Look layers",
+		default = false,
+		layer = true,
+	},
+	{
 		id = "grok",
 		label = "Grok",
 		group = "Look layers",
@@ -247,11 +254,6 @@ local TWEAKS = {
 		id = "chat-still",
 		label = "no streaming",
 		group = "omp",
-	},
-	{
-		id = "bot-view",
-		label = "chat look",
-		group = "omp bots",
 	},
 	{
 		id = "bot-turn-stats",
@@ -565,6 +567,7 @@ local LOOKS = {
 	{ label = "Mini", layers = { "mini" } },
 	{ label = "Ozette", layers = { "ozette", "ozette-motion", "ozette-cmus" } },
 	{ label = "YoRHa", layers = { "yorha" } },
+	{ label = "Dawn", layers = { "dawn" } },
 	{ label = "Grok", layers = { "grok" } },
 	{ label = "Departure", layers = { "departure", "bubbles" } },
 	{ label = "Automata", layers = { "automata", "bubbles" } },

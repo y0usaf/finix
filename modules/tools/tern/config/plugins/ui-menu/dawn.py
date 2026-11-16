@@ -62,6 +62,9 @@ for selectors, body in re.findall(r"([^{}]+)\{([^{}]*)\}", re.sub(r"/\*.*?\*/", 
 
 out = [scope + " {", "\t&,", f"\t& :where(:not({avatar})) {{", "\t\tall: unset;", "\t}"]
 out += rules
-out.append(open(sheet).read().rstrip("\n").replace("%avatar%", avatar))
+nested, _, outside = open(sheet).read().replace("%avatar%", avatar).partition("\n@keyframes")
+out.append(nested.rstrip("\n"))
 out.append("}")
+if outside:
+    out.append("@keyframes" + outside.rstrip("\n"))
 sys.stdout.write("\n".join(out) + "\n")

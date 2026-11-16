@@ -2432,12 +2432,6 @@
           ];
         }
       ]);
-      "plugins/ui-menu/snippets/bot-view.css" = "${pkgs.runCommand "bot-view.css" {nativeBuildInputs = [pkgs.python3];} ''
-        python3 ${./config/plugins/ui-menu/bot-view.py} ${tern}/bin/.tern-wrapped \
-          ${lib.escapeShellArg ":root:not(#bot-a):not(#bot-b):not(#bot-c) :where(section.tn-pane:has([data-role^='omp.bot.']) .sf-chat-reader:not(.sf-layer))"} \
-          ${lib.escapeShellArg "[data-role^='omp.bot.chao.'], [data-role^='omp.bot.chao.'] *, svg *"} \
-          ${./config/plugins/ui-menu/bot-view.css} > $out
-      ''}";
       "plugins/ui-menu/snippets/bottom.css" = generators.sourceFile "bottom.css" (generators.cssSource [
         {
           select = "html.lay-rail.tabs-h #tabbar > .tb-in > .tn-peers";
@@ -4456,6 +4450,12 @@
       ]);
       "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
       "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
+      "plugins/ui-menu/snippets/dawn.css" = "${pkgs.runCommand "dawn.css" {nativeBuildInputs = [pkgs.python3];} ''
+        python3 ${./config/plugins/ui-menu/dawn.py} ${tern}/bin/.tern-wrapped \
+          ${lib.escapeShellArg ":root:not(#dawn-a):not(#dawn-b):not(#dawn-c) :where(.sf-chat-reader:not(.sf-layer))"} \
+          ${lib.escapeShellArg "[data-role^='omp.bot.chao.'], [data-role^='omp.bot.chao.'] *, svg *"} \
+          ${./config/plugins/ui-menu/dawn.css} > $out
+      ''}";
       "plugins/ui-menu/snippets/grok.css" = "${flakeInputs.tern-ozette}/grok.css";
       "plugins/ui-menu/snippets/grok-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-answer-bubbles.css";
       "plugins/ui-menu/snippets/grok-user-bubbles.css" = "${flakeInputs.tern-ozette}/grok-user-bubbles.css";
