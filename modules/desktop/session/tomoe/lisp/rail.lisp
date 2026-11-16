@@ -505,9 +505,10 @@ its time stays small enough for a float to keep the motion smooth."
 
 (defun rail--switch (state side id now)
   "Note a change of the focused card ID, on SIDE, in STATE: a switch across the
-seam or along its column, siphoning after a pause and pouring on the heels of
-the last one, from the card that held focus before. A cut throw notes none, so
-nothing animates or redraws."
+seam or along its column, or between a card and :FREE, the deck holding no
+focus, siphoning after a pause and pouring on the heels of the last one, from
+the card that held focus before. A cut throw notes none, so nothing animates or
+redraws."
   (let ((was (getf state :rail-side))
         (old (getf state :rail-focus)))
     (when (and side was (not (and (eql side was) (eql id old)))
@@ -549,12 +550,13 @@ is open, the shape's numbers, and the level history, newest first."
             levels
             (make-list (- 48 (length levels)) :initial-element 0))))
 
-(defun rail--tide-data (origin skip seam extent output motion focus old voice gauges)
+(defun rail--tide-data (origin skip seam extent output motion focus old voice gauges ghost)
   "Every number morph.glsl reads, in the order it reads them. ORIGIN is the
 surface's corner and SKIP the span of x it leaves to the other surface, both in
 output pixels, and EXTENT the top and bottom of the rail's stack the slab holds;
 FOCUS and OLD index the surface's :WINDOWS; GAUGES are what RAIL--GAUGES makes
-of the readings the slab swells with."
+of the readings the slab swells with; GHOST is the box the old card last stood
+in when it is no longer shown, for its frame to drain from."
   (let* ((cast (getf *rail--look* :cast))
          (tide +rail--tide+)
          (lead (getf tide :lead)) (trail (getf tide :trail)) (ring (getf tide :ring))
@@ -583,6 +585,7 @@ of the readings the slab swells with."
             (loop for gauge in gauges append gauge)
             (make-list (* 3 (- 5 (length gauges))) :initial-element 0)
             (list (getf cast :swell))
+            (or ghost (list 0 0 0 0))
             (let ((glass (rail--material :glass)))
               (when glass
                 (loop for key in '(:tint :frost :lens :bevel :rim :lift)
@@ -610,12 +613,13 @@ of the readings the slab swells with."
      (if (eq side :right) (+ (getf +rail+ :channel) (getf +rail+ :width)) 0)))
 
 (defun rail--carried (columns layout)
-  "Each carried window as (:ID :SIDE :BOX), nearest each column's front first."
+  "Each carried window as (:ID :SIDE :BOX), nearest each column's front first;
+a hidden window is carried by neither column until it is shown again."
   (loop for side in '(:left :right)
         for ids = (getf columns side)
         append (loop for id in (subseq ids 0 (min (length ids) (getf +rail+ :carry-max)))
                      for box = (find id layout :key (lambda (entry) (getf entry :id)))
-                     when box collect (list :id id :side side :box box))))
+                     when (and box (getf box :visible)) collect (list :id id :side side :box box))))
 
 (defun rail--covered-p (snapshot box)
   "Whether a placed window overlaps BOX. Tiled windows never reach the seam, so
@@ -673,6 +677,14 @@ two plates across the top and bottom of the focal frame."
 
 ;;; morph's surfaces
 
+(defun rail--ghost (snapshot old)
+  "The box, x0 y0 x1 y1 in output pixels, the card OLD was laid out in when it
+is no longer shown -- hidden by a peek, say -- or NIL while it is shown."
+  (let ((entry (and old (find old (context snapshot :layout) :key (lambda (e) (getf e :id))))))
+    (when (and entry (not (getf entry :visible)) (plusp (getf entry :width 0)))
+      (list (getf entry :x) (getf entry :y)
+            (+ (getf entry :x) (getf entry :width)) (+ (getf entry :y) (getf entry :height))))))
+
 (defun rail--morph-draw (look context)
   "morph: the frames over the output, the slab down the seam as tall as the
 readings it holds, and the readings set into it, all from CONTEXT."
@@ -682,6 +694,7 @@ readings it holds, and the readings set into it, all from CONTEXT."
       context
     (let* ((focus-index (and key (position (getf key :id) windows)))
            (old-index (and old (position old windows)))
+           (ghost (rail--ghost snapshot old))
            (motion (rail--motion switch side epoch))
            (voice (cassette--bolo-turn-p (getf state :bolo-state)))
            (moved (if switch (max 0d0 (+ (- (getf switch :at) epoch) (getf +rail--tide+ :settle))) 0d0))
@@ -710,11 +723,11 @@ readings it holds, and the readings set into it, all from CONTEXT."
                                        (list left top)
                                        (list band-x (+ band-x band-width))
                                        seam extent output motion focus-index old-index
-                                       (rail--voice-data state nil epoch) nil)
+                                       (rail--voice-data state nil epoch) nil ghost)
                                 :windows windows :clock epoch :until moved
                                 ;; only the rings round the cards are
                                 ;; ever drawn or repainted
-                                :reach (rail--design 40)))
+                                :reach (unless ghost (rail--design 40))))
              (shell-surface
               :rail-slab (ui :stack)
               :output (getf output :name) :anchors '(:top :left)
@@ -727,7 +740,7 @@ readings it holds, and the readings set into it, all from CONTEXT."
                                        (list band-x top) (list 0 0)
                                        seam extent output motion focus-index old-index
                                        (rail--voice-data state voicing epoch)
-                                       (rail--gauges state blocks))
+                                       (rail--gauges state blocks) ghost)
                                 :windows windows :clock epoch
                                 :until (max moved calmed)))
              (shell-surface :rail-type (rail--web state snapshot seam blocks
@@ -811,7 +824,7 @@ readings it holds, and the readings set into it, all from CONTEXT."
     (setf (getf state :rail-theme) theme)
     ;; The readings move toward the last sample before anything draws them.
     (rail--glide state now)
-    (rail--switch state side (getf key :id) now)
+    (rail--switch state (or side (and output :free)) (getf key :id) now)
     (unless (or voice settling)
       (setf (getf state :bolo-history) nil
             (getf state :bolo-fade) nil))

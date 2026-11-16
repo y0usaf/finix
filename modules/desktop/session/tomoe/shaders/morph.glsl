@@ -25,7 +25,7 @@ const int RAD = 18, WF = 19, RECW = 20, SW = 21, INSET = 22, RS = 23, WELD = 24;
 const int SEAM = 25, SEAMW = 26, SIDE = 27, PREV = 28, TSW = 29, FLOW = 30, HOLD = 31, GULP = 32;
 const int FOCUS = 33, OLD = 34, METERS = 35, EXTENT = 36, SETTLE = 38;
 const int LEAD = 39, TRAIL = 43, WOB = 46, SQUASH = 49, POUR = 50, SIPHON = 56, HEIGHT = 64;
-const int VOICE = 65, LEVELS = 80, GAUGES = 128, SWELL = 143, PANE = 144;
+const int VOICE = 65, LEVELS = 80, GAUGES = 128, SWELL = 143, GHOST = 144, PANE = 148;
 
 vec2 g_origin;
 float g_h;
@@ -106,8 +106,7 @@ float seam_mid() { return D(SEAM) + D(SEAMW) * 0.5; }
 
 // The material round card i: role 1 the focused card at rest, 2 the card a
 // switch is filling, 3 the card it is draining.
-float frame_field(vec2 p, int i, int role, float dt) {
-    vec4 box = card(i);
+float frame_field(vec2 p, vec4 box, int role, float dt) {
     float q, b, qmax, iy;
     perim(p, box, (box.x + box.z) * 0.5 < seam_mid(), q, b, qmax, iy);
     float w0 = D(WF);
@@ -185,6 +184,7 @@ float gauges(float y) {
 // ---- the slab
 
 vec2 rest_edges(float side) {
+    if (side == 0.0) return seam_mid() + vec2(-0.5, 0.5) * D(SW);
     if (side < 0.0) {
         float left = D(SEAM) + D(WF);
         return vec2(left - 2.0, left + D(SW));
@@ -196,17 +196,20 @@ vec2 rest_edges(float side) {
 float g_cy, g_hh, g_top, g_bottom, g_amp, g_now, g_dt;
 bool g_hop, g_flow;
 
+float free_left(float side) { return 0.5 + 0.5 * side; }
+
 vec2 slab_edges(float y) {
-    float side = D(SIDE), hold = D(HOLD);
+    float side = D(SIDE), prev = D(PREV), hold = D(HOLD);
     vec2 e = rest_edges(side);
-    float wob = 0.0;
+    float wob = 0.0, left = free_left(side);
     if (g_hop) {
-        vec2 e0 = rest_edges(D(PREV)), e1 = e;
+        vec2 e0 = rest_edges(prev), e1 = e;
         float ny = clamp(abs(y - g_cy) / g_hh, 0.0, 1.0);
         float lead = spring_v(g_dt - D(LEAD + 3) * pow(ny, 1.4), D(LEAD), D(LEAD + 1), D(LEAD + 2));
         float trail = spring_v(g_dt - (D(TRAIL + 2) + hold * exp(-pow(ny / 0.3, 2.0))), D(TRAIL), D(TRAIL + 1), 0.0);
-        if (side > 0.0) e = vec2(e0.x + (e1.x - e0.x) * trail, e0.y + (e1.y - e0.y) * lead);
+        if (side > prev) e = vec2(e0.x + (e1.x - e0.x) * trail, e0.y + (e1.y - e0.y) * lead);
         else e = vec2(e0.x + (e1.x - e0.x) * lead, e0.y + (e1.y - e0.y) * trail);
+        left = mix(free_left(prev), left, clamp(lead, 0.0, 1.0));
         float after = g_dt - hold - 0.02;
         if (after > 0.0) wob = D(WOB) * exp(-after / D(WOB + 1)) * sin(after * D(WOB + 2)) * cos(ny * PI * 1.5);
     }
@@ -216,10 +219,8 @@ vec2 slab_edges(float y) {
         float yg = (g_hh - 40.0) * sm(hold - 0.02, hold + 0.16, g_dt);
         wob += gulp * g * exp(-pow((abs(y - g_cy) - yg) / 70.0, 2.0));
     }
-    if (side > 0.0) e.x -= wob; else e.y += wob;
-    float voice = wobble(y, g_top, g_bottom, g_now, g_amp) + gauges(y);
-    if (side > 0.0) e.x -= voice; else e.y += voice;
-    return e;
+    float reach = wob + wobble(y, g_top, g_bottom, g_now, g_amp) + gauges(y);
+    return e + vec2(-left, 1.0 - left) * reach;
 }
 
 float slab_field(vec2 p) {
@@ -239,19 +240,20 @@ float slab_field(vec2 p) {
 
 // ---- the whole material
 
-bool g_slab;
+bool g_slab, g_has_old;
 float g_kold;
+vec4 g_old;
 
 float field(vec2 p) {
     float f = g_slab ? slab_field(p) : 1e4;
     int focus = int(D(FOCUS)), old = int(D(OLD));
-    bool moving = g_hop || (g_flow && old >= 0);
+    bool moving = g_hop || (g_flow && g_has_old);
     if (card_shown(focus)) {
-        float m = frame_field(p, focus, moving ? 2 : 1, g_dt);
+        float m = frame_field(p, card(focus), moving ? 2 : 1, g_dt);
         f = g_slab ? smin(f, m, D(WELD)) : min(f, m);
     }
-    if (moving && card_shown(old) && old != focus) {
-        float m = frame_field(p, old, 3, g_dt);
+    if (moving && g_has_old && old != focus) {
+        float m = frame_field(p, g_old, 3, g_dt);
         f = g_kold > 0.05 ? smin(f, m, g_kold) : min(f, m);
     }
     return f;
@@ -312,9 +314,16 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     g_now = iTime;
     g_dt = iTime - D(TSW);
     g_flow = g_dt < D(SETTLE) && D(FLOW) > -0.5;
-    g_hop = g_flow && D(PREV) != 0.0 && D(PREV) != D(SIDE) && D(SIDE) != 0.0;
-    int focus = int(D(FOCUS));
-    g_slab = D(SIDE) != 0.0 && card_shown(focus);
+    g_hop = g_flow && D(PREV) != D(SIDE);
+    int focus = int(D(FOCUS)), old = int(D(OLD));
+    g_has_old = card_shown(old);
+    if (g_has_old) g_old = card(old);
+    else if (g_flow && D(GHOST + 2) > D(GHOST)) {
+        g_old = vec4(D(GHOST), D(GHOST + 1), D(GHOST + 2), D(GHOST + 3));
+        g_has_old = true;
+        near = min(near, abs(box_b(p, g_old) - 8.0));
+    }
+    g_slab = D(SIDE) == 0.0 || card_shown(focus);
     if (g_slab) {
         float y0 = D(EXTENT), y1 = D(EXTENT + 1);
         g_cy = (y0 + y1) * 0.5;
