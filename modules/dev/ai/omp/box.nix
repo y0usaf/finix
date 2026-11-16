@@ -36,6 +36,23 @@
       folders = [];
     }
   ];
+  # The box's own headless browsers. Every box user shares 127.0.0.1, and Chromium's DevTools endpoint has no
+  # authentication, so each port is opened to the browser's owner alone: a rule matches the connecting socket's
+  # Unix user and refuses every other one before Chromium sees the request.
+  browsers = {
+    baobot = {
+      profile = "${home}/.local/state/baobot/chromium";
+      port = 9222;
+    };
+  };
+  browserCdpGuard = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: browser: let
+    owner = lib.findFirst (bot: bot.name == name) null bots;
+    # A browser that is not a boxed bot runs as the box's own user, whose uid guest.nix fixes at 1001.
+    uid = if owner == null then 1001 else owner.uid;
+  in ''
+    ip daddr 127.0.0.1 tcp dport ${toString browser.port} meta skuid ${toString uid} accept
+    ip daddr 127.0.0.1 tcp dport ${toString browser.port} reject with tcp reset
+  '') browsers);
   json = lib.generators.toJSON {};
 
   proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.python.render (({
@@ -764,10 +781,7 @@
         # Headless Chromium the box keeps running, each with its DevTools on 127.0.0.1:PORT inside the box
         # for a boxed bot's browser.cdpUrl. A profile lives on a share (a bot's persist path), and its browser
         # waits until that share is mounted.
-        browsers.baobot = {
-          profile = "${home}/.local/state/baobot/chromium";
-          port = 9222;
-        };
+        inherit browsers;
         sharesDir = "${state}/shares";
         authDir = "${state}/auth";
         nativesDir = "${state}/natives";
@@ -777,6 +791,22 @@
         {nixpkgs.pkgs = pkgs;}
         flakeInputs.microvm.nixosModules.microvm
         ../../../../omp-box/guest.nix
+        {
+          # The browser services listen on loopback, which every box user shares. Refuse a connection unless the
+          # socket belongs to the browser's own Unix user: a bot has no way to open a socket as another one.
+          networking.nftables = {
+            enable = true;
+            ruleset = ''
+              flush ruleset
+              table inet omp-browser {
+                chain output {
+                  type filter hook output priority filter; policy accept;
+                  ${browserCdpGuard}
+                }
+              }
+            '';
+          };
+        }
       ];
     };
     runner = guest.config.microvm.declaredRunner;
