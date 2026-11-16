@@ -152,6 +152,26 @@ theme's own numbers."
             (kit--cards snapshot windows carried)
             theme)))
 
+(defun kit--band (context)
+  "The rail's own band, down the seam between the cards, as a surface: where
+the rail is, for whoever asks the compositor for it -- the landing gate crops
+the rail by this box, the one morph's type surface publishes. A theme sets its
+readings in its shader and so carries no type surface of its own; the band is
+still the rail's. Nothing of the look is drawn here, so it is the seam's own
+glass at 1/255: a surface with nothing in it is pruned."
+  (destructuring-bind (&key output layer seam &allow-other-keys) context
+    (let* ((middle (floor (rail--seam-width) 2))
+           (x (if seam (rail--lane seam :left)
+                  (- (+ (getf output :x) (floor (getf output :width) 2)) middle)))
+           (y (if seam (getf seam :y) (+ (getf output :y) 14))))
+      (shell-surface
+       :rail-type (ui :stack)
+       :output (getf output :name) :anchors '(:top :left)
+       :width (rail--design (rail--seam-width))
+       :height (rail--design (if seam (getf seam :height) (- (getf output :height) 28)))
+       :margin (rail--surface-margin output x y)
+       :layer layer :background "#00000001" :click-through t :slide t))))
+
 (defun kit--frames (look context theme &key (reach 48))
   "The theme's one surface: the whole output, drawn by its shader from
 KIT--DATA, repainting only within REACH pixels of the cards it carries."
@@ -167,7 +187,8 @@ KIT--DATA, repainting only within REACH pixels of the cards it carries."
                               :data (kit--data look context theme)
                               :windows windows :clock epoch
                               :until (kit--until look context)
-                              :reach (rail--design reach))))
+                              :reach (rail--design reach)))
+           (kit--band context))
      (unless (getf +rail+ :focus-border)
        (loop for entry in carried
              collect (window-properties
