@@ -1,308 +1,1654 @@
-:root:not(#dawn),
-html.tn-themed:not(#dawn) {
-	--dawn-page: light-dark(#fafaf8, #141418);
-	--dawn-side: light-dark(#f1f1ee, #19191e);
-	--dawn-card: light-dark(#ffffff, #1e1e23);
-	--dawn-ink: light-dark(#17171b, #f2f2ef);
-	--dawn-ink-2: light-dark(#4b4b54, #c4c4cc);
-	--dawn-ink-3: light-dark(#666670, #a3a3ad);
-	--dawn-ink-4: light-dark(#8d8d96, #84848e);
-	--dawn-wash: light-dark(rgb(23 23 27 / 5%), rgb(242 242 239 / 6.5%));
-	--dawn-wash-2: light-dark(rgb(23 23 27 / 9%), rgb(242 242 239 / 11%));
-	--dawn-line: light-dark(rgb(23 23 27 / 9%), rgb(242 242 239 / 10%));
-	--dawn-tint: light-dark(#3b78e6, #5f9bff);
-	--dawn-link: light-dark(#2365d4, #86b4ff);
-	--dawn-pick: light-dark(rgb(58 120 238 / 22%), rgb(98 156 255 / 34%));
-	--dawn-bad: light-dark(#cf3a33, #ff7a71);
-	--dawn-blur: blur(2em) saturate(150%);
-	--grok-page: var(--dawn-page);
-	--grok-chrome: var(--dawn-card);
-	--grok-side: var(--dawn-side);
-	--grok-ink: var(--dawn-ink);
-	--grok-muted: var(--dawn-ink-3);
-	--grok-line: var(--dawn-line);
-	--grok-soft: var(--dawn-wash);
-	--tn-page: var(--dawn-page) !important;
-	--t2: var(--dawn-ink-2);
-	--t3: var(--dawn-ink-3);
-	--t4: var(--dawn-ink-4);
-	--accent-ink: var(--dawn-link);
-	--pop-bg: light-dark(rgb(255 255 255 / 76%), rgb(30 30 35 / 82%));
-	--modal-bg: light-dark(rgb(255 255 255 / 84%), rgb(30 30 35 / 88%));
-	--modal-dim: light-dark(rgb(20 20 24 / 24%), rgb(0 0 0 / 50%));
+:root,
+html.tn-themed {
+	--dawn-page: var(--tn-page);
+	--dawn-chrome: var(--tbl-head);
+	--dawn-side: oklch(from var(--tn-page) calc(l * 0.97) c h);
+	--dawn-ink: light-dark(oklch(from var(--tn-page) 0.2 0.003 h), oklch(from var(--tn-page) 0.96 0.004 h));
+	--dawn-muted: color-mix(in srgb, var(--t3) 60%, var(--dawn-ink));
+	--dawn-line: color-mix(in srgb, var(--dawn-ink) 8%, transparent);
+	--dawn-soft: color-mix(in srgb, var(--dawn-ink) 6%, transparent);
+	--dawn-user: light-dark(var(--dawn-ink), color-mix(in srgb, var(--dawn-ink) 18%, transparent));
+	--frost-you-fill: color-mix(in srgb, var(--dawn-user) 72%, transparent);
+	--frost-you-ink: oklch(from var(--dawn-ink) 0.97 0 0);
+	--frost-reply-fill: var(--dawn-soft);
+	--frost-reply-ink: var(--dawn-ink);
+	--page: rgb(from var(--dawn-page) r g b / var(--surface-a, 1)) !important;
+	--panel: rgb(from var(--dawn-page) r g b / var(--surface-a, 1)) !important;
+	--card: var(--dawn-chrome);
+	--pop-bg: var(--dawn-chrome);
+	--modal-bg: var(--dawn-chrome);
+	--modal-filter: none;
+	--modal-dim: light-dark(rgb(0 0 0 / 50%), rgb(0 0 0 / 70%));
+	--modal-dim-filter: none;
+	--glass-hi: transparent;
+	--tv-bg: var(--dawn-page);
+	--tv-fg: var(--dawn-ink);
+	--ink: var(--dawn-ink);
+	--omp-text: var(--dawn-ink);
+	--omp-accent: var(--dawn-ink);
+	--omp-mdHeading: var(--dawn-ink);
+	--accent-ink: var(--dawn-ink);
+	--accent-fill: var(--dawn-ink);
+	--t1: var(--dawn-ink);
+	--l1: var(--dawn-line);
+	--l2: var(--dawn-soft);
+	--l3: color-mix(in srgb, var(--dawn-ink) 15%, transparent);
+	--accent: var(--dawn-ink);
+	--code-bg: var(--dawn-side);
+	--r-card: 16px;
+	--r-ctl: 10px;
 }
-:root:not(#dawn):not(#dawn-b) section.tn-pane:has([data-role^='omp.bot.'][data-role$='.red']) { --dawn-tint: #f2545f; }
-:root:not(#dawn):not(#dawn-b) section.tn-pane:has([data-role^='omp.bot.'][data-role$='.orange']) { --dawn-tint: #f58a42; }
-:root:not(#dawn):not(#dawn-b) section.tn-pane:has([data-role^='omp.bot.'][data-role$='.yellow']) { --dawn-tint: #e2ac12; }
-:root:not(#dawn):not(#dawn-b) section.tn-pane:has([data-role^='omp.bot.'][data-role$='.green']) { --dawn-tint: #32b26d; }
-:root:not(#dawn):not(#dawn-b) section.tn-pane:has([data-role^='omp.bot.'][data-role$='.teal']) { --dawn-tint: #1fb0ba; }
-:root:not(#dawn):not(#dawn-b) section.tn-pane:has([data-role^='omp.bot.'][data-role$='.blue']) { --dawn-tint: #4383f2; }
-:root:not(#dawn):not(#dawn-b) section.tn-pane:has([data-role^='omp.bot.'][data-role$='.purple']) { --dawn-tint: #8c6cf2; }
-:root:not(#dawn):not(#dawn-b) section.tn-pane:has([data-role^='omp.bot.'][data-role$='.pink']) { --dawn-tint: #ee5ea2; }
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader {
-	--rd-measure: 800px;
-	--dawn-you: rgb(from var(--dawn-tint) r g b / light-dark(13%, 22%));
+:root:not(#dawn) body {
+	--accent: var(--dawn-ink);
+	--accent-ink: var(--dawn-ink);
+	--accent-fill: var(--dawn-ink);
 }
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main {
-	padding: 28px 16px 24px;
+:root:not(#dawn) .tv-cover {
+	background: var(--page);
 }
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader ::selection {
-	background: var(--dawn-pick);
+:root:not(#dawn) #tabbar {
+	background: rgb(from var(--dawn-side) r g b / var(--surface-a, 1));
 }
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader {
-	--dawn-reply: light-dark(#ffffff, #1f1f25);
-	--dawn-reply-edge: light-dark(rgb(23 23 27 / 8%), rgb(242 242 239 / 9%));
-	--dawn-reply-lift: 0 14px 30px -18px light-dark(rgb(23 23 27 / 26%), rgb(0 0 0 / 75%));
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > .sf-col:has(> [data-role='omp.notice.work']) {
-	align-self: flex-start;
-	box-sizing: border-box;
-	width: fit-content;
-	max-width: 100%;
-	margin-top: 14px;
-	padding: 14px 20px;
-	border-radius: 22px;
-	background: var(--dawn-reply);
-	box-shadow: 0 1px 2px light-dark(rgb(23 23 27 / 5%), rgb(0 0 0 / 30%)), var(--dawn-reply-lift), inset 0 0 0 1px var(--dawn-reply-edge);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'] {
-	align-self: stretch;
-	width: auto;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > .sf-col:has(> [data-role='omp.notice.work']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']) {
-	padding-bottom: 7px;
-	border-bottom-left-radius: 0;
-	border-bottom-right-radius: 0;
-	box-shadow: inset 1px 0 0 var(--dawn-reply-edge), inset -1px 0 0 var(--dawn-reply-edge), inset 0 1px 0 var(--dawn-reply-edge);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + .sf-col:has(> [data-role='omp.notice.work']),
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + .sf-col:has(> [data-role='omp.notice.work']),
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col:has(> [data-role='omp.notice.work']),
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col:has(> [data-role='omp.notice.work']) {
-	margin-top: 0;
-	padding-top: 7px;
-	border-top-left-radius: 0;
-	border-top-right-radius: 0;
-	box-shadow: var(--dawn-reply-lift), inset 1px 0 0 var(--dawn-reply-edge), inset -1px 0 0 var(--dawn-reply-edge), inset 0 -1px 0 var(--dawn-reply-edge);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']) > [data-role^='omp.assistant'],
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + .sf-col:has(> [data-role='omp.notice.work']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']),
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + .sf-col:has(> [data-role='omp.notice.work']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']),
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col:has(> [data-role='omp.notice.work']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']),
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is(:is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']):has(> [data-role^='omp.assistant']), .sf-col:has(> [data-role='omp.notice.work'])) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col:has(> [data-role='omp.notice.work']):has(+ :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'], + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + :is(.sf-hidden, .sf-void:empty) + .sf-col > [data-role='omp.notice.work']) {
-	padding-bottom: 7px;
-	border-radius: 0;
-	box-shadow: inset 1px 0 0 var(--dawn-reply-edge), inset -1px 0 0 var(--dawn-reply-edge);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > .sf-col:has(> [data-role='omp.notice.work']) {
-	align-self: center;
-	width: 100%;
-	max-width: var(--rd-measure);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']) > [data-role^='omp.assistant'] .md .code {
-	background: var(--dawn-side);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-card[data-role='omp.user'] {
-	margin-top: 28px;
-	padding-bottom: 16px;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body {
-	max-width: min(80%, 560px);
-	padding: 10px 16px;
-	border-radius: 20px 20px 6px 20px;
-	background: var(--dawn-you);
-	box-shadow: inset 0 0 0 0.5px rgb(from var(--dawn-tint) r g b / 24%);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md {
-	font: 400 15px/25px var(--sans);
-	letter-spacing: 0.15px;
-	color: var(--dawn-ink);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md :is(p, ul, ol, blockquote, .tbl) {
-	margin: 0 0 14px;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md li {
-	margin-bottom: 6px;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md li::marker {
-	color: var(--dawn-ink-4);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md > :last-child,
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md li > p:last-child {
-	margin-bottom: 0;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md :is(h1, h2, h3, h4) {
-	margin: 26px 0 10px;
-	letter-spacing: -0.01em;
-	color: var(--dawn-ink);
-	line-height: 1.3;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md h1 { font-size: 22px; }
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md h2 { font-size: 19px; }
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md :is(h3, h4) { font-size: 16px; }
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md > :is(h1, h2, h3, h4):first-child {
-	margin-top: 0;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md :is(a, .sf-link) {
-	color: var(--dawn-link);
-	text-decoration: underline;
-	text-decoration-color: rgb(from var(--dawn-link) r g b / 35%);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md :not(pre) > code {
-	font: 13px/1.4 var(--tv-font, var(--mono));
-	padding: 2px 6px;
-	border-radius: 6px;
-	color: var(--dawn-ink-2);
-	background: var(--dawn-wash-2);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md blockquote {
-	padding-left: 14px;
-	color: var(--dawn-ink-2);
-	box-shadow: inset 2px 0 0 var(--dawn-wash-2);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md .code {
-	margin: 4px 0 14px;
-	border-radius: 14px;
-	background: var(--dawn-card);
-	box-shadow: inset 0 0 0 1px var(--dawn-line);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md :is(th, td) {
-	padding: 6px 14px 6px 0;
-	box-shadow: inset 0 -1px 0 var(--dawn-line);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .md th {
-	font: 600 13px/20px var(--sans);
-	color: var(--dawn-ink-3);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-card:is([data-role^='omp.custom'], [data-role^='omp.hook']) {
-	margin: 14px 0 4px;
-	border-radius: 16px;
-	background: none;
-	box-shadow: inset 0 0 0 1px var(--dawn-wash-2);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-card:is([data-role^='omp.custom'], [data-role^='omp.hook']) > .sf-card-head .sf-head {
-	font: 600 13px/20px var(--sans);
-	letter-spacing: 0.2px;
-	color: var(--dawn-ink-3);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-card:is([data-role^='omp.custom'], [data-role^='omp.hook']) > .sf-card-head .sf-t-accent {
-	color: inherit !important;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-card:is([data-role^='omp.custom'], [data-role^='omp.hook']) .sf-card-ic {
-	color: var(--dawn-ink-4);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-card:is([data-role^='omp.custom'], [data-role^='omp.hook']) .md {
-	font: 400 14px/22px var(--sans);
-	letter-spacing: 0.1px;
-	color: var(--dawn-ink-2);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-card:is([data-role^='omp.custom'], [data-role^='omp.hook']) .md p {
-	margin: 0 0 8px;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-card:is([data-role^='omp.custom'], [data-role^='omp.hook']) .md > :last-child {
-	margin-bottom: 0;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-col[data-role^='omp.editor'] {
-	max-width: var(--rd-measure);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
-	min-height: 48px;
-	padding: 9px 9px 9px 18px;
-	border-radius: 24px;
-	background: var(--dawn-card);
-	box-shadow: 0 6px 18px -8px light-dark(rgb(23 23 27 / 16%), rgb(0 0 0 / 55%));
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']):focus-within {
-	border-color: rgb(from var(--dawn-tint) r g b / 55%);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-col[data-role='omp.editor.bash'] { border-color: light-dark(#c7841c, #eda747); }
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-col[data-role='omp.editor.python'] { border-color: light-dark(#1689a6, #3ccbe6); }
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-ed-text {
-	font: 400 15px/24px var(--sans);
-	letter-spacing: 0.15px;
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-caret {
-	background: var(--dawn-tint);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-row[data-role='omp.composer.model'] {
-	display: flex;
-	height: 30px;
-	padding: 0 8px 0 10px;
-	border-radius: 15px;
-	font: 500 13px/1 var(--sans);
-	color: var(--dawn-ink-2);
-	background: var(--dawn-wash);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader .sf-row[data-role='omp.composer.model']:hover {
-	color: var(--dawn-ink);
-	background: var(--dawn-wash-2);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader [data-role='omp.composer.stop'] {
-	width: 30px;
-	height: 30px;
-	padding: 0;
-	border-radius: 50%;
-	background: var(--dawn-ink);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader [data-role='omp.composer.stop']::before {
-	left: 10px;
-	top: 10px;
-	background: var(--dawn-page);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader [data-role='omp.composer.stop']:hover {
-	background: var(--dawn-ink-2);
-}
-:root:not(#dawn):not(#dawn-b) .sf-chat-reader [data-role='omp.composer.send'] .kbd {
-	width: 30px;
-	min-width: 30px;
-	height: 30px;
-}
-:root:not(#dawn):not(#dawn-b) :is(.cmdk, .mdl, .dlg-card, .pk-sheet, .tn-hd, .tn-signin-card, :where(.sf-overlay.modal) > .sf-ov-card, :where(.sf-prefs .pf-editor) > .sf-col) {
-	-webkit-backdrop-filter: var(--dawn-blur);
-	backdrop-filter: var(--dawn-blur);
-	box-shadow: 0 1.2em 3em -1em light-dark(rgb(0 0 0 / 18%), rgb(0 0 0 / 60%)), 0 0 0 1px var(--dawn-line);
-}
-:root:not(#dawn):not(#dawn-b) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-clist, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.'], .toast, .tn-bn-card, .tn-find) {
-	-webkit-backdrop-filter: var(--dawn-blur);
-	backdrop-filter: var(--dawn-blur);
-	box-shadow: 0 0.6em 1.6em -0.5em light-dark(rgb(0 0 0 / 14%), rgb(0 0 0 / 55%)), 0 0 0 1px var(--dawn-line);
-}
-:root:not(#dawn):not(#dawn-b) .tv-thumb {
-	width: 5px;
-	background: rgb(from var(--dawn-ink) r g b / 22%);
-}
-:root:not(#dawn):not(#dawn-b) :is(.tv-bar:hover, .tv-bar.drag) .tv-thumb {
-	width: 7px;
-	background: rgb(from var(--dawn-ink) r g b / 38%);
-}
-:root:not(#dawn):not(#dawn-b) .sf-scroll > .sf-scroll-bar > .sf-scroll-thumb {
-	background: rgb(from var(--dawn-ink) r g b / 22%);
-}
-:root:not(#dawn):not(#dawn-b) #tabbar .tt.on {
-	background: var(--dawn-wash-2) !important;
+:root:not(#dawn) #tabbar .tt {
+	border-radius: 10px;
 	box-shadow: none;
 }
-:root:not(#dawn):not(#dawn-b) #tabbar .tt.on :is(.nm, .tn-tx, .tn-num, .ico, svg) {
-	color: var(--dawn-ink) !important;
+:root:not(#dawn) #tabbar .tt.on {
+	background: var(--dawn-soft);
 }
-:root:not(#dawn):not(#dawn-b) #tabbar .tt.on :is(.sub, .mk.keys, .kbd) {
-	color: var(--dawn-ink-3) !important;
+:root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-clist, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.'], .toast, .tn-bn-card, .tn-find) {
+	background: var(--pop-bg);
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	box-shadow: 0 10px 20px -3px color-mix(in srgb, var(--dawn-ink) calc(10% * 0.6), transparent), 0 4px 6px -4px color-mix(in srgb, var(--dawn-ink) calc(10% * 0.6), transparent), inset 0 0 0 0.5px color-mix(in srgb, var(--dawn-ink) 12%, transparent);
 }
-section.tn-pane:has(.sf-chat-reader.sf-main) > .tn-body {
-	background: var(--dawn-page);
+:root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-clist, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.']) {
+	border-radius: 16px;
+}
+:root:not(#dawn) :is(.sf-overlay:not(.modal) > .sf-ov-card, .tn-bn-card)::after,
+:root:not(#dawn) :is(.pk-sheet, .tn-signin-card, .tn-bn-card)::before,
+:root:not(#dawn) :is(.pk-sheet, .tn-signin-card)::after {
+	background: none;
+}
+:root:not(#dawn) :is(.cmdk, .mdl, .dlg-card, .pk-sheet, .tn-hd, .tn-signin-card, :where(.sf-overlay.modal) > .sf-ov-card, :where(.sf-prefs .pf-editor) > .sf-col) {
+	border-radius: 14px;
+	background: var(--modal-bg);
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--dawn-ink) 12%, transparent);
+}
+:root:not(#dawn) :is(.mdl-layer, .tn-hd-back, .tn-signin) {
+	background: var(--modal-dim);
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+}
+:root:not(#dawn) .sf-chat-reader.sf-main {
+	--rd-measure: 960px;
+	gap: 0;
+	padding: 24px 16px 20px;
+}
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] {
+	padding-bottom: 14px;
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md {
+	font: 400 15px/22px var(--sans);
+	letter-spacing: 0.15px;
+	color: var(--dawn-ink);
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md p {
+	margin: 0 0 10px;
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md > :first-child {
+	margin-top: 0;
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md > :last-child,
+:root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md li > p:last-child {
+	margin-bottom: 0;
+}
+:root:not(#dawn) .sf-chat-reader .md :is(h1, h2, h3, h4) {
+	font-family: var(--sans);
+	font-weight: 600;
+	letter-spacing: -0.025em;
+	line-height: 1.35;
+	margin: 20px 0 10px;
+}
+:root:not(#dawn) .sf-chat-reader .md :is(ul, ol) {
+	padding-left: 24px;
+	margin: 0 0 12px;
+}
+:root:not(#dawn) .sf-chat-reader .md li {
+	margin-bottom: 6px;
+}
+:root:not(#dawn) .sf-chat-reader .md :not(pre) > code {
+	font: 13px/1.4 var(--mono);
+	padding: 2px 5px;
+	border-radius: 5px;
+	color: inherit;
+	background: var(--dawn-soft);
+	box-shadow: none;
+}
+:root:not(#dawn) .sf-chat-reader .md .code {
+	border-radius: 12px;
+	background: var(--code-bg);
+	box-shadow: inset 0 0 0 1px var(--dawn-line);
+}
+:root:not(#dawn) .sf-chat-reader .md .code-head {
+	background: none;
+	color: var(--dawn-muted);
+	box-shadow: inset 0 -1px 0 var(--dawn-line);
+}
+:root:not(#dawn) .sf-chat-reader .md .code pre {
+	font: 13px/1.6 var(--mono);
+	padding: 14px 16px;
+}
+:root:not(#dawn) .sf-chat-reader .md a {
+	color: inherit;
+	text-decoration: underline;
+	box-shadow: none;
+}
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] {
+	width: calc(100% - 32px);
+	max-width: 960px;
+	margin-left: auto;
+	margin-right: auto;
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
+ box-sizing: border-box;
+ min-height: 44px;
+ padding: 7px 14px;
+ gap: 0 12px;
+ margin-bottom: 16px;
+ border: 0.5px solid rgb(from var(--t1) r g b / 12%);
+ border-radius: 22px;
+ background: rgb(from var(--card) r g b / var(--surface-a, 1));
+ transition: border-color 150ms ease, background-color 150ms ease, border-radius 300ms cubic-bezier(0.22, 1, 0.36, 1), padding 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
+ display: grid;
+ grid-template-columns: minmax(0, 1fr) auto;
+ grid-template-rows: auto auto auto;
+ align-items: center;
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col[data-role='omp.editor'] {
+ box-shadow: 0 2px 8px -1px rgb(0 0 0 / 5%), 0 1px 2px rgb(0 0 0 / 3%), 0 0 0 1px var(--dawn-line);
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']):is(:hover, :focus-within) {
+ border-color: color-mix(in srgb, var(--dawn-ink) 24%, transparent);
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python'])::before,
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python'])::after {
+ content: none;
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine).sf-folded .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
+ padding: 8px 12px;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.effort'] {
+ display: none;
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.line'] {
+ grid-column: 1;
+ grid-row: 2;
+ min-width: 0;
+ min-height: 22px;
+ align-items: center;
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.bar'] {
+ grid-column: 2;
+ grid-row: 2;
+ width: auto;
+ min-height: 28px;
+ height: 28px;
+ margin: 0;
+ gap: 8px;
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.focus'] {
+ grid-column: 1 / -1;
+ grid-row: 1;
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.chips'] {
+ grid-column: 1 / -1;
+ grid-row: 3;
+}
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-ed-ph {
+ color: var(--dawn-muted);
+ letter-spacing: 0.15px;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd {
+ box-sizing: border-box;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 28px;
+ min-width: 28px;
+ height: 28px;
+ padding: 0;
+ border-radius: 50%;
+ font-size: 0;
+ color: var(--dawn-page);
+ background: var(--t1);
+ box-shadow: none;
+ animation: dawn-polish-control-enter 220ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+ transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease, transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd::before {
+ content: '↑';
+ font: 500 18px/1 var(--sans);
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:hover .kbd {
+ color: var(--dawn-page);
+ background: color-mix(in srgb, var(--t1) 88%, transparent);
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.composer.send'], [data-role='omp.composer.stop']):focus-visible {
+ outline: 2px solid var(--accent);
+ outline-offset: -2px;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop']:is([disabled], [aria-disabled='true'], .disabled) {
+ color: color-mix(in srgb, var(--t4) 55%, var(--dawn-ink));
+ background: transparent;
+ transform: none;
+ cursor: default;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:is([disabled], [aria-disabled='true'], .disabled) .kbd {
+ color: color-mix(in srgb, var(--t4) 55%, var(--dawn-ink));
+ background: var(--l1);
+ transform: none;
+ cursor: default;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop'] {
+ box-sizing: border-box;
+ height: 28px;
+ padding: 0 8px;
+ border-radius: 14px;
+ background: var(--l1);
+ box-shadow: none;
+ animation: dawn-polish-control-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+ transition: background-color 150ms ease, color 150ms ease, transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop']:hover {
+ background: var(--l2);
+}
+:root:not(#dawn) #sidebar .tn-vt {
+	gap: 4px;
+}
+:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row,
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt {
+	box-sizing: border-box;
+	height: 54px;
+	gap: 8px;
+	padding: 0 8px;
+	border-radius: 12px;
+	color: var(--t2);
+	background: transparent;
+	box-shadow: none;
+	transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), width 0.2s cubic-bezier(0.22, 1, 0.36, 1), padding 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row:active,
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt:active {
+	transform: none;
+}
+:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row:hover:not(.off):not([aria-disabled='true']),
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt:hover:not(.on) {
+	background: var(--l1);
+	color: var(--t1);
+}
+:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row.on,
+:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row.on:hover,
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt.on {
+	background: var(--l2);
+	color: var(--t1);
+	box-shadow: none;
+}
+:root:not(#dawn) #sidebar .tn-vt .nav-row:focus-visible,
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tt:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+}
+:root:not(#dawn) #sidebar .tn-vt .nav-row .lbl {
+	font-weight: 500;
+}
+:root:not(#dawn) #sidebar .tn-vt .nav-row .meta {
+	color: var(--t3);
+}
+:root:not(#dawn) #sidebar .tn-vt .nav-head {
+	box-sizing: border-box;
+	height: 30px;
+	padding-left: 8px;
+	padding-right: 8px;
+	color: var(--t3);
+}
+:root:not(#dawn) #sidebar .tn-vt-find {
+	border-radius: 12px;
+	background: var(--l1);
+	box-shadow: none;
+}
+:root:not(#dawn) #sidebar .tn-vt-find:focus-within {
+	box-shadow: inset 0 0 0 0.5px var(--l3);
+}
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tt.on::before,
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tt.on::after { content: none; }
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs { gap: 4px; padding-right: 8px; }
+:root:not(#dawn):not(.tn-phone).lay-rail.tabs-h #tabbar { width: 280px; }
+:root:not(#dawn):not(.tn-phone).lay-rail.tabs-h #panel { left: calc(280px * var(--tn-zoom, 1)); }
+:root:not(#dawn) #tabbar .tn-ib-pip { color: var(--dawn-page); }
+
+:root:not(#dawn) :is(#pal, #thm, #pick) {
+	--t1: var(--dawn-ink);
+	--t2: color-mix(in srgb, var(--dawn-ink) 67%, transparent);
+	--t3: color-mix(in srgb, var(--dawn-ink) 55%, transparent);
+	--t4: var(--t3);
+	--accent: var(--t1);
+	--accent-ink: var(--t1);
+	--l1: color-mix(in srgb, var(--dawn-ink) 7%, transparent);
+	--l2: color-mix(in srgb, var(--dawn-ink) 11%, transparent);
+	background: light-dark(rgb(0 0 0 / 50%), rgb(0 0 0 / 69.7%));
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	animation: none;
+}
+:root:not(#dawn) #pal .cmdk {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	right: auto;
+	bottom: auto;
+	width: 560px;
+	max-width: min(92vw, calc(100vw - 32px));
+	transform: translate(-50%, -50%);
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .cmdk {
+	max-height: calc(100vh - 32px);
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	border: 1px solid var(--l2);
+	border-radius: 18px;
+	color: var(--t1);
+	box-shadow: none;
+	animation: none;
+	transition: none;
+}
+:root:not(#dawn) :is(#thm, #pick) .cmdk {
+	width: min(560px, calc(100vw - 24px));
+}
+:root:not(#dawn) #pick.anchored {
+	background: transparent;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-top {
+	flex: none;
+	gap: 4px;
+	height: auto;
+	min-height: 51px;
+	padding: 14px 10px 14px 14px;
+	box-sizing: border-box;
+	border-bottom: 1px solid var(--l1);
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-top > .ico {
+	flex: none;
+	width: 18px;
+	height: 18px;
+	color: var(--t3);
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-top input {
+	height: 22px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--t1);
+	font-family: var(--sans);
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 22px;
+	letter-spacing: -0.15px;
+	box-shadow: none;
+	animation: none;
+	transition: none;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-top input::placeholder {
+	color: var(--t3);
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-list {
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	row-gap: 2px;
+	padding: 8px;
+	box-sizing: border-box;
+	scroll-padding: 24px 0;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-group {
+	flex: none;
+	padding: 8px 8px 4px;
+	font-family: var(--sans);
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 18px;
+	letter-spacing: -0.08px;
+	color: var(--t2);
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item {
+	flex: none;
+	width: 100%;
+	min-height: 36px;
+	height: auto;
+	gap: 8px;
+	padding: 6px 10px 6px 8px;
+	box-sizing: border-box;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--t1);
+	font-family: var(--sans);
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 18px;
+	letter-spacing: -0.08px;
+	text-align: start;
+	box-shadow: none;
+	animation: none;
+	transition: none;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item:not([aria-selected='true']):hover {
+	background: color-mix(in srgb, var(--dawn-ink) 6%, transparent);
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item[aria-selected='true'],
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item[aria-selected='true']:hover {
+	background: color-mix(in srgb, var(--dawn-ink) 8%, transparent);
+	color: var(--t1);
+	box-shadow: none;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item[aria-selected='true']::before {
+	display: none;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item .ck-ic {
+	width: 24px;
+	height: 24px;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--t2);
+	box-shadow: none;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item .ck-ic > .ico {
+	width: 16px;
+	height: 16px;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-ic.deck .tn-dk {
+	--dk: 24px;
+	margin: 0;
+}
+:root:not(#dawn) #pal .tn-pl-avatar .av-img {
+	width: 24px;
+	height: 24px;
+	box-shadow: none;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item .ck-label {
+	font-size: 13px;
+	line-height: 18px;
+	letter-spacing: -0.08px;
+	color: var(--t1);
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item .ck-label mark {
+	background: transparent;
+	color: inherit;
+	font-weight: 600;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item .ck-sub {
+	color: var(--t2);
+	font-family: var(--sans);
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 16px;
+	letter-spacing: 0;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item .ck-label .ck-sub {
+	display: block;
+	margin-left: 0;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item .ck-hint {
+	color: var(--t3);
+	font-family: var(--sans);
+	font-size: 12px;
+	line-height: 16px;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .tn-keys .kbd,
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-top .kbd {
+	min-width: 0;
+	height: 18px;
+	padding: 0 3px;
+	border: 0;
+	background: transparent;
+	color: var(--t3);
+	box-shadow: none;
+	font-size: 12px;
+	line-height: 18px;
+}
+:root:not(#dawn) #pal .tn-pl-item:focus-within .tn-pl-acts {
+	opacity: 1;
+}
+:root:not(#dawn) #pal .tn-pl-acts .icon-btn {
+	width: 24px;
+	height: 24px;
+	border-radius: 6px;
+	box-shadow: none;
+	transition: none;
+}
+:root:not(#dawn) #pal .tn-pl-more {
+	border-radius: 9999px;
+	font-family: var(--sans);
+	font-size: 13px;
+	line-height: 18px;
+	letter-spacing: -0.08px;
+	transition: none;
+}
+:root:not(#dawn) #pal .tn-pl-more.link:hover {
+	color: var(--t1);
+	background: color-mix(in srgb, var(--dawn-ink) 6%, transparent);
+}
+:root:not(#dawn) #pal .tn-pl-dot {
+	box-shadow: none;
+}
+:root:not(#dawn) #pal .tn-pl-item.danger .ck-ic,
+:root:not(#dawn) #pal .tn-pl-item.danger[aria-selected='true'] .ck-label {
+	color: var(--bad);
+}
+:root:not(#dawn) #pal .tn-pl-item.danger[aria-selected='true'] {
+	background: rgb(from var(--bad) r g b / 8%);
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-empty {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 0 16px;
+	color: var(--t2);
+}
+:root:not(#dawn) #pal .tn-pl-empty-ic {
+	width: 32px;
+	height: 32px;
+	margin-bottom: 0;
+	border-radius: 0;
+	background: transparent;
+	color: var(--t3);
+	box-shadow: none;
+}
+:root:not(#dawn) #pal .tn-pl-empty-t {
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 18px;
+	color: var(--t2);
+}
+:root:not(#dawn) #pal .tn-pl-empty-s {
+	font-size: 12px;
+	line-height: 16px;
+	color: var(--t3);
+}
+:root:not(#dawn) #pal .ck-foot {
+	display: none;
+}
+:root:not(#dawn) :is(#pal, #thm, #pick) [hidden] {
+	display: none;
+}
+:root:not(#dawn) #pal .ck-list {
+	flex: 0 1 402px;
+	height: 402px;
+	max-height: calc(100vh - 84.5px);
+}
+:root:not(#dawn) #pal .ck-item {
+	height: 49px;
+	transition: background-color 100ms ease, color 100ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root:not(#dawn) :is(.sf-menu-pop, div.pop:not(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)) {
+	min-width: min(200px, calc(100vw - 16px));
+	max-width: min(320px, calc(100vw - 16px));
+	padding: 6px 0;
+	box-sizing: border-box;
+	letter-spacing: 0;
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-item:not(.rich), .pop .mi:not(.bare)) {
+	width: auto;
+	min-height: 32px;
+	height: auto;
+	margin-left: 6px;
+	margin-right: 6px;
+	padding: 6px 8px;
+	gap: 6px;
+	border-radius: 10px;
+	font-size: 14px;
+	line-height: 20px;
+	color: var(--t1);
+	transition: none;
+}
+:root:not(#dawn) .pop .mi:not(.bare) {
+	width: calc(100% - 12px);
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi):is(:hover, .active, .sel, .open):not(.dis, .danger) {
+	background: var(--dawn-soft);
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi):active:not(.dis, .danger) {
+	background: color-mix(in srgb, var(--dawn-ink) 18%, transparent);
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi).danger {
+	color: var(--bad);
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi).danger:is(:hover, .active, .sel, .open):not(.dis) {
+	background: rgb(from var(--bad) r g b / 10%);
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi).dis {
+	color: var(--t3);
+	opacity: 0.5;
+	background: transparent;
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-head, .pop .mi-sec) {
+	padding: 4px 14px;
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-sep, .pop .sep) {
+	margin: 4px 14px;
+	background: color-mix(in srgb, var(--dawn-ink) 12%, transparent);
+}
+:root:not(#dawn) .pop .mi .sub {
+	font: 400 13px/18px var(--sans);
+	color: var(--t3);
+}
+:root:not(#dawn) .pop :is(.mi, .mi-row) .ico {
+	color: var(--t2);
+}
+:root:not(#dawn) .sf-menu-pop .sf-menu-item:not(.rich) .sf-menu-lead {
+	width: 14px;
+	height: 14px;
+	margin-right: 0;
+}
+:root:not(#dawn) .sf-menu-pop .sf-menu-keys {
+	margin-left: 20px;
+}
+:root:not(#dawn) .sf-menu-pop .sf-menu-detail {
+	color: var(--t3);
+}
+:root:not(#dawn) .tooltip {
+	max-width: 300px;
+	padding: 4px 6px;
+	border-radius: 6px;
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	box-shadow: 0 4px 12px -1px color-mix(in srgb, var(--dawn-ink) calc(8% * 0.6), transparent), 0 2px 4px -2px color-mix(in srgb, var(--dawn-ink) calc(6% * 0.6), transparent), inset 0 0 0 0.5px color-mix(in srgb, var(--dawn-ink) 12%, transparent);
+	font-size: 12px;
+	line-height: 16px;
+	animation: dawn-menu-enter 100ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+:root:not(#dawn) .kbd {
+	padding: 0 4px;
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--dawn-ink) 6%, transparent);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dawn-ink) 6%, transparent);
+	color: var(--t2);
+	font-family: var(--sans);
+	font-weight: 400;
+	letter-spacing: 0.11px;
+}
+:root:not(#dawn) :is(.mdl-go:not(.bad), :where(.tn-hd-foot) .btn:not(.quiet)) .kbd {
+	background: rgb(255 255 255 / 16%);
+	box-shadow: none;
+	color: inherit;
+}
+:root:not(#dawn) :is(.toast, .tn-bn-card) {
+	border-radius: 9px;
+	gap: 8px;
+	font-size: 12.5px;
+}
+:root:not(#dawn) .toast {
+	min-height: 36px;
+	height: auto;
+	padding: 9px 12px;
+	line-height: 18px;
+}
+:root:not(#dawn) .toast.err {
+	box-shadow: 0 10px 20px -3px color-mix(in srgb, var(--dawn-ink) calc(10% * 0.6), transparent), 0 4px 6px -4px color-mix(in srgb, var(--dawn-ink) calc(10% * 0.6), transparent), inset 0 0 0 1px rgb(from var(--bad) r g b / 40%);
+}
+:root:not(#dawn):not(.tn-phone) #banners.tn-bn-stack {
+	top: auto;
+	bottom: 6px;
+	right: 16px;
+	width: 360px;
+	flex-direction: column-reverse;
+}
+:root:not(#dawn) .tn-bn-card {
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0;
+	padding: 9px 34px 9px 44px;
+}
+:root:not(#dawn) .tn-bn-card :is(.tn-bn-t, .tn-bn-b) {
+	font-size: 12.5px;
+	line-height: 16px;
+	letter-spacing: 0;
+}
+:root:not(#dawn) .tn-bn-card .tn-bn-t {
+	font-weight: 500;
+}
+:root:not(#dawn) .tn-bn-card .tn-bn-hd {
+	line-height: 16px;
+}
+:root:not(#dawn) .tn-bn-card :is(.tn-bn-s, .tn-bn-b) {
+	color: var(--t2);
+}
+:root:not(#dawn) .tn-bn-card :is(.tn-bn-ic, .tn-bn-k, .tn-bn-tx, .tn-bn-hd) {
+	display: contents;
+}
+:root:not(#dawn) .tn-bn-card .tn-bn-ic > .tn-dk {
+	--dk: 26px;
+	position: absolute;
+	left: 10px;
+	top: 50%;
+	margin-top: -13px;
+}
+:root:not(#dawn) .tn-bn-card .tn-bn-t {
+	order: 1;
+	display: block;
+	flex: 0 1 auto;
+}
+:root:not(#dawn) .tn-bn-card .tn-bn-s {
+	order: 2;
+	display: block;
+	flex: none;
+	margin-left: 6px;
+}
+:root:not(#dawn) .tn-bn-k::after {
+	order: 3;
+	display: block;
+	flex: none;
+	font-size: 12.5px;
+	line-height: 16px;
+	font-weight: 500;
+	letter-spacing: 0;
+	color: var(--t2);
+	white-space: pre;
+}
+:root:not(#dawn) .tn-bn-k.waiting::after {
+	content: ' is waiting for you';
+}
+:root:not(#dawn) .tn-bn-k.done::after {
+	content: ' finished working';
+}
+:root:not(#dawn) .tn-bn-k.failed::after {
+	content: ' stopped';
+}
+:root:not(#dawn) .tn-bn-card .tn-bn-b {
+	order: 4;
+	display: block;
+	flex: 0 0 100%;
+}
+:root:not(#dawn) .tn-bn-k::before {
+	content: '';
+	position: absolute;
+	left: 25px;
+	top: calc(50% + 5px);
+	width: 9px;
+	height: 9px;
+	padding: 3px;
+	border-radius: 50%;
+	background: var(--t3);
+	box-shadow: 0 0.5px 2px rgb(0 0 0 / 35%);
+}
+:root:not(#dawn) .tn-bn-k:is(.bell, .waiting)::before {
+	background: var(--accent-fill);
+}
+:root:not(#dawn) .tn-bn-k.done::before {
+	background: var(--ok-fill);
+}
+:root:not(#dawn) .tn-bn-k.failed::before {
+	background: var(--bad-fill);
+}
+:root:not(#dawn) .tn-bn-k > .ico {
+	position: absolute;
+	left: 28px;
+	top: calc(50% + 8px);
+	width: 9px;
+	height: 9px;
+	color: var(--dawn-page);
+}
+:root:not(#dawn) .tn-bn-k:is(.bell, .waiting) > .ico {
+	color: var(--dawn-page);
+}
+:root:not(#dawn) .tn-bn-card .tn-bn-x {
+	left: auto;
+	right: 9px;
+	top: 50%;
+	width: 18px;
+	height: 18px;
+	margin-top: -9px;
+	border-radius: 5px;
+	background: transparent;
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	box-shadow: none;
+	opacity: 0.7;
+	transform: none;
+}
+:root:not(#dawn) .tn-bn-card .tn-bn-x:hover {
+	opacity: 1;
+	background: var(--dawn-soft);
+}
+:root:not(#dawn) .tn-ib-head {
+	height: auto;
+	min-height: 46px;
+	padding: 12px 10px 4px 16px;
+	box-shadow: none;
+}
+:root:not(#dawn) .tn-ib-t {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 22px;
+	letter-spacing: 0.15px;
+}
+:root:not(#dawn) :is(.tn-ib-n, .tn-ib-gh .n) {
+	font-family: var(--sans);
+	font-size: 13px;
+	color: var(--t3);
+}
+:root:not(#dawn) .tn-ib-clear {
+	height: 28px;
+	padding: 0 10px;
+	border-radius: 999px;
+	font-size: 13px;
+	color: var(--t2);
+}
+:root:not(#dawn) .tn-ib-clear:hover {
+	background: var(--dawn-soft);
+}
+:root:not(#dawn) .tn-ib-list {
+	padding: 0 6px 6px;
+}
+:root:not(#dawn) .tn-ib-gh {
+	height: 24px;
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--t2);
+}
+:root:not(#dawn) .tn-ib-row {
+	height: 32px;
+	gap: 8px;
+	border-radius: 10px;
+	font-size: 14px;
+}
+:root:not(#dawn) .tn-ib-row:is(:hover, [aria-selected='true']) {
+	background: var(--dawn-soft);
+}
+:root:not(#dawn) .tn-ib-row[aria-selected='true']::before {
+	display: none;
+}
+:root:not(#dawn) .tn-ib-ic {
+	background: transparent;
+}
+:root:not(#dawn) .tn-ib-ic:not(.bell, .waiting, .done, .failed) {
+	color: var(--t2);
+}
+:root:not(#dawn) .tn-ib-lbl {
+	font-weight: 400;
+}
+:root:not(#dawn) .tn-ib-empty-ic {
+	background: none;
+	box-shadow: none;
+	color: var(--t3);
+}
+:root:not(#dawn) :is(.mdl-head, .dlg-head) {
+	padding: 16px 12px 8px 20px;
+}
+:root:not(#dawn) :is(.mdl-t, .tn-hd-t) {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 22px;
+	letter-spacing: 0.15px;
+}
+:root:not(#dawn) :is(.mdl-sub, .tn-hd-s) {
+	font-size: 13px;
+	line-height: 18px;
+}
+:root:not(#dawn) :is(.mdl:not(.danger) .mdl-ic, .tn-hd-ic:not(.warn), .dlg-card:not(.danger) .dlg-ic) {
+	border-radius: 10px;
+	background: var(--dawn-soft);
+	box-shadow: none;
+	color: var(--t2);
+}
+:root:not(#dawn) .mdl-body {
+	padding: 8px 20px 16px;
+}
+:root:not(#dawn) :is(.mdl-foot, .dlg-foot) {
+	border-top: 0;
+	padding: 4px 16px 16px 20px;
+}
+:root:not(#dawn) .tn-hd-foot {
+	box-shadow: none;
+}
+:root:not(#dawn) :is(.mdl-foot, .dlg-foot, .tn-hd-foot) .btn:not(#dawn) {
+	border-radius: 999px;
+}
+:root:not(#dawn) .pf.sheet {
+	background: var(--page);
+	box-shadow: inset 1px 0 0 var(--dawn-line);
+}
+:root:not(#dawn) .pf.sheet .pf-title {
+	font-weight: 500;
+	letter-spacing: 0.17px;
+}
+:root:not(#dawn) .pf-sec-t {
+	margin: 0 0 8px;
+	padding: 0 8px;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 16px;
+	color: var(--t2);
+}
+:root:not(#dawn) .pf-rows {
+	border-radius: 14px;
+	background: var(--dawn-chrome);
+	box-shadow: 0 0 0 1px var(--dawn-line);
+}
+:root:not(#dawn) .pf-rows > :not(:first-child, .focus, :focus-visible) {
+	box-shadow: none;
+}
+:root:not(#dawn) .pf-lbl .t {
+	font-weight: 400;
+	letter-spacing: -0.08px;
+}
+:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']) {
+	border-radius: 8px;
+	background: var(--dawn-soft);
+	color: var(--t2);
+	box-shadow: none;
+	transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):hover:not(.disabled, .dis, :disabled) {
+	background: color-mix(in srgb, var(--dawn-ink) 10%, transparent);
+	color: var(--t1);
+	box-shadow: none;
+}
+:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):active:not(.disabled, .dis, .busy, :disabled) {
+	transform: none;
+	background: color-mix(in srgb, var(--dawn-ink) 18%, transparent);
+}
+:root:not(#dawn) :is(.sf-button[data-variant='quiet'], .btn.quiet, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):not(:hover, .on) {
+	background: transparent;
+}
+:root:not(#dawn) :is(.sf-button[data-variant='primary'], .btn.accent, .mdl-go:not(.bad), :where(.tn-hd-foot) .btn:not(.quiet)):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']) {
+	background: var(--t1);
+	color: var(--dawn-page);
+}
+:root:not(#dawn) :is(.sf-button[data-variant='primary'], .btn.accent, .mdl-go:not(.bad), :where(.tn-hd-foot) .btn:not(.quiet)):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):hover:not(.disabled, .dis, :disabled) {
+	background: color-mix(in srgb, var(--dawn-ink) 80%, var(--dawn-page));
+	color: var(--dawn-page);
+}
+:root:not(#dawn) :is(.sf-button[data-variant='danger'], .btn.danger, .mdl-go.bad):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']) {
+	background: rgb(from var(--bad) r g b / 10%);
+	color: var(--bad);
+}
+:root:not(#dawn) :is(.sf-button[data-variant='danger'], .btn.danger, .mdl-go.bad):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):hover:not(.disabled, .dis, :disabled) {
+	background: rgb(from var(--bad) r g b / 18%);
+	color: var(--bad);
+}
+:root:not(#dawn) :is(.sf-button.on, .btn.on):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']) {
+	color: var(--t1);
+	background: color-mix(in srgb, var(--dawn-ink) 10%, transparent);
+}
+:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):is(.disabled, .dis, :disabled) {
+	opacity: 0.5;
+	transform: none;
+}
+:root:not(#dawn) :is(.sf-button.only-ic, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']) {
+	border-radius: 6px;
+}
+:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 1px;
+}
+:root:not(#dawn) .sf-buttons:is([data-variant='joined'], [data-variant='split']) > .sf-button:not(:first-child, :last-child) {
+	border-radius: 0;
+}
+:root:not(#dawn) .sf-buttons:is([data-variant='joined'], [data-variant='split']) > .sf-button:first-child:not(:last-child) {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+:root:not(#dawn) .sf-buttons:is([data-variant='joined'], [data-variant='split']) > .sf-button:last-child:not(:first-child) {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+:root:not(#dawn) .sf-scroll > .sf-scroll-bar > .sf-scroll-thumb {
+	background: var(--dawn-line);
+}
+:root:not(#dawn) .sf-scroll.can > .sf-scroll-bar:is(:hover, .held) .sf-scroll-thumb {
+	width: 6px;
+	background: color-mix(in srgb, var(--dawn-ink) 16%, transparent);
+}
+:root:not(#dawn) :is(.pop.scroll, .pop.sel-menu, .pop.combo-list, .sf-menu-pop) {
+	scrollbar-width: thin;
+	scrollbar-color: var(--dawn-line) transparent;
+}
+:root:not(#dawn) .sf-empty:not([data-tone='warning'], [data-tone='error']) {
+	color: var(--t3);
+}
+:root:not(#dawn) .sf-empty:not([data-tone='warning'], [data-tone='error']) .sf-empty-ic {
+	background: none;
+	box-shadow: none;
+}
+:root:not(#dawn) .sf-empty[data-variant='inline'] > .sf-empty-in {
+	padding: 4px 12px;
+	gap: 8px;
+}
+:root:not(#dawn) .sf-skeleton :is(.sk-bar, .sk-name) {
+	height: 12px;
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--dawn-ink) 4%, transparent);
+}
+:root:not(#dawn) .sf-paused :is(.sf-button, .btn, .icon-btn) {
+	transition: none;
+}
+
+@keyframes dawn-row-enter {
+	from { transform: translateY(12px); }
+	to { transform: translateY(0); }
+}
+@keyframes dawn-activity-enter {
+	from { opacity: 0; transform: scale(0.92); }
+	to { opacity: 1; transform: scale(1); }
+}
+@keyframes dawn-phrase-enter {
+	from { opacity: 0; transform: translateY(4px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+@keyframes dawn-menu-enter {
+	from { opacity: 0; transform: scale(0.98); }
+	to { opacity: 1; transform: none; }
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.working'] {
+	animation: dawn-activity-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.working.label'] {
+	animation: dawn-phrase-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.hud.activity'] [data-role='omp.working.label'] {
+	animation: dawn-phrase-enter 300ms cubic-bezier(0.1, 0.9, 0.2, 1) 60ms backwards;
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin {
+	width: 20px;
+	height: 8px;
+	overflow: visible;
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::before,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 8px;
+	right: auto;
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: currentColor;
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip > * { display: none; }
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::before {
+	left: 0;
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::after {
+	left: 16px;
+}
+:root:not(#dawn) :is(.sf-menu-pop, div.pop) {
+	animation: dawn-menu-enter 100ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+:root:not(#dawn) .sf-menu-pop.sf-menu-subpop { animation: none; }
+@keyframes dawn-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dawn-dialog-enter { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+@keyframes dawn-rotate { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes dawn-indeterminate { from { transform: translateX(-100%); } to { transform: translateX(294.118%); } }
+@keyframes dawn-indeterminate-rtl { from { transform: translateX(100%); } to { transform: translateX(-294.118%); } }
+@keyframes dawn-toast-enter { from { opacity: 0; transform: translateY(4px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes dawn-find-enter { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes dawn-reaction-enter {
+ 0% { opacity: 0; transform: scale(0); }
+ 2.5% { opacity: 0.0334; transform: scale(0.0334); }
+ 5% { opacity: 0.1181; transform: scale(0.1181); }
+ 7.5% { opacity: 0.2337; transform: scale(0.2337); }
+ 10% { opacity: 0.3639; transform: scale(0.3639); }
+ 12.5% { opacity: 0.4963; transform: scale(0.4963); }
+ 15% { opacity: 0.6218; transform: scale(0.6218); }
+ 17.5% { opacity: 0.7346; transform: scale(0.7346); }
+ 20% { opacity: 0.8311; transform: scale(0.8311); }
+ 22.5% { opacity: 0.9102; transform: scale(0.9102); }
+ 25% { opacity: 0.9718; transform: scale(0.9718); }
+ 26.5528634361% { opacity: 1; transform: scale(1); }
+ 27.5% { opacity: 1; transform: scale(1.0172); }
+ 30% { opacity: 1; transform: scale(1.0482); }
+ 32.5% { opacity: 1; transform: scale(1.0672); }
+ 35% { opacity: 1; transform: scale(1.0764); }
+ 37.5% { opacity: 1; transform: scale(1.078); }
+ 40% { opacity: 1; transform: scale(1.0743); }
+ 42.5% { opacity: 1; transform: scale(1.0669); }
+ 45% { opacity: 1; transform: scale(1.0575); }
+ 50% { opacity: 1; transform: scale(1.0369); }
+ 52.5% { opacity: 1; transform: scale(1.0273); }
+ 55% { opacity: 1; transform: scale(1.0188); }
+ 57.5% { opacity: 1; transform: scale(1.0116); }
+ 60% { opacity: 1; transform: scale(1.0057); }
+ 62.5% { opacity: 1; transform: scale(1.0012); }
+ 63.4375% { opacity: 1; transform: scale(1); }
+ 65% { opacity: 0.998; transform: scale(0.998); }
+ 67.5% { opacity: 0.9958; transform: scale(0.9958); }
+ 70% { opacity: 0.9945; transform: scale(0.9945); }
+ 72.5% { opacity: 0.994; transform: scale(0.994); }
+ 75% { opacity: 0.9939; transform: scale(0.9939); }
+ 77.5% { opacity: 0.9943; transform: scale(0.9943); }
+ 80% { opacity: 0.9949; transform: scale(0.9949); }
+ 87.5% { opacity: 0.9973; transform: scale(0.9973); }
+ 92.5% { opacity: 0.9987; transform: scale(0.9987); }
+ 95% { opacity: 0.9992; transform: scale(0.9992); }
+ 100% { opacity: 1; transform: scale(1); }
+}
+@keyframes dawn-reaction-fade {
+ 0% { opacity: 0; }
+ 2.5% { opacity: 0.0334; }
+ 5% { opacity: 0.1181; }
+ 7.5% { opacity: 0.2337; }
+ 10% { opacity: 0.3639; }
+ 12.5% { opacity: 0.4963; }
+ 15% { opacity: 0.6218; }
+ 17.5% { opacity: 0.7346; }
+ 20% { opacity: 0.8311; }
+ 22.5% { opacity: 0.9102; }
+ 25% { opacity: 0.9718; }
+ 26.5528634361% { opacity: 1; }
+ 63.4375% { opacity: 1; }
+ 65% { opacity: 0.998; }
+ 67.5% { opacity: 0.9958; }
+ 70% { opacity: 0.9945; }
+ 72.5% { opacity: 0.994; }
+ 75% { opacity: 0.9939; }
+ 77.5% { opacity: 0.9943; }
+ 80% { opacity: 0.9949; }
+ 87.5% { opacity: 0.9973; }
+ 92.5% { opacity: 0.9987; }
+ 95% { opacity: 0.9992; }
+ 100% { opacity: 1; }
+}
+@keyframes dawn-pane-row-enter {
+ 0% { opacity: 0; height: 0px; overflow: hidden; transform: translateY(-4px); }
+ 2% { opacity: 0.01588; height: 0.85752px; overflow: hidden; transform: translateY(-3.93648px); }
+ 4% { opacity: 0.05618; height: 3.03372px; overflow: hidden; transform: translateY(-3.77528px); }
+ 6% { opacity: 0.11201; height: 6.04854px; overflow: hidden; transform: translateY(-3.55196px); }
+ 8% { opacity: 0.1768; height: 9.5472px; overflow: hidden; transform: translateY(-3.2928px); }
+ 10% { opacity: 0.2458; height: 13.2732px; overflow: hidden; transform: translateY(-3.0168px); }
+ 12% { opacity: 0.31562; height: 17.04348px; overflow: hidden; transform: translateY(-2.73752px); }
+ 14% { opacity: 0.38392; height: 20.73168px; overflow: hidden; transform: translateY(-2.46432px); }
+ 16% { opacity: 0.44914; height: 24.25356px; overflow: hidden; transform: translateY(-2.20344px); }
+ 18% { opacity: 0.51029; height: 27.55566px; overflow: hidden; transform: translateY(-1.95884px); }
+ 20% { opacity: 0.56683; height: 30.60882px; overflow: hidden; transform: translateY(-1.73268px); }
+ 22% { opacity: 0.61852; height: 33.40008px; overflow: hidden; transform: translateY(-1.52592px); }
+ 24% { opacity: 0.66534; height: 35.92836px; overflow: hidden; transform: translateY(-1.33864px); }
+ 26% { opacity: 0.70743; height: 38.20122px; overflow: hidden; transform: translateY(-1.17028px); }
+ 28% { opacity: 0.74501; height: 40.23054px; overflow: hidden; transform: translateY(-1.01996px); }
+ 30% { opacity: 0.77838; height: 42.03252px; overflow: hidden; transform: translateY(-0.88648px); }
+ 32% { opacity: 0.80788; height: 43.62552px; overflow: hidden; transform: translateY(-0.76848px); }
+ 34% { opacity: 0.83383; height: 45.02682px; overflow: hidden; transform: translateY(-0.66468px); }
+ 36% { opacity: 0.85658; height: 46.25532px; overflow: hidden; transform: translateY(-0.57368px); }
+ 38% { opacity: 0.87645; height: 47.3283px; overflow: hidden; transform: translateY(-0.4942px); }
+ 40% { opacity: 0.89376; height: 48.26304px; overflow: hidden; transform: translateY(-0.42496px); }
+ 44% { opacity: 0.92183; height: 49.77882px; overflow: hidden; transform: translateY(-0.31268px); }
+ 48% { opacity: 0.94282; height: 50.91228px; overflow: hidden; transform: translateY(-0.22872px); }
+ 52% { opacity: 0.95838; height: 51.75252px; overflow: hidden; transform: translateY(-0.16648px); }
+ 56% { opacity: 0.96984; height: 52.37136px; overflow: hidden; transform: translateY(-0.12064px); }
+ 60% { opacity: 0.97823; height: 52.82442px; overflow: hidden; transform: translateY(-0.08708px); }
+ 64% { opacity: 0.98435; height: 53.1549px; overflow: hidden; transform: translateY(-0.0626px); }
+ 68% { opacity: 0.98878; height: 53.39412px; overflow: hidden; transform: translateY(-0.04488px); }
+ 72% { opacity: 0.99198; height: 53.56692px; overflow: hidden; transform: translateY(-0.03208px); }
+ 80% { opacity: 0.99594; height: 53.78076px; overflow: hidden; transform: translateY(-0.01624px); }
+ 90% { opacity: 0.99829; height: 53.90766px; overflow: hidden; transform: translateY(-0.00684px); }
+ 100% { opacity: 1; height: 54px; overflow: hidden; transform: translateY(0px); }
+}
+@keyframes dawn-pane-row-fade {
+ 0% { opacity: 0; }
+ 2% { opacity: 0.01588; }
+ 4% { opacity: 0.05618; }
+ 6% { opacity: 0.11201; }
+ 8% { opacity: 0.1768; }
+ 10% { opacity: 0.2458; }
+ 12% { opacity: 0.31562; }
+ 14% { opacity: 0.38392; }
+ 16% { opacity: 0.44914; }
+ 18% { opacity: 0.51029; }
+ 20% { opacity: 0.56683; }
+ 22% { opacity: 0.61852; }
+ 24% { opacity: 0.66534; }
+ 26% { opacity: 0.70743; }
+ 28% { opacity: 0.74501; }
+ 30% { opacity: 0.77838; }
+ 32% { opacity: 0.80788; }
+ 34% { opacity: 0.83383; }
+ 36% { opacity: 0.85658; }
+ 38% { opacity: 0.87645; }
+ 40% { opacity: 0.89376; }
+ 44% { opacity: 0.92183; }
+ 48% { opacity: 0.94282; }
+ 52% { opacity: 0.95838; }
+ 56% { opacity: 0.96984; }
+ 60% { opacity: 0.97823; }
+ 64% { opacity: 0.98435; }
+ 68% { opacity: 0.98878; }
+ 72% { opacity: 0.99198; }
+ 80% { opacity: 0.99594; }
+ 90% { opacity: 0.99829; }
+ 100% { opacity: 1; }
+}
+:root:not(#dawn) .sf-spinner .sf-orbit { animation: dawn-rotate 700ms linear infinite; }
+:root:not(#dawn) .mdl-go.busy::after { animation: dawn-rotate 1000ms linear infinite; }
+:root:not(#dawn) .sf-progress.indeterminate .fill {
+ width: 34%;
+ animation: dawn-indeterminate 1000ms linear infinite;
+}
+:root:not(#dawn)[dir='rtl'] .sf-progress.indeterminate .fill,
+:root:not(#dawn) [dir='rtl'] .sf-progress.indeterminate .fill { animation-name: dawn-indeterminate-rtl; }
+:root:not(#dawn) .sf-progress:not(.indeterminate) .fill {
+ transition: width 200ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+:root:not(#dawn) :is(.mdl-layer, .tn-hd-back) { animation: dawn-fade-in 200ms cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
+:root:not(#dawn) :is(.mdl:not(.shake), .tn-hd) { animation: dawn-dialog-enter 200ms cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
+:root:not(#dawn) :is(.toast:not(.swap), .tn-bn-card:not(.out)) { animation: dawn-toast-enter 200ms cubic-bezier(0.165, 0.84, 0.44, 1); }
+:root:not(#dawn) .tn-find { animation: dawn-find-enter 140ms cubic-bezier(0.22, 1, 0.36, 1); }
+:root:not(#dawn) .tn-ib { animation: dawn-menu-enter 100ms cubic-bezier(0.165, 0.84, 0.44, 1); }
+:root:not(#dawn) .sf-scroll > .sf-scroll-dock > .sf-scroll-jump {
+ transform: translateY(6px);
+ transition: opacity 150ms cubic-bezier(0.2, 0, 0, 1), transform 150ms cubic-bezier(0.2, 0, 0, 1), background-color 120ms ease, color 120ms ease;
+}
+:root:not(#dawn) .sf-scroll > .sf-scroll-dock > .sf-scroll-jump.on { transform: none; }
+:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(#pal *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']) {
+ transition: color 100ms ease, background-color 100ms ease, transform 50ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+:root:not(#dawn) .sf-switch-track {
+ transition: background-color 100ms ease, border-color 100ms ease, transform 50ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+:root:not(#dawn) .sf-switch-thumb { transition: transform 100ms cubic-bezier(0.165, 0.84, 0.44, 1); }
+:root:not(#dawn) .sf-input:not(#pal *) {
+ transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+:root:not(#dawn) #sidebar .nav-row.arrive { animation: dawn-pane-row-enter 240ms linear backwards; }
+:root:not(#dawn) :is(.sf-msg-react, .sf-badge[data-role='omp.reaction']) { animation: dawn-reaction-enter 500ms linear backwards; }
+:root:not(#dawn) .sf-chat-reader.sf-still.sf-main > *,
+:root:not(#dawn) .sf-still .sf-chat-reader.sf-main > *,
+:root:not(#dawn) .sf-still :is(.sf-spinner .sf-orbit, .sf-progress .fill, .sf-msg-react, .sf-badge[data-role='omp.reaction']),
+:root:not(#dawn) .sf-chat-reader.sf-still :is(.sf-spinner .sf-orbit, .sf-progress .fill, .sf-msg-react, .sf-badge[data-role='omp.reaction']) { animation: none; }
+:root:not(#dawn) .sf-still :is(.sf-button, .btn, .icon-btn, .sf-switch-track, .sf-switch-thumb, .sf-input, .sf-progress .fill) { transition: none; }
+
+:root:not(#dawn) .sf-message { animation: dawn-row-enter 240ms cubic-bezier(0.23, 1, 0.32, 1) backwards; }
+:root:not(#dawn) .sf-still .sf-message,
+:root:not(#dawn) .sf-message.sf-still { animation: none; }
+
+:root:not(#dawn).tn-status footer#statusline {
+	font-family: var(--sans);
+	justify-content: flex-start;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: var(--dawn-line) transparent;
+	color: var(--dawn-muted);
+	border-left-color: var(--dawn-line);
+	background: rgb(from var(--dawn-side) r g b / var(--surface-a, 1));
+}
+:root:not(#dawn).tn-status:not(.tabs-auto):not(.side-collapsed) footer#statusline {
+	padding: 16px 12px;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin:is([data-tone='deck'], [data-tone='deck-busy']) {
+	align-self: stretch;
+	min-height: 32px;
+	padding: 6px 8px;
+	margin-bottom: 16px;
+	font-size: 13px;
+	line-height: 20px;
+	letter-spacing: 0;
+	text-align: left;
+	background: transparent;
+	box-shadow: none;
+	border-radius: 8px;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone='deck-busy'] {
+	padding-right: 24px;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin:is([data-tone='deck'], [data-tone='deck-busy']) svg.ico {
+	width: 14px;
+	height: 14px;
+	margin-right: 8px;
+	vertical-align: -2px;
+	opacity: 1;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone='time'] {
+	padding: 0 8px;
+	font-size: 24px;
+	line-height: 32px;
+	letter-spacing: -0.02em;
+	text-align: left;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone='date'] {
+	padding: 2px 8px 20px;
+	font-size: 13px;
+	line-height: 18px;
+	letter-spacing: 0;
+	text-align: left;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone^='m-'] {
+	box-sizing: border-box;
+	padding: 6px 8px;
+	margin: 0;
+	border: 0;
+	border-radius: 8px;
+	font-size: 14px;
+	line-height: 20px;
+	background: transparent;
+	box-shadow: none;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone^='m-']::before {
+	padding: 0;
+	font-size: 13px;
+	line-height: 18px;
+	letter-spacing: 0;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone^='spark-'] {
+	--spark-c: var(--dawn-ink);
+	--spark-track: var(--dawn-line);
+	box-sizing: border-box;
+	width: calc(100% - 16px);
+	height: 32px;
+	margin: 0 8px 12px;
+	padding: 0;
+	border-radius: 0;
+	background-color: transparent;
+	background-origin: content-box;
+	background-clip: content-box;
+	box-shadow: none;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin:is([data-tone^='m-net'], [data-tone^='m-load']) {
+	min-height: 32px;
+	font-size: 12px;
+	line-height: 20px;
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on {
+	transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on:not([data-tone^='spark-']):hover {
+	background-color: rgb(from var(--dawn-ink) r g b / 6%);
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on:not([data-tone^='spark-']):active {
+	background-color: rgb(from var(--dawn-ink) r g b / 8%);
+}
+:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+}
+
+:root:not(#dawn) :is(#thm .ck-foot, #pick .ck-foot, .tn-ib-foot) {
+	flex: none;
+	border-top: 0;
+	box-shadow: inset 0 1px 0 var(--dawn-line);
+	color: var(--t2);
+	font-size: 12px;
+	line-height: 18px;
+}
+:root:not(#dawn) #thm .tn-thm-mode {
+	color: var(--t2);
+	background: var(--l1);
+}
+:root:not(#dawn) #thm .tn-thm-row.other:not([aria-selected='true']) .ck-label {
+	color: var(--t2);
+}
+:root:not(#dawn) #pick .tn-pk-check {
+	color: var(--t1);
+}
+:root:not(#dawn) #pick .tn-pk-path {
+	flex: none;
+}
+
+@keyframes dawn-polish-body-enter {
+ from { opacity: 0.65; transform: translateY(3px) scale(0.985); }
+ to { opacity: 1; transform: none; }
+}
+@keyframes dawn-polish-control-enter {
+ from { opacity: 0; transform: translateY(3px) scale(0.82); }
+ to { opacity: 1; transform: none; }
+}
+@keyframes dawn-polish-avatar-enter {
+ from { opacity: 0; transform: translateY(4px) scale(0.8); }
+ to { opacity: 1; transform: none; }
+}
+@keyframes dawn-polish-palette-enter {
+ from { opacity: 0; transform: translate(-50%, -50%) translateY(6px) scale(0.975); }
+ to { opacity: 1; transform: translate(-50%, -50%); }
+}
+@keyframes dawn-polish-menu-enter {
+ from { opacity: 0; transform: translateY(4px) scale(0.97); }
+ to { opacity: 1; transform: none; }
+}
+:root:not(#dawn) .sf-chat-reader .sf-message > .sf-msg-body,
+:root:not(#dawn) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md {
+ transform-origin: 50% 100%;
+ animation: dawn-polish-body-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+:root:not(#dawn) .sf-chat-reader .sf-message.pending > .sf-msg-body { animation: none; }
+:root:not(#dawn) .sf-chat-reader .sf-message > .sf-msg-av {
+ animation: dawn-polish-avatar-enter 280ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+:root:not(#dawn) .sf-chat-reader .sf-message > .sf-msg-body { transition: opacity 150ms ease; }
+:root:not(#dawn) .sf-chat-reader .sf-msg-acts,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.turn.usage'], [data-role='omp.user.tools']) {
+ transform: translateY(3px);
+ transition: opacity 150ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root:not(#dawn) .sf-chat-reader .sf-message:is(:hover, .reveal) .sf-msg-acts,
+:root:not(#dawn) .sf-chat-reader .sf-msg-acts:focus-within,
+:root:not(#dawn) .sf-chat-reader [data-role='omp.assistant']:hover > [data-role='omp.turn.usage'],
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user']:hover [data-role='omp.user.tools'],
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.turn.usage'], [data-role='omp.user.tools']):focus-within { transform: none; }
+:root:not(#dawn) .sf-chat-reader:where(:not(.sf-chat-spine, .sf-folded)) :where(.sf-col[data-role^='omp.editor']) .sf-editor.focused { animation: dawn-polish-editor-focus 150ms ease-out backwards; }
+@keyframes dawn-polish-editor-focus {
+ from { opacity: 0.65; }
+ to { opacity: 1; }
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:not(.disabled, .dis, [aria-disabled='true']):hover .kbd { transform: translateY(-1px) scale(1.06); }
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:not(.disabled, .dis, [aria-disabled='true']):active .kbd {
+ transform: scale(0.88);
+ transition-duration: 80ms;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop']:active { transform: scale(0.9); transition-duration: 80ms; }
+:root:not(#dawn) #pal:not([hidden]) { animation: dawn-fade-in 120ms ease-out backwards; }
+:root:not(#dawn) #pal:not([hidden]) .cmdk { animation: dawn-polish-palette-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+:root:not(#dawn) #pal .ck-item:not(.dis, [aria-disabled='true']):active { transform: scale(0.985); transition-duration: 70ms; }
+:root:not(#dawn) #pal .tn-pl-acts { transition: opacity 150ms ease; }
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop,
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop.sf-menu-subpop,
+:root:not(#dawn) .sf-chat-reader .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card {
+ animation: dawn-polish-menu-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop .sf-menu-item:not(.rich),
+:root:not(#dawn) .sf-chat-reader .sf-message .sf-msg-act,
+:root:not(#dawn) .sf-chat-reader .sf-button:not([data-role^='omp.composer.']) {
+ transition: background-color 100ms ease, color 100ms ease, transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop .sf-menu-item:not(.rich, .dis, [aria-disabled='true']):active { transform: scale(0.98); transition-duration: 70ms; }
+:root:not(#dawn) .sf-chat-reader .sf-message .sf-msg-act:not(:disabled, .dis, [aria-disabled='true']):active,
+:root:not(#dawn) .sf-chat-reader .sf-button:not([data-role^='omp.composer.'], .disabled, .dis, :disabled, [aria-disabled='true']):active { transform: scale(0.94); transition-duration: 80ms; }
+:root:not(#dawn) .sf-fx-pulse { animation: none; }
+:root:not(#dawn) .sf-skeleton .sk-b::after { animation: none; background-image: none; }
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-dots > i,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::before,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::after {
+ animation: none;
+ opacity: 0.55;
+ transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+	:root:not(#dawn) #sidebar .tn-vt .nav-row,
+	:root:not(#dawn).lay-rail.tabs-h #tabbar .tt {
+		transition-duration: 0s;
+	}
+	:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']) {
+		transition-duration: 0.01ms;
+	}
+ :root:not(#dawn) .sf-chat-reader [data-role='omp.working'],
+ :root:not(#dawn) .sf-chat-reader [data-role='omp.working.label'] { animation: dawn-fade-in 120ms ease-out backwards; }
+ :root:not(#dawn) .sf-chat-reader [data-role='omp.hud.activity'] [data-role='omp.working.label'] { animation: dawn-phrase-enter 100ms cubic-bezier(0.1, 0.9, 0.2, 1) 0ms backwards; }
+ :root:not(#dawn) :is(.sf-msg-react, .sf-badge[data-role='omp.reaction']) { animation: dawn-reaction-fade 120ms linear backwards; }
+ :root:not(#dawn) #sidebar .nav-row.arrive { animation: dawn-pane-row-fade 120ms linear backwards; }
+ :root:not(#dawn) :is(.mdl:not(.shake), .tn-hd) { animation: dawn-fade-in 200ms cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
+ :root:not(#dawn) .toast:not(.swap),
+ :root:not(#dawn) .tn-bn-card:not(.out),
+ :root:not(#dawn) .tn-ib,
+ :root:not(#dawn) .tn-find { animation: none; }
+ :root:not(#dawn) .tooltip { animation-duration: 0.01ms; }
+ :root:not(#dawn) .sf-progress.indeterminate .fill { opacity: 1; }
+ :root:not(#dawn) .sf-spinner .sf-orbit,
+ :root:not(#dawn) .mdl-go.busy::after { animation: none; }
+ :root:not(#dawn) .sf-scroll > .sf-scroll-dock > .sf-scroll-jump { transition: none; transform: none; }
+ :root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(#pal *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']),
+ :root:not(#dawn) :is(.sf-switch-track, .sf-switch-thumb, .sf-input):not(#pal *) { transition-duration: 0.01ms; }
+ :root:not(#dawn) .sf-message { animation: dawn-fade-in 120ms ease-out backwards; }
+ :root:not(#dawn) :is(.sf-menu-pop, div.pop) { animation-duration: 0.01ms; }
+	:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on {
+		transition: none;
+	}
+:root:not(#dawn) .sf-chat-reader .sf-editor.focused,
+:root:not(#dawn) .sf-chat-reader .sf-message > :is(.sf-msg-body, .sf-msg-av),
+:root:not(#dawn) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md,
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd,
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop'],
+:root:not(#dawn) #pal:not([hidden]),
+:root:not(#dawn) #pal:not([hidden]) .cmdk,
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop,
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop.sf-menu-subpop,
+:root:not(#dawn) .sf-chat-reader .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card { animation: none; }
+:root:not(#dawn) .sf-chat-reader .sf-msg-acts,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.turn.usage'], [data-role='omp.user.tools']),
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:not(.disabled, .dis, [aria-disabled='true']):hover .kbd,
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:not(.disabled, .dis, [aria-disabled='true']):active .kbd,
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop']:active,
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop .sf-menu-item:not(.rich, .dis, [aria-disabled='true']):active,
+:root:not(#dawn) .sf-chat-reader .sf-message .sf-msg-act:not(:disabled, .dis, [aria-disabled='true']):active,
+:root:not(#dawn) .sf-chat-reader .sf-button:not([data-role^='omp.composer.'], .disabled, .dis, :disabled, [aria-disabled='true']):active,
+:root:not(#dawn) #pal .ck-item:active { transform: none; transition: none; }
+}
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-message > :is(.sf-msg-body, .sf-msg-av),
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader [data-role='omp.composer.send'] .kbd,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader [data-role='omp.composer.stop'],
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-message > :is(.sf-msg-body, .sf-msg-av),
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered).sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) [data-role^='omp.assistant'] > .sf-md,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) [data-role='omp.composer.send'] .kbd,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) [data-role='omp.composer.stop'],
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-editor.focused,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-editor.focused,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-menu-pop,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-menu-pop,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card { animation: none; }
+
+html.tn-phone:not(#dawn) .sf-chat-reader.sf-main {
+	padding: 16px 8px;
+}
+html.tn-phone:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] {
+	width: auto;
+	max-width: none;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+html.tn-phone:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
+	margin-bottom: max(8px, calc(var(--tn-home) * 0.4 + 6px));
+	padding: 8px 12px;
+	gap: 0 8px;
+}
+html.tn-phone:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.bar'] {
+	height: auto;
+	min-height: 40px;
+	align-self: end;
+}
+html.tn-phone:not(#dawn) .sf-chat-reader :is([data-role='omp.composer.send'], [data-role='omp.composer.stop']),
+html.tn-phone:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd {
+	min-width: 40px;
+	min-height: 40px;
+}
+html.tn-phone:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd {
+	width: 40px;
+	height: 40px;
+}
+html.tn-phone:not(#dawn) :is(#pal, #thm, #pick) .cmdk {
+	position: fixed;
+	top: auto;
+	left: 8px;
+	right: 8px;
+	bottom: 8px;
+	width: auto;
+	max-width: none;
+	max-height: calc(100vh - var(--ph-top) - 16px);
+	zoom: 1;
+	transform: none;
+}
+html.tn-phone:not(#dawn) #pal:not([hidden]) .cmdk {
+	animation: none;
+}
+html.tn-phone:not(#dawn) :is(#pal, #thm, #pick) .ck-top input {
+	font-size: 16px;
+}
+html.tn-phone:not(#dawn) :is(#pal, #thm, #pick) .ck-item {
+	min-height: 44px;
+	height: auto;
+}
+html.tn-phone:not(#dawn) :is(#pal, #thm, #pick) .ck-item .ck-label {
+	font-size: 15px;
+	line-height: 20px;
+}
+html.tn-phone:not(#dawn) #pal .tn-pl-acts .icon-btn,
+html.tn-phone:not(#dawn) :is(div.pop[role='menu'] .mi:not(.bare), .sf-menu-pop .sf-menu-item:not(.rich)) {
+	min-width: 40px;
+	min-height: 40px;
+}
+:root:not(#dawn) #tabbar .tt.on :is(.nm, .sub, .tn-tx, .mk.keys, .kbd, .tn-num, .ico, svg) {
+	color: var(--dawn-page) !important;
+}
+:root:not(#dawn) .sf-chat-reader :is(.sf-t-dim, .sf-t-muted) {
+	color: var(--t2);
+}
+:root:not(#dawn) .sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md,
+:root:not(#dawn) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md,
+:root:not(#dawn) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'] {
+	align-self: flex-start;
+	width: auto;
+	max-width: min(80%, 560px, 100% - 82px);
+	padding: 7px 12px;
+	border-radius: 18px;
+	background: linear-gradient(to bottom, color-mix(in srgb, var(--dawn-page) 12%, transparent), transparent), var(--dawn-soft);
+	box-shadow: inset 0 0.5px 0 color-mix(in srgb, var(--dawn-page) 12%, transparent), inset 0 -0.5px 0 color-mix(in srgb, var(--dawn-page) 12%, transparent), inset 0 0 0 0.5px var(--dawn-soft);
+	overflow-wrap: anywhere;
+}
+:root:not(#dawn) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body {
+	align-self: flex-end;
+	width: auto;
+	max-width: min(80%, 560px, 100% - 82px);
+	margin-left: auto;
+	padding: 7px 12px;
+	border-radius: 18px;
+	background: linear-gradient(to bottom, color-mix(in srgb, var(--dawn-page) 5%, transparent), transparent), var(--dawn-user);
+	color: var(--t1);
+	--t1: oklch(from var(--dawn-ink) 0.98 0 0);
+	--t2: var(--t1);
+	--t3: color-mix(in srgb, var(--t1) 80%, transparent);
+	--t4: color-mix(in srgb, var(--t1) 50%, transparent);
+	--tv-fg: var(--t1);
+	--omp-userMessageText: var(--t1);
+	--omp-mdHeading: var(--t1);
+	box-shadow: inset 0 0.5px 0 color-mix(in srgb, var(--dawn-page) 5%, transparent), inset 0 -0.5px 0 color-mix(in srgb, var(--dawn-page) 5%, transparent), inset 0 0 0 0.5px var(--dawn-soft);
+	overflow-wrap: anywhere;
+}
+:root:not(#dawn) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] .md {
+	color: var(--t1);
 }
 section.tn-pane > .tn-body > .tn-glow {
 	display: none;
