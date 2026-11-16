@@ -1,0 +1,493 @@
+diff --git a/packages/coding-agent/src/modes/interactive-mode.ts b/packages/coding-agent/src/modes/interactive-mode.ts
+index 96c51d3dc0..65c89e6127 100644
+--- a/packages/coding-agent/src/modes/interactive-mode.ts
++++ b/packages/coding-agent/src/modes/interactive-mode.ts
+@@ -140,7 +140,6 @@ import planModeApprovedPrompt from "../prompts/system/plan-mode-approved.md" wit
+ import planModeCompactInstructionsPrompt from "../prompts/system/plan-mode-compact-instructions.md" with { type: "text" };
+ import type { AgentHubRegistry } from "@oh-my-pi/pi-tui/overlays/agent-hub-types";
+ import { AgentRegistry, MAIN_AGENT_ID } from "../registry/agent-registry";
+-import { registerPersistedSubagents } from "../registry/persisted-agents";
+ import type { AgentCostSnapshot } from "@oh-my-pi/pi-tui/overlays/agent-hub-projection";
+ import { sumSubagentTreeCost } from "./agent-hub-runtime";
+ import {
+@@ -2078,7 +2077,6 @@ export class InteractiveMode implements InteractiveModeContext {
+ 	#agentRegistrySubscriptionTarget?: AgentHubRegistry;
+ 	#subagentHudKey = "";
+ 	#subagentSessionCosts = new WeakMap<object, AgentCostSnapshot>();
+-	#subagentCostHydratedRoot?: string;
+ 	#mcpStatusOrder: string[] = [];
+ 	#mcpPendingServers = new Set<string>();
+ 	#mcpConnectedServers = new Set<string>();
+@@ -4837,8 +4835,13 @@ export class InteractiveMode implements InteractiveModeContext {
+ 		const agentsChanged = this.statusLine.setRunningSubagents(agentIds);
+ 		let treeCost = 0;
+ 		if (!this.collabGuest) {
++			// The tree total is projected from refs whose cost is already known: the
++			// live sessions, and the persisted ones the Agent Hub hydrated when it was
++			// opened. Reading every historical subagent transcript here to raise it
++			// costs a resumed session over a gigabyte of startup reads and hundreds of
++			// megabytes of parse memory, so that work belongs to the Hub, not the first
++			// frame; the task-result floor in the cost segment covers the rest.
+ 			const rootSessionFile = this.sessionManager.getSessionFile() ?? undefined;
+-			this.#hydratePersistedSubagentCosts(rootSessionFile);
+ 			treeCost = sumSubagentTreeCost({
+ 				refs: AgentRegistry.global().list(),
+ 				observers: this.#observerRegistry,
+@@ -4852,22 +4855,6 @@ export class InteractiveMode implements InteractiveModeContext {
+ 		return changed;
+ 	}
+ 
+-	/**
+-	 * Register a resumed session's persisted subagent transcripts (with usage
+-	 * history) so the status line's tree cost matches the Agent Hub without it
+-	 * being opened first. Once per on-disk root; registry changes re-sync the cost.
+-	 */
+-	#hydratePersistedSubagentCosts(rootSessionFile: string | undefined): void {
+-		if (!rootSessionFile || this.#subagentCostHydratedRoot === rootSessionFile) return;
+-		if (!this.sessionManager.isSessionOnDisk()) return;
+-		this.#subagentCostHydratedRoot = rootSessionFile;
+-		registerPersistedSubagents(AgentRegistry.global(), rootSessionFile, {
+-			shouldContinue: () => this.sessionManager.getSessionFile() === rootSessionFile,
+-		}).catch(error => {
+-			logger.warn("Persisted subagent cost hydration failed", { rootSessionFile, error: String(error) });
+-		});
+-	}
+-
+ 	/**
+ 	 * What the TSP composer shows: the draft's shell mode, the effort chip
+ 	 * (the viewed agent's, like the model chip beside it) or the model chip's
+diff --git a/packages/coding-agent/src/registry/persisted-agents.ts b/packages/coding-agent/src/registry/persisted-agents.ts
+index 7ae5d42a1e..df9a845f2e 100644
+--- a/packages/coding-agent/src/registry/persisted-agents.ts
++++ b/packages/coding-agent/src/registry/persisted-agents.ts
+@@ -5,8 +5,9 @@ import { logger } from "@oh-my-pi/pi-utils";
+ import { ADVISOR_TRANSCRIPT_FILENAME, isAdvisorTranscriptName } from "../advisor/transcript-recorder";
+ import { resolveExplicitModelRole } from "../config/model-resolver";
+ import { assistantTurnProducedOutput } from "../session/messages";
++import type { FileEntry } from "../session/session-entries";
+ import { EPHEMERAL_MODEL_CHANGE_ROLE, PREWALK_MODEL_CHANGE_ROLE } from "../session/session-entries";
+-import { readSessionHeaderId, visitEntriesFromFileStream } from "../session/session-loader";
++import { readSessionHeaderId, readSessionPrefix, visitEntriesFromFileStream } from "../session/session-loader";
+ import { loadBundledAgents } from "../task/agents";
+ import { isReadOnlyAgent } from "../task/read-only-policy";
+ import { persistedVibeChildIds } from "../vibe/lifecycle";
+@@ -90,20 +91,28 @@ function finiteNumber(value: unknown): number {
+ 	return typeof value === "number" && Number.isFinite(value) ? value : 0;
+ }
+ 
++/**
++ * Bundled agents projected once for {@link inferBundledAgent}: one roster scan
++ * runs it for every transcript, and trimming every bundled system prompt per call
++ * copies megabytes per transcript for the same answer.
++ */
++let bundledAgentSignatures: { agent: string; modelRole?: string; readOnly: boolean; rolePrompt: string }[] | undefined;
++
+ function inferBundledAgent(systemPrompt: string): { agent?: string; modelRole?: string; readOnly?: boolean } {
+-	const matches = loadBundledAgents().filter(agent => {
+-		const rolePrompt = agent.systemPrompt.trim();
+-		return rolePrompt.length > 0 && systemPrompt.includes(rolePrompt);
+-	});
++	bundledAgentSignatures ??= loadBundledAgents()
++		.map(agent => ({
++			agent: agent.name,
++			modelRole: resolveExplicitModelRole(agent.model),
++			readOnly: isReadOnlyAgent(agent),
++			rolePrompt: agent.systemPrompt.trim(),
++		}))
++		.filter(signature => signature.rolePrompt.length > 0);
++	const matches = bundledAgentSignatures.filter(signature => systemPrompt.includes(signature.rolePrompt));
+ 	// `task` and `sonic` intentionally share a prompt body. Ambiguous historical
+ 	// prompts stay unlabelled rather than inventing provenance.
+ 	if (matches.length !== 1) return {};
+-	const [agent] = matches;
+-	return {
+-		agent: agent.name,
+-		modelRole: resolveExplicitModelRole(agent.model),
+-		readOnly: isReadOnlyAgent(agent),
+-	};
++	const [match] = matches;
++	return { agent: match.agent, modelRole: match.modelRole, readOnly: match.readOnly };
+ }
+ 
+ function usageTokens(usage: Record<string, unknown>): number {
+@@ -332,7 +341,10 @@ function nestedPatchFilesFor(dir: string, transcriptName: string, entries: reado
+ /**
+  * Read only the small session prefix needed by the Hub. A subagent's first
+  * `session_init` is written before its conversation, so this never walks a
+- * multi-megabyte historical transcript just to populate one roster row.
++ * multi-megabyte historical transcript just to populate one roster row — and it
++ * reads a bounded window rather than streaming: one roster scan runs over every
++ * helper transcript a session ever wrote, where a stream chunk per file is
++ * gigabytes for a few kilobytes of metadata.
+  */
+ async function readPersistedAgentMetadata(
+ 	sessionFile: string,
+@@ -358,55 +370,60 @@ async function readPersistedAgentMetadata(
+ 	let history: AgentHistorySummary = {};
+ 	let hasSessionInit = false;
+ 	let hasConversation = false;
++	const visit = (entry: FileEntry): boolean | void => {
++		const record = recordOf(entry);
++		if (!record) return;
++		if (record.type === "session") {
++			createdAt ??= timestampOf(record.timestamp);
++			return;
++		}
++		if (record.type === "model_change") {
++			if (typeof record.model === "string") history.resolvedModel = record.model;
++			if (
++				typeof record.role === "string" &&
++				record.role !== EPHEMERAL_MODEL_CHANGE_ROLE &&
++				record.role !== PREWALK_MODEL_CHANGE_ROLE
++			) {
++				history.modelRole = record.role;
++			}
++			if (typeof record.resolvedModelIsFallback === "boolean") {
++				history.resolvedModelIsFallback = record.resolvedModelIsFallback;
++			}
++			return;
++		}
++		if (record.type === "message" || record.type === "custom_message") {
++			hasConversation = true;
++			return;
++		}
++		if (record.type !== "session_init") return;
++		hasSessionInit = true;
++		createdAt ??= timestampOf(record.timestamp);
++		if (typeof record.task === "string") activity = summarizePersistedTask(record.task);
++		const systemPrompt = Array.isArray(record.systemPrompt) ? record.systemPrompt.join("\n\n") : record.systemPrompt;
++		const inferred = typeof systemPrompt === "string" ? inferBundledAgent(systemPrompt) : {};
++		history = {
++			...history,
++			...inferred,
++			agent: typeof record.agent === "string" ? record.agent : inferred.agent,
++			modelRole: typeof record.modelRole === "string" ? record.modelRole : (history.modelRole ?? inferred.modelRole),
++			resolvedModel: typeof record.resolvedModel === "string" ? record.resolvedModel : history.resolvedModel,
++			readOnly: typeof record.readOnly === "boolean" ? record.readOnly : inferred.readOnly,
++		};
++		return false;
++	};
+ 	try {
+-		await visitEntriesFromFileStream(
+-			sessionFile,
+-			entry => {
+-				const record = recordOf(entry);
+-				if (!record) return;
+-				if (record.type === "session") {
+-					createdAt ??= timestampOf(record.timestamp);
+-					return;
+-				}
+-				if (record.type === "model_change") {
+-					if (typeof record.model === "string") history.resolvedModel = record.model;
+-					if (
+-						typeof record.role === "string" &&
+-						record.role !== EPHEMERAL_MODEL_CHANGE_ROLE &&
+-						record.role !== PREWALK_MODEL_CHANGE_ROLE
+-					) {
+-						history.modelRole = record.role;
+-					}
+-					if (typeof record.resolvedModelIsFallback === "boolean") {
+-						history.resolvedModelIsFallback = record.resolvedModelIsFallback;
+-					}
+-					return;
+-				}
+-				if (record.type === "message" || record.type === "custom_message") {
+-					hasConversation = true;
+-					return;
+-				}
+-				if (record.type !== "session_init") return;
+-				hasSessionInit = true;
+-				createdAt ??= timestampOf(record.timestamp);
+-				if (typeof record.task === "string") activity = summarizePersistedTask(record.task);
+-				const systemPrompt = Array.isArray(record.systemPrompt)
+-					? record.systemPrompt.join("\n\n")
+-					: record.systemPrompt;
+-				const inferred = typeof systemPrompt === "string" ? inferBundledAgent(systemPrompt) : {};
+-				history = {
+-					...history,
+-					...inferred,
+-					agent: typeof record.agent === "string" ? record.agent : inferred.agent,
+-					modelRole:
+-						typeof record.modelRole === "string" ? record.modelRole : (history.modelRole ?? inferred.modelRole),
+-					resolvedModel: typeof record.resolvedModel === "string" ? record.resolvedModel : history.resolvedModel,
+-					readOnly: typeof record.readOnly === "boolean" ? record.readOnly : inferred.readOnly,
+-				};
+-				return false;
+-			},
+-			{ maxRecords: MAX_METADATA_LINES },
+-		);
++		const prefix = await readSessionPrefix(sessionFile);
++		let stopped = false;
++		for (const entry of prefix.entries) {
++			if (visit(entry) === false) {
++				stopped = true;
++				break;
++			}
++		}
++		// A window that ended before `session_init` (a pathologically long init
++		// record) falls back to the stream, which only that outlier pays for.
++		if (!stopped && !prefix.complete)
++			await visitEntriesFromFileStream(sessionFile, visit, { maxRecords: MAX_METADATA_LINES });
+ 	} catch (error) {
+ 		// Malformed and truncated records are skipped in-band by the stream
+ 		// visitor, so the only errors reaching this catch are filesystem
+diff --git a/packages/coding-agent/src/session/exit-diagnostics.ts b/packages/coding-agent/src/session/exit-diagnostics.ts
+index fa75c9daa5..597c618200 100644
+--- a/packages/coding-agent/src/session/exit-diagnostics.ts
++++ b/packages/coding-agent/src/session/exit-diagnostics.ts
+@@ -198,6 +198,49 @@ export function hasRestorableTurn(entries: readonly SessionEntry[]): boolean {
+ 	return findUnfinishedTurn(entries, { assumeExit: true }) !== undefined;
+ }
+ 
++/**
++ * Whether a transcript tail — only its last records, not the whole file — can
++ * still hold an interrupted turn ({@link hasRestorableTurn}). `true` means the
++ * transcript has to be loaded to know for sure; only a tail that provably closed
++ * its turn answers `false`. `omp --restore` reads every historical helper
++ * transcript's tail through this, so a finished conversation is never parsed
++ * whole just to learn that it finished.
++ */
++export function tailMayHoldInterruptedTurn(entries: readonly SessionEntry[]): boolean {
++	// A recorded normal exit with nothing pending closes the session: hasRestorableTurn
++	// stops at it too, whatever the conversation tail looks like.
++	for (let index = entries.length - 1; index >= 0; index--) {
++		const exit = readSessionExit(entries[index]!);
++		if (!exit) continue;
++		if (exit.kind === "normal" && !exit.pendingToolCalls?.length) return false;
++		break;
++	}
++	let tailIndex = -1;
++	for (let index = entries.length - 1; index >= 0; index--) {
++		if (entries[index]!.type === "message") {
++			tailIndex = index;
++			break;
++		}
++	}
++	// A window with no message in it proves nothing: load the transcript.
++	if (tailIndex < 0) return true;
++	const entry = entries[tailIndex]!;
++	if (entry.type !== "message") return true;
++	if (isInterruptedTurnAbort(entry.message)) return true;
++	// A terminal assistant tail leaves nothing to go on with: with a recorded exit
++	// or an assumed one, findUnfinishedTurn declines it below this line.
++	if (entry.message.role === "assistant") return entry.message.content.some(isToolCallContent);
++	if (entry.message.role !== "toolResult") return true;
++	// Tool results the model never answered are only restorable when the turn that
++	// called them failed for its own reason rather than being cut off.
++	for (let index = tailIndex - 1; index >= 0; index--) {
++		const previous = entries[index]!;
++		if (previous.type !== "message" || previous.message.role !== "assistant") continue;
++		return previous.message.stopReason !== "error" && previous.message.stopReason !== "aborted";
++	}
++	return true;
++}
++
+ /**
+  * createInterruptedTurnAbortMessage returns a terminal assistant record when
+  * the latest persisted process exit follows a non-terminal conversation tail
+diff --git a/packages/coding-agent/src/session/session-loader.ts b/packages/coding-agent/src/session/session-loader.ts
+index d3d913df03..5890e3cb81 100644
+--- a/packages/coding-agent/src/session/session-loader.ts
++++ b/packages/coding-agent/src/session/session-loader.ts
+@@ -182,6 +182,45 @@ export function parseSessionContent(content: string): SessionLoadResult {
+ 	};
+ }
+ 
++/**
++ * Bytes of a transcript's start read for roster metadata. Leading records are the
++ * `session` header and `session_init`, whose system prompt is the largest thing
++ * here — a fraction of this window in a real helper transcript, whose `session_init`
++ * starts within the first few kilobytes. Every historical helper transcript is read
++ * through this window, so a whole stream chunk (about a megabyte) per transcript
++ * would cost a long session gigabytes of startup I/O for a few kilobytes of
++ * metadata; a transcript whose init does not fit falls back to the stream.
++ */
++export const SESSION_METADATA_PREFIX_BYTES = 64 * 1024;
++
++/**
++ * The records at the start of a transcript, read from at most `maxBytes`, and
++ * whether that window covered the whole file. A window that ends mid-record drops
++ * that record; callers that need certainty check `complete`.
++ */
++export async function readSessionPrefix(
++	filePath: string,
++	maxBytes = SESSION_METADATA_PREFIX_BYTES,
++): Promise<{ entries: FileEntry[]; complete: boolean }> {
++	const handle = await fs.open(filePath, "r");
++	try {
++		const { size } = await handle.stat();
++		const length = Math.min(size, Math.max(1, maxBytes));
++		const window = new Uint8Array(length);
++		await handle.read(window, 0, length, 0);
++		const complete = length >= size;
++		let text = new TextDecoder().decode(window);
++		if (!complete) {
++			// Only newline-terminated bytes are records; a cut mid-record is dropped.
++			const lastNewline = text.lastIndexOf("\n");
++			text = lastNewline === -1 ? "" : text.slice(0, lastNewline + 1);
++		}
++		return { entries: parseSessionContent(text).entries, complete };
++	} finally {
++		await handle.close();
++	}
++}
++
+ /** Upper bound on the bytes read to find a header: real headers (and the title slot before them) are far smaller. */
+ const SESSION_HEADER_READ_LIMIT = 1024 * 1024;
+ /** First read; holds the title slot and any real header, so the full limit is read only for outliers. */
+diff --git a/packages/coding-agent/src/session/sub-sessions.ts b/packages/coding-agent/src/session/sub-sessions.ts
+index 273e9395d5..bed777f587 100644
+--- a/packages/coding-agent/src/session/sub-sessions.ts
++++ b/packages/coding-agent/src/session/sub-sessions.ts
+@@ -11,6 +11,7 @@ import * as path from "node:path";
+ import { isEnoent } from "@oh-my-pi/pi-utils";
+ import { isAdvisorTranscriptName } from "../advisor/transcript-recorder";
+ import { getAgentTombstonePath } from "../registry/agent-tombstone";
++import { hasRestorableTurn, tailMayHoldInterruptedTurn } from "./exit-diagnostics";
+ import { resolveSessionLeafId, type SessionEntry, type SessionHeader } from "./session-entries";
+ import { loadSessionFile, parseSessionContent, type SessionLoadResult } from "./session-loader";
+ 
+@@ -41,6 +42,14 @@ export interface CollectSubSessionsOptions {
+ 	includeAdvisors?: boolean;
+ 	/** Include gc-compressed transcripts for read-only exports. */
+ 	includeCompressed?: boolean;
++	/**
++	 * `omp --restore` scope: keep only transcripts that still hold an interrupted
++	 * turn, decided from each transcript's tail before anything is parsed whole.
++	 * A killed transcript (tombstone) is skipped without a read, and a finished
++	 * one costs one tail window instead of its whole conversation — a session's
++	 * history can hold thousands of these, some tens of megabytes each.
++	 */
++	restorableOnly?: boolean;
+ }
+ 
+ /**
+@@ -75,6 +84,64 @@ async function loadCollectedSession(file: string): Promise<SessionLoadResult | n
+ 	}
+ }
+ 
++/**
++ * Bytes of a transcript's end inspected before deciding whether to load it whole.
++ * One restore reads every historical helper transcript's tail, and the records a
++ * decision needs (last message, the assistant before it, the last exit) are the
++ * last handful in the file.
++ */
++const TAIL_PROBE_BYTES = 64 * 1024;
++
++/**
++ * The records at the end of a transcript, or `undefined` when they cannot be read
++ * conclusively (compressed, empty, or ending mid-record) and the caller must load
++ * the file.
++ */
++async function readTranscriptTail(file: string): Promise<SessionEntry[] | undefined> {
++	if (file.endsWith(".gz")) return undefined;
++	let handle: fs.promises.FileHandle | undefined;
++	try {
++		handle = await fs.promises.open(file, "r");
++		const { size } = await handle.stat();
++		const length = Math.min(size, TAIL_PROBE_BYTES);
++		if (length === 0) return undefined;
++		const buffer = Buffer.allocUnsafe(length);
++		await handle.read(buffer, 0, length, size - length);
++		const text = utf8Decoder.decode(buffer);
++		// A transcript's last record can still be mid-write; a window that stops
++		// inside one is not a tail we can judge.
++		if (!text.endsWith("\n")) return undefined;
++		// The window starts mid-record unless it covers the whole file, and that
++		// record is dropped. A window holding little else may have lost the very
++		// record the decision hangs on, so it is not a tail we can judge either.
++		const firstBreak = length < size ? text.indexOf("\n") : -1;
++		if (firstBreak < 0 && length < size) return undefined;
++		const entries = parseSessionContent(firstBreak >= 0 ? text.slice(firstBreak + 1) : text).entries.filter(
++			(entry): entry is SessionEntry => entry.type !== "session",
++		);
++		if (firstBreak >= 0 && entries.length < 2) return undefined;
++		return entries;
++	} catch (err) {
++		if (isEnoent(err)) return [];
++		throw err;
++	} finally {
++		await handle?.close();
++	}
++}
++
++/** Whether `--restore` has to load this transcript to know it holds an interrupted turn. */
++async function mayHoldRestorableTurn(
++	dir: string,
++	name: string,
++	transcriptName: string,
++	siblings: Set<string>,
++): Promise<boolean> {
++	// A killed subagent is never revived; its transcript is not even read.
++	if (siblings.has(getAgentTombstonePath(transcriptName))) return false;
++	const tail = await readTranscriptTail(path.join(dir, name));
++	return tail === undefined || tailMayHoldInterruptedTurn(tail);
++}
++
+ async function collectSubSessionsFromDir(
+ 	dir: string,
+ 	parentKey: string | null,
+@@ -108,6 +175,13 @@ async function collectSubSessionsFromDir(
+ 		if (compressed && fileNames.has(transcriptName)) continue;
+ 		const agentId = transcriptName.slice(0, -6);
+ 		const key = parentKey ? `${parentKey}/${agentId}` : agentId;
++		if (options.restorableOnly && !(await mayHoldRestorableTurn(dir, name, transcriptName, fileNames))) {
++			// A finished helper can still own children that were cut off mid-turn.
++			if (childDirectories.has(agentId)) {
++				await collectSubSessionsFromDir(path.join(dir, agentId), key, out, options);
++			}
++			continue;
++		}
+ 		const loaded = await loadCollectedSession(path.join(dir, name));
+ 		if (!loaded) continue;
+ 		const { entries: fileEntries, malformedRecords, invalidHeader } = loaded;
+@@ -116,17 +190,20 @@ async function collectSubSessionsFromDir(
+ 		if (!invalidHeader && fileEntries.length > 0) {
+ 			const header = (fileEntries.find(e => e.type === "session") as SessionHeader | undefined) ?? null;
+ 			const entries = fileEntries.filter((e): e is SessionEntry => e.type !== "session");
+-			out[key] = {
+-				agentId,
+-				parent: parentKey,
+-				header,
+-				entries,
+-				leafId: resolveSessionLeafId(entries),
+-				aborted:
+-					fileNames.has(getAgentTombstonePath(transcriptName)) ||
+-					(compressed && fileNames.has(getAgentTombstonePath(name))),
+-				malformedRecords,
+-			};
++			// The tail only said "maybe"; the loaded transcript is what `--restore` gets.
++			if (!options.restorableOnly || hasRestorableTurn(entries)) {
++				out[key] = {
++					agentId,
++					parent: parentKey,
++					header,
++					entries,
++					leafId: resolveSessionLeafId(entries),
++					aborted:
++						fileNames.has(getAgentTombstonePath(transcriptName)) ||
++						(compressed && fileNames.has(getAgentTombstonePath(name))),
++					malformedRecords,
++				};
++			}
+ 		} else if (invalidHeader) {
+ 			options.onUnreadable?.(key);
+ 		}
+diff --git a/packages/coding-agent/src/task/restore.ts b/packages/coding-agent/src/task/restore.ts
+index 3e710a5701..427d8e8cc1 100644
+--- a/packages/coding-agent/src/task/restore.ts
++++ b/packages/coding-agent/src/task/restore.ts
+@@ -64,8 +64,13 @@ async function restoreSubagents(session: AgentSession, options: RestoreOptions):
+ 	if (!sessionFile || !manager) return [];
+ 	const registry = AgentRegistry.global();
+ 	await ensurePersistedRoster(registry, sessionFile);
++	// Only what still holds an interrupted turn is loaded: the shell of every
++	// historical helper is judged from its tail (or its tombstone), so a resumed
++	// session never parses its whole subagent history — some sessions carry
++	// thousands of transcripts and over a gigabyte of them.
+ 	const subSessions = await collectSubSessions(sessionFile, {
+ 		onUnreadable: key => logger.warn("Subagent transcript unreadable; not restored", { key }),
++		restorableOnly: true,
+ 	});
+ 	// Parents first: a child's result is delivered to its parent's session.
+ 	const keys = Object.keys(subSessions).sort((a, b) => a.split("/").length - b.split("/").length);

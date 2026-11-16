@@ -15,8 +15,12 @@ inputs: let
   # to its parent a minute in, with what its transcript shows.
   # The advisor reviews after the final reply, so its notes arrive as corrections; the seventh
   # holds the boundary for the review when that reply states a measurement, cause or completion.
+  # A resumed session loaded every helper transcript under its artifacts directory to decide what
+  # to restore (2.9 GB RSS for 540 transcripts), and read a stream chunk of each one for roster
+  # metadata and subagent costs; the eighth judges each transcript from its tail, reads a bounded
+  # metadata window, and leaves cost hydration to the Agent Hub.
   omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch];
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch];
   });
   inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 
