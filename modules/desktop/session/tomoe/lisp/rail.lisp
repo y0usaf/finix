@@ -87,8 +87,8 @@
 ;; own beat, and nothing at all once it has arrived. Every number the glide
 ;; follows is here.
 (defparameter +rail--glide+
-  (list :tick 16                        ; milliseconds between the display's steps
-        :tau 0.28d0                     ; seconds a reading takes to cover a change
+  (list :tick 100                       ; milliseconds between the display's steps
+        :tau 0.18d0                     ; seconds a reading takes to cover a change
         :within '(:cpu 0.5 :memory 0.5 :memory-used 64    ; what each gauge
                   :gpu 0.5 :vram 0.5 :vram-used 64)))     ; cannot show is arrived
 
@@ -700,6 +700,7 @@ is beside it."
          (fade (getf state :bolo-fade))
          (settling (and (not voice) (realp fade) levels
                         (< (- now fade) (getf +rail--voice+ :settle))))
+         (voicing (and (plusp (length levels)) (or voice settling)))
          (envelope (rail--voice-envelope voice (getf state :bolo-since) fade now))
          (edges rest)
          (impact 0d0)
@@ -753,9 +754,9 @@ is beside it."
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t)))
                       (when hop (list (interval :hop :refresh)))
-                      (when (or (getf state :rail-glide)
-                                (and (plusp (length levels)) (or voice settling)))
-                        (list (interval :hop (getf +rail--glide+ :tick))))
+                      (when (or voicing (getf state :rail-glide))
+                        (list (interval :hop (if voicing 16
+                                                 (getf +rail--glide+ :tick)))))
                       (cassette--bolo-watches)
                       (when (and output tray)
                         (list (publish-state :shelf-tray-rect
