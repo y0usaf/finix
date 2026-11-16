@@ -150,10 +150,10 @@ void card_frame(vec2 p, int i, inout vec4 color) {
 
 // ---- the rail
 
-// One pixel of a 3x5 digit. The code packs the rows bottom up, three bits each,
-// the left of a row in the least significant of its three.
+// One pixel of a 3x5 digit. The code packs the rows top down, three bits each,
+// the left of a row in the most significant of its three.
 bool digit_px(float code, int row, int col) {
-    return mod(floor(code / exp2(float(row * 3 + col))), 2.0) > 0.5;
+    return mod(floor(code / exp2(float(row * 3 + 2 - col))), 2.0) > 0.5;
 }
 
 const float BAYER[16] = float[16](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0,

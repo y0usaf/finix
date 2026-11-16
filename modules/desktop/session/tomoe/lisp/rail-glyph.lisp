@@ -112,8 +112,8 @@ the rule that closes it."
           :net (+ d rule) :net-h (max 0 (- height rule d rule)))))
 
 (defun rail-glyph--code (face)
-  "One 3x5 face as a bit code: a row's three bits above the one under it, the
-left of the row in the lowest of its three."
+  "One 3x5 face as a bit code: a row's three bits above the one over it, the
+left of the row in the highest of its three."
   (let ((code 0) (place 1))
     (dolist (row face)
       (setf code (+ code (* place row)))
