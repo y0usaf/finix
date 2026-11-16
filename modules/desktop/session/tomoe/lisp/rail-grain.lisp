@@ -43,22 +43,28 @@
 ;;; The palette is GRAIN's: morph's ground tones in dark over near black, warm
 ;;; dark grains on paper in light, one line colour and one glint.
 
+;; :INK is the one colour the rail's type draws on a bar in, and :TONES the four
+;; the rule itself is grained from -- the cast's ink is a list of tones, and the
+;; rail's type takes a colour, not a list of them.
 (defparameter +rail-grain--cast+
   (list :dark (list :line "#40435C" :name "#84817A" :dim "#969288" :box "#545978"
                     :glint "#FFFDF4"
                     :frame '("#70769C" "#8086AC" "#606588" "#969BBE")
-                    :ink '("#ECE7DC" "#D0CABE" "#B0AA9E" "#DCD6CA"))
+                    :ink "#ECE7DC"
+                    :tones '("#ECE7DC" "#D0CABE" "#B0AA9E" "#DCD6CA"))
         :light (list :line "#A8A39A" :name "#7C7868" :dim "#605C56" :box "#969087"
                      :glint "#FFFFFF"
                      :frame '("#78736A" "#646058" "#8C877E" "#524F49")
-                     :ink '("#292928" "#44423E" "#605D57" "#383734"))))
+                     :ink "#292928"
+                     :tones '("#292928" "#44423E" "#605D57" "#383734"))))
 
 (defparameter +rail-grain--pour+ 10400d0)    ; pixels a second the pour runs (2600 art px)
 (defparameter +rail-grain--crumble+ 12000d0) ; and the old frame's rules run back (3000)
 (defparameter +rail-grain--fall+ 1200d0)     ; pixels a second squared its type and sand drop (300)
 
 (defun rail-grain--tone (key)
-  "KEY of the cast in the current mode, its four tones as twelve reals."
+  "KEY of the cast in the current mode, its four tones as twelve reals, in the
+order grain.glsl reads them."
   (loop for hex in (rail--material key) append (rail--rgb hex)))
 
 (defun rail-grain--theme ()
@@ -68,14 +74,60 @@ frames, then the frame's four tones and the ink's four, then the pour's speed,
 the crumble and the fall."
   (append (kit--colors '(:line :name :glint :dim :box))
           (rail-grain--tone :frame)
-          (rail-grain--tone :ink)
+          (rail-grain--tone :tones)
           (list +rail-grain--pour+ +rail-grain--crumble+ +rail-grain--fall+)))
+
+(defparameter +rail-grain--strip-height+ 48)
+
+(defun rail-grain--bar (look context strip)
+  "GRAIN on a bar: one rule of grains along the strip's inner edge, the readings
+set above it in the theme's own ink."
+  (destructuring-bind (&key state snapshot output epoch layer &allow-other-keys) context
+    (let ((blocks (rail--bar-blocks state snapshot strip)))
+      (append
+       (list (shell-surface
+              (intern (format nil "RAIL-GRAIN-~A"
+                              (string-upcase (symbol-name (getf strip :place))))
+                      :keyword)
+              (ui :stack)
+              :output (getf output :name)
+              :anchors (list (getf strip :place))
+              :width (rail--design (getf strip :width))
+              :height (rail--design (getf strip :height))
+              :margin 0
+              :layer layer :click-through t
+              :exclusive-zone (rail--design (getf strip :height))
+              :background (list :shader (getf look :shader)
+                                :data (append (rail-grain--theme)
+                                              (list (if (eq (getf strip :place) :top) 1d0 2d0))
+                                              (rail--shader-rect output strip))
+                                :clock epoch
+                                :until (kit--until look context)))
+             (shell-surface
+              (intern (format nil "RAIL-GRAIN-TYPE-~A"
+                              (string-upcase (symbol-name (getf strip :place))))
+                      :keyword)
+              (rail--web state snapshot strip blocks (rail--ink))
+              :output (getf output :name)
+              :anchors (list (getf strip :place))
+              :width (rail--design (getf strip :width))
+              :height (rail--design (getf strip :height))
+              :margin 0
+              :layer layer :background "#00000000" :click-through t :slide t))))))
 
 (defun rail-grain--draw (look context)
   "grain: the rules over the output, the focused frame's furniture in its top
-rule, the pour between them and bolo's voice on the focused frame."
-  (kit--frames look context (rail-grain--theme) :reach 60))
+rule, the pour between them and bolo's voice on the focused frame; on an output
+the deck gives no seam, a rule along each bar with the readings above it."
+  (let ((bars (remove :seam (getf context :strips)
+                      :key (lambda (strip) (getf strip :place)))))
+    (append
+     (if bars
+         (kit--frames look context (append (rail-grain--theme) (list 0d0)) :reach 60)
+         (kit--frames look context (rail-grain--theme) :reach 60))
+     (loop for strip in bars append (rail-grain--bar look context strip)))))
 
 (defparameter +rail-grain+
   (list :draw #'rail-grain--draw :cast +rail-grain--cast+ :settle 0.65d0
+        :strip-height +rail-grain--strip-height+
         :frame (list :edge 20 :title 12 :seam 20)))

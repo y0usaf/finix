@@ -26,6 +26,12 @@
 // own that names no reach; the band is the same band, on a card that is not
 // there, through the same code.
 //
+// On an output the deck gives no seam -- the headset's -- the readout stands
+// along the bars the deck hands it instead: the same five rows of dots, the
+// clock and the date along the top bar, the readings and bolo's scope along the
+// bottom, and every item in the block the shared placement lays for it, so the
+// rail's geometry is the strip's and not this shader's.
+//
 // Everything is premultiplied, as the compositor blends the surface, and
 // coordinates are the output's, y down. A fragment costs a few dots: the nearest
 // dot of a ring and the two beside it for their share of the halo (a readout dot
@@ -34,11 +40,16 @@
 // item, and no copy of the readout per neighbour, which is what makes this
 // shader quick to compile as well as to draw.
 
-const int TH_ON = THEME, TH_OFF = THEME + 3, TH_GLOW = THEME + 6, TH_HOT = THEME + 9;
-const int TH_OUT = THEME + 12, TH_PITCH = THEME + 13, TH_DOT = THEME + 14;
-const int TH_CHASE = THEME + 15, TH_VU = THEME + 16, TH_HALO = THEME + 17;
-const int TH_FREE = THEME + 18, TH_ITEMS = THEME + 19, TH_PASSES = THEME + 20, TH_RAD = THEME + 33;
-const int TH_VLEN = THEME + 21, TH_TLEN = THEME + 25;
+// the theme's own numbers: the flag that says this surface is a bar rather than
+// a card's ring, the palette and the shape, the readings' value lengths, the
+// ring's radius, and then either a card's title lengths or -- on a bar -- the
+// box the readout stands in and the blocks its items take their columns from
+const int TH_ON = THEME + 1, TH_OFF = THEME + 4, TH_GLOW = THEME + 7, TH_HOT = THEME + 10;
+const int TH_OUT = THEME + 13, TH_PITCH = THEME + 14, TH_DOT = THEME + 15;
+const int TH_CHASE = THEME + 16, TH_VU = THEME + 17, TH_HALO = THEME + 18;
+const int TH_FREE = THEME + 19, TH_ITEMS = THEME + 20, TH_PASSES = THEME + 21, TH_RAD = THEME + 26;
+const int TH_VLEN = THEME + 22, TH_TLEN = THEME + 27;
+const int L_MODE = THEME, L_BOX = THEME + 27, L_BLOCKS = THEME + 31;
 
 const int BAND_ROWS = 5;
 const int SCOPE_COLS = 44;
@@ -221,18 +232,36 @@ float ring_bright(float u, float sx, int i, bool foc) {
 
 // ---------------------------------------------------------------- the readout
 
+// A bar's table: how many blocks it carries, then each one's kind and its rect
+// in output pixels, as the shared placement lays them along the strip.
+const int L_BLOCK_MAX = 5;
+
+// the dot column block KIND starts at, measured from X0 at SX a dot, or -1 when
+// this bar carries no block of that kind
+float bar_col(int kind, float x0, float sx) {
+    int nb = int(D(L_BLOCKS));
+    for (int i = 0; i < L_BLOCK_MAX; i++) {
+        if (i >= nb) break;
+        int b0 = L_BLOCKS + 1 + i * 5;
+        if (int(D(b0)) == kind) return floor((D(b0 + 1) - x0) / sx + 0.5);
+    }
+    return -1.0;
+}
+
 // The text the readout sets in column COL of card TI, if any: ITEM walks the
 // items -- the title, the clock, the date, the four labels, the four values --
 // and the type is called once, inside that walk, so the shader holds one copy of
 // it however many items it sets. TITLE is the title's length in characters (0
 // for the fallback band, which has none), NX the band's dot columns, SX its
-// pitch, X0 and ROW0 the left dot column and the first row's centre.
+// pitch, X0 and ROW0 the left dot column and the first row's centre. On a bar
+// each item stands at its own block instead of in the band's own layout.
 float readout_text(vec2 q, int col, float x0, float row0, float sx, int ti, int title,
         float nx, bool full, float mul) {
     float cGauges = nx - 4.0 - 23.0 - 5.0 - 19.0 - 5.0 - float(4 * GAUGE_COLS);
     float cClock = cGauges + float(4 * GAUGE_COLS) + 5.0;
     float cDate = cClock + 19.0 + 5.0;
     float fcol = float(col);
+    bool bar = D(L_MODE) > 0.5;
     int items = full ? int(D(TH_ITEMS)) : 1;
     int idx;
     for (int k = 0; k < items; k++) {
@@ -246,6 +275,24 @@ float readout_text(vec2 q, int col, float x0, float row0, float sx, int ti, int 
             // set as far as it fits instead of running under the readings
             at = 3.0; n = min(title, int((cGauges - 10.0 - float(SCOPE_COLS)) / 4.0));
             bright = max(mul, 0.42);
+        } else if (bar) {
+            // on a bar an item stands in the block the shared placement gives
+            // it: the clock in the clock's, the date in the date's, and a
+            // reading's label and value in that reading's own
+            at = bar_col(k == 1 ? 0 : (k == 2 ? 1 : (k < 7 ? k - 1 : k - 5)), x0, sx);
+            if (at < 0.0) continue;
+            if (k == 1) {
+                n = 5;
+            } else if (k == 2) {
+                n = 6; bright = 0.55 * mul;
+            } else if (k < 7) {
+                n = 3; bright = 0.55 * mul;
+            } else {
+                // a value, right aligned in four characters as it glides
+                int g = k - 7;
+                n = int(D(TH_VLEN + g));
+                at += float(VALUE_AT) + 4.0 * float(4 - n);
+            }
         } else if (k == 1) {
             at = cClock; n = 5;
         } else if (k == 2) {
@@ -280,6 +327,31 @@ float readout_cell(vec2 q, int col, int row, float x0, float row0, float sx, int
     float hit = readout_text(q, col, x0, row0, sx, ti, title, nx, full, mul);
     if (hit >= 0.0) return hit;
     if (!full) return -1.0;
+    // On a bar the readings' bars and bolo's scope stand in their own blocks,
+    // the twelve dots of a bar in the reading's block and the scope's columns in
+    // the voice's; on a card they are laid out along the band.
+    if (D(L_MODE) > 0.5) {
+        for (int g = 0; g < 4; g++) {
+            float bc = bar_col(2 + g, x0, sx);
+            if (bc < 0.0) continue;
+            float rel = fcol - bc;
+            if (rel < 0.0 || rel >= float(GAUGE_COLS)) continue;
+            if (rel < float(BAR_AT) || rel >= float(BAR_AT + BAR_COLS)) return 0.0;
+            if (row < 1 || row > 3) return -1.0;
+            float v = max(gauge_pct(g), 0.0) * 0.12;
+            float k = rel - float(BAR_AT);
+            return k + 1.0 <= v ? 1.0 : (k < v ? v - k : 0.0);
+        }
+        // bolo's scope: the level history, newest at its right, dark till it
+        // speaks; a bar has its columns only while it carries the voice's block
+        float sc = bar_col(6, x0, sx);
+        if (sc >= 0.0 && fcol >= sc && fcol < sc + float(SCOPE_COLS)) {
+            float lev = g_env * voice_level((sc + float(SCOPE_COLS) - 1.0 - fcol) / 30.0);
+            bool lit = abs(float(row) - 2.0) <= lev * 2.6 - 0.2;
+            return lit ? (1.0 + 0.6 * lev) * mul : 0.0;
+        }
+        return 0.0;
+    }
     // the readings' bars: twelve dots each, the leading one fractionally lit
     float cGauges = nx - 4.0 - 23.0 - 5.0 - 19.0 - 5.0 - float(4 * GAUGE_COLS);
     float rel = fcol - cGauges;
@@ -419,6 +491,14 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     g_hasua = D(K_TSW) > -1e5 && sw_age() >= 0.0 && sw_age() < D(K_SETTLE);
     g_age = move_age(DESIGN);
     g_env = voice_env();
+    if (D(L_MODE) > 0.5) {
+        // a bar: the readout's own dots, laid along the strip
+        vec4 b = vec4(D(L_BOX), D(L_BOX + 1), D(L_BOX + 2), D(L_BOX + 3));
+        vec4 acc = lumen_frame(p, b, 8, true, 1.0);
+        if (acc.a <= 0.002) discard;
+        color = acc;
+        return;
+    }
     g_ua = 0.0;
     g_per = 1.0;
     if (card_shown(g_f)) {

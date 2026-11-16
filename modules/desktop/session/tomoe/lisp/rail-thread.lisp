@@ -46,9 +46,13 @@
 ;; the mock, so the run is symmetric about it: the time at the top, the date at
 ;; the bottom, the four gauges either side of the middle where the mock has them.
 ;; The voice dot is the run's centre, not its fifth bead.
-(defparameter +rail-thread--beads+
-  '((:clock -388 40) (:date 388 30) (:cpu -270 50) (:mem -152 50)
-    (:voice 0 30) (:gpu 152 50) (:vram 270 50)))
+;;; The mock's beads, in the order they hang along the thread: each its kind, how far
+;;; its centre stands above the weld (negative below it) and half its height, in the
+;;; 1412 px of the mock's card. The voice bead sits on the weld itself, three beads
+;;; above it and three below, so the run is symmetric.
+(defparameter +rail-thread--mock+
+  '((:time -388 40) (:cpu -270 50) (:memory -152 50) (:voice 0 30)
+    (:gpu 152 50) (:vram 270 50) (:date 388 30)))
 
 (defun rail-thread--strip (context)
   "The strip the thread stands in: the deck's seam as it lays it out, or -- on an
@@ -63,17 +67,40 @@ down the middle of the output, inset as the frame insets the cards."
               :width (rail--seam-width)
               :height (- (getf output :height) (* 2 inset))))))
 
+;;; The order the shader reads its beads in: the clock, the date, CPU, memory, the
+;;; voice at the weld, the GPU and the VRAM.
+(defparameter +rail-thread--bead-order+ '(:time :date :cpu :memory :voice :gpu :vram))
+
 (defun rail-thread--layout (strip)
   "The thread's geometry in output pixels from the deck's STRIP: its centre, the
-cards' top and bottom, the weld's height, and each bead's centre and halves."
+cards' top and bottom, the weld's height, and each bead's centre and halves -- the
+mock's beads placed by the shared placement, symmetric about the weld."
   (let* ((y0 (getf strip :y))
          (height (getf strip :height))
          (weld (+ y0 (floor height 2)))
          (x (+ (getf strip :x) (floor (getf strip :width) 2)))
-         (px (lambda (offset) (round (* offset height) 1412))))
+         (px (lambda (offset) (round (* offset height) 1412)))
+         (mock (loop for (kind offset half) in +rail-thread--mock+
+                     collect (list kind (- (funcall px offset) (funcall px half))
+                                   (* 2 (funcall px half)))))
+         (specs (loop for i below (length mock)
+                      for (kind start size) = (nth i mock)
+                      for previous = (and (plusp i) (nth (1- i) mock))
+                      collect (list kind size
+                                    (if previous
+                                        (- start (+ (second previous) (third previous)))
+                                        0))))
+         (anchor (loop for (kind start size) in mock when (eq kind :voice) return (cons kind start)))
+         (placed (rail--place specs anchor 1 nil))
+         (by-kind (loop for (kind start size) in placed
+                        collect (list kind
+                                      (+ weld start (/ size 2))
+                                      (/ size 2)
+                                      14))))
     (list :x x :top y0 :bottom (+ y0 height) :weld weld
-          :beads (loop for (kind offset hy) in +rail-thread--beads+
-                       collect (list kind (+ weld (funcall px offset)) (funcall px hy) 14)))))
+          :beads (loop for kind in +rail-thread--bead-order+
+                       for bead = (find kind by-kind :key #'first)
+                       when bead collect bead))))
 
 ;;; What a card without focus keeps round it, in the order +RAIL--THREAD-STYLES+:
 ;;; the hairline pair the mock draws, a dimmer dark line alone, nothing at all,
@@ -150,16 +177,71 @@ read a zero reach as no reach.)"
                       :radius (rail--design (getf look :radius 0))
                       :border (list :focused "#00000000" :unfocused "#00000000")))))))
 
+(defparameter +rail-thread--strip-height+ 96)
+
+(defun rail-thread--bar-numbers (context strip)
+  "THREAD's numbers for a bar: the glass's shape from the strip's own layout, then
+the flag that says which bar this is, its rect and its blocks."
+  (append (rail-thread--numbers (rail-thread--layout strip) (getf context :state))
+          (list (if (eq (getf strip :place) :top) 1d0 2d0))
+          (rail--shader-rect (getf context :output) strip)
+          (rail--block-data strip (rail--bar-blocks (getf context :state)
+                                                    (getf context :snapshot) strip))))
+
 (defun rail-thread--draw (look context)
   "THREAD: the glass thread with its beads, the readings in their glass and the
-focused card's rim, all in one shader over the output."
-  (let ((theme (rail-thread--numbers
-                (rail-thread--layout (rail-thread--strip context))
-                (getf context :state))))
-    (if (getf context :windows)
-        (kit--frames look context theme :reach +rail-thread--reach+)
-        (rail-thread--whole look context theme))))
+focused card's rim, all in one shader over the output -- and on an output the
+deck gives no seam, a thread along each bar with a glass cell per reading."
+  (destructuring-bind (&key state snapshot output strips &allow-other-keys) context
+    (let* ((seam (find :seam strips :key (lambda (strip) (getf strip :place))))
+           (bars (remove seam strips)))
+      (if seam
+          (let ((theme (rail-thread--numbers
+                        (rail-thread--layout (rail-thread--strip context))
+                        state)))
+            (if (getf context :windows)
+                (kit--frames look context theme :reach +rail-thread--reach+)
+                (rail-thread--whole look context theme)))
+          (append
+           (kit--frames look context
+                        (append (rail-thread--numbers (rail-thread--layout (first bars)) state)
+                                (list 3d0))
+                        :reach +rail-thread--reach+)
+           (loop for strip in bars
+                 for blocks = (rail--bar-blocks state snapshot strip)
+                 for tag = (format nil "-~A" (string-upcase (symbol-name (getf strip :place))))
+                 when blocks
+                   append
+                   (list
+                    (shell-surface
+                     (intern (format nil "RAIL-THREAD-BAR~A" tag) :keyword)
+                     (ui :stack)
+                     :output (getf output :name)
+                     :anchors (list (getf strip :place))
+                     :width (rail--design (getf strip :width))
+                     :height (rail--design (getf strip :height))
+                     :margin 0
+                     :layer (getf context :layer) :click-through t
+                     :exclusive-zone (rail--design (getf strip :height))
+                     :background (list :shader (getf look :shader)
+                                       :data (rail-thread--bar-numbers context strip)
+                                       :clock (getf context :epoch)
+                                       :until (kit--until look context)))
+                    (shell-surface
+                     (intern (format nil "RAIL-THREAD-TYPE~A" tag) :keyword)
+                     (rail--web state snapshot strip blocks
+                                (or (rail--material :ink) (rail--ink)))
+                     :output (getf output :name)
+                     :anchors (list (getf strip :place))
+                     :width (rail--design (getf strip :width))
+                     :height (rail--design (getf strip :height))
+                     :margin 0
+                     :layer (getf context :layer) :background "#00000000"
+                     :click-through t :slide t))))))))
+
+
 
 (defparameter +rail-thread+
   (list :draw #'rail-thread--draw :settle +rail-thread--settle+
+        :strip-height +rail-thread--strip-height+
         :radius 14 :frame (list :edge 14 :title 0 :seam +rail-thread--width+)))
