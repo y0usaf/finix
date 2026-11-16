@@ -3853,11 +3853,11 @@
     "tern-ozette": {
       "flake": false,
       "locked": {
-        "lastModified": 1794867712,
-        "narHash": "sha256-FhO0EFf67i6guV60gWCIsx0vDQUeA6uN5rPfJbh1kZY=",
+        "lastModified": 1794868240,
+        "narHash": "sha256-e6EIK2Gcaz69rKBXHGJfOGWQnNHTF/43zZri/45QZYA=",
         "ref": "refs/heads/main",
-        "rev": "23e8dd17770f39b721abcd042375535a654cc333",
-        "revCount": 116,
+        "rev": "9c8703784cb2f4141a8cfb697ea4be9d5eb64d7c",
+        "revCount": 117,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-ozette"
       },
