@@ -1,0 +1,3 @@
+{
+  user.persist.directories = [".prime"];
+}
