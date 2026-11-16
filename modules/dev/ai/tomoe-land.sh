@@ -85,7 +85,7 @@ take_lease() {
 			fuser -v "$LOCK" 2>&1
 			grep ":$(stat -c '%i' "$LOCK") " /proc/locks 2>/dev/null
 		} >>"$ROOT/journal.log" 2>&1
-	) &
+	) 9>&- &
 	local watchdog=$!
 	local rc=0
 	flock "$mode" -w "$LEASEWAIT" 9 || rc=$?
