@@ -371,10 +371,10 @@
       description = "morph in liquid glass: the same slab, frames, gauges, motion and voice, but the slab and the focused frame refract, frost and tint what lies beneath them, with light caught along their rims; the material and its glass are +rail-glass+ in lisp/rail-glass.lisp.";
     }
     {
-      name = "fused";
-      shader = ./shaders/fused.glsl;
-      lisp = ./lisp/rail-fused.lisp;
-      description = "a pixel HUD cast in sand: a bevelled thirteen-art-pixel slab down the seam, its compartments recessed into the material with grooves between them and bolted to the focused card's frame by clamps; the focused card wears a double line whose top rules open round its name, every other card one light line with its name set into it, and both frames run into the slab. A focus switch turns the frame to sand -- the old one lets go from the rail outward, its grains falling and draining into the slab, the new one poured out of the slab cell by cell while its name types itself in. The gauges, the clock and bolo's voice are all grains in the slab's compartments, in morph's slate and cream. Drawn by one GPU shader that rests once the pour has settled and the voice has calmed.";
+      name = "glyph";
+      shader = ./shaders/glyph.glsl;
+      lisp = ./lisp/rail-glyph.lisp;
+      description = "a text mode: the seam is a column of box-drawing rules -- bolo's turn and its braille waterfall, the date, a clock built out of 3x5 blocks on a half-row grid, gauges as bars in sixths with a four-second sparkline under each, the network at the foot -- and the rail's rules run out into the square single-line frames round the cards it carries, so rail and windows are one drawing. The focused card's frame is the same line doubled in ink and its title row inverts, ink behind ground-coloured capitals. A focus change retypes rather than slides: two heads run out of the rail along the frame's perimeter and the line behind them doubles, old frame un-typing to a single line while the new title's letters type in one at a time. Bolo's voice is a dithered field of dots down the rail that fades away as the turn closes. One GPU shader draws it and rests once nothing moves; sizes and timings are +rail-glyph--cast+ and +rail-glyph--type+ in lisp/rail-glyph.lisp.";
     }
     {
       name = "sand";
@@ -389,10 +389,10 @@
       description = "the deck as a game HUD on four-pixel art pixels: a bevelled, notched nine-slice frame round every card with the focused one drawn in a warm sand bevel and a sky-blue selection cursor; the rail is a cabinet panel with a keyline, cut grooves, a two-channel VU tower of pips for bolo's voice that holds its peaks and lets them fall, and sixteen-pip gauges whose values run up like a score, with three clamps bolting the panel to the focused card. Focus moves as a sprite: the corner brackets pull in and go white, fly to the new card over two stepped eased frames leaving a dithered afterimage and a dashed smear, land white with a spark at each corner and settle in the accent, all at twenty frames a second. Drawn on the GPU on one art grid; the art is +rail-sprite--cast+ with its two palettes, the panel's rhythm +rail-sprite--panel+ and the sprite's cadence +rail-sprite--switch+ in lisp/rail-sprite.lisp, and every surface rests once its motion has settled.";
     }
     {
-      name = "glyph";
-      shader = ./shaders/glyph.glsl;
-      lisp = ./lisp/rail-glyph.lisp;
-      description = "a text mode: the seam is a column of box-drawing rules -- bolo's turn and its braille waterfall, the date, a clock built out of 3x5 blocks on a half-row grid, gauges as bars in sixths with a four-second sparkline under each, the network at the foot -- and the rail's rules run out into the square single-line frames round the cards it carries, so rail and windows are one drawing. The focused card's frame is the same line doubled in ink and its title row inverts, ink behind ground-coloured capitals. A focus change retypes rather than slides: two heads run out of the rail along the frame's perimeter and the line behind them doubles, old frame un-typing to a single line while the new title's letters type in one at a time. Bolo's voice is a dithered field of dots down the rail that fades away as the turn closes. One GPU shader draws it and rests once nothing moves; sizes and timings are +rail-glyph--cast+ and +rail-glyph--type+ in lisp/rail-glyph.lisp.";
+      name = "fused";
+      shader = ./shaders/fused.glsl;
+      lisp = ./lisp/rail-fused.lisp;
+      description = "a pixel HUD cast in sand: a bevelled thirteen-art-pixel slab down the seam, its compartments recessed into the material with grooves between them and bolted to the focused card's frame by clamps; the focused card wears a double line whose top rules open round its name, every other card one light line with its name set into it, and both frames run into the slab. A focus switch turns the frame to sand -- the old one lets go from the rail outward, its grains falling and draining into the slab, the new one poured out of the slab cell by cell while its name types itself in. The gauges, the clock and bolo's voice are all grains in the slab's compartments, in morph's slate and cream. Drawn by one GPU shader that rests once the pour has settled and the voice has calmed.";
     }
   ];
 
