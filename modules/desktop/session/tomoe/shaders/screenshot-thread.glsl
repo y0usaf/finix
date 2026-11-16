@@ -1,7 +1,7 @@
 float D(int i) { return iData[i >> 2][i & 3]; }
 vec4 D4(int i) { return vec4(D(i), D(i + 1), D(i + 2), D(i + 3)); }
 
-const int VEIL = 0, RIM = 4, SWELL = 5, PACE = 6, BEAD_HX = 7, BEAD_HY = 8, DOT = 9, DOT_SWELL = 10;
+const int VEIL = 0, RIM = 4, SWELL = 5, PACE = 6, BEAD_HX = 7, BEAD_HY = 8, DOT = 9, DOT_SWELL = 10, INK = 11;
 
 vec3 under(vec2 q) { return beneath(q).rgb; }
 
@@ -65,14 +65,13 @@ float field(vec2 p) {
     return smin(ring, bead, 6.0);
 }
 
-void mainImage(out vec4 color, in vec2 p) {
+vec4 thread_selector(vec2 p) {
     vec4 live = iSelection[0], sprung = iSelection[1], speed = iSelection[2];
     bool selected = iSelection[3].x > 0.5;
     vec4 veil = D4(VEIL);
     vec4 dim = vec4(veil.rgb * veil.a, veil.a);
     if (!selected) {
-        color = dim;
-        return;
+        return dim;
     }
     g_lo = min(live.xy, live.zw);
     g_hi = max(live.xy, live.zw);
@@ -93,8 +92,7 @@ void mainImage(out vec4 color, in vec2 p) {
 
     float f = field(p);
     if (f > 12.0) {
-        color = base;
-        return;
+        return base;
     }
     vec2 slant = vec2(field(p + vec2(1.0, 0.0)) - f, field(p + vec2(0.0, 1.0)) - f);
     vec2 dir = slant / (length(slant) + 1e-5);
@@ -122,5 +120,14 @@ void mainImage(out vec4 color, in vec2 p) {
             c = mix(c, ink_of(g_bead), da);
         }
     }
-    color = vec4(c, a);
+    return vec4(c, a);
+}
+
+void mainImage(out vec4 color, in vec2 p) {
+    color = thread_selector(p);
+    vec4 ink = D4(INK);
+    float marks = marked(p) * ink.a;
+    if (marks > 0.0)
+        color = vec4(ink.rgb * marks + color.rgb * (1.0 - marks),
+                     marks + color.a * (1.0 - marks));
 }
