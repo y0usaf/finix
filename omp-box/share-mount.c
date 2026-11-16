@@ -49,7 +49,7 @@ static int own(int fd, uid_t uid, gid_t gid) {
 
 // One component under dirfd: reuse it if it is a directory, create it if it is not there, and refuse a symlink or a
 // file, which is what a bot plants in the hope that root follows it somewhere else.
-static int descend(int *dirfd, const char *component, uid_t uid, gid_t gid, int last) {
+static int descend(int *dirfd, const char *component, uid_t uid, gid_t gid, int leave) {
 	int next = as_dir(*dirfd, component, 0);
 	if (next < 0 && errno == ENOENT) {
 		if (mkdirat(*dirfd, component, 0755) < 0 && errno != EEXIST) return -1;
@@ -58,7 +58,7 @@ static int descend(int *dirfd, const char *component, uid_t uid, gid_t gid, int 
 	if (next < 0) return -1;
 	// The last component is the mount point itself, which the share covers, so it is left as it is: chowning it
 	// would reach into a mount a previous pass made there, which is not root's to hand out.
-	if (!last && own(next, uid, gid) < 0) {
+	if (!leave && own(next, uid, gid) < 0) {
 		// The folder exists and root could not chown it: refuse rather than mount into something it does not own.
 		close(next);
 		return -1;
@@ -125,7 +125,9 @@ static int apply(char **argv) {
 			fprintf(stderr, "omp-share-mount: %s is not a plain path\n", path);
 			return 1;
 		}
-		if (descend(&target, part, uid, gid, next_part == NULL) < 0) {
+		// Only a bot's own home-relative path gets its folders handed to the bot: an absolute path is a place the
+		// box's own user asked for (a grant like /tmp/omp-box-checkins), and nothing on the way belongs to them.
+		if (descend(&target, part, uid, gid, absolute || next_part == NULL) < 0) {
 			int e = errno;
 			close(target);
 			errno = e;
