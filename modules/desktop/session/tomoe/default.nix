@@ -3330,7 +3330,6 @@ in {
   config.user.files.".config/tomoe/init.lisp".text = lib.concatStringsSep "\n" [
     ''
       (in-package #:tomoe-user)
-      (require-tomoe "${inputPackages.tomoe.default}")
       (load-policy "desktop" :only '("commands" "drag" "screenshot-theme" "notification-popups" "config-error" "screencast" "screenshot-clipboard"))
       (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ lib.concatLists (lib.mapAttrsToList (key: value: [(keyword key) value]) settings)) cfg.displays)})
       (defparameter +policy-settings+ ${toLisp ({
