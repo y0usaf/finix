@@ -358,10 +358,17 @@
   # The rail's themes, each the whole look drawn by its own shader from the plist
   # +rail-<name>+ in its lisp file (morph's is in lisp/rail.lisp itself). halo,
   # thread, grain and lumen share lisp/rail-kit.lisp and shaders/kit.glsl, which
-  # goes in front of each of their shaders.
+  # goes in front of each of their shaders. The order is the look: a session
+  # starts on the first of these and a theme it cannot find falls back to it.
   kitShader = name: file: pkgs.writeText "${name}.glsl" (builtins.readFile ./shaders/kit.glsl + "\n" + builtins.readFile file);
 
   railThemes = [
+    {
+      name = "thread";
+      shader = kitShader "thread" ./shaders/thread.glsl;
+      lisp = ./lisp/rail-thread.lisp;
+      description = "liquid glass on a thin seam: a 34 px seam with one glass thread down its middle, 11 px wide and as tall as the cards, carrying the readings as beads on it -- the clock as hours over minutes, the date as day over month, CPU, memory, bolo's voice at the weld, the GPU and the VRAM -- each gauge bead holding a level of denser glass from its foot up to its load with a small label over its value, every bead's block centred on it. Three beads hang above the voice dot at the weld and three below, one every 118 px of the mock, so the run is symmetric about it: the time at the top, the date at the bottom, the gauges either side of the middle. The focused card wears a 5 px glass rim welded to the thread by a meniscus at the weld; every other card keeps what bar.rail.focus asks for -- a pair of hairlines, the dark one alone and dimmer, nothing at all, or nothing under a soft halo round the focused rim. One set of glass numbers serves dark and light: the backdrop frosted and refracted toward the rim, a light tint lift, a bright inner highlight on the lit side, a dark outer hairline all round, and each bead's type inked from the luminance of what lies behind it. A switch across the seam bends the thread after the new side on a damped spring while the old rim drains back into the thread and the new one fills out of the weld both ways; within a column the weld stays and the rims only drain and fill. bolo plucks the thread -- a travelling wave out from the weld, each stretch as loud as the voice was when it passed, the beads the nodes of the string, the voice bead swelling -- and the ripple runs round the focused rim, thickening and brightening it, dying away over the settle.";
+    }
     {
       name = "morph";
       shader = ./shaders/morph.glsl;
@@ -379,12 +386,6 @@
       shader = kitShader "halo" ./shaders/halo.glsl;
       lisp = ./lisp/rail-halo.lisp;
       description = "morph's cast material with no centre slab at all -- every card stands its own five-pixel frame of the same cast (dark #3A3E58, light #B2ACA2) round 14 px corners, bright on its inner lip, dark on its outer edge, with a soft contact shadow, and every card the cast does not cover keeps only a thin darker line; the deck's seam carries nothing. On the focused card's top edge, at the end nearer the seam, a capsule is welded to the frame by the same smooth minimum that welds morph's slab -- the crown -- holding the clock, the day and date and the four gauges in IBM Plex Mono, each gauge's load swelling the crown's rim by a welded bump with a filled hairline under its value. A focus change siphons: the old frame drains back into the crown from the far side, the crown hops to the new card on two springs -- stiff lead, loose trail, so it stretches into a long thin capsule mid-flight while its type waits -- and the new frame fills out of it both ways round the card; within a column the cards scroll under a crown that does not move, and a quick switch only pours. bolo's turn makes the whole focused frame the speech waveform: spikes off its outer edge whose reach at each point is the level the voice had when it ran that far round from the crown (+/- 3600 px/s) over a slower swell, the cast brightening toward its glow colour with the level and a small live trace on the crown's head, all dying away over the settle -- only the focused frame moves. With no card holding focus the readings stand at the top centre on a flat capsule of the material. One shader draws it over the output, painting only within 56 px of the cards; a still rail draws nothing.";
-    }
-    {
-      name = "thread";
-      shader = kitShader "thread" ./shaders/thread.glsl;
-      lisp = ./lisp/rail-thread.lisp;
-      description = "liquid glass on a thin seam: a 34 px seam with one glass thread down its middle, 11 px wide and as tall as the cards, carrying the readings as beads on it -- the clock as hours over minutes, the date as day over month, CPU, memory, bolo's voice at the weld, the GPU and the VRAM -- each gauge bead holding a level of denser glass from its foot up to its load with a small label above its value. The focused card wears a 5 px glass rim welded to the thread by a meniscus at the weld; every other card keeps only a dark and a light hairline. One set of glass numbers serves dark and light: the backdrop frosted and refracted toward the rim, a light tint lift, a bright inner highlight on the lit side, a dark outer hairline all round, and each bead's type inked from the luminance of what lies behind it. A switch across the seam bends the thread after the new side on a damped spring while the old rim drains back into the thread and the new one fills out of the weld both ways; within a column the weld stays and the rims only drain and fill. bolo plucks the thread -- a travelling wave out from the weld, each stretch as loud as the voice was when it passed, the beads the nodes of the string, the voice bead swelling -- and the ripple runs round the focused rim, thickening and brightening it, dying away over the settle.";
     }
     {
       name = "grain";
@@ -432,6 +433,7 @@
     throw = keyword bar.rail.throwMode;
     carry-max = bar.rail.carryMax;
     focus-border = bar.rail.focusBorder;
+    focus = keyword bar.rail.focus;
     theme-bind = binding ["alt" "shift"] "t" "rail-theme" "Next Rail Theme";
     sample = 1000;
     colors = lib.mapAttrs (_: keyword) {
@@ -3334,6 +3336,11 @@ in {
           type = lib.types.bool;
           default = false;
           description = "Also keep Tomoe's own borders and square corners on carried windows. Off, the cast frame is the only focus indicator.";
+        };
+        focus = lib.mkOption {
+          type = lib.types.enum ["hairline" "dim" "recede" "glow"];
+          default = "glow";
+          description = "What a card without focus keeps round it in thread: hairline is the mock's pair of lines, a dark one and a light one just outside it; dim keeps the dark one at half strength; recede keeps nothing, so the focused card's glass rim is the only frame on the screen; glow keeps nothing and adds a soft halo round the focused card's rim. Recede and glow make focus read from across the room; hairline is the busiest.";
         };
       };
     };

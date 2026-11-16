@@ -26,13 +26,18 @@
 (defparameter +rail-thread--width+ 34)
 (defparameter +rail-thread--settle+ 0.8d0)
 
-;; Each bead in the mock's 1412 px card: its kind, the edge it hangs from, how
-;; far from that edge its centre sits, and half its height. The order is the
+;; Each bead in the mock's 1412 px card: its kind, how far above the weld its
+;; centre hangs (negative below it), and half its height. The order is the
 ;; shader's -- clock, date, cpu, memory, voice, gpu, vram -- and the voice bead
 ;; sits on the weld itself.
+;;
+;; Three beads hang above the voice dot and three below, a bead every 118 px of
+;; the mock, so the run is symmetric about it: the time at the top, the date at
+;; the bottom, the four gauges either side of the middle where the mock has them.
+;; The voice dot is the run's centre, not its fifth bead.
 (defparameter +rail-thread--beads+
-  '((:clock :top 78 40) (:date :top 176 30) (:cpu :top 436 50) (:mem :top 554 50)
-    (:voice :weld 0 30) (:gpu :weld 152 50) (:vram :weld 270 50)))
+  '((:clock -388 40) (:date 388 30) (:cpu -270 50) (:mem -152 50)
+    (:voice 0 30) (:gpu 152 50) (:vram 270 50)))
 
 (defun rail-thread--strip (context)
   "The strip the thread stands in: the deck's seam as it lays it out, or -- on an
@@ -53,18 +58,33 @@ cards' top and bottom, the weld's height, and each bead's centre and halves."
   (let* ((y0 (getf strip :y))
          (height (getf strip :height))
          (weld (+ y0 (floor height 2)))
-         (x (+ (getf strip :x) (floor (getf strip :width) 2))))
-    (labels ((px (offset) (round (* offset height) 1412))
-             (at (edge offset)
-               (if (eq edge :weld) (+ weld (px offset)) (+ y0 (px offset)))))
-      (list :x x :top y0 :bottom (+ y0 height) :weld weld
-            :beads (loop for (kind edge offset hy) in +rail-thread--beads+
-                         collect (list kind (at edge offset) (px hy) 14))))))
+         (x (+ (getf strip :x) (floor (getf strip :width) 2)))
+         (px (lambda (offset) (round (* offset height) 1412))))
+    (list :x x :top y0 :bottom (+ y0 height) :weld weld
+          :beads (loop for (kind offset hy) in +rail-thread--beads+
+                       collect (list kind (+ weld (funcall px offset)) (funcall px hy) 14)))))
 
-(defun rail-thread--numbers (layout)
+;;; What a card without focus keeps round it, in the order +RAIL--THREAD-STYLES+:
+;;; the hairline pair the mock draws, a dimmer dark line alone, nothing at all,
+;;; or nothing under a soft halo round the focused card's rim. The rail names
+;;; one in user.ui.tomoe.bar.rail.focus.
+(defparameter +rail--thread-styles+ '(:hairline :dim :recede :glow))
+
+(defun rail-thread--style ()
+  (or (position (getf +rail+ :focus) +rail--thread-styles+)
+      (position :glow +rail--thread-styles+)))
+
+(defun rail-thread--value-lengths (state)
+  "The four readings' values as character counts, so the shader centres each one
+by the width its characters really take."
+  (loop for reading in (kit--readings state)
+        collect (if reading (min 6 (length (getf reading :value))) 0)))
+
+(defun rail-thread--numbers (layout state)
   "The theme's own numbers for the shader, in the order thread.glsl reads them:
 the glass's shape and motion, then where the thread stands, then each bead's
-centre, half height and half width."
+centre, half height and half width, then the values' widths and the unfocused
+treatment."
   (append (list 5.5d0      ; half the thread's width
                 5d0        ; the focused card's rim
                 20d0       ; how far the rim and the thread weld
@@ -83,7 +103,9 @@ centre, half height and half width."
                 0.32d0     ; and how long it takes to fill
                 0.2d0      ; seconds the old rim drains in
                 (getf layout :x) (getf layout :top) (getf layout :bottom) (getf layout :weld))
-          (loop for (kind cy hy hw) in (getf layout :beads) append (list cy hy hw))))
+          (loop for (kind cy hy hw) in (getf layout :beads) append (list cy hy hw))
+          (mapcar (lambda (n) (coerce n 'double-float)) (rail-thread--value-lengths state))
+          (list (coerce (rail-thread--style) 'double-float))))
 
 ;;; The readout is set in the shader itself (shaders/thread.glsl), in the ink
 ;;; the backdrop behind each bead calls for, so the theme carries no type
@@ -121,7 +143,8 @@ read a zero reach as no reach.)"
   "THREAD: the glass thread with its beads, the readings in their glass and the
 focused card's rim, all in one shader over the output."
   (let ((theme (rail-thread--numbers
-                (rail-thread--layout (rail-thread--strip context)))))
+                (rail-thread--layout (rail-thread--strip context))
+                (getf context :state))))
     (if (getf context :windows)
         (kit--frames look context theme :reach 44)
         (rail-thread--whole look context theme))))

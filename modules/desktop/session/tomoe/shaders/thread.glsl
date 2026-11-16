@@ -31,7 +31,7 @@ const int T_CORNER = THEME + 4, T_VW = THEME + 5, T_AMP = THEME + 6, T_PLUCK = T
 const int T_PHZ = THEME + 8, T_ENV = THEME + 9, T_BEND = THEME + 10, T_BDEC = THEME + 11;
 const int T_BHZ = THEME + 12, T_BSIG = THEME + 13, T_FDELAY = THEME + 14, T_FDUR = THEME + 15;
 const int T_DDUR = THEME + 16, T_X = THEME + 17, T_TOP = THEME + 18, T_BOT = THEME + 19;
-const int T_WY = THEME + 20, T_BEADS = THEME + 21;
+const int T_WY = THEME + 20, T_BEADS = THEME + 21, T_VLEN = THEME + 42, T_FSTYLE = THEME + 46;
 
 const int NBEADS = 7;
 const int B_CLOCK = 0, B_DATE = 1, B_CPU = 2, B_MEM = 3, VOICE_BEAD = 4, B_GPU = 5, B_VRAM = 6;
@@ -198,8 +198,11 @@ vec3 ink_of(vec2 c) {
     return lum > 0.5 ? vec3(0.094, 0.094, 0.110) : vec3(0.957, 0.949, 0.925);
 }
 
-// the readings set in the beads' glass: the clock's hours over its minutes, the
-// day over the month, each gauge its label over its value
+// The readings set in the beads' glass: the clock's hours over its minutes, the
+// day over its month, each gauge its label over its value. Each block is centred
+// on its bead both ways -- the value as wide as the characters it really has, so
+// a four character reading like 8.2G centres like a three character one -- and
+// every bead's centre is the thread's.
 void set_type(vec2 p, inout vec3 c) {
     for (int i = 0; i < NBEADS; i++) {
         float cy = bead_cy(i);
@@ -208,14 +211,16 @@ void set_type(vec2 p, inout vec3 c) {
         bool on = false;
         float a = 1.0;
         if (i == B_CLOCK) {
+            // hours over minutes: 15 + 5 + 15 rows about the bead's middle
             float x0 = mid.x - 0.5 * text_span(2, 3.0);
-            on = char_hit(p, vec2(x0, cy - 31.0), vec2(3.0), K_CLOCK, 0, 2)
-              || char_hit(p, vec2(x0, cy - 2.0), vec2(3.0), K_CLOCK, 3, 2);
+            on = char_hit(p, vec2(x0, cy - 18.0), vec2(3.0), K_CLOCK, 0, 2)
+              || char_hit(p, vec2(x0, cy + 2.0), vec2(3.0), K_CLOCK, 3, 2);
         } else if (i == B_DATE) {
-            on = char_hit(p, vec2(mid.x - 0.5 * text_span(2, 3.0), cy - 24.0), vec2(3.0),
+            // the day over the month: 15 + 5 + 10 rows about the bead's middle
+            on = char_hit(p, vec2(mid.x - 0.5 * text_span(2, 3.0), cy - 15.0), vec2(3.0),
                           K_DATE, 0, 2);
             if (!on) {
-                on = char_hit(p, vec2(mid.x - 0.5 * text_span(3, 2.0), cy + 4.0), vec2(2.0),
+                on = char_hit(p, vec2(mid.x - 0.5 * text_span(3, 2.0), cy + 5.0), vec2(2.0),
                               K_DATE, 3, 3);
                 a = 0.76;
             }
@@ -223,11 +228,14 @@ void set_type(vec2 p, inout vec3 c) {
             int k = i == B_CPU ? 0 : (i == B_MEM ? 1 : (i == B_GPU ? 2 : 3));
             if (gauge_pct(k) < 0.0) continue;
             int base = K_GAUGES + k * K_GAUGE;
-            float w = 0.5 * text_span(3, 2.0);
-            on = char_hit(p, vec2(mid.x - w, cy - bead_hy(i) + 6.0), vec2(2.0), base + 4, 0, 3);
+            int vlen = clamp(int(D(T_VLEN + k)), 1, 6);
+            // the label over the value: 10 + 5 + 15 rows about the bead's middle
+            on = char_hit(p, vec2(mid.x - 0.5 * text_span(3, 2.0), cy - 15.0), vec2(2.0),
+                          base + 4, 0, 3);
             a = 0.72;
             if (!on) {
-                on = char_hit(p, vec2(mid.x - w, cy - 8.0), vec2(2.0, 3.0), base + 2, 0, 3);
+                on = char_hit(p, vec2(mid.x - 0.5 * text_span(vlen, 3.0), cy), vec2(2.0, 3.0),
+                              base + 2, 0, vlen);
                 a = 1.0;
             }
         }
@@ -256,21 +264,35 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
             g_drain = 1.0 - pow(ease_out(g_dt / max(0.01, D(T_DDUR))), 1.7);
     }
 
-    // the hairline pair round every card the glass does not cover: a dark line
-    // just outside the corner, a light one just outside that, so a card reads on
-    // a light and on a dark wallpaper alike
+    // What a card without focus keeps, in the treatment the rail asks for: the
+    // hairline pair (a dark line just outside the corner and a light one just
+    // outside that, so a card reads on a light and on a dark wallpaper alike), a
+    // dimmer dark line alone, or -- receding, and under the glow that marks the
+    // focused card instead -- nothing at all.
+    int style = int(D(T_FSTYLE));
     float hdark = 0.0, hlight = 0.0;
-    for (int i = 0; i < 8; i++) {
-        if (!card_shown(i) || i == focus) continue;
-        if (i == old && g_drain > 0.0) continue;
-        float d = sd_rbox(p, card(i), D(T_CORNER));
-        if (d < -1.0 || d > 3.0) continue;
-        hdark = max(hdark, 0.30 * clamp(1.0 - abs(d - 0.5), 0.0, 1.0));
-        hlight = max(hlight, 0.16 * clamp(1.0 - abs(d - 1.6), 0.0, 1.0));
+    if (style < 2) {
+        float line = style == 0 ? 0.30 : 0.12;
+        for (int i = 0; i < 8; i++) {
+            if (!card_shown(i) || i == focus) continue;
+            if (i == old && g_drain > 0.0) continue;
+            float d = sd_rbox(p, card(i), D(T_CORNER));
+            if (d < -1.0 || d > 3.0) continue;
+            hdark = max(hdark, line * clamp(1.0 - abs(d - 0.5), 0.0, 1.0));
+            if (style == 0)
+                hlight = max(hlight, 0.16 * clamp(1.0 - abs(d - 1.6), 0.0, 1.0));
+        }
+    }
+    // the focused card's soft halo, only where the rail asks for one: a wide
+    // falloff outside its rim, in the ink that reads on what lies there
+    float glow = 0.0;
+    if (style == 3 && g_f) {
+        float drim = sd_rbox(p, g_fbox, D(T_CORNER)) - D(T_RIM);
+        if (drim > 0.0) glow = 0.45 * exp(-drim / 12.0);
     }
 
     float f = field(p);
-    if (f > 12.0 && hdark <= 0.0 && hlight <= 0.0) discard;
+    if (f > 12.0 && hdark <= 0.0 && hlight <= 0.0 && glow <= 0.0) discard;
 
     vec2 slant = vec2(field(p + vec2(1.0, 0.0)) - f, field(p + vec2(0.0, 1.0)) - f);
     vec2 dir = slant / (length(slant) + 1e-5);
@@ -290,6 +312,10 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     a = hdark + a * (1.0 - hdark);
     c = mix(c, vec3(1.0), hlight);
     a = hlight + a * (1.0 - hlight);
+    if (glow > 0.0) {
+        c = mix(c, ink_of(clamp(p, g_fbox.xy, g_fbox.zw)), glow);
+        a = glow + a * (1.0 - glow);
+    }
 
     float cov = clamp(0.5 - f, 0.0, 1.0);
     float sh = f > 0.0 ? 0.16 * pow(clamp(1.0 - f / 10.0, 0.0, 1.0), 2.0) : 0.0;
