@@ -19,8 +19,14 @@ inputs: let
   # to restore (2.9 GB RSS for 540 transcripts), and read a stream chunk of each one for roster
   # metadata and subagent costs; the eighth judges each transcript from its tail, reads a bounded
   # metadata window, and leaves cost hydration to the Agent Hub.
+  # The editor queues every key while a paste is in flight, and an image paste whose clipboard owner
+  # never closes its pipe never settled: `wl-paste` was killed at 2s and the native reader that took
+  # over has no deadline. The ninth answers no image after a `wl-paste` timeout and bounds the
+  # native read at 5s, so a stuck owner costs one paste, not the tab's input; while a native read
+  # holds the addon's clipboard lock, copies use OSC 52 alone instead of waiting on it from the
+  # JS thread.
   omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch];
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch ./dev/ai/omp/clipboard-paste-deadline.patch];
   });
   inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 

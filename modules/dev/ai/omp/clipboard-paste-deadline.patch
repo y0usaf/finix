@@ -1,0 +1,192 @@
+diff --git a/packages/coding-agent/src/utils/clipboard.ts b/packages/coding-agent/src/utils/clipboard.ts
+index 02c7e0a959..62b2b4cb4b 100644
+--- a/packages/coding-agent/src/utils/clipboard.ts
++++ b/packages/coding-agent/src/utils/clipboard.ts
+@@ -6,13 +6,33 @@ import {
+ } from "@oh-my-pi/pi-natives/clipboard";
+ import { isSshSession } from "@oh-my-pi/pi-tui/terminal-capabilities";
+ import { writeTerminalSequence } from "@oh-my-pi/pi-tui/terminal";
+-import { isWsl } from "@oh-my-pi/pi-utils";
++import { isWsl, withTimeout } from "@oh-my-pi/pi-utils";
+ import * as logger from "@oh-my-pi/pi-utils/logger";
+ import { SUPPORTED_IMAGE_MIME_TYPES } from "@oh-my-pi/pi-utils/mime";
+ import MAC_FILE_URL_SCRIPT from "./mac-file-urls.applescript" with { type: "text" };
+ 
+ type SpawnCaptureOptions = { input?: string; timeoutMs?: number; env?: Record<string, string | undefined> };
+ 
++/** A clipboard tool spawnCapture killed because it outlived its budget. */
++class SpawnTimeoutError extends Error {}
++
++/**
++ * How long the native image read may take. The read runs on a worker thread
++ * that cannot be cancelled, so a selection owner that never closes its pipe
++ * would otherwise keep the paste — and the editor input queued behind it —
++ * pending forever.
++ */
++const NATIVE_IMAGE_READ_TIMEOUT_MS = 5000;
++const NATIVE_IMAGE_READ_TIMEOUT_MESSAGE = `the native clipboard image read timed out after ${NATIVE_IMAGE_READ_TIMEOUT_MS}ms`;
++
++/**
++ * The native image read until it settles, deadline or not. It holds the addon's
++ * process-wide clipboard lock, and the native copy takes that lock on the JS
++ * thread, where waiting would also stop the deadline from ever firing; so no
++ * other native clipboard call runs until the read lets go.
++ */
++let nativeReadInFlight = false;
++
+ /**
+  * Run a subprocess and capture its stdout without blocking the event loop.
+  *
+@@ -52,7 +72,7 @@ async function spawnCapture(
+ 			options.encoding === "bytes" ? new Uint8Array(await response.arrayBuffer()) : await response.text();
+ 		await proc.exited;
+ 		if (timedOut) {
+-			throw new Error(`${cmd[0]} timed out after ${timeoutMs}ms`);
++			throw new SpawnTimeoutError(`${cmd[0]} timed out after ${timeoutMs}ms`);
+ 		}
+ 		if (proc.exitCode !== 0) {
+ 			throw new Error(`${cmd[0]} exited with code ${proc.exitCode}`);
+@@ -178,7 +198,9 @@ export async function copyToClipboard(text: string): Promise<void> {
+ 			}
+ 		}
+ 
+-		await nativeCopyToClipboard(text);
++		// A native read holds the lock this synchronous copy waits on; the OSC 52
++		// write above is the copy until that read finishes.
++		if (!nativeReadInFlight) await nativeCopyToClipboard(text);
+ 	} catch {
+ 		// Ignore — clipboard copy is best-effort
+ 	} finally {
+@@ -352,7 +374,15 @@ export async function readImageFromClipboard(): Promise<ClipboardImage | null> {
+ 				const data = await spawnCapture(["wl-paste", "--type", mimeType], { encoding: "bytes" });
+ 				if (data.byteLength > 0) return { data, mimeType };
+ 			}
+-		} catch {
++		} catch (error) {
++			// An owner that does not finish sending what it advertised stalls the native
++			// reader the same way, so a timeout is the answer: no image.
++			if (error instanceof SpawnTimeoutError) {
++				logger.warn("clipboard: the clipboard owner did not finish sending its image", {
++					error: String(error),
++				});
++				return null;
++			}
+ 			// Fall through when wl-clipboard is absent or no advertised image payload can be read.
+ 		}
+ 	}
+@@ -361,9 +391,21 @@ export async function readImageFromClipboard(): Promise<ClipboardImage | null> {
+ 		return null;
+ 	}
+ 
++	if (nativeReadInFlight) {
++		logger.warn("clipboard: an earlier native clipboard read has not finished; reporting no image");
++		return null;
++	}
++	nativeReadInFlight = true;
++	// Async so a synchronous throw from the addon settles `read` like any failure.
++	const read = (async () => nativeReadImageFromClipboard())();
++	const settle = () => {
++		nativeReadInFlight = false;
++	};
++	read.then(settle, settle);
+ 	try {
+-		return (await nativeReadImageFromClipboard()) ?? null;
++		return (await withTimeout(read, NATIVE_IMAGE_READ_TIMEOUT_MS, NATIVE_IMAGE_READ_TIMEOUT_MESSAGE)) ?? null;
+ 	} catch (error) {
++		// A read that outlives NATIVE_IMAGE_READ_TIMEOUT_MS is reported as no image too.
+ 		// Some selection owners make the native image read throw instead of
+ 		// reporting "no image" — e.g. an xclip-written text-only selection
+ 		// (arboard: "Unknown error ... incorrect type received from clipboard").
+diff --git a/packages/coding-agent/test/utils/clipboard.test.ts b/packages/coding-agent/test/utils/clipboard.test.ts
+index 00a84ffd5a..5ee7989b58 100644
+--- a/packages/coding-agent/test/utils/clipboard.test.ts
++++ b/packages/coding-agent/test/utils/clipboard.test.ts
+@@ -1,5 +1,6 @@
+ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
+ import {
++	copyToClipboard,
+ 	isClipboardTerminalLocal,
+ 	readImageFromClipboard,
+ 	readMacFileUrlsFromClipboard,
+@@ -230,6 +231,81 @@ describe("readImageFromClipboard dispatch", () => {
+ 		},
+ 	);
+ 
++	it("gives up on an owner that advertises an image and never finishes sending it", async () => {
++		// Regression: a selection owner that never closed its pipe hung `wl-paste` until the
++		// 2s timeout, and the fall-through to the native reader then waited forever, holding
++		// every key typed afterwards in the editor's paste queue.
++		setPlatform("linux");
++		process.env.WAYLAND_DISPLAY = "wayland-0";
++		process.env.DISPLAY = ":0";
++		vi.useFakeTimers();
++		const calls: SpawnCall[] = [];
++		vi.spyOn(Bun, "spawn").mockImplementation(((cmd: string[]) => {
++			calls.push({ cmd, options: {} as SpawnOptions });
++			if (cmd[1] === "--list-types") return fakeProcess("image/png\n");
++			let close = () => {};
++			const exited = new Promise<number>(resolve => {
++				close = () => resolve(143);
++			});
++			const stdout = new ReadableStream<Uint8Array>({
++				start(controller) {
++					controller.enqueue(Uint8Array.from([0x89, 0x50, 0x4e, 0x47]));
++					const shut = close;
++					close = () => {
++						controller.close();
++						shut();
++					};
++				},
++			});
++			return { pid: 2, stdout, stderr: streamOf(""), exitCode: 143, exited, kill: () => (close(), true) };
++		}) as unknown as typeof Bun.spawn);
++		const nativeSpy = vi.spyOn(native, "readImageFromClipboard");
++
++		const read = readImageFromClipboard();
++		for (let i = 0; i < 50; i++) await Promise.resolve();
++		vi.advanceTimersByTime(2000);
++
++		expect(await read).toBeNull();
++		expect(calls.map(call => call.cmd)).toEqual([
++			["wl-paste", "--list-types"],
++			["wl-paste", "--type", "image/png"],
++		]);
++		expect(nativeSpy).not.toHaveBeenCalled();
++		vi.useRealTimers();
++	});
++
++	it("gives up on a stuck native image read and keeps native clipboard calls off its lock", async () => {
++		// The timed-out read keeps holding the addon's clipboard lock, which the
++		// synchronous native copy waits on: until it settles, copies use OSC 52 only
++		// and pastes report no image instead of queueing behind it.
++		setPlatform("linux");
++		process.env.DISPLAY = ":0";
++		vi.useFakeTimers();
++		let finish = (_: null) => {};
++		const nativeRead = vi
++			.spyOn(native, "readImageFromClipboard")
++			.mockReturnValue(new Promise(resolve => (finish = resolve)));
++		const nativeCopy = vi.spyOn(native, "copyToClipboard").mockImplementation(() => {});
++
++		const read = readImageFromClipboard();
++		for (let i = 0; i < 10; i++) await Promise.resolve();
++		await copyToClipboard("while reading");
++		expect(nativeCopy).not.toHaveBeenCalled();
++		vi.advanceTimersByTime(5000);
++		expect(await read).toBeNull();
++		vi.useRealTimers();
++
++		await copyToClipboard("while stuck");
++		expect(nativeCopy).not.toHaveBeenCalled();
++		expect(await readImageFromClipboard()).toBeNull();
++		expect(nativeRead).toHaveBeenCalledTimes(1);
++
++		finish(null);
++		await Bun.sleep(0);
++		await copyToClipboard("after");
++		expect(nativeCopy).toHaveBeenCalledWith("after");
++	});
++
+ 	it("returns null on Termux without spawning anything", async () => {
+ 		setPlatform("linux");
+ 		process.env.TERMUX_VERSION = "0.118";
