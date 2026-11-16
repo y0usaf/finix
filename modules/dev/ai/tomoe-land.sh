@@ -356,7 +356,7 @@ run_smoke() {
 }
 
 pin_finix() {
-	local log=$1 tip=$2 rev short remote=github
+	local log=$1 tip=$2 rev short full locked src remote=github
 	[[ -d $FINIX/.git ]] || {
 		printf 'no finix checkout at %s\n' "$FINIX" >"$log"
 		return 1
@@ -369,12 +369,20 @@ pin_finix() {
 		printf '%s has an uncommitted flake.lock; not overwriting it\n' "$FINIX" >"$log"
 		return 1
 	fi
+	full=$(git -C "$REPO" rev-parse "$tip") || return 1
 	short=$(git -C "$REPO" rev-parse --short "$tip") || return 1
 	git -C "$FINIX" remote 2>/dev/null | grep -qx "$remote" || remote=origin
 	(
 		cd "$FINIX" || exit 1
 		git fetch --quiet "$remote" || exit 1
-		nix flake update tomoe || exit 1
+		src=$(jq -r '.nodes.tomoe.original | "\(.owner)/\(.repo)"' flake.lock) || exit 1
+		nix flake lock --override-input tomoe "github:$src/$full" || exit 1
+		locked=$(jq -r .nodes.tomoe.locked.rev flake.lock) || exit 1
+		[[ $locked == "$full" ]] || {
+			printf 'flake.lock pins %s, not %s; not committing\n' "$locked" "$full"
+			git checkout -- flake.lock
+			exit 1
+		}
 		git add flake.lock || exit 1
 		git -c user.name=tomoe-land -c user.email=tomoe-land@localhost commit --quiet \
 			-m "finix: pin tomoe $short" -- flake.lock || exit 1
