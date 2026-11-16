@@ -32,9 +32,10 @@
 ;;; it is read. The compositor reads the counters once a second; the rail
 ;;; samples them four times a second, so a sample lands within a quarter of a
 ;;; second of the read, and between samples each gauge eases toward the last one
-;;; on an exponential approach stepped sixty times a second, sweeping through the
-;;; values in between instead of jumping a whole second's load at once. A gauge
-;;; that has caught up with its sample stops the step.
+;;; on an exponential approach, sweeping through the values in between instead
+;;; of jumping a whole second's load at once. A step is taken only when a drawn
+;;; number would change -- every number on the way is drawn, and no update is
+;;; spent redrawing the same one -- and a gauge that draws its sample stops.
 ;;;
 ;;; A spring can only move a surface, so the hop is recomputed once per display
 ;;; refresh while it runs, and the voice at 60 Hz while bolo's turn moves it --
@@ -83,14 +84,13 @@
 (defparameter +rail--corner-steps+ 7)   ; points across a rounded end
 
 ;; The gauges: a reading is read once a second, so the number drawn between
-;; reads glides toward it -- an exponential approach stepped at the display's
-;; own beat, and nothing at all once it has arrived. Every number the glide
-;; follows is here.
+;; reads glides toward it -- an exponential approach whose next step is taken
+;; exactly when the number it draws would next change, never sooner than the
+;; display's own beat, and nothing at all once it draws the sample. Every number
+;; the glide follows is here.
 (defparameter +rail--glide+
-  (list :tick 16                        ; milliseconds between the display's steps
-        :tau 0.18d0                     ; seconds a reading takes to cover a change
-        :within '(:cpu 0.5 :memory 0.5 :memory-used 64    ; what each gauge
-                  :gpu 0.5 :vram 0.5 :vram-used 64)))     ; cannot show is arrived
+  (list :tick 16                        ; milliseconds a step waits at the least
+        :tau 0.18d0))                   ; seconds a reading takes to cover a change
 
 (defun rail--design (px)
   "PX of the design, in this output's logical units."
@@ -194,21 +194,47 @@ each, and the memory and the video memory in MiB."
                     0d0)
           :vram-used (or (getf gpu :used) 0))))
 
+(defun rail--glide-unit (key value)
+  "The step at which KEY's gauge draws VALUE differently: a whole percent, or for
+memory the whole GiB from ten up and a tenth below, as RAIL--DIGITS writes it."
+  (if (member key '(:memory-used :vram-used))
+      (if (>= (abs value) 10240) 1024d0 102.4d0)
+      1d0))
+
+(defun rail--ln (x)
+  "The natural logarithm of X > 0, which the policy language does not carry:
+square roots bring X near one, where the series for 2 atanh((X-1)/(X+1)) is
+already exact to a millionth in three terms."
+  (let ((halvings 0))
+    (loop while (or (> x 1.25d0) (< x 0.8d0))
+          do (setf x (sqrt x) halvings (1+ halvings)))
+    (let* ((y (/ (- x 1d0) (+ x 1d0))) (y2 (* y y)))
+      (* (expt 2 (1+ halvings)) y (+ 1d0 (/ y2 3d0) (/ (* y2 y2) 5d0) (/ (* y2 y2 y2) 7d0))))))
+
+(defun rail--glide-due (key here to)
+  "Seconds until the approach from HERE to TO next changes what KEY's gauge
+draws, or NIL when it already draws what TO does."
+  (let* ((unit (rail--glide-unit key here))
+         (drawn (round (/ here unit)))
+         (edge (* unit (if (> to here) (+ drawn 0.5d0) (- drawn 0.5d0)))))
+    (when (if (> to here) (< edge to) (> edge to))
+      (* (getf +rail--glide+ :tau) (rail--ln (/ (- here to) (- edge to)))))))
+
 (defun rail--glide (state now)
   "Step every gauge toward its last sample: an exponential approach over the time
-since the last step, landing exactly on a sample it can no longer show the
-difference to. Leaves whether anything is still moving in the state's
-:RAIL-GLIDE, so the rail only keeps ticking while a number is on its way."
+since the last step, landing on the sample once it draws the same. Leaves how
+long until a drawn number next changes in the state's :RAIL-DUE, NIL once none
+will, so the rail ticks only when there is a different number to draw."
   (let* ((targets (rail--meter-targets state))
          (shown (getf state :rail-meter))
          (last (getf state :rail-step))
-         (elapsed (and last (max 0d0 (min 0.25d0 (- now last)))))
-         (grip (if elapsed
-                   (- 1d0 (expt 2.718281828459045
-                                (- (/ elapsed (getf +rail--glide+ :tau)))))
-                   0d0))
-         (within (getf +rail--glide+ :within))
-         (moving nil))
+         ;; a glide that had stopped starts from where it stood, not from when
+         ;; the rail last happened to look
+         (elapsed (if (and last (getf state :rail-due))
+                      (max 0d0 (min 1d0 (- now last)))
+                      0d0))
+         (grip (- 1d0 (expt 2.718281828459045 (- (/ elapsed (getf +rail--glide+ :tau))))))
+         (due nil))
     (setf (getf state :rail-step) now)
     (if (null shown)
         ;; The first sample is drawn as it is: a gauge counts up to nothing.
@@ -216,13 +242,14 @@ difference to. Leaves whether anything is still moving in the state's
         (dolist (key '(:cpu :memory :memory-used :gpu :vram :vram-used))
           (let* ((to (coerce (getf targets key) 'double-float))
                  (here (coerce (getf shown key to) 'double-float))
-                 (eased (+ here (* grip (- to here)))))
-            (if (<= (abs (- to eased)) (or (getf within key) 0.5))
-                (setf (getf shown key) to)
+                 (eased (+ here (* grip (- to here))))
+                 (next (rail--glide-due key eased to)))
+            (if next
                 (setf (getf shown key) eased
-                      moving t)))))
+                      due (if due (min due next) next))
+                (setf (getf shown key) to)))))
     (setf (getf state :rail-meter) shown
-          (getf state :rail-glide) moving)))
+          (getf state :rail-due) due)))
 
 (defun rail--gauge (label percent detail hot ground)
   (let* ((percent (max 0 (min 100 (round (or percent 0)))))
@@ -669,7 +696,7 @@ is beside it."
                                       :bolo-since nil :bolo-history nil :bolo-fade nil
                                       :rail-side nil :rail-edges nil :rail-hop nil
                                       :rail-focus nil :rail-box nil
-                                      :rail-meter nil :rail-step nil :rail-glide nil))
+                                      :rail-meter nil :rail-step nil :rail-due nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
     (cassette--bolo-watch state event))
@@ -763,8 +790,9 @@ is beside it."
                       ;; focus and tiling with it.
                       (let ((beat (cond (hop :refresh)
                                         (voicing 16)
-                                        ((getf state :rail-glide)
-                                         (getf +rail--glide+ :tick)))))
+                                        ((getf state :rail-due)
+                                         (max (getf +rail--glide+ :tick)
+                                              (ceiling (* 1000 (getf state :rail-due))))))))
                         (when beat (list (interval :hop beat))))
                       (cassette--bolo-watches)
                       (when (and output tray)
