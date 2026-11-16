@@ -26,8 +26,8 @@ float D(int i) { return iData[i >> 2][i & 3]; }
 vec3 D3(int i) { return vec3(D(i), D(i + 1), D(i + 2)); }
 
 const int ORIGIN = 1, SKIP = 3, FRAME_C = 5, LINE_C = 8, DUST_C = 11, GLINT_C = 17;
-const int SETTLE = 20, VTOP = 21, GRAV = 22, ON = 23, TSW = 24;
-const int BLOCK = 25;
+const int SETTLE = 20, VTOP = 21, GRAV = 22, ON = 23, TSW = 24, GAP = 25;
+const int BLOCK = 26;
 
 const int SX0 = 1, SX1 = 2, SH = 3, GROOVE = 4;
 const int MAT = 5, MAT_HI = 8, MAT_LO = 11, SHADOW = 14, DEEP = 17, GROOVE_C = 20;
@@ -56,29 +56,19 @@ vec4 card(int i) {
 
 bool shown(int i) { return i >= 0 && i < iWindowCount && iWindow[i].z > 0.0; }
 
-float frame_band(vec2 p, vec4 b, float s, bool dbl, float g0, float g1) {
-    float lo = (s < 0.0) ? 12.0 : 8.0;
-    float ro = (s < 0.0) ? 8.0 : 12.0;
+bool ring(vec2 p, vec4 b, float o, bool gap) {
+    float u = D(GAP);
+    bool sides = inr(p, b.x - o - u, b.y - o - u, b.x - o, b.w + o + u)
+        || inr(p, b.z + o, b.y - o - u, b.z + o + u, b.w + o + u)
+        || inr(p, b.x - o - u, b.w + o, b.z + o + u, b.w + o + u);
+    return sides || (!gap && inr(p, b.x - o - u, b.y - o - u, b.z + o + u, b.y - o));
+}
+
+float frame_band(vec2 p, vec4 b, bool dbl, float g0, float g1) {
+    float u = D(GAP);
     bool gap = p.x > g0 && p.x < g1;
-    float c = 0.0;
-    if (dbl) {
-        c = max(c, inr(p, b.x - 8.0, b.y - 12.0, b.x - 4.0, b.w + 4.0) ? 1.0 : 0.0);
-        c = max(c, inr(p, b.z + 4.0, b.y - 12.0, b.z + 8.0, b.w + 4.0) ? 1.0 : 0.0);
-        c = max(c, inr(p, b.x - 8.0, b.w, b.z + 8.0, b.w + 4.0) ? 1.0 : 0.0);
-        c = max(c, inr(p, b.x - lo - 4.0, b.y - 20.0, b.x - lo, b.w + 12.0) ? 1.0 : 0.0);
-        c = max(c, inr(p, b.z + ro, b.y - 20.0, b.z + ro + 4.0, b.w + 12.0) ? 1.0 : 0.0);
-        c = max(c, inr(p, b.x - lo - 4.0, b.w + 8.0, b.z + ro + 4.0, b.w + 12.0) ? 1.0 : 0.0);
-        if (!gap) {
-            c = max(c, inr(p, b.x - 8.0, b.y - 12.0, b.z + 8.0, b.y - 8.0) ? 1.0 : 0.0);
-            c = max(c, inr(p, b.x - lo - 4.0, b.y - 20.0, b.z + ro + 4.0, b.y - 16.0) ? 1.0 : 0.0);
-        }
-    } else {
-        c = max(c, inr(p, b.x - lo - 4.0, b.y - 20.0, b.x - lo, b.w + 8.0) ? 1.0 : 0.0);
-        c = max(c, inr(p, b.z + ro, b.y - 20.0, b.z + ro + 4.0, b.w + 8.0) ? 1.0 : 0.0);
-        c = max(c, inr(p, b.x - lo - 4.0, b.w + 4.0, b.z + ro + 4.0, b.w + 8.0) ? 1.0 : 0.0);
-        if (!gap) c = max(c, inr(p, b.x - lo - 4.0, b.y - 20.0, b.z + ro + 4.0, b.y - 16.0) ? 1.0 : 0.0);
-    }
-    return c;
+    if (dbl) return (ring(p, b, u, gap) || ring(p, b, 3.0 * u, gap)) ? 1.0 : 0.0;
+    return ring(p, b, 2.0 * u, gap) ? 1.0 : 0.0;
 }
 
 float arrival(vec2 p, vec4 b, float s, float hh) {
@@ -114,14 +104,15 @@ void frames(out vec4 color, in vec2 fragCoord) {
         float tx = D(BLOCK + i * 8 + 4);
         float prog = D(BLOCK + i * 8 + 5);
         if (p.x < b.x - 40.0 || p.x > b.z + 40.0 || p.y < b.y - 48.0 || p.y > b.w + 40.0) continue;
-        float g0 = tx - 8.0;
-        float g1 = tx + 12.0 * chars * prog + 8.0;
+        float adv = D(BLOCK + i * 8 + 6), fp = D(BLOCK + i * 8 + 7);
+        float g0 = tx - 2.0 * D(GAP);
+        float g1 = tx + adv * chars * prog - fp + 2.0 * D(GAP);
         if (chars < 0.5) { g0 = 1.0; g1 = 0.0; }
         if (was && live) {
             float hh = h2(floor((p - b.xy) / 4.0) + 17.0);
             float rel = release_time(p, b, s, hh);
             if (dt < rel) {
-                if (frame_band(p, b, s, true, g0, g1) > 0.5) { c = frameC; a = 1.0; }
+                if (frame_band(p, b, true, g0, g1) > 0.5) { c = frameC; a = 1.0; }
             } else {
                 vec2 src = p;
                 for (int k = 0; k < 2; k++) {
@@ -129,7 +120,7 @@ void frames(out vec4 color, in vec2 fragCoord) {
                     src.y = p.y - 0.5 * D(GRAV) * pow(max(dt - rs, 0.0), 2.0);
                 }
                 float rs = release_time(src, b, s, hh);
-                if (dt > rs && frame_band(src, b, s, true, g0, g1) > 0.5) {
+                if (dt > rs && frame_band(src, b, true, g0, g1) > 0.5) {
                     vec2 cell = floor(src / 4.0);
                     if (h2(cell + 23.0) < 0.62) {
                         c = h2(cell + 29.0) < 0.5 ? dust : dust2;
@@ -144,7 +135,7 @@ void frames(out vec4 color, in vec2 fragCoord) {
             vec2 cc = b.xy + (cell + 0.5) * 4.0;
             float hh = h2(cell + 7.0);
             float arr = arrival(cc, b, s, hh);
-            if (frame_band(p, b, s, true, g0, g1) > 0.5) {
+            if (frame_band(p, b, true, g0, g1) > 0.5) {
                 if (dt >= arr) {
                     c = frameC;
                     if (dt - arr < 0.035 && hh > 0.35) c = glint;
@@ -156,7 +147,7 @@ void frames(out vec4 color, in vec2 fragCoord) {
             }
             continue;
         }
-        if (frame_band(p, b, s, focus, g0, g1) > 0.5) {
+        if (frame_band(p, b, focus, g0, g1) > 0.5) {
             c = focus ? frameC : lineC;
             a = 1.0;
         }
@@ -212,7 +203,7 @@ void slab(out vec4 color, in vec2 fragCoord) {
     vec3 deep = D3(DEEP), grooveC = D3(GROOVE_C), frameC = D3(FRAME_S), glint = D3(GLINT_S);
     vec3 c = vec3(0.0);
     float a = 0.0;
-    if (inr(p, x0 + 4.0, 4.0, x1 + 4.0, height + 4.0)) { c = shadow; a = 1.0; }
+    if (inr(p, x0 + 4.0, height, x1, height + 4.0)) { c = shadow; a = 1.0; }
     if (inr(p, x0, 0.0, x1, height)) {
         c = mat;
         a = 1.0;

@@ -28,7 +28,7 @@
 ;;; reading changes, so a still rail costs nothing.
 
 (defparameter +rail-fused--cast+
-  (list :edge 20 :title 28 :slab 52 :inset 4 :groove 4 :pitch 196 :pitch-min 120
+  (list :edge 20 :title 28 :gap 4 :name 16 :slab 52 :inset 4 :groove 4 :pitch 196 :pitch-min 120
         :dark (list :mat "#3A3E58" :mat-hi "#545978" :mat-lo "#2A2D42" :shadow "#06060E"
                     :deep "#1C1E2C" :groove "#222434" :frame "#70769C" :line "#40435C"
                     :ink "#ECE7DC" :dim "#969288" :name "#84817A" :glint "#FFFDF4"
@@ -69,7 +69,7 @@
   "The name shown on ID's frame, cut to the room its title row has."
   (let* ((entry (find id carried :key (lambda (item) (getf item :id))))
          (box (and entry (getf entry :box)))
-         (room (if box (max 0 (floor (- (getf box :width) 28) 12)) 0))
+         (room (if box (max 0 (floor (- (getf box :width) 28) (/ (rail--cast :name) 2))) 0))
          (name (rail-fused--title id titles)))
     (subseq name 0 (min (length name) room))))
 
@@ -87,7 +87,7 @@
           (length text)
           (if entry (+ (getf (getf entry :box) :x) 16) 0)
           (if (and (eql id focus) switch (not cut)) progress 1d0)
-          0 0)))
+          (/ (rail--cast :name) 2) (/ (rail--cast :name) 8))))
 
 (defun rail-fused--frames-data (context)
   (destructuring-bind (&key snapshot epoch seam output carried key switch windows cut
@@ -111,7 +111,8 @@
               (rail--rgb (rail-fused--c :glint))
               (list (getf motion :settle) (getf motion :vtop) (getf motion :gravity)
                     on
-                    (if switch (- (getf switch :at) epoch) -1d6))
+                    (if switch (- (getf switch :at) epoch) -1d6)
+                    (rail--cast :gap))
               (loop for id in windows
                     append (rail-fused--window-block id carried titles focus old
                                                      switch cut progress))))))
@@ -343,19 +344,25 @@
               (let* ((text (rail-fused--title-text id carried titles))
                      (room (max 1 (- (getf box :width) 16)))
                      (writing (and (eql id focus) switch (not cut)))
-                     (shown (if writing (max 1 (* 12 (length text) progress))
-                                (* 12 (length text))))
+                     (size (rail--cast :name))
+                     (shown (* (/ size 2) (length text) (if writing progress 1)))
                      (colour (if (eql id focus) (rail-fused--c :frame)
                                  (rail-fused--c :name))))
                 (shell-surface
                  (intern (format nil "RAIL-TITLE-~D" id) :keyword)
-                 (ui :row :height (rail--design (rail--cast :title)) :align :center
-                     :children (list (ui :rect :width (rail--design 16))
-                                     (ui :text :text text :size (rail--design 24)
-                                         :line-height (rail--design 24)
-                                         :height (rail--design 24)
-                                         :width (rail--design shown)
-                                         :color colour :font (getf *rail--look* :font))))
+                 (ui :column :height (rail--design (rail--cast :title))
+                     :children (list (ui :rect :height (rail--design
+                                                         (- (rail--cast :title)
+                                                            (* 5/2 (rail--cast :gap))
+                                                            (* 3/8 size))))
+                                     (ui :row :height (rail--design size)
+                                         :children (list (ui :rect :width (rail--design 16))
+                                                         (ui :text :text text :size (rail--design size)
+                                                             :line-height (rail--design size)
+                                                             :height (rail--design size)
+                                                             :width (rail--design (max 1 shown))
+                                                             :color colour
+                                                             :font (getf *rail--look* :font))))))
                  :output (getf output :name) :anchors '(:top :left)
                  :width (rail--design room) :height (rail--design (rail--cast :title))
                  :margin (rail--surface-margin output (getf box :x)
