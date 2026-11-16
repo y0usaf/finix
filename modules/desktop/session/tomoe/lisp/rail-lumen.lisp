@@ -213,4 +213,6 @@ readings stand along each bar instead, from the shared block rects."
   (list :draw #'rail-lumen--draw :cast +rail-lumen--cast+ :settle 0.6d0
         :radius (round (getf +rail-lumen--shape+ :rad))
         :strip-height +rail-lumen--strip-height+
-        :frame (list :edge 20 :title 20 :seam 20)))
+        :frame (list :edge 20 :title 20 :seam 20)
+        :trail (list :cell 5d0 :life 0.22d0 :steps 3 :shape :dots
+                     :dark :on :light :on)))

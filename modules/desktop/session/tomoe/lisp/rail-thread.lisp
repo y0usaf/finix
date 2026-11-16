@@ -244,4 +244,6 @@ deck gives no seam, a thread along each bar with a glass cell per reading."
 (defparameter +rail-thread+
   (list :draw #'rail-thread--draw :settle +rail-thread--settle+
         :strip-height +rail-thread--strip-height+
-        :radius 14 :frame (list :edge 14 :title 0 :seam +rail-thread--width+)))
+        :radius 14 :frame (list :edge 14 :title 0 :seam +rail-thread--width+)
+        :trail (list :cell 4d0 :life 0.16d0 :steps 3 :shape :dots
+                     :dark :ink :light :ink)))

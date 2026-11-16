@@ -21,6 +21,8 @@
 
 (defparameter +rail-glass+
   (list :draw #'rail--morph-draw :font "IBM Plex Mono Medium" :strip-height 96
+        :trail (list :cell 5d0 :life 0.24d0 :steps 4 :shape :dots
+                     :dark :shine :light :shadow)
         :cast (list :frame 5 :line-width 1.5 :radius 14 :slab 50 :inset 22 :end 22 :weld 28
                     :squash 0.7 :swell 11
                     :dark (list* :material "#161925" +rail-glass--pane+)

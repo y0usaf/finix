@@ -346,4 +346,6 @@ along each bar."
 (defparameter +rail-sand+
   (list :draw #'rail-sand--draw :cast +rail-sand--cast+
         :strip-height +rail-sand--strip-height+
-        :frame (list :edge 12 :title 0)))
+        :frame (list :edge 12 :title 0)
+        :trail (list :cell 6d0 :life 0.6d0 :steps 6 :shape :cells
+                     :dark :glint :light :glint)))

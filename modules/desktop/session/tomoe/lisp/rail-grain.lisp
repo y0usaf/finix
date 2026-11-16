@@ -130,4 +130,6 @@ the deck gives no seam, a rule along each bar with the readings above it."
 (defparameter +rail-grain+
   (list :draw #'rail-grain--draw :cast +rail-grain--cast+ :settle 0.65d0
         :strip-height +rail-grain--strip-height+
-        :frame (list :edge 20 :title 12 :seam 20)))
+        :frame (list :edge 20 :title 12 :seam 20)
+        :trail (list :cell 4d0 :life 1d0 :steps 8 :shape :cells
+                     :dark :glint :light :ink)))

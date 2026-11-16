@@ -320,4 +320,6 @@ output the deck gives no seam, a crown along each bar."
   (list :draw #'rail-halo--draw :cast +rail-halo--cast+
         :font "IBM Plex Mono Medium" :settle +rail-halo--settle+ :radius 14
         :strip-height +rail-halo--strip-height+
-        :frame (list :edge 14 :title 30 :seam 20)))
+        :frame (list :edge 14 :title 30 :seam 20)
+        :trail (list :cell 9d0 :life 0.42d0 :steps 6 :shape :dots
+                     :dark :glow :light :glow)))

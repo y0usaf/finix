@@ -212,6 +212,20 @@ or counter when it has one, and the theme's published palette key otherwise."
 otherwise."
   (or (rail--material :ink) (rail--c :ink)))
 
+(defun rail--trail ()
+  "The pointer's trail: the theme's own cells, in the colour its cast gives them
+for this mode -- or its readings' ink -- and nothing at all when the config keeps
+trails off or the theme names none."
+  (let* ((trail (getf *rail--look* :trail))
+         (color (and trail (getf (getf (getf *rail--look* :cast) *rail--mode*)
+                                 (getf trail *rail--mode*)))))
+    (list :enabled (and trail t)
+          :cell (or (getf trail :cell) 9d0)
+          :life (or (getf trail :life) 0.35d0)
+          :steps (or (getf trail :steps) 4)
+          :shape (or (getf trail :shape) :cells)
+          :color (or color (rail--ink)))))
+
 (defun rail--value () (rail--ink))
 
 (defun rail--detail ()
@@ -1157,7 +1171,9 @@ CONTEXT."
 
 (defparameter +rail-morph+
   (list :draw #'rail--morph-draw :cast +rail--cast+ :font "IBM Plex Mono Medium"
-        :strip-height 96))
+        :strip-height 96
+        :trail (list :cell 7d0 :life 0.3d0 :steps 5 :shape :dots
+                     :dark :shine :light :shadow)))
 
 ;;; The rail
 
@@ -1241,6 +1257,8 @@ CONTEXT."
                             (define-command "rail-theme"
                               :description "Step the rail to its next theme.")
                             (apply #'bind-key (getf +rail+ :theme-bind)))
+                      (when (getf +rail+ :trail)
+                        (list (settings :cursor-trail (rail--trail))))
                       ;; Each theme animates on the GPU from the times the rail
                       ;; hands it; only the gauges need the rail itself to step,
                       ;; on its one timer, and only when a drawn number is due to

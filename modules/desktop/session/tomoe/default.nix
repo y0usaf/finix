@@ -451,6 +451,7 @@
       duration-ms = bar.rail.motion.durationMs;
       curve = keyword bar.rail.motion.curve;
     };
+    trail = bar.rail.trail && tomoeKnows "cursor-trail";
     theme-bind = binding ["alt" "shift"] "t" "rail-theme" "Next Rail Theme";
     sample = 1000;
     colors = lib.mapAttrs (_: keyword) {
@@ -3233,18 +3234,6 @@
 in {
   config.user.dev.prompts.host = ["`TOMOE_SOCKET`, `WAYLAND_DISPLAY` and `DBUS_SESSION_BUS_ADDRESS` in your environment point at the live tomoe session and its bus. Run private Tomoe instances, test clients and anything that injects input only through tomoe's `tools/isolate` (it refuses while those are set: `env -u DISPLAY -u WAYLAND_DISPLAY -u WAYLAND_SOCKET -u TOMOE_SOCKET tools/isolate DIR COMMAND`); never kernel fake input devices or `DISPLAY=:0`."];
 
-  config.user.ui.tomoe.extraConfig = ''
-    (define-extension "cursor-trail" (:reads () :state nil) (snapshot state event)
-      (declare (ignore snapshot state event))
-      (values nil
-              (list (shell-surface :cursor-trail (ui :stack)
-                                   :anchors '(:top :right :bottom :left)
-                                   :layer :overlay
-                                   :click-through t
-                                   :background '(:trail :cell 9 :life 0.35 :steps 4 :color #xb8e0ffff :idle 0.5)))
-              nil))
-  '';
-
   options.user.ui.tomoe = {
     layout = lib.mkOption {
       type = lib.types.enum ["deck" "sway"];
@@ -3339,6 +3328,11 @@ in {
           type = lib.types.ints.positive;
           default = 8;
           description = "Air between a window's border and the rail, part of the track the light falls across.";
+        };
+        trail = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Draw the pointer's own trail in the active theme's shape and colours: the cells its travel crossed over the last fraction of a second, fading behind it, and nothing at all while it rests. Each theme sets its own cell size, life, tiers, dots or cells and colour from its cast, in dark and light alike; off turns the trail off in every theme.";
         };
         throwMode = lib.mkOption {
           type = lib.types.enum ["slide" "cut"];
