@@ -82,7 +82,7 @@
     : >"$list.new"
     status=0
     apply() {
-      local name=$1 target=$2 flags=$3 how=rw home rel place
+      local name=$1 target=$2 flags=$3 how=rw home rel place want
       case "$target" in
         '~') target=$uhome ;;
         '~/'*) target="$uhome/''${target#'~/'}" ;;
@@ -110,13 +110,25 @@
       else
         home=/ rel=$target
       fi
+      case "$home:$rel" in
+        "/:.") want=/ ;;
+        "/:/*") want=$rel ;;
+        "/:"*) want="/$rel" ;;
+        ":*") want=$uhome ;;
+        *) want="$home/$rel" ;;
+      esac
       # The helper resolves every component without following a symlink and mounts on the fd it opened, so a bot
       # that replaces a folder with a link gets a refusal instead of root acting wherever the link points.
-      if ! place=$(${shareMount}/bin/omp-share-mount apply "$home" "$rel" "$uuid" "$ugid" "$how" "/run/omp-shares/$name"); then
-        status=1
+      if place=$(${shareMount}/bin/omp-share-mount apply "$home" "$rel" "$uuid" "$ugid" "$how" "/run/omp-shares/$name"); then
+        printf '%s\n' "$place" >>"$list.new"
         return
       fi
-      printf '%s\n' "$place" >>"$list.new"
+      status=1
+      # A pass that could not apply a grant keeps whatever is already mounted for it, so one refusal does not take
+      # a working folder away from the bot the moment it is looked at.
+      if grep -Fxq -- "$want" "$list" 2>/dev/null; then
+        printf '%s\n' "$want" >>"$list.new"
+      fi
     }
     if [ -r "$manifest" ]; then
       while IFS=$'\t' read -r line_user name target flags; do

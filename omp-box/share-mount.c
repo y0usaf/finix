@@ -38,21 +38,27 @@ static int as_dir(int dirfd, const char *path, int absolute) {
 }
 
 // Hands the user a folder it has to be able to write, through the fd that was opened without following anything.
+// A folder that already is the user's is left alone, which keeps every pass after the first from touching it.
 static int own(int fd, uid_t uid, gid_t gid) {
+	struct stat st;
+	if (fstat(fd, &st) < 0) return -1;
+	if (st.st_uid == uid && st.st_gid == gid) return 0;
 	if (fchownat(fd, "", uid, gid, AT_EMPTY_PATH) == 0) return 0;
 	return -1;
 }
 
 // One component under dirfd: reuse it if it is a directory, create it if it is not there, and refuse a symlink or a
 // file, which is what a bot plants in the hope that root follows it somewhere else.
-static int descend(int *dirfd, const char *component, uid_t uid, gid_t gid) {
+static int descend(int *dirfd, const char *component, uid_t uid, gid_t gid, int last) {
 	int next = as_dir(*dirfd, component, 0);
 	if (next < 0 && errno == ENOENT) {
 		if (mkdirat(*dirfd, component, 0755) < 0 && errno != EEXIST) return -1;
 		next = as_dir(*dirfd, component, 0);
 	}
 	if (next < 0) return -1;
-	if (own(next, uid, gid) < 0) {
+	// The last component is the mount point itself, which the share covers, so it is left as it is: chowning it
+	// would reach into a mount a previous pass made there, which is not root's to hand out.
+	if (!last && own(next, uid, gid) < 0) {
 		// The folder exists and root could not chown it: refuse rather than mount into something it does not own.
 		close(next);
 		return -1;
@@ -106,14 +112,20 @@ static int apply(char **argv) {
 	if (absolute) {
 		while (*walk == '/') walk++;
 	}
-	for (char *part = strtok_r(walk, "/", &save); part; part = strtok_r(NULL, "/", &save)) {
-		if (part[0] == 0 || strcmp(part, ".") == 0) continue;
+	// Every component is walked before anything is mounted, so the last one is known by looking ahead.
+	char *next_part = strtok_r(walk, "/", &save);
+	while (next_part) {
+		char *part = next_part;
+		while (part && (part[0] == 0 || strcmp(part, ".") == 0)) part = strtok_r(NULL, "/", &save);
+		if (!part) break;
+		next_part = strtok_r(NULL, "/", &save);
+		while (next_part && (next_part[0] == 0 || strcmp(next_part, ".") == 0)) next_part = strtok_r(NULL, "/", &save);
 		if (strcmp(part, "..") == 0) {
 			close(target);
 			fprintf(stderr, "omp-share-mount: %s is not a plain path\n", path);
 			return 1;
 		}
-		if (descend(&target, part, uid, gid) < 0) {
+		if (descend(&target, part, uid, gid, next_part == NULL) < 0) {
 			int e = errno;
 			close(target);
 			errno = e;
