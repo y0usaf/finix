@@ -756,10 +756,16 @@ is beside it."
       (values state
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t)))
-                      (when hop (list (interval :hop :refresh)))
-                      (when (or voicing (getf state :rail-glide))
-                        (list (interval :hop (if voicing 16
-                                                 (getf +rail--glide+ :tick)))))
+                      ;; One clock drives every motion the rail has, at the
+                      ;; fastest beat any of them needs: a second timer under
+                      ;; the same name is a duplicate effect, and a rejected
+                      ;; update throws away the whole transaction it was in --
+                      ;; focus and tiling with it.
+                      (let ((beat (cond (hop :refresh)
+                                        (voicing 16)
+                                        ((getf state :rail-glide)
+                                         (getf +rail--glide+ :tick)))))
+                        (when beat (list (interval :hop beat))))
                       (cassette--bolo-watches)
                       (when (and output tray)
                         (list (publish-state :shelf-tray-rect
