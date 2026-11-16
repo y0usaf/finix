@@ -3376,9 +3376,10 @@ in {
           focus-follows-mouse = true;
           pointer-follows-focus = true;
           mod = mkLispInline ":super";
-          # cursor-glass (enabled, delay-ms) returns with the build that reads it:
-          # DEW's tomoe commit adds the setting, and 5f0a460 refuses the whole
-          # session extension with "Unknown setting :CURSOR-GLASS".
+          cursor-glass = {
+            enabled = true;
+            delay-ms = 120;
+          };
         }
         // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;}
         // {
