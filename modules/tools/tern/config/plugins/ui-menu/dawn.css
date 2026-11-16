@@ -1,18 +1,4 @@
 	& {
-		--dawn-ink: light-dark(#17171b, #f2f2ef);
-		--dawn-ink-2: light-dark(#4b4b54, #c4c4cc);
-		--dawn-ink-3: light-dark(#666670, #a3a3ad);
-		--dawn-ink-4: light-dark(#8d8d96, #84848e);
-		--dawn-wash: light-dark(rgb(23 23 27 / 5%), rgb(242 242 239 / 6.5%));
-		--dawn-wash-2: light-dark(rgb(23 23 27 / 9%), rgb(242 242 239 / 11%));
-		--dawn-line: light-dark(rgb(23 23 27 / 9%), rgb(242 242 239 / 10%));
-		--dawn-tint: light-dark(#3b78e6, #5f9bff);
-		--dawn-you: rgb(from var(--dawn-tint) r g b / light-dark(14%, 24%));
-		--dawn-link: light-dark(#2365d4, #86b4ff);
-		--dawn-pick: light-dark(rgb(58 120 238 / 22%), rgb(98 156 255 / 34%));
-		--dawn-bad: light-dark(#cf3a33, #ff7a71);
-		--dawn-blur: blur(2em) saturate(150%);
-		--dawn-quick: 0.12s ease-out;
 		display: flex;
 		flex-direction: column;
 		box-sizing: border-box;
@@ -22,6 +8,7 @@
 		line-height: 1.5;
 		color: var(--dawn-ink);
 		-webkit-font-smoothing: antialiased;
+		--dawn-you: rgb(from var(--dawn-tint) r g b / light-dark(14%, 24%));
 	}
 	&:has([data-role^='omp.bot.'][data-role$='.red']) { --dawn-tint: #f2545f; }
 	&:has([data-role^='omp.bot.'][data-role$='.orange']) { --dawn-tint: #f58a42; }
@@ -690,6 +677,67 @@
 		opacity: 1;
 	}
 }
-section.tn-pane:has(.sf-chat-reader.sf-main) > .tn-body {
-	background: var(--tv-bg);
+:root:not(#dawn),
+html.tn-themed:not(#dawn) {
+	--dawn-page: light-dark(#fafaf8, #141418);
+	--dawn-side: light-dark(#f1f1ee, #19191e);
+	--dawn-card: light-dark(#ffffff, #1e1e23);
+	--dawn-ink: light-dark(#17171b, #f2f2ef);
+	--dawn-ink-2: light-dark(#4b4b54, #c4c4cc);
+	--dawn-ink-3: light-dark(#666670, #a3a3ad);
+	--dawn-ink-4: light-dark(#8d8d96, #84848e);
+	--dawn-wash: light-dark(rgb(23 23 27 / 5%), rgb(242 242 239 / 6.5%));
+	--dawn-wash-2: light-dark(rgb(23 23 27 / 9%), rgb(242 242 239 / 11%));
+	--dawn-line: light-dark(rgb(23 23 27 / 9%), rgb(242 242 239 / 10%));
+	--dawn-tint: light-dark(#3b78e6, #5f9bff);
+	--dawn-you: rgb(from var(--dawn-tint) r g b / light-dark(14%, 24%));
+	--dawn-link: light-dark(#2365d4, #86b4ff);
+	--dawn-pick: light-dark(rgb(58 120 238 / 22%), rgb(98 156 255 / 34%));
+	--dawn-bad: light-dark(#cf3a33, #ff7a71);
+	--dawn-blur: blur(2em) saturate(150%);
+	--dawn-quick: 0.12s ease-out;
+	--grok-page: var(--dawn-page);
+	--grok-chrome: var(--dawn-card);
+	--grok-side: var(--dawn-side);
+	--grok-ink: var(--dawn-ink);
+	--grok-muted: var(--dawn-ink-3);
+	--grok-line: var(--dawn-line);
+	--grok-soft: var(--dawn-wash);
+	--tn-page: var(--dawn-page) !important;
+	--t2: var(--dawn-ink-2);
+	--t3: var(--dawn-ink-3);
+	--t4: var(--dawn-ink-4);
+	--accent-ink: var(--dawn-link);
+	--pop-bg: var(--dawn-card);
+	--modal-bg: rgb(from var(--dawn-card) r g b / light-dark(86%, 90%));
+	--modal-dim: light-dark(rgb(20 20 24 / 24%), rgb(0 0 0 / 50%));
+}
+:root:not(#dawn):not(#dawn-b) :is(.cmdk, .mdl, .dlg-card, .pk-sheet, .tn-hd, .tn-signin-card, :where(.sf-overlay.modal) > .sf-ov-card, :where(.sf-prefs .pf-editor) > .sf-col) {
+	-webkit-backdrop-filter: var(--dawn-blur);
+	backdrop-filter: var(--dawn-blur);
+	box-shadow: 0 1.2em 3em -1em light-dark(rgb(0 0 0 / 18%), rgb(0 0 0 / 60%)), 0 0 0 1px var(--dawn-line);
+}
+:root:not(#dawn):not(#dawn-b) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-clist, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.'], .toast, .tn-bn-card, .tn-find) {
+	box-shadow: 0 0.6em 1.6em -0.5em light-dark(rgb(0 0 0 / 14%), rgb(0 0 0 / 55%)), 0 0 0 1px var(--dawn-line);
+}
+:root:not(#dawn):not(#dawn-b) .tv-thumb {
+	width: 5px;
+	background: rgb(from var(--dawn-ink) r g b / 22%);
+}
+:root:not(#dawn):not(#dawn-b) :is(.tv-bar:hover, .tv-bar.drag) .tv-thumb {
+	width: 7px;
+	background: rgb(from var(--dawn-ink) r g b / 38%);
+}
+:root:not(#dawn):not(#dawn-b) .sf-scroll > .sf-scroll-bar > .sf-scroll-thumb {
+	background: rgb(from var(--dawn-ink) r g b / 22%);
+}
+:root:not(#dawn):not(#dawn-b) #tabbar .tt.on {
+	background: var(--dawn-wash-2) !important;
+	box-shadow: none;
+}
+:root:not(#dawn):not(#dawn-b) #tabbar .tt.on :is(.nm, .tn-tx, .tn-num, .ico, svg) {
+	color: var(--dawn-ink) !important;
+}
+:root:not(#dawn):not(#dawn-b) #tabbar .tt.on :is(.sub, .mk.keys, .kbd) {
+	color: var(--dawn-ink-3) !important;
 }

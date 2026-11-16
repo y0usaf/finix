@@ -567,7 +567,7 @@ local LOOKS = {
 	{ label = "Mini", layers = { "mini" } },
 	{ label = "Ozette", layers = { "ozette", "ozette-motion", "ozette-cmus" } },
 	{ label = "YoRHa", layers = { "yorha" } },
-	{ label = "Dawn", layers = { "dawn" } },
+	{ label = "Dawn", layers = { "dawn", "grok" } },
 	{ label = "Grok", layers = { "grok" } },
 	{ label = "Departure", layers = { "departure", "bubbles" } },
 	{ label = "Automata", layers = { "automata", "bubbles" } },
