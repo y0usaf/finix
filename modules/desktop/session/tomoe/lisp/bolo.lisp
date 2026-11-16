@@ -77,19 +77,24 @@ an idle bar wakes no more than it did without it."
 (defun cassette--bolo-watch (state event)
   "Fold one watch event from bolo's state or level file into STATE. A turn opens
 the clock from the age the watch reports with the file and starts a fresh
-waveform, and level events scroll that waveform."
+waveform, level events scroll that waveform, and a turn closing keeps the
+waveform for the bar to calm it -- the rail draws that from :bolo-fade."
   (let ((content (cassette--bolo-trim (getf event :content))))
     (cond
       ((eq (getf event :name) :bolo-state)
        (when (member content '("idle" "listening" "recording" "transcribing" "done" "error")
                      :test #'equal)
-         ;; Only the edge into a turn starts it; recording -> listening within
-         ;; the same turn keeps the clock and the waveform.
-         (unless (and (cassette--bolo-turn-p (getf state :bolo-state))
-                      (cassette--bolo-turn-p content))
-           (setf (getf state :bolo-history) nil)
-           (when (cassette--bolo-turn-p content)
-             (setf (getf state :bolo-since) (cassette--bolo-since (getf event :age)))))
+         ;; Only the edges matter; recording -> listening within the same turn
+         ;; keeps the clock and the waveform.
+         (let ((was (cassette--bolo-turn-p (getf state :bolo-state)))
+               (turn (cassette--bolo-turn-p content)))
+           (cond
+             ((and turn (not was))
+              (setf (getf state :bolo-history) nil
+                    (getf state :bolo-fade) nil
+                    (getf state :bolo-since) (cassette--bolo-since (getf event :age))))
+             ((and was (not turn))
+              (setf (getf state :bolo-fade) (cassette--bolo-now)))))
          (setf (getf state :bolo-state) content)))
       ((eq (getf event :name) :bolo-level)
        (let ((level (ignore-errors (read-from-string content))))

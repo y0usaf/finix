@@ -14,9 +14,11 @@
 ;;; straight edges are welded by the meniscus their union makes -- the curve
 ;;; B(A) = (SQRT K - SQRT A)^2, where A is the height above the slab's end and K
 ;;; is how far the weld reaches up the frame -- so the slab appears to be poured
-;;; against the card rather than butted to it. While bolo has the turn the free
-;;; edge is a level history: a sine ripple whose amplitude follows a sliding
-;;; window of the last sixty-four samples, newest at the top.
+;;; against the card rather than butted to it. While bolo has the turn the slab
+;;; is the voice: its whole free edge is a level history -- a wave whose reach at
+;;; each row is the level the voice had when it passed, newest at the top -- with
+;;; a belly that leans out with the level being spoken, so the slab swells and
+;;; wobbles as it is talked through.
 ;;;
 ;;; When focus crosses the rail the slab hops: its leading edge leaps to the new
 ;;; card's frame on a stiff spring, its trailing edge lets go 25ms later on a
@@ -26,8 +28,8 @@
 ;;; the slab's middle.
 ;;;
 ;;; A spring can only move a surface, so the hop is recomputed once per display
-;;; refresh while it runs, and the ripple at 60 Hz while bolo's turn moves it --
-;;; a 4 Hz wave needs no more, and a repaint of the whole slab costs a few
+;;; refresh while it runs, and the voice at 60 Hz while bolo's turn moves it --
+;;; a 2.5 Hz wave needs no more, and a repaint of the whole slab costs a few
 ;;; milliseconds. At rest the slab's tree is the same tree every sample and the
 ;;; compositor reuses it: nothing ticks.
 
@@ -38,7 +40,24 @@
 (defparameter +rail--clock-inset+ 27)
 (defparameter +rail--clock-height+ 62)
 (defparameter +rail--air+ 32)
-(defparameter +rail--wave-rows+ 20)
+
+;; The voice: the slab is the meter, so what bolo says is drawn by the slab's own
+;; shape. While the turn is open the free edge is a wave over its whole height,
+;; its reach at each row the level the voice had when it passed (newest at the
+;; top), plus a belly that leans out with the level being spoken; the whole slab
+;; heaves with it. Every number the shape follows is here.
+(defparameter +rail--voice+
+  (list :rest 1d0        ; the free edge's wave in the quiet of a turn
+        :level 12d0      ; and how much more the voice adds to it
+        :swell 4.5d0     ; how far the belly leans toward the far card at full voice
+        :wave 0.022d0    ; radians per pixel down the slab
+        :hz 15d0         ; radians per second the wave travels
+        :bob 2.5d0       ; how far the whole slab heaves at full voice
+        :bob-hz 9d0      ; radians per second it heaves
+        :rise 0.25d0     ; seconds the shape takes to come up as a turn opens
+        :settle 0.8d0    ; seconds it takes to calm once the turn has closed
+        :fade 48         ; pixels the wave takes to reach full strength at each end
+        :step 6))        ; how finely the silhouette follows it
 
 (defparameter +rail--slab+ 50)          ; how much of the seam the slab fills
 (defparameter +rail--inset+ 32)         ; the slab stops this far short of the ends
@@ -50,11 +69,6 @@
 (defparameter +rail--hop-delay+ 0.025)  ; the trailing edge lets go this much later
 (defparameter +rail--hop-lead+ '(:stiffness 6084 :damping-ratio 0.72 :launch 60))
 (defparameter +rail--hop-trail+ '(:stiffness 7396 :damping-ratio 0.42 :launch 0))
-(defparameter +rail--ripple-top+ 60)    ; where the free edge starts to move
-(defparameter +rail--ripple-height+ 410) ; and how far down it goes
-(defparameter +rail--ripple-step+ 4)  ; how finely the silhouette follows it
-(defparameter +rail--ripple-wave+ 0.075) ; radians per pixel down the slab
-(defparameter +rail--ripple-hz+ 26)     ; how fast the wave travels
 (defparameter +rail--shadow+ 10)        ; the contact shadow's reach, in pixels
 (defparameter +rail--shadow-alpha+ (list 0.55d0 0.26d0)) ; dark, light
 (defparameter +rail--corner-steps+ 7)   ; points across a rounded end
@@ -90,16 +104,6 @@ dark and up in the light. It is the mode's own cast piece, not its opposite."
   (if (eq *rail--mode* :dark)
       (hud--mix (rail--paper) "#000000" 0.62)
       (hud--mix (rail--paper) "#FFFFFF" 0.70)))
-
-(defun rail--slab-fill ()
-  "The slab's own light: a hair lighter at the top than at the bottom, the way a
-cast face catches a room's light, as one two-stop gradient."
-  (let ((slab (rail--slab)))
-    (if (eq *rail--mode* :dark)
-        (list :linear 90 (list 0 (hud--mix slab "#FFFFFF" 0.035))
-              (list 1 (hud--mix slab "#000000" 0.035)))
-        (list :linear 90 (list 0 (hud--mix slab "#FFFFFF" 0.06))
-              (list 1 (hud--mix slab "#000000" 0.03))))))
 
 (defun rail--slab-shadow ()
   "The shadow the slab casts on whatever is beside it: black over the wallpaper
@@ -212,29 +216,14 @@ one reading a percentage cannot carry."
         :children (list (rail--text "NET" (rail--label) 22)
                         (rail--text (if online "ON" "OFF") (rail--value) 22)))))
 
-(defun rail--voice-row (level)
-  (let ((level (max 0 (min 1 (or level 0)))))
-    (if (> level 0.02)
-        (ui :rect :width (rail--design (max 2 (* 2 (round (* 18 (sqrt level))))))
-            :height (rail--design 2) :radius (rail--design 1) :background (rail--value))
-        (ui :column :align :center :padding '(1 0 0 0)
-            :children (list (ui :rect :width (rail--design 2) :height (rail--design 1)
-                                :radius (rail--design 1) :background (rail--label)))))))
-
 (defun rail--voice (state)
-  "Bolo's turn at the top of the web: the elapsed time and its own level
-scrolling down as a waveform."
+  "Bolo's turn at the top of the web: the elapsed time. The level itself is the
+slab's shape, not a reading."
   (let ((since (getf state :bolo-since)))
     (ui :column :align :center
-        :children
-        (list (rail--text (cassette--bolo-clock
-                           (and (realp since) (- (cassette--bolo-now) since)))
-                          (rail--value) 22)
-              (ui :rect :height (rail--design 4))
-              (ui :column :align :center :gap (rail--design 3)
-                  :children (loop for rest = (getf state :bolo-history) then (cdr rest)
-                                  repeat +rail--wave-rows+
-                                  collect (rail--voice-row (first rest))))))))
+        :children (list (rail--text (cassette--bolo-clock
+                                     (and (realp since) (- (cassette--bolo-now) since)))
+                                    (rail--value) 22)))))
 
 (defun rail--height (module state snapshot)
   "The design height of MODULE's block, or NIL when it has nothing to show."
@@ -326,7 +315,7 @@ the module list has no clock."
                  :background (rail--c :tray))))
       (when voice
         (to (+ base 36 (/ (or tray 0) *rail--scale*)))
-        (put 123 (rail--voice state)))
+        (put 22 (rail--voice state)))
       (dolist (entry (rail--places state snapshot (+ base (floor height 2))))
         (to (cdr entry))
         (put (rail--height (car entry) state snapshot)
@@ -380,42 +369,69 @@ on a looser one, so the slab bridges both frames and then snaps to width."
 it: full against the frame, gone once the edge has let go by two pixels."
   (if (< gap 2) (* k (- 1 (/ gap 2))) 0))
 
-(defun rail--ripple (y now levels)
-  "The free edge's offset at Y: a sine wave travelling down the slab, its
-amplitude following the level history newest at the top."
+(defun rail--voice-level (y top bottom levels)
+  "The level the history draws at Y: newest at the top, oldest at the bottom."
   (let ((rows (length levels)))
-    (if (or (zerop rows)
-            (< y +rail--ripple-top+)
-            (> y (+ +rail--ripple-top+ +rail--ripple-height+)))
-        0
-        (let* ((band (/ +rail--ripple-height+ rows))
-               (key (/ (- y +rail--ripple-top+) band))
-               (index (min (1- rows) (max 0 (floor key))))
-               (next (min (1- rows) (1+ index)))
-               (fraction (- key (floor key)))
-               (here (or (nth index levels) 0))
-               (there (or (nth next levels) 0))
-               (level (+ here (* fraction (- there here))))
-               (envelope (* (rail--smoothstep (/ (- y +rail--ripple-top+) 30d0))
-                            (rail--smoothstep (/ (- (+ +rail--ripple-top+ +rail--ripple-height+) y)
-                                                 60d0)))))
-          (* (+ 2.5d0 (* 7d0 level))
-             (sin (- (* y +rail--ripple-wave+) (* now +rail--ripple-hz+)))
-             envelope)))))
+    (when (plusp rows)
+      (let* ((span (max 1 (- bottom top)))
+             (key (* rows (/ (- (max top (min bottom y)) top) span)))
+             (index (min (1- rows) (max 0 (floor key))))
+             (next (min (1- rows) (1+ index)))
+             (fraction (- key (floor key)))
+             (here (or (nth index levels) 0))
+             (there (or (nth next levels) 0)))
+        (+ here (* fraction (- there here)))))))
+
+(defun rail--voice-envelope (voice since fade now)
+  "How much of the voice the slab draws: it comes up as a turn opens and dies
+away over :settle once the turn has closed, so the slab calms like water rather
+than snapping flat."
+  (cond
+    (voice (rail--smoothstep (/ (- now (or since now))
+                                (max 0.01d0 (getf +rail--voice+ :rise)))))
+    ((realp fade) (- 1d0 (rail--smoothstep (/ (- now fade)
+                                              (max 0.01d0 (getf +rail--voice+ :settle))))))
+    (t 0d0)))
+
+(defun rail--voice-bob (now levels amp)
+  "How far the whole slab heaves this instant, in pixels."
+  (if (null levels)
+      0d0
+      (* amp
+         (getf +rail--voice+ :bob)
+         (or (first levels) 0)
+         (sin (* now (getf +rail--voice+ :bob-hz))))))
+
+(defun rail--wobble (y top bottom now levels amp)
+  "How far the free edge stands out at Y: a wave travelling down the slab whose
+reach there is the level the voice had when it passed, and a belly that leans out
+with the level being spoken now. Both only ever swell outward -- the slab never
+draws in past the readings it carries -- and die into its rounded ends."
+  (let ((level (rail--voice-level y top bottom levels)))
+    (if (null level)
+        0d0
+        (let* ((fade (min (getf +rail--voice+ :fade) (max 1 (floor (- bottom top) 3))))
+               (edge (* (rail--smoothstep (/ (- y top) fade))
+                        (rail--smoothstep (/ (- bottom y) fade))))
+               (wave (* 0.5d0 (+ 1d0 (sin (- (* y (getf +rail--voice+ :wave))
+                                             (* now (getf +rail--voice+ :hz)))))))
+               (belly (sin (* 3.141592653589793d0
+                              (/ (- y top) (max 1 (- bottom top))))))
+               (reach (+ (* (+ (getf +rail--voice+ :rest)
+                               (* (getf +rail--voice+ :level) level))
+                            wave)
+                         (* (getf +rail--voice+ :swell)
+                            (or (first levels) 0)
+                            belly))))
+          (* amp edge reach)))))
 
 (defun rail--edge-rows (top bottom radius)
-  "The rows of a free edge: whole, but dense where the voice ripples it."
+  "The rows of a free edge, from its top corner to its bottom one."
   (let* ((low (+ top radius))
          (high (- bottom radius))
-         (first-row (max low +rail--ripple-top+))
-         (last-row (min high (+ +rail--ripple-top+ +rail--ripple-height+))))
+         (step (max 1 (getf +rail--voice+ :step))))
     (remove-duplicates
-     (append
-      (list low)
-      (when (> first-row low) (list (- first-row 1)))
-      (loop for y from first-row to last-row by +rail--ripple-step+ collect y)
-      (when (< last-row high) (list (1+ last-row)))
-      (list high))
+     (append (loop for y from low to high by step collect y) (list high))
      :test #'equal :from-end t)))
 
 (defun rail--weld-profile (k)
@@ -427,10 +443,10 @@ and a straight edge, from the apex on the frame to the slab's own end."
           for x = (* k (/ step steps))
           collect (cons x (expt (- root (sqrt x)) 2)))))
 
-(defun rail--slab-points (width edges top bottom welds ripple now levels)
+(defun rail--slab-points (width edges top bottom welds ripple now levels amp)
   "The slab's silhouette as x/y pairs: flush against the fused card's frame with
-the weld that joins them, the free edge rippling with the voice, its two ends
-rounded. WELDS is how far each side's weld reaches, 0 for a side that let go."
+the weld that joins them, the whole free edge wobbling with the voice, its two
+ends rounded. WELDS is how far each side's weld reaches, 0 for a side that let go."
   (let* ((xl (car edges))
          (xr (cdr edges))
          (kleft (car welds))
@@ -439,50 +455,50 @@ rounded. WELDS is how far each side's weld reaches, 0 for a side that let go."
          (quarter (* 0.5 1.5707963267948966))
          (rows (rail--edge-rows top bottom radius))
          (ripples (and ripple now levels (plusp (length levels))))
+         (bob (if ripples (rail--voice-bob now levels amp) 0))
          (points nil))
     (labels ((add (x y)
-               (push (list (coerce x 'double-float) (coerce y 'double-float)) points))
-             (free-right (y) (+ xr (if ripples (rail--ripple y now levels) 0)))
-             (free-left (y) (- xl (if ripples (rail--ripple y now levels) 0))))
+               (push (list (coerce x 'double-float) (coerce (+ y bob) 'double-float)) points))
+             (wobble (y) (if ripples (rail--wobble y top bottom now levels amp) 0))
+             (out-right (x y) (add (+ x (if (> kright 0.5) 0 (wobble y))) y))
+             (out-left (x y) (add (- x (if (> kleft 0.5) 0 (wobble y))) y)))
       ;; the left end of the top edge
       (if (> kleft 0.5)
           (dolist (step (rail--weld-profile kleft)) (add (car step) (- top (cdr step))))
-          (progn
-            (add xl (+ top radius))
-            (loop for step from 0 to +rail--corner-steps+
-                  for angle = (* quarter (/ step +rail--corner-steps+))
-                  do (add (- (+ xl radius) (* radius (cos angle)))
-                          (- (+ top radius) (* radius (sin angle)))))))
+          (loop for step from 0 to +rail--corner-steps+
+                for angle = (* quarter (/ step +rail--corner-steps+))
+                do (out-left (- (+ xl radius) (* radius (cos angle)))
+                             (- (+ top radius) (* radius (sin angle))))))
       ;; the right end of the top edge
       (if (> kright 0.5)
           (dolist (step (reverse (rail--weld-profile kright)))
             (add (- width (car step)) (- top (cdr step))))
           (loop for step from 0 to +rail--corner-steps+
                 for angle = (* quarter (/ step +rail--corner-steps+))
-                do (add (+ (- xr radius) (* radius (sin angle)))
-                        (- (+ top radius) (* radius (cos angle))))))
+                do (out-right (+ (- xr radius) (* radius (sin angle)))
+                              (- (+ top radius) (* radius (cos angle))))))
       ;; the right side
       (unless (> kright 0.5)
-        (dolist (y rows) (add (free-right y) y)))
+        (dolist (y rows) (out-right xr y)))
       ;; the right end of the bottom edge
       (if (> kright 0.5)
           (dolist (step (rail--weld-profile kright))
             (add (- width (car step)) (+ bottom (cdr step))))
           (loop for step from 0 to +rail--corner-steps+
                 for angle = (* quarter (/ step +rail--corner-steps+))
-                do (add (+ (- xr radius) (* radius (cos angle)))
-                        (+ (- bottom radius) (* radius (sin angle))))))
+                do (out-right (+ (- xr radius) (* radius (cos angle)))
+                              (+ (- bottom radius) (* radius (sin angle))))))
       ;; the left end of the bottom edge
       (if (> kleft 0.5)
           (dolist (step (reverse (rail--weld-profile kleft)))
             (add (car step) (+ bottom (cdr step))))
           (loop for step from 0 to +rail--corner-steps+
                 for angle = (* quarter (/ step +rail--corner-steps+))
-                do (add (- (+ xl radius) (* radius (sin angle)))
-                        (+ (- bottom radius) (* radius (cos angle))))))
+                do (out-left (- (+ xl radius) (* radius (sin angle)))
+                             (+ (- bottom radius) (* radius (cos angle))))))
       ;; the left side
       (unless (> kleft 0.5)
-        (dolist (y (reverse rows)) (add (free-left y) y)))
+        (dolist (y (reverse rows)) (out-left xl y)))
       (let ((kept nil) (last-x nil) (last-y nil))
         (dolist (point (nreverse points))
           (unless (and last-x (< (abs (- (car point) last-x)) 0.05)
@@ -570,18 +586,19 @@ two plates across the top and bottom of the focal frame."
 
 ;;; The rail
 
-(defun rail--slab-node (width height edges top bottom welds ripple now levels)
-  "One shape: the whole slab, welded to the fused card's frame, with its own
-light and the shadow it casts on what is beside it."
+(defun rail--slab-node (width height edges top bottom welds ripple now levels amp)
+  "One shape: the whole slab, welded to the fused card's frame, in one flat tone
+so no band or seam shows where the readings sit, with the shadow it casts on what
+is beside it."
   (ui :shape :width (rail--design width) :height (rail--design height)
-      :points (rail--slab-points width edges top bottom welds ripple now levels)
-      :background (rail--slab-fill)
+      :points (rail--slab-points width edges top bottom welds ripple now levels amp)
+      :background (rail--slab)
       :shadow (list (list 0 0 (rail--design +rail--shadow+) 0 (rail--slab-shadow)))))
 
 (define-extension "bar" (:reads (:system :services :data :outputs :layout :focus)
                          :state (list :cpu nil :memory nil :gpu nil
                                       :bolo-state nil :bolo-level 0
-                                      :bolo-since nil :bolo-history nil
+                                      :bolo-since nil :bolo-history nil :bolo-fade nil
                                       :rail-side nil :rail-edges nil :rail-hop nil
                                       :rail-focus nil :rail-box nil))
     (snapshot state event)
@@ -614,6 +631,10 @@ light and the shadow it casts on what is beside it."
          (rest (and side (rail--slab-edges width side)))
          (voice (cassette--bolo-turn-p (getf state :bolo-state)))
          (levels (getf state :bolo-history))
+         (fade (getf state :bolo-fade))
+         (settling (and (not voice) (realp fade) levels
+                        (< (- now fade) (getf +rail--voice+ :settle))))
+         (envelope (rail--voice-envelope voice (getf state :bolo-since) fade now))
          (edges rest)
          (impact 0d0)
          (fresh 1d0))
@@ -652,6 +673,9 @@ light and the shadow it casts on what is beside it."
            (shift (if edges (rail--slab-shift width edges) 0))
            (hot (loop for probe in '(:cpu :gpu)
                       thereis (cassette--hot-p (getf (getf state probe) :temp)))))
+      (unless (or voice settling)
+        (setf (getf state :bolo-history) nil
+              (getf state :bolo-fade) nil))
       (setf (getf state :rail-side) side
             (getf state :rail-edges) edges
             (getf state :rail-hop) hop
@@ -661,7 +685,7 @@ light and the shadow it casts on what is beside it."
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t)))
                       (when hop (list (interval :hop :refresh)))
-                      (when (and voice (plusp (length levels)))
+                      (when (and (plusp (length levels)) (or voice settling))
                         (list (interval :hop 16)))
                       (cassette--bolo-watches)
                       (when (and output tray)
@@ -678,7 +702,8 @@ light and the shadow it casts on what is beside it."
                                                  :children
                                                  (list (rail--slab-node width live-height edges
                                                                         top bottom welds
-                                                                        voice now levels)))
+                                                                        (or voice settling)
+                                                                        now levels envelope)))
                                              :output (getf output :name) :anchors '(:top :left)
                                              :width (rail--design width)
                                              :height (rail--design live-height)

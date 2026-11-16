@@ -14,7 +14,7 @@
 (define-extension "bar" (:reads (:system :services :data :outputs)
                          :state (list :cpu nil :memory nil :gpu nil
                                       :bolo-state nil :bolo-level 0
-                                      :bolo-since nil :bolo-history nil))
+                                      :bolo-since nil :bolo-history nil :bolo-fade nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
     (cassette--bolo-watch state event))
