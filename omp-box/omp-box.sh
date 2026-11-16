@@ -60,7 +60,8 @@ apply_host() {
   # is opened to the group they both have: cheap to walk here as the owner, and impossible to do safely from inside
   # the box (root there would be walking paths the bot can rewrite). The group matters because the box's own files
   # keep it and a folder the bot created came out with the box's group.
-  if [ "$fresh" = 1 ] && [ "$who" != "$target_user" ] && [ "$mode" != ro ]; then
+  if [ "$who" != "$target_user" ] && [ "$mode" != ro ] &&
+     { [ "$fresh" = 1 ] || [ "$(stat -c %g -- "$shares/$name" 2>/dev/null)" != 100 ]; }; then
     chgrp -R users -- "$shares/$name" 2>/dev/null || true
     chmod -R g+rwX -- "$shares/$name" || fail "could not open $shares/$name to the group"
   fi
