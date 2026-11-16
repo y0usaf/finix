@@ -3349,6 +3349,10 @@ in {
           focus-follows-mouse = true;
           pointer-follows-focus = true;
           mod = mkLispInline ":super";
+          cursor-glass = {
+            enabled = true;
+            delay-ms = 120;
+          };
         }
         // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;}
         // {
