@@ -1,6 +1,6 @@
 (in-package #:tomoe-user)
 
-;;; MERIDIAN
+;;; MORPH
 ;;;
 ;;; The seam between the deck's two columns is filled by one slab, and the
 ;;; focused card's frame is the same material: one colour, one thickness, the two
@@ -22,7 +22,7 @@
 ;;; it passed, newest at the top, with a belly that leans out with the level being
 ;;; spoken and a heave of the whole slab; when the turn closes it calms.
 ;;;
-;;; All of that is one shader (shaders/meridian.glsl) drawn on the GPU over two
+;;; All of that is one shader (shaders/morph.glsl) drawn on the GPU over two
 ;;; surfaces: a band down the seam and the frames over the rest of the output. The
 ;;; rail hands it the numbers below, the carried cards (whose drawn boxes the
 ;;; compositor fills in every frame, so a frame rides a card that is still sliding)
@@ -484,7 +484,7 @@ is open, the shape's numbers, and the level history, newest first."
             levels)))
 
 (defun rail--tide-data (origin skip seam output motion focus old voice)
-  "Every number meridian.glsl reads, in the order it reads them. ORIGIN is the
+  "Every number morph.glsl reads, in the order it reads them. ORIGIN is the
 surface's corner and SKIP the span of x it leaves to the other surface, both in
 output pixels; FOCUS and OLD index the surface's :WINDOWS."
   (let* ((cast +rail--cast+)
