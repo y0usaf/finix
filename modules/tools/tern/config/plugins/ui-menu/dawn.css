@@ -439,17 +439,31 @@
 		color: var(--dawn-ink-3);
 	}
 	& .sf-rows-mark { display: none; }
+	/* The pill is the dock's own column, not the editor inside it: omp nests the
+	   editor column a spacer's depth down, so a wash on the editor alone reads as
+	   a short pill inside a taller block. The outer column carries the wash, the
+	   radius and the blur, and the editor column inside stays bare. No shadow --
+	   the composer sits in the pane rather than floating over it. */
+	&.sf-dock > .sf-col {
+		padding: 0.15em 0.15em 0.15em 0.9em;
+		border-radius: 1.3em;
+		background: var(--dawn-wash);
+		-webkit-backdrop-filter: var(--dawn-blur);
+		backdrop-filter: var(--dawn-blur);
+		box-shadow: none;
+		cursor: text;
+	}
 	& .sf-col[data-role^='omp.editor'] {
 		flex-direction: row;
 		flex-wrap: wrap;
 		align-items: flex-end;
 		gap: 0.3em 0.4em;
-		padding: 0.3em 0.3em 0.3em 0.9em;
-		border-radius: 1.3em;
-		background: var(--dawn-wash);
-		-webkit-backdrop-filter: var(--dawn-blur);
-		backdrop-filter: var(--dawn-blur);
-		cursor: text;
+		padding: 0.15em 0.15em 0.15em 0;
+		border-radius: 0;
+		background: none;
+		-webkit-backdrop-filter: none;
+		backdrop-filter: none;
+		box-shadow: none;
 	}
 	& .sf-col[data-role^='omp.editor'] > * {
 		flex: 1 1 100%;
@@ -826,4 +840,13 @@ html.tn-themed:not(#dawn) {
    stock --tv-bg and keeps only the bubbles and the composer translucent. */
 section.tn-pane:has(.sf-chat-reader.sf-main) > .tn-body {
 	background: var(--tv-bg);
+}
+
+/* Tern flashes a green ring round a pane as a turn finishes -- the ok colour,
+   which this look does not carry -- and sweeps the same ring in the tint while
+   the turn works. On paper the flash's first frames read as stray blocks under
+   the composer, and a window whose animations are held shows them for as long
+   as it stays held; the transcript and the tab already say the turn ended. */
+section.tn-pane.finished .tn-glow {
+	display: none;
 }
