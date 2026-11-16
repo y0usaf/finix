@@ -3196,6 +3196,19 @@ in {
       '';
     };
 
+    motion = {
+      durationMs = lib.mkOption {
+        type = lib.types.ints.positive;
+        default = 300;
+        description = "How long a window takes to glide to a new place: a deck scroll bringing the next card forward, a swap, a move between columns, and the rail's readings sliding across the seam with them. 300 ms runs alongside the rail's frame filling round the new card.";
+      };
+      curve = lib.mkOption {
+        type = lib.types.enum ["linear" "ease-out-quad" "ease-out-cubic" "ease-out-expo"];
+        default = "ease-out-cubic";
+        description = "The easing of that glide.";
+      };
+    };
+
     displays = lib.mkOption {
       type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
       default = {};
@@ -3302,7 +3315,16 @@ in {
           mod = mkLispInline ":super";
         }
         // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;}
-        // lib.optionalAttrs (bar.style == "rail") {animations = {focus-outline = false;};})})
+        // {
+          animations =
+            {
+              window-move = [(keyword "ease") {
+                duration-ms = cfg.motion.durationMs;
+                curve = keyword cfg.motion.curve;
+              }];
+            }
+            // lib.optionalAttrs (bar.style == "rail") {focus-outline = false;};
+        })})
       (defparameter +policy-launcher+ ${toLisp {
         app-id = "launcher";
         ratio = mkLispInline "1/3";
