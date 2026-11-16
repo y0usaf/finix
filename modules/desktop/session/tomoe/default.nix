@@ -362,7 +362,13 @@
       name = "morph";
       shader = ./shaders/morph.glsl;
       lisp = null;
-      description = "the deck's seam filled by one slab cast in one material with the focused card's frame -- same colour, same thickness, welded smoothly where they meet, rounded 14px corners -- with the readings, clock and bolo's voice knocked out of it in ink; every other card keeps a thin darker line. A focus change across the seam hops the slab on two springs, one within a column leaves it on its side; either way, after a pause the old frame drains back into the slab and the new one fills out of it, a quick switch only pours one frame into the other. Bolo's turn ripples the slab's free edge. Drawn by one GPU shader that rests once nothing moves; the material, geometry and timings are +rail--cast+ and +rail--tide+ in lisp/rail.lisp.";
+      description = "one slab in the deck's seam, as tall as the readings it carries, cast in one material with the focused card's frame -- same colour, same thickness, welded smoothly where they meet, rounded 14px corners -- with each gauge swelling the slab's free edge by its load and the readings, clock and bolo's voice set into it in IBM Plex Mono; every other card keeps a thin darker line. A focus change across the seam hops the slab on two springs, one within a column leaves it on its side; either way, after a pause the old frame drains back into the slab and the new one fills out of it, a quick switch only pours one frame into the other. Bolo's turn ripples the slab's free edge. Drawn by one GPU shader that rests once nothing moves; the material, geometry and timings are +rail--cast+ and +rail--tide+ in lisp/rail.lisp.";
+    }
+    {
+      name = "glass";
+      shader = pkgs.writeText "glass.glsl" ("#define GLASS\n" + builtins.readFile ./shaders/morph.glsl);
+      lisp = ./lisp/rail-glass.lisp;
+      description = "morph in liquid glass: the same slab, frames, gauges, motion and voice, but the slab and the focused frame refract, frost and tint what lies beneath them, with light caught along their rims; the material and its glass are +rail-glass+ in lisp/rail-glass.lisp.";
     }
   ];
 
@@ -387,7 +393,6 @@
     inherit (barParameters) modules time date;
     width = bar.rail.width;
     channel = bar.rail.channel;
-    key-motion = keyword bar.rail.keyMotion;
     throw = keyword bar.rail.throwMode;
     carry-max = bar.rail.carryMax;
     focus-border = bar.rail.focusBorder;
@@ -3278,11 +3283,6 @@ in {
           type = lib.types.ints.positive;
           default = 8;
           description = "Air between a window's border and the rail, part of the track the light falls across.";
-        };
-        keyMotion = lib.mkOption {
-          type = lib.types.enum ["ride" "dock"];
-          default = "ride";
-          description = "ride: a scroll attaches the slab to the incoming card and it rises with it. dock: the slab stays at the height the seam starts at and the cards slide past under it.";
         };
         throwMode = lib.mkOption {
           type = lib.types.enum ["slide" "cut"];

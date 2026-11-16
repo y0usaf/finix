@@ -18,10 +18,12 @@
 ;;;
 ;;; morph
 ;;;
-;;; The seam between the deck's two columns is filled by one slab, and the
-;;; focused card's frame is the same material: one colour, one thickness, the two
-;;; welded where they meet by the smooth minimum of their fields, so slab, frame
-;;; and the readings knocked out of the slab in ink read as one cast piece. Every
+;;; The seam between the deck's two columns holds one slab, as tall as the
+;;; readings it carries, and the focused card's frame is the same material: one
+;;; colour, one thickness, the two welded where they meet by the smooth minimum
+;;; of their fields. Each gauge swells the slab's free edge by its load and its
+;;; numbers are set into the slab in ink, so slab, frame and readings read as one
+;;; cast piece. Every
 ;;; other card the rail carries keeps a thin, darker line, and the slab stands off
 ;;; it with the wallpaper visible in between. The cards' corners are rounded to
 ;;; the frame's radius.
@@ -85,14 +87,17 @@
         :fade 48))       ; pixels the wave takes to reach full strength at each end
 
 ;; CAST: the material and its geometry, in physical pixels. The slab fills
-;; :SLAB of the seam and stops :INSET short of its card's ends, which it rounds
-;; by :END; the focused frame is :FRAME thick round corners of :RADIUS, welded to
-;; the slab over :WELD; every other card has a :LINE-wide line. A stretched slab
-;; gives back :SQUASH of its stretch at its ends. Each mode has its :MATERIAL,
-;; the :LINE colour, the :SHADOW the material casts at :SHADE strength, and the
+;; :SLAB of the seam and reaches :INSET past the rail's first and last blocks, so
+;; it is as tall as what it holds, rounding its ends by :END; each gauge swells
+;; the slab's free edge over its own rows by up to :SWELL at a full reading. The
+;; focused frame is :FRAME thick round corners of :RADIUS, welded to the slab
+;; over :WELD; every other card has a :LINE-wide line. A stretched slab gives
+;; back :SQUASH of its stretch at its ends. Each mode has its :MATERIAL, the
+;; :LINE colour, the :SHADOW the material casts at :SHADE strength, and the
 ;; :SHINE its highlight takes at :GLOSS.
 (defparameter +rail--cast+
-  (list :frame 5 :line-width 1.5 :radius 14 :slab 50 :inset 30 :end 12 :weld 28 :squash 0.7
+  (list :frame 5 :line-width 1.5 :radius 14 :slab 50 :inset 22 :end 22 :weld 28 :squash 0.7
+        :swell 11
         :dark (list :material "#3A3E58" :line "#26283C" :shadow "#020208" :shade 0.55
                     :shine "#ECE7DC" :gloss 0.34)
         :light (list :material "#B2ACA2" :line "#D6D2CA" :shadow "#342E28" :shade 0.24
@@ -163,18 +168,15 @@ otherwise."
 (defun rail--label ()
   (hud--fade (rail--ink) (if (eq *rail--mode* :dark) 0.40 0.46)))
 
-(defun rail--outline ()
-  (hud--fade (rail--ink) 0.90))
-
 (defun rail--parts (text)
-  (loop with start = 0
-        for i = (position-if (lambda (c) (member c '(#\: #\Space))) text :start start)
-        for part = (subseq text start i)
-        when (plusp (length part)) collect part
-        while i do (setf start (1+ i))))
+  (let ((parts nil) (start 0))
+    (dotimes (i (1+ (length text)) (nreverse parts))
+      (when (or (= i (length text)) (member (char text i) '(#\: #\Space)))
+        (when (> i start) (push (subseq text start i) parts))
+        (setf start (1+ i))))))
 
 (defun rail--text (text color size &optional (height size))
-  (ui :text :text text :size (rail--design size) :line-height (rail--design size)
+  (ui :text :text text :size (rail--design size) :line-height (rail--design height)
       :height (rail--design height) :color color :font (or (getf *rail--look* :font) (getf +cassette+ :font))))
 
 (defun rail--split-unit (text)
@@ -184,17 +186,19 @@ below the number it belongs to."
       (list (subseq text 0 (1- (length text))) "%")
       (list text nil)))
 
-(defun rail--number (text &optional (height 22))
+(defun rail--number (text &optional (ink (rail--value)) (unit-ink (rail--label)))
   (destructuring-bind (number unit) (rail--split-unit text)
     (ui :row :align :center
-        :children (append (list (rail--text number (rail--value) 22 height))
-                          (when unit (list (rail--text unit (rail--label) 22 height)))))))
+        :children (append (list (rail--text number ink 21 22))
+                          (when unit (list (rail--text unit unit-ink 14 22)))))))
 
-(defun rail--badge (node ground)
-  "NODE inside a one pixel ink outline: a warning without a hue."
-  (ui :column :align :center :padding '(3 4 0 4) :radius 3 :border 1
-      :border-color (rail--outline) :background ground
-      :children (list node)))
+(defun rail--drop (text ground)
+  "TEXT cast in the slab's material inside a bead of ink: a warning without a hue."
+  (destructuring-bind (number unit) (rail--split-unit text)
+    (ui :row :align :center :padding (list 0 (rail--design 5) 0 (rail--design 5))
+        :radius (rail--design 10) :height (rail--design 20) :background (rail--value)
+        :children (append (list (rail--text number ground 15 20))
+                          (when unit (list (rail--text unit ground 11 20)))))))
 
 (defun rail--meter (percent)
   "A 36 wide, four tall rounded pill: the played fraction of the media, the
@@ -285,14 +289,12 @@ will, so the rail ticks only when there is a different number to draw."
          (value (format nil "~D%" percent)))
     (ui :column :align :center
         :children
-        (append (list (rail--text label (rail--label) 22)
-                      (if (> percent 84)
-                          (rail--badge (rail--number value 19) ground)
-                          (rail--number value)))
+        (append (list (rail--text label (rail--label) 13 22)
+                      (if (> percent 84) (rail--drop value ground) (rail--number value)))
                 (when detail
                   (list (if hot
-                            (rail--badge (rail--number detail 19) ground)
-                            (rail--text detail (rail--detail) 22))))))))
+                            (rail--drop detail ground)
+                            (rail--text detail (rail--detail) 15 22))))))))
 
 (defun rail--date ()
   (destructuring-bind (&optional day date month &rest rest)
@@ -300,16 +302,16 @@ will, so the rail ticks only when there is a different number to draw."
     (declare (ignore rest))
     (ui :column :align :center
         :children (remove nil
-                          (list (when day (rail--text day (rail--label) 22))
-                                (when date (rail--text date (rail--value) 22))
-                                (when month (rail--text month (rail--label) 22)))))))
+                          (list (when day (rail--text day (rail--label) 13 22))
+                                (when date (rail--text date (rail--value) 21 22))
+                                (when month (rail--text month (rail--label) 13 22)))))))
 
 (defun rail--clock ()
   (destructuring-bind (&optional hours minutes)
       (rail--parts (clock-text (getf +cassette+ :time)))
     (ui :column :align :center
-        :children (list (rail--text (or hours "--") (rail--value) 33)
-                        (rail--text (or minutes "--") (rail--value) 33 29)))))
+        :children (list (rail--text (or hours "--") (rail--value) 30 33)
+                        (rail--text (or minutes "--") (rail--value) 30 29)))))
 
 (defun rail--media-played (snapshot)
   (let* ((service (service-state snapshot :mpris))
@@ -324,24 +326,24 @@ will, so the rail ticks only when there is a different number to draw."
 (defun rail--media (snapshot)
   (destructuring-bind (status played) (rail--media-played snapshot)
     (ui :column :align :center
-        :children (list (rail--text (if (equal status "Playing") ">" "||") (rail--value) 22)
+        :children (list (rail--text (if (equal status "Playing") ">" "||") (rail--value) 21 22)
                         (rail--meter (round (* 100 played)))
                         (ui :rect :height (rail--design 8))))))
 
 (defun rail--network (snapshot)
   (let ((online (getf (service-state snapshot :network) :connected)))
     (ui :column :align :center
-        :children (list (rail--text "NET" (rail--label) 22)
-                        (rail--text (if online "ON" "OFF") (rail--value) 22)))))
+        :children (list (rail--text "NET" (rail--label) 13 22)
+                        (rail--text (if online "ON" "OFF") (rail--value) 15 22)))))
 
 (defun rail--voice (state)
-  "Bolo's turn at the top of the web: the elapsed time. The level itself is the
+  "Bolo's turn at the top of the stack: the elapsed time. The level itself is the
 slab's shape, not a reading."
   (let ((since (getf state :bolo-since)))
     (ui :column :align :center
         :children (list (rail--text (cassette--bolo-clock
                                      (and (realp since) (- (cassette--bolo-now) since)))
-                                    (rail--value) 22)))))
+                                    (rail--value) 15 22)))))
 
 (defun rail--height (module state snapshot)
   "The design height of MODULE's block, or NIL when it has nothing to show."
@@ -407,39 +409,73 @@ the module list has no clock."
           (append (reverse above) (list (cons :time clock)) below)))))
 
 (defun rail--tray (snapshot)
-  "The height of the slot the shelf asked for at the top of the web, or NIL."
+  "The height of the slot the shelf asked for at the top of the stack, or NIL."
   (let ((tray (state-value snapshot :shelf-tray)))
     (when (and tray (plusp (getf tray :count 0)) (plusp (getf tray :size 0)))
       (* (getf tray :count) (getf tray :size)))))
 
-(defun rail--web (state snapshot seam ground)
+(defun rail--blocks (state snapshot seam)
+  "Every block the rail stacks, as (MODULE TOP HEIGHT) in logical pixels down the
+output: the readings round the clock, and above them bolo's turn and the shelf's
+tray when they are there."
+  (let* ((base (/ (getf seam :y) *rail--scale*))
+         (height (/ (getf seam :height) *rail--scale*))
+         (placed (loop for (module . top) in (rail--places state snapshot (+ base (floor height 2)))
+                       collect (list module top (rail--height module state snapshot))))
+         (top (if placed (second (first placed)) (+ base (floor height 2))))
+         (tray (rail--tray snapshot))
+         (above (append (when tray (list (list :tray (/ tray *rail--scale*))))
+                        (when (cassette--bolo-turn-p (getf state :bolo-state))
+                          (list (list :voice 22))))))
+    (append (loop for (module tall) in (reverse above)
+                  do (decf top (+ tall +rail--air+))
+                  collect (list module top tall) into stacked
+                  finally (return (reverse stacked)))
+            placed)))
+
+(defun rail--extent (blocks)
+  "The first block's top and the last block's bottom, in output pixels."
+  (when blocks
+    (let ((last (car (last blocks))))
+      (list (* *rail--scale* (second (first blocks)))
+            (* *rail--scale* (+ (second last) (third last)))))))
+
+(defun rail--web (state snapshot seam blocks ground)
   "The readings, the voice block and the tray, in type over the track."
   (let* ((base (/ (getf seam :y) *rail--scale*))
          (height (/ (getf seam :height) *rail--scale*))
          (width (rail--seam-width))
-         (tray (rail--tray snapshot))
-         (voice (cassette--bolo-turn-p (getf state :bolo-state)))
-         (parts nil)
-         (cursor 0))
-    (labels ((to (screen-y)
-               (let ((y (- screen-y base)))
-                 (when (> y cursor) (push (cons (- y cursor) nil) parts) (setf cursor y))))
-             (put (tall node) (push (cons tall node) parts) (incf cursor tall)))
-      (when tray
-        (to (+ base 36))
-        (put (/ tray *rail--scale*)
-             (ui :rect :height (rail--design tray) :width (rail--design 52)
-                 :background (rail--c :tray))))
-      (when voice
-        (to (+ base 36 (/ (or tray 0) *rail--scale*)))
-        (put 22 (rail--voice state)))
-      (dolist (entry (rail--places state snapshot (+ base (floor height 2))))
-        (to (cdr entry))
-        (put (rail--height (car entry) state snapshot)
-             (rail--block (car entry) state snapshot ground))))
+         (cursor 0)
+         (parts nil))
+    (loop for (module top tall) in blocks
+          for y = (- top base)
+          do (when (> y cursor) (push (cons (- y cursor) nil) parts))
+             (push (cons tall
+                         (case module
+                           (:tray (ui :rect :height (rail--design (* tall *rail--scale*))
+                                      :width (rail--design 52) :background (rail--c :tray)))
+                           (:voice (rail--voice state))
+                           (t (rail--block module state snapshot ground))))
+                   parts)
+             (setf cursor (+ y tall)))
     (ui :column :align :center :width (rail--design width) :height (rail--design height)
         :children (loop for (tall . node) in (nreverse parts)
                         collect (or node (ui :rect :height (rail--design tall)))))))
+
+(defun rail--gauges (state blocks)
+  "The readings the slab swells with, as the shader reads them: for each gauge
+its middle and half its reach in output pixels and its fraction, up to five."
+  (let ((meter (getf state :rail-meter)))
+    (loop for (module top tall) in blocks
+          for value = (case module
+                        (:cpu (getf meter :cpu)) (:memory (getf meter :memory))
+                        (:gpu (getf meter :gpu)) (:vram (getf meter :vram)))
+          when value
+            collect (list (* *rail--scale* (+ top (/ tall 2)))
+                          (* *rail--scale* (/ (+ tall +rail--air+) 2))
+                          (/ (max 0 (min 100 value)) 100d0))
+              into gauges
+          finally (return (subseq gauges 0 (min 5 (length gauges)))))))
 
 
 ;;; The slab and the frames
@@ -499,7 +535,7 @@ nothing animates or redraws."
   "The voice as the shader reads it: when the turn opened and closed, whether it
 is open, the shape's numbers, and the level history, newest first."
   (let* ((levels (if voicing (subseq (getf state :bolo-history) 0
-                                     (min 64 (length (getf state :bolo-history))))
+                                     (min 48 (length (getf state :bolo-history))))
                      nil))
          (since (and voicing (getf state :bolo-since)))
          (fade (and voicing (getf state :bolo-fade)))
@@ -510,17 +546,19 @@ is open, the shape's numbers, and the level history, newest first."
                   (getf v :rest) (getf v :level) (getf v :swell) (getf v :wave) (getf v :hz)
                   (getf v :bob) (getf v :bob-hz) (getf v :rise) (getf v :settle) (getf v :fade)
                   (length levels) 0)
-            levels)))
+            levels
+            (make-list (- 48 (length levels)) :initial-element 0))))
 
-(defun rail--tide-data (origin skip seam output motion focus old voice)
+(defun rail--tide-data (origin skip seam extent output motion focus old voice gauges)
   "Every number morph.glsl reads, in the order it reads them. ORIGIN is the
 surface's corner and SKIP the span of x it leaves to the other surface, both in
-output pixels; FOCUS and OLD index the surface's :WINDOWS."
+output pixels, and EXTENT the top and bottom of the rail's stack the slab holds;
+FOCUS and OLD index the surface's :WINDOWS; GAUGES are what RAIL--GAUGES makes
+of the readings the slab swells with."
   (let* ((cast (getf *rail--look* :cast))
          (tide +rail--tide+)
          (lead (getf tide :lead)) (trail (getf tide :trail)) (ring (getf tide :ring))
-         (pour (getf tide :pour)) (siphon (getf tide :siphon))
-         (dock (eq (getf +rail+ :key-motion) :dock)))
+         (pour (getf tide :pour)) (siphon (getf tide :siphon)))
     (append origin skip
             (rail--rgb (rail--material :material)) (rail--rgb (rail--material :line))
             (rail--rgb (rail--material :shadow)) (rail--rgb (rail--material :shine))
@@ -529,8 +567,7 @@ output pixels; FOCUS and OLD index the surface's :WINDOWS."
                   (getf cast :slab) (getf cast :inset) (getf cast :end) (getf cast :weld)
                   (rail--edge seam) (getf +layout+ :seam))
             motion
-            (list (or focus -1) (or old -1)
-                  (if dock 1 0) (getf seam :y) (+ (getf seam :y) (getf seam :height))
+            (list (or focus -1) (or old -1) (length gauges) (first extent) (second extent)
                   (getf tide :settle)
                   (getf lead :omega) (getf lead :damping) (getf lead :launch) (getf lead :lag)
                   (getf trail :omega) (getf trail :damping) (getf trail :delay)
@@ -542,7 +579,14 @@ output pixels; FOCUS and OLD index the surface's :WINDOWS."
                   (getf siphon :fill-at) (getf siphon :fill) (getf siphon :head)
                   (getf siphon :ripple) (getf siphon :meet)
                   (getf output :height))
-            voice)))
+            voice
+            (loop for gauge in gauges append gauge)
+            (make-list (* 3 (- 5 (length gauges))) :initial-element 0)
+            (list (getf cast :swell))
+            (let ((glass (rail--material :glass)))
+              (when glass
+                (loop for key in '(:tint :frost :lens :bevel :rim :lift)
+                      collect (getf glass key)))))))
 
 (defun rail--shown (carried output)
   "The carried cards on OUTPUT's screen, nearest each column's front first."
@@ -630,8 +674,8 @@ two plates across the top and bottom of the focal frame."
 ;;; morph's surfaces
 
 (defun rail--morph-draw (look context)
-  "morph: the frames over the output, the slab down the seam and the readings
-knocked out of it, all from CONTEXT."
+  "morph: the frames over the output, the slab down the seam as tall as the
+readings it holds, and the readings set into it, all from CONTEXT."
   (declare (ignore look))
   (destructuring-bind (&key state snapshot epoch seam output carried key side switch
                          old windows voicing fade layer &allow-other-keys)
@@ -644,6 +688,10 @@ knocked out of it, all from CONTEXT."
            (calmed (cond (voice 1d6)
                          ((realp fade) (max 0d0 (+ (- fade epoch) (getf +rail--voice+ :settle))))
                          (t 0d0)))
+           (blocks (rail--blocks state snapshot seam))
+           (extent (or (rail--extent blocks)
+                       (let ((middle (+ (getf seam :y) (floor (getf seam :height) 2))))
+                         (list middle middle))))
            (pad 60)
            (band-x (- (rail--edge seam) pad))
            (band-width (+ (getf +layout+ :seam) (* 2 pad)))
@@ -661,8 +709,8 @@ knocked out of it, all from CONTEXT."
                                 :data (rail--tide-data
                                        (list left top)
                                        (list band-x (+ band-x band-width))
-                                       seam output motion focus-index old-index
-                                       (rail--voice-data state nil epoch))
+                                       seam extent output motion focus-index old-index
+                                       (rail--voice-data state nil epoch) nil)
                                 :windows windows :clock epoch :until moved
                                 ;; only the rings round the cards are
                                 ;; ever drawn or repainted
@@ -677,11 +725,12 @@ knocked out of it, all from CONTEXT."
               :background (list :shader shader
                                 :data (rail--tide-data
                                        (list band-x top) (list 0 0)
-                                       seam output motion focus-index old-index
-                                       (rail--voice-data state voicing epoch))
+                                       seam extent output motion focus-index old-index
+                                       (rail--voice-data state voicing epoch)
+                                       (rail--gauges state blocks))
                                 :windows windows :clock epoch
                                 :until (max moved calmed)))
-             (shell-surface :rail-type (rail--web state snapshot seam
+             (shell-surface :rail-type (rail--web state snapshot seam blocks
                                                   (rail--material :material))
                             :output (getf output :name) :anchors '(:top :left)
                             :width (rail--design (rail--seam-width))
@@ -700,7 +749,8 @@ knocked out of it, all from CONTEXT."
                         :border (list :focused "#00000000"
                                       :unfocused "#00000000"))))))))
 
-(defparameter +rail-morph+ (list :draw #'rail--morph-draw :cast +rail--cast+))
+(defparameter +rail-morph+
+  (list :draw #'rail--morph-draw :cast +rail--cast+ :font "IBM Plex Mono Medium"))
 
 ;;; The rail
 
@@ -793,7 +843,9 @@ knocked out of it, all from CONTEXT."
                         (list (publish-state :shelf-tray-rect
                                              (list :output (getf seam :output)
                                                    :x (+ (rail--lane seam :left) (getf +rail+ :channel))
-                                                   :y (getf seam :y)
+                                                   :y (* *rail--scale*
+                                                         (second (find :tray (rail--blocks state snapshot seam)
+                                                                       :key #'first)))
                                                    :width (getf +rail+ :width)
                                                    :height tray))))
                       (when output

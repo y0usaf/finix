@@ -23,9 +23,9 @@ vec3 D3(int i) { return vec3(D(i), D(i + 1), D(i + 2)); }
 const int ORIGIN = 0, SKIP = 2, MAT = 4, REC_C = 7, SHADOW_C = 10, SPEC_C = 13, KS = 16, SA = 17;
 const int RAD = 18, WF = 19, RECW = 20, SW = 21, INSET = 22, RS = 23, WELD = 24;
 const int SEAM = 25, SEAMW = 26, SIDE = 27, PREV = 28, TSW = 29, FLOW = 30, HOLD = 31, GULP = 32;
-const int FOCUS = 33, OLD = 34, DOCK = 35, DOCK_Y = 36, SETTLE = 38;
+const int FOCUS = 33, OLD = 34, METERS = 35, EXTENT = 36, SETTLE = 38;
 const int LEAD = 39, TRAIL = 43, WOB = 46, SQUASH = 49, POUR = 50, SIPHON = 56, HEIGHT = 64;
-const int VOICE = 65, LEVELS = 80;
+const int VOICE = 65, LEVELS = 80, GAUGES = 128, SWELL = 143, PANE = 144;
 
 vec2 g_origin;
 float g_h;
@@ -170,6 +170,18 @@ float wobble(float y, float top, float bottom, float now, float amp) {
     return amp * edge * reach;
 }
 
+// ---- the gauges
+
+float gauges(float y) {
+    float reach = 0.0;
+    for (int i = 0; i < int(D(METERS)); i++) {
+        int k = GAUGES + 3 * i;
+        float u = clamp((y - D(k)) / max(1.0, D(k + 1)), -1.0, 1.0);
+        reach += D(k + 2) * (0.5 + 0.5 * cos(PI * u));
+    }
+    return reach * D(SWELL);
+}
+
 // ---- the slab
 
 vec2 rest_edges(float side) {
@@ -205,7 +217,7 @@ vec2 slab_edges(float y) {
         wob += gulp * g * exp(-pow((abs(y - g_cy) - yg) / 70.0, 2.0));
     }
     if (side > 0.0) e.x -= wob; else e.y += wob;
-    float voice = wobble(y, g_top, g_bottom, g_now, g_amp);
+    float voice = wobble(y, g_top, g_bottom, g_now, g_amp) + gauges(y);
     if (side > 0.0) e.x -= voice; else e.y += voice;
     return e;
 }
@@ -245,6 +257,44 @@ float field(vec2 p) {
     return f;
 }
 
+#ifdef GLASS
+vec3 under(vec2 q) { return beneath(vec2(q.x - g_origin.x, g_h - (q.y - g_origin.y))).rgb; }
+
+vec3 frosted(vec2 q, float r, float spin) {
+    if (r < 0.5) return under(q);
+    vec3 sum = vec3(0.0);
+    for (int i = 0; i < 12; i++) {
+        float a = float(i) * 2.39996 + spin;
+        sum += under(q + r * sqrt((float(i) + 0.5) / 12.0) * vec2(cos(a), sin(a)));
+    }
+    return sum / 12.0;
+}
+
+vec3 glass(vec2 p, float f, vec2 dir) {
+    float bevel = D(PANE + 3);
+    float depth = clamp(-f / bevel, 0.0, 1.0);
+    float thick = clamp(-field(p - dir * bevel) / (0.5 * bevel), 0.0, 1.0);
+    float edge = (1.0 - depth) * (1.0 - depth);
+    vec2 bend = dir * D(PANE + 2) * edge * thick;
+    float spin = 6.2832 * fract(52.9829 * fract(dot(p, vec2(0.06711, 0.00584))));
+    vec3 seen = frosted(p + bend, D(PANE + 1) * thick, spin);
+    float split = edge * thick * 0.6;
+    seen.r = mix(seen.r, under(p + bend * 1.3).r, split);
+    seen.b = mix(seen.b, under(p + bend * 0.7).b, split);
+    vec3 luma = vec3(0.2126, 0.7152, 0.0722);
+    float apart = abs(dot(seen, luma) - dot(D3(MAT), luma));
+    float tint = mix(D(PANE), 0.72, thick * depth * sm(0.25, 0.65, apart));
+    vec3 body = mix(seen, D3(MAT), tint) * (1.0 + D(PANE + 5));
+    vec2 light = normalize(vec2(-0.6, -0.8));
+    float facing = dot(dir, light);
+    float lip = exp(-max(-f, 0.0) / 1.2);
+    float rim = D(PANE + 4);
+    body += D3(SPEC_C) * lip * (pow(max(facing, 0.0), 1.5) + 0.45 * pow(max(-facing, 0.0), 2.0)) * rim;
+    body += D3(SPEC_C) * 0.12 * rim * edge * max(facing, 0.0);
+    return min(body, vec3(1.0));
+}
+#endif
+
 void mainImage(out vec4 color, in vec2 fragCoord) {
     g_origin = vec2(D(ORIGIN), D(ORIGIN + 1));
     g_h = iResolution.y;
@@ -266,20 +316,19 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     int focus = int(D(FOCUS));
     g_slab = D(SIDE) != 0.0 && card_shown(focus);
     if (g_slab) {
-        vec4 box = card(focus);
-        float y0 = D(DOCK) > 0.5 ? D(DOCK_Y) : box.y, y1 = D(DOCK) > 0.5 ? D(DOCK_Y + 1) : box.w;
+        float y0 = D(EXTENT), y1 = D(EXTENT + 1);
         g_cy = (y0 + y1) * 0.5;
         g_hh = max(1.0, (y1 - y0) * 0.5);
         g_amp = voice_amp(g_now);
         float bob = 0.0;
         if (g_amp > 0.0)
             bob = g_amp * D(VOICE + 8) * D(LEVELS) * sin(g_now * D(VOICE + 9));
-        g_top = y0 + D(INSET) - 8.0;
-        g_bottom = y1 - D(INSET) + 8.0;
+        g_top = y0 - D(INSET) - 8.0;
+        g_bottom = y1 + D(INSET) + 8.0;
         vec2 mid = slab_edges(g_cy + 0.5 * g_hh);
         float squash = max(mid.y - mid.x - D(SW), 0.0) * D(SQUASH);
-        g_top = y0 + D(INSET) + squash + bob;
-        g_bottom = y1 - D(INSET) - squash + bob;
+        g_top = y0 - D(INSET) + squash + bob;
+        g_bottom = y1 + D(INSET) - squash + bob;
         g_kold = g_flow ? D(WELD) * (1.0 - sm(D(HOLD) * 0.6, D(HOLD) + 0.03, g_dt)) : 0.0;
         if (p.y > g_top - 40.0 && p.y < g_bottom + 40.0)
             near = min(near, max(abs(p.x - seam_mid()) - D(SEAMW) * 0.5 - 10.0, 0.0));
@@ -303,6 +352,9 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     if (cov > 0.0) {
         vec2 g = vec2(field(p + vec2(1.0, 0.0)) - field(p - vec2(1.0, 0.0)),
                       field(p + vec2(0.0, 1.0)) - field(p - vec2(0.0, 1.0))) * 0.5;
+#ifdef GLASS
+        vec3 m = glass(p, f, g / (length(g) + 1e-6));
+#else
         vec3 light = normalize(vec3(-0.45, -0.65, 0.61));
         vec3 half_v = normalize(light + vec3(0.0, 0.0, 1.0));
         float tilt = 1.0 - clamp(-f / 2.6, 0.0, 1.0);
@@ -313,6 +365,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         float tone = (0.80 + 0.33 * lam) * (1.0 + 0.035 * (D(HEIGHT) * 0.5 - p.y) / 720.0);
         vec3 m = D3(MAT) * tone;
         m += (D3(SPEC_C) - m) * spec;
+#endif
         c = m * cov + c * (1.0 - cov);
         a = cov + a * (1.0 - cov);
     }

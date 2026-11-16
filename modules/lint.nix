@@ -25,7 +25,16 @@
     uniform float iTime;
     uniform int iFrame;
     uniform vec4 iMouse;
-    uniform sampler2D iChannel0;
+    uniform int iTrailCount;
+    uniform vec4 iTrail[64];
+    uniform vec4 iData[48];
+    uniform int iWindowCount;
+    uniform vec4 iWindow[8];
+    uniform sampler2D tomoe_beneath;
+    uniform vec4 tomoe_beneath_box;
+    vec4 beneath(vec2 at) {
+        return texture(tomoe_beneath, (at - tomoe_beneath_box.xy) * tomoe_beneath_box.zw);
+    }
     in vec2 v_local;
     out vec4 tomoe_color;
     #line 1
