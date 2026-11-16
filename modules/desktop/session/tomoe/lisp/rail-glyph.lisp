@@ -55,8 +55,6 @@
         (list 5 5 7 1 1) (list 7 4 7 1 7) (list 7 4 7 5 7) (list 7 1 1 2 2)
         (list 7 5 7 5 7) (list 7 5 7 1 7)))
 
-(defvar *rail-glyph--samples* nil)
-(defvar *rail-glyph--second* nil)
 (defun rail-glyph--num (key) (getf +rail-glyph--bands+ key))
 
 (defun rail-glyph--c (role)
@@ -133,21 +131,15 @@ left of the row in the highest of its three."
     (append (subseq codes 0 (min 4 (length codes)))
             (loop repeat (- 4 (min 4 (length codes))) collect 0d0))))
 
-(defun rail-glyph--history (state now)
-  "Four whole seconds of each gauge, oldest first, from the samples the rail is
-gliding toward."
-  (let ((second (floor now)))
-    (unless (eql second *rail-glyph--second*)
-      (setf *rail-glyph--second* second)
-      (setf *rail-glyph--samples*
-            (cons (rail--meter-targets state)
-                  (subseq *rail-glyph--samples* 0
-                          (min 3 (length *rail-glyph--samples*))))))
-    (let ((count (length *rail-glyph--samples*)))
-      (loop for key in '(:cpu :memory :gpu :vram)
-            append (loop for i from 3 downto 0
-                         for sample = (nth (min i (1- count)) *rail-glyph--samples*)
-                         collect (coerce (or (getf sample key) 0) 'double-float))))))
+(defun rail-glyph--history (state)
+  "Four whole seconds of each gauge, oldest first, from the samples the rail
+keeps."
+  (let* ((samples (or (getf state :rail-history) (list (rail--meter-targets state))))
+         (count (length samples)))
+    (loop for key in '(:cpu :memory :gpu :vram)
+          append (loop for i from 3 downto 0
+                       for sample = (nth (min i (1- count)) samples)
+                       collect (coerce (or (getf sample key) 0) 'double-float)))))
 
 (defun rail-glyph--meter (state)
   "The four gauges as percentages, in the order the rail draws them."
@@ -233,7 +225,7 @@ from the first carried card's box so the rail and the frames meet."
             (+ y (getf band :rule3)) (+ y (getf band :rule4)))
       (rail-glyph--clock-codes)
       (rail-glyph--meter state)
-      (rail-glyph--history state (or (getf state :rail-step) 0))
+      (rail-glyph--history state)
       (rail-glyph--voice state voicing epoch)
       (rail-glyph--outer frame seam))
      "rail" 124)))

@@ -792,14 +792,17 @@ readings it holds, and the readings set into it, all from CONTEXT."
                                       :rail-theme nil
                                       :rail-side nil :rail-focus nil
                                       :rail-switch nil :rail-switched nil
-                                      :rail-meter nil :rail-step nil :rail-glide nil))
+                                      :rail-meter nil :rail-step nil :rail-glide nil
+                                      :rail-history nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
     (cassette--bolo-watch state event))
   (when (and (eq (getf event :type) :timer) (eq (getf event :name) :sample))
     (let ((system (context snapshot :system)))
       (dolist (probe '(:cpu :memory :gpu))
-        (setf (getf state probe) (probe--sample probe (getf state probe) system)))))
+        (setf (getf state probe) (probe--sample probe (getf state probe) system)))
+      (let ((history (cons (rail--meter-targets state) (getf state :rail-history))))
+        (setf (getf state :rail-history) (subseq history 0 (min 4 (length history)))))))
   (when (and (eq (getf event :type) :command) (equal (getf event :owner) "bar")
              (equal (getf event :name) "rail-theme"))
     (setf (getf state :rail-theme) (rail--next-theme (rail--theme state))))
