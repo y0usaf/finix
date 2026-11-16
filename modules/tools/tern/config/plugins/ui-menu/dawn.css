@@ -843,11 +843,12 @@ section.tn-pane:has(.sf-chat-reader.sf-main) > .tn-body {
 	background: var(--tv-bg);
 }
 
-/* Tern flashes a green ring round a pane as a turn finishes -- the ok colour,
-   which this look does not carry -- and sweeps the same ring in the tint while
-   the turn works. On paper the flash's first frames read as stray blocks under
-   the composer, and a window whose animations are held shows them for as long
-   as it stays held; the transcript and the tab already say the turn ended. */
-section.tn-pane.finished .tn-glow {
+/* Tern draws a ring round a pane: a green sweep as a turn finishes -- the ok
+   colour, which this look does not carry -- and a tinted one while a turn
+   works. On paper the flash's first frames read as stray blocks under the
+   composer, and a window whose animations are held shows them for as long as it
+   stays held. The transcript's working row and the tab already say both, so
+   this look leaves the ring out whole, in either state. */
+section.tn-pane > .tn-body > .tn-glow {
 	display: none;
 }
