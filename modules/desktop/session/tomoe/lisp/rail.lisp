@@ -27,6 +27,15 @@
 ;;; frame flashes toward the ink as the slab lands on it, and the readings ride
 ;;; the slab's middle.
 ;;;
+;;; The readings are sampled, not streamed: a CPU percentage is two reads of
+;;; /proc/stat and a GPU is a polled counter, so a number only ever changes when
+;;; it is read. The compositor reads the counters once a second; the rail
+;;; samples them four times a second, so a sample lands within a quarter of a
+;;; second of the read, and between samples each gauge eases toward the last one
+;;; on an exponential approach stepped sixty times a second, sweeping through the
+;;; values in between instead of jumping a whole second's load at once. A gauge
+;;; that has caught up with its sample stops the step.
+;;;
 ;;; A spring can only move a surface, so the hop is recomputed once per display
 ;;; refresh while it runs, and the voice at 60 Hz while bolo's turn moves it --
 ;;; a 2.5 Hz wave needs no more, and a repaint of the whole slab costs a few
@@ -72,6 +81,16 @@
 (defparameter +rail--shadow+ 10)        ; the contact shadow's reach, in pixels
 (defparameter +rail--shadow-alpha+ (list 0.55d0 0.26d0)) ; dark, light
 (defparameter +rail--corner-steps+ 7)   ; points across a rounded end
+
+;; The gauges: a reading is read once a second, so the number drawn between
+;; reads glides toward it -- an exponential approach stepped at the display's
+;; own beat, and nothing at all once it has arrived. Every number the glide
+;; follows is here.
+(defparameter +rail--glide+
+  (list :tick 16                        ; milliseconds between the display's steps
+        :tau 0.28d0                     ; seconds a reading takes to cover a change
+        :within '(:cpu 0.5 :memory 0.5 :memory-used 64    ; what each gauge
+                  :gpu 0.5 :vram 0.5 :vram-used 64)))     ; cannot show is arrived
 
 (defun rail--design (px)
   "PX of the design, in this output's logical units."
@@ -162,6 +181,49 @@ one reading a percentage cannot carry."
         (if (>= gib 10) (format nil "~DG" (round gib)) (format nil "~,1FG" gib)))
       "--G"))
 
+(defun rail--meter-targets (state)
+  "The numbers the gauges draw, as the last sample read them: a percentage for
+each, and the memory and the video memory in MiB."
+  (let ((memory (getf state :memory)) (gpu (getf state :gpu)))
+    (list :cpu (or (getf (getf state :cpu) :percent) 0)
+          :memory (or (getf memory :percent) 0)
+          :memory-used (or (getf memory :used) 0)
+          :gpu (or (getf gpu :percent) 0)
+          :vram (if (plusp (or (getf gpu :total) 0))
+                    (/ (* 100d0 (or (getf gpu :used) 0)) (getf gpu :total))
+                    0d0)
+          :vram-used (or (getf gpu :used) 0))))
+
+(defun rail--glide (state now)
+  "Step every gauge toward its last sample: an exponential approach over the time
+since the last step, landing exactly on a sample it can no longer show the
+difference to. Leaves whether anything is still moving in the state's
+:RAIL-GLIDE, so the rail only keeps ticking while a number is on its way."
+  (let* ((targets (rail--meter-targets state))
+         (shown (getf state :rail-meter))
+         (last (getf state :rail-step))
+         (elapsed (and last (max 0d0 (min 0.25d0 (- now last)))))
+         (grip (if elapsed
+                   (- 1d0 (expt 2.718281828459045
+                                (- (/ elapsed (getf +rail--glide+ :tau)))))
+                   0d0))
+         (within (getf +rail--glide+ :within))
+         (moving nil))
+    (setf (getf state :rail-step) now)
+    (if (null shown)
+        ;; The first sample is drawn as it is: a gauge counts up to nothing.
+        (setf shown targets)
+        (dolist (key '(:cpu :memory :memory-used :gpu :vram :vram-used))
+          (let* ((to (coerce (getf targets key) 'double-float))
+                 (here (coerce (getf shown key to) 'double-float))
+                 (eased (+ here (* grip (- to here)))))
+            (if (<= (abs (- to eased)) (or (getf within key) 0.5))
+                (setf (getf shown key) to)
+                (setf (getf shown key) eased
+                      moving t)))))
+    (setf (getf state :rail-meter) shown
+          (getf state :rail-glide) moving)))
+
 (defun rail--gauge (label percent detail hot ground)
   (let* ((percent (max 0 (min 100 (round (or percent 0)))))
          (value (format nil "~D%" percent)))
@@ -240,21 +302,20 @@ slab's shape, not a reading."
     (:frame (when (getf (state-value snapshot :frame-battery) :percent) 44))))
 
 (defun rail--block (module state snapshot ground)
-  (let ((cpu (getf state :cpu)) (memory (getf state :memory)) (gpu (getf state :gpu)))
+  (let ((cpu (getf state :cpu)) (gpu (getf state :gpu))
+        (meter (getf state :rail-meter)))
     (ecase module
       (:time (rail--clock))
       (:date (rail--date))
       (:media (rail--media snapshot))
-      (:cpu (rail--gauge "CPU" (getf cpu :percent) (cassette--degrees (getf cpu :temp))
+      (:cpu (rail--gauge "CPU" (getf meter :cpu) (cassette--degrees (getf cpu :temp))
                          (cassette--hot-p (getf cpu :temp)) ground))
-      (:memory (rail--gauge "MEM" (getf memory :percent) (rail--digits (getf memory :used))
-                            nil ground))
-      (:gpu (rail--gauge "GPU" (getf gpu :percent) (cassette--degrees (getf gpu :temp))
+      (:memory (rail--gauge "MEM" (getf meter :memory)
+                            (rail--digits (getf meter :memory-used)) nil ground))
+      (:gpu (rail--gauge "GPU" (getf meter :gpu) (cassette--degrees (getf gpu :temp))
                          (cassette--hot-p (getf gpu :temp)) ground))
-      (:vram (rail--gauge "VRAM" (if (plusp (or (getf gpu :total) 0))
-                                     (round (* 100 (or (getf gpu :used) 0)) (getf gpu :total))
-                                     0)
-                          (rail--digits (getf gpu :used)) nil ground))
+      (:vram (rail--gauge "VRAM" (getf meter :vram)
+                          (rail--digits (getf meter :vram-used)) nil ground))
       (:battery (let ((battery (service-state snapshot :battery)))
                   (rail--gauge (if (getf battery :charging) "CHG" "BAT")
                                (getf battery :percent) nil nil ground)))
@@ -430,9 +491,12 @@ draws in past the readings it carries -- and die into its rounded ends."
   (let* ((low (+ top radius))
          (high (- bottom radius))
          (step (max 1 (getf +rail--voice+ :step))))
-    (remove-duplicates
-     (append (loop for y from low to high by step collect y) (list high))
-     :test #'equal :from-end t)))
+    (if (> low high)
+        (list high)
+        (let ((rows nil))
+          (loop for y from low to high by step do (push y rows))
+          (unless (= (car rows) high) (push high rows))
+          (nreverse rows)))))
 
 (defun rail--weld-profile (k)
   "Where a weld's boundary stands X out from the card's frame, and how far above
@@ -456,9 +520,17 @@ ends rounded. WELDS is how far each side's weld reaches, 0 for a side that let g
          (rows (rail--edge-rows top bottom radius))
          (ripples (and ripple now levels (plusp (length levels))))
          (bob (if ripples (rail--voice-bob now levels amp) 0))
+         (last-x nil)
+         (last-y nil)
          (points nil))
     (labels ((add (x y)
-               (push (list (coerce x 'double-float) (coerce (+ y bob) 'double-float)) points))
+               (let ((x (coerce x 'double-float)) (y (coerce (+ y bob) 'double-float)))
+                 (unless (and last-x (< (abs (- x last-x)) 0.05)
+                              (< (abs (- y last-y)) 0.05))
+                   (push x points)
+                   (push y points)
+                   (setf last-x x
+                         last-y y))))
              (wobble (y) (if ripples (rail--wobble y top bottom now levels amp) 0))
              (out-right (x y) (add (+ x (if (> kright 0.5) 0 (wobble y))) y))
              (out-left (x y) (add (- x (if (> kleft 0.5) 0 (wobble y))) y)))
@@ -499,14 +571,7 @@ ends rounded. WELDS is how far each side's weld reaches, 0 for a side that let g
       ;; the left side
       (unless (> kleft 0.5)
         (dolist (y (reverse rows)) (out-left xl y)))
-      (let ((kept nil) (last-x nil) (last-y nil))
-        (dolist (point (nreverse points))
-          (unless (and last-x (< (abs (- (car point) last-x)) 0.05)
-                       (< (abs (- (car (cdr point)) last-y)) 0.05))
-            (push point kept)
-            (setf last-x (car point)
-                  last-y (car (cdr point)))))
-        (loop for point in (nreverse kept) append point)))))
+      (nreverse points))))
 
 (defun rail--edge (seam) (- (getf seam :x) (getf +layout+ :gaps)))
 
@@ -600,7 +665,8 @@ is beside it."
                                       :bolo-state nil :bolo-level 0
                                       :bolo-since nil :bolo-history nil :bolo-fade nil
                                       :rail-side nil :rail-edges nil :rail-hop nil
-                                      :rail-focus nil :rail-box nil))
+                                      :rail-focus nil :rail-box nil
+                                      :rail-meter nil :rail-step nil :rail-glide nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
     (cassette--bolo-watch state event))
@@ -638,6 +704,8 @@ is beside it."
          (edges rest)
          (impact 0d0)
          (fresh 1d0))
+    ;; The readings move toward the last sample before anything draws them.
+    (rail--glide state now)
     ;; A slab whose side changes hops; one that stays put rides its card, which
     ;; the surface's own attachment carries.
     (when (not (eql side (getf state :rail-side)))
@@ -685,8 +753,9 @@ is beside it."
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t)))
                       (when hop (list (interval :hop :refresh)))
-                      (when (and (plusp (length levels)) (or voice settling))
-                        (list (interval :hop 16)))
+                      (when (or (getf state :rail-glide)
+                                (and (plusp (length levels)) (or voice settling)))
+                        (list (interval :hop (getf +rail--glide+ :tick))))
                       (cassette--bolo-watches)
                       (when (and output tray)
                         (list (publish-state :shelf-tray-rect
