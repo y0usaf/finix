@@ -708,8 +708,8 @@ html.tn-themed:not(#dawn) {
 	--t3: var(--dawn-ink-3);
 	--t4: var(--dawn-ink-4);
 	--accent-ink: var(--dawn-link);
-	--pop-bg: var(--dawn-card);
-	--modal-bg: rgb(from var(--dawn-card) r g b / light-dark(86%, 90%));
+	--pop-bg: light-dark(rgb(255 255 255 / 76%), rgb(30 30 35 / 82%));
+	--modal-bg: light-dark(rgb(255 255 255 / 84%), rgb(30 30 35 / 88%));
 	--modal-dim: light-dark(rgb(20 20 24 / 24%), rgb(0 0 0 / 50%));
 }
 :root:not(#dawn):not(#dawn-b) :is(.cmdk, .mdl, .dlg-card, .pk-sheet, .tn-hd, .tn-signin-card, :where(.sf-overlay.modal) > .sf-ov-card, :where(.sf-prefs .pf-editor) > .sf-col) {
@@ -718,6 +718,8 @@ html.tn-themed:not(#dawn) {
 	box-shadow: 0 1.2em 3em -1em light-dark(rgb(0 0 0 / 18%), rgb(0 0 0 / 60%)), 0 0 0 1px var(--dawn-line);
 }
 :root:not(#dawn):not(#dawn-b) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-clist, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.'], .toast, .tn-bn-card, .tn-find) {
+	-webkit-backdrop-filter: var(--dawn-blur);
+	backdrop-filter: var(--dawn-blur);
 	box-shadow: 0 0.6em 1.6em -0.5em light-dark(rgb(0 0 0 / 14%), rgb(0 0 0 / 55%)), 0 0 0 1px var(--dawn-line);
 }
 :root:not(#dawn):not(#dawn-b) .tv-thumb {
