@@ -416,6 +416,10 @@
     then throw "user.ui.tomoe.bar.rail.themes: no rail theme named ${name}; there is ${lib.concatStringsSep ", " railThemeNames}"
     else builtins.head found;
 
+  screenshotLisp =
+    "(defparameter +screenshot-thread--shader+ \"${./shaders/screenshot-thread.glsl}\")\n"
+    + builtins.readFile ./lisp/screenshot-thread.lisp;
+
   railThemeLisp = let
     themes = map railTheme bar.rail.themes;
   in
@@ -3007,7 +3011,7 @@
         ]))
         generators.lisp));
     cassette = cassetteLisp ./lisp/plates.lisp;
-    rail = cassetteLisp ./lisp/rail.lisp + railThemeLisp;
+    rail = cassetteLisp ./lisp/rail.lisp + railThemeLisp + screenshotLisp;
   };
 
   railColors = {
