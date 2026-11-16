@@ -17,6 +17,7 @@ PENDINGWAIT=${LAND_PENDING_WAIT:-600}
 LANDPEND=${LAND_PENDING_WAIT_LAND:-30}
 SMOKE_TIMEOUT=${LAND_SMOKE_TIMEOUT:-1200}
 TIMING_TIMEOUT=${LAND_TIMING_TIMEOUT:-1800}
+GATE_TIMEOUT=${LAND_GATE_TIMEOUT:-1800}
 KILLWAIT=${LAND_KILL_AFTER:-60}
 KEEP=${LAND_KEEP:-0}
 
@@ -41,7 +42,7 @@ usage() {
 usage: tomoe-land <command> [args]
 
   daemon                          run the queue (one job at a time, in order)
-  submit <sha|branch>             land that commit: rebase, smoke, push both remotes
+  submit <sha|branch>             land that commit: rebase, smoke, gate, push both remotes
   submit --timing [-s SUITE] [--timeout SEC] [REF]
                                   measure one suite in its own VM, time boxed
   wait <id> [-t SEC]              block until the result file exists, then print it
@@ -267,6 +268,16 @@ run_land() {
 		cleanup_tree "$repo" "$tree"
 		return 1
 	}
+	if ! run_gate "$tree" "$tip" "$log/gate.log"; then
+		cleanup_tree "$repo" "$tree"
+		finish "$id" failed "$tip" "$base_sha" gate "$log/gate.log"
+		return 1
+	fi
+	note_step gate passed "$log/gate.log"
+	[[ -f $RESULTS/$id ]] && {
+		cleanup_tree "$repo" "$tree"
+		return 1
+	}
 
 	push_landing "$id" "$repo" "$tip" "$base_sha" "$ref" "$log/push.log"
 	case $? in
@@ -300,6 +311,22 @@ cleanup_tree() {
 	if ((KEEP)); then return 0; fi
 	git -C "$1" worktree remove --force "$2" >/dev/null 2>&1 || true
 	git -C "$1" worktree prune >/dev/null 2>&1 || true
+}
+
+run_gate() {
+	local tree=$1 tip=$2 log=$3 rc=0
+	[[ -x $tree/gate.sh ]] || {
+		printf 'land: %s has no gate.sh\n' "$tip" >"$log"
+		return 1
+	}
+	(
+		cd "$tree" || exit 1
+		GATE_FINIX=$FINIX timeout --signal=TERM --kill-after="$KILLWAIT" "$GATE_TIMEOUT" \
+			nice -n 10 ./gate.sh "$tip"
+	) >"$log" 2>&1 || rc=$?
+	((rc == 0)) && return 0
+	printf 'land: the gate failed (exit %s)\n' "$rc" >>"$log"
+	return 1
 }
 
 run_smoke() {
