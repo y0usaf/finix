@@ -4,7 +4,7 @@
   (list :grid nil :ratio 1 :focus nil
         :columns nil :windows nil
         :fronts (list (cons :left nil) (cons :right nil))
-        :floating nil :floats nil :fullscreen nil))
+        :floating nil :floats nil :fullscreen nil :frame nil))
 
 (defun deck--entry (list id) (assoc id list))
 (defun deck--layout-entry (layout id) (find id layout :key (lambda (entry) (getf entry :id))))
@@ -120,18 +120,28 @@ middle seam: a grid with an odd number of columns."
             (+ (* half (deck--grid-cell cols width)) (* (1- half) (getf +layout+ :gaps))))))
       (deck--left-width state width)))
 
+(defun deck--edge (state)
+  "How far the two columns stand in from the area's edges: the rail theme's
+frame asks for its own room, a window gap otherwise."
+  (getf (getf state :frame) :edge (getf +layout+ :gaps)))
+
+(defun deck--title (state)
+  "The row the rail theme's frame sets above each column's card for its title."
+  (getf (getf state :frame) :title 0))
+
 (defun deck--seam (state area)
   "The free strip in the deck's middle seam on AREA, a window gap in from each
 side; NIL on a narrow output, while a window is fullscreen, in a grid with an
 odd number of columns, or when the seam is no wider than two gaps."
   (let* ((gaps (getf +layout+ :gaps))
-         (x (and area (+ (getf area :x) gaps)))
-         (split (and area (deck--split state (- (getf area :width) (* 2 gaps)))))
+         (edge (deck--edge state))
+         (x (and area (+ (getf area :x) edge)))
+         (split (and area (deck--split state (- (getf area :width) (* 2 edge)))))
          (inner (- (getf +layout+ :seam) (* 2 gaps))))
     (unless (or (null split) (getf state :fullscreen) (deck--narrow-p area) (not (plusp inner)))
       (list :output (getf (getf area :output) :name)
-            :x (+ x split gaps) :y (+ (getf area :y) gaps)
-            :width inner :height (- (getf area :height) (* 2 gaps))))))
+            :x (+ x split gaps) :y (+ (getf area :y) edge)
+            :width inner :height (- (getf area :height) (* 2 edge))))))
 
 (defun deck--columns (state seam)
   "Each column's ids, nearest its front first, or NIL when there is no seam to
@@ -173,6 +183,12 @@ carry them. A grid keeps ordinary borders, so it publishes nothing either."
            (list x (+ y (* (- index front) (+ height gaps))) width height))))
       (t
        (let* ((seam (getf +layout+ :seam))
+              (edge (deck--edge state))
+              (title (deck--title state))
+              (x (+ (getf area :x) edge))
+              (y (+ (getf area :y) edge title))
+              (width (- (getf area :width) (* 2 edge)))
+              (height (- (getf area :height) (* 2 edge) title))
               (left-width (deck--left-width state width))
               (right-width (- width seam left-width))
               (side (deck--side-of state id))
@@ -181,7 +197,7 @@ carry them. A grid keeps ordinary borders, so it publishes nothing either."
               (index (position id column)))
          (when (and side index front)
            (list (if (eql side :left) x (+ x left-width seam))
-                 (+ y (* (- index front) (+ height gaps)))
+                 (+ y (* (- index front) (+ height edge title)))
                  (if (eql side :left) left-width right-width)
                  height)))))))
 
@@ -358,6 +374,7 @@ carry them. A grid keeps ordinary borders, so it publishes nothing either."
                        (getf event :name)))
          (terminal (and (equal command "terminal") (policy--terminal windows)))
          (quiet nil))
+    (setf (getf state :frame) (state-value snapshot :rail-frame))
     (when (eq type :unmap)
       (let ((gone (getf event :id)))
         (dolist (side '(:left :right))

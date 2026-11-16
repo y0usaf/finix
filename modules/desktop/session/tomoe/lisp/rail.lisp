@@ -8,7 +8,10 @@
 ;;; titles, how focus moves between them, the gauges and the voice -- and is one
 ;;; plist, +RAIL-<NAME>+, whose :DRAW turns the rail's context into the surfaces
 ;;; and window properties that draw it; default.nix gathers the themes
-;;; bar.rail.themes names into +RAIL-THEMES+ with each one's shader. The theme is
+;;; bar.rail.themes names into +RAIL-THEMES+ with each one's shader. A theme
+;;; whose frames need more room than a window gap names it as :FRAME -- :EDGE
+;;; pixels between the columns and the screen's edges, :TITLE pixels of title row
+;;; above each card -- and the deck lays the columns out by it. The theme is
 ;;; the bar's own state, the first one until Alt+Shift+T steps to the next, so a
 ;;; config reload keeps it. The rest of this file is what every theme shares --
 ;;; the readings, the switch and the voice -- and the first theme, morph.
@@ -773,6 +776,7 @@ knocked out of it, all from CONTEXT."
       (values state
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t))
+                            (publish-state :rail-frame (getf *rail--look* :frame))
                             (define-command "rail-theme"
                               :description "Step the rail to its next theme.")
                             (apply #'bind-key (getf +rail+ :theme-bind)))
