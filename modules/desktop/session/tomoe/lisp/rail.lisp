@@ -1,35 +1,31 @@
 (in-package #:tomoe-user)
 
-;;; MERIDIAN
+;;; LAMP
 ;;;
-;;; The seam between the deck's two columns is not a bar and no longer a track:
-;;; it is one solid slab in the mode's own tone -- the paper dropped a step in
-;;; the dark and lifted a step in the light -- with the readings knocked out of
-;;; it in ink. The slab stands flush against the focused card and follows that
-;;; card's frame, which is drawn in the same tone, so slab, readings and frame
-;;; read as one cast piece; the far card keeps a dim hairline and the slab
-;;; stands off it, leaving the wallpaper visible in between.
+;;; The seam between the deck's two columns is not a bar but a track: one step
+;;; darker than the paper, carrying nothing but light. The focused card's rail
+;;; edge is a filament, and its light falls across the track, easing out toward
+;;; the far card and fading toward the card's ends. Nothing else on the desktop
+;;; marks focus, and there is no accent: the light is the theme's own ink lifted
+;;; toward white in the dark and white itself in the light, so both modes read
+;;; the same way.
 ;;;
-;;; Its ends are liquid: where the slab meets the focused card's frame the two
-;;; straight edges are welded by the meniscus their union makes -- the curve
-;;; B(A) = (SQRT K - SQRT A)^2, where A is the height above the slab's end and K
-;;; is how far the weld reaches up the frame -- so the slab appears to be poured
-;;; against the card rather than butted to it. While bolo has the turn the free
-;;; edge is a level history: a sine ripple whose amplitude follows a sliding
-;;; window of the last sixty-four samples, newest at the top.
+;;; When focus leaves a card for one across the rail, the light neither jumps
+;;; nor slides. The light that was on the old card converges on the rail's
+;;; midpoint and dies there while, on the same clock, the new light blooms out
+;;; of that midpoint on the other side. The filament crosses with it, so a lit
+;;; edge is on the track in every frame of the crossing.
 ;;;
-;;; When focus crosses the rail the slab hops: its leading edge leaps to the new
-;;; card's frame on a stiff spring, its trailing edge lets go 25ms later on a
-;;; looser one, so the slab stretches across both frames, the welds stretch with
-;;; it and break as it leaves, and it snaps back to width and settles. The new
-;;; frame flashes toward the ink as the slab lands on it, and the readings ride
-;;; the slab's middle.
+;;; The track, the light, the carriages' stubs and the readings' type are four
+;;; kinds of shell surface. The light and the stubs are attached to their
+;;; window, so the compositor adds that window's in-flight move offset to them
+;;; every frame and they cannot drift from the card.
 ;;;
-;;; A spring can only move a surface, so the hop is recomputed once per display
-;;; refresh while it runs, and the ripple at 60 Hz while bolo's turn moves it --
-;;; a 4 Hz wave needs no more, and a repaint of the whole slab costs a few
-;;; milliseconds. At rest the slab's tree is the same tree every sample and the
-;;; compositor reuses it: nothing ticks.
+;;; A crossing is the one thing a spring cannot carry: a light that dies has to
+;;; change its own alpha, and a surface's spring only moves it. So while a
+;;; crossing runs the light is recomputed once per display refresh -- and only
+;;; then. Nothing ticks at rest, and the light's tree at rest is the same tree
+;;; every sample, which the compositor reuses instead of redrawing.
 
 (defvar *rail--palette* nil)
 (defvar *rail--mode* :dark)
@@ -39,25 +35,15 @@
 (defparameter +rail--clock-height+ 62)
 (defparameter +rail--air+ 32)
 (defparameter +rail--wave-rows+ 20)
-
-(defparameter +rail--slab+ 50)          ; how much of the seam the slab fills
-(defparameter +rail--inset+ 32)         ; the slab stops this far short of the ends
-(defparameter +rail--radius+ 10)        ; the slab's own ends
-(defparameter +rail--weld+ 26)          ; how far the meniscus reaches up a frame
-(defparameter +rail--weld-far+ 13)      ; the same, for the card it is leaving
-(defparameter +rail--squash+ 0.9)       ; a stretched slab gives some of it back
-(defparameter +rail--hop-ms+ 0.22)      ; one hop, start to settled
-(defparameter +rail--hop-delay+ 0.025)  ; the trailing edge lets go this much later
-(defparameter +rail--hop-lead+ '(:stiffness 6084 :damping-ratio 0.72 :launch 60))
-(defparameter +rail--hop-trail+ '(:stiffness 7396 :damping-ratio 0.42 :launch 0))
-(defparameter +rail--ripple-top+ 60)    ; where the free edge starts to move
-(defparameter +rail--ripple-height+ 410) ; and how far down it goes
-(defparameter +rail--ripple-step+ 4)  ; how finely the silhouette follows it
-(defparameter +rail--ripple-wave+ 0.075) ; radians per pixel down the slab
-(defparameter +rail--ripple-hz+ 26)     ; how fast the wave travels
-(defparameter +rail--shadow+ 10)        ; the contact shadow's reach, in pixels
-(defparameter +rail--shadow-alpha+ (list 0.55d0 0.26d0)) ; dark, light
-(defparameter +rail--corner-steps+ 7)   ; points across a rounded end
+(defparameter +rail--stub+ 40)          ; stub length at a card's two ends
+(defparameter +rail--filament-inset+ 24)
+(defparameter +rail--cross-ms+ 150)     ; one crossing, start to settled
+(defparameter +rail--reach+ 60)         ; how far the light falls each way
+(defparameter +rail--fade+ 140)         ; how long it takes to die at a card's end
+(defparameter +rail--cells+ 18)         ; four pixels each across the open seam
+(defparameter +rail--bands+ 6)          ; fade bands at each of a card's two ends
+(defparameter +rail--floor+ 0.004)      ; the alpha a cell must reach to be drawn
+(defparameter +rail--gather+ 1.6)       ; how early a dying light reaches the midpoint
 
 (defun rail--design (px)
   "PX of the design, in this output's logical units."
@@ -84,35 +70,23 @@ or counter when it has one, and the theme's published palette key otherwise."
 
 (defun rail--paper () (hud--c *rail--palette* :bg))
 
-(defun rail--slab ()
-  "The slab's tone: the paper a step further from the ink, which is down in the
-dark and up in the light. It is the mode's own cast piece, not its opposite."
+(defun rail--track ()
+  "The track, one step below the paper it stands on. The light falls on it."
   (if (eq *rail--mode* :dark)
-      (hud--mix (rail--paper) "#000000" 0.62)
-      (hud--mix (rail--paper) "#FFFFFF" 0.70)))
+      (hud--mix (rail--paper) "#000000" 0.45)
+      (hud--mix (rail--paper) (rail--c :ink) 0.11)))
 
-(defun rail--slab-fill ()
-  "The slab's own light: a hair lighter at the top than at the bottom, the way a
-cast face catches a room's light, as one two-stop gradient."
-  (let ((slab (rail--slab)))
-    (if (eq *rail--mode* :dark)
-        (list :linear 90 (list 0 (hud--mix slab "#FFFFFF" 0.035))
-              (list 1 (hud--mix slab "#000000" 0.035)))
-        (list :linear 90 (list 0 (hud--mix slab "#FFFFFF" 0.06))
-              (list 1 (hud--mix slab "#000000" 0.03))))))
+(defun rail--light ()
+  "What the light is made of: toward white in both modes."
+  (if (eq *rail--mode* :dark) (hud--mix (rail--c :ink) "#FFFFFF" 0.2) "#FFFFFF"))
 
-(defun rail--slab-shadow ()
-  "The shadow the slab casts on whatever is beside it: black over the wallpaper
-in the dark, ink over it in the light."
-  (hud--fade (if (eq *rail--mode* :dark) "#000000" (rail--c :ink))
-             (if (eq *rail--mode* :dark) (first +rail--shadow-alpha+)
-                 (second +rail--shadow-alpha+))))
+(defun rail--peak () (if (eq *rail--mode* :dark) 0.22d0 0.95d0))
 
-(defun rail--knock () (rail--c :ink))
+(defun rail--filament () (if (eq *rail--mode* :dark) (rail--c :ink) "#FFFFFF"))
 
-(defun rail--dead ()
-  "An unfocused card's hairline: the paper with a little ink in it."
-  (hud--mix (rail--paper) (rail--c :ink) 0.30))
+(defun rail--filament-alpha () (if (eq *rail--mode* :dark) 0.9 1))
+
+(defun rail--stub () (hud--fade (rail--c :ink) 0.22))
 
 (defun rail--parts (text)
   (loop with start = 0
@@ -310,7 +284,7 @@ the module list has no clock."
   "The readings, the voice block and the tray, in type over the track."
   (let* ((base (/ (getf seam :y) *rail--scale*))
          (height (/ (getf seam :height) *rail--scale*))
-         (width (rail--seam-width))
+         (width (rail--light-width))
          (tray (rail--tray snapshot))
          (voice (cassette--bolo-turn-p (getf state :bolo-state)))
          (parts nil)
@@ -336,161 +310,148 @@ the module list has no clock."
                         collect (or node (ui :rect :height (rail--design tall)))))))
 
 
+;;; The light
 
-;;; The slab
-
-(defun rail--seam-width ()
+(defun rail--light-width ()
   "The open seam between the two cards' borders: both channels and the rail."
   (+ (* 2 (getf +rail+ :channel)) (getf +rail+ :width)))
 
-(defun rail--slab-edges (width side)
-  "Where the slab starts and ends, in the seam's own pixels, for SIDE's card."
-  (if (eq side :left)
-      (cons 0 +rail--slab+)
-      (cons (- width +rail--slab+) width)))
+(defun rail--light-centre () (/ (1- (rail--light-width)) 2))
 
-(defun rail--slab-shift (width edges)
-  "How far the readings move off the seam's centre to ride the slab."
-  (- (/ (+ (car edges) (cdr edges)) 2) (floor width 2)))
+(defun rail--light-edge (side)
+  "Where a CARD's edge meets the track: the left card's right edge, or the
+right card's left edge, in the light surface's own pixels."
+  (if (eq side :left) 0 (1- (rail--light-width))))
 
 (defun rail--smoothstep (fraction)
   (let ((x (max 0d0 (min 1d0 fraction))))
     (* x x (- 3 (* 2 x)))))
 
-(defun rail--hop-edges (from to elapsed)
-  "The slab's two edges ELAPSED seconds into a hop from FROM's to TO's. The edge
-in the direction of travel leads on a stiff spring; the other lets go 25ms later
-on a looser one, so the slab bridges both frames and then snaps to width."
-  (let* ((l0 (car from)) (r0 (cdr from)) (l1 (car to)) (r1 (cdr to))
-         (lead (spring +rail--hop-lead+ elapsed))
-         (trail (spring +rail--hop-trail+ (- elapsed +rail--hop-delay+))))
-    (if (>= (+ l1 r1) (+ l0 r0))
-        (cons (+ l0 (* trail (- l1 l0))) (+ r0 (* lead (- r1 r0))))
-        (cons (+ l0 (* lead (- l1 l0))) (+ r0 (* trail (- r1 r0)))))))
+(defun rail--curve (fraction)
+  "A crossing's clock: quick off the mark, soft onto it, never past it."
+  (let ((left (- 1d0 (max 0d0 (min 1d0 fraction)))))
+    (- 1d0 (* left left left))))
 
-(defun rail--hop-impact (elapsed)
-  "The new frame's overshoot: zero, a stroke and a half at 45ms, then gone."
-  (if (<= elapsed 0d0)
-      0d0
-      (* (expt 2.718281828459045 (/ (- (max (- elapsed 0.045d0) 0d0)) 0.07d0))
-         (rail--smoothstep (/ elapsed 0.045d0)))))
+(defun rail--lobe (x reach peak)
+  (list :x (coerce x 'double-float) :reach (coerce reach 'double-float)
+        :peak (coerce peak 'double-float)))
 
-(defun rail--weld (gap k)
-  "How far the weld reaches up the frame while the slab's edge stands GAP from
-it: full against the frame, gone once the edge has let go by two pixels."
-  (if (< gap 2) (* k (- 1 (/ gap 2))) 0))
+(defun rail--rest-lobe (side)
+  (rail--lobe (rail--light-edge side) +rail--reach+ (rail--peak)))
 
-(defun rail--ripple (y now levels)
-  "The free edge's offset at Y: a sine wave travelling down the slab, its
-amplitude following the level history newest at the top."
-  (let ((rows (length levels)))
-    (if (or (zerop rows)
-            (< y +rail--ripple-top+)
-            (> y (+ +rail--ripple-top+ +rail--ripple-height+)))
-        0
-        (let* ((band (/ +rail--ripple-height+ rows))
-               (key (/ (- y +rail--ripple-top+) band))
-               (index (min (1- rows) (max 0 (floor key))))
-               (next (min (1- rows) (1+ index)))
-               (fraction (- key (floor key)))
-               (here (or (nth index levels) 0))
-               (there (or (nth next levels) 0))
-               (level (+ here (* fraction (- there here))))
-               (envelope (* (rail--smoothstep (/ (- y +rail--ripple-top+) 30d0))
-                            (rail--smoothstep (/ (- (+ +rail--ripple-top+ +rail--ripple-height+) y)
-                                                 60d0)))))
-          (* (+ 2.5d0 (* 7d0 level))
-             (sin (- (* y +rail--ripple-wave+) (* now +rail--ripple-hz+)))
-             envelope)))))
+(defun rail--falloff (lobe x row)
+  "LOBE's alpha at X on a row whose own fade is ROW, zero outside its reach."
+  (let ((reach (getf lobe :reach)) (peak (getf lobe :peak)))
+    (if (or (null reach) (null peak) (<= reach 0d0) (<= peak 0d0))
+        0d0
+        (let ((near (max 0d0 (- 1d0 (/ (abs (- x (getf lobe :x))) reach)))))
+          (* peak row (expt near 2.2d0))))))
 
-(defun rail--edge-rows (top bottom radius)
-  "The rows of a free edge: whole, but dense where the voice ripples it."
-  (let* ((low (+ top radius))
-         (high (- bottom radius))
-         (first-row (max low +rail--ripple-top+))
-         (last-row (min high (+ +rail--ripple-top+ +rail--ripple-height+))))
-    (remove-duplicates
-     (append
-      (list low)
-      (when (> first-row low) (list (- first-row 1)))
-      (loop for y from first-row to last-row by +rail--ripple-step+ collect y)
-      (when (< last-row high) (list (1+ last-row)))
-      (list high))
-     :test #'equal :from-end t)))
+(defun rail--light-cell (lobes x row)
+  "The alpha of LOBES where they meet at X on a row of ROW: the composite of
+stacking both, kept as one cell."
+  (let ((clear 1d0))
+    (dolist (lobe lobes)
+      (let ((alpha (rail--falloff lobe x row)))
+        (when (plusp alpha) (setf clear (* clear (- 1d0 (min 1d0 alpha)))))))
+    (- 1d0 clear)))
 
-(defun rail--weld-profile (k)
-  "Where a weld's boundary stands X out from the card's frame, and how far above
-the slab's end it is: B(A) = (SQRT K - SQRT B)^2, the union of a straight frame
-and a straight edge, from the apex on the frame to the slab's own end."
-  (let ((root (sqrt k)) (steps (max 1 (round k))))
-    (loop for step from 0 to steps
-          for x = (* k (/ step steps))
-          collect (cons x (expt (- root (sqrt x)) 2)))))
+(defun rail--light-rows (height fade)
+  "The light's bands down a card of HEIGHT: a cut every FADE/BANDS at each end,
+the body between them whole. HEIGHT and FADE are in the surface's own pixels."
+  (let ((edge (min fade (floor height 2))))
+    (if (< edge 2)
+        (list (cons 0 height))
+        (let* ((step (max 1 (round (/ edge +rail--bands+))))
+               (cuts (append (loop for y from 0 to edge by step collect y)
+                             (list (- height edge))
+                             (loop for y from (+ (- height edge) step) below height by step
+                                   collect y)
+                             (list height))))
+          (remove-duplicates
+           (loop for (top next) on cuts while next when (< top next)
+                 collect (cons top next))
+           :test #'equal :from-end t)))))
 
-(defun rail--slab-points (width edges top bottom welds ripple now levels)
-  "The slab's silhouette as x/y pairs: flush against the fused card's frame with
-the weld that joins them, the free edge rippling with the voice, its two ends
-rounded. WELDS is how far each side's weld reaches, 0 for a side that let go."
-  (let* ((xl (car edges))
-         (xr (cdr edges))
-         (kleft (car welds))
-         (kright (cdr welds))
-         (radius (min +rail--radius+ (max 0 (floor (- xr xl) 2))))
-         (quarter (* 0.5 1.5707963267948966))
-         (rows (rail--edge-rows top bottom radius))
-         (ripples (and ripple now levels (plusp (length levels))))
-         (points nil))
-    (labels ((add (x y)
-               (push (list (coerce x 'double-float) (coerce y 'double-float)) points))
-             (free-right (y) (+ xr (if ripples (rail--ripple y now levels) 0)))
-             (free-left (y) (- xl (if ripples (rail--ripple y now levels) 0))))
-      ;; the left end of the top edge
-      (if (> kleft 0.5)
-          (dolist (step (rail--weld-profile kleft)) (add (car step) (- top (cdr step))))
-          (progn
-            (add xl (+ top radius))
-            (loop for step from 0 to +rail--corner-steps+
-                  for angle = (* quarter (/ step +rail--corner-steps+))
-                  do (add (- (+ xl radius) (* radius (cos angle)))
-                          (- (+ top radius) (* radius (sin angle)))))))
-      ;; the right end of the top edge
-      (if (> kright 0.5)
-          (dolist (step (reverse (rail--weld-profile kright)))
-            (add (- width (car step)) (- top (cdr step))))
-          (loop for step from 0 to +rail--corner-steps+
-                for angle = (* quarter (/ step +rail--corner-steps+))
-                do (add (+ (- xr radius) (* radius (sin angle)))
-                        (- (+ top radius) (* radius (cos angle))))))
-      ;; the right side
-      (unless (> kright 0.5)
-        (dolist (y rows) (add (free-right y) y)))
-      ;; the right end of the bottom edge
-      (if (> kright 0.5)
-          (dolist (step (rail--weld-profile kright))
-            (add (- width (car step)) (+ bottom (cdr step))))
-          (loop for step from 0 to +rail--corner-steps+
-                for angle = (* quarter (/ step +rail--corner-steps+))
-                do (add (+ (- xr radius) (* radius (cos angle)))
-                        (+ (- bottom radius) (* radius (sin angle))))))
-      ;; the left end of the bottom edge
-      (if (> kleft 0.5)
-          (dolist (step (reverse (rail--weld-profile kleft)))
-            (add (car step) (+ bottom (cdr step))))
-          (loop for step from 0 to +rail--corner-steps+
-                for angle = (* quarter (/ step +rail--corner-steps+))
-                do (add (- (+ xl radius) (* radius (sin angle)))
-                        (+ (- bottom radius) (* radius (cos angle))))))
-      ;; the left side
-      (unless (> kleft 0.5)
-        (dolist (y (reverse rows)) (add (free-left y) y)))
-      (let ((kept nil) (last-x nil) (last-y nil))
-        (dolist (point (nreverse points))
-          (unless (and last-x (< (abs (- (car point) last-x)) 0.05)
-                       (< (abs (- (car (cdr point)) last-y)) 0.05))
-            (push point kept)
-            (setf last-x (car point)
-                  last-y (car (cdr point)))))
-        (loop for point in (nreverse kept) append point)))))
+(defun rail--light-row-fade (top bottom height fade)
+  (let ((edge (min fade (floor height 2))))
+    (if (< edge 1)
+        1d0
+        (let ((middle (/ (+ top bottom) 2)))
+          (rail--smoothstep (/ (min middle (- height 1 middle)) edge))))))
+
+(defun rail--light-band (top bottom height fade lobes)
+  (let* ((cell (/ (rail--light-width) +rail--cells+))
+         (row (rail--light-row-fade top bottom height fade))
+         (paint (rail--light)))
+    (ui :row :height (- bottom top) :align :start
+        :children (loop for index below +rail--cells+
+                        for x = (* cell (+ index 1/2))
+                        for alpha = (rail--light-cell lobes x row)
+                        collect (ui :rect :width (rail--design cell)
+                                    :height (- bottom top)
+                                    :background (when (> alpha +rail--floor+)
+                                                  (hud--fade paint alpha)))))))
+
+(defun rail--filament-node (height x rgb alpha)
+  "The filament: a pixel of lifted ink at X, inset from the card's ends."
+  (let ((inset (rail--design +rail--filament-inset+)))
+    (ui :row :align :start
+        :children
+        (list (ui :rect :width (rail--design x))
+              (ui :column :children
+                  (list (ui :rect :height inset)
+                        (ui :rect :width (rail--design 1)
+                            :height (- height inset inset)
+                            :background (hud--fade rgb alpha))
+                        (ui :rect :height inset)))))))
+
+(defun rail--light-tree (height lobes filament)
+  "The light over a card of HEIGHT: LOBES' cells, the FILAMENT in front."
+  (let ((fade (rail--design +rail--fade+)))
+    (ui :stack :width (rail--design (rail--light-width)) :height height
+        :children
+        (append (list (ui :column :align :stretch
+                          :children (loop for (top . bottom) in (rail--light-rows height fade)
+                                          collect (rail--light-band top bottom height fade lobes))))
+                (when filament
+                  (list (rail--filament-node height (first filament) (second filament)
+                                             (third filament))))))))
+
+(defun rail--bloom (lobes to progress)
+  "The light at PROGRESS across a crossing: LOBES converging on the midpoint and
+dying there, and the wanted side's light blooming out of that same midpoint."
+  (append
+   (loop for lobe in lobes
+         for u = (min 1d0 (* +rail--gather+ progress))
+         collect (rail--lobe (+ (getf lobe :x) (* u (- (rail--light-centre) (getf lobe :x))))
+                             (* (getf lobe :reach) (- 1d0 (* 0.4d0 progress)))
+                             (* (getf lobe :peak) (- 1d0 progress))))
+   (when (getf to :side)
+     (let* ((edge (rail--light-edge (getf to :side)))
+            (v (max 0d0 (min 1d0 (- (* +rail--gather+ progress) (1- +rail--gather+))))))
+       (list (rail--lobe (+ (rail--light-centre) (* v (- edge (rail--light-centre))))
+                         (* +rail--reach+ (+ (1- (/ 1d0 +rail--gather+))
+                                             (* (/ 1d0 +rail--gather+) v)))
+                         (* (rail--peak) progress)))))))
+
+
+;;; The rail
+
+(defun rail--track-body ()
+  "The track: the whole open seam, one tone below the paper."
+  (ui :column :align :stretch))
+
+(defun rail--carriage (box side)
+  "One card's two stubs, a pixel of ink at each end of where it meets the
+track. The focused card is not given one: its edge is lit instead."
+  (let ((height (getf box :height)))
+    (ui :column :align (if (eq side :left) :start :end)
+        :children (list (ui :rect :width (rail--design 1) :height (rail--design +rail--stub+)
+                            :background (rail--stub))
+                        (ui :rect :height (rail--design (- height (* 2 +rail--stub+))))
+                        (ui :rect :width (rail--design 1) :height (rail--design +rail--stub+)
+                            :background (rail--stub))))))
 
 (defun rail--edge (seam) (- (getf seam :x) (getf +layout+ :gaps)))
 
@@ -567,23 +528,11 @@ two plates across the top and bottom of the focal frame."
                                (and (equal (getf focal :output) (getf output :name)) focal)
                                snapshot))))
 
-
-;;; The rail
-
-(defun rail--slab-node (width height edges top bottom welds ripple now levels)
-  "One shape: the whole slab, welded to the fused card's frame, with its own
-light and the shadow it casts on what is beside it."
-  (ui :shape :width (rail--design width) :height (rail--design height)
-      :points (rail--slab-points width edges top bottom welds ripple now levels)
-      :background (rail--slab-fill)
-      :shadow (list (list 0 0 (rail--design +rail--shadow+) 0 (rail--slab-shadow)))))
-
 (define-extension "bar" (:reads (:system :services :data :outputs :layout :focus)
                          :state (list :cpu nil :memory nil :gpu nil
                                       :bolo-state nil :bolo-level 0
                                       :bolo-since nil :bolo-history nil
-                                      :rail-side nil :rail-edges nil :rail-hop nil
-                                      :rail-focus nil :rail-box nil))
+                                      :rail-light nil :rail-paint nil :rail-cross nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
     (cassette--bolo-watch state event))
@@ -598,8 +547,6 @@ light and the shadow it casts on what is beside it."
          (output (and seam (find (getf seam :output) (context snapshot :outputs)
                                  :key (lambda (o) (getf o :name)) :test #'equal)))
          (*rail--scale* (or (and output (max 1/4 (/ (getf output :scale-120 120) 120))) 1))
-         (width (rail--seam-width))
-         (height (if seam (getf seam :height) 0))
          (columns (and seam (state-value snapshot :deck-columns)))
          (carried (and columns (rail--carried columns (context snapshot :layout))))
          (focus (context snapshot :focus))
@@ -609,60 +556,54 @@ light and the shadow it casts on what is beside it."
          (layer (if (rail--covered-p snapshot seam) :bottom :top))
          (tray (rail--tray snapshot))
          (now (hud--now))
-         (hop (getf state :rail-hop))
-         (painted (getf state :rail-edges))
-         (rest (and side (rail--slab-edges width side)))
-         (voice (cassette--bolo-turn-p (getf state :bolo-state)))
-         (levels (getf state :bolo-history))
-         (edges rest)
-         (impact 0d0)
-         (fresh 1d0))
-    ;; A slab whose side changes hops; one that stays put rides its card, which
-    ;; the surface's own attachment carries.
-    (when (not (eql side (getf state :rail-side)))
-      (setf hop (when (and (or painted rest) (eq (getf +rail+ :throw) :slide))
-                  (list :at now :from (or painted rest) :to (or rest painted)
-                        :from-side (getf state :rail-side) :to-side side
-                        :box (or box (getf state :rail-box))
-                        :focus (getf state :rail-focus)))))
-    (when hop
-      (let ((elapsed (- now (getf hop :at))))
-        (if (>= elapsed +rail--hop-ms+)
-            (setf hop nil)
-            (let ((to (or rest (getf hop :to))))
-              (setf edges (rail--hop-edges (getf hop :from) to elapsed)
-                    impact (rail--hop-impact elapsed)
-                    fresh (rail--smoothstep (/ elapsed 0.05d0)))))))
-    (unless hop
-      (setf edges (or rest painted)))
-    (let* ((live (and edges box))
+         (painted (getf state :rail-paint))
+         (wanted (and side (list :id focus :side side :box box)))
+         (cross (getf state :rail-cross))
+         (rest (and wanted (rail--rest-lobe side)))
+         (lobes nil)
+         (filament nil))
+    ;; A light whose side changes crosses the rail; one that stays put rides its
+    ;; card, which the surface's own attachment carries.
+    (when (not (eql side (getf (getf state :rail-light) :side)))
+      (setf cross (when (and (or painted wanted) (eq (getf +rail+ :throw) :slide))
+                    (list :at now :lobes painted :to wanted
+                          :box (or box (getf (getf state :rail-light) :box))
+                          :from-x (if painted (getf (first painted) :x)
+                                      (rail--light-centre))))))
+    (when cross
+      (let ((progress (rail--curve (/ (* 1000d0 (- now (getf cross :at)))
+                                     +rail--cross-ms+))))
+        (if (>= progress 1d0)
+            (setf cross nil)
+            (let ((edge (and (getf (getf cross :to) :side)
+                             (rail--light-edge (getf (getf cross :to) :side)))))
+              (setf lobes (rail--bloom (getf cross :lobes) (getf cross :to) progress)
+                    filament (list (+ (getf cross :from-x)
+                                      (* progress (- (or edge (rail--light-centre))
+                                                     (getf cross :from-x))))
+                                    (rail--filament)
+                                    (if edge
+                                        (rail--filament-alpha)
+                                        (* (rail--filament-alpha) (- 1d0 progress)))))))))
+    (unless cross
+      (setf lobes (and rest (list rest))
+            filament (when rest (list (rail--light-edge side) (rail--filament)
+                                      (rail--filament-alpha)))))
+    (let* ((live (and lobes (or (and box box) (getf cross :box))))
            (dock (eq (getf +rail+ :key-motion) :dock))
-           (live-height (if dock height (if live (getf live :height) 0)))
+           (live-height (if dock (if seam (getf seam :height) 0)
+                            (if live (getf live :height) 0)))
            (live-y (if dock (if seam (getf seam :y) 0) (if live (getf live :y) 0)))
-           (squash (if edges (* (max 0 (- (cdr edges) (car edges) +rail--slab+))
-                                +rail--squash+)
-                       0))
-           (top (if live (+ +rail--inset+ squash) 0))
-           (bottom (if live (- live-height +rail--inset+ squash) 0))
-           (welds (and edges
-                       (cons (rail--weld (car edges)
-                                         (if (eql side :left) +rail--weld+ +rail--weld-far+))
-                             (rail--weld (- width (cdr edges))
-                                         (if (eql side :right) +rail--weld+ +rail--weld-far+)))))
-           (shift (if edges (rail--slab-shift width edges) 0))
+           (stubs (remove (getf wanted :id) carried :key (lambda (entry) (getf entry :id))))
            (hot (loop for probe in '(:cpu :gpu)
                       thereis (cassette--hot-p (getf (getf state probe) :temp)))))
-      (setf (getf state :rail-side) side
-            (getf state :rail-edges) edges
-            (getf state :rail-hop) hop
-            (getf state :rail-focus) (getf key :id)
-            (getf state :rail-box) (or box (getf state :rail-box)))
+      (setf (getf state :rail-light) wanted
+            (getf state :rail-paint) lobes
+            (getf state :rail-cross) cross)
       (values state
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t)))
-                      (when hop (list (interval :hop :refresh)))
-                      (when (and voice (plusp (length levels)))
-                        (list (interval :hop 16)))
+                      (when cross (list (interval :cross :refresh)))
                       (cassette--bolo-watches)
                       (when (and output tray)
                         (list (publish-state :shelf-tray-rect
@@ -671,47 +612,56 @@ light and the shadow it casts on what is beside it."
                                                    :y (getf seam :y)
                                                    :width (getf +rail+ :width)
                                                    :height tray))))
-                      (when (and output live (plusp live-height) welds)
-                        (list (shell-surface :rail-slab
-                                             (ui :stack :width (rail--design width)
-                                                 :height (rail--design live-height)
-                                                 :children
-                                                 (list (rail--slab-node width live-height edges
-                                                                        top bottom welds
-                                                                        voice now levels)))
+                      (when output
+                        (list (shell-surface :rail-track (rail--track-body)
                                              :output (getf output :name) :anchors '(:top :left)
-                                             :width (rail--design width)
+                                             :width (rail--design (rail--light-width))
+                                             :height (rail--design (getf seam :height))
+                                             :margin (rail--surface-margin output (rail--lane seam :left)
+                                                                           (getf seam :y))
+                                             :layer layer :background (rail--track)
+                                             :click-through t)))
+                      (when (and output live (plusp live-height))
+                        (list (shell-surface :rail-light
+                                             (rail--light-tree (rail--design live-height)
+                                                               lobes filament)
+                                             :output (getf output :name) :anchors '(:top :left)
+                                             :width (rail--design (rail--light-width))
                                              :height (rail--design live-height)
                                              :margin (rail--surface-margin
                                                       output (rail--lane seam :left) live-y)
                                              :layer layer :background "#00000000"
                                              :click-through t
-                                             :attach (and (not dock) (getf key :id))
+                                             :attach (and (not dock) (getf wanted :id))
                                              :attach-axes '(:y))))
+                      (loop for entry in stubs
+                            for id = (getf entry :id)
+                            for stub = (getf entry :box)
+                            append (list (shell-surface
+                                          (intern (format nil "RAIL-CAR-~D" id) :keyword)
+                                          (rail--carriage stub (getf entry :side))
+                                          :output (getf output :name) :anchors '(:top :left)
+                                          :width (rail--design (getf +rail+ :channel))
+                                          :height (rail--design (getf stub :height))
+                                          :margin (rail--surface-margin
+                                                   output (rail--lane seam (getf entry :side))
+                                                   (getf stub :y))
+                                          :layer layer :background "#00000000"
+                                          :click-through t :slide t
+                                          :attach id :attach-axes '(:y))))
                       (when output
-                        (list (shell-surface :rail-type (rail--web state snapshot seam (rail--slab))
+                        (list (shell-surface :rail-type (rail--web state snapshot seam (rail--track))
                                              :output (getf output :name) :anchors '(:top :left)
-                                             :width (rail--design width)
-                                             :height (rail--design height)
-                                             :margin (rail--surface-margin
-                                                      output (+ (rail--lane seam :left) shift)
-                                                      (getf seam :y))
+                                             :width (rail--design (rail--light-width))
+                                             :height (rail--design (getf seam :height))
+                                             :margin (rail--surface-margin output (rail--lane seam :left)
+                                                                           (getf seam :y))
                                              :layer layer :background "#00000000"
                                              :click-through t)))
                       (unless (getf +rail+ :focus-border)
                         (loop for entry in carried
-                              for id = (getf entry :id)
-                              for mine = (eql id (getf key :id))
-                              for old = (eql id (getf hop :focus))
-                              collect (window-properties
-                                       id
-                                       :border (list :focused (hud--mix (rail--dead)
-                                                                        (rail--knock)
-                                                                        (max fresh impact))
-                                                     :unfocused (if (and old hop)
-                                                                    (hud--mix (rail--dead)
-                                                                              (rail--knock)
-                                                                              (- 1d0 fresh))
-                                                                    (rail--dead))))))
+                              collect (window-properties (getf entry :id)
+                                                         :border (list :focused (rail--c :rim)
+                                                                       :unfocused (rail--c :rim)))))
                       (rail--narrow snapshot state))
               nil))))

@@ -1,11 +1,9 @@
 (in-package #:tomoe-user)
 
-;; The voice block's shape: how many sample rows the waveform shows, how many
-;; samples the history keeps for whatever else reads it (the rail's ripple walks
-;; the whole history at 30 samples a second), how wide a full-level bar is, and
-;; how a row and the gap under it are drawn.
+;; The voice block's shape: how many sample rows the waveform keeps, how wide a
+;; full-level bar is, and how a row and the gap under it are drawn.
 (defparameter +bolo-voice+
-  (list :rows 20 :ripple 64 :width 14 :bar 2 :gap 1 :floor 0.02))
+  (list :rows 20 :width 14 :bar 2 :gap 1 :floor 0.02))
 
 (defparameter +bolo-ticks+ (coerce internal-time-units-per-second 'double-float))
 
@@ -98,7 +96,7 @@ waveform, and level events scroll that waveform."
              (setf (getf state :bolo-level) level)
              (when (cassette--bolo-turn-p (getf state :bolo-state))
                (let ((history (cons level (getf state :bolo-history)))
-                     (rows (max (getf +bolo-voice+ :rows) (getf +bolo-voice+ :ripple))))
+                     (rows (getf +bolo-voice+ :rows)))
                  (setf (getf state :bolo-history)
                        (if (> (length history) rows)
                            (subseq history 0 rows)
