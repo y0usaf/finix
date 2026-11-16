@@ -841,6 +841,11 @@ in {
             task = catalog.taskModel;
           };
           retry.fallbackChains = catalog.fallbackChains;
+          tier = {
+            openai = "none";
+            advisor = "none";
+            subagent = "none";
+          };
           extensions = map (path: "${extDir}/${path}") [
             "pi-chronobreak"
             "pi-recap"
