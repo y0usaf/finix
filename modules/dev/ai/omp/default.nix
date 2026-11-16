@@ -789,6 +789,7 @@ in {
           defaultThinkingLevel = catalog.ompThinkingLevel;
           advisor.enabled = true;
           advisor.reviewMode = "agent-end";
+          task.agentAdvisor.task = "on";
           startup.checkUpdate = false;
           startup.setupWizard = false;
           setupVersion = 3;
