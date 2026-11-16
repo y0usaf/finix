@@ -68,15 +68,19 @@ static int descend(int *dirfd, const char *component, uid_t uid, gid_t gid, int 
 	return 0;
 }
 
+// Whether this directory already carries a mount of its own. Comparing device numbers is not enough: every grant
+// comes out of the same share tree, so binding one folder inside another leaves both on the same device and the
+// service would mount the same grant again every two seconds until the box runs out of mount slots. The mount id
+// of the directory against its parent's says exactly what is wanted.
 static int mounted(int fd) {
-	struct stat here, up;
-	if (fstat(fd, &here) < 0) return -1;
+	struct statx here, up;
+	if (statx(fd, "", AT_EMPTY_PATH, STATX_MNT_ID, &here) < 0) return -1;
 	int parent = openat(fd, "..", O_PATH | O_DIRECTORY);
 	if (parent < 0) return -1;
-	int r = fstat(parent, &up);
+	int r = statx(parent, "", AT_EMPTY_PATH, STATX_MNT_ID, &up);
 	close(parent);
 	if (r < 0) return -1;
-	return here.st_dev != up.st_dev;
+	return here.stx_mnt_id != up.stx_mnt_id;
 }
 
 static int show(int fd, char *out, size_t size) {

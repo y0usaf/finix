@@ -57,8 +57,13 @@ apply_host() {
     ro) if ! findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1; then /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; fresh=1; fi; if test -w "$shares/$name"; then /run/wrappers/bin/sudo -n mount -o remount,bind,ro "$shares/$name"; fi ;;
   esac
   # What is shared here is the user's own files, and a bot in the box is another Unix user, so what the bot is given
-  # is made writable by the group they both have: cheap to walk here, and slow to walk from inside the box.
-  if [ "$fresh" = 1 ] && [ "$who" != "$target_user" ] && [ "$mode" != ro ]; then chmod -R g+rwX -- "$shares/$name" || fail "could not open $shares/$name to the group"; fi
+  # is opened to the group they both have: cheap to walk here as the owner, and impossible to do safely from inside
+  # the box (root there would be walking paths the bot can rewrite). The group matters because the box's own files
+  # keep it and a folder the bot created came out with the box's group.
+  if [ "$fresh" = 1 ] && [ "$who" != "$target_user" ] && [ "$mode" != ro ]; then
+    chgrp -R users -- "$shares/$name" 2>/dev/null || true
+    chmod -R g+rwX -- "$shares/$name" || fail "could not open $shares/$name to the group"
+  fi
 }
 
 # What each user gets, one `user grant target flags` line per grant, read by the box's own root-run service: the

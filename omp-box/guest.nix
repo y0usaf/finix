@@ -183,8 +183,6 @@
       Group = "users";
       Restart = "always";
       RestartSec = 5;
-      # "+" runs the prep as root, before the browser itself drops to the bot.
-      ExecStartPre = ["+${browserPrep asHome}"];
     };
     script = ''
       profile=${lib.escapeShellArg asHome}
@@ -209,22 +207,6 @@
         --window-size=1920,1080 --user-agent=${lib.escapeShellArg userAgent}
     '';
   };
-  # The profile lives on a share, so its files belong to the host user and carry the group the box's 9p server
-  # had, which is not the group the browser runs as; root puts them right before every start of the browser.
-  browserPrep = profile:
-    pkgs.writeShellScript "browser-profile-prep" ''
-      set -eu
-      profile=${lib.escapeShellArg profile}
-      for _ in $(seq 1 60); do
-        [ "$(${pkgs.util-linux}/bin/findmnt -n -o FSTYPE --target "$(dirname "$profile")" 2>/dev/null)" = 9p ] && break
-        sleep 0.5
-      done
-      [ "$(${pkgs.util-linux}/bin/findmnt -n -o FSTYPE --target "$(dirname "$profile")" 2>/dev/null)" = 9p ] || exit 0
-      mkdir -p "$profile"
-      chgrp -R users "$profile" 2>/dev/null || true
-      chmod -R g+rwX "$profile" 2>/dev/null || true
-      rm -f "$profile/SingletonLock" "$profile/SingletonCookie" "$profile/SingletonSocket"
-    '';
 in {
   system.stateVersion = "24.05";
 
