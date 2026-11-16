@@ -878,6 +878,17 @@
       trap 'fail "setup failed at line $LINENO: $BASH_COMMAND (exit $?)"' ERR
 
       mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${state}/seed ${state}/meta ${home}/.omp/natives
+      # A browser's profile is the box user's folder on a share, but chromium runs as the bot. Chromium creates
+      # its user-data-dir 0700, which the bot cannot write through 9p, so give the box user's group the profile
+      # and everything under it before the guest starts. A link a previous guest left at the path is removed,
+      # never walked: the box is down, and the host user owns the folder.
+      ${lib.concatMapStringsSep "\n" (browser: ''
+        profile=${lib.escapeShellArg browser.profile}
+        [ ! -L "$profile" ] || rm -f "$profile"
+        mkdir -p "$profile" 2>/dev/null || true
+        chgrp -R users "$profile" 2>/dev/null || true
+        chmod -R g+rwX "$profile" 2>/dev/null || true
+      '') (lib.attrValues browsers)}
       [ -e ${state}/meta/manifest ] || : >${state}/meta/manifest
       rm -f ${state}/id_ed25519
       [ -f ${state}/ssh-key ] || ssh-keygen -q -t ed25519 -N "" -C omp-box -f ${state}/ssh-key
