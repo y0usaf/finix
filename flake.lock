@@ -1983,11 +1983,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793971355,
-        "narHash": "sha256-5O6D+EYthfTIzv05cPI/NVoGRZkoPm8dgaSuNXTSE9Y=",
+        "lastModified": 1794804777,
+        "narHash": "sha256-asJyOH6k5nXCuMAz0lb7TlSQv37QowvFwIOnUXYqhXA=",
         "ref": "refs/heads/main",
-        "rev": "c3c1bcdacb9cd62b83c45cb2e8f39f4e3f702af6",
-        "revCount": 13,
+        "rev": "10560a1a83b65dc845bc8ff713781badbd83a42c",
+        "revCount": 14,
         "type": "git",
         "url": "file:///home/y0usaf/dev/developing/tern-script"
       },
@@ -2002,11 +2002,11 @@
         "nixpkgs": "nixpkgs_12"
       },
       "locked": {
-        "lastModified": 1794801669,
-        "narHash": "sha256-+nHoCvU2vLMjv02uAqMqo4u0BReSjtWeX/kiX6mKtCM=",
+        "lastModified": 1794804841,
+        "narHash": "sha256-dIBBnuz8Zj2tFzucvj4LNOXdk26dHWFurAv9saVsfms=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "b5a51228f1e25c625fe71703460d29521ab6923b",
+        "rev": "35f1a67e630d3bc615a0cd243a25fc97cc668658",
         "type": "github"
       },
       "original": {
