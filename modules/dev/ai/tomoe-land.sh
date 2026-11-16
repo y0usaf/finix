@@ -5,6 +5,7 @@ PROG=tomoe-land
 ROOT=${TOMOE_LAND_ROOT:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/agent/tomoe-land}
 LOCK=${TOMOE_LOCK:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/agent/tomoe-vm.lock}
 PENDING=${TOMOE_PENDING:-$(dirname "$LOCK")/tomoe-vm.pending}
+SWITCH_LOCK=${TOMOE_SWITCH_LOCK:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/agent/finix-switch.lock}
 AGENT=${TOMOE_AGENT:-tomoe-land}
 SYSTEM=${LAND_SYSTEM:-x86_64-linux}
 BASE=${LAND_BASE:-origin/main}
@@ -67,8 +68,60 @@ note_step() {
 	printf '%s %s %s\n' "$1" "$2" "$3" >>"$ROOT/steps"
 }
 
+LEASE_HOLDER=""
+LEASE_ACK=""
+
+lease_take() {
+	local lock=${1:-} mode=${2:-} wait=${3:-0} rc=0 tick=0 logged="" caller=$BASHPID
+	local -a holder
+	[[ -n $lock && ( $mode == -s || $mode == -x ) ]] || return 2
+	lease_release
+	mkdir -p "$(dirname "$lock")" || return 1
+	LEASE_ACK=$(mktemp "${TMPDIR:-/tmp}/tomoe-lease.XXXXXX") || return 1
+	holder=(flock "$mode" -o -E 75)
+	((wait > 0)) && holder+=(-w "$wait")
+	holder+=("$lock" bash -c '
+		printf lease >"$1" || exit 1
+		while kill -0 "$PPID" 2>/dev/null && kill -0 "$2" 2>/dev/null; do sleep 1; done
+	' _ "$LEASE_ACK" "$caller")
+	"${holder[@]}" </dev/null >/dev/null 2>&1 &
+	LEASE_HOLDER=$!
+	while [[ ! -s $LEASE_ACK ]]; do
+		if ! kill -0 "$LEASE_HOLDER" 2>/dev/null; then
+			wait "$LEASE_HOLDER" 2>/dev/null
+			rc=$?
+			LEASE_HOLDER=""
+			rm -f "$LEASE_ACK"
+			LEASE_ACK=""
+			return $((rc == 0 ? 1 : rc))
+		fi
+		if [[ -z $logged ]] && ((tick > 1500)); then
+			logged=1
+			{
+				printf '%s lease-wait %s still blocked on %s\n' \
+					"$(date -u +%FT%TZ)" "$mode" "$lock"
+				fuser -v "$lock" 2>&1
+				grep ":$({ stat -c '%i' "$lock"; } 2>/dev/null) " /proc/locks 2>/dev/null
+			} >>"$ROOT/journal.log" 2>&1
+		fi
+		if ((tick < 20)); then sleep 0.05; else sleep 1; fi
+		tick=$((tick + 1))
+	done
+	return 0
+}
+
+lease_release() {
+	[[ -n $LEASE_HOLDER ]] || return 0
+	kill -TERM "$LEASE_HOLDER" 2>/dev/null
+	wait "$LEASE_HOLDER" 2>/dev/null
+	LEASE_HOLDER=""
+	[[ -n $LEASE_ACK ]] && rm -f "$LEASE_ACK"
+	LEASE_ACK=""
+	return 0
+}
+
 take_lease() {
-	local mode=$1 pendmax=${2:-$PENDINGWAIT} waited=0
+	local mode=$1 pendmax=${2:-$PENDINGWAIT} waited=0 rc=0
 	if [[ $mode == -x ]]; then
 		mkdir -p "$PENDING" || return 1
 		: >"$PENDING/$AGENT.$$" || return 1
@@ -78,32 +131,17 @@ take_lease() {
 			waited=$((waited + 2))
 		done
 	fi
-	exec 9>"$LOCK" || return 1
-	(
-		sleep 1500
-		printf '%s lease-wait %s still blocked on %s\n' "$(date -u +%FT%TZ)" "$mode" "$LOCK" \
-			>>"$ROOT/journal.log"
-		{
-			fuser -v "$LOCK" 2>&1
-			grep ":$(stat -c '%i' "$LOCK") " /proc/locks 2>/dev/null
-		} >>"$ROOT/journal.log" 2>&1
-	) 9>&- &
-	local watchdog=$!
-	local rc=0
-	flock "$mode" -w "$LEASEWAIT" 9 || rc=$?
-	kill "$watchdog" 2>/dev/null
-	wait "$watchdog" 2>/dev/null
+	lease_take "$LOCK" "$mode" "$LEASEWAIT" || rc=$?
+	rm -f "$PENDING/$AGENT.$$"
 	if ((rc != 0)); then
-		rm -f "$PENDING/$AGENT.$$"
 		printf '%s lease-timeout %s after %ss\n' "$(date -u +%FT%TZ)" "$mode" "$LEASEWAIT" \
 			>>"$ROOT/journal.log"
 		return 75
 	fi
-	rm -f "$PENDING/$AGENT.$$"
 	return 0
 }
 
-release_lease() { exec 9>&-; }
+release_lease() { lease_release; }
 
 submit() {
 	local type=land ref="" suite=timing timeout=""
@@ -390,8 +428,8 @@ run_smoke() {
 	local pid
 	set -m
 	timeout --signal=TERM --kill-after="$KILLWAIT" "$SMOKE_TIMEOUT" \
-		bash -c 'exec 9>&-; cd "$1" && LOGFILE=/dev/null nice -n 10 "$2/bin/nixos-test-driver" -o "$1/out"' _ \
-		"$ROOT/run/$id" "$driver" 9>&- >>"$log" 2>&1 &
+		bash -c 'cd "$1" && LOGFILE=/dev/null nice -n 10 "$2/bin/nixos-test-driver" -o "$1/out"' _ \
+		"$ROOT/run/$id" "$driver" >>"$log" 2>&1 &
 	pid=$!
 	set +m
 	printf '%s\n' "$pid" >"$ACTIVE_FILE.pid"
@@ -436,8 +474,7 @@ pin_finix() {
 	rm -f "$log.rev"
 	(
 		cd "$FINIX" || exit 1
-		exec 8>"${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/agent/finix-switch.lock"
-		flock 8 || exit 1
+		lease_take "$SWITCH_LOCK" -x 0 || exit 1
 		git fetch --quiet "$remote" || exit 1
 		src=$(jq -r '.nodes.tomoe.original | "\(.owner)/\(.repo)"' flake.lock) || exit 1
 		nix flake lock --override-input tomoe "github:$src/$full" || exit 1
@@ -564,8 +601,8 @@ run_timing() {
 	mkdir -p "$ROOT/run/$id/out"
 	set -m
 	timeout --signal=TERM --kill-after="$KILLWAIT" "$limit" \
-		bash -c 'exec 9>&-; cd "$1" && LOGFILE=/dev/null nice -n 10 "$2/bin/nixos-test-driver" -o "$1/out"' _ \
-		"$ROOT/run/$id" "$driver" 9>&- >>"$log/timing.log" 2>&1 &
+		bash -c 'cd "$1" && LOGFILE=/dev/null nice -n 10 "$2/bin/nixos-test-driver" -o "$1/out"' _ \
+		"$ROOT/run/$id" "$driver" >>"$log/timing.log" 2>&1 &
 	pid=$!
 	set +m
 	printf '%s\n' "$pid" >"$ACTIVE_FILE.pid"
@@ -763,10 +800,10 @@ daemon() {
 case ${1:-} in
 daemon) shift; daemon ;;
 _job) shift; job_main "$@" ;;
-submit) shift; exec 9>&-; submit "$@" ;;
-wait) shift; exec 9>&-; wait_result "$@" ;;
-status) shift; exec 9>&-; status ;;
-cancel) shift; exec 9>&-; cancel "$@" ;;
+submit) shift; submit "$@" ;;
+wait) shift; wait_result "$@" ;;
+status) shift; status ;;
+cancel) shift; cancel "$@" ;;
 -h | --help | help) usage ;;
 *) usage >&2; exit 2 ;;
 esac
