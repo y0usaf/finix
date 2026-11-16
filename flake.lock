@@ -2002,11 +2002,11 @@
         "nixpkgs": "nixpkgs_12"
       },
       "locked": {
-        "lastModified": 1794843032,
-        "narHash": "sha256-oLobb0b4S6UkHMezY56AKviIW+O4w9+9CsbQuyaNrEc=",
+        "lastModified": 1794843182,
+        "narHash": "sha256-qFc5eCM30u10vFwWUGopLGrz5RawiwRGnhIfIyjaccQ=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "1c9c7db3397e8fd41bbe0d35ac403b4a51b4f496",
+        "rev": "2e1fc7c886e8ebb3faaf96ac288351c56ea819de",
         "type": "github"
       },
       "original": {
