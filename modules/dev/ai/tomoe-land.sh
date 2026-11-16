@@ -374,6 +374,8 @@ pin_finix() {
 	git -C "$FINIX" remote 2>/dev/null | grep -qx "$remote" || remote=origin
 	(
 		cd "$FINIX" || exit 1
+		exec 8>"${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/agent/finix-switch.lock"
+		flock 8 || exit 1
 		git fetch --quiet "$remote" || exit 1
 		src=$(jq -r '.nodes.tomoe.original | "\(.owner)/\(.repo)"' flake.lock) || exit 1
 		nix flake lock --override-input tomoe "github:$src/$full" || exit 1
@@ -386,6 +388,11 @@ pin_finix() {
 		git add flake.lock || exit 1
 		git -c user.name=tomoe-land -c user.email=tomoe-land@localhost commit --quiet \
 			-m "finix: pin tomoe $short" -- flake.lock || exit 1
+		locked=$(git show HEAD:flake.lock | jq -r .nodes.tomoe.locked.rev) || exit 1
+		[[ $locked == "$full" ]] || {
+			printf 'committed flake.lock pins %s, not %s; not pushing\n' "$locked" "$full"
+			exit 1
+		}
 		git push "$remote" HEAD:main || exit 1
 	) >"$log" 2>&1 || return 1
 	rev=$(git -C "$FINIX" rev-parse --short HEAD) || return 1
