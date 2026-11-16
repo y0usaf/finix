@@ -31,16 +31,18 @@ const int TONE = 6, GLINT = 18, DUST = 21, GLASS = 24, GLASSHI = 27;
 const int INSIDE = 30, INK = 33, DIM = 36, RED = 39;
 const int GRAV = 42, VTOP = 43, VFLOW = 44;
 const int VOICE = 45, LEVELS = 51;
-const int TSW = 99, SETTLE = 100, FOCUS = 101, OLD = 102, ANIM = 103;
+const int TSW = 83, SETTLE = 84, FOCUS = 85, OLD = 86, ANIM = 87;
 const float DESIGN = 0.7;      // seconds the pour was drawn for
-const int TX0 = 99, TX1 = 100, TY0 = 101, TY1 = 102, TAXIS = 103;
-// the compartments as blocks: how many, then each one's kind and its rect --
-// seven of them, bolo's bed, the day, the clock and the four readings, which
-// with the palette, the type and the readings' own numbers keeps the tube inside
-// the 192 a surface's data may hold
-const int SB_N = 104, SB = 105;
-const int DAY = 140, DATE = 142, HOUR = 144, MINUTE = 146, TIMER = 148, VKIND = 150;
-const int GAUGES = 151, GSLOT = 10;
+const int TX0 = 83, TX1 = 84, TY0 = 85, TY1 = 86, TAXIS = 87;
+// the compartments as blocks: how many, then each one's kind and the start and
+// end of its run along the tube -- the run across it is the tube's own, since a
+// compartment always spans the tube from edge to edge. Nine of them: bolo's bed,
+// the day, the clock and one for each of the six readings a bar can carry, which
+// with the palette, the type and the readings' own numbers holds the tube at 187
+// of the 192 a surface's data may hold.
+const int SB_N = 88, SB = 89, SLOT = 3, SB_MAX = 9;
+const int DAY = 116, DATE = 118, HOUR = 120, MINUTE = 122, TIMER = 124, VKIND = 126;
+const int GAUGES = 127, GSLOT = 10;
 
 #define PI 3.14159265358979
 
@@ -381,7 +383,7 @@ vec4 frames_shot(vec2 p) {
 int gauge_slot(int upto) {
     int k = 0;
     for (int j = 0; j < upto; j++) {
-        int kind = int(D(SB + j * 5));
+        int kind = int(D(SB + j * SLOT));
         if (kind == 2 || kind == 3 || kind == 4 || kind == 5 ||
             kind == 8 || kind == 9 || kind == 10 || kind == 11) k++;
     }
@@ -401,12 +403,14 @@ vec4 tube_shot(vec2 p) {
     int nb = int(D(SB_N));
     // The compartments are blocks now, so a bar's run along its length and a
     // seam's down it; the painter inside each one is the same.
-    for (int i = 0; i < 8; i++) {
+    bool runs_down = D(TAXIS) < 0.5;
+    for (int i = 0; i < SB_MAX; i++) {
         if (i >= nb) break;
-        int b0 = SB + i * 5;
+        int b0 = SB + i * SLOT;
         int kind = int(D(b0));
-        vec4 r = vec4(D(b0 + 1), D(b0 + 2), D(b0 + 3), D(b0 + 4));
-        if (r.z <= r.x) break;
+        float from = D(b0 + 1), to = D(b0 + 2);
+        if (to <= from) break;
+        vec4 r = runs_down ? vec4(x0, from, x1, to) : vec4(from, y0, to, y1);
         if (p.x < r.x || p.x >= r.z || p.y < r.y || p.y >= r.w) continue;
         float bcx = (r.x + r.z) * 0.5;
         if (kind == 6) {

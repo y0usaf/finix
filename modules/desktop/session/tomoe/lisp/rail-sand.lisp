@@ -55,8 +55,11 @@
 (defparameter +rail-sand--gravity+ 36000d0)
 (defparameter +rail-sand--top+ 16800d0)
 (defparameter +rail-sand--flow+ 10400d0)
-(defparameter +rail-sand--levels+ 48)
-(defparameter +rail-sand--slots+ 4)
+(defparameter +rail-sand--levels+ 32)
+;; the readings a tube carries: every module the config names can have one, so
+;; media, CPU, memory, the GPU, its video memory and the frame's battery all
+;; draw, and the tube's numbers still fit the 192 a surface's data may hold
+(defparameter +rail-sand--slots+ 6)
 
 (defparameter +rail-sand--voice-height+ 0.30d0)
 (defparameter +rail-sand--date+ 20)
@@ -196,7 +199,7 @@ compartment blocks, then the text and the readings."
          (voice (cassette--bolo-turn-p (getf state :bolo-state))))
     (append (rail-sand--head 1 (list x0 y0) mid state clock voicing fade)
             (list x0 x1 y0 y1 (if (eq (getf strip :axis) :y) 0d0 1d0))
-            (rail--block-data strip blocks :max +rail-sand--blocks-max+)
+            (rail-sand--block-data strip blocks)
             (rail-sand--pack day)
             (rail-sand--pack date)
             (rail-sand--pack hour)
@@ -210,9 +213,27 @@ compartment blocks, then the text and the readings."
             (loop for section in sections append (rail-sand--gauge-data section)))))
 
 ;; The blocks a tube's shader reads: bolo's bed, the day, the clock and one
-;; compartment for each of the four readings -- seven, and no more than the
-;; shader's data list holds beside the palette, the type and the gauges.
-(defparameter +rail-sand--blocks-max+ 7)
+;; compartment for each of the six readings a bar can carry -- nine, and no more
+;; than the shader's data list holds beside the palette, the type and the gauges.
+(defparameter +rail-sand--blocks-max+ 9)
+
+(defun rail-sand--block-data (strip blocks)
+  "BLOCKS as sand.glsl reads them: how many, then each one's kind and the start
+and end of its run along STRIP's axis, in output pixels from the strip's corner.
+A compartment always spans the strip across that axis, so its other two sides are
+the tube's own; the table is padded to +RAIL-SAND--BLOCKS-MAX+ so the type and the
+readings that follow it keep their indices however few compartments a bar
+carries."
+  (let* ((vertical (eq (getf strip :axis) :y))
+         (origin (if vertical (getf strip :y) (getf strip :x)))
+         (shown (subseq blocks 0 (min +rail-sand--blocks-max+ (length blocks)))))
+    (append (list (length shown))
+            (loop for (module x y width height) in shown
+                  for from = (+ origin (if vertical y x))
+                  append (list (rail--kind module) from
+                               (+ from (if vertical height width))))
+            (make-list (* 3 (max 0 (- +rail-sand--blocks-max+ (length shown))))
+                       :initial-element 0))))
 
 (defparameter +rail-sand--strip-height+ 96)
 
@@ -235,12 +256,15 @@ reading, in the tube's own proportions."
 
 (defun rail-sand--bar-modules (state snapshot place)
   "The blocks a bar at PLACE carries: the clock and the date along the top bar,
-the compartments and bolo's bed along the bottom."
+the compartments and bolo's bed along the bottom. A bar carries the same readings
+the tube's numbers do -- no more -- so every compartment has its record."
   (if (eq place :top)
       (loop for module in '(:time :date)
             when (rail--height module state snapshot) collect module)
-      (append (rail-sand--modules state snapshot)
-              (when (cassette--bolo-turn-p (getf state :bolo-state)) (list :voice)))))
+      (let ((modules (rail-sand--modules state snapshot)))
+        (append (subseq modules 0 (min +rail-sand--slots+ (length modules)))
+                (when (cassette--bolo-turn-p (getf state :bolo-state))
+                  (list :voice))))))
 
 (defun rail-sand--blocks (state snapshot strip)
   "STRIP's blocks: the tube's own compartments in a seam, one equal slot each
