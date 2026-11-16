@@ -87,7 +87,7 @@
 ;; own beat, and nothing at all once it has arrived. Every number the glide
 ;; follows is here.
 (defparameter +rail--glide+
-  (list :tick 100                       ; milliseconds between the display's steps
+  (list :tick 16                        ; milliseconds between the display's steps
         :tau 0.18d0                     ; seconds a reading takes to cover a change
         :within '(:cpu 0.5 :memory 0.5 :memory-used 64    ; what each gauge
                   :gpu 0.5 :vram 0.5 :vram-used 64)))     ; cannot show is arrived
