@@ -257,6 +257,10 @@ vec2 rest_edges(float side) {
 
 float g_cy, g_hh, g_top, g_bottom, g_amp, g_dt;
 bool g_hop, g_flow;
+// The slab's edges at the six y a fragment's field() samples read them at, its
+// y - 3 up to its y + 2, taken once in mainImage: field() is inlined once at
+// each sample, so working them out inside it would repeat them there.
+vec2 g_edge[6];
 
 float free_left(float side) { return 0.5 + 0.5 * side; }
 
@@ -285,12 +289,8 @@ vec2 slab_edges(float y) {
     return e + vec2(-left, 1.0 - left) * reach;
 }
 
-float slab_field(vec2 p) {
-    // Far from the seam the slab cannot reach within a weld of p: a lower bound
-    // past the weld's reach leaves the smooth minimum exactly the frame's own.
-    float dx = abs(p.x - seam_mid()) - D(SEAMW) * 0.5;
-    if (dx > 60.0) return dx - 20.0;
-    vec2 e = slab_edges(p.y), up = slab_edges(p.y - 1.0), down = slab_edges(p.y + 1.0);
+// The slab at p from edges already worked out: i is where p.y sits in g_edge.
+float slab_edges_field(vec2 p, vec2 e, vec2 up, vec2 down) {
     vec2 slope = (down - up) * 0.5;
     float dl = (e.x - p.x) / sqrt(1.0 + slope.x * slope.x);
     float dr = (p.x - e.y) / sqrt(1.0 + slope.y * slope.y);
@@ -300,26 +300,47 @@ float slab_field(vec2 p) {
     return length(max(vec2(qx, qy), 0.0)) + min(max(qx, qy), 0.0) - rs;
 }
 
+float slab_field(vec2 p, int i) {
+    // Far from the seam the slab cannot reach within a weld of p: a lower bound
+    // past the weld's reach leaves the smooth minimum exactly the frame's own.
+    float dx = abs(p.x - seam_mid()) - D(SEAMW) * 0.5;
+    if (dx > 60.0) return dx - 20.0;
+    return slab_edges_field(p, g_edge[i], g_edge[i - 1], g_edge[i + 1]);
+}
+
+// The slab at a sample off those six: the glass bends its probe point by up to
+// its bevel, so it works its own edges out.
+float slab_field_at(vec2 p) {
+    float dx = abs(p.x - seam_mid()) - D(SEAMW) * 0.5;
+    if (dx > 60.0) return dx - 20.0;
+    return slab_edges_field(p, slab_edges(p.y), slab_edges(p.y - 1.0), slab_edges(p.y + 1.0));
+}
+
 // ---- the whole material
 
 bool g_slab, g_has_old;
 float g_kold;
 vec4 g_old;
 
-float field(vec2 p) {
-    float f = g_slab ? slab_field(p) : 1e4;
+// The two frames a sample can meet -- the focused card's and, while a switch
+// runs, the one draining away -- share one copy of the frame's material.
+float field_body(vec2 p, float f) {
     int focus = int(D(FOCUS)), old = int(D(OLD));
     bool moving = g_hop || (g_flow && g_has_old);
-    if (card_shown(focus)) {
-        float m = frame_field(p, card(focus), moving ? 2 : 1, g_dt);
-        f = g_slab ? smin(f, m, D(WELD)) : min(f, m);
-    }
-    if (moving && g_has_old && old != focus) {
-        float m = frame_field(p, g_old, 3, g_dt);
-        f = g_kold > 0.05 ? smin(f, m, g_kold) : min(f, m);
+    for (int r = 0; r < 2; r++) {
+        if (r == 0 && !card_shown(focus)) continue;
+        if (r == 1 && !(moving && g_has_old && old != focus)) break;
+        vec4 box = r == 0 ? card(focus) : g_old;
+        float m = frame_field(p, box, r == 0 ? (moving ? 2 : 1) : 3, g_dt);
+        f = (r == 0 ? g_slab : g_kold > 0.05) ? smin(f, m, r == 0 ? D(WELD) : g_kold)
+                                             : min(f, m);
     }
     return f;
 }
+
+float field(vec2 p, int i) { return field_body(p, g_slab ? slab_field(p, i) : 1e4); }
+
+float field_at(vec2 p) { return field_body(p, g_slab ? slab_field_at(p) : 1e4); }
 
 float g_shine;
 
@@ -364,7 +385,7 @@ vec3 etched(vec2 q) {
 vec3 glass(vec2 p, float f, vec2 dir) {
     float bevel = D(PANE + 2);
     float depth = clamp(-f / bevel, 0.0, 1.0);
-    float thick = clamp(-field(p - dir * bevel) / (0.5 * bevel), 0.0, 1.0);
+    float thick = clamp(-field_at(p - dir * bevel) / (0.5 * bevel), 0.0, 1.0);
     float edge = (1.0 - depth) * (1.0 - depth);
     vec2 bend = dir * D(PANE + 1) * edge * thick;
     float spin = 6.2832 * fract(52.9829 * fract(dot(p, vec2(0.06711, 0.00584))));
@@ -449,8 +470,27 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         return;
     }
 
-    float f = field(p);
-    float fs = field(p - vec2(1.0, 2.0));
+    // The edges slab_field() would work out for each sample, worked out once.
+    if (g_slab)
+        for (int k = 0; k < 6; k++) g_edge[k] = slab_edges(p.y - 3.0 + float(k));
+
+    float f = field(p, 3);
+    // The other five samples the fragment reads -- the shadow's, and the four the
+    // normal is measured at -- in one copy of the field.
+    float fs = f, sx = 0.0, sy = 0.0;
+    float cov = clamp(0.5 - f, 0.0, 1.0);
+    for (int k = 0; k < 5; k++) {
+        if (k > 0 && cov <= 0.0) break;
+        vec2 at = p + (k == 0 ? vec2(-1.0, -2.0) : k == 1 ? vec2(1.0, 0.0)
+                          : k == 2 ? vec2(-1.0, 0.0) : k == 3 ? vec2(0.0, 1.0)
+                          : vec2(0.0, -1.0));
+        float v = field(at, k == 0 ? 1 : k == 3 ? 4 : k == 4 ? 2 : 3);
+        if (k == 0) fs = v;
+        else if (k == 1) sx += v;
+        else if (k == 2) sx -= v;
+        else if (k == 3) sy += v;
+        else sy -= v;
+    }
     // How brightly the voice's crests light the focused frame at p.
     float shine = 0.0;
     if (g_vamp > 0.0 && f < 0.5) {
@@ -459,21 +499,12 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         perim(p, box, (box.x + box.z) * 0.5 < seam_mid(), q, b, qmax, iy);
         shine = frame_voice(q, qmax, iy).z * exp(-max(b - D(WF) - D(VOICE + 14), 0.0) / 4.0);
     }
-    float cov = clamp(0.5 - f, 0.0, 1.0);
     float sh = fs < 14.0 ? D(SA) * exp(-max(fs, 0.0) / 5.0) * (1.0 - cov) : 0.0;
     c = D3(SHADOW_C) * sh + c * (1.0 - sh);
     a = sh + a * (1.0 - sh);
     g_shine = shine;
-    // The material is one field, so the direction its shading reads off it is the
-    // field's own screen-space derivative. Four more evaluations would say the
-    // same thing, and with the other two they made the shader compile for 1.5 s
-    // -- past the 1 s a policy evaluation gets, so the first Alt+Shift+T onto
-    // this theme was dropped -- where this says it in 0.4 s. Only the direction
-    // is used, so nothing the look reads off it changed: the 2 px spread the
-    // difference took was smoothing, not data. Taken outside the COV test so a
-    // quad half on the material still has both its samples.
-    vec2 g = vec2(dFdx(f), dFdy(f));
     if (cov > 0.0) {
+        vec2 g = vec2(sx, sy) * 0.5;
 #ifdef GLASS
         vec3 m = glass(p, f, g / (length(g) + 1e-6));
 #else
