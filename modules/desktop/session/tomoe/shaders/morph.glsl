@@ -4,10 +4,11 @@
 // the rail carries. The focused frame is the slab's own material, as thick as
 // the slab's lip, welded to it by a smooth minimum, so slab and frame read as
 // one piece; every other card keeps a thin darker line. A switch across the
-// seam hops the slab on two springs and moves the frame: after a pause the old
-// frame drains back into the slab and the new one fills out of it (siphon), a
-// rapid switch only swaps the two frames under a quick slide (pour). While bolo
-// has the turn the slab's free edge is the voice.
+// seam hops the slab on two springs; one along a column leaves it on its side.
+// Either moves the frame: after a pause the old frame drains back into the slab
+// and the new one fills out of it (siphon), a rapid switch only swaps the two
+// frames under a quick slide (pour). While bolo has the turn the slab's free
+// edge is the voice.
 //
 // Every number comes from iData (laid out by rail.lisp's rail--tide-data), the
 // cards from iWindow, and time from iTime, which the rail counts from its own
@@ -181,31 +182,29 @@ vec2 rest_edges(float side) {
 }
 
 float g_cy, g_hh, g_top, g_bottom, g_amp, g_now, g_dt;
-bool g_hop;
+bool g_hop, g_flow;
 
 vec2 slab_edges(float y) {
     float side = D(SIDE), hold = D(HOLD);
-    vec2 e1 = rest_edges(side);
-    vec2 e;
+    vec2 e = rest_edges(side);
+    float wob = 0.0;
     if (g_hop) {
-        vec2 e0 = rest_edges(D(PREV));
+        vec2 e0 = rest_edges(D(PREV)), e1 = e;
         float ny = clamp(abs(y - g_cy) / g_hh, 0.0, 1.0);
         float lead = spring_v(g_dt - D(LEAD + 3) * pow(ny, 1.4), D(LEAD), D(LEAD + 1), D(LEAD + 2));
         float trail = spring_v(g_dt - (D(TRAIL + 2) + hold * exp(-pow(ny / 0.3, 2.0))), D(TRAIL), D(TRAIL + 1), 0.0);
         if (side > 0.0) e = vec2(e0.x + (e1.x - e0.x) * trail, e0.y + (e1.y - e0.y) * lead);
         else e = vec2(e0.x + (e1.x - e0.x) * lead, e0.y + (e1.y - e0.y) * trail);
-        float wob = 0.0, after = g_dt - hold - 0.02;
+        float after = g_dt - hold - 0.02;
         if (after > 0.0) wob = D(WOB) * exp(-after / D(WOB + 1)) * sin(after * D(WOB + 2)) * cos(ny * PI * 1.5);
-        float gulp = D(GULP);
-        if (gulp > 0.0) {
-            float g = sm(hold - 0.03, hold + 0.02, g_dt) * (1.0 - sm(hold + 0.10, hold + 0.22, g_dt));
-            float yg = (g_hh - 40.0) * sm(hold - 0.02, hold + 0.16, g_dt);
-            wob += gulp * g * exp(-pow((abs(y - g_cy) - yg) / 70.0, 2.0));
-        }
-        if (side > 0.0) e.x -= wob; else e.y += wob;
-    } else {
-        e = e1;
     }
+    float gulp = D(GULP);
+    if (g_flow && gulp > 0.0) {
+        float g = sm(hold - 0.03, hold + 0.02, g_dt) * (1.0 - sm(hold + 0.10, hold + 0.22, g_dt));
+        float yg = (g_hh - 40.0) * sm(hold - 0.02, hold + 0.16, g_dt);
+        wob += gulp * g * exp(-pow((abs(y - g_cy) - yg) / 70.0, 2.0));
+    }
+    if (side > 0.0) e.x -= wob; else e.y += wob;
     float voice = wobble(y, g_top, g_bottom, g_now, g_amp);
     if (side > 0.0) e.x -= voice; else e.y += voice;
     return e;
@@ -234,7 +233,7 @@ float g_kold;
 float field(vec2 p) {
     float f = g_slab ? slab_field(p) : 1e4;
     int focus = int(D(FOCUS)), old = int(D(OLD));
-    bool moving = g_hop || (g_dt < D(SETTLE) && D(FLOW) > -0.5 && old >= 0);
+    bool moving = g_hop || (g_flow && old >= 0);
     if (card_shown(focus)) {
         float m = frame_field(p, focus, moving ? 2 : 1, g_dt);
         f = g_slab ? smin(f, m, D(WELD)) : min(f, m);
@@ -262,7 +261,8 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     }
     g_now = iTime;
     g_dt = iTime - D(TSW);
-    g_hop = D(PREV) != 0.0 && D(PREV) != D(SIDE) && D(SIDE) != 0.0 && g_dt < D(SETTLE);
+    g_flow = g_dt < D(SETTLE) && D(FLOW) > -0.5;
+    g_hop = g_flow && D(PREV) != 0.0 && D(PREV) != D(SIDE) && D(SIDE) != 0.0;
     int focus = int(D(FOCUS));
     g_slab = D(SIDE) != 0.0 && card_shown(focus);
     if (g_slab) {
@@ -280,7 +280,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         float squash = max(mid.y - mid.x - D(SW), 0.0) * D(SQUASH);
         g_top = y0 + D(INSET) + squash + bob;
         g_bottom = y1 - D(INSET) - squash + bob;
-        g_kold = g_hop ? D(WELD) * (1.0 - sm(D(HOLD) * 0.6, D(HOLD) + 0.03, g_dt)) : 0.0;
+        g_kold = g_flow ? D(WELD) * (1.0 - sm(D(HOLD) * 0.6, D(HOLD) + 0.03, g_dt)) : 0.0;
         if (p.y > g_top - 40.0 && p.y < g_bottom + 40.0)
             near = min(near, max(abs(p.x - seam_mid()) - D(SEAMW) * 0.5 - 10.0, 0.0));
     }

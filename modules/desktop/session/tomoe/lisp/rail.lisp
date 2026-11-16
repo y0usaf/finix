@@ -12,12 +12,13 @@
 ;;;
 ;;; When focus crosses the rail the slab hops: its leading edge leaps to the new
 ;;; card on a stiff spring and its trailing edge lets go on a looser one, so the
-;;; slab stretches across the seam and snaps back to width. How the frame moves
-;;; depends on the pace of the work (TIDE): a switch after a pause siphons -- the
-;;; old frame drains back into the slab, the slab gulps, and the new frame fills
-;;; out of it round the card -- while a switch hard on the heels of another only
-;;; pours, the old frame thinning away as the new one swells in, so fast work
-;;; stays calm. While bolo has the turn the slab is the voice: its free edge is a
+;;; slab stretches across the seam and snaps back to width; when focus moves to
+;;; another card in the same column the slab stays on its side. Either way the
+;;; frame moves with the pace of the work (TIDE): a switch after a pause siphons
+;;; -- the old frame drains back into the slab, the slab gulps, and the new frame
+;;; fills out of it round the card -- while a switch hard on the heels of another
+;;; only pours, the old frame thinning away as the new one swells in, so fast
+;;; work stays calm. While bolo has the turn the slab is the voice: its free edge is a
 ;;; level history, a wave whose reach at each row is the level the voice had when
 ;;; it passed, newest at the top, with a belly that leans out with the level being
 ;;; spoken and a heave of the whole slab; when the turn closes it calms.
@@ -80,9 +81,9 @@
         :light (list :material "#B2ACA2" :line "#D6D2CA" :shadow "#342E28" :shade 0.24
                      :shine "#FFFFFF" :gloss 0.55)))
 
-;; TIDE: how a switch across the seam moves, in seconds unless marked. A switch
-;; that comes :GAP or more after the previous one siphons, a quicker one pours;
-;; either draws for :SETTLE. The slab's leading edge rides a spring of :OMEGA
+;; TIDE: how a focus switch moves, in seconds unless marked. A switch that comes
+;; :GAP or more after the previous one siphons, a quicker one pours; either draws
+;; for :SETTLE. Across the seam the slab's leading edge rides a spring of :OMEGA
 ;; radians per second at :DAMPING with a :LAUNCH, its ends :LAG behind its middle;
 ;; the trailing edge lets go :DELAY plus the flow's :HOLD later on its own
 ;; spring. Once free the slab rings by :REACH pixels, dying over :DECAY at :RATE
@@ -441,23 +442,25 @@ its time stays small enough for a float to keep the motion smooth."
 (defun rail--side-sign (side) (case side (:left -1) (:right 1) (t 0)))
 
 (defun rail--switch (state side id now)
-  "Note a change of the focused card's SIDE in STATE: a switch across the seam,
-siphoning after a pause and pouring on the heels of the last one, from the card
-that held focus before."
-  (let ((was (getf state :rail-side)))
-    (when (and side was (not (eql side was)))
-      (let* ((last (getf state :rail-crossed))
+  "Note a change of the focused card ID, on SIDE, in STATE: a switch across the
+seam or along its column, siphoning after a pause and pouring on the heels of
+the last one, from the card that held focus before. A cut throw notes none, so
+nothing animates or redraws."
+  (let ((was (getf state :rail-side))
+        (old (getf state :rail-focus)))
+    (when (and side was (not (and (eql side was) (eql id old)))
+               (eq (getf +rail+ :throw) :slide))
+      (let* ((last (getf state :rail-switched))
              (pour (and last (< (- now last) (getf +rail--tide+ :gap)))))
         (setf (getf state :rail-switch)
-              (list :at now :from was :flow (if pour :pour :siphon) :old (getf state :rail-focus))
-              (getf state :rail-crossed) now)))
+              (list :at now :from was :flow (if pour :pour :siphon) :old old)
+              (getf state :rail-switched) now)))
     (setf (getf state :rail-side) side
           (getf state :rail-focus) id)))
 
 (defun rail--motion (switch side epoch)
   "The switch as the shader reads it: side, previous side, start, flow, hold, gulp."
-  (let* ((cut (not (eq (getf +rail+ :throw) :slide)))
-         (flow (and switch (not cut) (getf switch :flow)))
+  (let* ((flow (and switch (getf switch :flow)))
          (tide (getf +rail--tide+ (or flow :pour))))
     (list (rail--side-sign side)
           (if flow (rail--side-sign (getf switch :from)) (rail--side-sign side))
@@ -605,7 +608,7 @@ two plates across the top and bottom of the focal frame."
                                       :bolo-state nil :bolo-level 0
                                       :bolo-since nil :bolo-history nil :bolo-fade nil
                                       :rail-side nil :rail-focus nil
-                                      :rail-switch nil :rail-crossed nil
+                                      :rail-switch nil :rail-switched nil
                                       :rail-meter nil :rail-step nil :rail-glide nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)

@@ -3204,7 +3204,7 @@ in {
       style = lib.mkOption {
         type = lib.types.enum ["panels" "gap" "cassette" "rail"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. rail: morph, the deck's seam filled by one slab cast in one material with the focused card's frame -- same colour, same thickness, welded smoothly where they meet, rounded 14px corners -- with the readings, clock and bolo's voice knocked out of it in ink; every other card keeps a thin darker line. A focus change across the seam hops the slab on two springs; after a pause the old frame drains back into the slab and the new one fills out of it, a quick switch only pours one frame into the other. Bolo's turn ripples the slab's free edge. Drawn by one GPU shader that rests once nothing moves; the material, geometry and timings are +rail--cast+ and +rail--tide+ in lisp/rail.lisp.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. rail: morph, the deck's seam filled by one slab cast in one material with the focused card's frame -- same colour, same thickness, welded smoothly where they meet, rounded 14px corners -- with the readings, clock and bolo's voice knocked out of it in ink; every other card keeps a thin darker line. A focus change across the seam hops the slab on two springs, one within a column leaves it on its side; either way, after a pause the old frame drains back into the slab and the new one fills out of it, a quick switch only pours one frame into the other. Bolo's turn ripples the slab's free edge. Drawn by one GPU shader that rests once nothing moves; the material, geometry and timings are +rail--cast+ and +rail--tide+ in lisp/rail.lisp.";
       };
 
       modules = lib.mkOption {
@@ -3244,7 +3244,7 @@ in {
         throwMode = lib.mkOption {
           type = lib.types.enum ["slide" "cut"];
           default = "slide";
-          description = "slide: a focus change across the rail hops the slab over on two springs and moves the frame (siphon after a pause, pour on a quick switch). cut: the slab and frame appear on the other side at once.";
+          description = "slide: a focus change moves the frame (siphon after a pause, pour on a quick switch), and one across the rail also hops the slab over on two springs. cut: the slab and frame appear on the new card at once.";
         };
         carryMax = lib.mkOption {
           type = lib.types.ints.positive;
