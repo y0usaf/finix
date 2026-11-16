@@ -22,12 +22,13 @@
 ;;; card's frame on a stiff spring, its trailing edge lets go 25ms later on a
 ;;; looser one, so the slab stretches across both frames, the welds stretch with
 ;;; it and break as it leaves, and it snaps back to width and settles. The new
-;;; frame takes a thicker stroke that relaxes as the slab lands on it, and the
-;;; readings ride the slab's middle.
+;;; frame flashes toward the ink as the slab lands on it, and the readings ride
+;;; the slab's middle.
 ;;;
 ;;; A spring can only move a surface, so the hop is recomputed once per display
-;;; refresh while it runs -- and only then, and only while bolo's turn moves the
-;;; ripple. At rest the slab's tree is the same tree every sample and the
+;;; refresh while it runs, and the ripple at 60 Hz while bolo's turn moves it --
+;;; a 4 Hz wave needs no more, and a repaint of the whole slab costs a few
+;;; milliseconds. At rest the slab's tree is the same tree every sample and the
 ;;; compositor reuses it: nothing ticks.
 
 (defvar *rail--palette* nil)
@@ -51,14 +52,11 @@
 (defparameter +rail--hop-trail+ '(:stiffness 7396 :damping-ratio 0.42 :launch 0))
 (defparameter +rail--ripple-top+ 60)    ; where the free edge starts to move
 (defparameter +rail--ripple-height+ 410) ; and how far down it goes
-(defparameter +rail--ripple-step+ 2.5)  ; how finely the silhouette follows it
+(defparameter +rail--ripple-step+ 4)  ; how finely the silhouette follows it
 (defparameter +rail--ripple-wave+ 0.075) ; radians per pixel down the slab
 (defparameter +rail--ripple-hz+ 26)     ; how fast the wave travels
-(defparameter +rail--shadow+ 12)        ; the contact shadow's reach, in pixels
+(defparameter +rail--shadow+ 10)        ; the contact shadow's reach, in pixels
 (defparameter +rail--shadow-alpha+ (list 0.55d0 0.26d0)) ; dark, light
-(defparameter +rail--frame+ 2)          ; the focused card's frame
-(defparameter +rail--hair-width+ 2)     ; an unfocused card's
-(defparameter +rail--impact+ 4)         ; how far that frame swells on a landing
 (defparameter +rail--corner-steps+ 7)   ; points across a rounded end
 
 (defun rail--design (px)
@@ -485,7 +483,14 @@ rounded. WELDS is how far each side's weld reaches, 0 for a side that let go."
       ;; the left side
       (unless (> kleft 0.5)
         (dolist (y (reverse rows)) (add (free-left y) y)))
-      (loop for point in (nreverse points) append point))))
+      (let ((kept nil) (last-x nil) (last-y nil))
+        (dolist (point (nreverse points))
+          (unless (and last-x (< (abs (- (car point) last-x)) 0.05)
+                       (< (abs (- (car (cdr point)) last-y)) 0.05))
+            (push point kept)
+            (setf last-x (car point)
+                  last-y (car (cdr point)))))
+        (loop for point in (nreverse kept) append point)))))
 
 (defun rail--edge (seam) (- (getf seam :x) (getf +layout+ :gaps)))
 
@@ -655,8 +660,9 @@ light and the shadow it casts on what is beside it."
       (values state
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t)))
-                      (when (or hop (and voice (plusp (length levels))))
-                        (list (interval :hop :refresh)))
+                      (when hop (list (interval :hop :refresh)))
+                      (when (and voice (plusp (length levels)))
+                        (list (interval :hop 16)))
                       (cassette--bolo-watches)
                       (when (and output tray)
                         (list (publish-state :shelf-tray-rect
@@ -699,13 +705,9 @@ light and the shadow it casts on what is beside it."
                               for old = (eql id (getf hop :focus))
                               collect (window-properties
                                        id
-                                       :border (list :radius 0
-                                                     :width (if mine
-                                                                (round (+ +rail--frame+
-                                                                          (* +rail--impact+ impact)))
-                                                                +rail--hair-width+)
-                                                     :focused (hud--mix (rail--dead)
-                                                                        (rail--knock) fresh)
+                                       :border (list :focused (hud--mix (rail--dead)
+                                                                        (rail--knock)
+                                                                        (max fresh impact))
                                                      :unfocused (if (and old hop)
                                                                     (hud--mix (rail--dead)
                                                                               (rail--knock)
