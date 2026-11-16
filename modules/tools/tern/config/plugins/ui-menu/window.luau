@@ -276,7 +276,10 @@ local TWEAKS = {
 	},
 	{
 		id = "grok-answer-bubbles",
-		requires = { "grok", "answer-bubbles" },
+		label = false,
+		default = false,
+		layer = true,
+		requires = { "grok" },
 	},
 	{
 		id = "grok-user-bubbles",
@@ -568,7 +571,7 @@ local LOOKS = {
 	{ label = "Ozette", layers = { "ozette", "ozette-motion", "ozette-cmus" } },
 	{ label = "YoRHa", layers = { "yorha" } },
 	{ label = "Dawn", layers = { "dawn", "grok" } },
-	{ label = "Grok", layers = { "grok" } },
+	{ label = "Grok", layers = { "grok", "grok-answer-bubbles" } },
 	{ label = "Departure", layers = { "departure", "bubbles" } },
 	{ label = "Automata", layers = { "automata", "bubbles" } },
 	{ label = "Botanical", layers = { "botanical", "bubbles" } },
