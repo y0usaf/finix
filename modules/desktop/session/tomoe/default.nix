@@ -368,7 +368,7 @@
       name = "glass";
       shader = pkgs.writeText "glass.glsl" ("#define GLASS\n" + builtins.readFile ./shaders/morph.glsl);
       lisp = ./lisp/rail-glass.lisp;
-      description = "morph in liquid glass: the same slab, frames, gauges, motion and voice -- the focused frame's ripple bending what lies under it and running light along its rim while bolo listens -- but the slab and the focused frame refract, frost and tint what lies beneath them, with light caught along their rims; the material and its glass are +rail-glass+ in lisp/rail-glass.lisp.";
+      description = "morph in liquid glass: the same slab, frames, gauges, motion and voice -- the focused frame's ripple bending what lies under it and running light along its rim while bolo listens -- but the slab and the focused frame take no colour of their own and nothing from the mode: they bend what lies beneath them towards their rims, frost it and lift its colour, with light caught along their rims and a dark line just inside them, so they read over light and dark alike; only the readings' ink follows the mode, and where what is beneath sits too near it the glass darkens or brightens it, keeping its hue, until the readings stand clear. Every other card's line is etched out of what lies beneath it. The glass is +rail-glass+ in lisp/rail-glass.lisp.";
     }
     {
       name = "sand";

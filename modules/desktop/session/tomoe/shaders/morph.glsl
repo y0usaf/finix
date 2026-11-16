@@ -303,7 +303,12 @@ float field(vec2 p) {
 float g_shine;
 
 #ifdef GLASS
+// Glass takes no colour of its own and nothing from the mode: PANE holds its
+// frost, lens, bevel, rim, haze, vibrance, contrast and edge, then the ink the
+// readings are set in.
 vec3 under(vec2 q) { return beneath(vec2(q.x - g_origin.x, g_h - (q.y - g_origin.y))).rgb; }
+
+float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 
 vec3 frosted(vec2 q, float r, float spin) {
     if (r < 0.5) return under(q);
@@ -315,27 +320,48 @@ vec3 frosted(vec2 q, float r, float spin) {
     return sum / 12.0;
 }
 
+// What the glass sees, darkened or brightened by W toward the luminance that
+// stands CONTRAST apart from the ink's, its hue kept: over what already stands
+// apart from the ink it changes nothing.
+vec3 legible(vec3 seen, float w) {
+    float ink = luma(D3(PANE + 8)), l = luma(seen), need = D(PANE + 6);
+    if (ink > 0.5) {
+        float top = max(ink - need, 0.04);
+        return l > top ? seen * mix(1.0, top / l, w) : seen;
+    }
+    float floor_l = min(ink + need, 0.96);
+    return l < floor_l ? 1.0 - (1.0 - seen) * mix(1.0, (1.0 - floor_l) / max(1.0 - l, 1e-3), w) : seen;
+}
+
+// A line etched out of what lies beneath it: darker over the light, lighter
+// over the dark.
+vec3 etched(vec2 q) {
+    vec3 u = under(q);
+    return luma(u) > 0.42 ? u * 0.66 : u + (1.0 - u) * 0.36;
+}
+
 vec3 glass(vec2 p, float f, vec2 dir) {
-    float bevel = D(PANE + 3);
+    float bevel = D(PANE + 2);
     float depth = clamp(-f / bevel, 0.0, 1.0);
     float thick = clamp(-field(p - dir * bevel) / (0.5 * bevel), 0.0, 1.0);
     float edge = (1.0 - depth) * (1.0 - depth);
-    vec2 bend = dir * D(PANE + 2) * edge * thick;
+    vec2 bend = dir * D(PANE + 1) * edge * thick;
     float spin = 6.2832 * fract(52.9829 * fract(dot(p, vec2(0.06711, 0.00584))));
-    vec3 seen = frosted(p + bend, D(PANE + 1) * thick, spin);
+    vec3 seen = frosted(p + bend, D(PANE) * thick, spin);
     float split = edge * thick * 0.6;
     seen.r = mix(seen.r, under(p + bend * 1.3).r, split);
     seen.b = mix(seen.b, under(p + bend * 0.7).b, split);
-    vec3 luma = vec3(0.2126, 0.7152, 0.0722);
-    float apart = abs(dot(seen, luma) - dot(D3(MAT), luma));
-    float tint = mix(D(PANE), 0.72, thick * depth * sm(0.25, 0.65, apart));
-    vec3 body = mix(seen, D3(MAT), tint) * (1.0 + D(PANE + 5));
+    seen = clamp(mix(vec3(luma(seen)), seen, 1.0 + D(PANE + 5) * thick), 0.0, 1.0);
+    seen += (1.0 - seen) * D(PANE + 4) * thick;
+    vec3 body = legible(seen, thick * sm(0.0, 0.6, depth));
     vec2 light = normalize(vec2(-0.6, -0.8));
     float facing = dot(dir, light);
-    float lip = exp(-max(-f, 0.0) / 1.2);
-    float rim = D(PANE + 4);
+    float inside = max(-f, 0.0);
+    float lip = exp(-inside / 1.2);
+    float rim = D(PANE + 3);
+    body *= 1.0 - D(PANE + 7) * exp(-pow((inside - 2.6) / 1.1, 2.0)) * (0.6 + 0.4 * max(-facing, 0.0));
     body += D3(SPEC_C) * lip * (pow(max(facing, 0.0), 1.5) + 0.45 * pow(max(-facing, 0.0), 2.0)) * rim;
-    body += D3(SPEC_C) * 0.12 * rim * edge * max(facing, 0.0);
+    body += D3(SPEC_C) * 0.10 * rim * edge * max(facing, 0.0);
     body += (D3(SPEC_C) - body) * g_shine;
     return min(body, vec3(1.0));
 }
@@ -389,7 +415,11 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     }
 
     float cr = clamp(0.5 - rec, 0.0, 1.0);
+#ifdef GLASS
+    vec3 c = cr > 0.0 ? etched(p) * cr : vec3(0.0);
+#else
     vec3 c = D3(REC_C) * cr;
+#endif
     float a = cr;
     if (near > 40.0) {
         if (a <= 0.0) discard;

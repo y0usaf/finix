@@ -608,8 +608,9 @@ in when it is no longer shown, for its frame to drain from."
             (or ghost (list 0 0 0 0))
             (let ((glass (rail--material :glass)))
               (when glass
-                (loop for key in '(:tint :frost :lens :bevel :rim :lift)
-                      collect (getf glass key)))))))
+                (append (loop for key in '(:frost :lens :bevel :rim :haze :vibrance :contrast :edge)
+                              collect (getf glass key))
+                        (rail--rgb (rail--ink))))))))
 
 (defun rail--shown (carried output)
   "The carried cards on OUTPUT's screen, nearest each column's front first."
