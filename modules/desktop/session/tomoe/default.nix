@@ -355,9 +355,34 @@
     media-width = 34;
   };
 
-  # morph's rail: one slab in the deck's seam cast in one material with the
-  # focused card's frame, drawn by shaders/morph.glsl on the GPU, with the
-  # readings knocked out of it in ink on a surface of their own.
+  # The rail's themes, each the whole look drawn by its own shader from the plist
+  # +rail-<name>+ in its lisp file (morph's is in lisp/rail.lisp itself).
+  railThemes = [
+    {
+      name = "morph";
+      shader = ./shaders/morph.glsl;
+      lisp = null;
+      description = "the deck's seam filled by one slab cast in one material with the focused card's frame -- same colour, same thickness, welded smoothly where they meet, rounded 14px corners -- with the readings, clock and bolo's voice knocked out of it in ink; every other card keeps a thin darker line. A focus change across the seam hops the slab on two springs, one within a column leaves it on its side; either way, after a pause the old frame drains back into the slab and the new one fills out of it, a quick switch only pours one frame into the other. Bolo's turn ripples the slab's free edge. Drawn by one GPU shader that rests once nothing moves; the material, geometry and timings are +rail--cast+ and +rail--tide+ in lisp/rail.lisp.";
+    }
+  ];
+
+  railThemeNames = map (theme: theme.name) railThemes;
+
+  railTheme = name: let
+    found = lib.filter (theme: theme.name == name) railThemes;
+  in
+    if found == []
+    then throw "user.ui.tomoe.bar.rail.themes: no rail theme named ${name}; there is ${lib.concatStringsSep ", " railThemeNames}"
+    else builtins.head found;
+
+  railThemeLisp = let
+    themes = map railTheme bar.rail.themes;
+  in
+    lib.concatMapStrings (theme: lib.optionalString (theme.lisp != null) (builtins.readFile theme.lisp + "\n")) themes
+    + "(defparameter +rail-themes+ (list ${lib.concatMapStringsSep " " (theme: ":${theme.name} (list* :shader \"${theme.shader}\" +rail-${theme.name}+)") themes}))\n";
+
+  # The rail: the deck's seam drawn in one theme at a time, its readings on a
+  # surface of their own.
   railParameters = {
     inherit (barParameters) modules time date;
     width = bar.rail.width;
@@ -366,7 +391,7 @@
     throw = keyword bar.rail.throwMode;
     carry-max = bar.rail.carryMax;
     focus-border = bar.rail.focusBorder;
-    shader = "${./shaders/morph.glsl}";
+    theme-bind = binding ["alt" "shift"] "t" "rail-theme" "Next Rail Theme";
     sample = 1000;
     colors = lib.mapAttrs (_: keyword) {
       ink = "ink";
@@ -2939,7 +2964,7 @@
         ]))
         generators.lisp));
     cassette = cassetteLisp ./lisp/plates.lisp;
-    rail = cassetteLisp ./lisp/rail.lisp;
+    rail = cassetteLisp ./lisp/rail.lisp + railThemeLisp;
   };
 
   railColors = {
@@ -3204,7 +3229,7 @@ in {
       style = lib.mkOption {
         type = lib.types.enum ["panels" "gap" "cassette" "rail"];
         default = "panels";
-        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. rail: morph, the deck's seam filled by one slab cast in one material with the focused card's frame -- same colour, same thickness, welded smoothly where they meet, rounded 14px corners -- with the readings, clock and bolo's voice knocked out of it in ink; every other card keeps a thin darker line. A focus change across the seam hops the slab on two springs, one within a column leaves it on its side; either way, after a pause the old frame drains back into the slab and the new one fills out of it, a quick switch only pours one frame into the other. Bolo's turn ripples the slab's free edge. Drawn by one GPU shader that rests once nothing moves; the material, geometry and timings are +rail--cast+ and +rail--tide+ in lisp/rail.lisp.";
+        description = "panels: framed boxes floating over the screen edges. gap: one line of text inside the 8px window gap, covering nothing. cassette: two putty deck plates hanging from the screen edge either side of the centre, with LCD readouts, LED ladders, a tape counter clock and a J-card for media, in a fixed palette that ignores the colour scheme. rail: the deck's seam filled by the rail, drawn with the frames round its cards in one of bar.rail.themes at a time.";
       };
 
       modules = lib.mkOption {
@@ -3226,6 +3251,11 @@ in {
       };
 
       rail = {
+        themes = lib.mkOption {
+          type = lib.types.listOf (lib.types.enum railThemeNames);
+          default = railThemeNames;
+          description = "Rail themes in the order Alt+Shift+T steps through them; a session starts on the first and a config reload keeps the one it is on. Each is the whole look: the rail, the window frames and titles, how focus moves, the gauges and bolo's voice, in a dark and a light palette. ${lib.concatMapStringsSep " " (theme: "${theme.name}: ${theme.description}") railThemes}";
+        };
         width = lib.mkOption {
           type = lib.types.ints.positive;
           default = 56;

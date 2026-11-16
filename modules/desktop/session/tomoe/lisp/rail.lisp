@@ -1,5 +1,18 @@
 (in-package #:tomoe-user)
 
+;;; The rail
+;;;
+;;; The seam between the deck's two columns is the rail: the readings, the clock
+;;; and bolo's voice, drawn with the frames round the cards it carries in one of
+;;; its themes. A theme is the whole look -- the rail, the window frames and
+;;; titles, how focus moves between them, the gauges and the voice -- and is one
+;;; plist, +RAIL-<NAME>+, whose :DRAW turns the rail's context into the surfaces
+;;; and window properties that draw it; default.nix gathers the themes
+;;; bar.rail.themes names into +RAIL-THEMES+ with each one's shader. The theme is
+;;; the bar's own state, the first one until Alt+Shift+T steps to the next, so a
+;;; config reload keeps it. The rest of this file is what every theme shares --
+;;; the readings, the switch and the voice -- and the first theme, morph.
+;;;
 ;;; morph
 ;;;
 ;;; The seam between the deck's two columns is filled by one slab, and the
@@ -43,6 +56,7 @@
 ;;; spent redrawing the same one -- and a gauge that draws its sample stops.
 
 (defvar *rail--palette* nil)
+(defvar *rail--look* nil)
 (defvar *rail--mode* :dark)
 (defvar *rail--scale* 1)
 
@@ -125,16 +139,29 @@ or counter when it has one, and the theme's published palette key otherwise."
         (getf *rail--palette* source)
         "#00000000")))
 
-(defun rail--value () (rail--c :ink))
+(defun rail--cast (key)
+  "KEY of the theme's cast: its geometry, or with a mode its colours."
+  (getf (getf *rail--look* :cast) key))
+
+(defun rail--material (key)
+  "KEY of the theme's cast in the current mode."
+  (getf (rail--cast *rail--mode*) key))
+
+(defun rail--ink ()
+  "The readings' ink: the theme's own when its cast names one, the palette's
+otherwise."
+  (or (rail--material :ink) (rail--c :ink)))
+
+(defun rail--value () (rail--ink))
 
 (defun rail--detail ()
-  (hud--fade (rail--c :ink) (if (eq *rail--mode* :dark) 0.62 0.66)))
+  (hud--fade (rail--ink) (if (eq *rail--mode* :dark) 0.62 0.66)))
 
 (defun rail--label ()
-  (hud--fade (rail--c :ink) (if (eq *rail--mode* :dark) 0.40 0.46)))
+  (hud--fade (rail--ink) (if (eq *rail--mode* :dark) 0.40 0.46)))
 
 (defun rail--outline ()
-  (hud--fade (rail--c :ink) 0.90))
+  (hud--fade (rail--ink) 0.90))
 
 (defun rail--parts (text)
   (loop with start = 0
@@ -145,7 +172,7 @@ or counter when it has one, and the theme's published palette key otherwise."
 
 (defun rail--text (text color size &optional (height size))
   (ui :text :text text :size (rail--design size) :line-height (rail--design size)
-      :height (rail--design height) :color color :font (getf +cassette+ :font)))
+      :height (rail--design height) :color color :font (or (getf *rail--look* :font) (getf +cassette+ :font))))
 
 (defun rail--split-unit (text)
   "TEXT as its number and its trailing percent sign, the sign drawn one tier
@@ -171,7 +198,7 @@ below the number it belongs to."
 one reading a percentage cannot carry."
   (ui :progress :width (rail--design 36) :height (rail--design 4)
       :radius (rail--design 2) :value (/ (max 0 (min 100 (round (or percent 0)))) 100)
-      :track (hud--fade (rail--c :ink) 0.12) :color (rail--value)))
+      :track (hud--fade (rail--ink) 0.12) :color (rail--value)))
 
 (defun rail--digits (mib)
   "Whole GiB from ten up, one decimal below, so a memory detail is four cells."
@@ -420,13 +447,9 @@ the module list has no clock."
 
 (defun rail--shift (side)
   "How far the readings move off the seam's centre to ride the slab on SIDE."
-  (let ((off (- (+ (getf +rail--cast+ :frame) (/ (getf +rail--cast+ :slab) 2) -1)
+  (let ((off (- (+ (rail--cast :frame) (/ (rail--cast :slab) 2) -1)
                 (/ (getf +layout+ :seam) 2))))
     (if (eq side :right) (- off) off)))
-
-(defun rail--material (key)
-  "KEY of the cast material in the current mode."
-  (getf (getf +rail--cast+ *rail--mode*) key))
 
 (defun rail--rgb (hex)
   "#RRGGBB as three reals from 0 to 1."
@@ -490,7 +513,7 @@ is open, the shape's numbers, and the level history, newest first."
   "Every number morph.glsl reads, in the order it reads them. ORIGIN is the
 surface's corner and SKIP the span of x it leaves to the other surface, both in
 output pixels; FOCUS and OLD index the surface's :WINDOWS."
-  (let* ((cast +rail--cast+)
+  (let* ((cast (getf *rail--look* :cast))
          (tide +rail--tide+)
          (lead (getf tide :lead)) (trail (getf tide :trail)) (ring (getf tide :ring))
          (pour (getf tide :pour)) (siphon (getf tide :siphon))
@@ -601,12 +624,98 @@ two plates across the top and bottom of the focal frame."
                                (and (equal (getf focal :output) (getf output :name)) focal)
                                snapshot))))
 
+;;; morph's surfaces
+
+(defun rail--morph-draw (look context)
+  "morph: the frames over the output, the slab down the seam and the readings
+knocked out of it, all from CONTEXT."
+  (declare (ignore look))
+  (destructuring-bind (&key state snapshot epoch seam output carried key side switch
+                         old windows voicing fade layer &allow-other-keys)
+      context
+    (let* ((focus-index (and key (position (getf key :id) windows)))
+           (old-index (and old (position old windows)))
+           (motion (rail--motion switch side epoch))
+           (voice (cassette--bolo-turn-p (getf state :bolo-state)))
+           (moved (if switch (max 0d0 (+ (- (getf switch :at) epoch) (getf +rail--tide+ :settle))) 0d0))
+           (calmed (cond (voice 1d6)
+                         ((realp fade) (max 0d0 (+ (- fade epoch) (getf +rail--voice+ :settle))))
+                         (t 0d0)))
+           (pad 60)
+           (band-x (- (rail--edge seam) pad))
+           (band-width (+ (getf +layout+ :seam) (* 2 pad)))
+           (top (getf output :y))
+           (left (getf output :x))
+           (shader (getf look :shader)))
+      (append
+       (list (shell-surface
+              :rail-frames (ui :stack)
+              :output (getf output :name) :anchors '(:top :left)
+              :width (rail--design (getf output :width))
+              :height (rail--design (getf output :height))
+              :layer layer :click-through t
+              :background (list :shader shader
+                                :data (rail--tide-data
+                                       (list left top)
+                                       (list band-x (+ band-x band-width))
+                                       seam output motion focus-index old-index
+                                       (rail--voice-data state nil epoch))
+                                :windows windows :clock epoch :until moved
+                                ;; only the rings round the cards are
+                                ;; ever drawn or repainted
+                                :reach (rail--design 40)))
+             (shell-surface
+              :rail-slab (ui :stack)
+              :output (getf output :name) :anchors '(:top :left)
+              :width (rail--design band-width)
+              :height (rail--design (getf output :height))
+              :margin (rail--surface-margin output band-x top)
+              :layer layer :click-through t
+              :background (list :shader shader
+                                :data (rail--tide-data
+                                       (list band-x top) (list 0 0)
+                                       seam output motion focus-index old-index
+                                       (rail--voice-data state voicing epoch))
+                                :windows windows :clock epoch
+                                :until (max moved calmed)))
+             (shell-surface :rail-type (rail--web state snapshot seam
+                                                  (rail--material :material))
+                            :output (getf output :name) :anchors '(:top :left)
+                            :width (rail--design (rail--seam-width))
+                            :height (rail--design (getf seam :height))
+                            :margin (rail--surface-margin
+                                     output (+ (rail--lane seam :left)
+                                               (if side (rail--shift side) 0))
+                                     (getf seam :y))
+                            :layer layer :background "#00000000"
+                            :click-through t :slide t))
+       (unless (getf +rail+ :focus-border)
+         (loop for entry in carried
+               collect (window-properties
+                        (getf entry :id)
+                        :radius (rail--design (rail--cast :radius))
+                        :border (list :focused "#00000000"
+                                      :unfocused "#00000000"))))))))
+
+(defparameter +rail-morph+ (list :draw #'rail--morph-draw :cast +rail--cast+))
+
 ;;; The rail
 
-(define-extension "bar" (:reads (:system :services :data :outputs :layout :focus)
+(defun rail--theme (state)
+  "The theme the rail draws in: the one STATE names, or the first."
+  (let ((name (getf state :rail-theme)))
+    (if (getf +rail-themes+ name) name (first +rail-themes+))))
+
+(defun rail--next-theme (name)
+  "The theme after NAME in +RAIL-THEMES+, round to the first after the last."
+  (let ((rest (cddr (member name +rail-themes+))))
+    (if rest (first rest) (first +rail-themes+))))
+
+(define-extension "bar" (:reads (:system :services :data :outputs :layout :focus :command)
                          :state (list :cpu nil :memory nil :gpu nil
                                       :bolo-state nil :bolo-level 0
                                       :bolo-since nil :bolo-history nil :bolo-fade nil
+                                      :rail-theme nil
                                       :rail-side nil :rail-focus nil
                                       :rail-switch nil :rail-switched nil
                                       :rail-meter nil :rail-step nil :rail-glide nil))
@@ -617,15 +726,18 @@ two plates across the top and bottom of the focal frame."
     (let ((system (context snapshot :system)))
       (dolist (probe '(:cpu :memory :gpu))
         (setf (getf state probe) (probe--sample probe (getf state probe) system)))))
-  (let* ((*cassette-mode* (state-value snapshot :theme-mode :dark))
+  (when (and (eq (getf event :type) :command) (equal (getf event :owner) "bar")
+             (equal (getf event :name) "rail-theme"))
+    (setf (getf state :rail-theme) (rail--next-theme (rail--theme state))))
+  (let* ((theme (rail--theme state))
+         (*rail--look* (getf +rail-themes+ theme))
+         (*cassette-mode* (state-value snapshot :theme-mode :dark))
          (*rail--mode* *cassette-mode*)
          (*rail--palette* (state-value snapshot :hud-palette))
          (seam (state-value snapshot :deck-seam))
          (output (and seam (find (getf seam :output) (context snapshot :outputs)
                                  :key (lambda (o) (getf o :name)) :test #'equal)))
          (*rail--scale* (or (and output (max 1/4 (/ (getf output :scale-120 120) 120))) 1))
-         (width (rail--seam-width))
-         (height (if seam (getf seam :height) 0))
          (columns (and seam (state-value snapshot :deck-columns)))
          (carried (and columns (rail--carried columns (context snapshot :layout))))
          (focus (context snapshot :focus))
@@ -643,6 +755,7 @@ two plates across the top and bottom of the focal frame."
          (voicing (and (plusp (length levels)) (or voice settling)))
          (hot (loop for probe in '(:cpu :gpu)
                     thereis (cassette--hot-p (getf (getf state probe) :temp)))))
+    (setf (getf state :rail-theme) theme)
     ;; The readings move toward the last sample before anything draws them.
     (rail--glide state now)
     (rail--switch state side (getf key :id) now)
@@ -650,29 +763,23 @@ two plates across the top and bottom of the focal frame."
       (setf (getf state :bolo-history) nil
             (getf state :bolo-fade) nil))
     (let* ((switch (getf state :rail-switch))
+           (cut (not (eq (getf +rail+ :throw) :slide)))
            (switching (and switch (< (- now (getf switch :at)) (getf +rail--tide+ :settle))))
            (old (and switching (getf switch :old)))
            (shown (and output (rail--shown carried output)))
            (windows (let ((ids (remove-duplicates (remove nil (list* (getf key :id) old shown))
                                                   :from-end t)))
-                      (subseq ids 0 (min 8 (length ids)))))
-           (focus-index (and key (position (getf key :id) windows)))
-           (old-index (and old (position old windows)))
-           (motion (rail--motion switch side epoch))
-           (moved (if switch (max 0d0 (+ (- (getf switch :at) epoch) (getf +rail--tide+ :settle))) 0d0))
-           (calmed (cond (voice 1d6)
-                         ((realp fade) (max 0d0 (+ (- fade epoch) (getf +rail--voice+ :settle))))
-                         (t 0d0)))
-           (pad 60)
-           (band-x (and seam (- (rail--edge seam) pad)))
-           (band-width (+ (getf +layout+ :seam) (* 2 pad))))
+                      (subseq ids 0 (min 8 (length ids))))))
       (values state
               (append (list (interval :sample (getf +rail+ :sample))
-                            (publish-state :hud-hot (and hot t)))
-                      ;; The slab, the frames and the voice animate on the GPU from
-                      ;; the times the rail hands them; only the gauges need the
-                      ;; rail itself to step, on its one timer, and only when a
-                      ;; drawn number is due to change.
+                            (publish-state :hud-hot (and hot t))
+                            (define-command "rail-theme"
+                              :description "Step the rail to its next theme.")
+                            (apply #'bind-key (getf +rail+ :theme-bind)))
+                      ;; Each theme animates on the GPU from the times the rail
+                      ;; hands it; only the gauges need the rail itself to step,
+                      ;; on its one timer, and only when a drawn number is due to
+                      ;; change.
                       (let ((due (getf state :rail-glide)))
                         (when due
                           (list (interval :hop (max (getf +rail--glide+ :tick)
@@ -686,54 +793,13 @@ two plates across the top and bottom of the focal frame."
                                                    :width (getf +rail+ :width)
                                                    :height tray))))
                       (when output
-                        (let ((top (getf output :y)) (left (getf output :x)))
-                          (list (shell-surface
-                                 :rail-frames (ui :stack)
-                                 :output (getf output :name) :anchors '(:top :left)
-                                 :width (rail--design (getf output :width))
-                                 :height (rail--design (getf output :height))
-                                 :layer layer :click-through t
-                                 :background (list :shader (getf +rail+ :shader)
-                                                   :data (rail--tide-data
-                                                          (list left top)
-                                                          (list band-x (+ band-x band-width))
-                                                          seam output motion focus-index old-index
-                                                          (rail--voice-data state nil epoch))
-                                                   :windows windows :clock epoch :until moved
-                                                   ;; only the rings round the cards are
-                                                   ;; ever drawn or repainted
-                                                   :reach (rail--design 40)))
-                                (shell-surface
-                                 :rail-slab (ui :stack)
-                                 :output (getf output :name) :anchors '(:top :left)
-                                 :width (rail--design band-width)
-                                 :height (rail--design (getf output :height))
-                                 :margin (rail--surface-margin output band-x top)
-                                 :layer layer :click-through t
-                                 :background (list :shader (getf +rail+ :shader)
-                                                   :data (rail--tide-data
-                                                          (list band-x top) (list 0 0)
-                                                          seam output motion focus-index old-index
-                                                          (rail--voice-data state voicing epoch))
-                                                   :windows windows :clock epoch
-                                                   :until (max moved calmed)))
-                                (shell-surface :rail-type (rail--web state snapshot seam
-                                                                     (rail--material :material))
-                                               :output (getf output :name) :anchors '(:top :left)
-                                               :width (rail--design width)
-                                               :height (rail--design height)
-                                               :margin (rail--surface-margin
-                                                        output (+ (rail--lane seam :left)
-                                                                  (if side (rail--shift side) 0))
-                                                        (getf seam :y))
-                                               :layer layer :background "#00000000"
-                                               :click-through t :slide t))))
-                      (unless (getf +rail+ :focus-border)
-                        (loop for entry in carried
-                              collect (window-properties
-                                       (getf entry :id)
-                                       :radius (rail--design (getf +rail--cast+ :radius))
-                                       :border (list :focused "#00000000"
-                                                     :unfocused "#00000000"))))
+                        (funcall (getf *rail--look* :draw) *rail--look*
+                                 (list :theme theme :state state :snapshot snapshot
+                                       :now now :epoch epoch :seam seam :output output
+                                       :carried carried :key key :side side
+                                       :switch switch :switching switching :cut cut :old old
+                                       :windows windows :voice voice :voicing voicing
+                                       :levels levels :fade fade :settling settling
+                                       :layer layer :tray tray :hot hot)))
                       (rail--narrow snapshot state))
               nil))))
