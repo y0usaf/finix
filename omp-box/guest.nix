@@ -468,12 +468,16 @@ in {
             fi
             # A bot's home is the bot's to rewrite, so root must not walk a path under it: the folder is the bot's
             # and the write runs with the bot's rights, reading a source only root can open.
-            if ${pkgs.util-linux}/bin/runuser -u ${githubUser} -- ${pkgs.coreutils}/bin/install -d -m 700 ${githubHome}/.config ${githubHome}/.config/gh &&
-               ${pkgs.util-linux}/bin/runuser -u ${githubUser} -- ${pkgs.coreutils}/bin/sh -c "umask 077; cat > ${githubHome}/.config/gh/hosts.yml" <"$src"; then
-              echo "omp-github: installed $src as ${githubHome}/.config/gh/hosts.yml"
-            else
+            if ! ${pkgs.util-linux}/bin/runuser -u ${githubUser} -- ${pkgs.coreutils}/bin/install -d -m 700 ${githubHome}/.config ${githubHome}/.config/gh ||
+               ! ${pkgs.util-linux}/bin/runuser -u ${githubUser} -- ${pkgs.bash}/bin/sh -c "umask 077; cat > ${githubHome}/.config/gh/hosts.yml" <"$src"; then
               echo "omp-github: cannot install $src for ${githubUser}" >&2
+              exit 0
             fi
+            echo "omp-github: installed $src as ${githubHome}/.config/gh/hosts.yml"
+            # The host's gh prefers ssh, which no box user has a key for: gh's own git operations (gh repo clone,
+            # gh pr checkout) use the https login just installed, through the helper in /etc/gitconfig.
+            ${pkgs.util-linux}/bin/runuser -u ${githubUser} -- ${pkgs.gh}/bin/gh config set git_protocol https --host github.com ||
+              echo "omp-github: gh keeps the host's git protocol for ${githubUser}" >&2
           '';
         };
         # The shared tree is mounted as root at boot, and every grant the host wrote is bind mounted from here into
