@@ -190,6 +190,11 @@ move retargeting rather than a second transition of its own."
   (list :tick 16                        ; milliseconds a step waits at the least
         :tau 0.18d0))                   ; seconds a reading takes to cover a change
 
+(defun rail--output-scale (output)
+  "OUTPUT's scale: one design pixel in physical pixels. A rail strip's frame
+names the output it is drawn on, so its design sizes come from that output."
+  (if output (max 1/4 (/ (getf output :scale-120 120) 120)) 1))
+
 (defun rail--design (px)
   "PX of the design, in this output's logical units."
   (/ px *rail--scale*))
@@ -740,8 +745,11 @@ each along the strip, by the shared placement, centred in it."
          (n (length modules))
          (span (if (eq (getf strip :axis) :y) (getf strip :height) (getf strip :width))))
     (when (plusp n)
+      ;; the shared placement scales each size once more, so the slot it is
+      ;; given is a design length, not the strip's physical span
       (rail--strip-blocks state snapshot strip
-                          (loop for module in modules collect (list module (floor span n) 0))
+                          (loop for module in modules
+                                collect (list module (floor (/ span *rail--scale*) n) 0))
                           nil))))
 
 (defun rail--windows-on (snapshot output)
@@ -778,32 +786,33 @@ stand on: each with the blocks it carries and the weld it attaches to."
     (dolist (placement (rail--placements))
       (let* ((frame (first placement))
              (placed (rail--placement-strip snapshot deck focal cards output placement))
-             (base (first placed)) (strip-output (second placed)))
+             (base (first placed))
+             (strip-output (second placed)))
         (when base
-          (let* ((seam (eq (getf base :place) :seam))
-                 (at-edge (and (eq frame :output) (not seam)))
-                 (across (rail--across base))
-                 (blocks (if (eq (getf base :axis) :y)
-                             (rail--blocks state snapshot base)
-                             (rail--bar-blocks state snapshot base))))
-            (setf found (append found
-                                (list (list strip-output
-                                            (append base
-                                                    (list :blocks blocks
-                                                          :weld (rail--weld base focus-box)
-                                                          :seam-x (if seam (rail--edge base) (car across))
-                                                          :seam-width (if seam
-                                                                           (getf +layout+ :seam)
-                                                                           (cdr across))
-                                                          :edge (and at-edge (getf base :place))
-                                                          :zone (if at-edge
-                                                                    (rail--design
-                                                                     (if (eq (getf base :axis) :x)
-                                                                         (getf base :height)
-                                                                         (getf base :width)))
-                                                                    0)))))))
-            (unless (member strip-output outputs :test #'eq)
-              (setf outputs (append outputs (list strip-output))))))))
+          (let ((*rail--scale* (rail--output-scale strip-output)))
+            (let* ((seam (eq (getf base :place) :seam))
+                   (at-edge (and (eq frame :output) (not seam)))
+                   (across (rail--across base))
+                   (blocks (if (eq (getf base :axis) :y)
+                               (rail--blocks state snapshot base)
+                               (rail--bar-blocks state snapshot base)))
+                   (strip (append base
+                                  (list :blocks blocks
+                                        :weld (rail--weld base focus-box)
+                                        :seam-x (if seam (rail--edge base) (car across))
+                                        :seam-width (if seam
+                                                         (getf +layout+ :seam)
+                                                         (cdr across))
+                                        :edge (and at-edge (getf base :place))
+                                        :zone (if at-edge
+                                                  (rail--design
+                                                   (if (eq (getf base :axis) :x)
+                                                       (getf base :height)
+                                                       (getf base :width)))
+                                                  0)))))
+              (setf found (append found (list (list strip-output strip))))
+              (unless (member strip-output outputs :test #'eq)
+                (setf outputs (append outputs (list strip-output)))))))))
     (loop for output in outputs
           collect (list output
                         (loop for entry in found
@@ -1349,7 +1358,7 @@ CONTEXT."
          (seam (or deck (first cards)))
          (output (and seam (find (getf seam :output) (context snapshot :outputs)
                                  :key (lambda (o) (getf o :name)) :test #'equal)))
-         (*rail--scale* (or (and output (max 1/4 (/ (getf output :scale-120 120) 120))) 1))
+         (*rail--scale* (rail--output-scale output))
          (strips (rail--strips state snapshot deck output cards focal))
          (has-seam (some (lambda (group)
                            (find :seam (second group)
@@ -1434,7 +1443,9 @@ CONTEXT."
                                                                                         group-output)))
                                                             :from-end t)))
                                                   (subseq ids 0 (min 8 (length ids))))
-                            when group-strips append (funcall (getf *rail--look* :draw) *rail--look*
+                            when group-strips append
+                              (let ((*rail--scale* (rail--output-scale group-output)))
+                                (funcall (getf *rail--look* :draw) *rail--look*
                                             (list :theme theme :state state :snapshot snapshot
                                                   :now now :epoch epoch
                                                   :seam group-seam
@@ -1450,5 +1461,5 @@ CONTEXT."
                                                              (if (rail--covered-p snapshot group-seam)
                                                                  :bottom :top)
                                                              :top)
-                                                  :tray tray :hot hot))))
+                                                  :tray tray :hot hot)))))
               nil))))
