@@ -1041,7 +1041,9 @@
         rm -f "$snapshot" "$snapshot-wal"
         cp -f "$db" "$snapshot" || continue
         [ ! -f "$db-wal" ] || cp -f "$db-wal" "$snapshot-wal"
-        timeout 60 python3 -c 'import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); c.execute("PRAGMA wal_checkpoint(TRUNCATE)"); c.execute("VACUUM"); c.close()' "$snapshot" || continue
+        # The write-ahead log becomes a plain rollback journal: a read-only reader of a write-ahead database needs the
+        # -shm file, which the bot must not be able to write, and this copy is only ever read.
+        timeout 60 python3 -c 'import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); c.execute("PRAGMA wal_checkpoint(TRUNCATE)"); c.execute("VACUUM"); c.execute("PRAGMA journal_mode=DELETE"); c.close()' "$snapshot" || continue
         dated=0
         dated=$(timeout 30 python3 -c 'import sqlite3,sys; print(sqlite3.connect(sys.argv[1]).execute("select count(last_visit_date) from moz_places").fetchone()[0])' "$snapshot" 2>/dev/null) || dated=0
         if [ "$dated" -gt 0 ]; then history=$db; break; fi
