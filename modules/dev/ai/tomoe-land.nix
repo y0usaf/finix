@@ -22,6 +22,7 @@ in
             "${pkgs.coreutils}/bin"
             "${pkgs.git}/bin"
             "${pkgs.util-linux}/bin"
+            "/run/wrappers/bin"
             "/run/current-system/sw/bin"
             "/nix/var/nix/profiles/default/bin"
             "${homeDirectory}/.nix-profile/bin"
