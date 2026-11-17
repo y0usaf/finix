@@ -300,7 +300,7 @@ in {
     hostName = "omp-box";
     firewall.enable = false;
     useNetworkd = true;
-    nameservers = ["10.0.2.3"];
+    nameservers = ["1.1.1.1" "8.8.8.8"];
   };
   system.nssModules = lib.mkForce [];
   services = {
@@ -376,7 +376,7 @@ in {
       networkConfig = {
         Address = ["10.0.2.15/24"];
         Gateway = "10.0.2.2";
-        DNS = ["10.0.2.3"];
+        DNS = ["1.1.1.1" "8.8.8.8"];
         Domains = ["home"];
       };
     };
