@@ -175,6 +175,19 @@ resetState();
 	check("exhausted names the way out", /\/login|\/antigravity NAME/.test(visible[0].message.content), true);
 }
 
+// 8. when nothing is left after a tool ran, recovery gets no tools either.
+{
+	const { handlers, sent, state, toolRan, userSaid } = load();
+	handlers.agent_start({});
+	toolRan();
+	await handlers.agent_end({ willContinue: false, messages: [assistantError("quota exceeded: insufficient_quota")] });
+	check("exhausted after a tool switches tools off", state.activeTools, []);
+	check("exhausted after a tool does not continue", sent.some(item => item.options?.triggerTurn === true), false);
+	check("exhausted after a tool says why", /A tool already ran in this turn/.test(sent.at(-1).message.content), true);
+	await userSaid("interactive");
+	check("exhausted tools come back on the next message", state.activeTools, ["counter", "bash", "read"]);
+}
+
 if (failures > 0) {
 	console.log(`${failures} check(s) failed`);
 	process.exit(1);

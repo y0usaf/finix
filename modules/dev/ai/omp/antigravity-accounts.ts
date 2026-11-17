@@ -145,6 +145,15 @@ export default function antigravityAccounts(pi) {
 		if (!limited && !gated) return;
 		// A gated account will not heal by itself, so it sits out for an hour
 		// instead of the default cooldown; a quota only cools for the default.
+		const ranTool = usedTool;
+		if (ranTool) {
+			toolsOff = true;
+			if (savedTools === undefined) {
+				savedTools = pi.getActiveTools();
+				await pi.setActiveTools([]);
+			}
+		}
+		const toolNote = " A tool already ran in this turn, so every tool is switched off here to keep it from running twice; send your next message and the tools come back.";
 		const next = crest(["json", "rotate"], limited ? undefined : { CREST_AUTH_COOLDOWN: "3600" });
 		if (typeof next?.to !== "string" || typeof next.dir !== "string") {
 			pi.sendMessage({
@@ -152,7 +161,7 @@ export default function antigravityAccounts(pi) {
 				display: true,
 				content: `${
 					link === undefined ? "" : `Google wants an account confirmed: [open Google's page](${link}).\n\n`
-				}Every Antigravity account is out of quota or needs a Google sign-in (${String(next?.until ?? "no successor")}). This turn stops here: sign the account in with /login → Google Antigravity (ACP), or add another with /antigravity NAME.`,
+				}Every Antigravity account is out of quota or needs a Google sign-in (${String(next?.until ?? "no successor")}). This turn stops here: sign the account in with /login → Google Antigravity (ACP), or add another with /antigravity NAME.${ranTool ? toolNote : ""}`,
 			});
 			return;
 		}
@@ -162,19 +171,8 @@ export default function antigravityAccounts(pi) {
 		const switchNote = `Account ${String(next.from)} ${why}. ${next.to} serves this session now.${
 			link === undefined ? "" : ` Google's page for ${String(next.from)}: [open it](${link}).`
 		}${limited ? "" : ` Sign ${String(next.from)} in again with /login → Google Antigravity (ACP) when convenient.`}`;
-		if (usedTool) {
-			// OMP recovers a failed turn by itself, so a message is not a guard:
-			// with no active tool the recovery cannot execute anything either.
-			toolsOff = true;
-			if (savedTools === undefined) {
-				savedTools = pi.getActiveTools();
-				await pi.setActiveTools([]);
-			}
-			pi.sendMessage({
-				customType: "antigravity-accounts",
-				display: true,
-				content: `${switchNote} A tool already ran in this turn, so every tool is switched off here to keep it from running twice; send your next message and the tools come back.`,
-			});
+		if (ranTool) {
+			pi.sendMessage({ customType: "antigravity-accounts", display: true, content: `${switchNote}${toolNote}` });
 			return;
 		}
 		pi.sendMessage({ customType: "antigravity-accounts", display: true, content: switchNote });
