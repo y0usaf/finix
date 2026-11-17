@@ -1627,12 +1627,17 @@ html.tn-phone:not(#dawn) :is(div.pop[role='menu'] .mi:not(.bare), .sf-menu-pop .
 :root:not(#dawn) #tabbar .tt.on :is(.nm, .sub, .tn-tx, .mk.keys, .kbd, .tn-num, .ico, svg) {
 	color: var(--dawn-page) !important;
 }
-/** The status line under a tab's name: the rail_status and bot-rail tweaks paint
- ** a state word in --pill and then fade the whole .sub to 55%, which left every
- ** state between 1.9:1 and 4.0:1 on the tab behind it. Keep each state's hue and
- ** set it at full strength, deep enough in light and bright enough in dark to
+/** A tinted tab's name and the line under it: rail_status and bot-rail paint a
+ ** state word in --pill and fade the whole .sub to 55%, which left every state
+ ** between 1.9:1 and 4.0:1 on the tab behind it, while the selected tab's name
+ ** and subtitle fell to --dawn-page over its own #ececee. Keep each state's hue
+ ** and its full strength, deep enough in light and bright enough in dark to
  ** clear 4.5:1 (WCAG AA) on the tab at rest (#eeeeee), hovered (#dddddd) and
  ** selected (#ececee light, #2a2a2d dark). The ring and dot keep --pill. */
+:root:not(#dawn) #tabbar .tt[data-tc] .nm,
+:root:not(#dawn) #tabbar .tt[data-tc].on .nm {
+	color: light-dark(#18181b, #f2f2f3) !important;
+}
 :root:not(#dawn) #tabbar .tt[data-tc] .sub,
 :root:not(#dawn) #tabbar .tt[data-tc].on .sub {
 	opacity: 1 !important;
