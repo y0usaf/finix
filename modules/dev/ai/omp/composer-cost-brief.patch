@@ -1,0 +1,28 @@
+--- a/packages/tui/src/status-line/component.ts
++++ b/packages/tui/src/status-line/component.ts
+@@ -3866,18 +3866,22 @@
+ 			"context",
+ 		);
+ 
+-		// The meter reads the context; the bar's usage is the session's cost.
+-		const cost =
++		// The meter reads the context; the bar's usage is the session's own spend.
++		// Helper and advisor costs, the pricing period and premium requests stay
++		// in the title, which shows on hover, so the bar carries one short figure
++		// instead of the whole bill.
++		const billing =
+ 			describeSegment("cost", ctx)
+ 				?.spans.map(part => part.t)
+ 				.join("") ?? "";
++		const cost = billing.split(" ")[0] ?? "";
+ 		const usage = node(
+ 			"text",
+ 			{
+ 				role: "omp.composer.usage",
+ 				text: cost,
+ 				wrap: "none",
+-				...(cost ? { title: `Session cost ${cost}` } : {}),
++				...(billing ? { title: `Session cost ${billing}` } : {}),
+ 				actions: { click: "status.cost" },
+ 			},
+ 			undefined,

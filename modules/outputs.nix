@@ -24,9 +24,11 @@ inputs: let
   # over has no deadline. The ninth answers no image after a `wl-paste` timeout and bounds the
   # native read at 5s, so a stuck owner costs one paste, not the tab's input; while a native read
   # holds the addon's clipboard lock, copies use OSC 52 alone instead of waiting on it from the
-  # JS thread.
+  # JS thread. The composer's usage readout repeated the whole bill — helper and advisor costs, the
+  # pricing period, premium requests — after every draft; the tenth puts the session's own spend
+  # there alone and leaves the rest in the title, which shows on hover.
   omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch ./dev/ai/omp/clipboard-paste-deadline.patch];
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch ./dev/ai/omp/clipboard-paste-deadline.patch ./dev/ai/omp/composer-cost-brief.patch];
   });
   inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 
