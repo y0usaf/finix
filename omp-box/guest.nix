@@ -29,6 +29,17 @@
     bots;
   botNames = map (bot: bot.user) bots;
   botsOf = name: lib.findFirst (bot: bot.name == name) null bots;
+  # The box user who gets the host user's GitHub login: no other Unix user can read the host's 0600
+  # ~/.config/gh/hosts.yml, so the host copies it into the auth share and omp-github installs it in this user's
+  # home, where gh and git's github.com helper find it.
+  githubUser = ompBox.github;
+  githubHome =
+    let
+      person = lib.findFirst (person: person.name == githubUser) null people;
+    in
+    if person == null
+    then throw "ompBox.github names ${githubUser}, which is not a user in the box"
+    else person.home;
   browserUser = name: let
     found = botsOf name;
   in
@@ -282,6 +293,13 @@ in {
   };
 
   environment.systemPackages = [ompBox.omp pkgs.bun pkgs.python3 pkgs.ungoogled-chromium pkgs.git pkgs.ripgrep pkgs.curl pkgs.gh pkgs.jq pkgs.fd pkgs.gnumake pkgs.gcc];
+  # git reaches github.com as the account gh is logged in to: the helper asks gh, which reads the login in the box
+  # user's own config, so no token is ever written into a URL, a remote or a file git reads. A user with no login
+  # gets gh's own failure, and git falls back to asking for one.
+  environment.etc."gitconfig".text = ''
+    [credential "https://github.com"]
+    	helper = "!${pkgs.gh}/bin/gh auth git-credential"
+  '';
   fonts.packages = [pkgs.noto-fonts-cjk-sans];
   documentation.enable = false;
 
@@ -429,6 +447,33 @@ in {
               fi
             '')
             people}
+          '';
+        };
+        # The host user's GitHub login, for the one bot that works on GitHub: the guest cannot read the host's
+        # ~/.config/gh/hosts.yml (0600, and another Unix user), so the host copied hosts.yml into the auth share and
+        # this installs it in the bot's own config. A re-login on the host reaches the box when it next boots.
+        omp-github = {
+          wantedBy = ["multi-user.target"];
+          unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+          script = ''
+            set -u
+            src=/etc/ssh/omp-box/gh-hosts.yml
+            if [ ! -r "$src" ]; then
+              echo "omp-github: $src is not in the auth share, so ${githubUser} has no GitHub login" >&2
+              exit 0
+            fi
+            # A bot's home is the bot's to rewrite, so root must not walk a path under it: the folder is the bot's
+            # and the write runs with the bot's rights, reading a source only root can open.
+            if ${pkgs.util-linux}/bin/runuser -u ${githubUser} -- ${pkgs.coreutils}/bin/install -d -m 700 ${githubHome}/.config ${githubHome}/.config/gh &&
+               ${pkgs.util-linux}/bin/runuser -u ${githubUser} -- ${pkgs.coreutils}/bin/sh -c "umask 077; cat > ${githubHome}/.config/gh/hosts.yml" <"$src"; then
+              echo "omp-github: installed $src as ${githubHome}/.config/gh/hosts.yml"
+            else
+              echo "omp-github: cannot install $src for ${githubUser}" >&2
+            fi
           '';
         };
         # The shared tree is mounted as root at boot, and every grant the host wrote is bind mounted from here into

@@ -821,6 +821,9 @@
     guest = flakeInputs.nixpkgs.lib.nixosSystem {
       specialArgs.ompBox = {
         inherit user port seedMount bots;
+        # The boxed bot that gets the host user's GitHub login: the run script copies ~/.config/gh into the auth
+        # share and the guest installs it in that bot's home, so it speaks to github.com as the host user does.
+        github = "cubot";
         # The seed share's host side, which omp-box-seed fills.
         seedDir = "${state}/seed";
         # The grants each guest user gets, one `user grant target ro|rw` line per grant, which omp-box writes.
@@ -941,6 +944,14 @@
       rm -f ${state}/id_ed25519
       [ -f ${state}/ssh-key ] || ssh-keygen -q -t ed25519 -N "" -C omp-box -f ${state}/ssh-key
       cp ${state}/ssh-key.pub ${state}/auth/authorized_keys
+      # The host's own GitHub login for the boxed bot that works on GitHub: the guest cannot read the user's 0600
+      # ~/.config/gh and only root there could, so the host copies hosts.yml into the auth share, which the guest
+      # installs as that bot. A re-login on the host reaches the box when it next starts.
+      if [ -r ${home}/.config/gh/hosts.yml ]; then
+        install -m 600 ${home}/.config/gh/hosts.yml ${state}/auth/gh-hosts.yml
+      else
+        rm -f ${state}/auth/gh-hosts.yml
+      fi
       cp -al ${home}/.omp/natives/. ${state}/natives/ 2>/dev/null || cp -a ${home}/.omp/natives/. ${state}/natives/
       free=0
       for _ in $(seq 60); do
