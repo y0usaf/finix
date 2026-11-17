@@ -121,13 +121,25 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader .md li {
 	margin-bottom: 6px;
 }
+/** The chip must not add a line box of its own: inside a card Dawn does not
+ ** type (a done-check or work card is omp.custom), a 13px/1.4 chip next to the
+ ** card's smaller text made every code-bearing line taller than the plain ones,
+ ** so the plain lines read cramped. Plain and chip share the line, and the
+ ** chip keeps its own size only in the message text Dawn sets itself. */
 :root:not(#dawn) .sf-chat-reader .md :not(pre) > code {
-	font: 13px/1.4 var(--mono);
-	padding: 2px 5px;
+	font-family: var(--mono);
+	font-size: inherit;
+	line-height: inherit;
+	padding: 0 0.3em;
 	border-radius: 5px;
 	color: inherit;
 	background: var(--dawn-soft);
 	box-shadow: none;
+}
+:root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md :not(pre) > code {
+	font-size: 13px;
+	line-height: 1.4;
+	padding: 2px 5px;
 }
 :root:not(#dawn) .sf-chat-reader .md .code {
 	border-radius: 12px;
