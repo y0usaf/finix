@@ -669,7 +669,9 @@
     def dated(source, out):
         try:
             uri = "file:" + source + "?mode=ro"
-            live = sqlite3.connect(uri, uri=True, timeout=10)
+            # A profile that holds the database to itself answers nothing:
+            # three seconds fits a copy that can happen and a quick start.
+            live = sqlite3.connect(uri, uri=True, timeout=3)
             live.execute("VACUUM INTO ?", (out,))
             live.close()
         except sqlite3.Error as error:
@@ -1074,7 +1076,7 @@
       for db in $(ls -t ${home}/.librewolf/*/places.sqlite ${home}/.mozilla/firefox/*/places.sqlite 2>/dev/null); do
         [ -s "$db" ] || continue
         rm -f "$snapshot.new"
-        dated=$(timeout 60 ${historySnapshot}/bin/omp-history-snapshot "$db" "$snapshot.new" 2>/dev/null) || dated=
+        dated=$(timeout 60 ${historySnapshot} "$db" "$snapshot.new" 2>/dev/null) || dated=
         case $dated in "" | *[!0-9]*) dated=0 ;; esac
         if [ "$dated" -gt 0 ] && mv -f "$snapshot.new" "$snapshot"; then history=$db; break; fi
       done
