@@ -77,6 +77,16 @@ export default function antigravityAccounts(pi) {
 	adopt();
 	pi.on("session_start", adopt);
 
+	// A tool that ran is never run again by an account switch: the turn may only
+	// continue on its own when nothing executed in it.
+	let usedTool = false;
+	pi.on("agent_start", () => {
+		usedTool = false;
+	});
+	pi.on("tool_execution_end", () => {
+		usedTool = true;
+	});
+
 	pi.registerCommand("antigravity", {
 		description: "List the Crest Antigravity accounts, or add one: /antigravity NAME",
 		handler: async (args, ctx) => {
@@ -137,18 +147,26 @@ export default function antigravityAccounts(pi) {
 		process.env.GEMINI_HOME = next.dir;
 		stopRuntime();
 		const why = limited ? "hit its quota" : "needs Google verification, so the ACP runtime advertised no models";
-		pi.sendMessage({
-			customType: "antigravity-accounts",
-			display: true,
-			content: `Account ${String(next.from)} ${why}. ${next.to} serves this session now.${
-				link === undefined ? "" : ` Google's page for ${String(next.from)}: [open it](${link}).`
-			}${limited ? "" : ` Sign ${String(next.from)} in again with /login → Google Antigravity (ACP) when convenient.`}`,
-		});
+		const switchNote = `Account ${String(next.from)} ${why}. ${next.to} serves this session now.${
+			link === undefined ? "" : ` Google's page for ${String(next.from)}: [open it](${link}).`
+		}${limited ? "" : ` Sign ${String(next.from)} in again with /login → Google Antigravity (ACP) when convenient.`}`;
+		if (usedTool) {
+			// The ACP agent, not this extension, decides what its next request
+			// runs, so a turn that already executed a tool stops here instead of
+			// risking the same tool twice; the next message uses the new account.
+			pi.sendMessage({
+				customType: "antigravity-accounts",
+				display: true,
+				content: `${switchNote} A tool already ran in this turn, so the failed turn is not replayed: whatever continues it keeps every recorded tool result.`,
+			});
+			return;
+		}
+		pi.sendMessage({ customType: "antigravity-accounts", display: true, content: switchNote });
 		pi.sendMessage(
 			{
 				customType: "antigravity-accounts",
 				display: false,
-				content: `Account ${String(next.from)} stopped this turn and ${next.to} serves it now. Everything above is final, including every tool result: continue exactly where the turn stopped and do not run a tool again to redo work.`,
+				content: `Account ${String(next.from)} stopped this turn and ${next.to} serves it now. Nothing ran yet in this turn, so continue from where it stopped.`,
 			},
 			{ deliverAs: "nextTurn", triggerTurn: true },
 		);
