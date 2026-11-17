@@ -113,6 +113,11 @@
       local name=$1 place=/run/omp-mapped/$wanted/$1
       [ -n "$hostUid" ] || return 1
       case "$name" in ''' | */*) return 1 ;; esac
+      # The views are allow_other, so what keeps one bot out of another's is this one root-only folder: a bot
+      # reaches its own folder below it through the mount omp-share-mount binds into its home, never by walking
+      # this path, and nothing but root can enter here at all.
+      mkdir -p /run/omp-mapped || return 1
+      chmod 0700 /run/omp-mapped || return 1
       mkdir -p "/run/omp-mapped/$wanted" || return 1
       if findmnt -n -o TARGET -- "$place" >/dev/null 2>&1; then
         if stat -c %i -- "$place" >/dev/null 2>&1; then
