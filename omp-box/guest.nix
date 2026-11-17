@@ -15,13 +15,13 @@
         name = user;
         uid = 1001;
         gid = 100;
-        home = home;
+        inherit home;
         admin = true;
       }
     ]
     ++ map (bot: {
       name = bot.user;
-      uid = bot.uid;
+      inherit (bot) uid;
       gid = 100;
       home = "/home/${bot.user}";
       admin = false;
@@ -33,10 +33,9 @@
   # ~/.config/gh, ~/Tokens or CLI config, so the host copies what this bot needs into the auth share and
   # omp-logins installs it in this user's home, where gh, git's github.com helper and each CLI find it.
   loginUser = ompBox.logins;
-  loginHome =
-    let
-      person = lib.findFirst (person: person.name == loginUser) null people;
-    in
+  loginHome = let
+    person = lib.findFirst (candidate: candidate.name == loginUser) null people;
+  in
     if person == null
     then throw "ompBox.logins names ${loginUser}, which is not a user in the box"
     else person.home;
@@ -50,7 +49,10 @@
   # their folders keep their relative place under it.
   browserPath = name: path: let
     u = browserUser name;
-    guestHome = if u == user then home else "/home/${u}";
+    guestHome =
+      if u == user
+      then home
+      else "/home/${u}";
   in
     if path == home
     then guestHome
@@ -245,7 +247,6 @@
     profile,
     port,
   }: let
-    bot = botsOf name;
     runAs = browserUser name;
     asHome = browserPath name profile;
   in {
@@ -298,15 +299,17 @@ in {
     # ~120MB of it was the store. Reading the host's store over 9p instead costs ~2s of boot (9.6s
     # against 6.8s) and ~0.15s per uncached program start, and the same box idles at ~445MB.
     storeOnDisk = false;
-    shares = [
-      {
-        tag = "store";
-        source = "/nix/store";
-        mountPoint = "/nix/store";
-        proto = "9p";
-        readOnly = true;
-      }
-    ] ++ map (p: {
+    shares =
+      [
+        {
+          tag = "store";
+          source = "/nix/store";
+          mountPoint = "/nix/store";
+          proto = "9p";
+          readOnly = true;
+        }
+      ]
+      ++ map (p: {
         tag = "share-${builtins.substring 0 16 (builtins.hashString "sha1" p)}";
         source = p;
         mountPoint = p;
@@ -359,85 +362,89 @@ in {
     ];
   };
 
-  environment.systemPackages = [
-    ompBox.omp
-    # The view omp-shares mounts over a bot's grants (see shareApply).
-    pkgs.bindfs
-    pkgs.bun
-    pkgs.python3
-    pkgs.ungoogled-chromium
-    pkgs.git
-    pkgs.ripgrep
-    pkgs.curl
-    pkgs.gh
-    pkgs.jq
-    pkgs.fd
-    pkgs.gnumake
-    pkgs.gcc
-    # The work tools a bot ran on the host: node for the TypeScript repos, the postgres 16 client and server for
-    # their tests, a JDK for gradle, the Google Workspace CLI, imagemagick for assets, and the two CLIs the host
-    # itself wraps (agent-slack and vercel-account-router), built once in pkgs/ for the host and for this box.
-    pkgs.nodejs
-    pkgs.postgresql_16
-    pkgs.jdk17
-    pkgs.gws
-    pkgs.imagemagick
-    (import ../pkgs/agent-slack.nix {inherit pkgs;})
-    # The box exists for the work account, so a bare `vercel` here answers as the host's vercel-work does: a folder
-    # with no GitHub origin has nothing to route on, and refusing to guess would leave the bot with a dead command.
-    (import ../pkgs/vercel-account-router.nix {
-      inherit pkgs;
-      default = "work";
-    })
-  ];
-  # Commits made in the box are the host user's, as they were while the bots ran on the host (modules/tools/git.nix);
-  # the host's own config is left out, since it sends github.com to ssh, which no box user has a key for.
-  #
-  # git reaches github.com as the account gh is logged in to: the helper asks gh, which reads the login in the box
-  # user's own config, so no token is ever written into a URL, a remote or a file git reads. A user with no login
-  # gets gh's own failure, and git falls back to asking for one.
-  environment.etc."gitconfig".text = ''
-    [user]
-    	name = ${user}
-    	email = 74448287+y0usaf@users.noreply.github.com
-    [init]
-    	defaultBranch = main
-    [pull]
-    	rebase = true
-    [push]
-    	autoSetupRemote = true
-    # The repos in the bot's workbench were cloned with git@github.com: remotes, which no box user has a key for, so
-    # every GitHub ssh URL goes over https instead, through the same gh login.
-    [url "https://github.com/"]
-    	insteadOf = git@github.com:
-    	insteadOf = ssh://git@github.com/
-    [credential "https://github.com"]
-    	helper = "!${pkgs.gh}/bin/gh auth git-credential"
-    # A granted folder comes in from the host over 9p, so it belongs to the user the grant names rather than to the
-    # bot that works in it, and git refuses every repository there as foreign without this.
-    [safe]
-    	directory = *
-  '';
-  # initdb and the server it starts look for their data files beside the binary, which they find through the store
-  # but not through the profile's bin: link postgres' share dir into the profile, so a bot starts a database from
-  # PATH the way it did on the host from a nix build.
-  environment.pathsToLink = ["/share/postgresql"];
+  environment = {
+    systemPackages = [
+      ompBox.omp
+      # The view omp-shares mounts over a bot's grants (see shareApply).
+      pkgs.bindfs
+      pkgs.bun
+      pkgs.python3
+      pkgs.ungoogled-chromium
+      pkgs.git
+      pkgs.ripgrep
+      pkgs.curl
+      pkgs.gh
+      pkgs.jq
+      pkgs.fd
+      pkgs.gnumake
+      pkgs.gcc
+      # The work tools a bot ran on the host: node for the TypeScript repos, the postgres 16 client and server for
+      # their tests, a JDK for gradle, the Google Workspace CLI, imagemagick for assets, and the two CLIs the host
+      # itself wraps (agent-slack and vercel-account-router), built once in pkgs/ for the host and for this box.
+      pkgs.nodejs
+      pkgs.postgresql_16
+      pkgs.jdk17
+      pkgs.gws
+      pkgs.imagemagick
+      (import ../pkgs/agent-slack.nix {inherit pkgs;})
+      # The box exists for the work account, so a bare `vercel` here answers as the host's vercel-work does: a folder
+      # with no GitHub origin has nothing to route on, and refusing to guess would leave the bot with a dead command.
+      (import ../pkgs/vercel-account-router.nix {
+        inherit pkgs;
+        default = "work";
+      })
+    ];
+    # Commits made in the box are the host user's, as they were while the bots ran on the host (modules/tools/git.nix);
+    # the host's own config is left out, since it sends github.com to ssh, which no box user has a key for.
+    #
+    # git reaches github.com as the account gh is logged in to: the helper asks gh, which reads the login in the box
+    # user's own config, so no token is ever written into a URL, a remote or a file git reads. A user with no login
+    # gets gh's own failure, and git falls back to asking for one.
+    etc."gitconfig".text = ''
+      [user]
+      	name = ${user}
+      	email = 74448287+y0usaf@users.noreply.github.com
+      [init]
+      	defaultBranch = main
+      [pull]
+      	rebase = true
+      [push]
+      	autoSetupRemote = true
+      # The repos in the bot's workbench were cloned with git@github.com: remotes, which no box user has a key for, so
+      # every GitHub ssh URL goes over https instead, through the same gh login.
+      [url "https://github.com/"]
+      	insteadOf = git@github.com:
+      	insteadOf = ssh://git@github.com/
+      [credential "https://github.com"]
+      	helper = "!${pkgs.gh}/bin/gh auth git-credential"
+      # A granted folder comes in from the host over 9p, so it belongs to the user the grant names rather than to the
+      # bot that works in it, and git refuses every repository there as foreign without this.
+      [safe]
+      	directory = *
+    '';
+    # initdb and the server it starts look for their data files beside the binary, which they find through the store
+    # but not through the profile's bin: link postgres' share dir into the profile, so a bot starts a database from
+    # PATH the way it did on the host from a nix build.
+    pathsToLink = ["/share/postgresql"];
+  };
   fonts.packages = [pkgs.noto-fonts-cjk-sans];
   documentation.enable = false;
 
-  boot.kernelParams = [
-    "console=ttyS0"
-    "loglevel=4"
-    "sysctl.vm.mem_profiling=never"
-    "kfence.sample_interval=0"
-    "initcall_blacklist=ksm_init,tpm_init,init_tis"
-    "psi=0"
-    "transparent_hugepage=never"
-  ];
-  boot.blacklistedKernelModules = ["edac_core" "intel_rapl_msr" "intel_rapl_common" "kvm_amd" "kvm_intel" "kvm" "ccp" "irqbypass" "mousedev" "input_leds" "led_class" "cfg80211" "rfkill" "psmouse" "serio_raw" "atkbd" "i8042" "mac_hid" "pcspkr" "dm_mod" "loop" "virtiofs"];
-  # A bot's view of its grants is a bindfs mount (omp-shares), so fuse is loaded at boot instead of on the first
-  # mount, which would be the one omp-shares makes for a grant.
-  boot.kernelModules = ["fuse"];
+  boot = {
+    kernelParams = [
+      "console=ttyS0"
+      "loglevel=4"
+      "sysctl.vm.mem_profiling=never"
+      "kfence.sample_interval=0"
+      "initcall_blacklist=ksm_init,tpm_init,init_tis"
+      "psi=0"
+      "transparent_hugepage=never"
+    ];
+    blacklistedKernelModules = ["edac_core" "intel_rapl_msr" "intel_rapl_common" "kvm_amd" "kvm_intel" "kvm" "ccp" "irqbypass" "mousedev" "input_leds" "led_class" "cfg80211" "rfkill" "psmouse" "serio_raw" "atkbd" "i8042" "mac_hid" "pcspkr" "dm_mod" "loop" "virtiofs"];
+    # A bot's view of its grants is a bindfs mount (omp-shares), so fuse is loaded at boot instead of on the first
+    # mount, which would be the one omp-shares makes for a grant.
+    kernelModules = ["fuse"];
+  };
 
   networking = {
     hostName = "omp-box";
@@ -472,14 +479,15 @@ in {
         extraGroups = ["wheel"];
       };
     }
-    // lib.listToAttrs (map (bot: lib.nameValuePair bot.user {
-        isNormalUser = true;
-        uid = bot.uid;
-        # The user's group, so a folder shared in from the host keeps the modes and ownership it has there.
-        group = "users";
-        home = "/home/${bot.user}";
-        homeMode = "0700";
-      })
+    // lib.listToAttrs (map (bot:
+        lib.nameValuePair bot.user {
+          isNormalUser = true;
+          inherit (bot) uid;
+          # The user's group, so a folder shared in from the host keeps the modes and ownership it has there.
+          group = "users";
+          home = "/home/${bot.user}";
+          homeMode = "0700";
+        })
       bots);
   # No bot is in wheel: the box mounts every shared folder as root when it boots (omp-shares), so nothing has to
   # hand a bot a way to mount or to become root.
@@ -564,14 +572,14 @@ in {
             # A bot's home is the bot's to rewrite, so root must not walk a path under it: each write runs as the
             # user the file belongs to, and a link the bot plants there can only be followed with its own rights.
             ${lib.concatMapStringsSep "\n" (person: ''
-              if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.ssh &&
-                 ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 /etc/ssh/omp-box/authorized_keys ${person.home}/.ssh/authorized_keys; then
-                :
-              else
-                echo "omp-keys: cannot prepare ${person.home}/.ssh; ssh will refuse it" >&2
-              fi
-            '')
-            people}
+                if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.ssh &&
+                   ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 /etc/ssh/omp-box/authorized_keys ${person.home}/.ssh/authorized_keys; then
+                  :
+                else
+                  echo "omp-keys: cannot prepare ${person.home}/.ssh; ssh will refuse it" >&2
+                fi
+              '')
+              people}
           '';
         };
         # The host user's own logins, for the one bot that works with them: gh's login, the token files under
@@ -653,15 +661,15 @@ in {
             set -u
             mkdir -p /run/omp-natives
             ${lib.concatMapStringsSep "\n" (person: ''
-              mkdir -p /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name}
-              # The mount point lives under a home the bot can rename, so the helper opens it a component at a
-              # time without following a link and mounts on the fd; the upper and work folders are root's.
-              if ! ${shareMount}/bin/omp-share-mount overlay ${person.home} .omp/natives /mnt/omp-natives \
-                /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name}; then
-                echo "omp-natives: cannot mount ${person.home}/.omp/natives" >&2
-              fi
-            '')
-            people}
+                mkdir -p /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name}
+                # The mount point lives under a home the bot can rename, so the helper opens it a component at a
+                # time without following a link and mounts on the fd; the upper and work folders are root's.
+                if ! ${shareMount}/bin/omp-share-mount overlay ${person.home} .omp/natives /mnt/omp-natives \
+                  /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name}; then
+                  echo "omp-natives: cannot mount ${person.home}/.omp/natives" >&2
+                fi
+              '')
+              people}
           '';
         };
         # The omp config, read from the seed share's current generation at boot and again by the host's
@@ -680,20 +688,20 @@ in {
             # Every write below is the bot's own: the seed is world-readable, and running install as the user
             # means a path the bot swapped for a link can only be followed with the bot's rights, never root's.
             ${lib.concatMapStringsSep "\n" (person: ''
-              if [ ! -d ${person.home}/.omp ]; then
-                ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 755 ${person.home}/.omp ||
-                  echo "omp-seed: cannot create ${person.home}/.omp" >&2
-              fi
-              if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent; then
-                for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md; do
-                  ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$file" ${person.home}/.omp/agent/$file ||
-                    echo "omp-seed: cannot install $file for ${person.name}" >&2
-                done
-              else
-                echo "omp-seed: cannot prepare ${person.home}/.omp/agent" >&2
-              fi
-            '')
-            people}
+                if [ ! -d ${person.home}/.omp ]; then
+                  ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 755 ${person.home}/.omp ||
+                    echo "omp-seed: cannot create ${person.home}/.omp" >&2
+                fi
+                if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent; then
+                  for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md; do
+                    ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$file" ${person.home}/.omp/agent/$file ||
+                      echo "omp-seed: cannot install $file for ${person.name}" >&2
+                  done
+                else
+                  echo "omp-seed: cannot prepare ${person.home}/.omp/agent" >&2
+                fi
+              '')
+              people}
           '';
         };
       };

@@ -1,15 +1,18 @@
-{ config, lib, pkgs, ... }:
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   inherit (config.user) name homeDirectory;
   repo = "/home/y0usaf/dev/maintaining/tomoe";
-  runtime = "/run/user/1001/agent";
+  runtime = "${config.user.runtimeDir}/agent";
   # The canonical copy of this script is Tomoe's land.sh; it runs from here until
   # the package ships bin/tomoe-land, so the queue survives restarts either way.
   queue = pkgs.writeShellScriptBin "tomoe-land" (builtins.readFile ./tomoe-land.sh);
-in
-{
+in {
   config = {
-    environment.systemPackages = [ queue ];
+    environment.systemPackages = [queue];
     finit.services.tomoe-land = {
       description = "Tomoe landing queue: smoke gate, then push main";
       user = name;
@@ -42,7 +45,7 @@ in
         TOMOE_LOCK = "${runtime}/tomoe-vm.lock";
         TOMOE_PENDING = "${runtime}/tomoe-vm.pending";
         TOMOE_AGENT = "tomoe-land";
-        SSH_AUTH_SOCK = "/run/user/1001/ssh-agent";
+        SSH_AUTH_SOCK = "${config.user.runtimeDir}/ssh-agent";
       };
       log = true;
     };

@@ -55,7 +55,12 @@ in {
               input = ["text" "image"];
               contextWindow = 1048576;
               maxTokens = 65536;
-              cost = { input = 2; output = 10; cacheRead = 0.2; cacheWrite = 0; };
+              cost = {
+                input = 2;
+                output = 10;
+                cacheRead = 0.2;
+                cacheWrite = 0;
+              };
             }
             {
               id = "gemini-4-carbon";
@@ -65,7 +70,12 @@ in {
               input = ["text" "image"];
               contextWindow = 1048576;
               maxTokens = 65536;
-              cost = { input = 2; output = 10; cacheRead = 0.2; cacheWrite = 0; };
+              cost = {
+                input = 2;
+                output = 10;
+                cacheRead = 0.2;
+                cacheWrite = 0;
+              };
             }
             {
               id = "gemini-4-argon-high";
@@ -75,7 +85,12 @@ in {
               input = ["text" "image"];
               contextWindow = 1048576;
               maxTokens = 65536;
-              cost = { input = 2; output = 10; cacheRead = 0.2; cacheWrite = 0; };
+              cost = {
+                input = 2;
+                output = 10;
+                cacheRead = 0.2;
+                cacheWrite = 0;
+              };
             }
             {
               id = "gemini-4-hydrogen-high";
@@ -85,7 +100,12 @@ in {
               input = ["text" "image"];
               contextWindow = 1048576;
               maxTokens = 65536;
-              cost = { input = 1.5; output = 7.5; cacheRead = 0.1; cacheWrite = 0; };
+              cost = {
+                input = 1.5;
+                output = 7.5;
+                cacheRead = 0.1;
+                cacheWrite = 0;
+              };
             }
           ];
         };
@@ -101,7 +121,12 @@ in {
               input = ["text" "image"];
               contextWindow = 1048576;
               maxTokens = 65536;
-              cost = { input = 2; output = 10; cacheRead = 0.2; cacheWrite = 0; };
+              cost = {
+                input = 2;
+                output = 10;
+                cacheRead = 0.2;
+                cacheWrite = 0;
+              };
             }
           ];
         };

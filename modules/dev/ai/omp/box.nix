@@ -66,17 +66,23 @@
   # authentication, so each port is opened to the browser's owner alone: the rule matches the connecting socket's
   # Unix user and refuses every other one, with a reset, before Chromium sees the request. A bot has no way to open
   # a socket as another one.
-  cdpGuard = address: uid: ports: lib.concatMapStrings (port: ''
-    ip daddr ${address} tcp dport ${toString port} meta skuid ${toString uid} accept
-    ip daddr ${address} tcp dport ${toString port} reject with tcp reset
-  '') ports;
+  cdpGuard = address: uid: ports:
+    lib.concatMapStrings (port: ''
+      ip daddr ${address} tcp dport ${toString port} meta skuid ${toString uid} accept
+      ip daddr ${address} tcp dport ${toString port} reject with tcp reset
+    '')
+    ports;
   browserCdpGuard = lib.concatStringsSep "\n" (
     # The box's own browsers, on its loopback.
     (lib.mapAttrsToList (name: browser: let
         owner = lib.findFirst (bot: bot.name == name) null bots;
         # A browser that is not a boxed bot runs as the box's own user, whose uid guest.nix fixes at 1001.
-        uid = if owner == null then 1001 else owner.uid;
-      in cdpGuard "127.0.0.1" uid [browser.port])
+        uid =
+          if owner == null
+          then 1001
+          else owner.uid;
+      in
+        cdpGuard "127.0.0.1" uid [browser.port])
       browsers)
     # Browsers on the host, which reach the box through its gateway: modules/hosts/y0usaf-desktop/baobot-browser.nix
     # names the ports there, since it is the module that starts that browser and the broker in front of it.
@@ -971,12 +977,13 @@
       find ${home}/Tokens -maxdepth 1 -type f -size -1048576c -exec cp -a -t ${state}/auth/logins/Tokens {} + 2>/dev/null ||
         echo "omp-box: cannot copy every token file from ${home}/Tokens into the auth share" >&2
       ${lib.concatMapStringsSep "\n" (path: ''
-        if [ -e ${home}/${path} ]; then
-          mkdir -p "$(dirname ${state}/auth/logins/${path})"
-          cp -a ${home}/${path} ${state}/auth/logins/${path} 2>/dev/null ||
-            echo "omp-box: cannot copy ~/${path} into the auth share" >&2
-        fi
-      '') loginPaths}
+          if [ -e ${home}/${path} ]; then
+            mkdir -p "$(dirname ${state}/auth/logins/${path})"
+            cp -a ${home}/${path} ${state}/auth/logins/${path} 2>/dev/null ||
+              echo "omp-box: cannot copy ~/${path} into the auth share" >&2
+          fi
+        '')
+        loginPaths}
       # Only the bot reads this copy, and what is in it is tokens and live CLI sessions: the guest unpacks it as
       # itself, so its modes have to be the owner's alone.
       chmod -R go-rwx ${state}/auth/logins
@@ -1233,10 +1240,12 @@ in {
       export OMP_BOT_BOX_PATH=${seedMount}/current/bin
       # Which guest user each boxed bot runs as, and the folders inside the user's home that bot also gets;
       # omp-bot-box refuses a bot this list leaves out, so every bot user the box has is named in finix.
-      export OMP_BOT_BOX_USERS=${lib.escapeShellArg (builtins.toJSON (lib.listToAttrs (map (bot: lib.nameValuePair bot.name {
-        inherit (bot) user folders;
-        home = "/home/${bot.user}";
-      }) bots)))}
+      export OMP_BOT_BOX_USERS=${lib.escapeShellArg (builtins.toJSON (lib.listToAttrs (map (bot:
+          lib.nameValuePair bot.name {
+            inherit (bot) user folders;
+            home = "/home/${bot.user}";
+          })
+        bots)))}
       unset OMP_BOT_EXTENSION
     '';
 

@@ -364,8 +364,8 @@
     text = ''
       case "''${1:-}" in
         ${lib.concatMapStringsSep "\n  "
-          (name: "${name}) gtk=${gtkThemes.${name}}; cursor=(${config.user.appearance.applyCursor name}) ;;")
-          (builtins.attrNames schemes)}
+        (name: "${name}) gtk=${gtkThemes.${name}}; cursor=(${config.user.appearance.applyCursor name}) ;;")
+        (builtins.attrNames schemes)}
         *)
           echo "usage: theme <${lib.concatStringsSep "|" (builtins.attrNames schemes)}>" >&2
           exit 1

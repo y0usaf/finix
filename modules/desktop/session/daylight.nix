@@ -116,14 +116,14 @@ in {
     };
 
     user.ui.tomoe.extraConfig = ''
-    (define-extension "night-light" (:reads (:command)) (snapshot state event)
-      (declare (ignore snapshot))
-      (values state
-              (list (define-command "toggle-night-light" :description "Toggle the night light filter.")
-                    (bind-key (list :alt) "n" "toggle-night-light" :description "Toggle Night Light"))
-              (when (and (eq (getf event :type) :command)
-                         (equal (getf event :name) "toggle-night-light"))
-                (list (launch "${nightLightToggle}")))))
+      (define-extension "night-light" (:reads (:command)) (snapshot state event)
+        (declare (ignore snapshot))
+        (values state
+                (list (define-command "toggle-night-light" :description "Toggle the night light filter.")
+                      (bind-key (list :alt) "n" "toggle-night-light" :description "Toggle Night Light"))
+                (when (and (eq (getf event :type) :command)
+                           (equal (getf event :name) "toggle-night-light"))
+                  (list (launch "${nightLightToggle}")))))
     '';
   };
 }

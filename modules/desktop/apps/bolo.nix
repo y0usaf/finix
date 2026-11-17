@@ -42,18 +42,19 @@
     };
   };
 
-  models = lib.mapAttrs (name: m:
-    m
-    // {
-      files =
-        lib.mapAttrs (file: hash:
-          pkgs.fetchurl {
-            url = "${m.url}/${file}";
-            inherit hash;
-          })
-        m.hashes;
-    })
-  modelDirs;
+  models =
+    lib.mapAttrs (_: m:
+      m
+      // {
+        files =
+          lib.mapAttrs (file: hash:
+            pkgs.fetchurl {
+              url = "${m.url}/${file}";
+              inherit hash;
+            })
+          m.hashes;
+      })
+    modelDirs;
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
 
@@ -70,15 +71,14 @@
     gain = 6.0;
     # Whole-clip turns: one write of the finished transcript, typed once.
     pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool";
-    models = lib.mapAttrsToList (name: m: {
-      inherit name;
-      inherit (m) engine;
-      encoder = "${modelDir name}/${m.layout.encoder}";
-      decoder = "${modelDir name}/${m.layout.decoder}";
-      joiner = "${modelDir name}/${m.layout.joiner}";
-      tokens = "${modelDir name}/${m.layout.tokens}";
-    })
-    models;
+    models =
+      lib.mapAttrsToList (name: m:
+        {
+          inherit name;
+          inherit (m) engine;
+        }
+        // lib.genAttrs ["encoder" "decoder" "joiner" "tokens"] (part: "${modelDir name}/${m.layout.${part}}"))
+      models;
     vocabulary = lib.mapAttrsToList (word: aliases: {inherit word aliases;}) vocabulary;
     vocab_fuzzy = 0.85;
     turn = {
