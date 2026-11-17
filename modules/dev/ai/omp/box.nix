@@ -43,12 +43,16 @@
       port = 9222;
     };
   };
-  # QEMU's user networking hands the box this host's loopback as 10.0.2.2, which is also the guest's gateway, so
-  # a browser running on the host is as reachable from the box as one in it.
-  hostLoopback = "10.0.2.2";
-  # Every box user shares both loopbacks, and Chromium's DevTools endpoint has no authentication, so each port is
-  # opened to the browser's owner alone: the rule matches the connecting socket's Unix user and refuses every
-  # other one, with a reset, before Chromium sees the request. A bot has no way to open a socket as another user.
+  # QEMU's user networking hands the box this host's loopback as 10.0.2.2, the guest's gateway, so a browser on
+  # the host is as reachable from the box as one in it. Measured against the broker's neighbours, that one address
+  # carries through to the host's loopback and the rest of the guest network answers nothing (10.0.2.3 answers
+  # DNS alone); the guard covers the whole network anyway, so an address slirp translates later is refused by
+  # these rules instead of reopening the port.
+  hostAddresses = "10.0.2.0/24";
+  # Every box user shares the box's loopback and the route to the host's, and Chromium's DevTools endpoint has no
+  # authentication, so each port is opened to the browser's owner alone: the rule matches the connecting socket's
+  # Unix user and refuses every other one, with a reset, before Chromium sees the request. A bot has no way to open
+  # a socket as another one.
   cdpGuard = address: uid: ports: lib.concatMapStrings (port: ''
     ip daddr ${address} tcp dport ${toString port} meta skuid ${toString uid} accept
     ip daddr ${address} tcp dport ${toString port} reject with tcp reset
@@ -68,7 +72,7 @@
       in
         if owner == null
         then throw "user.dev.ompBoxHostCdp names ${name}, which is not a bot in the box"
-        else cdpGuard hostLoopback owner.uid host.ports)
+        else cdpGuard hostAddresses owner.uid host.ports)
       config.user.dev.ompBoxHostCdp)
   );
   json = lib.generators.toJSON {};
