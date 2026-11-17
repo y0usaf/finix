@@ -828,8 +828,7 @@
         ../../../../omp-box/guest.nix
         {
           # The browsers listen on loopback, which every box user shares, here and on the host the box reaches
-          # through its gateway. Refuse a connection unless the socket belongs to the browser's own Unix user,
-          # and open nothing else on the host's side of the gateway beyond the model gateway and DNS.
+          # through its gateway. Refuse a connection unless the socket belongs to the browser's own Unix user.
           networking.nftables = {
             enable = true;
             ruleset = ''
