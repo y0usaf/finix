@@ -1030,21 +1030,29 @@
       # key4.db or cookies. The newest profile wins, so the browser the user last used is the one that dates them.
       rm -rf ${state}/auth/history
       install -d -m 700 ${state}/auth/history
+      # The database is copied with its write-ahead log and the copy is what sqlite opens: a live places.sqlite is
+      # not read through a read-only handle while its profile writes to it, and a copy of the pair is exactly the state
+      # sqlite itself recovers to, since an incomplete frame at the end is dropped. The profile's own files are only
+      # read. A profile that clears its history on close has the newest file and nothing dated in it, so the snapshot
+      # comes from the newest profile that still remembers dated visits: that is the history worth dating accounts by.
+      snapshot=${state}/auth/history/places.sqlite
       history=
-      for db in ${home}/.librewolf/*/places.sqlite ${home}/.mozilla/firefox/*/places.sqlite; do
-        [ -f "$db" ] || continue
-        if [ -z "$history" ] || [ "$db" -nt "$history" ]; then history=$db; fi
+      for db in $(ls -t ${home}/.librewolf/*/places.sqlite ${home}/.mozilla/firefox/*/places.sqlite 2>/dev/null); do
+        [ -s "$db" ] || continue
+        rm -f "$snapshot" "$snapshot-wal"
+        cp -f "$db" "$snapshot" || continue
+        [ ! -f "$db-wal" ] || cp -f "$db-wal" "$snapshot-wal"
+        timeout 60 python3 -c 'import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); c.execute("PRAGMA wal_checkpoint(TRUNCATE)"); c.execute("VACUUM"); c.close()' "$snapshot" || continue
+        dated=$(timeout 30 python3 -c 'import sqlite3,sys; print(sqlite3.connect(sys.argv[1]).execute("select count(last_visit_date) from moz_places").fetchone()[0])' "$snapshot" 2>/dev/null || echo 0)
+        if [ "${dated:-0}" -gt 0 ]; then history=$db; break; fi
       done
+      rm -f "$snapshot-shm" "$snapshot-wal"
       if [ -n "$history" ]; then
-        if python3 -c 'import sqlite3,sys; s=sqlite3.connect("file:"+sys.argv[1]+"?mode=ro",uri=True); d=sqlite3.connect(sys.argv[2]); s.backup(d); d.close(); s.close()' "$history" ${state}/auth/history/places.sqlite; then
-          chmod 400 ${state}/auth/history/places.sqlite
-          echo "omp-box: snapshotted $history for Sweep" >&2
-        else
-          rm -f ${state}/auth/history/places.sqlite
-          echo "omp-box: cannot snapshot $history, so Sweep gets no browsing history" >&2
-        fi
+        chmod 400 "$snapshot"
+        echo "omp-box: snapshotted $history for Sweep" >&2
       else
-        echo "omp-box: there is no places.sqlite to snapshot for Sweep" >&2
+        rm -f "$snapshot"
+        echo "omp-box: no profile holds dated browsing history, so Sweep gets none" >&2
       fi
       # Which Google Antigravity account Sweep answers on: whatever Crest calls active, by the folder that account
       # keeps its own login in. Only the ACP login files travel, not the account's conversation downloads.

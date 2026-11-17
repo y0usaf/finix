@@ -693,7 +693,7 @@ in {
             bot=${sweepBot.user}
             home=${sweepBot.home or "/home/${sweepBot.user}"}
             src=/etc/ssh/omp-box/history/places.sqlite
-            if [ -r "$src" ]; then
+            if [ -s "$src" ]; then
               # Root owns what it writes here, so the bot can read its history and cannot change it.
               if ${pkgs.coreutils}/bin/install -d -m 755 "$home/history" &&
                 ${pkgs.coreutils}/bin/install -m 444 -o root -g root "$src" "$home/history/places.sqlite"; then
@@ -702,7 +702,7 @@ in {
                 echo "omp-sweep: cannot install $src for $bot" >&2
               fi
             else
-              echo "omp-sweep: $src is not in the auth share, so $bot has no browsing history" >&2
+              echo "omp-sweep: $src is missing or empty in the auth share, so $bot has no browsing history" >&2
             fi
             agy=/etc/ssh/omp-box/antigravity
             if [ -r "$agy/acp_token.json" ]; then
