@@ -49,13 +49,6 @@
                    (* 256 (kit--code text (+ (* 3 k) 1)))
                    (* 65536 (kit--code text (+ (* 3 k) 2))))))
 
-(defun kit--rgb (key)
-  "KEY of the theme's cast in the current mode as three reals."
-  (rail--rgb (rail--material key)))
-
-(defun kit--colors (keys)
-  (loop for key in keys append (kit--rgb key)))
-
 (defun kit--title (snapshot id)
   "ID's title, or its app id when it has none."
   (let ((window (find id (context snapshot :windows) :key (lambda (w) (getf w :id)))))

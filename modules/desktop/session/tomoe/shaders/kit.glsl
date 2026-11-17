@@ -31,12 +31,6 @@ float ease_out(float u) {
     return 1.0 - (1.0 - u) * (1.0 - u) * (1.0 - u);
 }
 
-float spring(float t, float w, float z) {
-    if (t <= 0.0) return 0.0;
-    float wd = w * sqrt(1.0 - z * z);
-    return 1.0 - exp(-z * w * t) * (cos(wd * t) + z * w / wd * sin(wd * t));
-}
-
 uint hu(int a, int b, uint s) {
     uint h = uint(a) * 73856093u ^ uint(b) * 19349663u ^ s * 83492791u;
     h = (h ^ (h >> 13)) * 1274126177u;
@@ -80,8 +74,6 @@ vec4 card(int i) {
     float top = k_h - (w.y + w.w);
     return vec4(w.x + k_origin.x, top + k_origin.y, w.x + w.z + k_origin.x, top + w.w + k_origin.y);
 }
-
-float card_side(int i) { return D(K_CARDS + i * K_CARD); }
 
 // the perimeter coordinate of the nearest edge of box b, clockwise from its
 // top-left corner, and the perimeter's length in .y
@@ -127,8 +119,6 @@ float move_age(float design) {
     float dur = max(D(K_SETTLE), 1.0 / 240.0);
     return design * ease_code(max(sw_age(), 0.0) / dur, int(D(K_CURVE)));
 }
-
-bool sw_on() { return D(K_TSW) > -1e5 && sw_age() >= 0.0 && sw_age() < D(K_SETTLE) + 0.5; }
 
 // ---------------------------------------------------------------- voice
 float voice_env() {
@@ -176,8 +166,6 @@ float voice_level(float age) {
 
 // ---------------------------------------------------------------- readings
 float gauge_pct(int k) { return D(K_GAUGES + k * K_GAUGE); }
-float gauge_trend(int k) { return D(K_GAUGES + k * K_GAUGE + 1); }
-bool gauge_shown(int k) { return gauge_pct(k) >= 0.0; }
 
 // ---------------------------------------------------------------- type
 const int GLYPH[96] = int[96](
@@ -203,32 +191,3 @@ int char_at(int base, int i) {
     float s = k == 0 ? 1.0 : (k == 1 ? 256.0 : 65536.0);
     return int(mod(floor(v / s + 0.5 / s), 256.0));
 }
-
-// how many characters of the text at base, up to n, before trailing spaces
-int text_len(int base, int n) {
-    int len = 0;
-    for (int i = 0; i < 15; i++) {
-        if (i >= n) break;
-        int c = char_at(base, i);
-        if (c != 32 && c != 0) len = i + 1;
-    }
-    return len;
-}
-
-// whether p is on a lit cell of the text at base, its first cell's top-left at
-// at, each cell s pixels, advancing 4 cells a character; .x the hit, and the
-// character index the cell belongs to in idx
-bool text_hit(vec2 p, vec2 at, float s, int base, int n, out int idx) {
-    vec2 q = (p - at) / s;
-    idx = -1;
-    if (q.x < 0.0 || q.y < 0.0 || q.y >= 5.0) return false;
-    int ci = int(floor(q.x / 4.0));
-    if (ci >= n) return false;
-    int col = int(floor(q.x)) - ci * 4;
-    if (col > 2) return false;
-    int row = int(floor(q.y));
-    idx = ci;
-    return (glyph(char_at(base, ci)) & (1 << (row * 3 + col))) != 0;
-}
-
-float text_width(int n, float s) { return (4.0 * float(n) - 1.0) * s; }
