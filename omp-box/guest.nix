@@ -332,6 +332,11 @@ in {
     	rebase = true
     [push]
     	autoSetupRemote = true
+    # The repos in the bot's workbench were cloned with git@github.com: remotes, which no box user has a key for, so
+    # every GitHub ssh URL goes over https instead, through the same gh login.
+    [url "https://github.com/"]
+    	insteadOf = git@github.com:
+    	insteadOf = ssh://git@github.com/
     [credential "https://github.com"]
     	helper = "!${pkgs.gh}/bin/gh auth git-credential"
     # A granted folder comes in from the host over 9p, so it belongs to the user the grant names rather than to the
