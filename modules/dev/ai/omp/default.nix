@@ -18,6 +18,7 @@
     lib.genAttrs ["pi-chronobreak" "pi-recap"] (name: "${flakeInputs.${name}}")
     // {
       pi-donsetch = "${inputPackages.pi-donsetch.default}";
+      antigravity-acp = "${import ../../../../pkgs/omp-antigravity-acp-provider.nix {inherit pkgs;}}/lib/node_modules/@n1netynine99/omp-antigravity-acp-provider";
       "compact-eval.ts" = ./compact-eval.ts;
       "work-fold.ts" = ./work-fold.ts;
       "message-interrupts.ts" = ./message-interrupts.ts;
@@ -776,6 +777,7 @@ in {
     ".omp"
     ".local/share/omp"
     ".local/state/omp-secrets"
+    ".gemini/antigravity-acp"
   ];
 
   environment.systemPackages = [pkgs.jq pkgs.age ompSecret];
@@ -860,6 +862,7 @@ in {
             "secrets/secrets.ts"
             "crest-auth.ts"
             "crest-reroute.ts"
+            "antigravity-acp"
             "optchat/extension.ts"
             "tools.ts"
           ];
@@ -885,7 +888,7 @@ in {
           inherit (catalog) defaultProvider;
           inherit (catalog) defaultModel;
           defaultThinkingLevel = catalog.ompThinkingLevel;
-          inherit (catalog) enabledModels;
+          enabledModels = catalog.enabledModels ++ ["antigravity-acp/*"];
           packages = [];
         };
       };
