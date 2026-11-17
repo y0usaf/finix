@@ -3127,12 +3127,14 @@
       path = "${./shaders/llama-herd.glsl}";
       mode = "light";
       family = "llama-herd";
+      opaque = true;
     }
     {
       name = "llama-herd-night";
       path = "${./shaders/llama-herd-night.glsl}";
       mode = "dark";
       family = "llama-herd";
+      opaque = true;
     }
     {
       name = "liquify";
@@ -3198,6 +3200,7 @@
       (config.user.theme.apply entry.mode)
       entry.mode
       (entry.family or entry.name)
+      (entry.opaque or false)
     ]) (map wallpaper cfg.wallpapers);
     preview = {
       width = 256;
@@ -4484,7 +4487,9 @@ in {
                                 (list (shell-surface :shader-wallpaper (ui :stack)
                                                      :anchors '(:top :right :bottom :left)
                                                      :layer :background
-                                                     :background (list :shader (first shown) :fps (second shown)))))
+                                                     :background (append (list :shader (first shown) :fps (second shown))
+                                                                         (when (and (sixth shown) (tomoe-shader-option-known-p :opaque))
+                                                                           (list :opaque t))))))
                               (when (and command (plusp (or apply 0)))
                                 (list (exec-async :theme (format nil "~A # ~D" command apply))))
                               (when menu
