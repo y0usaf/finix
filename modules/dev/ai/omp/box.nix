@@ -656,6 +656,42 @@
     ]))
     generators.python));
   gatewayUrl = "http://${hostAddress}:${toString gatewayPort}";
+  # The browsing history Sweep dates each account by, taken with SQLite's own online copy: one statement, one read
+  # transaction, so the result is a database at a single instant even while the profile is writing to it. Copying the
+  # file and its write-ahead log by hand cannot promise that, because a checkpoint between the two copies leaves a
+  # database with a log that no longer covers it. It prints how many visited pages carry a date, and 0 when the
+  # profile holds the database to itself (Firefox and LibreWolf take it exclusively) or the copy fails its own check.
+  historySnapshot = pkgs.writers.writePython3 "omp-history-snapshot" {} ''
+    import sqlite3
+    import sys
+
+
+    def dated(source, out):
+        try:
+            uri = "file:" + source + "?mode=ro"
+            live = sqlite3.connect(uri, uri=True, timeout=10)
+            live.execute("VACUUM INTO ?", (out,))
+            live.close()
+        except sqlite3.Error as error:
+            print("cannot copy " + source + ": " + str(error), file=sys.stderr)
+            return 0
+        copy = sqlite3.connect(out)
+        if copy.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+            print("copy of " + source + " fails its check", file=sys.stderr)
+            copy.close()
+            return 0
+        # A rollback journal is what lets the root-owned, read-only
+        # snapshot open for the bot at all.
+        copy.execute("PRAGMA journal_mode=DELETE")
+        rows = copy.execute(
+            "select count(last_visit_date) from moz_places"
+        ).fetchone()[0]
+        copy.close()
+        return rows
+
+
+    print(dated(sys.argv[1], sys.argv[2]))
+  '';
   # What omp in the box loads: built here, and copied while the box runs by omp-box-seed into the box's seed
   # share instead of baked into the guest, so a new extension, omp-bot or prompt reaches the box without
   # restarting it and every bot in it. A generation holds the omp config files, store/ with a copy of each
@@ -1033,26 +1069,22 @@
       # read. A profile that clears its history on close has the newest file and nothing dated in it, so the snapshot
       # comes from the newest profile that still remembers dated visits: that is the history worth dating accounts by.
       snapshot=${state}/auth/history/places.sqlite
+      rm -f "$snapshot.new"
       history=
       for db in $(ls -t ${home}/.librewolf/*/places.sqlite ${home}/.mozilla/firefox/*/places.sqlite 2>/dev/null); do
         [ -s "$db" ] || continue
-        rm -f "$snapshot" "$snapshot-wal"
-        cp -f "$db" "$snapshot" || continue
-        [ ! -f "$db-wal" ] || cp -f "$db-wal" "$snapshot-wal"
-        # The write-ahead log becomes a plain rollback journal: a read-only reader of a write-ahead database needs the
-        # -shm file, which the bot must not be able to write, and this copy is only ever read.
-        timeout 60 python3 -c 'import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); c.execute("PRAGMA wal_checkpoint(TRUNCATE)"); c.execute("VACUUM"); c.execute("PRAGMA journal_mode=DELETE"); c.close()' "$snapshot" || continue
-        dated=0
-        dated=$(timeout 30 python3 -c 'import sqlite3,sys; print(sqlite3.connect(sys.argv[1]).execute("select count(last_visit_date) from moz_places").fetchone()[0])' "$snapshot" 2>/dev/null) || dated=0
-        if [ "$dated" -gt 0 ]; then history=$db; break; fi
+        rm -f "$snapshot.new"
+        dated=$(timeout 60 ${historySnapshot}/bin/omp-history-snapshot "$db" "$snapshot.new" 2>/dev/null) || dated=
+        case $dated in "" | *[!0-9]*) dated=0 ;; esac
+        if [ "$dated" -gt 0 ] && mv -f "$snapshot.new" "$snapshot"; then history=$db; break; fi
       done
-      rm -f "$snapshot-shm" "$snapshot-wal"
+      rm -f "$snapshot.new"
       if [ -n "$history" ]; then
         chmod 400 "$snapshot"
-        echo "omp-box: snapshotted $history for Sweep" >&2
+        echo "omp-box: snapshotted $history for Sweep ($dated visited pages carry a date)" >&2
       else
         rm -f "$snapshot"
-        echo "omp-box: no profile holds dated browsing history, so Sweep gets none" >&2
+        echo "omp-box: no profile gave a consistent copy with dated history, so Sweep gets none" >&2
       fi
       # Which Google Antigravity account Sweep answers on: whatever Crest calls active, by the folder that account
       # keeps its own login in. Only the ACP login files travel, not the account's conversation downloads.
