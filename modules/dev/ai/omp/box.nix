@@ -755,8 +755,6 @@
             # cannot be reached: the same account-routed DeepSeek the host's task role uses, through this gateway.
             - api: anthropic-messages
               baseUrl: ${gatewayUrl}
-              compat:
-                allowEmptySignature: true
               contextWindow: 1000000
               cost:
                 cacheRead: 0.0026
