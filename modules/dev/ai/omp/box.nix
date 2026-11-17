@@ -87,6 +87,7 @@
     "192.168.0.0/16"
   ];
   privateAddressSet = "{ ${lib.concatStringsSep ", " privateAddresses} }";
+  slirpHost6 = "fec0::2";
   hostGuard = lib.concatStringsSep "\n" [
     "ip daddr ${dnsAddress} udp dport 53 accept"
     "ip daddr ${dnsAddress} tcp dport 53 accept"
@@ -95,6 +96,8 @@
     browserCdpGuard
     "ip daddr ${privateAddressSet} ip daddr != ${guestAddress} ct state new meta l4proto tcp reject with tcp reset"
     "ip daddr ${privateAddressSet} ip daddr != ${guestAddress} ct state new reject"
+    "ip6 daddr ${slirpHost6} ct state new meta l4proto tcp reject with tcp reset"
+    "ip6 daddr ${slirpHost6} ct state new reject"
     "ip6 daddr fc00::/7 ct state new meta l4proto tcp reject with tcp reset"
     "ip6 daddr fc00::/7 ct state new reject"
   ];
