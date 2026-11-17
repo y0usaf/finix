@@ -78,9 +78,16 @@
   # Applies the grants the host wrote for one user: the share tree is mounted once as root, and each grant is bind
   # mounted where that user's own paths live, inside its home and nowhere else. omp-shares runs this as root at
   # boot and whenever the host writes a new list, so no box user ever needs a way to mount anything.
+  #
+  # A bot reaches its grants through a view in which the host user's files are the bot's own. The box is another
+  # Unix user, so a file the host writes belongs to neither the bot's uid nor its group, and no mode the host could
+  # set short of open-to-everyone would let the bot write it; the view maps the host user's uid to the bot's with
+  # bindfs, so every file there is the bot's to write whenever it was written and with whatever umask. The host's
+  # files and their modes are never touched, and what the bot writes is still the host user's file, because the 9p
+  # server writes as that user.
   shareApply = pkgs.writeShellScript "omp-shares-apply" ''
     set -u
-    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep]}
+    export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.util-linux pkgs.bindfs pkgs.fuse3]}
     wanted=$1
     case "$wanted" in
     ${userTable}
@@ -88,10 +95,42 @@
     esac
     manifest=/etc/omp-box/manifest
     run=/run/omp-box
+    # The host user's uid, which is what a grant's files belong to on the host; only the host knows it, so it writes
+    # it beside the grants. Without it a grant still applies, unwrapped, and the bot cannot write what the host wrote.
+    hostUid=
+    if [ -r /etc/omp-box/host-uid ]; then read -r hostUid </etc/omp-box/host-uid; fi
+    case "$hostUid" in ''' | *[!0-9]*) hostUid= ;; esac
     mkdir -p "$run"
     list="$run/$wanted.applied"
+    views="$run/$wanted.views"
     : >"$list.new"
+    : >"$views.new"
     status=0
+    # view NAME - mount the bot's view of grant NAME and print where it landed. A view an earlier pass made is kept
+    # as long as the daemon behind it still answers, so a pass that changes nothing mounts nothing; a view that no
+    # longer answers is replaced, since a dead daemon leaves a mount that answers nothing.
+    view() {
+      local name=$1 place=/run/omp-mapped/$wanted/$1
+      [ -n "$hostUid" ] || return 1
+      case "$name" in ''' | */*) return 1 ;; esac
+      mkdir -p "/run/omp-mapped/$wanted" || return 1
+      if findmnt -n -o TARGET -- "$place" >/dev/null 2>&1; then
+        if stat -c %i -- "$place" >/dev/null 2>&1; then
+          printf '%s\n' "$name" >>"$views.new"
+          printf '%s\n' "$place"
+          return 0
+        fi
+        umount -l -- "$place" 2>/dev/null || true
+      fi
+      mkdir -p "$place" || return 1
+      # bindfs says nothing when it works, and what it says when it does not belongs in the service's log rather
+      # than in the path this function prints.
+      if ! bindfs --map="$hostUid/$uuid:@$ugid/@$ugid" -o allow_other "/run/omp-shares/$name" "$place" >&2; then
+        return 1
+      fi
+      printf '%s\n' "$name" >>"$views.new"
+      printf '%s\n' "$place"
+    }
     apply() {
       local name=$1 target=$2 flags=$3 how=rw home rel place want
       case "$target" in
@@ -128,9 +167,19 @@
         ":*") want=$uhome ;;
         *) want="$home/$rel" ;;
       esac
+      # A bot's grant comes through its own view of the share (see view), and the user's own sessions bind the
+      # share itself, so they see a granted folder exactly the way the host does.
+      local source=/run/omp-shares/$name mapped
+      if [ "$admin" = 0 ]; then
+        if mapped=$(view "$name"); then
+          source=$mapped
+        else
+          echo "omp-shares: $name reaches $wanted unwrapped, so $wanted cannot write what the host wrote" >&2
+        fi
+      fi
       # The helper resolves every component without following a symlink and mounts on the fd it opened, so a bot
       # that replaces a folder with a link gets a refusal instead of root acting wherever the link points.
-      if place=$(${shareMount}/bin/omp-share-mount apply "$home" "$rel" "$uuid" "$ugid" "$how" "/run/omp-shares/$name"); then
+      if place=$(${shareMount}/bin/omp-share-mount apply "$home" "$rel" "$uuid" "$ugid" "$how" "$source"); then
         printf '%s\n' "$place" >>"$list.new"
         return
       fi
@@ -156,6 +205,16 @@
         ${shareMount}/bin/omp-share-mount remove "$old" || true
       done <"$list"
     fi
+    # A grant the host revoked takes its view with it: the daemon behind a view outlives the manifest line.
+    if [ -d "/run/omp-mapped/$wanted" ]; then
+      for place in "/run/omp-mapped/$wanted"/*; do
+        [ -e "$place" ] || continue
+        grep -Fxq -- "''${place##*/}" "$views.new" && continue
+        umount -l -- "$place" 2>/dev/null || true
+        rmdir -- "$place" 2>/dev/null || true
+      done
+    fi
+    mv -f "$views.new" "$views"
     mv -f "$list.new" "$list"
     exit "$status"
   '';
@@ -197,10 +256,13 @@
     };
     script = ''
       profile=${lib.escapeShellArg asHome}
-      if [ "$(${pkgs.util-linux}/bin/findmnt -n -o FSTYPE --target "$(dirname "$profile")")" != 9p ]; then
-        echo "$(dirname "$profile") is not shared into the box yet"
-        exit 1
-      fi
+      case "$(${pkgs.util-linux}/bin/findmnt -n -o FSTYPE --target "$(dirname "$profile")")" in
+        9p | fuse) ;;
+        *)
+          echo "$(dirname "$profile") is not shared into the box yet"
+          exit 1
+          ;;
+      esac
       # What the browser writes is the host user's file on the host, so it writes with no umask of its own.
       umask 000
       mkdir -p "$profile"
@@ -294,6 +356,8 @@ in {
 
   environment.systemPackages = [
     ompBox.omp
+    # The view omp-shares mounts over a bot's grants (see shareApply).
+    pkgs.bindfs
     pkgs.bun
     pkgs.python3
     pkgs.ungoogled-chromium
@@ -365,7 +429,10 @@ in {
     "psi=0"
     "transparent_hugepage=never"
   ];
-  boot.blacklistedKernelModules = ["edac_core" "intel_rapl_msr" "intel_rapl_common" "kvm_amd" "kvm_intel" "kvm" "ccp" "irqbypass" "mousedev" "input_leds" "led_class" "cfg80211" "rfkill" "psmouse" "serio_raw" "atkbd" "i8042" "mac_hid" "pcspkr" "dm_mod" "loop" "virtiofs" "fuse"];
+  boot.blacklistedKernelModules = ["edac_core" "intel_rapl_msr" "intel_rapl_common" "kvm_amd" "kvm_intel" "kvm" "ccp" "irqbypass" "mousedev" "input_leds" "led_class" "cfg80211" "rfkill" "psmouse" "serio_raw" "atkbd" "i8042" "mac_hid" "pcspkr" "dm_mod" "loop" "virtiofs"];
+  # A bot's view of its grants is a bindfs mount (omp-shares), so fuse is loaded at boot instead of on the first
+  # mount, which would be the one omp-shares makes for a grant.
+  boot.kernelModules = ["fuse"];
 
   networking = {
     hostName = "omp-box";

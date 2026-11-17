@@ -49,22 +49,16 @@ box_target() {
 target_user=${target%@*}
 
 apply_host() {
-  local name=$1 path=$2 mode=$3 who=${4:-$target_user} fresh=0
+  local name=$1 path=$2 mode=$3
   mkdir -p "$shares/$name"
   case $mode in
-    copy) cp -au "$path/." "$shares/$name/"; fresh=1 ;;
-    bind) if ! findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1; then /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; fresh=1; fi ;;
-    ro) if ! findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1; then /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; fresh=1; fi; if test -w "$shares/$name"; then /run/wrappers/bin/sudo -n mount -o remount,bind,ro "$shares/$name"; fi ;;
+    copy) cp -au "$path/." "$shares/$name/" ;;
+    bind) if ! findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1; then /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; fi ;;
+    ro) if ! findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1; then /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; fi; if test -w "$shares/$name"; then /run/wrappers/bin/sudo -n mount -o remount,bind,ro "$shares/$name"; fi ;;
   esac
-  # What is shared here is the user's own files, and a bot in the box is another Unix user, so what the bot is given
-  # is opened to the group they both have: cheap to walk here as the owner, and impossible to do safely from inside
-  # the box (root there would be walking paths the bot can rewrite). The group matters because the box's own files
-  # keep it and a folder the bot created came out with the box's group.
-  if [ "$who" != "$target_user" ] && [ "$mode" != ro ] &&
-     { [ "$fresh" = 1 ] || [ "$(stat -c %g -- "$shares/$name" 2>/dev/null)" != 100 ]; }; then
-    chgrp -R users -- "$shares/$name" 2>/dev/null || true
-    chmod -R g+rwX -- "$shares/$name" || fail "could not open $shares/$name to the group"
-  fi
+  # Nothing here touches the shared files: a bot in the box is another Unix user, and it works in the folder through
+  # a view that makes the host user's files its own (omp-box/guest.nix), so the host's modes stay the host's own and
+  # no file is rewritten for the box's benefit.
 }
 
 # What each user gets, one `user grant target flags` line per grant, read by the box's own root-run service: the
@@ -73,6 +67,9 @@ apply_host() {
 write_manifest() {
   local f name path mode who tmp
   mkdir -p "$meta"
+  # The guest maps a granted folder to the bot it was granted to by the uid the folder's files belong to here, so it
+  # needs that uid beside the grants (omp-box/guest.nix, shareApply).
+  id -u >"$meta/host-uid"
   tmp=$(mktemp "$meta/.manifest.XXXXXX")
   for f in "$grants"/*; do
     [ -e "$f" ] || continue
@@ -121,7 +118,7 @@ cmd_add() {
   [ -n "$name" ] || fail "the grant needs a name of letters, digits, '.', '_' or '-'"
   [ -e "$grants/$name" ] && fail "grant '$name' already exists (rm it first)"
   mkdir -p "$grants" "$shares"
-  apply_host "$name" "$path" "$mode" "$who"
+  apply_host "$name" "$path" "$mode"
   printf '%s\t%s\t%s\n' "$path" "$mode" "$who" > "$grants/$name"
   write_manifest
   printf '%s  %s  %s  %s\n' "$name" "$mode" "$who" "$path"
@@ -176,7 +173,7 @@ cmd_reconcile() {
     IFS=$'\t' read -r path mode who < "$f"
     [ -d "$path" ] || continue
     name=$(basename -- "$f")
-    apply_host "$name" "$path" "$mode" "$who" || {
+    apply_host "$name" "$path" "$mode" || {
       printf 'omp-box: grant %s (%s) did not apply\n' "$name" "$path" >&2
       failed=1
     }

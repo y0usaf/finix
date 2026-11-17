@@ -939,16 +939,17 @@
       trap 'fail "setup failed at line $LINENO: $BASH_COMMAND (exit $?)"' ERR
 
       mkdir -p ${state}/shares ${state}/grants ${state}/natives ${state}/auth ${state}/seed ${state}/meta ${home}/.omp/natives
-      # A browser's profile is the box user's folder on a share, but chromium runs as the bot. Chromium creates
-      # its user-data-dir 0700, which the bot cannot write through 9p, so give the box user's group the profile
-      # and everything under it before the guest starts. A link a previous guest left at the path is removed,
-      # never walked: the box is down, and the host user owns the folder.
+      # The grants omp-box writes name the paths, and the guest needs the uid those paths' files belong to: that is
+      # how omp-shares maps a granted folder to the bot it was granted to (see omp-box/guest.nix). This is the
+      # service's own uid, since the box runs as the host user.
+      id -u >${state}/meta/host-uid
+      # A browser's profile is the box user's folder on a share, but chromium runs as the bot, which reaches it
+      # through its view of the grant (omp-shares) and so writes it as its own whatever chromium sets on it. A link
+      # a previous guest left at the path is removed, never walked: the box is down, and the host user owns it.
       ${lib.concatMapStringsSep "\n" (browser: ''
         profile=${lib.escapeShellArg browser.profile}
         [ ! -L "$profile" ] || rm -f "$profile"
         mkdir -p "$profile" 2>/dev/null || true
-        chgrp -R users "$profile" 2>/dev/null || true
-        chmod -R g+rwX "$profile" 2>/dev/null || true
       '') (lib.attrValues browsers)}
       [ -e ${state}/meta/manifest ] || : >${state}/meta/manifest
       rm -f ${state}/id_ed25519
