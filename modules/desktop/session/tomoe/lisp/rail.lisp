@@ -661,9 +661,16 @@ first: the cards a rail strip on that output carries."
                                     :left :right)
                           :box entry))))
 
-(defun rail--strips (look state snapshot deck output)
-  "The rail's strips: the deck's seam on its output, and a top and a bottom bar on
-every output the deck gives no seam, each with the weld it attaches to."
+(defun rail--room (look)
+  "The width of the seam LOOK's rail stands in: the theme's own when its frame
+names one, the layout's otherwise -- the room the deck leaves between its
+columns, and the headset's layout leaves beside the card in its focal frame."
+  (getf (getf look :frame) :seam (getf +layout+ :seam)))
+
+(defun rail--strips (look state snapshot deck output cards focal)
+  "The rail's strips: the deck's seam on its output, the seam beside the card a
+narrow output's focal frame centres, and a top and a bottom bar on every other
+narrow output the deck gives no seam, each with the weld it attaches to."
   (declare (ignore state))
   (let* ((focus-box (and (context snapshot :focus)
                          (find (context snapshot :focus) (context snapshot :layout)
@@ -671,11 +678,17 @@ every output the deck gives no seam, each with the weld it attaches to."
          (seam (and deck output
                      (rail--strip :seam :y output (getf deck :x) (getf deck :y)
                                   (getf deck :width) (getf deck :height) nil)))
-         (narrow (loop for o in (context snapshot :outputs)
-                       when (deck--narrow-p (list :output o)) collect o))
-         (groups (append (when seam (list (list output (list seam))))
-                         (loop for o in narrow
-                               collect (list o (rail--edge-strips look o))))))
+         (focal-seam (and focal (first cards)))
+         (focal-output (and focal (getf focal :output)))
+         (groups (append
+                  (when seam (list (list output (list seam))))
+                  (loop for o in (context snapshot :outputs)
+                        when (deck--narrow-p (list :output o))
+                          collect (list o
+                                        (if (and focal-seam focal-output
+                                                 (equal (getf o :name) (getf focal-output :name)))
+                                            (list focal-seam)
+                                            (rail--edge-strips look o)))))))
     (loop for group in groups
           for group-output = (first group)
           collect (list group-output
@@ -989,10 +1002,11 @@ layout publishes, in output pixels, with its :OUTPUT; NIL when there is none."
           (list :output output :x (+ (getf output :x) (px :left)) :y (+ (getf output :y) (px :top))
                 :width (px :width) :height (px :height)))))))
 
-(defun rail--focal-cards (snapshot focal)
+(defun rail--focal-cards (snapshot focal room)
   "The seam a narrow output's rail stands in, beside the card in FOCAL as the
-deck's seam stands beside its right column, and every card shown on that output
-on the side of it its middle falls, the one in the frame first: (SEAM CARRIED)."
+deck's seam stands beside its right column, ROOM wide, and every card shown on
+that output on the side of it its middle falls, the one in the frame first:
+(SEAM CARRIED)."
   (let* ((output (getf focal :output))
          (shown (loop for entry in (context snapshot :layout)
                       when (and (getf entry :visible) (not (getf entry :fullscreen))
@@ -1010,9 +1024,9 @@ on the side of it its middle falls, the one in the frame first: (SEAM CARRIED)."
          (box (or inner focal))
          (gaps (getf +layout+ :gaps))
          (edge (getf box :x))
-         (seam (list :output (getf output :name)
-                     :x (+ (- edge (getf +layout+ :seam)) gaps) :y (getf box :y)
-                     :width (- (getf +layout+ :seam) (* 2 gaps)) :height (getf box :height))))
+         (seam (rail--strip :seam :y output
+                            (+ (- edge room) gaps) (getf box :y)
+                            (- room (* 2 gaps)) (getf box :height) nil)))
     (list seam
           (loop for entry in (if inner (cons inner (remove inner shown)) shown)
                 repeat (getf +rail+ :carry-max)
@@ -1210,17 +1224,22 @@ CONTEXT."
          (*rail--mode* *cassette-mode*)
          (*rail--palette* (state-value snapshot :hud-palette))
          (deck (state-value snapshot :deck-seam))
-         (seam deck)
+         ;; on a headset's narrow output the deck has no seam: the rail stands
+         ;; beside the card the layout centres in its focal frame, in a seam as
+         ;; wide as the theme's own, so the same theme draws it there.
+         (focal (rail--focal snapshot))
+         (cards (and focal (rail--focal-cards snapshot focal (rail--room *rail--look*))))
+         (seam (or deck (first cards)))
          (output (and seam (find (getf seam :output) (context snapshot :outputs)
                                  :key (lambda (o) (getf o :name)) :test #'equal)))
          (*rail--scale* (or (and output (max 1/4 (/ (getf output :scale-120 120) 120))) 1))
-         (strips (rail--strips *rail--look* state snapshot deck output))
+         (strips (rail--strips *rail--look* state snapshot deck output cards focal))
          (columns (and deck (state-value snapshot :deck-columns)))
-         (carried (and deck columns (rail--carried columns (context snapshot :layout))))
+         (carried (if deck (and columns (rail--carried columns (context snapshot :layout)))
+                      (second cards)))
          (focus (context snapshot :focus))
          (key (and focus (find focus carried :key (lambda (entry) (getf entry :id)))))
          (side (and key (getf key :side)))
-         (layer (if (rail--covered-p snapshot seam) :bottom :top))
          (tray (rail--tray snapshot))
          (now (hud--now))
          (epoch (rail--epoch now))
@@ -1242,11 +1261,7 @@ CONTEXT."
     (let* ((switch (getf state :rail-switch))
            (cut (not (eq (getf +rail+ :throw) :slide)))
            (switching (and switch (< (- now (getf switch :at)) (rail--settle switch))))
-           (old (and switching (getf switch :old)))
-           (shown (and output (rail--shown carried output)))
-           (windows (let ((ids (remove-duplicates (remove nil (list* (getf key :id) old shown))
-                                                  :from-end t)))
-                      (subseq ids 0 (min 8 (length ids))))))
+           (old (and switching (getf switch :old))))
       (values state
               (append (list (interval :sample (getf +rail+ :sample))
                             (publish-state :hud-hot (and hot t))
@@ -1280,24 +1295,40 @@ CONTEXT."
                       (loop for group in strips
                             for group-output = (first group)
                             for group-strips = (second group)
+                            for group-seam = (find :seam group-strips
+                                                   :key (lambda (strip) (getf strip :place)))
+                            for group-carried = (cond ((and (eq group-output output) output) carried)
+                                                      ((and cards focal
+                                                            (equal (getf group-output :name)
+                                                                   (getf (getf focal :output) :name)))
+                                                       (second cards))
+                                                      (t (rail--windows-on snapshot group-output)))
+                            for group-key = (and focus (find focus group-carried
+                                                            :key (lambda (entry) (getf entry :id))))
+                            for group-side = (and group-key (getf group-key :side))
+                            for group-windows = (let ((ids (remove-duplicates
+                                                            (remove nil
+                                                                    (list* (getf group-key :id) old
+                                                                           (mapcar (lambda (entry) (getf entry :id))
+                                                                                   (rail--shown group-carried
+                                                                                                group-output))))
+                                                            :from-end t)))
+                                                  (subseq ids 0 (min 8 (length ids))))
                             when group-strips append (funcall (getf *rail--look* :draw) *rail--look*
                                             (list :theme theme :state state :snapshot snapshot
                                                   :now now :epoch epoch
-                                                  :seam (and (eq group-output output) seam)
+                                                  :seam group-seam
                                                   :strips group-strips :output group-output
-                                                  :carried (if (eq group-output output)
-                                                               carried
-                                                               (rail--windows-on snapshot group-output))
-                                                  :key key :side side
+                                                  :carried group-carried
+                                                  :key group-key :side group-side
                                                   :switch switch :switching switching
                                                   :cut cut :old old
-                                                  :windows (if (eq group-output output)
-                                                               windows
-                                                               (let ((ids (mapcar (lambda (entry) (getf entry :id))
-                                                                                  (rail--windows-on snapshot group-output))))
-                                                                 (subseq ids 0 (min 8 (length ids)))))
+                                                  :windows group-windows
                                                   :voice voice :voicing voicing
                                                   :levels levels :fade fade :settling settling
-                                                  :layer (if (eq group-output output) layer :top)
+                                                  :layer (if group-seam
+                                                             (if (rail--covered-p snapshot group-seam)
+                                                                 :bottom :top)
+                                                             :top)
                                                   :tray tray :hot hot))))
               nil))))
