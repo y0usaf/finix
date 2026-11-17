@@ -781,7 +781,7 @@ in {
     ".gemini/antigravity-acp"
   ];
 
-  environment.systemPackages = [pkgs.jq pkgs.age ompSecret];
+  environment.systemPackages = [pkgs.jq pkgs.age pkgs.poppler-utils pkgs.sqlite ompSecret];
 
   user.files =
     lib.mapAttrs' (name: source: lib.nameValuePair ".omp/agent/ext/${name}" {source = "${source}";}) extLinks
@@ -834,17 +834,20 @@ in {
             };
             js = false;
           };
+          python.interpreter = "${pkgs.python3.withPackages (ps: [ps.pillow ps.numpy ps.pandas ps.fonttools])}/bin/python3";
           codexResets.autoRedeem = "no";
           title.icons = "nf+emoji";
           interruptMode = "immediate";
           modelRoles = {
             default = "${catalog.defaultProvider}/${catalog.defaultModel}";
-            advisor = catalog.advisorModel;
+            advisor = "antigravity-acp/gemini-4-hydrogen:high";
             smol = catalog.smolModel;
             judge = catalog.judgeModel;
             task = catalog.taskModel;
           };
-          retry.fallbackChains = catalog.fallbackChains;
+          retry.fallbackChains = catalog.fallbackChains // {
+            advisor = ["openai-codex/gpt-6.1-sol:high"];
+          };
           tier = {
             openai = "none";
             advisor = "none";

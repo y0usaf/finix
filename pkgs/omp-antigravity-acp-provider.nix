@@ -58,6 +58,26 @@ in
       substituteInPlace extension/runtime.mjs --replace-fail \
         'return `''${FORCE_FILE_STORAGE_ENV} set by the user`;' \
         'return `''${FORCE_FILE_STORAGE_ENV} is set, so each login stays in its GEMINI_HOME folder`;'
+      # Go's ACP server rejects JSON Schema type arrays (e.g. omptype's ["number", "null"]).
+      substituteInPlace extension/runtime.mjs --replace-fail \
+        'if ("const" in output2 && !("enum" in output2)) {' \
+        'if (Array.isArray(output2.type)) {
+    const types = output2.type;
+    if (types.length === 1) {
+      output2.type = types[0];
+    } else {
+      delete output2.type;
+      const variants = types.map((item) => ({ type: item }));
+      spend(budget, 0, 8 + variants.reduce((acc, item) => acc + scalarChars(item.type) + 10, 0));
+      if ("anyOf" in output2) {
+        output2.allOf = [...(output2.allOf ?? []), { anyOf: output2.anyOf }, { anyOf: variants }];
+        delete output2.anyOf;
+      } else {
+        output2.anyOf = variants;
+      }
+    }
+  }
+  if ("const" in output2 && !("enum" in output2)) {'
       # Crest signs each Antigravity account in inside its own folder and pins
       # the ACP server to the file store with AGY_ACP_FORCE_FILE_STORAGE. The
       # shared Secret Service item then belongs to a different account, so this
