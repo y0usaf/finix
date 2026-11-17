@@ -12,10 +12,14 @@
 ;;; whose frames need more room than a window gap names it as :FRAME -- :EDGE
 ;;; pixels between the columns and the screen's edges, :TITLE pixels of title row
 ;;; above each card -- and the deck lays the columns out by it; the bar publishes
-;;; that with the seam's width as :RAIL-FRAME. On a narrow output, the headset's,
-;;; the deck has no seam: the rail stands beside the card in the focal frame the
-;;; headset's layout publishes, as the seam stands beside the deck's right column,
-;;; and carries every card shown there, so the same theme draws it. The theme is
+;;; that with the seam's width as :RAIL-FRAME. Where the rail stands is a
+;;; placement: a frame -- the focused card, the layout's column of cards, or the
+;;; output -- and one of its edges. A seam is the layout's own, the deck's
+;;; between its columns or the one beside the card a headset's layout centres,
+;;; and it is the default; a bar along any other edge is as long as the frame, as
+;;; thick as the theme's strip and scaled by the frame's output. The config's
+;;; :PLACE lists the placements, so a headset can wear bars hugging its focal
+;;; card, and every placement carries the cards shown on its output. The theme is
 ;;; the bar's own state, the first one until Alt+Shift+T steps to the next, so a
 ;;; config reload keeps it. The rest of this file is what every theme shares --
 ;;; the readings, the switch and the voice -- and the first theme, morph.

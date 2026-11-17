@@ -439,8 +439,8 @@
     + lib.concatMapStrings (theme: lib.optionalString (theme.lisp != null) (builtins.readFile theme.lisp + "\n")) themes
     + "(defparameter +rail-themes+ (list ${lib.concatMapStringsSep " " (theme: ":${theme.name} (list* :shader \"${theme.shader}\" :bar-shader \"${theme.barShader or theme.shader}\" +rail-${theme.name}+)") themes}))\n";
 
-  # The rail: the deck's seam drawn in one theme at a time, its readings on a
-  # surface of their own.
+  # The rail: its strips placed on a frame's edges, drawn in one theme at a
+  # time, its readings on a surface of their own.
   railParameters = {
     inherit (barParameters) modules time date;
     width = bar.rail.width;
