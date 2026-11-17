@@ -35,7 +35,7 @@ const int VOICE = 66, BANDS = 86, LEVELS = 89, GAUGES = 137, SWELL = 152, GHOST 
 const int M_AXIS = 168, M_RECT = 169, M_SLAB = 173, M_RAIL = 174, M_FREE = 175;
 
 vec2 g_origin;
-float g_h;
+float g_h;         // the surface's height, what lies beneath it is read in
 
 float g_axis;      // 0: the strip runs down y; 1: across x
 vec4 g_strip;      // the strip's rect in the output's y-up pixels
@@ -96,7 +96,8 @@ float cap(float w, float q, float front, float soft) {
     return (w + 1.0) * sqrt(clamp((front - q) / soft, 0.0, 1.0)) - 1.0;
 }
 
-// A card's box in output pixels: x0, y0, x1, y1.
+// A card's box in output pixels: x0, y0, x1, y1, y up from the output's bottom.
+// The compositor hands a surface its cards in the surface's own pixels.
 vec4 card(int i) {
     vec4 w = iWindow[i];
     float top = g_h - (w.y + w.w);
@@ -274,7 +275,7 @@ float gauges(float y) {
 // ---- the slab
 
 vec2 rest_edges(float side) {
-    if (g_axis > 0.5) {
+    if (g_free != 0.0) {
         // a bar: the slab fills the strip against its outer edge, its free edge
         // facing the cards, and gives the gauges' swell its air
         float lo = acr_lo(), hi = acr_hi();

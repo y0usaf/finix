@@ -54,19 +54,6 @@
   '((:time -388 40) (:cpu -270 50) (:memory -152 50) (:voice 0 30)
     (:gpu 152 50) (:vram 270 50) (:date 388 30)))
 
-(defun rail-thread--strip (context)
-  "The strip the thread stands in: the deck's seam as it lays it out, or -- on an
-output the deck gives no seam (an empty desktop, a fullscreen card) -- a strip
-down the middle of the output, inset as the frame insets the cards."
-  (or (getf context :seam)
-      (let ((output (getf context :output)) (inset 14))
-        (list :output (getf output :name)
-              :x (- (+ (getf output :x) (floor (getf output :width) 2))
-                    (floor (rail--seam-width) 2))
-              :y (+ (getf output :y) inset)
-              :width (rail--seam-width)
-              :height (- (getf output :height) (* 2 inset))))))
-
 ;;; The order the shader reads its beads in: the clock, the date, CPU, memory, the
 ;;; voice at the weld, the GPU and the VRAM.
 (defparameter +rail-thread--bead-order+ '(:time :date :cpu :memory :voice :gpu :vram))
@@ -180,66 +167,75 @@ read a zero reach as no reach.)"
 (defparameter +rail-thread--strip-height+ 96)
 
 (defun rail-thread--bar-numbers (context strip)
-  "THREAD's numbers for a bar: the glass's shape from the strip's own layout, then
-the flag that says which bar this is, its rect and its blocks."
-  (append (rail-thread--numbers (rail-thread--layout strip) (getf context :state))
-          (list (if (eq (getf strip :place) :top) 1d0 2d0))
-          (rail--shader-rect (getf context :output) strip)
-          (rail--block-data strip (rail--bar-blocks (getf context :state)
-                                                    (getf context :snapshot) strip))))
+  "THREAD's numbers for a bar, laid out for a surface that is the strip itself:
+the corner its backdrop is read from, the thread's half width, the bar's mode --
+1 along the top edge, 2 along the bottom, 4 down a side -- its own rect, and each
+block's kind and rect in the surface's pixels, y up."
+  (let* ((blocks (getf strip :blocks))
+         (height (getf strip :height)))
+    (append (list 0d0 0d0 5.5d0)
+            (list (case (getf strip :place)
+                    (:top 1d0) (:bottom 2d0) (t 4d0)))
+            (list 0d0 0d0 (getf strip :width) height)
+            (list (length blocks))
+            (loop for (module x y width block-height) in blocks
+                  append (list (rail--kind module) x (- height y block-height)
+                               (+ x width) (- height y))))))
 
 (defun rail-thread--draw (look context)
   "THREAD: the glass thread with its beads, the readings in their glass and the
-focused card's rim, all in one shader over the output -- and on an output the
-deck gives no seam, a thread along each bar with a glass cell per reading."
+focused card's rim, all in one shader over the output -- the seam and its beads
+when the rail stands in a seam, else the frames alone and a glass bar along each
+strip the config places."
   (destructuring-bind (&key state snapshot output strips &allow-other-keys) context
     (let* ((seam (find :seam strips :key (lambda (strip) (getf strip :place))))
-           (bars (remove seam strips)))
-      (if seam
-          (let ((theme (rail-thread--numbers
-                        (rail-thread--layout (rail-thread--strip context))
-                        state)))
-            (if (getf context :windows)
-                (kit--frames look context theme :reach +rail-thread--reach+)
-                (rail-thread--whole look context theme)))
-          (append
-           (kit--frames look context
-                        (append (rail-thread--numbers (rail-thread--layout (first bars)) state)
-                                (list 3d0))
-                        :reach +rail-thread--reach+)
-           (loop for strip in bars
-                 for blocks = (rail--bar-blocks state snapshot strip)
-                 for tag = (format nil "-~A" (string-upcase (symbol-name (getf strip :place))))
-                 when blocks
-                   append
-                   (list
-                    (shell-surface
-                     (intern (format nil "RAIL-THREAD-BAR~A" tag) :keyword)
-                     (ui :stack)
-                     :output (getf output :name)
-                     :anchors (list (getf strip :place))
-                     :width (rail--design (getf strip :width))
-                     :height (rail--design (getf strip :height))
-                     :margin 0
-                     :layer (getf context :layer) :click-through t
-                     :exclusive-zone (rail--design (getf strip :height))
-                     :background (list :shader (getf look :shader)
-                                       :data (rail-thread--bar-numbers context strip)
-                                       :clock (getf context :epoch)
-                                       :until (kit--until look context)))
-                    (shell-surface
-                     (intern (format nil "RAIL-THREAD-TYPE~A" tag) :keyword)
-                     (rail--web state snapshot strip blocks
-                                (or (rail--material :ink) (rail--ink)))
-                     :output (getf output :name)
-                     :anchors (list (getf strip :place))
-                     :width (rail--design (getf strip :width))
-                     :height (rail--design (getf strip :height))
-                     :margin 0
-                     :layer (getf context :layer) :background "#00000000"
-                     :click-through t :slide t))))))))
-
-
+           (bars (remove seam strips))
+           (vertical (find-if (lambda (strip) (eq (getf strip :axis) :y)) bars))
+           (frame-strip (or seam vertical (first bars))))
+      (append
+       (if seam
+           (let ((theme (rail-thread--numbers (rail-thread--layout seam) state)))
+             (if (getf context :windows)
+                 (kit--frames look context theme :reach +rail-thread--reach+)
+                 (rail-thread--whole look context theme)))
+           (when frame-strip
+             (kit--frames look context
+                          (append (rail-thread--numbers (rail-thread--layout frame-strip) state)
+                                  (list 3d0))
+                          :reach +rail-thread--reach+)))
+       (loop for strip in bars
+             for blocks = (getf strip :blocks)
+             for tag = (format nil "-~A" (string-upcase (symbol-name (getf strip :place))))
+             when blocks
+               append
+               (list
+                (shell-surface
+                 (intern (format nil "RAIL-THREAD-BAR~A" tag) :keyword)
+                 (ui :stack)
+                 :output (getf output :name)
+                 :anchors (if (getf strip :edge) (list (getf strip :edge)) '(:top :left))
+                 :width (rail--design (getf strip :width))
+                 :height (rail--design (getf strip :height))
+                 :margin (if (getf strip :edge) 0
+                             (rail--surface-margin output (getf strip :x) (getf strip :y)))
+                 :exclusive-zone (getf strip :zone 0)
+                 :layer (getf context :layer) :click-through t
+                 :background (list :shader (getf look :bar-shader (getf look :shader))
+                                   :data (rail-thread--bar-numbers context strip)
+                                   :clock (getf context :epoch)
+                                   :until (kit--until look context)))
+                (shell-surface
+                 (intern (format nil "RAIL-THREAD-TYPE~A" tag) :keyword)
+                 (rail--web state snapshot strip blocks
+                            (or (rail--material :ink) (rail--ink)))
+                 :output (getf output :name)
+                 :anchors (if (getf strip :edge) (list (getf strip :edge)) '(:top :left))
+                 :width (rail--design (getf strip :width))
+                 :height (rail--design (getf strip :height))
+                 :margin (if (getf strip :edge) 0
+                             (rail--surface-margin output (getf strip :x) (getf strip :y)))
+                 :layer (getf context :layer) :background "#00000000"
+                 :click-through t :slide t)))))))
 
 (defparameter +rail-thread+
   (list :draw #'rail-thread--draw :settle +rail-thread--settle+

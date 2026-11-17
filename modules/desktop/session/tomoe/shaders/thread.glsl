@@ -32,8 +32,8 @@ const int T_PHZ = THEME + 8, T_ENV = THEME + 9, T_BEND = THEME + 10, T_BDEC = TH
 const int T_BHZ = THEME + 12, T_BSIG = THEME + 13, T_FDELAY = THEME + 14, T_FDUR = THEME + 15;
 const int T_DDUR = THEME + 16, T_X = THEME + 17, T_TOP = THEME + 18, T_BOT = THEME + 19;
 const int T_WY = THEME + 20, T_BEADS = THEME + 21, T_VLEN = THEME + 42, T_FSTYLE = THEME + 46;
-// a bar: which one this surface is (1 the top, 2 the bottom, 3 the frames alone),
-// its rect, and the blocks the thread carries there
+// a bar: which one this surface is (1 the top, 2 the bottom, 3 the frames alone,
+// 4 a side), its rect, and the blocks the thread carries there
 const int T_MODE = THEME + 47, T_BR = THEME + 48, T_BN = THEME + 52;
 
 const float DESIGN = 0.8;         // seconds the siphon was drawn for
@@ -186,20 +186,24 @@ vec3 glass(vec2 p, float f, vec2 dir, float shine) {
 vec4 thread_bar(vec2 p) {
     vec4 r = vec4(D(T_BR), D(T_BR + 1), D(T_BR + 2), D(T_BR + 3));
     if (p.x < r.x || p.x >= r.z || p.y < r.y || p.y >= r.w) return vec4(0.0);
-    float mid = 0.5 * (r.y + r.w);
+    bool down = D(T_MODE) > 3.5;      // a bar on a side runs down y
+    float mid = down ? 0.5 * (r.x + r.z) : 0.5 * (r.y + r.w);
     float halfw = max(2.0, D(T_TW));
-    float f = sd_rbox(p, vec4(r.x, mid - halfw, r.z, mid + halfw), halfw);
+    float f = down ? sd_rbox(p, vec4(mid - halfw, r.y, mid + halfw, r.w), halfw)
+                   : sd_rbox(p, vec4(r.x, mid - halfw, r.z, mid + halfw), halfw);
     int nb = int(D(T_BN));
     for (int i = 0; i < 8; i++) {
         if (i >= nb) break;
         int b0 = T_BN + 1 + i * 5;
         vec4 br = vec4(D(b0 + 1), D(b0 + 2), D(b0 + 3), D(b0 + 4));
         if (br.z <= br.x) break;
-        f = smin(f, sd_rbox(p, vec4(br.x + 4.0, br.y + 8.0, br.z - 4.0, br.w - 8.0), 10.0), 6.0);
+        f = smin(f, down ? sd_rbox(p, vec4(br.x + 8.0, br.y + 4.0, br.z - 8.0, br.w - 4.0), 10.0)
+                         : sd_rbox(p, vec4(br.x + 4.0, br.y + 8.0, br.z - 4.0, br.w - 8.0), 10.0), 6.0);
     }
     float cov = clamp(0.5 - f, 0.0, 1.0);
     if (cov <= 0.0) return vec4(0.0);
-    return vec4(glass(p, f, normalize(vec2(0.0, p.y - mid) + vec2(1e-5, 0.0)), 0.0), cov);
+    vec2 dir = down ? normalize(vec2(p.x - mid, 1e-5)) : normalize(vec2(1e-5, p.y - mid));
+    return vec4(glass(p, f, dir, 0.0), cov);
 }
 
 // ---------------------------------------------------------------- the readout
@@ -275,7 +279,7 @@ void set_type(vec2 p, inout vec3 c) {
 void mainImage(out vec4 color, in vec2 fragCoord) {
     kit_begin();
     vec2 p = kit_point(fragCoord);
-    if (D(T_MODE) > 0.5 && D(T_MODE) < 2.5) {
+    if (D(T_MODE) > 0.5 && D(T_MODE) < 4.5) {
         color = thread_bar(p);
         if (color.a <= 0.0) discard;
         return;

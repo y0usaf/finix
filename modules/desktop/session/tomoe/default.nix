@@ -371,10 +371,23 @@
   # on the first of these and a theme it cannot find falls back to it.
   kitShader = name: file: pkgs.writeText "${name}.glsl" (builtins.readFile ./shaders/kit.glsl + "\n" + builtins.readFile file);
 
+  # THREAD's bars are surfaces the size of the strip, so their shader reads the
+  # same picture from the strip's own corner: the kit's layout starts at index 2
+  # and the bar's numbers sit there, rather than after the whole kit.
+  threadBarShader = pkgs.writeText "thread-bar.glsl"
+    (builtins.replaceStrings [ "const int THEME = 132;" ] [ "const int THEME = 2;" ]
+      (builtins.readFile ./shaders/kit.glsl)
+    + "\n"
+    + builtins.replaceStrings
+      [ "const int T_MODE = THEME + 47, T_BR = THEME + 48, T_BN = THEME + 52;" ]
+      [ "const int T_MODE = THEME + 1, T_BR = THEME + 2, T_BN = THEME + 6;" ]
+      (builtins.readFile ./shaders/thread.glsl));
+
   railThemes = [
     {
       name = "thread";
       shader = kitShader "thread" ./shaders/thread.glsl;
+      barShader = threadBarShader;
       lisp = ./lisp/rail-thread.lisp;
       description = "liquid glass on a thin seam: a 34 px seam with one glass thread down its middle, 11 px wide and as tall as the cards, carrying the readings as beads on it -- the clock as hours over minutes, the date as day over month, CPU, memory, bolo's voice at the weld, the GPU and the VRAM -- each gauge bead holding a level of denser glass from its foot up to its load with a small label over its value, every bead's block centred on it. Three beads hang above the voice dot at the weld and three below, one every 118 px of the mock, so the run is symmetric about it: the time at the top, the date at the bottom, the gauges either side of the middle. The focused card wears a 5 px glass rim welded to the thread by a meniscus at the weld; every other card keeps what bar.rail.focus asks for -- a pair of hairlines, the dark one alone and dimmer, nothing at all, or nothing under a soft halo round the focused rim. One set of glass numbers serves dark and light: the backdrop frosted and refracted toward the rim, a light tint lift, a bright inner highlight on the lit side, a dark outer hairline all round, and each bead's type inked from the luminance of what lies behind it. A switch across the seam bends the thread after the new side on a damped spring while the old rim drains back into the thread and the new one fills out of the weld both ways; within a column the weld stays and the rims only drain and fill. bolo plucks the thread -- a travelling wave out from the weld, each stretch as loud as the voice was when it passed, the beads the nodes of the string, the voice bead swelling -- and the ripple runs round the focused rim, thickening and brightening it, dying away over the settle.";
     }
@@ -424,7 +437,7 @@
     builtins.readFile ./lisp/rail-kit.lisp
     + "\n"
     + lib.concatMapStrings (theme: lib.optionalString (theme.lisp != null) (builtins.readFile theme.lisp + "\n")) themes
-    + "(defparameter +rail-themes+ (list ${lib.concatMapStringsSep " " (theme: ":${theme.name} (list* :shader \"${theme.shader}\" +rail-${theme.name}+)") themes}))\n";
+    + "(defparameter +rail-themes+ (list ${lib.concatMapStringsSep " " (theme: ":${theme.name} (list* :shader \"${theme.shader}\" :bar-shader \"${theme.barShader or theme.shader}\" +rail-${theme.name}+)") themes}))\n";
 
   # The rail: the deck's seam drawn in one theme at a time, its readings on a
   # surface of their own.
@@ -442,6 +455,8 @@
     };
     trail = bar.rail.trail && tomoeKnows "cursor-trail";
     theme-bind = binding ["alt" "shift"] "t" "rail-theme" "Next Rail Theme";
+    place = map (placement: [(keyword placement.frame) (keyword placement.edge)])
+      bar.rail.place;
     sample = 1000;
     colors = lib.mapAttrs (_: keyword) {
       ink = "ink";
@@ -3310,6 +3325,24 @@ in {
           type = lib.types.listOf (lib.types.enum railThemeNames);
           default = railThemeNames;
           description = "Rail themes in the order Alt+Shift+T steps through them; a session starts on the first and a config reload keeps the one it is on. Each is the whole look: the rail, the window frames and titles, how focus moves, the gauges and bolo's voice, in a dark and a light palette. ${lib.concatMapStringsSep " " (theme: "${theme.name}: ${theme.description}") railThemes}";
+        };
+        place = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              frame = lib.mkOption {
+                type = lib.types.enum ["focused" "column" "output"];
+                default = "column";
+                description = "The focused card, the layout's column of cards, or the output.";
+              };
+              edge = lib.mkOption {
+                type = lib.types.enum ["top" "bottom" "left" "right" "seam"];
+                default = "seam";
+                description = "The edge of that frame the rail stands on. A seam is the layout's own: the deck's between its columns, or the one beside the card a headset's layout centres; the other edges are bars along the frame.";
+              };
+            };
+          });
+          default = [{frame = "column"; edge = "seam";}];
+          description = "Where the rail stands, one strip per declaration: the frame it is attached to and that frame's edge. Each strip takes its length from the frame, its thickness from the theme and its scale from the frame's output, so the same theme draws it on the desktop and on a headset. The default is the layout's own seam. A headset's top and bottom bars hugging the focal card are [{frame = \"focused\"; edge = \"top\";} {frame = \"focused\"; edge = \"bottom\";}]; the old full-output bars are [{frame = \"output\"; edge = \"top\";} {frame = \"output\"; edge = \"bottom\";}]. The value is the Lisp config's :PLACE, so extraConfig can replace it (setf (getf +rail+ :place) ...) and a config reload applies it.";
         };
         width = lib.mkOption {
           type = lib.types.ints.positive;
