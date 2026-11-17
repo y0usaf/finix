@@ -108,36 +108,6 @@ providers:
         maxTokens: 65536
         name: Gemini 4 Carbon
         reasoning: true
-  openai-codex:
-    models:
-      - api: openai-codex-responses
-        contextWindow: 500000
-        cost:
-          cacheRead: 0.1
-          cacheWrite: 0
-          input: 2
-          output: 10
-        id: gpt-6.2-sol
-        input:
-          - text
-          - image
-        maxTokens: 128000
-        name: GPT-6.2 Sol
-        reasoning: true
-      - api: openai-codex-responses
-        contextWindow: 500000
-        cost:
-          cacheRead: 0.4
-          cacheWrite: 0
-          input: 8
-          output: 40
-        id: gpt-6.2-astra
-        input:
-          - text
-          - image
-        maxTokens: 128000
-        name: GPT-6.2 Astra
-        reasoning: true
   vercel-ai-gateway:
     baseUrl: https://ai-gateway.vercel.sh/v1
     apiKey: AI_GATEWAY_API_KEY
