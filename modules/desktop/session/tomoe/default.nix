@@ -3344,8 +3344,8 @@ in {
         };
         trail = lib.mkOption {
           type = lib.types.bool;
-          default = false;
-          description = "Draw the pointer's own trail in the active theme's shape and colours: the cells its travel crossed over the last fraction of a second, fading behind it, and nothing at all while it rests. Each theme sets its own cell size, life, tiers, dots or cells and colour from its cast, in dark and light alike. Off by default: on, the trail's per-cell draw issue pushes the frame past the 240 Hz budget in six of the fourteen theme-modes, so it stays off until that cost is batched away.";
+          default = true;
+          description = "Draw the pointer's own trail in the active theme's shape and colours: the cells its travel crossed over the last fraction of a second, fading behind it, and nothing at all while it rests. Each theme sets its own cell size, life, tiers, dots or cells and colour from its cast, in dark and light alike. Every lit cell rides one instanced draw: the trail costs the frame about 90 us of its 4.17 ms, and the light theme-modes sit at the budget's edge with it on or off.";
         };
         throwMode = lib.mkOption {
           type = lib.types.enum ["slide" "cut"];
