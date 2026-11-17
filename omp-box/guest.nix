@@ -29,6 +29,10 @@
     bots;
   botNames = map (bot: bot.user) bots;
   botsOf = name: lib.findFirst (bot: bot.name == name) null bots;
+  # The bot that cleans up old accounts (Sweep). The host takes a consistent snapshot of the user's browsing history
+  # and copies the active Google Antigravity login into the auth share at every start; this installs both in that
+  # bot's home: the history root-owned and read-only, the login as the bot, since the ACP runtime renews it in place.
+  sweepBot = botsOf "Sweep";
   # The box user who works with the host user's own logins: no other Unix user can read the host's 0600
   # ~/.config/gh, ~/Tokens or CLI config, so the host copies what this bot needs into the auth share and
   # omp-logins installs it in this user's home, where gh, git's github.com helper and each CLI find it.
@@ -674,6 +678,51 @@ in {
         };
         # The omp config, read from the seed share's current generation at boot and again by the host's
         # omp-box-seed whenever it puts a new one there; at boot it waits for omp-box-seed's first copy.
+        # Sweep's history and its Google login, laid down before anything in the box runs. The snapshot is a copy the
+        # host made through sqlite's own backup, so the profile's database is never read halfway through a write.
+        omp-sweep = lib.mkIf (sweepBot != null) {
+          wantedBy = ["multi-user.target"];
+          before = ["sshd.service"];
+          unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+          script = ''
+            set -u
+            bot=${sweepBot.user}
+            home=${sweepBot.home or "/home/${sweepBot.user}"}
+            src=/etc/ssh/omp-box/history/places.sqlite
+            if [ -r "$src" ]; then
+              # Root owns what it writes here, so the bot can read its history and cannot change it.
+              if ${pkgs.coreutils}/bin/install -d -m 755 "$home/history" &&
+                ${pkgs.coreutils}/bin/install -m 444 -o root -g root "$src" "$home/history/places.sqlite"; then
+                echo "omp-sweep: put the browsing history at $home/history/places.sqlite"
+              else
+                echo "omp-sweep: cannot install $src for $bot" >&2
+              fi
+            else
+              echo "omp-sweep: $src is not in the auth share, so $bot has no browsing history" >&2
+            fi
+            agy=/etc/ssh/omp-box/antigravity
+            if [ -r "$agy/acp_token.json" ]; then
+              # The bot's own files: the runtime refreshes the token, and a token it cannot write is a login that
+              # expires.
+              if ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/install -d -m 700 "$home/.gemini" "$home/.gemini/antigravity-acp"; then
+                for file in acp_token.json settings.json; do
+                  [ -r "$agy/$file" ] || continue
+                  ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.bash}/bin/bash -c "umask 077; cat > $(printf %q "$home/.gemini/antigravity-acp/$file")" <"$agy/$file" ||
+                    echo "omp-sweep: cannot install the Antigravity $file for $bot" >&2
+                done
+                echo "omp-sweep: installed the signed-in Antigravity account for $bot"
+              else
+                echo "omp-sweep: cannot prepare $home/.gemini for $bot" >&2
+              fi
+            else
+              echo "omp-sweep: the auth share holds no signed-in Antigravity account, so $bot answers on its fallback" >&2
+            fi
+          '';
+        };
         omp-seed = {
           wantedBy = ["multi-user.target"];
           unitConfig.RequiresMountsFor = [ompBox.seedMount] ++ map (person: "${person.home}/.omp/agent") people;

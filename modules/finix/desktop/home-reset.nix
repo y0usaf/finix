@@ -293,6 +293,7 @@
             "cu-workbench"
             "finix"
             "inscend"
+            "sweep-workbench"
           ];
           files = [".SNOW"];
         };

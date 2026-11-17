@@ -35,6 +35,14 @@
       uid = 2003;
       folders = [];
     }
+    {
+      # Old-account cleanup: it works in its own folder, where the user drops a Firefox logins export into
+      # inbox/, and signs in to the sites it deletes accounts on through the browser below.
+      name = "Sweep";
+      user = "sweepbot";
+      uid = 2004;
+      folders = ["sweep-workbench"];
+    }
   ];
   # Besides the token files, what the bot that works with the host user's logins gets from the user's home: the
   # file or folder each work CLI keeps its login in. A path the host does not have is skipped.
@@ -47,6 +55,12 @@
   ];
   # The box's own headless browsers.
   browsers = {
+    # Sweep signs in to the sites whose accounts it deletes, so this profile holds live sessions: it lives in the
+    # bot's own state folder, which only that bot reaches and which survives a reboot.
+    Sweep = {
+      profile = "${home}/.local/state/omp-bot/bots/Sweep/browser";
+      port = 9223;
+    };
     baobot = {
       profile = "${home}/.local/state/baobot/chromium";
       port = 9222;
@@ -649,6 +663,9 @@
   # ${seedMount}/current/ext/NAME, a path no switch changes, so a running omp sees the same extensions list.
   seedMount = "/mnt/seed";
   extensions = {
+    # Google Antigravity's own ACP runtime, which the provider pins AGY_ACP_BIN to, so a bot in the box can answer
+    # on a Gemini 4 model through the account it is given.
+    antigravity-acp = "${import ../../../../pkgs/omp-antigravity-acp-provider.nix {inherit pkgs;}}/lib/node_modules/@n1netynine99/omp-antigravity-acp-provider";
     "compact-eval.ts" = "${./compact-eval.ts}";
     "work-fold.ts" = "${./work-fold.ts}";
     "crest-reroute.ts" = "${./crest-reroute.ts}";
@@ -681,6 +698,7 @@
   };
   optchatExtension = "${inBox "optchat"}/extension.ts";
   ompExtensions = [
+    "${inBox "antigravity-acp"}"
     "${inBox "compact-eval.ts"}"
     "${inBox "work-fold.ts"}"
     "${inBox "crest-reroute.ts"}"
@@ -733,6 +751,23 @@
               maxTokens: 65536
               name: Gemini 4 Hydrogen
               reasoning: true
+            # The fallback a boxed bot that answers on Antigravity goes to when Google's account is out of quota or
+            # cannot be reached: the same account-routed DeepSeek the host's task role uses, through this gateway.
+            - api: anthropic-messages
+              baseUrl: ${gatewayUrl}
+              compat:
+                allowEmptySignature: true
+              contextWindow: 1000000
+              cost:
+                cacheRead: 0.0026
+                cacheWrite: 0
+                input: 0.13
+                output: 0.5
+              id: deepseek/deepseek-v4.1-flash-1017
+              input: [text, image]
+              maxTokens: 384000
+              name: DeepSeek V4.1 Flash 1017
+              reasoning: true
         anthropic:
           baseUrl: ${gatewayUrl}/anthropic
           apiKey: "!echo sk-ant-oat-crest"
@@ -761,7 +796,7 @@
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel;
       defaultThinkingLevel = catalog.ompThinkingLevel;
-      enabledModels = catalog.enabledModels ++ ["ablit/${ablit.id}"];
+      enabledModels = catalog.enabledModels ++ ["antigravity-acp/*" "ablit/${ablit.id}"];
       packages = [];
     });
     config = pkgs.writeText "config.yml" ''
@@ -881,7 +916,7 @@
     inherit guest runner state port;
     run = pkgs.writeShellScript "omp-box-run" ''
       set -Eeuo pipefail
-      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.findutils pkgs.gnugrep pkgs.iproute2 pkgs.openssh pkgs.jq]}
+      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.findutils pkgs.gnugrep pkgs.iproute2 pkgs.openssh pkgs.jq pkgs.python3 inputPackages.crest.crest-auth]}
       status=${state}/status.json
       runner=${runner}
       limit=3
@@ -987,6 +1022,45 @@
       # Only the bot reads this copy, and what is in it is tokens and live CLI sessions: the guest unpacks it as
       # itself, so its modes have to be the owner's alone.
       chmod -R go-rwx ${state}/auth/logins
+      # Sweep's own folder: the user drops a Firefox logins export into inbox/, and the bot works beside it. Nothing
+      # else on this machine writes there, and no other box user can reach it.
+      install -d -m 700 ${home}/sweep-workbench ${home}/sweep-workbench/inbox
+      # The history Sweep dates each account by. Firefox keeps places.sqlite open and writes it in place, so the copy
+      # goes through sqlite's own backup, which reads a consistent database; that one file travels, never logins.json,
+      # key4.db or cookies. The newest profile wins, so the browser the user last used is the one that dates them.
+      rm -rf ${state}/auth/history
+      install -d -m 700 ${state}/auth/history
+      history=
+      for db in ${home}/.librewolf/*/places.sqlite ${home}/.mozilla/firefox/*/places.sqlite; do
+        [ -f "$db" ] || continue
+        if [ -z "$history" ] || [ "$db" -nt "$history" ]; then history=$db; fi
+      done
+      if [ -n "$history" ]; then
+        if python3 -c 'import sqlite3,sys; s=sqlite3.connect("file:"+sys.argv[1]+"?mode=ro",uri=True); d=sqlite3.connect(sys.argv[2]); s.backup(d); d.close(); s.close()' "$history" ${state}/auth/history/places.sqlite; then
+          chmod 400 ${state}/auth/history/places.sqlite
+          echo "omp-box: snapshotted $history for Sweep" >&2
+        else
+          rm -f ${state}/auth/history/places.sqlite
+          echo "omp-box: cannot snapshot $history, so Sweep gets no browsing history" >&2
+        fi
+      else
+        echo "omp-box: there is no places.sqlite to snapshot for Sweep" >&2
+      fi
+      # Which Google Antigravity account Sweep answers on: whatever Crest calls active, by the folder that account
+      # keeps its own login in. Only the ACP login files travel, not the account's conversation downloads.
+      rm -rf ${state}/auth/antigravity
+      install -d -m 700 ${state}/auth/antigravity
+      antigravity=$(crest-auth json antigravity 2>/dev/null | jq -r '.dir // empty')
+      for file in acp_token.json settings.json; do
+        if [ -n "$antigravity" ] && [ -r "$antigravity/antigravity-acp/$file" ]; then
+          install -m 600 "$antigravity/antigravity-acp/$file" ${state}/auth/antigravity/$file
+        fi
+      done
+      if [ -s ${state}/auth/antigravity/acp_token.json ]; then
+        echo "omp-box: Sweep answers on the Antigravity account in $antigravity" >&2
+      else
+        echo "omp-box: no signed-in Antigravity account for Sweep, which then answers on its fallback" >&2
+      fi
       cp -al ${home}/.omp/natives/. ${state}/natives/ 2>/dev/null || cp -a ${home}/.omp/natives/. ${state}/natives/
       free=0
       for _ in $(seq 60); do
