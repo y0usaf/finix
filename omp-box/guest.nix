@@ -295,7 +295,7 @@ in {
 
   microvm = {
     hypervisor = "qemu";
-    mem = 4096;
+    mem = 8192;
     vcpu = 4;
     balloon = true;
     # The host store already holds this box's closure, so packing a second copy into a store disk image
