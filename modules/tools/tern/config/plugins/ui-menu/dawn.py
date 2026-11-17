@@ -16,6 +16,11 @@ ELSEWHERE = re.compile(
     r"|\.(?:cmdk|mdl|mdl-layer|dlg-card|pk-sheet|tn-hd|tn-ib|tn-bn-card|tn-signin|toast|tooltip|pf)\b"
 )
 PSEUDO = re.compile(r"::|:(?:before|after|first-line|first-letter)\b")
+KEYFRAMES = re.compile(r"@(?:-\w+-)?keyframes\s+[^{]+\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}")
+
+
+def motion(decl):
+    return decl.split(":", 1)[0].strip().startswith(("animation", "transition"))
 
 binary, target, scope, keep, sheet = sys.argv[1:6]
 extra = sys.argv[6:]
@@ -165,9 +170,11 @@ def resolve(selector, parent):
     return selector.replace("&", whole) if "&" in selector else whole + " " + selector
 
 
-def emit(items, parent=None):
+def emit(items, parent=None, only_motion=False):
     out = []
     decls = [h for h, b in items if b is None]
+    if only_motion:
+        decls = [d for d in decls if motion(d)]
     kept = [p for p in parent or [] if not ELSEWHERE.search(positive(p))]
     if decls and kept:
         out.append(", ".join(boost(p) for p in kept) + " {\n" + "".join("\t" + d + ";\n" for d in decls) + "}\n")
@@ -176,14 +183,14 @@ def emit(items, parent=None):
             continue
         if head.startswith("@"):
             if re.match(r"@(media|supports|container|layer)\b", head):
-                inner = emit(body, parent)
+                inner = emit(body, parent, only_motion)
                 if inner:
                     out.append(head + " {\n" + inner + "}\n")
             continue
         selectors = split(head)
         if parent:
             selectors = [resolve(s, parent) for s in selectors]
-        out.append(emit(body, selectors))
+        out.append(emit(body, selectors, only_motion))
     return "".join(out)
 
 
@@ -192,6 +199,18 @@ out = [own.rstrip("\n") + "\n"]
 out.append(f":where({scope}){IDS},\n:where({scope}) :where(:not({keep})){IDS} {{\n\tall: unset;\n}}\n")
 for name in SHEETS:
     out.append(emit(parse(stock[name])[0]))
+# Every sheet the app ships, not just the ones Dawn restates: the reset above wipes the chat, so the
+# stock motion of the sheets it does not restate (pickers, apps, prefs, completions, controls, dialogs,
+# popovers) has to come back too, or those controls open and react with no transition at all.
+out.append("".join(emit(parse(stock[name])[0], only_motion=True) for name in sorted(stock) if name not in SHEETS))
+frames, seen = [], set()
+for name in sorted(stock):
+    for m in KEYFRAMES.finditer(stock[name]):
+        key = re.match(r"@(?:-\w+-)?keyframes\s+([^{\s]+)", m.group(0)).group(1)
+        if key not in seen:
+            seen.add(key)
+            frames.append(m.group(0))
+out.append("\n".join(frames) + "\n")
 for path in extra:
     out.append(emit(parse(open(path).read())[0]))
 out.append(emit(parse(own)[0]))
