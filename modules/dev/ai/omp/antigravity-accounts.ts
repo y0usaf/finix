@@ -77,14 +77,26 @@ export default function antigravityAccounts(pi) {
 	adopt();
 	pi.on("session_start", adopt);
 
-	// A tool that ran is never run again by an account switch: the turn may only
-	// continue on its own when nothing executed in it.
+	// A tool that ran is never run again by an account switch. OMP recovers an
+	// error turn on its own, so the guard cannot live in this handler: after a
+	// switch that followed a tool, every tool is switched off and stays off
+	// across the automatic agent starts until the user sends something.
 	let usedTool = false;
+	let toolsOff = false;
+	let savedTools: string[] | undefined;
 	pi.on("agent_start", () => {
 		usedTool = false;
 	});
 	pi.on("tool_execution_end", () => {
 		usedTool = true;
+	});
+	pi.on("input", async event => {
+		if (!toolsOff || event.source === "extension") return;
+		toolsOff = false;
+		if (savedTools !== undefined) {
+			await pi.setActiveTools(savedTools);
+			savedTools = undefined;
+		}
 	});
 
 	pi.registerCommand("antigravity", {
@@ -120,7 +132,7 @@ export default function antigravityAccounts(pi) {
 		},
 	});
 
-	pi.on("agent_end", (event, _ctx) => {
+	pi.on("agent_end", async (event, _ctx) => {
 		if (event.willContinue) return;
 		const failed = [...(event.messages ?? [])]
 			.reverse()
@@ -151,13 +163,17 @@ export default function antigravityAccounts(pi) {
 			link === undefined ? "" : ` Google's page for ${String(next.from)}: [open it](${link}).`
 		}${limited ? "" : ` Sign ${String(next.from)} in again with /login → Google Antigravity (ACP) when convenient.`}`;
 		if (usedTool) {
-			// The ACP agent, not this extension, decides what its next request
-			// runs, so a turn that already executed a tool stops here instead of
-			// risking the same tool twice; the next message uses the new account.
+			// OMP recovers a failed turn by itself, so a message is not a guard:
+			// with no active tool the recovery cannot execute anything either.
+			toolsOff = true;
+			if (savedTools === undefined) {
+				savedTools = pi.getActiveTools();
+				await pi.setActiveTools([]);
+			}
 			pi.sendMessage({
 				customType: "antigravity-accounts",
 				display: true,
-				content: `${switchNote} A tool already ran in this turn, so the failed turn is not replayed: whatever continues it keeps every recorded tool result.`,
+				content: `${switchNote} A tool already ran in this turn, so every tool is switched off here to keep it from running twice; send your next message and the tools come back.`,
 			});
 			return;
 		}

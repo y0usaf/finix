@@ -36,14 +36,25 @@ const resetState = () => {
 const load = () => {
 	const handlers = {};
 	const sent = [];
+	const state = { activeTools: ["counter", "bash", "read"] };
 	antigravityAccounts({
 		on: (name, fn) => {
 			handlers[name] = fn;
 		},
 		registerCommand: () => {},
 		sendMessage: (message, options) => sent.push({ message, options }),
+		getActiveTools: () => [...state.activeTools],
+		setActiveTools: async names => {
+			state.activeTools = [...names];
+		},
 	});
-	return { handlers, sent, toolRan: () => handlers.tool_execution_end?.({}, {}) };
+	return {
+		handlers,
+		sent,
+		state,
+		toolRan: () => handlers.tool_execution_end?.({}, {}),
+		userSaid: source => handlers.input?.({ source, text: "next", type: "input" }),
+	};
 };
 
 const assistantError = (errorMessage) => ({
@@ -73,32 +84,39 @@ resetState();
 // 2. an unrelated failure, or a turn that continues, does nothing.
 {
 	const { handlers, sent } = load();
-	handlers.agent_end({ willContinue: false, messages: [assistantError("HTTP 500 server error")] });
+	await handlers.agent_end({ willContinue: false, messages: [assistantError("HTTP 500 server error")] });
 	check("unrelated error sends nothing", sent.length, 0);
-	handlers.agent_end({ willContinue: true, messages: [assistantError("quota exceeded")] });
+	await handlers.agent_end({ willContinue: true, messages: [assistantError("quota exceeded")] });
 	check("a continuing turn is left alone", sent.length, 0);
 }
 
 // 3. a quota failure after a tool ran switches the account and stops the turn,
 //    because the ACP agent decides what the next request runs.
 {
-	const { handlers, sent, toolRan } = load();
+	const { handlers, sent, state, toolRan } = load();
 	handlers.agent_start({});
 	toolRan();
-	handlers.agent_end({ willContinue: false, messages: [assistantError("quota exceeded: resource exhausted")] });
+	await handlers.agent_end({ willContinue: false, messages: [assistantError("quota exceeded: resource exhausted")] });
 	const visible = sent.filter(item => item.message.display === true);
 	check("tool then quota switches the account", process.env.GEMINI_HOME, `${STATE}/antigravity/spare`);
 	check("tool then quota stops the turn", sent.some(item => item.options?.triggerTurn === true), false);
-	check("tool then quota says why it stopped", /A tool already ran in this turn, so the failed turn is not replayed/.test(visible.at(-1).message.content), true);
+	check("tool then quota says why it stopped", /every tool is switched off here to keep it from running twice/.test(visible.at(-1).message.content), true);
 	check("tool then quota names the next account", /spare serves this session now/.test(visible.at(-1).message.content), true);
 	check("tool then quota order leads with the successor", order()[0], "spare");
+	check("tool then quota switches every tool off", state.activeTools, []);
+	handlers.agent_start({});
+	check("an automatic agent start keeps them off", state.activeTools, []);
+	await handlers.input({ source: "extension", text: "hidden", type: "input" });
+	check("an extension injection keeps them off", state.activeTools, []);
+	await handlers.input({ source: "interactive", text: "carry on", type: "input" });
+	check("a user message brings them back", state.activeTools, ["counter", "bash", "read"]);
 }
 
 // 4. a quota failure with nothing run yet continues on the next account.
 {
 	const { handlers, sent } = load();
 	handlers.agent_start({});
-	handlers.agent_end({ willContinue: false, messages: [assistantError("quota exceeded: rate limit")] });
+	await handlers.agent_end({ willContinue: false, messages: [assistantError("quota exceeded: rate limit")] });
 	const hidden = sent.filter(item => item.message.display === false);
 	check("no-tool quota switches the account", process.env.GEMINI_HOME, `${STATE}/antigravity/work`);
 	check("no-tool quota continues once", [hidden.length, hidden[0]?.options], [1, { deliverAs: "nextTurn", triggerTurn: true }]);
@@ -111,7 +129,7 @@ resetState();
 	resetState();
 	const { handlers, sent } = load();
 	handlers.agent_start({});
-	handlers.agent_end({
+	await handlers.agent_end({
 		willContinue: false,
 		messages: [
 			assistantError(
@@ -138,7 +156,7 @@ resetState();
 	const { handlers, sent, toolRan } = load();
 	handlers.agent_start({});
 	toolRan();
-	handlers.agent_end({
+	await handlers.agent_end({
 		willContinue: false,
 		messages: [assistantError("Antigravity ACP no longer advertises model gemini-4-hydrogen; verify your account")],
 	});
@@ -150,7 +168,7 @@ resetState();
 {
 	const { handlers, sent } = load();
 	handlers.agent_start({});
-	handlers.agent_end({ willContinue: false, messages: [assistantError("quota exceeded: insufficient_quota")] });
+	await handlers.agent_end({ willContinue: false, messages: [assistantError("quota exceeded: insufficient_quota")] });
 	const visible = sent.filter(item => item.message.display === true);
 	check("exhausted announces a stop", visible.length, 1);
 	check("exhausted does not continue", sent.some(item => item.options?.triggerTurn === true), false);
