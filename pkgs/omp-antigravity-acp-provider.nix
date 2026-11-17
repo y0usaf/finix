@@ -55,6 +55,33 @@ in
       substituteInPlace extension/runtime.mjs --replace-fail \
         'const override = explicit || env.NODE;' \
         'const override = explicit || env.NODE || "${pkgs.nodejs}/bin/node";'
+      substituteInPlace extension/runtime.mjs --replace-fail \
+        'return `''${FORCE_FILE_STORAGE_ENV} set by the user`;' \
+        'return `''${FORCE_FILE_STORAGE_ENV} is set, so each login stays in its GEMINI_HOME folder`;'
+      # Crest signs each Antigravity account in inside its own folder and pins
+      # the ACP server to the file store with AGY_ACP_FORCE_FILE_STORAGE. The
+      # shared Secret Service item then belongs to a different account, so this
+      # adapter must neither read it nor clear it for a folder account.
+      substituteInPlace extension/auth-sync.ts --replace-fail \
+        'const execFileAsync = promisify(execFile);' \
+        'const execFileAsync = promisify(execFile);
+
+function crestFileStorage(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.AGY_ACP_FORCE_FILE_STORAGE?.trim());
+}'
+      substituteInPlace extension/auth-sync.ts --replace-fail \
+        '  async removeStoredCredentialsDurably(): Promise<CredentialRemoval> {' \
+        '  async removeStoredCredentialsDurably(): Promise<CredentialRemoval> {
+    // A folder login never owns the keyring entry; clearing it would sign the
+    // keyring account out.
+    if (crestFileStorage()) return { keychainRemoved: undefined, keyringRemoved: undefined };'
+      substituteInPlace extension/auth-sync.ts --replace-fail \
+        '  if ((await secretService.present()) === true) {' \
+        '  if (!crestFileStorage(env) && (await secretService.present()) === true) {'
+      substituteInPlace extension/auth-sync.ts --replace-fail \
+        '  if (fromFile) return fromFile;' \
+        '  if (fromFile) return fromFile;
+  if (crestFileStorage()) return undefined;'
     '';
     meta = {
       description = "Google Antigravity ACP provider for OMP";

@@ -69,10 +69,20 @@ export default function antigravityAccounts(pi) {
 	// An explicit GEMINI_HOME wins: anything that names a folder, including the
 	// dispatcher behind `crest-auth login antigravity-acp NAME`, keeps its own
 	// choice, and so does a user who set it before starting OMP.
+	// A folder login is pinned to that folder's file store; the keyring account
+	// keeps the shared Secret Service item. Whichever account Crest calls active
+	// decides which of the two the ACP server may use, so a stale pin is dropped
+	// on every move.
+	const adoptAccount = (account: unknown) => {
+		const row = account as { dir?: unknown; storage?: unknown } | undefined;
+		if (typeof row?.dir !== "string" || row.dir === "") return;
+		process.env.GEMINI_HOME = row.dir;
+		if (row.storage === "file") process.env.AGY_ACP_FORCE_FILE_STORAGE = "1";
+		else delete process.env.AGY_ACP_FORCE_FILE_STORAGE;
+	};
 	const adopt = () => {
 		if (process.env.GEMINI_HOME?.trim()) return;
-		const dir = crest(["json", "antigravity"])?.dir;
-		if (typeof dir === "string" && dir !== "") process.env.GEMINI_HOME = dir;
+		adoptAccount(crest(["json", "antigravity"]));
 	};
 	adopt();
 	pi.on("session_start", adopt);
@@ -124,7 +134,7 @@ export default function antigravityAccounts(pi) {
 				ctx.ui.notify(`Could not add an Antigravity account named ${wanted}.`, "error");
 				return;
 			}
-			process.env.GEMINI_HOME = added.dir;
+			adoptAccount(added);
 			ctx.ui.notify(
 				`Antigravity account ${wanted} is active in ${added.dir}. Sign it in with /login → Google Antigravity (ACP); the login shows Google's page as a link here.`,
 				"info",
@@ -165,7 +175,7 @@ export default function antigravityAccounts(pi) {
 			});
 			return;
 		}
-		process.env.GEMINI_HOME = next.dir;
+		adoptAccount(next);
 		stopRuntime();
 		const why = limited ? "hit its quota" : "needs Google verification, so the ACP runtime advertised no models";
 		const switchNote = `Account ${String(next.from)} ${why}. ${next.to} serves this session now.${
