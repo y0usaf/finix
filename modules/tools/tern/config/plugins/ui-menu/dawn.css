@@ -82,13 +82,15 @@ html.tn-themed {
 	-webkit-backdrop-filter: none;
 	backdrop-filter: none;
 }
+/** One gap between every pair of blocks in the transcript: a message, a reply,
+ ** a work or done-check card, a tool or system notice — whatever the upper or
+ ** lower block is — so no two bubbles ever share a seam. The user's card used
+ ** to carry this 14px in its own padding; the reader's gap gives it to every
+ ** pair alike, and hidden .sf-void/.sf-hidden blocks stay out of it. */
 :root:not(#dawn) .sf-chat-reader.sf-main {
 	--rd-measure: 960px;
-	gap: 0;
+	gap: 14px 0;
 	padding: 24px 16px 20px;
-}
-:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] {
-	padding-bottom: 14px;
 }
 :root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md {
 	font: 400 15px/22px var(--sans);
@@ -1627,16 +1629,6 @@ html.tn-phone:not(#dawn) :is(div.pop[role='menu'] .mi:not(.bare), .sf-menu-pop .
 	background: linear-gradient(to bottom, color-mix(in srgb, var(--dawn-page) 12%, transparent), transparent), var(--dawn-soft);
 	box-shadow: inset 0 0.5px 0 color-mix(in srgb, var(--dawn-page) 12%, transparent), inset 0 -0.5px 0 color-mix(in srgb, var(--dawn-page) 12%, transparent), inset 0 0 0 0.5px var(--dawn-soft);
 	overflow-wrap: anywhere;
-}
-/** Dawn's reader has no gap of its own: a user message carries its 14px below
- ** its own card, a reply carried none, so two replies in a row, or a reply and
- ** the message under it, shared one seam. The space has to sit on the reply
- ** itself rather than on a sibling margin, because omp leaves hidden
- ** .sf-hidden/.sf-void blocks between messages. Covers a bot chat's
- ** omp.bot.reply block and a plain omp chat's omp.chat.msg block that holds an
- ** assistant. */
-:root:not(#dawn) .sf-chat-reader.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']:has([data-role^='omp.assistant'])) {
-	padding-bottom: 14px;
 }
 :root:not(#dawn) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body {
 	align-self: flex-end;
