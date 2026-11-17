@@ -79,14 +79,24 @@
         else cdpGuard hostAddresses owner.uid host.ports)
       config.user.dev.ompBoxHostCdp)
   );
+  privateAddresses = [
+    "10.0.0.0/8"
+    "100.64.0.0/10"
+    "169.254.0.0/16"
+    "172.16.0.0/12"
+    "192.168.0.0/16"
+  ];
+  privateAddressSet = "{ ${lib.concatStringsSep ", " privateAddresses} }";
   hostGuard = lib.concatStringsSep "\n" [
     "ip daddr ${dnsAddress} udp dport 53 accept"
     "ip daddr ${dnsAddress} tcp dport 53 accept"
     "ip daddr ${hostAddress} tcp dport ${toString gatewayPort} accept"
     "ip daddr ${hostAddress} tcp dport ${toString ablit.port} accept"
     browserCdpGuard
-    "ip daddr ${hostAddresses} ip daddr != ${guestAddress} ct state new meta l4proto tcp reject with tcp reset"
-    "ip daddr ${hostAddresses} ip daddr != ${guestAddress} ct state new reject"
+    "ip daddr ${privateAddressSet} ip daddr != ${guestAddress} ct state new meta l4proto tcp reject with tcp reset"
+    "ip daddr ${privateAddressSet} ip daddr != ${guestAddress} ct state new reject"
+    "ip6 daddr fc00::/7 ct state new meta l4proto tcp reject with tcp reset"
+    "ip6 daddr fc00::/7 ct state new reject"
   ];
   json = lib.generators.toJSON {};
 
