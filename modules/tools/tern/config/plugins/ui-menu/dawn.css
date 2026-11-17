@@ -194,7 +194,7 @@ html.tn-themed {
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.bar'] {
  grid-column: 1 / -1;
- grid-row: 4;
+ grid-row: 3;
  width: 100%;
  min-height: 24px;
  height: 24px;
@@ -207,7 +207,7 @@ html.tn-themed {
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.chips'] {
  grid-column: 1 / -1;
- grid-row: 3;
+ grid-row: 4;
 }
 :root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-ed-ph {
  color: var(--dawn-muted);
