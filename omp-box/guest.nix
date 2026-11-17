@@ -334,7 +334,15 @@ in {
     	autoSetupRemote = true
     [credential "https://github.com"]
     	helper = "!${pkgs.gh}/bin/gh auth git-credential"
+    # A granted folder comes in from the host over 9p, so it belongs to the user the grant names rather than to the
+    # bot that works in it, and git refuses every repository there as foreign without this.
+    [safe]
+    	directory = *
   '';
+  # initdb and the server it starts look for their data files beside the binary, which they find through the store
+  # but not through the profile's bin: link postgres' share dir into the profile, so a bot starts a database from
+  # PATH the way it did on the host from a nix build.
+  environment.pathsToLink = ["/share/postgresql"];
   fonts.packages = [pkgs.noto-fonts-cjk-sans];
   documentation.enable = false;
 
