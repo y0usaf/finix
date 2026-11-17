@@ -48,7 +48,11 @@
   # carries through to the host's loopback and the rest of the guest network answers nothing (10.0.2.3 answers
   # DNS alone); the guard covers the whole network anyway, so an address slirp translates later is refused by
   # these rules instead of reopening the port.
+  hostAddress = "10.0.2.2";
   hostAddresses = "10.0.2.0/24";
+  guestAddress = "10.0.2.15";
+  dnsAddress = "10.0.2.3";
+  gatewayPort = 8899;
   # Every box user shares the box's loopback and the route to the host's, and Chromium's DevTools endpoint has no
   # authentication, so each port is opened to the browser's owner alone: the rule matches the connecting socket's
   # Unix user and refuses every other one, with a reset, before Chromium sees the request. A bot has no way to open
@@ -75,6 +79,15 @@
         else cdpGuard hostAddresses owner.uid host.ports)
       config.user.dev.ompBoxHostCdp)
   );
+  hostGuard = lib.concatStringsSep "\n" [
+    "ip daddr ${dnsAddress} udp dport 53 accept"
+    "ip daddr ${dnsAddress} tcp dport 53 accept"
+    "ip daddr ${hostAddress} tcp dport ${toString gatewayPort} accept"
+    "ip daddr ${hostAddress} tcp dport ${toString ablit.port} accept"
+    browserCdpGuard
+    "ip daddr ${hostAddresses} ip daddr != ${guestAddress} ct state new meta l4proto tcp reject with tcp reset"
+    "ip daddr ${hostAddresses} ip daddr != ${guestAddress} ct state new reject"
+  ];
   json = lib.generators.toJSON {};
 
   proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.python.render (({
@@ -600,7 +613,7 @@
       (call (dot asyncio "run") [(call main [])])
     ]))
     generators.python));
-  gatewayUrl = "http://10.0.2.2:8899";
+  gatewayUrl = "http://${hostAddress}:${toString gatewayPort}";
   # What omp in the box loads: built here, and copied while the box runs by omp-box-seed into the box's seed
   # share instead of baked into the guest, so a new extension, omp-bot or prompt reaches the box without
   # restarting it and every bot in it. A generation holds the omp config files, store/ with a copy of each
@@ -815,7 +828,8 @@
         ../../../../omp-box/guest.nix
         {
           # The browsers listen on loopback, which every box user shares, here and on the host the box reaches
-          # through its gateway. Refuse a connection unless the socket belongs to the browser's own Unix user.
+          # through its gateway. Refuse a connection unless the socket belongs to the browser's own Unix user,
+          # and open nothing else on the host's side of the gateway beyond the model gateway and DNS.
           networking.nftables = {
             enable = true;
             ruleset = ''
@@ -823,7 +837,7 @@
               table inet omp-browser {
                 chain output {
                   type filter hook output priority filter; policy accept;
-                  ${browserCdpGuard}
+                  ${hostGuard}
                 }
               }
             '';
