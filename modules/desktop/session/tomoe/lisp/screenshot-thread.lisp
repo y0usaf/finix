@@ -22,7 +22,9 @@
 (defun screenshot-thread--look (mode)
   (let ((cast (getf +screenshot-thread--modes+ mode (getf +screenshot-thread--modes+ :dark)))
         (shape +screenshot-thread--shape+))
-    (list :shader +screenshot-thread--shader+
+    (list :shader (if (tomoe-setting-known-p :screenshot-mark)
+                      +screenshot-thread--marks+
+                      +screenshot-thread--shader+)
           :data (append (getf cast :veil)
                         (loop for key in '(:rim :swell :pace :bead-hx :bead-hy :dot :dot-swell)
                               collect (getf shape key))

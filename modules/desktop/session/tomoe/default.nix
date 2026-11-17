@@ -425,8 +425,21 @@
     then throw "user.ui.tomoe.bar.rail.themes: no rail theme named ${name}; there is ${lib.concatStringsSep ", " railThemeNames}"
     else builtins.head found;
 
+  # The running Tomoe decides which of these it can compile: one without the
+  # marks composite, for a build whose shader prelude has no MARKED, and the one
+  # with it. Both are assets, so a build that reloads this config keeps working.
+  screenshotShader = builtins.readFile ./shaders/screenshot-thread.glsl;
+  screenshotMarks = builtins.readFile ./shaders/screenshot-thread-marks.glsl;
+  screenshotPlain = pkgs.writeText "screenshot-thread.glsl"
+    (builtins.replaceStrings [ "/*@MARKS@*/" ] [ "" ] screenshotShader);
+  screenshotMarked = pkgs.writeText "screenshot-thread-marks.glsl"
+    (builtins.replaceStrings [ "/*@MARKS@*/" ] [ screenshotMarks ] screenshotShader);
+
+  tomoeCompatLisp = builtins.readFile ./lisp/tomoe-compat.lisp;
+
   screenshotLisp =
-    "(defparameter +screenshot-thread--shader+ \"${./shaders/screenshot-thread.glsl}\")\n"
+    "(defparameter +screenshot-thread--shader+ \"${screenshotPlain}\")\n"
+    + "(defparameter +screenshot-thread--marks+ \"${screenshotMarked}\")\n"
     + builtins.readFile ./lisp/screenshot-thread.lisp;
 
   railThemeLisp = let
@@ -3025,7 +3038,7 @@
         ]))
         generators.lisp));
     cassette = cassetteLisp ./lisp/plates.lisp;
-    rail = cassetteLisp ./lisp/rail.lisp + railThemeLisp + screenshotLisp;
+    rail = tomoeCompatLisp + cassetteLisp ./lisp/rail.lisp + railThemeLisp + screenshotLisp;
   };
 
   railColors = {

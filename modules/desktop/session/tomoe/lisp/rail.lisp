@@ -1257,7 +1257,7 @@ CONTEXT."
                             (define-command "rail-theme"
                               :description "Step the rail to its next theme.")
                             (apply #'bind-key (getf +rail+ :theme-bind)))
-                      (when (getf +rail+ :trail)
+                      (when (and (getf +rail+ :trail) (tomoe-setting-known-p :cursor-trail))
                         (list (settings :cursor-trail (rail--trail))))
                       ;; Each theme animates on the GPU from the times the rail
                       ;; hands it; only the gauges need the rail itself to step,

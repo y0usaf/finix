@@ -125,9 +125,5 @@ vec4 thread_selector(vec2 p) {
 
 void mainImage(out vec4 color, in vec2 p) {
     color = thread_selector(p);
-    vec4 ink = D4(INK);
-    float marks = marked(p) * ink.a;
-    if (marks > 0.0)
-        color = vec4(ink.rgb * marks + color.rgb * (1.0 - marks),
-                     marks + color.a * (1.0 - marks));
+/*@MARKS@*/
 }
