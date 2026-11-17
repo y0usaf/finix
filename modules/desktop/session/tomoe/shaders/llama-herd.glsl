@@ -166,15 +166,23 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float t = mod(iTime, period);
     float t1 = stopTime(cx);
     vec3 color = scenery(p, sw, ground, iTime);
-    for (int r = 0; r < 12; r++) {
-        if (p.y == ground - 24.0 + float(r * 2) || p.y == ground - 23.0 + float(r * 2)) {
-            if (p.x >= cx - 8.0 && p.x < cx + 8.0 && bit(CACTUS_ROWS[r], int(floor((p.x - cx + 8.0) / 2.0)))) {
-                color = CACTUS;
+    if (p.y >= ground - 24.0 && p.y < ground && p.x >= cx - 8.0 && p.x < cx + 8.0) {
+        for (int r = 0; r < 12; r++) {
+            if (p.y == ground - 24.0 + float(r * 2) || p.y == ground - 23.0 + float(r * 2)) {
+                if (p.x >= cx - 8.0 && p.x < cx + 8.0 && bit(CACTUS_ROWS[r], int(floor((p.x - cx + 8.0) / 2.0)))) {
+                    color = CACTUS;
+                }
             }
         }
     }
     for (int i = 3; i >= 0; i--) {
         float s = scale(i);
+        if (i != 3 || t < t1) {
+            float x = SPEED * t - 40.0 - (i == 0 ? 0.0 : (i == 1 ? 46.0 : (i == 2 ? 76.0 : 106.0)));
+            if (pf.x < x - 1.0 || pf.x > x + 12.0 * s + 1.0) {
+                continue;
+            }
+        }
         vec3 at = pose(i, t, cx);
         vec2 o = vec2(at.x, ground - 12.0 * s + at.y);
         bool jet = i == 3 && t >= t1 + JET_ON;
