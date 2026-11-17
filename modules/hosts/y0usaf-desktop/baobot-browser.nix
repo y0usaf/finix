@@ -11,7 +11,9 @@
   # A headed Chromium on the desktop that baobot, in omp-box, drives for Taobao over DevTools. It binds
   # 127.0.0.1 only; QEMU's user networking hands the box the host's loopback as 10.0.2.2, as it does the
   # model gateway on 8899, so the box reaches it and the LAN never does. Its own profile, apart from the
-  # everyday browser's, and apart from the box's own headless browser-baobot on 9222.
+  # everyday browser's, and apart from the box's own headless browser-baobot on 9222. Both of its ports are
+  # guarded in the box (box.nix) the way that headless one is: only baobot may connect, since DevTools carries
+  # the logged-in session and has no authentication of its own.
   #
   # Nothing starts it at boot: a browser no one asked for costs a few hundred MB of RAM for the whole
   # session. What holds the port the box reaches (9233) is `broker`: a connection there starts the
@@ -115,6 +117,10 @@ in {
   user = {
     persist.directories = [".local/state/baobot-desktop"];
 
+    # The broker and the DevTools behind it, as the box reaches this host's loopback (10.0.2.2); box.nix opens
+    # both ports to baobot alone inside the guest.
+    dev.ompBoxHostCdp.baobot.ports = [port devtoolsPort];
+
     ui.tomoe.extraConfig =
       builtins.readFile "${flakeInputs.tomoe}/examples/special.lisp"
       + ''
@@ -147,7 +153,8 @@ in {
   };
 
   # What the box connects to at 10.0.2.2:${port}: the browser starts when that port is asked for, and
-  # nothing else on the host is reachable from the box through it.
+  # nothing else on the host is reachable from the box through it. Only baobot gets this far: the box refuses
+  # every other box user at ${toString port} and ${toString devtoolsPort} before either one answers.
   finit.services.baobot-chromium = {
     description = "baobot's Taobao Chromium, started when the box connects (${userName})";
     user = userName;

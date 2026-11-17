@@ -36,23 +36,41 @@
       folders = [];
     }
   ];
-  # The box's own headless browsers. Every box user shares 127.0.0.1, and Chromium's DevTools endpoint has no
-  # authentication, so each port is opened to the browser's owner alone: a rule matches the connecting socket's
-  # Unix user and refuses every other one before Chromium sees the request.
+  # The box's own headless browsers.
   browsers = {
     baobot = {
       profile = "${home}/.local/state/baobot/chromium";
       port = 9222;
     };
   };
-  browserCdpGuard = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: browser: let
-    owner = lib.findFirst (bot: bot.name == name) null bots;
-    # A browser that is not a boxed bot runs as the box's own user, whose uid guest.nix fixes at 1001.
-    uid = if owner == null then 1001 else owner.uid;
-  in ''
-    ip daddr 127.0.0.1 tcp dport ${toString browser.port} meta skuid ${toString uid} accept
-    ip daddr 127.0.0.1 tcp dport ${toString browser.port} reject with tcp reset
-  '') browsers);
+  # QEMU's user networking hands the box this host's loopback as 10.0.2.2, which is also the guest's gateway, so
+  # a browser running on the host is as reachable from the box as one in it.
+  hostLoopback = "10.0.2.2";
+  # Every box user shares both loopbacks, and Chromium's DevTools endpoint has no authentication, so each port is
+  # opened to the browser's owner alone: the rule matches the connecting socket's Unix user and refuses every
+  # other one, with a reset, before Chromium sees the request. A bot has no way to open a socket as another user.
+  cdpGuard = address: uid: ports: lib.concatMapStrings (port: ''
+    ip daddr ${address} tcp dport ${toString port} meta skuid ${toString uid} accept
+    ip daddr ${address} tcp dport ${toString port} reject with tcp reset
+  '') ports;
+  browserCdpGuard = lib.concatStringsSep "\n" (
+    # The box's own browsers, on its loopback.
+    (lib.mapAttrsToList (name: browser: let
+        owner = lib.findFirst (bot: bot.name == name) null bots;
+        # A browser that is not a boxed bot runs as the box's own user, whose uid guest.nix fixes at 1001.
+        uid = if owner == null then 1001 else owner.uid;
+      in cdpGuard "127.0.0.1" uid [browser.port])
+      browsers)
+    # Browsers on the host, which reach the box through its gateway: modules/hosts/y0usaf-desktop/baobot-browser.nix
+    # names the ports there, since it is the module that starts that browser and the broker in front of it.
+    ++ (lib.mapAttrsToList (name: host: let
+        owner = lib.findFirst (bot: bot.name == name) null bots;
+      in
+        if owner == null
+        then throw "user.dev.ompBoxHostCdp names ${name}, which is not a bot in the box"
+        else cdpGuard hostLoopback owner.uid host.ports)
+      config.user.dev.ompBoxHostCdp)
+  );
   json = lib.generators.toJSON {};
 
   proxy = pkgs.writers.writePython3Bin "omp-gateway-proxy" {} (generators.python.render (({
@@ -792,8 +810,8 @@
         flakeInputs.microvm.nixosModules.microvm
         ../../../../omp-box/guest.nix
         {
-          # The browser services listen on loopback, which every box user shares. Refuse a connection unless the
-          # socket belongs to the browser's own Unix user: a bot has no way to open a socket as another one.
+          # The browsers listen on loopback, which every box user shares, here and on the host the box reaches
+          # through its gateway. Refuse a connection unless the socket belongs to the browser's own Unix user.
           networking.nftables = {
             enable = true;
             ruleset = ''
@@ -1115,6 +1133,22 @@
     '';
   };
 in {
+  options.user.dev.ompBoxHostCdp = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule {
+      options.ports = lib.mkOption {
+        type = lib.types.listOf lib.types.port;
+        description = ''
+          The ports the browser answers on, as the box reaches the host's loopback at 10.0.2.2: the port in
+          front of it, and the DevTools behind that one.
+        '';
+      };
+    });
+    default = {};
+    description = ''
+      Browsers on the host that the box can reach, keyed by the boxed bot that owns each. Every other box user
+      is refused at each port, because DevTools carries whatever that browser is signed in to.
+    '';
+  };
   config = {
     user.persist.directories = [".local/state/omp-box"];
     finix.persistence.homeServices = ["omp-box" "omp-box-grants" "omp-box-proxy" "omp-box-seed"];
