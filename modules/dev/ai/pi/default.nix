@@ -22,7 +22,7 @@ in {
       inherit defaultProvider defaultModel taskModel;
       defaultThinkingLevel = "xhigh";
       ompThinkingLevel = "auto";
-      advisorModel = "openai-codex/gpt-6.2-sol:high";
+      advisorModel = "openai-codex/gpt-6.1-sol:high";
       taskNote = "omp task workers run on ${taskModel} unless the task names a model; give Lean proofs and compiler work `model: \"${defaultProvider}/${defaultModel}\"`.";
       smolModel = flash;
       judgeModel = flash;
@@ -38,7 +38,6 @@ in {
         "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017"
         "anthropic/claude-opus-5-5"
         "anthropic/claude-sonnet-5-5"
-        "openai-codex/gpt-6.2-astra"
         "google-antigravity/gemini-4-carbon-high"
         "google-gemini-cli/gemini-4-carbon"
       ];
@@ -106,28 +105,6 @@ in {
             }
           ];
         };
-        openai-codex.models = [
-          {
-            id = "gpt-6.2-sol";
-            name = "GPT-6.2 Sol";
-            api = "openai-codex-responses";
-            reasoning = true;
-            input = ["text" "image"];
-            contextWindow = 500000;
-            maxTokens = 128000;
-            cost = { input = 2; output = 10; cacheRead = 0.1; cacheWrite = 0; };
-          }
-          {
-            id = "gpt-6.2-astra";
-            name = "GPT-6.2 Astra";
-            api = "openai-codex-responses";
-            reasoning = true;
-            input = ["text" "image"];
-            contextWindow = 500000;
-            maxTokens = 128000;
-            cost = { input = 8; output = 40; cacheRead = 0.4; cacheWrite = 0; };
-          }
-        ];
         vercel-ai-gateway = {
           modelOverrides = {
             "zai/glm-5.3-flash".compat.vercelGatewayRouting.order = ["runware" "wafer"];
