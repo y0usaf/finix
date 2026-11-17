@@ -1025,9 +1025,8 @@
       # Sweep's own folder: the user drops a Firefox logins export into inbox/, and the bot works beside it. Nothing
       # else on this machine writes there, and no other box user can reach it.
       install -d -m 700 ${home}/sweep-workbench ${home}/sweep-workbench/inbox
-      # The history Sweep dates each account by. Firefox keeps places.sqlite open and writes it in place, so the copy
-      # goes through sqlite's own backup, which reads a consistent database; that one file travels, never logins.json,
-      # key4.db or cookies. The newest profile wins, so the browser the user last used is the one that dates them.
+      # The history Sweep dates each account by: that one file, places.sqlite, and never logins.json, key4.db or
+      # cookies.
       rm -rf ${state}/auth/history
       install -d -m 700 ${state}/auth/history
       # The database is copied with its write-ahead log and the copy is what sqlite opens: a live places.sqlite is
@@ -1043,8 +1042,9 @@
         cp -f "$db" "$snapshot" || continue
         [ ! -f "$db-wal" ] || cp -f "$db-wal" "$snapshot-wal"
         timeout 60 python3 -c 'import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); c.execute("PRAGMA wal_checkpoint(TRUNCATE)"); c.execute("VACUUM"); c.close()' "$snapshot" || continue
-        dated=$(timeout 30 python3 -c 'import sqlite3,sys; print(sqlite3.connect(sys.argv[1]).execute("select count(last_visit_date) from moz_places").fetchone()[0])' "$snapshot" 2>/dev/null || echo 0)
-        if [ "${dated:-0}" -gt 0 ]; then history=$db; break; fi
+        dated=0
+        dated=$(timeout 30 python3 -c 'import sqlite3,sys; print(sqlite3.connect(sys.argv[1]).execute("select count(last_visit_date) from moz_places").fetchone()[0])' "$snapshot" 2>/dev/null) || dated=0
+        if [ "$dated" -gt 0 ]; then history=$db; break; fi
       done
       rm -f "$snapshot-shm" "$snapshot-wal"
       if [ -n "$history" ]; then
