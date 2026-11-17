@@ -1309,9 +1309,8 @@ CONTEXT."
                             for group-windows = (let ((ids (remove-duplicates
                                                             (remove nil
                                                                     (list* (getf group-key :id) old
-                                                                           (mapcar (lambda (entry) (getf entry :id))
-                                                                                   (rail--shown group-carried
-                                                                                                group-output))))
+                                                                           (rail--shown group-carried
+                                                                                        group-output)))
                                                             :from-end t)))
                                                   (subseq ids 0 (min 8 (length ids))))
                             when group-strips append (funcall (getf *rail--look* :draw) *rail--look*
