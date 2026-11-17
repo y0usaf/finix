@@ -314,7 +314,12 @@ in {
     pkgs.gws
     pkgs.imagemagick
     (import ../pkgs/agent-slack.nix {inherit pkgs;})
-    (import ../pkgs/vercel-account-router.nix {inherit pkgs;})
+    # The box exists for the work account, so a bare `vercel` here answers as the host's vercel-work does: a folder
+    # with no GitHub origin has nothing to route on, and refusing to guess would leave the bot with a dead command.
+    (import ../pkgs/vercel-account-router.nix {
+      inherit pkgs;
+      default = "work";
+    })
   ];
   # Commits made in the box are the host user's, as they were while the bots ran on the host (modules/tools/git.nix);
   # the host's own config is left out, since it sends github.com to ssh, which no box user has a key for.

@@ -1,4 +1,11 @@
-{pkgs, ...}: let
+{
+  pkgs,
+  # The account this copy answers as where neither VERCEL_ACCOUNT nor a GitHub origin picks one. The host leaves it
+  # empty, since it holds both logins and refuses to guess; a copy built into a box that exists for one account
+  # names it, so `vercel whoami` there needs neither a repository nor an environment variable.
+  default ? "",
+  ...
+}: let
   inherit (pkgs) lib;
   version = "59.5.0";
   package = pkgs.buildNpmPackage {
@@ -36,6 +43,7 @@ in
       vercel = package;
       inherit (pkgs) git;
       owners = builtins.toJSON {y0usaf = "personal";};
+      inherit default;
     }} "\$@"
     EOF
     for account in personal work; do
