@@ -23,6 +23,7 @@
       "work-fold.ts" = ./work-fold.ts;
       "message-interrupts.ts" = ./message-interrupts.ts;
       "crest-reroute.ts" = ./crest-reroute.ts;
+      "antigravity-accounts.ts" = ./antigravity-accounts.ts;
       "tools.ts" = ./tools.ts;
       "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (({
           Array,
@@ -862,6 +863,7 @@ in {
             "secrets/secrets.ts"
             "crest-auth.ts"
             "crest-reroute.ts"
+            "antigravity-accounts.ts"
             "antigravity-acp"
             "optchat/extension.ts"
             "tools.ts"
