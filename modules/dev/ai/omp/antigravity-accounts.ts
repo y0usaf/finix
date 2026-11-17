@@ -72,13 +72,15 @@ export default function antigravityAccounts(pi) {
 	// A folder login is pinned to that folder's file store; the keyring account
 	// keeps the shared Secret Service item. Whichever account Crest calls active
 	// decides which of the two the ACP server may use, so a stale pin is dropped
-	// on every move.
+	// on every move. Only an account Crest marks keyring goes without the pin:
+	// anything else, including a name just added here, must not fall back to the
+	// shared login.
 	const adoptAccount = (account: unknown) => {
 		const row = account as { dir?: unknown; storage?: unknown } | undefined;
 		if (typeof row?.dir !== "string" || row.dir === "") return;
 		process.env.GEMINI_HOME = row.dir;
-		if (row.storage === "file") process.env.AGY_ACP_FORCE_FILE_STORAGE = "1";
-		else delete process.env.AGY_ACP_FORCE_FILE_STORAGE;
+		if (row.storage === "keyring") delete process.env.AGY_ACP_FORCE_FILE_STORAGE;
+		else process.env.AGY_ACP_FORCE_FILE_STORAGE = "1";
 	};
 	const adopt = () => {
 		if (process.env.GEMINI_HOME?.trim()) return;
