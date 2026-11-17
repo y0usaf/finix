@@ -1650,6 +1650,16 @@ html.tn-phone:not(#dawn) :is(div.pop[role='menu'] .mi:not(.bare), .sf-menu-pop .
 :root:not(#dawn) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] .md {
 	color: var(--t1);
 }
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body {
+	box-sizing: border-box;
+	max-width: min(540px, 100% - 82px);
+	overflow-wrap: anywhere;
+}
+:root:not(#dawn) .sf-chat-reader .sf-card-body :is(img, .sf-image, .sf-row),
+:root:not(#dawn) .sf-chat-reader .sf-md :is(img, .sf-image) {
+	min-width: 0;
+	max-width: 100%;
+}
 section.tn-pane > .tn-body > .tn-glow {
 	display: none;
 }
