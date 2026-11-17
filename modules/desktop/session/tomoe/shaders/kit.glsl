@@ -1,5 +1,5 @@
-// kit: what the halo, thread, grain and lumen shaders share. default.nix puts
-// this file in front of each of them. It reads the layout lisp/rail-kit.lisp
+// kit: what the thread shader draws on. default.nix puts this file in front of
+// it. It reads the layout lisp/rail-kit.lisp
 // writes into iData -- the switch, bolo's turn, the four readings, the clock and
 // each card's side and title -- and gives the theme the cards in output
 // pixels, the voice's envelope and level history, and a three-by-five bitmap

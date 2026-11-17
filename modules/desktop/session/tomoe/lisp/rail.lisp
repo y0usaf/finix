@@ -140,9 +140,8 @@
 ;; at, straight to the newest, so a run of quick switches shows one move and not
 ;; one per window -- and :CURVES the clocks the rail knows, which the config
 ;; picks one of. Every theme keeps the choreography it was drawn with and plays
-;; it on this clock: the kit's four count the move's own seconds, morph, glass
-;; and sand theirs, so a shorter duration compresses the move instead of cutting
-;; it off.
+;; it on this clock: thread counts the move's own seconds, morph and glass
+;; theirs, so a shorter duration compresses the move instead of cutting it off.
 (defparameter +rail--motion+
   (list :duration 0.30d0 :quick 0.12d0
         :curves '(:linear :ease-out-quad :ease-out-cubic :ease-out-expo)))

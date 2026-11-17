@@ -1,12 +1,12 @@
 (in-package #:tomoe-user)
 
-;;; The kit halo, thread, grain and lumen share
+;;; The kit thread's shader draws with
 ;;;
-;;; Each of the four draws its whole look in one shader over the output -- the
-;;; frames round the cards, the readings riding the focused frame or the seam,
-;;; the motion of a focus switch and bolo's voice on the focused frame -- from
-;;; numbers the rail hands it in one layout all four read the same way, and
-;;; shaders/kit.glsl, which every one of their shaders starts with, unpacks it:
+;;; Thread draws its whole look in one shader over the output -- the frames round
+;;; the cards, the readings riding the focused frame or the seam, the motion of a
+;;; focus switch and bolo's voice on the focused frame -- from numbers the rail
+;;; hands it in one layout, and shaders/kit.glsl, which its shader starts with,
+;;; unpacks it:
 ;;;
 ;;;   0-1     the surface's corner in output pixels
 ;;;   2-4     the focused card's index in :WINDOWS, the old one's, its side

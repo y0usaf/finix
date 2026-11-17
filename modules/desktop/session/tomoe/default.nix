@@ -365,10 +365,10 @@
   };
 
   # The rail's themes, each the whole look drawn by its own shader from the plist
-  # +rail-<name>+ in its lisp file (morph's is in lisp/rail.lisp itself). halo,
-  # thread, grain and lumen share lisp/rail-kit.lisp and shaders/kit.glsl, which
-  # goes in front of each of their shaders. The order is the look: a session
-  # starts on the first of these and a theme it cannot find falls back to it.
+  # +rail-<name>+ in its lisp file (morph's is in lisp/rail.lisp itself). thread
+  # draws its look in shaders/thread.glsl on the layout lisp/rail-kit.lisp hands
+  # it, which shaders/kit.glsl unpacks. The order is the look: a session starts
+  # on the first of these and a theme it cannot find falls back to it.
   kitShader = name: file: pkgs.writeText "${name}.glsl" (builtins.readFile ./shaders/kit.glsl + "\n" + builtins.readFile file);
 
   railThemes = [
@@ -389,30 +389,6 @@
       shader = pkgs.writeText "glass.glsl" ("#define GLASS\n" + builtins.readFile ./shaders/morph.glsl);
       lisp = ./lisp/rail-glass.lisp;
       description = "morph in liquid glass: the same slab, frames, gauges, motion and voice -- the focused frame's ripple bending what lies under it and running light along its rim while bolo listens -- but the slab and the focused frame take no colour of their own and nothing from the mode: they bend what lies beneath them towards their rims, frost it and lift its colour, with light caught along their rims and a dark line just inside them, so they read over light and dark alike; only the readings' ink follows the mode, and where what is beneath sits too near it the glass darkens or brightens it, keeping its hue, until the readings stand clear. Every other card's line is etched out of what lies beneath it. The glass is +rail-glass+ in lisp/rail-glass.lisp.";
-    }
-    {
-      name = "halo";
-      shader = kitShader "halo" ./shaders/halo.glsl;
-      lisp = ./lisp/rail-halo.lisp;
-      description = "morph's cast material with no centre slab at all -- every card stands its own five-pixel frame of the same cast (dark #3A3E58, light #B2ACA2) round 14 px corners, bright on its inner lip, dark on its outer edge, with a soft contact shadow, and every card the cast does not cover keeps only a thin darker line; the deck's seam carries nothing. On the focused card's top edge, at the end nearer the seam, a capsule is welded to the frame by the same smooth minimum that welds morph's slab -- the crown -- holding the clock, the day and date and the four gauges in IBM Plex Mono, each gauge's load swelling the crown's rim by a welded bump with a filled hairline under its value. A focus change siphons: the old frame drains back into the crown from the far side, the crown hops to the new card on two springs -- stiff lead, loose trail, so it stretches into a long thin capsule mid-flight while its type waits -- and the new frame fills out of it both ways round the card; within a column the cards scroll under a crown that does not move, and a quick switch only pours. bolo's turn makes the whole focused frame the speech waveform: spikes off its outer edge whose reach at each point is the level the voice had when it ran that far round from the crown (+/- 3600 px/s) over a slower swell, the cast brightening toward its glow colour with the level and a small live trace on the crown's head, all dying away over the settle -- only the focused frame moves. With no card holding focus the readings stand at the top centre on a flat capsule of the material. One shader draws it over the output, painting only within 56 px of the cards; a still rail draws nothing.";
-    }
-    {
-      name = "grain";
-      shader = kitShader "grain" ./shaders/grain.glsl;
-      lisp = ./lisp/rail-grain.lisp;
-      description = "pixel sand on glass's footprint: every card's frame is one four-pixel rule of grains on the third art pixel outside its content, the deck's five-art-pixel seam is exactly that art column for both columns so two rules side by side are joined by construction, and the focused card's frame is doubled -- a second rule on the first art pixel outside -- with the neighbour's single rule running on through the seam as the outer half. The focused card's top rule carries, in a three-by-five pixel type of four-pixel cells, the title in the rule's own ink (typed in behind the pour, no plate), bolo's compartment beside it, and at its right end a recessed box of sand for each reading with its value, then the clock cast in sand digits and the date, the rule opening round them and the inner rule running on beneath as the shelf they stand on. Focus is a pour: the frame that loses focus runs its rules back along themselves into the point nearest the new card while its type and sand drop away, the new frame is poured from that point both ways along its rules, grains landing out of a small arc ahead of the front with the title typing in behind it, a short stream crossing the seam and sparks where the two fronts meet; within a column the pour starts at the title corner. Bolo's voice jumps every grain of the focused double rule off the frame by the level the voice had when it ran that far round from the title, hot grains glinting, and the compartment's bed hops with the level history; only the focused card's rules move. Every place, tone and jump is a closed form of the cell, the time since the switch and a hash of the cell, so it draws nothing once still.";
-    }
-    {
-      name = "lumen";
-      shader = kitShader "lumen" ./shaders/lumen.glsl;
-      lisp = ./lisp/rail-lumen.lisp;
-      description = "pixel as light rather than matter: every card's frame is one row of LED dots five pixels from dot to dot in the ten pixels round it, so the two columns' rings meet in a single shared column down the middle of the seam and every corner lands on a dot, and a card out of focus is unlit dots -- slate in the dark, warm grey on paper -- with its title lit dim. The focused card's ring is lit, warm white with a halo in the dark and ink with a faint darkening one on paper, and its top edge carries a five-row dot-matrix readout in a three-by-five type, one dot a font pixel: the title, a scope for bolo's voice, CPU, MEM, GPU and VRAM each as a label, a twelve-dot bar (its leading dot fractionally lit as the reading glides) and its value, then the clock and the date. A focus change is a marquee chase: a bright head starts at the point of the new ring nearest the old card -- at the title's corner for a change within a column -- and runs both ways round it at nine thousand pixels a second, lighting the dots behind it and the readout's columns as it reaches them, while the old frame fades on a phosphor afterglow in a fifth of a second. The voice is a VU chase: every dot of the focused ring takes the level the voice had when the chase, which starts at the title, ran that far round it, spikes of one or two dots stand off its sides and bottom (never two on the seam side, so they never reach the other card), and the readout's scope scrolls the level history, newest at its right; all of it dies away over the settle. With no card in focus -- a peek, an empty desktop -- the readings stand as one band of dots at the top centre, on a surface of their own that names no reach, because the frames surface is only drawn within reach of the cards it carries. Only the focused card's ring and its readout ever move, a still rail draws nothing, and a dot's halo costs the nearest two dots, never a whole ring.";
-    }
-    {
-      name = "sand";
-      shader = ./shaders/sand.glsl;
-      lisp = ./lisp/rail-sand.lisp;
-      description = "pixels as matter: every card's frame is three rows of packed four pixel grains in SAND's warm ground tones, each grain its own shade with a few catching the light, and a card out of focus keeps only a dusting of loose grains along its inner edge. Focus is poured -- the old frame's grains drop, drift and run along its bottom edge into the seam's glass tube while the new frame is poured out of it, its top edge filling behind a spray, its sides filling from the bottom up, its bottom running in from both corners. The tube holds the date and clock cast in grains and the readings as sand levels in glass compartments, mounded while they climb and dented while they fall, with a stream falling in as they rise; bolo's voice is a bed of grains that hops with the level history, and the focused card's frame -- only its own ring of grains, every other card's dusting staying still -- hops with it, the wave running out round the frame from the rail, both dying away over the settle. Every grain is a closed form of its cell, the switch time and a hash, drawn by one GPU shader that stops once the sand has landed; geometry, speeds and the palette are +rail-sand--...+ in lisp/rail-sand.lisp.";
     }
   ];
 
@@ -3374,7 +3350,7 @@ in {
           curve = lib.mkOption {
             type = lib.types.enum ["linear" "ease-out-quad" "ease-out-cubic" "ease-out-expo"];
             default = "ease-out-cubic";
-            description = "The shape of a focus change's clock: linear moves at one pace, the ease-out curves put the movement at the front and settle it at the end. halo, thread, grain and lumen move on this clock; morph, glass and sand move on their own springs and take only the duration.";
+            description = "The shape of a focus change's clock: linear moves at one pace, the ease-out curves put the movement at the front and settle it at the end. thread moves on this clock; morph and glass move on their own springs and take only the duration.";
           };
         };
         focus = lib.mkOption {
