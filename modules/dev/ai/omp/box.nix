@@ -36,6 +36,15 @@
       folders = [];
     }
   ];
+  # Besides the token files, what the bot that works with the host user's logins gets from the user's home: the
+  # file or folder each work CLI keeps its login in. A path the host does not have is skipped.
+  loginPaths = [
+    ".npmrc" # npx @cook-unity/... from the private registry
+    ".config/agent-slack/credentials.json" # agent-slack: the work Slack login
+    ".config/gws" # gws: Google Workspace documents and drive as the work account
+    ".local/share/com.vercel.cli/profiles/work" # vercel-work: the work account's CLI login
+    ".supabase/access-token"
+  ];
   # The box's own headless browsers.
   browsers = {
     baobot = {
@@ -821,9 +830,10 @@
     guest = flakeInputs.nixpkgs.lib.nixosSystem {
       specialArgs.ompBox = {
         inherit user port seedMount bots;
-        # The boxed bot that gets the host user's GitHub login: the run script copies ~/.config/gh into the auth
-        # share and the guest installs it in that bot's home, so it speaks to github.com as the host user does.
-        github = "cubot";
+        # The boxed bot that works with the host user's own logins: gh and git, the token files under ~/Tokens, and
+        # the config each work CLI reads (agent-slack, vercel-work, gws, npm, supabase). The run script copies them
+        # into the auth share and the guest installs them in that bot's home, so it answers as the host does.
+        logins = "cubot";
         # The seed share's host side, which omp-box-seed fills.
         seedDir = "${state}/seed";
         # The grants each guest user gets, one `user grant target ro|rw` line per grant, which omp-box writes.
@@ -865,7 +875,7 @@
     inherit guest runner state port;
     run = pkgs.writeShellScript "omp-box-run" ''
       set -Eeuo pipefail
-      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.iproute2 pkgs.openssh pkgs.jq]}
+      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.findutils pkgs.gnugrep pkgs.iproute2 pkgs.openssh pkgs.jq]}
       status=${state}/status.json
       runner=${runner}
       limit=3
@@ -944,14 +954,31 @@
       rm -f ${state}/id_ed25519
       [ -f ${state}/ssh-key ] || ssh-keygen -q -t ed25519 -N "" -C omp-box -f ${state}/ssh-key
       cp ${state}/ssh-key.pub ${state}/auth/authorized_keys
-      # The host's own GitHub login for the boxed bot that works on GitHub: the guest cannot read the user's 0600
-      # ~/.config/gh and only root there could, so the host copies hosts.yml into the auth share, which the guest
-      # installs as that bot. A re-login on the host reaches the box when it next starts.
+      # The host user's own logins for the one boxed bot that works with them: the guest cannot read the user's 0600
+      # ~/.config/gh, ~/Tokens or CLI config and only root there could, so the host copies what that bot needs into
+      # the auth share, which the guest installs in the bot's home. A re-login on the host reaches the box when it
+      # next starts.
       if [ -r ${home}/.config/gh/hosts.yml ]; then
         install -m 600 ${home}/.config/gh/hosts.yml ${state}/auth/gh-hosts.yml
       else
         rm -f ${state}/auth/gh-hosts.yml
       fi
+      rm -rf ${state}/auth/logins
+      install -d -m 700 ${state}/auth/logins ${state}/auth/logins/Tokens
+      # The token files the bot reads by name. ~/Tokens also holds the user's multi-megabyte backups, and the box's
+      # root filesystem is a tmpfs, so only files that could be a credential come along: every one of them is small.
+      find ${home}/Tokens -maxdepth 1 -type f -size -1048576c -exec cp -a -t ${state}/auth/logins/Tokens {} + 2>/dev/null ||
+        echo "omp-box: cannot copy every token file from ${home}/Tokens into the auth share" >&2
+      ${lib.concatMapStringsSep "\n" (path: ''
+        if [ -e ${home}/${path} ]; then
+          mkdir -p "$(dirname ${state}/auth/logins/${path})"
+          cp -a ${home}/${path} ${state}/auth/logins/${path} 2>/dev/null ||
+            echo "omp-box: cannot copy ~/${path} into the auth share" >&2
+        fi
+      '') loginPaths}
+      # Only the bot reads this copy, and what is in it is tokens and live CLI sessions: the guest unpacks it as
+      # itself, so its modes have to be the owner's alone.
+      chmod -R go-rwx ${state}/auth/logins
       cp -al ${home}/.omp/natives/. ${state}/natives/ 2>/dev/null || cp -a ${home}/.omp/natives/. ${state}/natives/
       free=0
       for _ in $(seq 60); do
