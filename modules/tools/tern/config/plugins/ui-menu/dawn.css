@@ -1628,14 +1628,15 @@ html.tn-phone:not(#dawn) :is(div.pop[role='menu'] .mi:not(.bare), .sf-menu-pop .
 	box-shadow: inset 0 0.5px 0 color-mix(in srgb, var(--dawn-page) 12%, transparent), inset 0 -0.5px 0 color-mix(in srgb, var(--dawn-page) 12%, transparent), inset 0 0 0 0.5px var(--dawn-soft);
 	overflow-wrap: anywhere;
 }
-/** Dawn's reader has no gap of its own: a user message carries its 14px inside
- ** its card, and replies carried none, so two replies in a row, or a reply and
- ** the message under it, shared one seam. Give whatever follows a reply that
- ** same 14px, in a bot chat (omp.bot.reply, then its .sf-col children) and a
- ** plain omp chat (omp.chat.msg, one block per message). */
-:root:not(#dawn) .sf-chat-reader.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']:has([data-role^='omp.assistant'])) + :is([data-role='omp.chat.msg'], [data-role='omp.bot.reply'], .sf-col),
-:root:not(#dawn) .sf-chat-reader.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']:has([data-role^='omp.assistant'])) + .sf-void + :is([data-role='omp.chat.msg'], [data-role='omp.bot.reply'], .sf-col) {
-	margin-top: 14px;
+/** Dawn's reader has no gap of its own: a user message carries its 14px below
+ ** its own card, a reply carried none, so two replies in a row, or a reply and
+ ** the message under it, shared one seam. The space has to sit on the reply
+ ** itself rather than on a sibling margin, because omp leaves hidden
+ ** .sf-hidden/.sf-void blocks between messages. Covers a bot chat's
+ ** omp.bot.reply block and a plain omp chat's omp.chat.msg block that holds an
+ ** assistant. */
+:root:not(#dawn) .sf-chat-reader.sf-main > :is([data-role='omp.bot.reply'], [data-role='omp.chat.msg']:has([data-role^='omp.assistant'])) {
+	padding-bottom: 14px;
 }
 :root:not(#dawn) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body {
 	align-self: flex-end;
