@@ -710,7 +710,7 @@ its columns, or beside the card a headset layout centres -- so its pixels do
 not depend on where a bar would put it."
   (destructuring-bind (frame edge) placement
     (cond ((and (eq frame :column) (eq edge :seam))
-           (cond (deck (list (rail--seam-strip output deck) output))
+           (cond (deck (and output (list (rail--seam-strip output deck) output)))
                  ((first cards) (list (first cards) (getf focal :output)))))
           (t (let ((target (rail--frame-box snapshot frame deck focal)))
                (when target
