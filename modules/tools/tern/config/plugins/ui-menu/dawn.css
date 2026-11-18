@@ -47,14 +47,27 @@ html.tn-themed {
 	background: var(--page);
 }
 :root:not(#dawn) #tabbar {
+	--t1: var(--dawn-ink);
+	--t2: color-mix(in oklab, var(--dawn-ink) 76%, var(--dawn-side));
+	--t3: color-mix(in oklab, var(--dawn-ink) 68%, var(--dawn-side));
+	--t4: color-mix(in oklab, var(--dawn-ink) 64%, var(--dawn-side));
+	--dawn-select: light-dark(color-mix(in oklab, var(--dawn-ink) 12%, var(--dawn-side)), color-mix(in oklab, var(--dawn-ink) 19%, var(--dawn-side)));
+	--dawn-select-ring: color-mix(in srgb, var(--dawn-ink) 16%, transparent);
+	--dawn-working: var(--dawn-ink);
+	--dawn-waiting: light-dark(oklch(from var(--warn) 0.42 c h), oklch(from var(--warn) 0.82 c h));
+	--dawn-done: light-dark(oklch(from var(--ok) 0.42 c h), oklch(from var(--ok) 0.82 c h));
+	--dawn-failed: light-dark(oklch(from var(--bad) 0.42 c h), oklch(from var(--bad) 0.78 c h));
 	background: rgb(from var(--dawn-side) r g b / var(--surface-a, 1));
 }
 :root:not(#dawn) #tabbar .tt {
 	border-radius: 10px;
 	box-shadow: none;
 }
-:root:not(#dawn) #tabbar .tt.on {
-	background: var(--dawn-soft);
+:root:not(#dawn) #tabbar .tt.on,
+:root:not(#dawn) #tabbar .tt[data-tc].on {
+	background: var(--dawn-select) !important;
+	box-shadow: inset 0 0 0 1px var(--dawn-select-ring);
+	color: var(--t1);
 }
 :root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-clist, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.'], .toast, .tn-bn-card, .tn-find) {
 	background: var(--pop-bg);
@@ -305,11 +318,15 @@ html.tn-themed {
 	transition-duration: 60ms, 60ms, 280ms, 0.2s, 0.2s;
 }
 :root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row.on,
-:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row.on:hover,
-:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt.on {
+:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row.on:hover {
 	background: var(--l2);
 	color: var(--t1);
 	box-shadow: none;
+}
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt.on {
+	background: var(--dawn-select) !important;
+	color: var(--t1);
+	box-shadow: inset 0 0 0 1px var(--dawn-select-ring);
 }
 :root:not(#dawn) #sidebar .tn-vt .nav-row:focus-visible,
 :root:not(#dawn).lay-rail.tabs-h #tabbar .tt:focus-visible {
@@ -1425,7 +1442,11 @@ html.tn-themed {
 }
 
 @keyframes dawn-polish-body-enter {
- from { opacity: 0.65; transform: translateY(3px) scale(0.985); }
+ from { opacity: 0; transform: translateY(12px) scale(0.97); }
+ to { opacity: 1; transform: none; }
+}
+@keyframes dawn-stream-enter {
+ from { opacity: 0; transform: translateY(6px); }
  to { opacity: 1; transform: none; }
 }
 @keyframes dawn-polish-control-enter {
@@ -1457,10 +1478,17 @@ html.tn-themed {
  35% { opacity: 1; }
 }
 :root:not(#dawn) .sf-chat-reader .sf-message > .sf-msg-body,
-:root:not(#dawn) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body,
 :root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md {
- transform-origin: 50% 100%;
- animation: dawn-polish-body-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+ transform-origin: 0 100%;
+ animation: dawn-polish-body-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body { transform-origin: 100% 100%; }
+:root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md:has(> .md.streaming) > .md:not(.streaming) > :last-child {
+ animation: dawn-stream-enter 200ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+:root:not(#dawn) .sf-chat-reader .sf-editor.empty .sf-ed-ph {
+ animation: dawn-fade-in 200ms ease-out backwards;
 }
 :root:not(#dawn) .sf-chat-reader .sf-message.pending > .sf-msg-body { animation: none; }
 :root:not(#dawn) .sf-chat-reader .sf-message > .sf-msg-av {
@@ -1569,8 +1597,10 @@ html.tn-themed {
 	}
 :root:not(#dawn) .sf-chat-reader .sf-editor.focused,
 :root:not(#dawn) .sf-chat-reader .sf-message > :is(.sf-msg-body, .sf-msg-av),
-:root:not(#dawn) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body,
 :root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md,
+:root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md:has(> .md.streaming) > .md:not(.streaming) > :last-child,
+:root:not(#dawn) .sf-chat-reader .sf-editor.empty .sf-ed-ph,
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd,
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop'],
 :root:not(#dawn) :is(#pal, #thm):not([hidden]),
@@ -1591,13 +1621,15 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) :is(.sf-spin .strip, .sf-spin::before, .sf-spin::after) { animation: none; }
 }
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-message > :is(.sf-msg-body, .sf-msg-av),
-:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body,
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader [data-role='omp.composer.send'] .kbd,
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader [data-role='omp.composer.stop'],
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-message > :is(.sf-msg-body, .sf-msg-av),
-:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered).sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-card[data-role='omp.user'] > .sf-card-body,
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md,
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) [data-role^='omp.assistant'] > .sf-md,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md:has(> .md.streaming) > .md:not(.streaming) > :last-child,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) [data-role^='omp.assistant'] > .sf-md:has(> .md.streaming) > .md:not(.streaming) > :last-child,
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) [data-role='omp.composer.send'] .kbd,
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) [data-role='omp.composer.stop'],
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-editor.focused,
@@ -1670,29 +1702,32 @@ html.tn-phone:not(#dawn) :is(div.pop[role='menu'] .mi:not(.bare), .sf-menu-pop .
 	min-width: 40px;
 	min-height: 40px;
 }
-:root:not(#dawn) #tabbar .tt.on :is(.nm, .sub, .tn-tx, .mk.keys, .kbd, .tn-num, .ico, svg) {
-	color: var(--dawn-page) !important;
+:root:not(#dawn) #tabbar .tt .nm {
+	color: var(--t1);
 }
-:root:not(#dawn) #tabbar .tt[data-tc] .nm,
-:root:not(#dawn) #tabbar .tt[data-tc].on .nm {
-	color: light-dark(#18181b, #f2f2f3) !important;
+:root:not(#dawn) #tabbar .tt .sub {
+	opacity: 1;
+	color: var(--t2);
 }
-:root:not(#dawn) #tabbar .tt[data-tc] .sub,
-:root:not(#dawn) #tabbar .tt[data-tc].on .sub {
-	opacity: 1 !important;
-	color: light-dark(#5a5c64, #a5a8b0) !important;
+:root:not(#dawn) #tabbar .tt.working {
+	--pill: var(--dawn-working);
 }
-:root:not(#dawn) #tabbar .tt.working .sub::before {
-	color: light-dark(#006861, #5eead4) !important;
+:root:not(#dawn) #tabbar .tt[title*='\206B'] {
+	--pill: var(--dawn-waiting);
 }
-:root:not(#dawn) #tabbar .tt[title*='\206B'] .sub::before {
-	color: light-dark(#9e3f00, #fbbf24) !important;
+:root:not(#dawn) #tabbar .tt[title*='\206C'] {
+	--pill: var(--dawn-done);
 }
-:root:not(#dawn) #tabbar .tt[title*='\206C'] .sub::before {
-	color: light-dark(#006b29, #4ade80) !important;
+:root:not(#dawn) #tabbar .tt[title*='\206D'] {
+	--pill: var(--dawn-failed);
 }
-:root:not(#dawn) #tabbar .tt[title*='\206D'] .sub::before {
-	color: light-dark(#b61819, #ff7d7d) !important;
+:root:not(#dawn) #tabbar .tt.working .nm {
+	--sh-lo: var(--dawn-ink);
+	--t1: var(--t3);
+	color: var(--dawn-ink);
+}
+:root:not(#dawn) #tabbar .tt.working::after {
+	color: var(--pill);
 }
 :root:not(#dawn) .sf-chat-reader :is(.sf-t-dim, .sf-t-muted) {
 	color: var(--t2);
