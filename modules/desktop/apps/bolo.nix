@@ -68,7 +68,6 @@
     active = "fluid-speech-pro";
     provider = "cuda";
     threads = null;
-    gain = 6.0;
     # Whole-clip turns: one write of the finished transcript, typed once.
     pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool";
     models =
