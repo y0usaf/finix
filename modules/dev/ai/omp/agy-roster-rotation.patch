@@ -1,0 +1,66 @@
+diff --git a/packages/ai/src/error/flags.ts b/packages/ai/src/error/flags.ts
+index bacf7d6..38701a2 100644
+--- a/packages/ai/src/error/flags.ts
++++ b/packages/ai/src/error/flags.ts
+@@ -269,6 +269,28 @@ const CODEX_CHATGPT_ACCOUNT_MODEL_MAX_LENGTH = 256;
+ const CURSOR_PLAN_POLICY_MARKER_PATTERN = /\bERROR_RATE_LIMITED_CHANGEABLE\b/i;
+ const CURSOR_PLAN_POLICY_PATTERN = /\bNamed models unavailable\b|\bModel unavailable on\b|\bFree plans can only use\b/i;
+ 
++const AGY_UNKNOWN_MODEL_PATTERN = /^Unknown model ID: (\S+)$/;
++
++function agyUnknownModelFromText(text: string): string | undefined {
++	return AGY_UNKNOWN_MODEL_PATTERN.exec(text.trim())?.[1];
++}
++
++function isAgyUnknownModelText(text: string, provider: string | undefined, modelId: string | undefined): boolean {
++	return provider === "antigravity-cli" && modelId !== undefined && agyUnknownModelFromText(text) === modelId;
++}
++
++function agyUnknownModel(error: unknown, depth = 0): string | undefined {
++	if (depth > 6) return undefined;
++	if (typeof error === "string") return agyUnknownModelFromText(error);
++	if (!error || typeof error !== "object") return undefined;
++	for (const key of ["errorMessage", "message"] as const) {
++		const text = key in error ? (error as Record<string, unknown>)[key] : undefined;
++		const model = typeof text === "string" ? agyUnknownModelFromText(text) : undefined;
++		if (model !== undefined) return model;
++	}
++	return "cause" in error ? agyUnknownModel(error.cause, depth + 1) : undefined;
++}
++
+ function isCursorPlanPolicyText(text: string): boolean {
+ 	return CURSOR_PLAN_POLICY_MARKER_PATTERN.test(text) && CURSOR_PLAN_POLICY_PATTERN.test(text);
+ }
+@@ -669,7 +691,10 @@ function classifyText(
+ 		) {
+ 			kinds |= Flag.AccountPolicy | Flag.ContentBlocked;
+ 		}
+-		if (isAnthropicAccountPolicyText(errorMessage, provider, statusClean)) {
++		if (
++			isAnthropicAccountPolicyText(errorMessage, provider, statusClean) ||
++			isAgyUnknownModelText(errorMessage, provider, modelId)
++		) {
+ 			kinds |= Flag.AccountPolicy;
+ 		}
+ 		if (isAuthFailureText(errorMessage)) kinds |= Flag.AuthFailed;
+@@ -976,6 +1001,9 @@ export function modelEntitlementDenialKinds(error: unknown, provider: string, mo
+ 	if (isCodexChatGPTAccountPolicyError(error, provider, modelId) || isCursorPlanAccountPolicyError(error, provider)) {
+ 		return Flag.AccountPolicy | Flag.ContentBlocked;
+ 	}
++	if (provider === "antigravity-cli" && modelId !== undefined && agyUnknownModel(error) === modelId) {
++		return Flag.AccountPolicy;
++	}
+ 	return isAnthropicModelNotFoundError(error, provider, modelId) ? Flag.AccountPolicy : 0;
+ }
+ 
+@@ -994,7 +1022,9 @@ export function isMismatchedModelEntitlementDenial(
+ 	modelId: string | undefined,
+ ): boolean {
+ 	const namesModel =
+-		codexChatGPTAccountPolicyModel(error) !== undefined || anthropicModelNotFoundId(error) !== undefined;
++		codexChatGPTAccountPolicyModel(error) !== undefined ||
++		anthropicModelNotFoundId(error) !== undefined ||
++		(provider === "antigravity-cli" && agyUnknownModel(error) !== undefined);
+ 	return namesModel && !isModelEntitlementDenial(error, provider, modelId);
+ }
+ 
