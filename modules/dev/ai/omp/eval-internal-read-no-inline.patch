@@ -1,0 +1,80 @@
+diff --git a/packages/coding-agent/src/eval/js/tool-bridge.ts b/packages/coding-agent/src/eval/js/tool-bridge.ts
+index 5207a0a305..5929b9d405 100644
+--- a/packages/coding-agent/src/eval/js/tool-bridge.ts
++++ b/packages/coding-agent/src/eval/js/tool-bridge.ts
+@@ -7,6 +7,7 @@ import {
+ import { type ImageContent, toolWireSchema } from "@oh-my-pi/pi-ai";
+ import { isRecord } from "@oh-my-pi/pi-utils";
+ import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
++import { InternalUrlRouter } from "../../internal-urls";
+ import type { ToolSession } from "../../tools";
+ import { committedTodoPhases } from "../../tools/todo";
+ import { isReplyWrite, toolResultReplies } from "@oh-my-pi/pi-tui/chat/reply-write";
+@@ -86,9 +87,17 @@ function toolResultHasError(result: AgentToolResult): boolean {
+ 	return isRecord(result.details) && result.details.isError === true;
+ }
+ 
+-function getTool(session: ToolSession, name: string): AgentTool {
++function getTool(session: ToolSession, name: string, args?: unknown): AgentTool {
+ 	const tool = session.getToolForEvalBridge ? session.getToolForEvalBridge(name) : session.getToolByName?.(name);
+ 	if (tool) return tool;
++	if (name === "read" && isRecord(args) && typeof args.path === "string") {
++		const router = InternalUrlRouter.instance();
++		const { path: bare } = router.split(args.path);
++		if (router.canResolve(bare)) {
++			const registered = session.getToolByName?.("read");
++			if (registered) return registered;
++		}
++	}
+ 	// A registry hit means the tool exists, but the session does not expose it here.
+ 	if (session.getToolForEvalBridge && session.getToolByName?.(name)) {
+ 		throw new ToolError(`Tool is registered but not available in this session: ${name}`);
+@@ -284,7 +293,7 @@ export async function callSessionTool(name: string, args: unknown, options: Tool
+ 	if (name === EVAL_WORKPOOL_BRIDGE_NAME) {
+ 		return await runEvalWorkpool(args, options);
+ 	}
+-	const tool = getTool(options.session, name);
++	const tool = getTool(options.session, name, args);
+ 	// Wire aliases share every guard, status and bookkeeping path with the canonical tool.
+ 	name = tool.name;
+ 	if (!isEvalBridgeToolCallable(tool)) {
+diff --git a/packages/coding-agent/src/prompts/tools/eval.md b/packages/coding-agent/src/prompts/tools/eval.md
+index 5b1af40b8f..133d168ddc 100644
+--- a/packages/coding-agent/src/prompts/tools/eval.md
++++ b/packages/coding-agent/src/prompts/tools/eval.md
+@@ -47,7 +47,7 @@ await sh(command, { cwd?, timeout? })  await sh`cmd ${arg}` — embedded bash en
+ {{{inlineTopics}}}
+ {{else}}
+ <namespaces>
+-More globals; `read` the linked docs before first use:
++More globals; read `xd://eval/<topic>` (eval `read(...)` or `bash` `cat`) before first use:
+ - `judge`, `{{#if py}}judge_batch{{else}}judgeBatch{{/if}}`, `completion`: classification, bulk judgment, model calls → `xd://eval/judge`
+ - `%load`{{#if py}}, `%pip`{{/if}}{{#if js}}, `%bun add`{{/if}}, `budget`{{#if evalTools}}, `@tool`/`tool(fn)`{{/if}}: setup, installs, utilities → `xd://eval/helpers`
+ {{#if spawns}}
+diff --git a/packages/coding-agent/src/session/session-tools.ts b/packages/coding-agent/src/session/session-tools.ts
+index 6cee4a2cf8..efa60823dc 100644
+--- a/packages/coding-agent/src/session/session-tools.ts
++++ b/packages/coding-agent/src/session/session-tools.ts
+@@ -2027,7 +2027,8 @@ export class SessionTools {
+ 		if (added.length === 0 && removed.length === 0) return undefined;
+ 		// Topic docs are served through `read`; sessions without it get them inline,
+ 		// matching the eval description's `inlineTopics` fallback.
+-		const canRead = this.getActiveToolNames().includes("read");
++		const activeToolNames = this.getActiveToolNames();
++		const canRead = activeToolNames.includes("read") || activeToolNames.includes("eval") || activeToolNames.includes("bash");
+ 		return {
+ 			role: "custom",
+ 			customType: EVAL_PRELUDE_NOTICE_MESSAGE_TYPE,
+diff --git a/packages/coding-agent/src/tools/eval.ts b/packages/coding-agent/src/tools/eval.ts
+index 320bcbd177..b840e73118 100644
+--- a/packages/coding-agent/src/tools/eval.ts
++++ b/packages/coding-agent/src/tools/eval.ts
+@@ -402,7 +402,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+ 			eagerDelegation: sessionDelegationBias(session) === "eager",
+ 			waitTool: hasWaitTool(session),
+ 			preludes: this.#advertisedPreludes(session),
+-			inlineTopics: session.isToolActive?.("read") === false,
++			inlineTopics: false,
+ 			autoProvision: cfgEvalAutoProvision.get(session.settings),
+ 			perCallModel,
+ 			perCallModelAdvertisement: perCallModel

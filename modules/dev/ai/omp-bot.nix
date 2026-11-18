@@ -9,16 +9,6 @@
   userName = config.user.name;
   home = config.user.homeDirectory;
   inherit (inputPackages.oh-my-pi) omp;
-  pilotConfig = pkgs.writeText "lloyd-python.yml" (lib.generators.toYAML {} {
-    python.interpreter = "${pkgs.python3.withPackages (ps: [ps.pillow])}/bin/python3";
-    advisor.enabled = true;
-  });
-  pilotOmp = pkgs.writeShellScriptBin "omp" ''
-    if [ "''${OMP_BOT_NAME-}" = Lloyd ]; then
-      exec ${omp}/bin/omp "$@" --config ${pilotConfig}
-    fi
-    exec ${omp}/bin/omp "$@"
-  '';
   src = flakeInputs.omp-bot;
   tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
   persistentHome = "/persist/home/${userName}";
@@ -92,7 +82,7 @@ in {
 
   user.files = {
     ".config/omp-bot/env".text = ''
-      : "''${OMP_BIN:=${pilotOmp}/bin/omp}"
+      : "''${OMP_BIN:=${omp}/bin/omp}"
       : "''${OMP_BOT_EXTENSION:=${ext}/crest-auth.ts}"
       : "''${OMP_BOT_CWD_EXTENSION:=${ext}/cwd.ts}"
       : "''${OMP_BOT_SECRETS_EXTENSION:=${ext}/secrets/secrets.ts}"

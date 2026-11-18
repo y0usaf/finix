@@ -817,7 +817,14 @@ in {
             shimmer = "classic";
             smoothStreaming = true;
           };
+          todo.enabled = false;
+          grep.enabled = false;
+          glob.enabled = false;
+          find.enabled = "off";
+          astEdit.enabled = false;
+          fetch.enabled = false;
           task = {
+            disabledAgents = ["scout" "reviewer" "security-reviewer" "sonic" "designer" "librarian" "seance"];
             showResolvedModelBadge = false;
             eager = "preferred";
             enableLsp = false;
@@ -845,9 +852,11 @@ in {
             judge = catalog.judgeModel;
             task = catalog.taskModel;
           };
-          retry.fallbackChains = catalog.fallbackChains // {
-            advisor = ["openai-codex/gpt-6.1-sol:high"];
-          };
+          retry.fallbackChains =
+            catalog.fallbackChains
+            // {
+              advisor = ["openai-codex/gpt-6.1-sol:high"];
+            };
           tier = {
             openai = "none";
             advisor = "none";

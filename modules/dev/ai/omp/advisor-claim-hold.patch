@@ -1,8 +1,8 @@
 diff --git a/packages/coding-agent/src/session/session-advisors.ts b/packages/coding-agent/src/session/session-advisors.ts
-index 47bc44ee6b..2d15d66db9 100644
+index 1b5f936b74..bb727d5d61 100644
 --- a/packages/coding-agent/src/session/session-advisors.ts
 +++ b/packages/coding-agent/src/session/session-advisors.ts
-@@ -267,6 +267,44 @@ function lastPrimaryUserMessage(messages: readonly AgentMessage[]): AgentMessage
+@@ -267,6 +267,54 @@ function lastPrimaryUserMessage(messages: readonly AgentMessage[]): AgentMessage
  	}
  	return undefined;
  }
@@ -39,6 +39,16 @@ index 47bc44ee6b..2d15d66db9 100644
 + * advisory turns into a correction, so their boundary waits for the review; a
 + * reply that asserts none of them settles at once.
 + */
++function turnHasToolActivity(messages: readonly AgentMessage[]): boolean {
++	for (let index = messages.length - 1; index >= 0; index--) {
++		const message = messages[index]!;
++		if (message.role === "toolResult") return true;
++		if (message.role === "user" && message.attribution !== "agent") return false;
++		if (message.role === "custom" && isUserTurnInitiator(message)) return false;
++	}
++	return false;
++}
++
 +function claimsConclusion(text: string | undefined): boolean {
 +	if (text === undefined) return false;
 +	return CLAIM_MEASUREMENT.test(text) || CLAIM_CAUSE.test(text) || CLAIM_COMPLETION.test(text);
@@ -47,7 +57,7 @@ index 47bc44ee6b..2d15d66db9 100644
  /** Advisor statistics for the advisor status command. */
  export interface AdvisorStats {
  	configured: boolean;
-@@ -716,13 +754,26 @@ export class SessionAdvisors {
+@@ -716,13 +764,26 @@ export class SessionAdvisors {
  			// transition, and disposal still release it) while an asynchronous
  			// turn reviewer never parks the primary.
  			const globalSyncBacklog = cfgAdvisorSyncBacklog.get(this.#host.settings);
@@ -65,7 +75,7 @@ index 47bc44ee6b..2d15d66db9 100644
 +			// kind a late advisory turns into a correction. Its boundary waits, bounded,
 +			// for this turn's review, so the note reaches the model while it can still
 +			// revise; every other reply settles at once.
-+			if (!willContinue && claimsConclusion(lastAssistantText(messages))) {
++			if (!willContinue && turnHasToolActivity(messages) && claimsConclusion(lastAssistantText(messages))) {
 +				for (const scheduled of scheduledAdvisors) {
 +					if (!holds.has(scheduled)) holds.set(scheduled, { maxMs: ADVISOR_CLAIM_HOLD_MS, threshold: 1 });
 +				}

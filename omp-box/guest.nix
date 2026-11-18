@@ -372,7 +372,7 @@ in {
       # The view omp-shares mounts over a bot's grants (see shareApply).
       pkgs.bindfs
       pkgs.bun
-      pkgs.python3
+      (pkgs.python3.withPackages (ps: [ps.pillow ps.numpy ps.pandas ps.fonttools]))
       pkgs.ungoogled-chromium
       pkgs.git
       pkgs.ripgrep

@@ -26,5 +26,6 @@ async function prune(pi: ExtensionAPI): Promise<void> {
 }
 
 export default function tools(pi: ExtensionAPI): void {
+	pi.on("session_start", () => prune(pi));
 	pi.on("before_agent_start", () => prune(pi));
 }

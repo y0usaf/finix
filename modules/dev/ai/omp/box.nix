@@ -715,6 +715,7 @@
     "compact-eval.ts" = "${./compact-eval.ts}";
     "work-fold.ts" = "${./work-fold.ts}";
     "crest-reroute.ts" = "${./crest-reroute.ts}";
+    "tools.ts" = "${./tools.ts}";
     optchat = "${./optchat}";
     # The same store path as the host's ext link, so omp-bot-box names a boxed bot's secrets extension by this link.
     secrets = "${./secrets}";
@@ -748,6 +749,7 @@
     "${inBox "compact-eval.ts"}"
     "${inBox "work-fold.ts"}"
     "${inBox "crest-reroute.ts"}"
+    "${inBox "tools.ts"}"
     optchatExtension
   ];
   files = {
@@ -866,6 +868,29 @@
         autoBackground:
           enabled: true
           thresholdMs: 3600000
+        js: false
+      todo:
+        enabled: false
+      grep:
+        enabled: false
+      glob:
+        enabled: false
+      find:
+        enabled: "off"
+      astEdit:
+        enabled: false
+      fetch:
+        enabled: false
+      task:
+        agentAdvisor:
+          task: "on"
+        disabledAgents: [scout, reviewer, security-reviewer, sonic, designer, librarian, seance]
+        showResolvedModelBadge: false
+        eager: preferred
+        enableLsp: false
+        completionProbe: false
+        softRequestBudget: 0
+        perCallModel: "on"
       extensions: ${builtins.toJSON ompExtensions}
     '';
     appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n\n${catalog.taskNote}\n";
