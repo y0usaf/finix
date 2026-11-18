@@ -7,10 +7,6 @@
   generators,
   ...
 }: let
-  # What the Tomoe this config is built for reads: a policy setting goes in only
-  # when that build knows it. A build that does not know one refuses the whole
-  # session extension ("Unknown setting :X"), so the config and the pin cannot
-  # drift apart -- and the landing gate can run this config against either side.
   tomoeKnows = name: let
     api = "${flakeInputs.tomoe.outPath}/lisp/api.lisp";
   in
@@ -126,8 +122,6 @@
 
   keyword = name: mkLispInline ":${name}";
 
-  # A binding names a registered command; a command that starts a program uses
-  # the built-in launch command with the argv declared for it.
   launchCommands =
     {
       browser = [defaults.browser];
@@ -304,7 +298,6 @@
       XF86MonBrightnessDown = "brightness-down";
     };
 
-  # TERMINAL is not bound to a key: the deck's terminal command starts it.
   launches = lib.mapAttrsToList (command: argv: [command argv]) (launchCommands
     // {
       terminal = ["tern"];
@@ -324,8 +317,6 @@
 
   gaps = 8;
 
-  # The theme draws a window's border OUTSIDE its box, so the rail's seam is two
-  # borders, two channels and the rail itself.
   borderWidth = 2;
 
   seam =
@@ -363,16 +354,8 @@
     media-width = 34;
   };
 
-  # The rail's themes, each the whole look drawn by its own shader from the plist
-  # +rail-<name>+ in its lisp file (morph's is in lisp/rail.lisp itself). thread
-  # draws its look in shaders/thread.glsl on the layout lisp/rail-kit.lisp hands
-  # it, which shaders/kit.glsl unpacks. The order is the look: a session starts
-  # on the first of these and a theme it cannot find falls back to it.
   kitShader = name: file: pkgs.writeText "${name}.glsl" (builtins.readFile ./shaders/kit.glsl + "\n" + builtins.readFile file);
 
-  # THREAD's bars are surfaces the size of the strip, so their shader reads the
-  # same picture from the strip's own corner: the kit's layout starts at index 2
-  # and the bar's numbers sit there, rather than after the whole kit.
   threadBarShader =
     pkgs.writeText "thread-bar.glsl"
     (builtins.replaceStrings ["const int THEME = 132;"] ["const int THEME = 2;"]
@@ -462,8 +445,6 @@
     (lib.unique (lib.concatMap (theme: lib.optionals (theme.lisp != null) (lib.toList theme.lisp)) themes))
     + "(defparameter +rail-themes+ (list ${lib.concatMapStringsSep " " (theme: ":${theme.name} (list* :shader \"${theme.shader}\" :bar-shader \"${theme.barShader or theme.shader}\" +rail-${theme.name}+)") themes}))\n";
 
-  # The rail: its strips placed on a frame's edges, drawn in one theme at a
-  # time, its readings on a surface of their own.
   railParameters = {
     inherit (barParameters) modules time date;
     inherit (bar.rail) width channel;
@@ -550,7 +531,6 @@
     cassetteLisp = deck:
       lib.concatStrings [
         "(defparameter +cassette+ ${toLisp cassetteParameters})\n"
-        # Where bolo keeps the dictation state and level the bar reads.
         "(defparameter +bolo+ (list :state \"${config.user.runtimeDir}/bolo/state\" :level \"${config.user.runtimeDir}/bolo/level\"))\n"
         "(defparameter +rail+ ${toLisp railParameters})\n"
         source_probe
