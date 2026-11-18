@@ -3418,6 +3418,13 @@ in {
             delay-ms = 120;
           };
         }
+        // lib.optionalAttrs (tomoeKnows "shadow") {
+          shadow = {
+            range = 4;
+            power = 2;
+            color = "#00000040";
+          };
+        }
         // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;}
         // {
           animations =
