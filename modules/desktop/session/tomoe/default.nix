@@ -4393,8 +4393,13 @@ in {
         uninterned,
         values,
         window-properties,
+        if',
+        list,
         ...
-      }: ({glass--margin}: [
+      }: ({
+        glass--margin,
+        glass--known,
+      }: [
         [in-package (uninterned "tomoe-user")]
         blank
         ({
@@ -4404,6 +4409,14 @@ in {
           rows [
             [defun glass--margin [passes offset]]
             [[min 4096 [truncate ["*" [expt 2 passes] ["+" offset 2]]]]]
+          ])
+        blank
+        ({glass}:
+          rows [
+            [defun glass--known [glass]]
+            [[if' [{symbol = "tomoe-setting-field-known-p";} (kw "blur") (kw "noise")]
+                glass
+                [list (kw "passes") [getf glass (kw "passes")] (kw "offset") [getf glass (kw "offset")]]]]
           ])
         blank
         ({
@@ -4426,7 +4439,7 @@ in {
                       ["list*" (kw "enabled") t]
                       (kw "anti-artifact-margin")
                       [[glass--margin [getf (constant glass) (kw "passes")] [getf (constant glass) (kw "offset")]]]
-                      (constant glass)
+                      [[glass--known (constant glass)]]
                     ])
                   ]
                 ]
