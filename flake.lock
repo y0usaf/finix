@@ -177,12 +177,12 @@
         "rev": "00902d9e90c0c7525f5e3b862d48a75fa2ba5184",
         "revCount": 588,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/boar-rs"
+        "url": "ssh://git@github.com/y0usaf/boar-rs.git"
       },
       "original": {
         "rev": "00902d9e90c0c7525f5e3b862d48a75fa2ba5184",
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/boar-rs"
+        "url": "ssh://git@github.com/y0usaf/boar-rs.git"
       }
     },
     "boar-rs_2": {
@@ -788,15 +788,15 @@
       "locked": {
         "lastModified": 1794313884,
         "narHash": "sha256-T4QSXb7qXkiXF8HU27Xz0eoKBZBJqN1qO8LdsrD8Mxo=",
-        "ref": "refs/heads/main",
+        "owner": "y0usaf",
+        "repo": "deepseek-harness-flake",
         "rev": "3e7ecd723a0fa30076cd49aec3563b3a24f8fd07",
-        "revCount": 4,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/deepseek-harness-flake"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/deepseek-harness-flake"
+        "owner": "y0usaf",
+        "repo": "deepseek-harness-flake",
+        "type": "github"
       }
     },
     "deepseek-harness-flake_2": {
@@ -827,17 +827,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1794369288,
-        "narHash": "sha256-VyVIvJ1ZUu9ilglvjs6QXdv02ashn1iCiQ1SPaKnOww=",
+        "lastModified": 1794330246,
+        "narHash": "sha256-/bDUM1BdB/PHNwFiaGmmRBwJwnAwTXs244ySXkSUqq4=",
         "ref": "refs/heads/main",
-        "rev": "dc473e605508e80b6d0e44802a858d05c7291f85",
-        "revCount": 19,
+        "rev": "96b9667d4eabd7b08df946f52eef37bac0c87b8c",
+        "revCount": 11,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/dsh-tern"
+        "url": "ssh://git@github.com/y0usaf/dsh-tern.git"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/dsh-tern"
+        "url": "ssh://git@github.com/y0usaf/dsh-tern.git"
       }
     },
     "dsh-tern_2": {
@@ -2812,15 +2812,15 @@
       "locked": {
         "lastModified": 1794955561,
         "narHash": "sha256-kUiI3er8AKBsA5HBvWL1TlBOXNNia3GmfZjrDJsJJRc=",
-        "ref": "refs/heads/main",
+        "owner": "y0usaf",
+        "repo": "omp-bot",
         "rev": "faa3e9bef39e5aa20cd2ee330123f7b937c436e9",
-        "revCount": 192,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/omp-bot"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/omp-bot"
+        "owner": "y0usaf",
+        "repo": "omp-bot",
+        "type": "github"
       }
     },
     "omp-bot_2": {
@@ -3788,16 +3788,15 @@
       "locked": {
         "lastModified": 1793930802,
         "narHash": "sha256-FjP96Bii33IJNxV+qSD4f9h4HwzydQZJWkc/Zctd2N0=",
-        "ref": "main",
+        "ref": "refs/heads/main",
         "rev": "34f51c9e4698f03e79f6421b1d4b57d7cf3b4413",
         "revCount": 8,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-ekko"
+        "url": "ssh://git@github.com/y0usaf/tern-ekko.git"
       },
       "original": {
-        "ref": "main",
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-ekko"
+        "url": "ssh://git@github.com/y0usaf/tern-ekko.git"
       }
     },
     "tern-ekko_2": {
@@ -3821,16 +3820,15 @@
       "locked": {
         "lastModified": 1794869027,
         "narHash": "sha256-jrVKDZlazTrR+eTkZHq8cddzOB7CyVAWBPWAcD2ZKl8=",
-        "ref": "main",
+        "owner": "y0usaf",
+        "repo": "tern-ozette",
         "rev": "d8b3b658cfdbb5dd195f74828fefb55374bb4aa7",
-        "revCount": 118,
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-ozette"
+        "type": "github"
       },
       "original": {
-        "ref": "main",
-        "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-ozette"
+        "owner": "y0usaf",
+        "repo": "tern-ozette",
+        "type": "github"
       }
     },
     "tern-ozette_2": {
@@ -3858,11 +3856,11 @@
         "rev": "fc16f17e364831540f6da3137c13a5d8898c663e",
         "revCount": 19,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-scratch"
+        "url": "ssh://git@github.com/y0usaf/tern-scratch.git"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-scratch"
+        "url": "ssh://git@github.com/y0usaf/tern-scratch.git"
       }
     },
     "tern-scratch_2": {
@@ -3894,11 +3892,11 @@
         "rev": "10560a1a83b65dc845bc8ff713781badbd83a42c",
         "revCount": 14,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-script"
+        "url": "ssh://git@github.com/y0usaf/tern-script.git"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/tern-script"
+        "url": "ssh://git@github.com/y0usaf/tern-script.git"
       }
     },
     "tern-script_2": {

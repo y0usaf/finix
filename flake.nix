@@ -32,7 +32,7 @@
     };
 
     tern-script = {
-      url = "git+file:///home/y0usaf/dev/developing/tern-script";
+      url = "git+ssh://git@github.com/y0usaf/tern-script.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -47,7 +47,7 @@
     };
 
     boar-rs = {
-      url = "git+file:///home/y0usaf/dev/developing/boar-rs?rev=00902d9e90c0c7525f5e3b862d48a75fa2ba5184";
+      url = "git+ssh://git@github.com/y0usaf/boar-rs.git?rev=00902d9e90c0c7525f5e3b862d48a75fa2ba5184";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -62,32 +62,32 @@
     };
 
     omp-bot = {
-      url = "git+file:///home/y0usaf/dev/developing/omp-bot";
+      url = "github:y0usaf/omp-bot";
       flake = false;
     };
 
     deepseek-harness-flake = {
-      url = "git+file:///home/y0usaf/dev/developing/deepseek-harness-flake";
+      url = "github:y0usaf/deepseek-harness-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     dsh-tern = {
-      url = "git+file:///home/y0usaf/dev/developing/dsh-tern";
+      url = "git+ssh://git@github.com/y0usaf/dsh-tern.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     tern-ekko = {
-      url = "git+file:///home/y0usaf/dev/developing/tern-ekko?ref=main";
+      url = "git+ssh://git@github.com/y0usaf/tern-ekko.git";
       flake = false;
     };
 
     tern-ozette = {
-      url = "git+file:///home/y0usaf/dev/developing/tern-ozette?ref=main";
+      url = "github:y0usaf/tern-ozette";
       flake = false;
     };
 
     tern-scratch = {
-      url = "git+file:///home/y0usaf/dev/developing/tern-scratch";
+      url = "git+ssh://git@github.com/y0usaf/tern-scratch.git";
       flake = false;
     };
 
