@@ -58,11 +58,6 @@
 
   modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
 
-  vadModel = pkgs.fetchurl {
-    url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx";
-    hash = "sha256-niRJ4Qh0ltjUyrqQfyPgvT942R+lUkebucI6wJy7H9Y=";
-  };
-
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
     active = "fluid-speech-pro";
@@ -82,8 +77,7 @@
     vocab_fuzzy = 0.85;
     turn = {
       vad = {
-        model = "${vadModel}";
-        threshold = 0.35;
+        open = 8.0;
         min_silence = 2.5;
       };
       start_timeout = 10.0;
