@@ -383,6 +383,16 @@
       ["const int T_MODE = THEME + 1, T_BR = THEME + 2, T_BN = THEME + 6;"]
       (builtins.readFile ./shaders/thread.glsl));
 
+  membraneBarShader =
+    pkgs.writeText "membrane-bar.glsl"
+    (builtins.replaceStrings ["const int THEME = 132;"] ["const int THEME = 2;"]
+      (builtins.readFile ./shaders/kit.glsl)
+      + "\n"
+      + builtins.replaceStrings
+      ["const int T_MODE = THEME + 59, T_BR = THEME + 48, T_BN = THEME + 52;"]
+      ["const int T_MODE = THEME + 1, T_BR = THEME + 2, T_BN = THEME + 6;"]
+      (builtins.readFile ./shaders/membrane.glsl));
+
   railThemes = [
     {
       name = "thread";
@@ -390,6 +400,13 @@
       barShader = threadBarShader;
       lisp = ./lisp/rail-thread.lisp;
       description = "liquid glass on a thin seam: a 34 px seam with one glass thread down its middle, 11 px wide and as tall as the cards, carrying the readings as beads on it -- the clock as hours over minutes, the date as day over month, CPU, memory, bolo's voice at the weld, the GPU and the VRAM -- each gauge bead holding a level of denser glass from its foot up to its load with a small label over its value, every bead's block centred on it. Three beads hang above the voice dot at the weld and three below, one every 118 px of the mock, so the run is symmetric about it: the time at the top, the date at the bottom, the gauges either side of the middle. The focused card wears a 5 px glass rim welded to the thread by a meniscus at the weld; every other card keeps what bar.rail.focus asks for -- a pair of hairlines, the dark one alone and dimmer, nothing at all, or nothing under a soft halo round the focused rim. One set of glass numbers serves dark and light: the backdrop frosted and refracted toward the rim, a light tint lift, a bright inner highlight on the lit side, a dark outer hairline all round, and each bead's type inked from the luminance of what lies behind it. A switch across the seam bends the thread after the new side on a damped spring while the old rim drains back into the thread and the new one fills out of the weld both ways; within a column the weld stays and the rims only drain and fill. bolo plucks the thread -- a travelling wave out from the weld, each stretch as loud as the voice was when it passed, the beads the nodes of the string, the voice bead swelling -- and the ripple runs round the focused rim, thickening and brightening it, dying away over the settle.";
+    }
+    {
+      name = "membrane";
+      shader = kitShader "membrane" ./shaders/membrane.glsl;
+      barShader = membraneBarShader;
+      lisp = [./lisp/rail-thread.lisp ./lisp/rail-membrane.lisp];
+      description = "thread in living glass: the same seam, beads, readings, weld, rim and motion, but the glass reads as glass and grows like tissue -- its edges bend what lies beneath them, the primaries slightly apart, its body carries the windows' own blur of the backdrop, a Fresnel rim mirrors the sky and the desktop beside it, a highlight runs down the lit side and the light it gathers falls beside it; its walls are a soap film with a thin inner membrane, organelles drift in its plasm and bolo's bead is a nucleus. A switch sends a swell along the thread, the new rim buds out of the weld and the old one pearls into droplets as it drains. One set of glass numbers for both modes, +rail-membrane--glass+ in lisp/rail-membrane.lisp.";
     }
     {
       name = "morph";
@@ -441,7 +458,8 @@
   in
     builtins.readFile ./lisp/rail-kit.lisp
     + "\n"
-    + lib.concatMapStrings (theme: lib.optionalString (theme.lisp != null) (builtins.readFile theme.lisp + "\n")) themes
+    + lib.concatMapStrings (file: builtins.readFile file + "\n")
+    (lib.unique (lib.concatMap (theme: lib.optionals (theme.lisp != null) (lib.toList theme.lisp)) themes))
     + "(defparameter +rail-themes+ (list ${lib.concatMapStringsSep " " (theme: ":${theme.name} (list* :shader \"${theme.shader}\" :bar-shader \"${theme.barShader or theme.shader}\" +rail-${theme.name}+)") themes}))\n";
 
   # The rail: its strips placed on a frame's edges, drawn in one theme at a
@@ -499,7 +517,7 @@
     };
 
   glassParameters = {
-    inherit (config.user.appearance.glass) passes offset;
+    inherit (config.user.appearance.glass) passes offset noise vibrancy;
   };
 
   glassAlpha = lib.fixedWidthString 2 "0" (lib.toHexString (builtins.floor (config.user.appearance.glass.opacity * 255 + 0.5)));

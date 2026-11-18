@@ -48,6 +48,16 @@
         default = 8;
         description = "Blur sample offset in texels per pass; wider taps smear more at the same radius.";
       };
+      noise = lib.mkOption {
+        type = lib.types.numbers.between 0 16;
+        default = 1;
+        description = "Steps of 8-bit dither the blur's last pass adds, so a wide blur of a smooth gradient keeps no bands; 0 leaves the blur as it was.";
+      };
+      vibrancy = lib.mkOption {
+        type = lib.types.numbers.between 0 4;
+        default = 1;
+        description = "Saturation of what the blur passes, as glass lifts colour: 1 leaves it, above 1 deepens it.";
+      };
     };
   };
 

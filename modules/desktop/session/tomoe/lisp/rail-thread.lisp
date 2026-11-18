@@ -186,21 +186,24 @@ block's kind and rect in the surface's pixels, y up."
   "THREAD: the glass thread with its beads, the readings in their glass and the
 focused card's rim, all in one shader over the output -- the seam and its beads
 when the rail stands in a seam, else the frames alone and a glass bar along each
-strip the config places."
+strip the config places. A theme drawn the same way with numbers of its own
+names them in LOOK as :NUMBERS and :BAR-NUMBERS."
   (destructuring-bind (&key state snapshot output strips &allow-other-keys) context
-    (let* ((seam (find :seam strips :key (lambda (strip) (getf strip :place))))
+    (let* ((numbers (getf look :numbers #'rail-thread--numbers))
+           (bar-numbers (getf look :bar-numbers #'rail-thread--bar-numbers))
+           (seam (find :seam strips :key (lambda (strip) (getf strip :place))))
            (bars (remove seam strips))
            (vertical (find-if (lambda (strip) (eq (getf strip :axis) :y)) bars))
            (frame-strip (or seam vertical (first bars))))
       (append
        (if seam
-           (let ((theme (rail-thread--numbers (rail-thread--layout seam) state)))
+           (let ((theme (funcall numbers (rail-thread--layout seam) state)))
              (if (getf context :windows)
                  (kit--frames look context theme :reach +rail-thread--reach+)
                  (rail-thread--whole look context theme)))
            (when frame-strip
              (kit--frames look context
-                          (append (rail-thread--numbers (rail-thread--layout frame-strip) state)
+                          (append (funcall numbers (rail-thread--layout frame-strip) state)
                                   (list 3d0))
                           :reach +rail-thread--reach+)))
        (loop for strip in bars
@@ -221,7 +224,7 @@ strip the config places."
                  :exclusive-zone (getf strip :zone 0)
                  :layer (getf context :layer) :click-through t
                  :background (list :shader (getf look :bar-shader (getf look :shader))
-                                   :data (rail-thread--bar-numbers context strip)
+                                   :data (funcall bar-numbers context strip)
                                    :clock (getf context :epoch)
                                    :until (kit--until look context)))
                 (shell-surface
