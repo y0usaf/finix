@@ -7,6 +7,13 @@ a setting that build does not know refuses the extension that publishes it, so
 an optional setting is published only where the running core lists it."
   (and (boundp 'tomoe::+settings+) (not (null (assoc key tomoe::+settings+)))))
 
+(defun tomoe-setting-field-known-p (group key)
+  "Whether the running Tomoe's settings table has KEY inside the setting GROUP:
+a group a build may predate gains fields, and publishing one it does not know
+refuses the whole extension."
+  (let ((entry (and (boundp 'tomoe::+settings+) (assoc group tomoe::+settings+))))
+    (and entry (not (null (assoc key (rest (second entry))))))))
+
 (defun tomoe-shader-option-known-p (key)
   "Whether the running Tomoe's shell shaders take the option KEY, which a build
 that predates it would refuse along with the surface asking for it."
