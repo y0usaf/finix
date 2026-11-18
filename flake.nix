@@ -77,12 +77,12 @@
     };
 
     tern-ekko = {
-      url = "git+file:///home/y0usaf/dev/developing/tern-ekko";
+      url = "git+file:///home/y0usaf/dev/developing/tern-ekko?ref=main";
       flake = false;
     };
 
     tern-ozette = {
-      url = "git+file:///home/y0usaf/dev/developing/tern-ozette";
+      url = "git+file:///home/y0usaf/dev/developing/tern-ozette?ref=main";
       flake = false;
     };
 
