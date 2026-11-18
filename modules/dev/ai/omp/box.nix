@@ -43,6 +43,14 @@
       uid = 2004;
       folders = ["sweep-workbench"];
     }
+    {
+      # DoorDash: its folder holds the official CLI, its agent skills and the login token, and the bot reads menus
+      # and fills a cart there, never ordering.
+      name = "Dash";
+      user = "dashbot";
+      uid = 2005;
+      folders = ["dash-workbench"];
+    }
   ];
   # Besides the token files, what the bot that works with the host user's logins gets from the user's home: the
   # file or folder each work CLI keeps its login in. A path the host does not have is skipped.

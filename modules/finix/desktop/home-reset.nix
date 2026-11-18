@@ -291,6 +291,7 @@
             "Tokens"
             "Videos"
             "cu-workbench"
+            "dash-workbench"
             "finix"
             "inscend"
             "sweep-workbench"
