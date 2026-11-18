@@ -11,6 +11,7 @@
   user = config.user.name;
   home = config.users.users.${user}.home;
   catalog = config.user.dev.modelCatalog;
+  prompts = config.user.dev.ompPrompts;
   shares = [];
   # The bots that run inside the box, one Unix user each (guest.nix). A bot only reaches the folders granted to
   # it, and omp-bot-box refuses to box a bot that is not named here, so nothing gets in by accident. `folders` are
@@ -737,8 +738,10 @@
       state=$(mktemp -d "$HOME/.omp-ablit.XXXXXX")
       trap 'rm -rf "$state"' EXIT
       trap 'exit 130' INT TERM HUP
-      mkdir "$state/agent"
-      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$seed/APPEND_SYSTEM.md" "$state/agent/"
+      mkdir -p "$state/agent/agents" "$state/agent/antigravity-acp-provider"
+      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$seed/APPEND_SYSTEM.md" "$seed/SYSTEM_TEMPLATE.md" "$state/agent/"
+      cp "$seed/task.md" "$state/agent/agents/task.md"
+      cp "$seed/omp-tools.json" "$state/agent/antigravity-acp-provider/omp-tools.json"
       PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
         --model ablit/${ablit.id} --config "$seed/ablit.yml" "$@"
     '';
@@ -894,6 +897,9 @@
       extensions: ${builtins.toJSON ompExtensions}
     '';
     appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n\n${catalog.taskNote}\n";
+    systemTemplate = pkgs.writeText "SYSTEM_TEMPLATE.md" prompts.systemTemplate;
+    taskAgent = pkgs.writeText "task.md" prompts.taskAgent;
+    ompTools = pkgs.writeText "omp-tools.json" (json prompts.ompTools);
   };
   seed = pkgs.runCommand "omp-box-seed" {} ''
     mkdir -p $out/store $out/ext $out/bin
@@ -902,6 +908,9 @@
     cp ${files.settings} $out/settings.json
     cp ${files.config} $out/config.yml
     cp ${files.appendSystem} $out/APPEND_SYSTEM.md
+    cp ${files.systemTemplate} $out/SYSTEM_TEMPLATE.md
+    cp ${files.taskAgent} $out/task.md
+    cp ${files.ompTools} $out/omp-tools.json
     cp ${files.ablitConfig} $out/ablit.yml
     ${lib.concatStrings (lib.mapAttrsToList (name: path: let
         copy = builtins.baseNameOf (toString path);

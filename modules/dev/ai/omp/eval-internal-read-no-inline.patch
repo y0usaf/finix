@@ -1,5 +1,5 @@
 diff --git a/packages/coding-agent/src/eval/js/tool-bridge.ts b/packages/coding-agent/src/eval/js/tool-bridge.ts
-index 5207a0a305..5929b9d405 100644
+index 10b95e3..cba6a80 100644
 --- a/packages/coding-agent/src/eval/js/tool-bridge.ts
 +++ b/packages/coding-agent/src/eval/js/tool-bridge.ts
 @@ -7,6 +7,7 @@ import {
@@ -10,7 +10,7 @@ index 5207a0a305..5929b9d405 100644
  import type { ToolSession } from "../../tools";
  import { committedTodoPhases } from "../../tools/todo";
  import { isReplyWrite, toolResultReplies } from "@oh-my-pi/pi-tui/chat/reply-write";
-@@ -86,9 +87,17 @@ function toolResultHasError(result: AgentToolResult): boolean {
+@@ -88,9 +89,17 @@ function toolResultHasError(result: AgentToolResult): boolean {
  	return isRecord(result.details) && result.details.isError === true;
  }
  
@@ -29,7 +29,7 @@ index 5207a0a305..5929b9d405 100644
  	// A registry hit means the tool exists, but the session does not expose it here.
  	if (session.getToolForEvalBridge && session.getToolByName?.(name)) {
  		throw new ToolError(`Tool is registered but not available in this session: ${name}`);
-@@ -284,7 +293,7 @@ export async function callSessionTool(name: string, args: unknown, options: Tool
+@@ -295,7 +304,7 @@ async function dispatchSessionTool(name: string, args: unknown, options: ToolBri
  	if (name === EVAL_WORKPOOL_BRIDGE_NAME) {
  		return await runEvalWorkpool(args, options);
  	}
@@ -39,42 +39,50 @@ index 5207a0a305..5929b9d405 100644
  	name = tool.name;
  	if (!isEvalBridgeToolCallable(tool)) {
 diff --git a/packages/coding-agent/src/prompts/tools/eval.md b/packages/coding-agent/src/prompts/tools/eval.md
-index 5b1af40b8f..133d168ddc 100644
+index aaa7ae3..fa453bd 100644
 --- a/packages/coding-agent/src/prompts/tools/eval.md
 +++ b/packages/coding-agent/src/prompts/tools/eval.md
-@@ -47,7 +47,7 @@ await sh(command, { cwd?, timeout? })  await sh`cmd ${arg}` — embedded bash en
+@@ -62,7 +62,7 @@ await sh(command, { cwd?, timeout? })  await sh`cmd ${arg}` — embedded bash en
  {{{inlineTopics}}}
  {{else}}
  <namespaces>
 -More globals; `read` the linked docs before first use:
 +More globals; read `xd://eval/<topic>` (eval `read(...)` or `bash` `cat`) before first use:
- - `judge`, `{{#if py}}judge_batch{{else}}judgeBatch{{/if}}`, `completion`: classification, bulk judgment, model calls → `xd://eval/judge`
- - `%load`{{#if py}}, `%pip`{{/if}}{{#if js}}, `%bun add`{{/if}}, `budget`{{#if evalTools}}, `@tool`/`tool(fn)`{{/if}}: setup, installs, utilities → `xd://eval/helpers`
+ - `judge`, `{{#if py}}judge_batch{{else}}judgeBatch{{/if}}`, `completion`: classification, bulk judgment, model calls → xd://eval/judge
+ - `%load`{{#if py}}, `%pip`{{/if}}{{#if js}}, `%bun add`{{/if}}, `budget`{{#if evalTools}}, `@tool`/`tool(fn)`{{/if}}: setup, installs, utilities → xd://eval/helpers
  {{#if spawns}}
 diff --git a/packages/coding-agent/src/session/session-tools.ts b/packages/coding-agent/src/session/session-tools.ts
-index 6cee4a2cf8..efa60823dc 100644
+index c10efcd..f0341a9 100644
 --- a/packages/coding-agent/src/session/session-tools.ts
 +++ b/packages/coding-agent/src/session/session-tools.ts
-@@ -2027,7 +2027,8 @@ export class SessionTools {
+@@ -2081,7 +2081,8 @@ export class SessionTools {
  		if (added.length === 0 && removed.length === 0) return undefined;
  		// Topic docs are served through `read`; sessions without it get them inline,
  		// matching the eval description's `inlineTopics` fallback.
 -		const canRead = this.getActiveToolNames().includes("read");
 +		const activeToolNames = this.getActiveToolNames();
 +		const canRead = activeToolNames.includes("read") || activeToolNames.includes("eval") || activeToolNames.includes("bash");
- 		return {
- 			role: "custom",
- 			customType: EVAL_PRELUDE_NOTICE_MESSAGE_TYPE,
+ 		const entries = added.map(definition => ({
+ 			name: definition.name,
+ 			summary: evalPreludeSummary(definition),
 diff --git a/packages/coding-agent/src/tools/eval.ts b/packages/coding-agent/src/tools/eval.ts
-index 320bcbd177..b840e73118 100644
+index ea66122..db52cbb 100644
 --- a/packages/coding-agent/src/tools/eval.ts
 +++ b/packages/coding-agent/src/tools/eval.ts
-@@ -402,7 +402,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+@@ -66,7 +66,6 @@ import { hasWaitTool } from "./wait";
+ import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+ import { toolResult } from "./tool-result";
+ import { clampTimeout, TOOL_TIMEOUTS } from "./tool-timeouts";
+-import { docTopicsReadable } from "./xdev";
+ 
+ import {
+ 	cfgEvalAutoBackgroundEnabled,
+@@ -420,7 +419,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
  			eagerDelegation: sessionDelegationBias(session) === "eager",
  			waitTool: hasWaitTool(session),
  			preludes: this.#advertisedPreludes(session),
--			inlineTopics: session.isToolActive?.("read") === false,
+-			inlineTopics: !docTopicsReadable(session),
 +			inlineTopics: false,
+ 			firstCallGuides: session.noteEvalPreludeCall !== undefined,
  			autoProvision: cfgEvalAutoProvision.get(session.settings),
  			perCallModel,
- 			perCallModelAdvertisement: perCallModel

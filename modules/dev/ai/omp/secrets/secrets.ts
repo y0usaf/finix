@@ -176,7 +176,7 @@ export default function secrets(pi) {
 		name: "secret",
 		label: "Secret",
 		description:
-			"Secrets (API keys, tokens) the user hands you without you ever seeing them. action request asks the user for secret name (capitals, digits and _, like GITHUB_TOKEN) with a one-line reason and an optional ttl (30m, 12h, 7d or never; default 24h), opening a masked box in this chat where they type it, and waits for it; shared true stores it for every bot instead of only you, when the user asks for that; list shows the names you hold, yours and the ones shared with all bots, and when they expire; forget deletes one of yours. Use a secret by writing $SECRET_NAME (e.g. $SECRET_GITHUB_TOKEN) in a bash command: it is set for that command only (your own copy if you hold one, else the shared one), and any output containing the value shows the name in brackets instead, like [SECRET_GITHUB_TOKEN]. Never ask for a secret in chat or try to read, print or decode its value.",
+			"Manage user-supplied secrets (hidden from you; write $SECRET_NAME in bash, scrubbed in output). action=request (name like GITHUB_TOKEN, one-line reason, optional ttl 30m|12h|7d|never default 24h, optional shared), list, or forget. Never ask for or inspect values.",
 		parameters: z.object({
 			action: z.enum(["request", "list", "forget"]),
 			name: z.string().optional(),

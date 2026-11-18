@@ -3,32 +3,8 @@ inputs: let
   inherit (pkgs) lib;
   packagesFor = platform: builtins.mapAttrs (_: input: input.packages.${platform} or {}) inputs;
   rawInputPackages = packagesFor system;
-  # omp re-appends the whole replayed primary transcript to `__advisor.jsonl` after every advisor
-  # reset, so the file grows quadratically; the patch records replays once by position.
-  # Claude refuses with `reasoning_extraction` once enough Gemini/DeepSeek thinking is replayed to
-  # it as prose; the second patch drops foreign thinking for readers with that classifier.
-  # A date/cwd reminder written into a turn that was already sent rewrites the whole provider
-  # cache tail; the fourth patch appends a changed reminder after the last turn instead.
-  # A wait that gives up after seconds makes helpers poll; the fifth blocks until a result
-  # arrives, under one 30-minute dead-man and with no "waiting is not progress" nag.
-  # A helper that cannot reach a model looks like work for its whole run; the sixth fails it
-  # to its parent a minute in, with what its transcript shows.
-  # The advisor reviews after the final reply, so its notes arrive as corrections; the seventh
-  # holds the boundary for the review when that reply states a measurement, cause or completion.
-  # A resumed session loaded every helper transcript under its artifacts directory to decide what
-  # to restore (2.9 GB RSS for 540 transcripts), and read a stream chunk of each one for roster
-  # metadata and subagent costs; the eighth judges each transcript from its tail, reads a bounded
-  # metadata window, and leaves cost hydration to the Agent Hub.
-  # The editor queues every key while a paste is in flight, and an image paste whose clipboard owner
-  # never closes its pipe never settled: `wl-paste` was killed at 2s and the native reader that took
-  # over has no deadline. The ninth answers no image after a `wl-paste` timeout and bounds the
-  # native read at 5s, so a stuck owner costs one paste, not the tab's input; while a native read
-  # holds the addon's clipboard lock, copies use OSC 52 alone instead of waiting on it from the
-  # JS thread. The composer's usage readout repeated the whole bill — helper and advisor costs, the
-  # pricing period, premium requests — after every draft; the tenth puts the session's own spend
-  # there alone and leaves the rest in the title, which shows on hover.
   omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/claude-foreign-thinking.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/wait-blocking.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch ./dev/ai/omp/clipboard-paste-deadline.patch ./dev/ai/omp/composer-cost-brief.patch ./dev/ai/omp/eval-internal-read-no-inline.patch ./dev/ai/omp/prompt-ablation.patch];
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch ./dev/ai/omp/clipboard-paste-deadline.patch ./dev/ai/omp/composer-cost-brief.patch ./dev/ai/omp/eval-internal-read-no-inline.patch];
   });
   inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 

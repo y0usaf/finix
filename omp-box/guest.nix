@@ -757,9 +757,15 @@ in {
                     echo "omp-seed: cannot create ${person.home}/.omp" >&2
                 fi
                 if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent; then
-                  for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md; do
+                  for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md SYSTEM_TEMPLATE.md; do
                     ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$file" ${person.home}/.omp/agent/$file ||
                       echo "omp-seed: cannot install $file for ${person.name}" >&2
+                  done
+                  for pair in agents/task.md:task.md antigravity-acp-provider/omp-tools.json:omp-tools.json; do
+                    dst=''${pair%%:*} srcfile=''${pair#*:}
+                    ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent/"''${dst%/*}" &&
+                      ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$srcfile" ${person.home}/.omp/agent/"$dst" ||
+                      echo "omp-seed: cannot install $dst for ${person.name}" >&2
                   done
                 else
                   echo "omp-seed: cannot prepare ${person.home}/.omp/agent" >&2

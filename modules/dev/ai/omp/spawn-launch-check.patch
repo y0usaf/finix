@@ -1,8 +1,8 @@
 diff --git a/packages/coding-agent/src/task/index.ts b/packages/coding-agent/src/task/index.ts
-index 74389bf298..17ac78f840 100644
+index 72c0a28..ed268e9 100644
 --- a/packages/coding-agent/src/task/index.ts
 +++ b/packages/coding-agent/src/task/index.ts
-@@ -160,6 +160,15 @@ export {
+@@ -143,6 +143,15 @@ export {
  	taskSchema,
  } from "./types";
  
@@ -18,8 +18,8 @@ index 74389bf298..17ac78f840 100644
  interface TaskDescriptionOptions {
  	agents: AgentDefinition[];
  	sessionAgents: readonly AgentDefinition[];
-@@ -1984,6 +1993,22 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
- 			params.taskFile !== undefined ? { taskFile: params.taskFile, taskFileSha256: params.taskFileSha256 } : {};
+@@ -1850,6 +1859,22 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
+ 		const assignment = spawnAssignment(params);
  		const context = this.#isBatchEnabled() ? params.context?.trim() || undefined : undefined;
  		let latestProgress: AgentProgress | undefined;
 +		// The launch check: a spawn that has finished no assistant reply a minute in
@@ -41,7 +41,7 @@ index 74389bf298..17ac78f840 100644
  		try {
  			const execution = await runStructuredSubagent({
  				session: this.session,
-@@ -2024,7 +2049,7 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
+@@ -1890,7 +1915,7 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
  				enableLsp: (this.session.enableLsp ?? true) && cfgTaskEnableLsp.get(this.session.settings),
  				enableIrc: isIrcEnabled(this.session.settings, this.session.taskDepth ?? 0),
  				maxRuntimeMs: cfgTaskMaxRuntimeMs.get(this.session.settings),
@@ -49,8 +49,8 @@ index 74389bf298..17ac78f840 100644
 +				signal: launch.signal,
  				...(tools ? { onToolResult: (result: SubagentToolResult) => appendToolResult(tools, result) } : {}),
  				onProgress: progress => {
- 					latestProgress = { ...progress, ...taskFileMetadata, recentTools: progress.recentTools.slice() };
-@@ -2046,7 +2071,7 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
+ 					latestProgress = { ...progress, recentTools: progress.recentTools.slice() };
+@@ -1912,7 +1937,7 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
  				execution.mergeSummary,
  			);
  		} catch (error) {
@@ -59,7 +59,7 @@ index 74389bf298..17ac78f840 100644
  			// A child that finished before the failure keeps its exit status,
  			// usage, and artifact path. `error` is set so nothing reads a zero
  			// exit code as a completed run.
-@@ -2071,6 +2096,9 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
+@@ -1936,6 +1961,9 @@ export class TaskTool implements AgentTool<TaskToolSchemaInstance, TaskToolDetai
  					...(latestProgress ? { progress: [latestProgress] } : {}),
  				},
  			};

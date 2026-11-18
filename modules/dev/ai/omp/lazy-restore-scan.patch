@@ -1,8 +1,8 @@
 diff --git a/packages/coding-agent/src/modes/interactive-mode.ts b/packages/coding-agent/src/modes/interactive-mode.ts
-index 96c51d3dc0..65c89e6127 100644
+index 10f7d22..99c131e 100644
 --- a/packages/coding-agent/src/modes/interactive-mode.ts
 +++ b/packages/coding-agent/src/modes/interactive-mode.ts
-@@ -140,7 +140,6 @@ import planModeApprovedPrompt from "../prompts/system/plan-mode-approved.md" wit
+@@ -144,7 +144,6 @@ import planModeApprovedPrompt from "../prompts/system/plan-mode-approved.md" wit
  import planModeCompactInstructionsPrompt from "../prompts/system/plan-mode-compact-instructions.md" with { type: "text" };
  import type { AgentHubRegistry } from "@oh-my-pi/pi-tui/overlays/agent-hub-types";
  import { AgentRegistry, MAIN_AGENT_ID } from "../registry/agent-registry";
@@ -10,7 +10,7 @@ index 96c51d3dc0..65c89e6127 100644
  import type { AgentCostSnapshot } from "@oh-my-pi/pi-tui/overlays/agent-hub-projection";
  import { sumSubagentTreeCost } from "./agent-hub-runtime";
  import {
-@@ -2078,7 +2077,6 @@ export class InteractiveMode implements InteractiveModeContext {
+@@ -2101,7 +2100,6 @@ export class InteractiveMode implements InteractiveModeContext {
  	#agentRegistrySubscriptionTarget?: AgentHubRegistry;
  	#subagentHudKey = "";
  	#subagentSessionCosts = new WeakMap<object, AgentCostSnapshot>();
@@ -18,7 +18,7 @@ index 96c51d3dc0..65c89e6127 100644
  	#mcpStatusOrder: string[] = [];
  	#mcpPendingServers = new Set<string>();
  	#mcpConnectedServers = new Set<string>();
-@@ -4837,8 +4835,13 @@ export class InteractiveMode implements InteractiveModeContext {
+@@ -4856,8 +4854,13 @@ export class InteractiveMode implements InteractiveModeContext {
  		const agentsChanged = this.statusLine.setRunningSubagents(agentIds);
  		let treeCost = 0;
  		if (!this.collabGuest) {
@@ -33,7 +33,7 @@ index 96c51d3dc0..65c89e6127 100644
  			treeCost = sumSubagentTreeCost({
  				refs: AgentRegistry.global().list(),
  				observers: this.#observerRegistry,
-@@ -4852,22 +4855,6 @@ export class InteractiveMode implements InteractiveModeContext {
+@@ -4871,22 +4874,6 @@ export class InteractiveMode implements InteractiveModeContext {
  		return changed;
  	}
  
@@ -57,13 +57,13 @@ index 96c51d3dc0..65c89e6127 100644
  	 * What the TSP composer shows: the draft's shell mode, the effort chip
  	 * (the viewed agent's, like the model chip beside it) or the model chip's
 diff --git a/packages/coding-agent/src/registry/persisted-agents.ts b/packages/coding-agent/src/registry/persisted-agents.ts
-index 7ae5d42a1e..df9a845f2e 100644
+index ce19d7e..25dec4d 100644
 --- a/packages/coding-agent/src/registry/persisted-agents.ts
 +++ b/packages/coding-agent/src/registry/persisted-agents.ts
 @@ -5,8 +5,9 @@ import { logger } from "@oh-my-pi/pi-utils";
  import { ADVISOR_TRANSCRIPT_FILENAME, isAdvisorTranscriptName } from "../advisor/transcript-recorder";
  import { resolveExplicitModelRole } from "../config/model-resolver";
- import { assistantTurnProducedOutput } from "../session/messages";
+ import { assistantTurnProducedOutput, usageContextTokens } from "../session/messages";
 +import type { FileEntry } from "../session/session-entries";
  import { EPHEMERAL_MODEL_CHANGE_ROLE, PREWALK_MODEL_CHANGE_ROLE } from "../session/session-entries";
 -import { readSessionHeaderId, visitEntriesFromFileStream } from "../session/session-loader";
@@ -232,7 +232,7 @@ index 7ae5d42a1e..df9a845f2e 100644
  		// Malformed and truncated records are skipped in-band by the stream
  		// visitor, so the only errors reaching this catch are filesystem
 diff --git a/packages/coding-agent/src/session/exit-diagnostics.ts b/packages/coding-agent/src/session/exit-diagnostics.ts
-index fa75c9daa5..26c54db6b5 100644
+index fa75c9d..26c54db 100644
 --- a/packages/coding-agent/src/session/exit-diagnostics.ts
 +++ b/packages/coding-agent/src/session/exit-diagnostics.ts
 @@ -198,6 +198,49 @@ export function hasRestorableTurn(entries: readonly SessionEntry[]): boolean {
@@ -286,10 +286,10 @@ index fa75c9daa5..26c54db6b5 100644
   * createInterruptedTurnAbortMessage returns a terminal assistant record when
   * the latest persisted process exit follows a non-terminal conversation tail
 diff --git a/packages/coding-agent/src/session/session-loader.ts b/packages/coding-agent/src/session/session-loader.ts
-index d3d913df03..5890e3cb81 100644
+index 0cfdcfa..9116ef4 100644
 --- a/packages/coding-agent/src/session/session-loader.ts
 +++ b/packages/coding-agent/src/session/session-loader.ts
-@@ -182,6 +182,45 @@ export function parseSessionContent(content: string): SessionLoadResult {
+@@ -181,6 +181,45 @@ export function parseSessionContent(content: string): SessionLoadResult {
  	};
  }
  
@@ -332,11 +332,11 @@ index d3d913df03..5890e3cb81 100644
 +	}
 +}
 +
- /** Upper bound on the bytes read to find a header: real headers (and the title slot before them) are far smaller. */
- const SESSION_HEADER_READ_LIMIT = 1024 * 1024;
  /** First read; holds the title slot and any real header, so the full limit is read only for outliers. */
+ const SESSION_HEADER_FIRST_READ = 16 * 1024;
+ 
 diff --git a/packages/coding-agent/src/session/sub-sessions.ts b/packages/coding-agent/src/session/sub-sessions.ts
-index 273e9395d5..bed777f587 100644
+index 273e939..bed777f 100644
 --- a/packages/coding-agent/src/session/sub-sessions.ts
 +++ b/packages/coding-agent/src/session/sub-sessions.ts
 @@ -11,6 +11,7 @@ import * as path from "node:path";
@@ -474,10 +474,10 @@ index 273e9395d5..bed777f587 100644
  			options.onUnreadable?.(key);
  		}
 diff --git a/packages/coding-agent/src/task/restore.ts b/packages/coding-agent/src/task/restore.ts
-index 3e710a5701..427d8e8cc1 100644
+index ce25898..d8c042a 100644
 --- a/packages/coding-agent/src/task/restore.ts
 +++ b/packages/coding-agent/src/task/restore.ts
-@@ -64,8 +64,13 @@ async function restoreSubagents(session: AgentSession, options: RestoreOptions):
+@@ -66,8 +66,13 @@ async function restoreSubagents(session: AgentSession, options: RestoreOptions):
  	if (!sessionFile || !manager) return [];
  	const registry = AgentRegistry.global();
  	await ensurePersistedRoster(registry, sessionFile);

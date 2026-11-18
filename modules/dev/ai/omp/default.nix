@@ -8,6 +8,7 @@
   ...
 }: let
   catalog = config.user.dev.modelCatalog;
+  prompts = config.user.dev.ompPrompts;
   toJSON = lib.generators.toJSON {};
   secrets = ./secrets;
   # omp loads its extensions through these links, not their store paths, so a switch that rebuilds one leaves
@@ -912,5 +913,11 @@ in {
         value = catalog.models;
       };
       ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.shared}\n\n${catalog.taskNote}\n";
+      ".omp/agent/SYSTEM_TEMPLATE.md".text = prompts.systemTemplate;
+      ".omp/agent/agents/task.md".text = prompts.taskAgent;
+      ".omp/agent/antigravity-acp-provider/omp-tools.json" = {
+        generator = toJSON;
+        value = prompts.ompTools;
+      };
     };
 }

@@ -1,5 +1,5 @@
 diff --git a/packages/coding-agent/src/utils/clipboard.ts b/packages/coding-agent/src/utils/clipboard.ts
-index 02c7e0a959..62b2b4cb4b 100644
+index d47389e..25d93d8 100644
 --- a/packages/coding-agent/src/utils/clipboard.ts
 +++ b/packages/coding-agent/src/utils/clipboard.ts
 @@ -6,13 +6,33 @@ import {
@@ -37,7 +37,7 @@ index 02c7e0a959..62b2b4cb4b 100644
  /**
   * Run a subprocess and capture its stdout without blocking the event loop.
   *
-@@ -52,7 +72,7 @@ async function spawnCapture(
+@@ -53,7 +73,7 @@ async function spawnCapture(
  			options.encoding === "bytes" ? new Uint8Array(await response.arrayBuffer()) : await response.text();
  		await proc.exited;
  		if (timedOut) {
@@ -45,8 +45,8 @@ index 02c7e0a959..62b2b4cb4b 100644
 +			throw new SpawnTimeoutError(`${cmd[0]} timed out after ${timeoutMs}ms`);
  		}
  		if (proc.exitCode !== 0) {
- 			throw new Error(`${cmd[0]} exited with code ${proc.exitCode}`);
-@@ -178,7 +198,9 @@ export async function copyToClipboard(text: string): Promise<void> {
+ 			const detail = (await stderr).trim();
+@@ -180,7 +200,9 @@ export async function copyToClipboard(text: string): Promise<void> {
  			}
  		}
  
@@ -57,7 +57,7 @@ index 02c7e0a959..62b2b4cb4b 100644
  	} catch {
  		// Ignore — clipboard copy is best-effort
  	} finally {
-@@ -352,7 +374,15 @@ export async function readImageFromClipboard(): Promise<ClipboardImage | null> {
+@@ -358,7 +380,15 @@ export async function readImageFromClipboard(): Promise<ClipboardImage | null> {
  				const data = await spawnCapture(["wl-paste", "--type", mimeType], { encoding: "bytes" });
  				if (data.byteLength > 0) return { data, mimeType };
  			}
@@ -74,7 +74,7 @@ index 02c7e0a959..62b2b4cb4b 100644
  			// Fall through when wl-clipboard is absent or no advertised image payload can be read.
  		}
  	}
-@@ -361,9 +391,21 @@ export async function readImageFromClipboard(): Promise<ClipboardImage | null> {
+@@ -367,9 +397,21 @@ export async function readImageFromClipboard(): Promise<ClipboardImage | null> {
  		return null;
  	}
  
@@ -98,7 +98,7 @@ index 02c7e0a959..62b2b4cb4b 100644
  		// reporting "no image" — e.g. an xclip-written text-only selection
  		// (arboard: "Unknown error ... incorrect type received from clipboard").
 diff --git a/packages/coding-agent/test/utils/clipboard.test.ts b/packages/coding-agent/test/utils/clipboard.test.ts
-index 00a84ffd5a..5ee7989b58 100644
+index 581c2bf..d5b0220 100644
 --- a/packages/coding-agent/test/utils/clipboard.test.ts
 +++ b/packages/coding-agent/test/utils/clipboard.test.ts
 @@ -1,5 +1,6 @@
@@ -108,7 +108,7 @@ index 00a84ffd5a..5ee7989b58 100644
  	isClipboardTerminalLocal,
  	readImageFromClipboard,
  	readMacFileUrlsFromClipboard,
-@@ -230,6 +231,81 @@ describe("readImageFromClipboard dispatch", () => {
+@@ -231,6 +232,81 @@ describe("readImageFromClipboard dispatch", () => {
  		},
  	);
  
