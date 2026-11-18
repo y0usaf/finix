@@ -827,11 +827,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794330246,
-        "narHash": "sha256-/bDUM1BdB/PHNwFiaGmmRBwJwnAwTXs244ySXkSUqq4=",
+        "lastModified": 1794973021,
+        "narHash": "sha256-SaXTQwyCCpHF44P8i2wI6icXPX2MAQetVRdeSlyUUW4=",
         "ref": "refs/heads/main",
-        "rev": "96b9667d4eabd7b08df946f52eef37bac0c87b8c",
-        "revCount": 11,
+        "rev": "6e106b82b3f9f491366c567340c3cbc9fb7258bc",
+        "revCount": 20,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/dsh-tern.git"
       },
@@ -3886,11 +3886,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794804777,
-        "narHash": "sha256-asJyOH6k5nXCuMAz0lb7TlSQv37QowvFwIOnUXYqhXA=",
+        "lastModified": 1794973686,
+        "narHash": "sha256-7LHnwCfv4eXcN4m4UmbvXIAFJoafG0oIX9RlEmk+158=",
         "ref": "refs/heads/main",
-        "rev": "10560a1a83b65dc845bc8ff713781badbd83a42c",
-        "revCount": 14,
+        "rev": "b2117dba3337794f3b7c25a03ff54a0361fc06f6",
+        "revCount": 15,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/tern-script.git"
       },
