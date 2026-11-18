@@ -26,11 +26,6 @@ float sm(float a, float b, float x) {
     return u * u * (3.0 - 2.0 * u);
 }
 
-float ease_out(float u) {
-    u = clamp(u, 0.0, 1.0);
-    return 1.0 - (1.0 - u) * (1.0 - u) * (1.0 - u);
-}
-
 uint hu(int a, int b, uint s) {
     uint h = uint(a) * 73856093u ^ uint(b) * 19349663u ^ s * 83492791u;
     h = (h ^ (h >> 13)) * 1274126177u;
@@ -100,7 +95,9 @@ float pdist(float u, float ua, float per) {
 // The rail names how long a focus move is drawn for (K_SETTLE) and which curve
 // shapes its clock (K_CURVE), and every theme keeps the choreography it was
 // drawn with by playing that choreography on this clock: a theme's own DESIGN
-// seconds of it, stretched over the duration the rail asks for. A move that
+// seconds of it, the whole of it from the switch to the last thing it moves,
+// stretched over the duration the rail asks for, so the curve is the one ease
+// the move has and every part of it is drawn across that duration. A move that
 // arrives mid-flight is retargeted and drawn for a shorter time, so a run of
 // quick switches reads as one move and not one transition per window.
 float sw_age() { return iTime - D(K_TSW); }

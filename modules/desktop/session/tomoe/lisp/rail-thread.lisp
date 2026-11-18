@@ -125,7 +125,7 @@ treatment."
                 46d0       ; radians per second it rings at
                 260d0      ; pixels up and down the bend reaches
                 0.12d0     ; seconds after a switch the new rim waits
-                0.32d0     ; and how long it takes to fill
+                0.32d0     ; and how long it takes to fill, where the move ends
                 0.2d0      ; seconds the old rim drains in
                 (getf layout :x) (getf layout :top) (getf layout :bottom) (getf layout :weld))
           (loop for (kind cy hy hw) in (getf layout :beads) append (list cy hy hw))

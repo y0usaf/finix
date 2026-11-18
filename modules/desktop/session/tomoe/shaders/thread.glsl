@@ -36,8 +36,6 @@ const int T_WY = THEME + 20, T_BEADS = THEME + 21, T_VLEN = THEME + 42, T_FSTYLE
 // 4 a side), its rect, and the blocks the thread carries there
 const int T_MODE = THEME + 47, T_BR = THEME + 48, T_BN = THEME + 52;
 
-const float DESIGN = 0.8;         // seconds the siphon was drawn for
-
 const int NBEADS = 7;
 const int B_CLOCK = 0, B_DATE = 1, B_CPU = 2, B_MEM = 3, VOICE_BEAD = 4, B_GPU = 5, B_VRAM = 6;
 
@@ -291,16 +289,16 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     g_bot = D(T_BOT);
     g_wy = D(T_WY);
     g_raw = iTime - D(K_TSW);
-    g_dt = move_age(DESIGN);
+    g_dt = move_age(D(T_FDELAY) + D(T_FDUR));
     int focus = int(D(K_FOCUS)), old = int(D(K_OLD));
     g_f = card_shown(focus);
     if (g_f) g_fbox = card(focus);
     g_fill = 1.0;
     g_drain = 0.0;
     if (D(K_TSW) > -1e5 && g_raw >= 0.0 && g_raw < D(K_SETTLE) && D(K_FLOW) > -0.5) {
-        g_fill = ease_out((g_dt - D(T_FDELAY)) / max(0.01, D(T_FDUR)));
+        g_fill = clamp((g_dt - D(T_FDELAY)) / max(0.01, D(T_FDUR)), 0.0, 1.0);
         if (card_shown(old) && old != focus)
-            g_drain = 1.0 - pow(ease_out(g_dt / max(0.01, D(T_DDUR))), 1.7);
+            g_drain = 1.0 - pow(clamp(g_dt / max(0.01, D(T_DDUR)), 0.0, 1.0), 1.7);
     }
 
     // What a card without focus keeps, in the treatment the rail asks for: the
@@ -327,11 +325,22 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     // on the wallpaper instead of wearing a band of it. It is cast six pixels
     // down from the rim, where a light above the screen would throw it, falls
     // away over twenty-two pixels rather than twelve, and is two-fifths the
-    // alpha the old halo carried.
+    // alpha the old halo carried. It comes in as the rim fills and leaves the
+    // card focus left as that rim drains.
     float glow = 0.0;
+    vec4 gbox = g_fbox;
     if (style == 3 && g_f) {
         float drim = sd_rbox(p - vec2(0.0, 6.0), g_fbox, D(T_CORNER)) - D(T_RIM);
-        if (drim > 0.0) glow = 0.18 * exp(-drim / 22.0);
+        if (drim > 0.0) glow = 0.18 * g_fill * exp(-drim / 22.0);
+    }
+    if (style == 3 && g_drain > 0.0 && card_shown(old)) {
+        vec4 ob = card(old);
+        float drim = sd_rbox(p - vec2(0.0, 6.0), ob, D(T_CORNER)) - D(T_RIM);
+        float was = drim > 0.0 ? 0.18 * g_drain * exp(-drim / 22.0) : 0.0;
+        if (was > glow) {
+            glow = was;
+            gbox = ob;
+        }
     }
 
     float f = field(p);
@@ -356,7 +365,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
     c = mix(c, vec3(1.0), hlight);
     a = hlight + a * (1.0 - hlight);
     if (glow > 0.0) {
-        c = mix(c, ink_of(clamp(p, g_fbox.xy, g_fbox.zw)), glow);
+        c = mix(c, ink_of(clamp(p, gbox.xy, gbox.zw)), glow);
         a = glow + a * (1.0 - glow);
     }
 
