@@ -6,9 +6,6 @@
 }: let
   inherit (ompBox) user bots;
   home = "/home/${user}";
-  # Every Unix user the box has: the user's own sessions (the admin, which may reach any granted path the way it
-  # always could) and one user per boxed bot. A bot's grants only ever land inside its own home, and the home is
-  # 0700, so another bot or the user's sessions cannot even walk to them.
   people =
     [
       {
@@ -29,13 +26,8 @@
     bots;
   botNames = map (bot: bot.user) bots;
   botsOf = name: lib.findFirst (bot: bot.name == name) null bots;
-  # The bot that cleans up old accounts (Sweep). The host takes a consistent snapshot of the user's browsing history
-  # into the auth share at every start, and this installs it in that bot's home, root-owned and read-only.
   sweepBot = botsOf "Sweep";
   acpBots = lib.filter (bot: bot != null) (map botsOf ["Sweep" "Dash"]);
-  # The box user who works with the host user's own logins: no other Unix user can read the host's 0600
-  # ~/.config/gh, ~/Tokens or CLI config, so the host copies what this bot needs into the auth share and
-  # omp-logins installs it in this user's home, where gh, git's github.com helper and each CLI find it.
   loginUser = ompBox.logins;
   loginHome = let
     person = lib.findFirst (candidate: candidate.name == loginUser) null people;
@@ -49,8 +41,6 @@
     if found == null
     then user
     else found.user;
-  # A host path as the same user sees it in the box: the bot users have a home of their own, so their state and
-  # their folders keep their relative place under it.
   browserPath = name: path: let
     u = browserUser name;
     guestHome =
@@ -73,24 +63,12 @@
         } ;;''
     )
     people;
-  # Mounting runs in a helper of its own: a grant's target lives inside a home the bot owns, so every step has to
-  # work on directory fds opened without following symlinks (see the comment at the top of share-mount.c).
   shareMount = pkgs.stdenv.mkDerivation {
     name = "omp-share-mount";
     dontUnpack = true;
     buildPhase = "${pkgs.stdenv.cc}/bin/cc -O2 -Wall -Wextra -o omp-share-mount ${./share-mount.c}";
     installPhase = "install -Dm755 omp-share-mount $out/bin/omp-share-mount";
   };
-  # Applies the grants the host wrote for one user: the share tree is mounted once as root, and each grant is bind
-  # mounted where that user's own paths live, inside its home and nowhere else. omp-shares runs this as root at
-  # boot and whenever the host writes a new list, so no box user ever needs a way to mount anything.
-  #
-  # A bot reaches its grants through a view in which the host user's files are the bot's own. The box is another
-  # Unix user, so a file the host writes belongs to neither the bot's uid nor its group, and no mode the host could
-  # set short of open-to-everyone would let the bot write it; the view maps the host user's uid to the bot's with
-  # bindfs, so every file there is the bot's to write whenever it was written and with whatever umask. The host's
-  # files and their modes are never touched, and what the bot writes is still the host user's file, because the 9p
-  # server writes as that user.
   shareApply = pkgs.writeShellScript "omp-shares-apply" ''
     set -u
     export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.util-linux pkgs.bindfs pkgs.fuse3]}
@@ -229,10 +207,6 @@
     mv -f "$list.new" "$list"
     exit "$status"
   '';
-  # pam_namespace reads its configuration out of the PAM store path it was built with, and a plain NixOS /etc
-  # never reaches it, so the box builds the PAM it loads the module from and bakes the file in. Only the box's bot
-  # users are polyinstantiated: a bot session gets a private /tmp and /var/tmp of its own, while the user's own
-  # sessions keep the box's shared one.
   namespaceConf = ''
     /tmp      /tmp-inst/$USER      tmpfs:noinit:mntopts=size=256M,nosuid,nodev    ~${lib.concatStringsSep "," botNames}
     /var/tmp  /var/tmp-inst/$USER  tmpfs:noinit:mntopts=size=64M,nosuid,nodev     ~${lib.concatStringsSep "," botNames}
@@ -245,7 +219,6 @@
         chmod 0644 $out/etc/security/namespace.conf
       '';
   });
-  # Headless Chromium says HeadlessChrome in its user agent, which shops turn away; claim the same version as Chrome.
   userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${lib.versions.major pkgs.ungoogled-chromium.version}.0.0.0 Safari/537.36";
   browser = name: {
     profile,
@@ -298,10 +271,6 @@ in {
     mem = 8192;
     vcpu = 4;
     balloon = true;
-    # The host store already holds this box's closure, so packing a second copy into a store disk image
-    # only made the guest page-cache those pages in its own RAM: an idle box held ~560MB that way, and
-    # ~120MB of it was the store. Reading the host's store over 9p instead costs ~2s of boot (9.6s
-    # against 6.8s) and ~0.15s per uncached program start, and the same box idles at ~445MB.
     storeOnDisk = false;
     shares =
       [
@@ -327,7 +296,6 @@ in {
           mountPoint = "/run/omp-shares";
           proto = "9p";
         }
-        # What the host granted each user, one `user grant target ro|rw` line per grant, written by omp-box.
         {
           tag = "meta";
           source = ompBox.metaDir;
@@ -369,7 +337,6 @@ in {
   environment = {
     systemPackages = [
       ompBox.omp
-      # The view omp-shares mounts over a bot's grants (see shareApply).
       pkgs.bindfs
       pkgs.bun
       (pkgs.python3.withPackages (ps: [ps.pillow ps.numpy ps.pandas ps.fonttools]))
@@ -382,28 +349,17 @@ in {
       pkgs.fd
       pkgs.gnumake
       pkgs.gcc
-      # The work tools a bot ran on the host: node for the TypeScript repos, the postgres 16 client and server for
-      # their tests, a JDK for gradle, the Google Workspace CLI, imagemagick for assets, and the two CLIs the host
-      # itself wraps (agent-slack and vercel-account-router), built once in pkgs/ for the host and for this box.
       pkgs.nodejs
       pkgs.postgresql_16
       pkgs.jdk17
       pkgs.gws
       pkgs.imagemagick
       (import ../pkgs/agent-slack.nix {inherit pkgs;})
-      # The box exists for the work account, so a bare `vercel` here answers as the host's vercel-work does: a folder
-      # with no GitHub origin has nothing to route on, and refusing to guess would leave the bot with a dead command.
       (import ../pkgs/vercel-account-router.nix {
         inherit pkgs;
         default = "work";
       })
     ];
-    # Commits made in the box are the host user's, as they were while the bots ran on the host (modules/tools/git.nix);
-    # the host's own config is left out, since it sends github.com to ssh, which no box user has a key for.
-    #
-    # git reaches github.com as the account gh is logged in to: the helper asks gh, which reads the login in the box
-    # user's own config, so no token is ever written into a URL, a remote or a file git reads. A user with no login
-    # gets gh's own failure, and git falls back to asking for one.
     etc."gitconfig".text = ''
       [user]
       	name = ${user}
@@ -426,9 +382,6 @@ in {
       [safe]
       	directory = *
     '';
-    # initdb and the server it starts look for their data files beside the binary, which they find through the store
-    # but not through the profile's bin: link postgres' share dir into the profile, so a bot starts a database from
-    # PATH the way it did on the host from a nix build.
     pathsToLink = ["/share/postgresql"];
   };
   fonts.packages = [pkgs.noto-fonts-cjk-sans];
@@ -445,8 +398,6 @@ in {
       "transparent_hugepage=never"
     ];
     blacklistedKernelModules = ["edac_core" "intel_rapl_msr" "intel_rapl_common" "kvm_amd" "kvm_intel" "kvm" "ccp" "irqbypass" "mousedev" "input_leds" "led_class" "cfg80211" "rfkill" "psmouse" "serio_raw" "atkbd" "i8042" "mac_hid" "pcspkr" "dm_mod" "loop" "virtiofs"];
-    # A bot's view of its grants is a bindfs mount (omp-shares), so fuse is loaded at boot instead of on the first
-    # mount, which would be the one omp-shares makes for a grant.
     kernelModules = ["fuse"];
   };
 
@@ -487,14 +438,11 @@ in {
         lib.nameValuePair bot.user {
           isNormalUser = true;
           inherit (bot) uid;
-          # The user's group, so a folder shared in from the host keeps the modes and ownership it has there.
           group = "users";
           home = "/home/${bot.user}";
           homeMode = "0700";
         })
       bots);
-  # No bot is in wheel: the box mounts every shared folder as root when it boots (omp-shares), so nothing has to
-  # hand a bot a way to mount or to become root.
   security.sudo.wheelNeedsPassword = false;
 
   fileSystems =
@@ -536,7 +484,6 @@ in {
       };
     };
 
-    # The instance directories pam_namespace gives each bot session, and the empty parents it needs.
     tmpfiles.rules = [
       "d /tmp-inst 0000 root root -"
       "d /var/tmp-inst 0000 root root -"
@@ -549,7 +496,6 @@ in {
         "getty@tty1".enable = false;
         "autovt@".enable = false;
         "serial-getty@ttyS0".enable = false;
-        # One user's processes stay out of another's sight, which is what makes a bot unix user worth anything.
         omp-proc = {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
@@ -561,8 +507,6 @@ in {
             ${pkgs.util-linux}/bin/mount -o remount,hidepid=2 /proc
           '';
         };
-        # sshd only trusts a key file owned by root or by the user it lets in, and every file on a share reads as
-        # the host user's, so each user gets the box key copied into its own home before sshd starts.
         omp-keys = {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
@@ -586,10 +530,6 @@ in {
               people}
           '';
         };
-        # The host user's own logins, for the one bot that works with them: gh's login, the token files under
-        # ~/Tokens, and the config each work CLI reads (agent-slack, vercel-work, gws, npm, supabase). The guest
-        # cannot read the host's files (0600, another Unix user), so the host copied them into the auth share and
-        # this installs them in the bot's own home. A re-login on the host reaches the box when it next boots.
         omp-logins = {
           wantedBy = ["multi-user.target"];
           unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"];
@@ -632,8 +572,6 @@ in {
             fi
           '';
         };
-        # The shared tree is mounted as root at boot, and every grant the host wrote is bind mounted from here into
-        # the one user's paths it names. Grants added while the box runs land within a couple of seconds.
         omp-shares = {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
@@ -676,10 +614,6 @@ in {
               people}
           '';
         };
-        # The omp config, read from the seed share's current generation at boot and again by the host's
-        # omp-box-seed whenever it puts a new one there; at boot it waits for omp-box-seed's first copy.
-        # Sweep's history, laid down before anything in the box runs. The snapshot is a copy the host made through
-        # sqlite's own backup, so the profile's database is never read halfway through a write.
         omp-sweep = lib.mkIf (sweepBot != null) {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
@@ -706,8 +640,6 @@ in {
             fi
           '';
         };
-        # The Antigravity login for the bots that answer on it, laid down before the box takes a session. Each bot's
-        # copy is its own files, since the runtime renews the token in place.
         omp-antigravity = lib.mkIf (acpBots != []) {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];

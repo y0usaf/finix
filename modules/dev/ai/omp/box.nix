@@ -13,10 +13,6 @@
   catalog = config.user.dev.modelCatalog;
   prompts = config.user.dev.ompPrompts;
   shares = [];
-  # The bots that run inside the box, one Unix user each (guest.nix). A bot only reaches the folders granted to
-  # it, and omp-bot-box refuses to box a bot that is not named here, so nothing gets in by accident. `folders` are
-  # the host folders inside the user's home that bot gets besides its own state, mapped to the same place in its
-  # guest home.
   bots = [
     {
       name = "CU-Bot";
@@ -37,35 +33,26 @@
       folders = [];
     }
     {
-      # Old-account cleanup: it works in its own folder, where the user drops a Firefox logins export into
-      # inbox/, and signs in to the sites it deletes accounts on through the browser below.
       name = "Sweep";
       user = "sweepbot";
       uid = 2004;
       folders = ["sweep-workbench"];
     }
     {
-      # DoorDash: its folder holds the official CLI, its agent skills and the login token, and the bot reads menus
-      # and fills a cart there, never ordering.
       name = "Dash";
       user = "dashbot";
       uid = 2005;
       folders = ["dash-workbench"];
     }
   ];
-  # Besides the token files, what the bot that works with the host user's logins gets from the user's home: the
-  # file or folder each work CLI keeps its login in. A path the host does not have is skipped.
   loginPaths = [
-    ".npmrc" # npx @cook-unity/... from the private registry
-    ".config/agent-slack/credentials.json" # agent-slack: the work Slack login
-    ".config/gws" # gws: Google Workspace documents and drive as the work account
-    ".local/share/com.vercel.cli/profiles/work" # vercel-work: the work account's CLI login
+    ".npmrc"
+    ".config/agent-slack/credentials.json"
+    ".config/gws"
+    ".local/share/com.vercel.cli/profiles/work"
     ".supabase/access-token"
   ];
-  # The box's own headless browsers.
   browsers = {
-    # Sweep signs in to the sites whose accounts it deletes, so this profile holds live sessions: it lives in the
-    # bot's own state folder, which only that bot reaches and which survives a reboot.
     Sweep = {
       profile = "${home}/.local/state/omp-bot/bots/Sweep/browser";
       port = 9223;
@@ -75,20 +62,11 @@
       port = 9222;
     };
   };
-  # QEMU's user networking hands the box this host's loopback as 10.0.2.2, the guest's gateway, so a browser on
-  # the host is as reachable from the box as one in it. Measured against the broker's neighbours, that one address
-  # carries through to the host's loopback and the rest of the guest network answers nothing (10.0.2.3 answers
-  # DNS alone); the guard covers the whole network anyway, so an address slirp translates later is refused by
-  # these rules instead of reopening the port.
   hostAddress = "10.0.2.2";
   hostAddresses = "10.0.2.0/24";
   guestAddress = "10.0.2.15";
   dnsAddress = "10.0.2.3";
   gatewayPort = 8899;
-  # Every box user shares the box's loopback and the route to the host's, and Chromium's DevTools endpoint has no
-  # authentication, so each port is opened to the browser's owner alone: the rule matches the connecting socket's
-  # Unix user and refuses every other one, with a reset, before Chromium sees the request. A bot has no way to open
-  # a socket as another one.
   cdpGuard = address: uid: ports:
     lib.concatMapStrings (port: ''
       ip daddr ${address} tcp dport ${toString port} meta skuid ${toString uid} accept
@@ -96,10 +74,8 @@
     '')
     ports;
   browserCdpGuard = lib.concatStringsSep "\n" (
-    # The box's own browsers, on its loopback.
     (lib.mapAttrsToList (name: browser: let
         owner = lib.findFirst (bot: bot.name == name) null bots;
-        # A browser that is not a boxed bot runs as the box's own user, whose uid guest.nix fixes at 1001.
         uid =
           if owner == null
           then 1001
@@ -107,8 +83,6 @@
       in
         cdpGuard "127.0.0.1" uid [browser.port])
       browsers)
-    # Browsers on the host, which reach the box through its gateway: modules/hosts/y0usaf-desktop/baobot-browser.nix
-    # names the ports there, since it is the module that starts that browser and the broker in front of it.
     ++ (lib.mapAttrsToList (name: host: let
         owner = lib.findFirst (bot: bot.name == name) null bots;
       in
@@ -665,11 +639,6 @@
     ]))
     generators.python));
   gatewayUrl = "http://${hostAddress}:${toString gatewayPort}";
-  # The browsing history Sweep dates each account by, taken with SQLite's own online copy: one statement, one read
-  # transaction, so the result is a database at a single instant even while the profile is writing to it. Copying the
-  # file and its write-ahead log by hand cannot promise that, because a checkpoint between the two copies leaves a
-  # database with a log that no longer covers it. It prints how many visited pages carry a date, and 0 when the
-  # profile holds the database to itself (Firefox and LibreWolf take it exclusively) or the copy fails its own check.
   historySnapshot = pkgs.writers.writePython3 "omp-history-snapshot" {} ''
     import sqlite3
     import sys
@@ -703,27 +672,17 @@
 
     print(dated(sys.argv[1], sys.argv[2]))
   '';
-  # What omp in the box loads: built here, and copied while the box runs by omp-box-seed into the box's seed
-  # share instead of baked into the guest, so a new extension, omp-bot or prompt reaches the box without
-  # restarting it and every bot in it. A generation holds the omp config files, store/ with a copy of each
-  # store path below and ext/NAME, a link to its copy; the box's omp config names extensions by
-  # ${seedMount}/current/ext/NAME, a path no switch changes, so a running omp sees the same extensions list.
   seedMount = "/mnt/seed";
   extensions = {
-    # Google Antigravity's own ACP runtime, which the provider pins AGY_ACP_BIN to, so a bot in the box can answer
-    # on a Gemini 4 model through the account it is given.
     antigravity-acp = "${import ../../../../pkgs/omp-antigravity-acp-provider.nix {inherit pkgs;}}/lib/node_modules/@n1netynine99/omp-antigravity-acp-provider";
     "compact-eval.ts" = "${./compact-eval.ts}";
     "work-fold.ts" = "${./work-fold.ts}";
     "crest-reroute.ts" = "${./crest-reroute.ts}";
     "tools.ts" = "${./tools.ts}";
     optchat = "${./optchat}";
-    # The same store path as the host's ext link, so omp-bot-box names a boxed bot's secrets extension by this link.
     secrets = "${./secrets}";
   };
   inBox = name: "${seedMount}/current/ext/${name}";
-  # Programs a boxed bot gets on PATH (box.env's OMP_BOT_BOX_PATH): the secrets extension's age and omp-secret.
-  # age is linked against the guest's own glibc, which the guest always has, as it is built from the same pkgs.
   seedBin = {
     age = "${pkgs.age}/bin/age";
     age-keygen = "${pkgs.age}/bin/age-keygen";
@@ -835,8 +794,6 @@
               contextWindow: ${toString ablit.contextWindow}
               maxTokens: ${toString ablit.maxTokens}
     '';
-    # omp-ablit's own overlay (ablit.nix): a local session asks no cloud model for a review, and loads neither
-    # OptChat, which logs every chat into the shared memory.
     ablitConfig = pkgs.writeText "ablit.yml" ''
       advisor:
         enabled: false
@@ -925,7 +882,6 @@
       seedBin)}
   '';
 
-  # How omp-bot's boxed bots reach the box (bin/omp-bot-box): the same key and port the omp wrapper uses.
   sshConfig = pkgs.writeText "omp-box-ssh-config" ''
     Host *
       HostName 127.0.0.1
@@ -949,18 +905,10 @@
     guest = flakeInputs.nixpkgs.lib.nixosSystem {
       specialArgs.ompBox = {
         inherit user port seedMount bots;
-        # The boxed bot that works with the host user's own logins: gh and git, the token files under ~/Tokens, and
-        # the config each work CLI reads (agent-slack, vercel-work, gws, npm, supabase). The run script copies them
-        # into the auth share and the guest installs them in that bot's home, so it answers as the host does.
         logins = "cubot";
-        # The seed share's host side, which omp-box-seed fills.
         seedDir = "${state}/seed";
-        # The grants each guest user gets, one `user grant target ro|rw` line per grant, which omp-box writes.
         metaDir = "${state}/meta";
         inherit shares;
-        # Headless Chromium the box keeps running, each with its DevTools on 127.0.0.1:PORT inside the box
-        # for a boxed bot's browser.cdpUrl. A profile lives on a share (a bot's persist path), and its browser
-        # waits until that share is mounted.
         inherit browsers;
         sharesDir = "${state}/shares";
         authDir = "${state}/auth";
@@ -972,8 +920,6 @@
         flakeInputs.microvm.nixosModules.microvm
         ../../../../omp-box/guest.nix
         {
-          # The browsers listen on loopback, which every box user shares, here and on the host the box reaches
-          # through its gateway. Refuse a connection unless the socket belongs to the browser's own Unix user.
           networking.nftables = {
             enable = true;
             ruleset = ''
@@ -1438,10 +1384,6 @@ in {
       ''}";
     };
 
-    # Copies the seed into the box's seed share whenever it changes (finit restarts this service, not omp-box,
-    # on a switch that changes it): a new generation, then current pointed at it, then the box's omp-seed run
-    # again so its omp config names it. The ten newest generations stay, since a box session may still run code
-    # from an older one; a box that is down reads current when it boots.
     finit.services.omp-box-seed = {
       description = "copy what omp in the box loads into its seed share";
       inherit user;

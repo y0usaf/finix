@@ -11,9 +11,6 @@
   prompts = config.user.dev.ompPrompts;
   toJSON = lib.generators.toJSON {};
   secrets = ./secrets;
-  # omp loads its extensions through these links, not their store paths, so a switch that rebuilds one leaves
-  # config.yml's paths alone and running sessions see no "newly enabled" extension to restart for. omp-bot's
-  # env (the omp_bot module) names its extensions by the same links, so a bot loads each once.
   extDir = "${config.users.users.${config.user.name}.home}/.omp/agent/ext";
   extLinks =
     lib.genAttrs ["pi-chronobreak" "pi-recap"] (name: "${flakeInputs.${name}}")
@@ -834,8 +831,6 @@ in {
             perCallModel = "on";
           };
           eval = {
-            # A steer backgrounds a running cell so a message lands at once; the hour keeps
-            # omp from backgrounding long cells on its own.
             autoBackground = {
               enabled = true;
               thresholdMs = 3600000;

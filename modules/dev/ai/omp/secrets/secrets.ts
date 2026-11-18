@@ -80,13 +80,10 @@ export default function secrets(pi) {
 	const known = new Map<string, { mtime: number; value: string }>();
 	const seen = new Map<string, string>();
 	const showing = new Set<string>();
-	// In a box the store is the bot's own folder: the shared secrets there are a copy the host keeps, so a boxed bot
-	// can't add one.
 	const boxed = Boolean(process.env.OMP_SECRETS_DIR);
 
 	pi.setLabel("Secrets");
 
-	// Every value this session could hand a command, its own and the shared ones, so output naming one is scrubbed.
 	async function values(): Promise<[string, string][]> {
 		for (const scope of bot ? [bot, undefined] : [undefined]) {
 			let files: string[] = [];
@@ -135,7 +132,6 @@ export default function secrets(pi) {
 		return value;
 	}
 
-	// The masked box: stores what the user types as scope's NAME. It closes by itself when NAME is set elsewhere.
 	async function enter(ctx, scope: Scope, name: string, reason: string, expiry: string | undefined, signal?: AbortSignal): Promise<void> {
 		const id = `${label(scope)}/${name}`;
 		if (signal?.aborted || showing.has(id)) return;
