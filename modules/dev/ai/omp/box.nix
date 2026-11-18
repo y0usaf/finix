@@ -674,7 +674,6 @@
   '';
   seedMount = "/mnt/seed";
   extensions = {
-    antigravity-acp = "${import ../../../../pkgs/omp-antigravity-acp-provider.nix {inherit pkgs;}}/lib/node_modules/@n1netynine99/omp-antigravity-acp-provider";
     "compact-eval.ts" = "${./compact-eval.ts}";
     "work-fold.ts" = "${./work-fold.ts}";
     "crest-reroute.ts" = "${./crest-reroute.ts}";
@@ -697,17 +696,15 @@
       state=$(mktemp -d "$HOME/.omp-ablit.XXXXXX")
       trap 'rm -rf "$state"' EXIT
       trap 'exit 130' INT TERM HUP
-      mkdir -p "$state/agent/agents" "$state/agent/antigravity-acp-provider"
+      mkdir -p "$state/agent/agents"
       cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$seed/APPEND_SYSTEM.md" "$seed/SYSTEM_TEMPLATE.md" "$state/agent/"
       cp "$seed/task.md" "$state/agent/agents/task.md"
-      cp "$seed/omp-tools.json" "$state/agent/antigravity-acp-provider/omp-tools.json"
       PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
         --model ablit/${ablit.id} --config "$seed/ablit.yml" "$@"
     '';
   };
   optchatExtension = "${inBox "optchat"}/extension.ts";
   ompExtensions = [
-    "${inBox "antigravity-acp"}"
     "${inBox "compact-eval.ts"}"
     "${inBox "work-fold.ts"}"
     "${inBox "crest-reroute.ts"}"
@@ -802,7 +799,7 @@
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel;
       defaultThinkingLevel = catalog.ompThinkingLevel;
-      enabledModels = catalog.enabledModels ++ ["antigravity-acp/*" "ablit/${ablit.id}"];
+      enabledModels = catalog.enabledModels ++ ["antigravity-cli/*" "ablit/${ablit.id}"];
       packages = [];
     });
     config = pkgs.writeText "config.yml" ''
@@ -856,7 +853,6 @@
     appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n\n${catalog.taskNote}\n";
     systemTemplate = pkgs.writeText "SYSTEM_TEMPLATE.md" prompts.systemTemplate;
     taskAgent = pkgs.writeText "task.md" prompts.taskAgent;
-    ompTools = pkgs.writeText "omp-tools.json" (json prompts.ompTools);
   };
   seed = pkgs.runCommand "omp-box-seed" {} ''
     mkdir -p $out/store $out/ext $out/bin
@@ -867,7 +863,6 @@
     cp ${files.appendSystem} $out/APPEND_SYSTEM.md
     cp ${files.systemTemplate} $out/SYSTEM_TEMPLATE.md
     cp ${files.taskAgent} $out/task.md
-    cp ${files.ompTools} $out/omp-tools.json
     cp ${files.ablitConfig} $out/ablit.yml
     ${lib.concatStrings (lib.mapAttrsToList (name: path: let
         copy = builtins.baseNameOf (toString path);
@@ -940,7 +935,7 @@
     inherit guest runner state port;
     run = pkgs.writeShellScript "omp-box-run" ''
       set -Eeuo pipefail
-      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.findutils pkgs.gnugrep pkgs.iproute2 pkgs.openssh pkgs.jq pkgs.python3 inputPackages.crest.crest-auth]}
+      export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.findutils pkgs.gnugrep pkgs.iproute2 pkgs.openssh pkgs.jq pkgs.python3]}
       status=${state}/status.json
       runner=${runner}
       limit=3
@@ -1076,21 +1071,33 @@
         rm -f "$snapshot"
         echo "omp-box: no profile gave a consistent copy with dated history, so Sweep gets none" >&2
       fi
-      # Which Google Antigravity account Sweep answers on: whatever Crest calls active, by the folder that account
-      # keeps its own login in. Only the ACP login files travel, not the account's conversation downloads.
+      # The Google Antigravity accounts the boxed bots answer on: every antigravity-cli login in the host's omp
+      # credential store, written in the shape `omp auth-broker import` reads, which the guest imports for each bot.
       rm -rf ${state}/auth/antigravity
       install -d -m 700 ${state}/auth/antigravity
-      antigravity=$(crest-auth json antigravity 2>/dev/null | jq -r '.dir // empty')
-      for file in acp_token.json settings.json; do
-        if [ -n "$antigravity" ] && [ -r "$antigravity/antigravity-acp/$file" ]; then
-          install -m 600 "$antigravity/antigravity-acp/$file" ${state}/auth/antigravity/$file
-        fi
-      done
-      if [ -s ${state}/auth/antigravity/acp_token.json ]; then
-        echo "omp-box: Sweep answers on the Antigravity account in $antigravity" >&2
-      else
-        echo "omp-box: no signed-in Antigravity account for Sweep, which then answers on its fallback" >&2
-      fi
+      accounts=$(python3 - ${home}/.local/share/omp/agent.db ${state}/auth/antigravity <<'EOF'
+      import datetime, json, os, sqlite3, sys
+      db = sqlite3.connect("file:" + sys.argv[1] + "?mode=ro", uri=True, timeout=5)
+      rows = db.execute(
+          "select id, data from auth_credentials where provider = 'antigravity-cli'"
+          " and credential_type = 'oauth' and disabled_cause is null"
+      ).fetchall()
+      for row, data in rows:
+          grant = json.loads(data)
+          expires = datetime.datetime.fromtimestamp(grant["expires"] / 1000, datetime.timezone.utc)
+          out = os.open(os.path.join(sys.argv[2], str(row) + ".json"), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+          with os.fdopen(out, "w") as file:
+              json.dump({
+                  "type": "antigravity-cli",
+                  "access_token": grant["access"],
+                  "refresh_token": grant["refresh"],
+                  "expired": expires.isoformat(),
+                  "email": grant.get("email"),
+              }, file)
+      print(len(rows))
+      EOF
+      ) || accounts=0
+      echo "omp-box: $accounts Antigravity account(s) for the boxed bots" >&2
       cp -al ${home}/.omp/natives/. ${state}/natives/ 2>/dev/null || cp -a ${home}/.omp/natives/. ${state}/natives/
       free=0
       for _ in $(seq 60); do

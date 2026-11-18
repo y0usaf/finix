@@ -3,9 +3,20 @@ inputs: let
   inherit (pkgs) lib;
   packagesFor = platform: builtins.mapAttrs (_: input: input.packages.${platform} or {}) inputs;
   rawInputPackages = packagesFor system;
-  omp = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
+  ompBuild = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
     patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch ./dev/ai/omp/clipboard-paste-deadline.patch ./dev/ai/omp/composer-cost-brief.patch ./dev/ai/omp/eval-internal-read-no-inline.patch];
   });
+  omp = pkgs.symlinkJoin {
+    name = "omp-${ompBuild.version}";
+    inherit (ompBuild) version;
+    paths = [ompBuild];
+    nativeBuildInputs = [pkgs.makeWrapper];
+    postBuild = ''
+      wrapProgram $out/bin/omp \
+        --set-default PI_AGY_PATH ${import ../pkgs/agy.nix {inherit pkgs;}}/bin/agy \
+        --suffix PATH : ${lib.makeBinPath [pkgs.netcat]}
+    '';
+  };
   inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
 
   mkPkgs = cudaSupport:

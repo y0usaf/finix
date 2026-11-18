@@ -16,12 +16,10 @@
     lib.genAttrs ["pi-chronobreak" "pi-recap"] (name: "${flakeInputs.${name}}")
     // {
       pi-donsetch = "${inputPackages.pi-donsetch.default}";
-      antigravity-acp = "${import ../../../../pkgs/omp-antigravity-acp-provider.nix {inherit pkgs;}}/lib/node_modules/@n1netynine99/omp-antigravity-acp-provider";
       "compact-eval.ts" = ./compact-eval.ts;
       "work-fold.ts" = ./work-fold.ts;
       "message-interrupts.ts" = ./message-interrupts.ts;
       "crest-reroute.ts" = ./crest-reroute.ts;
-      "antigravity-accounts.ts" = ./antigravity-accounts.ts;
       "tools.ts" = ./tools.ts;
       "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (({
           Array,
@@ -776,7 +774,6 @@ in {
     ".omp"
     ".local/share/omp"
     ".local/state/omp-secrets"
-    ".gemini/antigravity-acp"
   ];
 
   environment.systemPackages = [pkgs.jq pkgs.age pkgs.poppler-utils pkgs.sqlite ompSecret];
@@ -843,7 +840,7 @@ in {
           interruptMode = "immediate";
           modelRoles = {
             default = "${catalog.defaultProvider}/${catalog.defaultModel}";
-            advisor = "antigravity-acp/gemini-4-hydrogen:high";
+            advisor = "antigravity-cli/gemini-4-hydrogen:high";
             smol = catalog.smolModel;
             judge = catalog.judgeModel;
             task = catalog.taskModel;
@@ -871,8 +868,6 @@ in {
             "secrets/secrets.ts"
             "crest-auth.ts"
             "crest-reroute.ts"
-            "antigravity-accounts.ts"
-            "antigravity-acp"
             "optchat/extension.ts"
             "tools.ts"
           ];
@@ -898,7 +893,7 @@ in {
           inherit (catalog) defaultProvider;
           inherit (catalog) defaultModel;
           defaultThinkingLevel = catalog.ompThinkingLevel;
-          enabledModels = catalog.enabledModels ++ ["antigravity-acp/*"];
+          enabledModels = catalog.enabledModels ++ ["antigravity-cli/*"];
           packages = [];
         };
       };
@@ -910,9 +905,5 @@ in {
       ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.shared}\n\n${catalog.taskNote}\n";
       ".omp/agent/SYSTEM_TEMPLATE.md".text = prompts.systemTemplate;
       ".omp/agent/agents/task.md".text = prompts.taskAgent;
-      ".omp/agent/antigravity-acp-provider/omp-tools.json" = {
-        generator = toJSON;
-        value = prompts.ompTools;
-      };
     };
 }

@@ -2,14 +2,10 @@
   options.user.dev.ompPrompts = lib.mkOption {
     type = lib.types.attrsOf lib.types.anything;
     readOnly = true;
-    description = "Ablated OMP system template, task agent, and antigravity provider config.";
+    description = "Ablated OMP system template and task agent.";
   };
 
   config.user.dev.ompPrompts = {
-    ompTools = {
-      nativeTools = "disabled";
-      debugToolUpdates = false;
-    };
     systemTemplate = ''
       RFC 2119 keywords: MUST, REQUIRED, SHOULD, RECOMMENDED, MAY, OPTIONAL. `NEVER` = `MUST NOT`; `AVOID` = `SHOULD NOT`.
       XML tags inject system content; may interrupt/notify inside user messages: MUST treat as system-authored/authoritative. User content is sanitized.

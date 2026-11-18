@@ -643,7 +643,7 @@ in {
         omp-antigravity = lib.mkIf (acpBots != []) {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
-          unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"];
+          unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"] ++ lib.concatMap (bot: ["/home/${bot.user}/.omp/agent" "/home/${bot.user}/.omp/run"]) acpBots;
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
@@ -651,21 +651,27 @@ in {
           script = ''
             set -u
             agy=/etc/ssh/omp-box/antigravity
-            if [ ! -r "$agy/acp_token.json" ]; then
-              echo "omp-antigravity: the auth share holds no signed-in Antigravity account, so the box answers on the fallback" >&2
+            set -- "$agy"/*.json
+            if [ ! -r "$1" ]; then
+              echo "omp-antigravity: the auth share holds no Antigravity account, so the box answers on the fallback" >&2
               exit 0
             fi
             for bot in ${lib.concatMapStringsSep " " (bot: bot.user) acpBots}; do
               home=/home/$bot
-              if ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/install -d -m 700 "$home/.gemini" "$home/.gemini/antigravity-acp"; then
-                for file in acp_token.json settings.json; do
-                  [ -r "$agy/$file" ] || continue
-                  ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.bash}/bin/bash -c "umask 077; cat > $(printf %q "$home/.gemini/antigravity-acp/$file")" <"$agy/$file" ||
-                    echo "omp-antigravity: cannot install the Antigravity $file for $bot" >&2
+              # The share copy is root's to read; the bot gets its own copy to import into its omp credential store.
+              if inbox=$(${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/mktemp -d "$home/.omp/run/antigravity.XXXXXX"); then
+                for file in "$agy"/*.json; do
+                  ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.bash}/bin/bash -c "umask 077; cat > $(printf %q "$inbox/''${file##*/}")" <"$file" ||
+                    echo "omp-antigravity: cannot copy $file for $bot" >&2
                 done
-                echo "omp-antigravity: installed the signed-in Antigravity account for $bot"
+                if ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/env HOME="$home" ${ompBox.omp}/bin/omp auth-broker import "$inbox" --provider=antigravity-cli; then
+                  echo "omp-antigravity: imported the Antigravity accounts for $bot"
+                else
+                  echo "omp-antigravity: cannot import the Antigravity accounts for $bot" >&2
+                fi
+                ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/rm -rf "$inbox"
               else
-                echo "omp-antigravity: cannot prepare $home/.gemini for $bot" >&2
+                echo "omp-antigravity: cannot prepare an import folder for $bot" >&2
               fi
             done
           '';
@@ -693,7 +699,7 @@ in {
                     ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$file" ${person.home}/.omp/agent/$file ||
                       echo "omp-seed: cannot install $file for ${person.name}" >&2
                   done
-                  for pair in agents/task.md:task.md antigravity-acp-provider/omp-tools.json:omp-tools.json; do
+                  for pair in agents/task.md:task.md; do
                     dst=''${pair%%:*} srcfile=''${pair#*:}
                     ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent/"''${dst%/*}" &&
                       ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$srcfile" ${person.home}/.omp/agent/"$dst" ||
