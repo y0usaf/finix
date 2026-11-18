@@ -2,8 +2,8 @@
 
 ;;; THREAD: liquid glass on a thin seam
 ;;;
-;;; A 34 px seam with one glass thread down its middle, 11 px wide and as tall
-;;; as the cards, carrying the readings as beads: the clock (hours over
+;;; A 34 px seam with one glass thread down its middle, as wide as a bead's cell
+;;; and as tall as the cards, carrying the readings as beads: the clock (hours over
 ;;; minutes), the date (day over month), CPU, memory, bolo's voice at the weld,
 ;;; the GPU and the VRAM. Each gauge bead holds a level of denser glass from its
 ;;; foot up to its load, with a small label and its value. The focused card
@@ -110,7 +110,9 @@ by the width its characters really take."
 the glass's shape and motion, then where the thread stands, then each bead's
 centre, half height and half width, then the values' widths and the unfocused
 treatment."
-  (append (list 5.5d0      ; half the thread's width
+  (append (list 14d0       ; half the thread's width: a bead's own, so the glass is
+                           ; one run the height of the cards and the edge's bevel
+                           ; and highlight never step out at a cell
                 5d0        ; the focused card's rim
                 20d0       ; how far the rim and the thread weld
                 64d0       ; how far the weld reaches up and down
