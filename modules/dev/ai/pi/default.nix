@@ -22,13 +22,13 @@ in {
       inherit defaultProvider defaultModel taskModel;
       defaultThinkingLevel = "xhigh";
       ompThinkingLevel = "auto";
-      advisorModel = "openai-codex/gpt-6.1-sol:high";
+      advisorModel = "openai-codex/gpt-6.2-sol:high";
       taskNote = "omp task workers run on ${taskModel} unless the task names a model; give Lean proofs and compiler work `model: \"${defaultProvider}/${defaultModel}\"`.";
       smolModel = flash;
       judgeModel = flash;
       fallbackChains = {
         default = ["openai-codex/gpt-6.1-sol:xhigh" flash];
-        advisor = [flash];
+        advisor = ["openai-codex/gpt-6.1-sol:high" flash];
         task = [fastFlash];
       };
 

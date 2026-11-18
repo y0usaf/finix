@@ -840,16 +840,12 @@ in {
           interruptMode = "immediate";
           modelRoles = {
             default = "${catalog.defaultProvider}/${catalog.defaultModel}";
-            advisor = "antigravity-cli/gemini-4-hydrogen:high";
+            advisor = catalog.advisorModel;
             smol = catalog.smolModel;
             judge = catalog.judgeModel;
             task = catalog.taskModel;
           };
-          retry.fallbackChains =
-            catalog.fallbackChains
-            // {
-              advisor = ["openai-codex/gpt-6.1-sol:high"];
-            };
+          retry.fallbackChains = catalog.fallbackChains;
           tier = {
             openai = "none";
             advisor = "none";
