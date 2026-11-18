@@ -82,11 +82,6 @@ html.tn-themed {
 	-webkit-backdrop-filter: none;
 	backdrop-filter: none;
 }
-/** One gap between every pair of blocks in the transcript: a message, a reply,
- ** a work or done-check card, a tool or system notice — whatever the upper or
- ** lower block is — so no two bubbles ever share a seam. The user's card used
- ** to carry this 14px in its own padding; the reader's gap gives it to every
- ** pair alike, and hidden .sf-void/.sf-hidden blocks stay out of it. */
 :root:not(#dawn) .sf-chat-reader.sf-main {
 	--rd-measure: 960px;
 	gap: 14px 0;
@@ -121,11 +116,6 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader .md li {
 	margin-bottom: 6px;
 }
-/** The chip must not add a line box of its own: inside a card Dawn does not
- ** type (a done-check or work card is omp.custom), a 13px/1.4 chip next to the
- ** card's smaller text made every code-bearing line taller than the plain ones,
- ** so the plain lines read cramped. Plain and chip share the line, and the
- ** chip keeps its own size only in the message text Dawn sets itself. */
 :root:not(#dawn) .sf-chat-reader .md :not(pre) > code {
 	font-family: var(--mono);
 	font-size: inherit;
@@ -175,7 +165,7 @@ html.tn-themed {
  border: 0.5px solid rgb(from var(--t1) r g b / 12%);
  border-radius: 22px;
  background: rgb(from var(--card) r g b / var(--surface-a, 1));
- transition: border-color 150ms ease, background-color 150ms ease, border-radius 300ms cubic-bezier(0.22, 1, 0.36, 1), padding 300ms cubic-bezier(0.22, 1, 0.36, 1);
+ transition: border-color 150ms ease, background-color 150ms ease, box-shadow 200ms ease-out, border-radius 300ms cubic-bezier(0.22, 1, 0.36, 1), padding 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
  display: grid;
@@ -188,6 +178,13 @@ html.tn-themed {
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']):is(:hover, :focus-within) {
  border-color: color-mix(in srgb, var(--dawn-ink) 24%, transparent);
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col[data-role='omp.editor']:focus-within {
+ box-shadow: 0 6px 18px -4px rgb(0 0 0 / 9%), 0 1px 3px rgb(0 0 0 / 4%), 0 0 0 1px color-mix(in srgb, var(--dawn-ink) 10%, transparent);
+}
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor']:has(.sf-editor.empty) [data-role='omp.composer.send'] .kbd {
+ opacity: 0.38;
+ transform: scale(0.86);
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python'])::before,
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python'])::after {
@@ -294,16 +291,18 @@ html.tn-themed {
 	color: var(--t2);
 	background: transparent;
 	box-shadow: none;
-	transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), width 0.2s cubic-bezier(0.22, 1, 0.36, 1), padding 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+	transition: background-color 180ms ease-out, color 180ms ease-out, transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), width 0.2s cubic-bezier(0.22, 1, 0.36, 1), padding 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
-:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row:active,
-:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt:active {
-	transform: none;
+:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row:active:not(#dawn),
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt:active:not(#dawn) {
+	transform: scale(0.98);
+	transition-duration: 0s, 0s, 70ms, 0.2s, 0.2s;
 }
 :root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row:hover:not(.off):not([aria-disabled='true']),
 :root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt:hover:not(.on) {
 	background: var(--l1);
 	color: var(--t1);
+	transition-duration: 60ms, 60ms, 280ms, 0.2s, 0.2s;
 }
 :root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row.on,
 :root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row.on:hover,
@@ -459,10 +458,11 @@ html.tn-themed {
 	text-align: start;
 	box-shadow: none;
 	animation: none;
-	transition: none;
+	transition: background-color 120ms ease-out, color 120ms ease-out, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 :root:not(#dawn) :is(#pal, #thm, #pick) .ck-item:not([aria-selected='true']):hover {
 	background: color-mix(in srgb, var(--dawn-ink) 6%, transparent);
+	transition-duration: 40ms, 40ms, 220ms;
 }
 :root:not(#dawn) :is(#pal, #thm, #pick) .ck-item[aria-selected='true'],
 :root:not(#dawn) :is(#pal, #thm, #pick) .ck-item[aria-selected='true']:hover {
@@ -543,7 +543,7 @@ html.tn-themed {
 	height: 24px;
 	border-radius: 6px;
 	box-shadow: none;
-	transition: none;
+	transition: background-color 120ms ease-out, color 120ms ease-out;
 }
 :root:not(#dawn) #pal .tn-pl-more {
 	border-radius: 9999px;
@@ -551,7 +551,7 @@ html.tn-themed {
 	font-size: 13px;
 	line-height: 18px;
 	letter-spacing: -0.08px;
-	transition: none;
+	transition: background-color 120ms ease-out, color 120ms ease-out;
 }
 :root:not(#dawn) #pal .tn-pl-more.link:hover {
 	color: var(--t1);
@@ -633,16 +633,19 @@ html.tn-themed {
 	font-size: 14px;
 	line-height: 20px;
 	color: var(--t1);
-	transition: none;
+	transition: background-color 140ms ease-out, color 140ms ease-out, transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :root:not(#dawn) .pop .mi:not(.bare) {
 	width: calc(100% - 12px);
 }
 :root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi):is(:hover, .active, .sel, .open):not(.dis, .danger) {
 	background: var(--dawn-soft);
+	transition-duration: 40ms, 40ms, 240ms;
 }
 :root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi):active:not(.dis, .danger) {
 	background: color-mix(in srgb, var(--dawn-ink) 18%, transparent);
+	transform: scale(0.98);
+	transition-duration: 0s, 0s, 70ms;
 }
 :root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi).danger {
 	color: var(--bad);
@@ -979,7 +982,6 @@ html.tn-themed {
 	box-shadow: none;
 }
 :root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):active:not(.disabled, .dis, .busy, :disabled) {
-	transform: none;
 	background: color-mix(in srgb, var(--dawn-ink) 18%, transparent);
 }
 :root:not(#dawn) :is(.sf-button[data-variant='quiet'], .btn.quiet, .icon-btn):not(.cmdk *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):not(:hover, .on) {
@@ -1275,7 +1277,11 @@ html.tn-themed {
 }
 :root:not(#dawn) .sf-scroll > .sf-scroll-dock > .sf-scroll-jump.on { transform: none; }
 :root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(#pal *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']) {
- transition: color 100ms ease, background-color 100ms ease, transform 50ms cubic-bezier(0.165, 0.84, 0.44, 1);
+ transition: color 100ms ease, background-color 100ms ease, transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(#pal *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):active:not(.disabled, .dis, .busy, :disabled) {
+ transform: scale(0.96);
+ transition-duration: 0s, 0s, 60ms;
 }
 :root:not(#dawn) .sf-switch-track {
  transition: background-color 100ms ease, border-color 100ms ease, transform 50ms cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -1438,6 +1444,18 @@ html.tn-themed {
  from { opacity: 0; transform: translateY(4px) scale(0.97); }
  to { opacity: 1; transform: none; }
 }
+@keyframes dawn-polish-sheet-enter {
+ from { opacity: 0; transform: translateX(-50%) translateY(6px) scale(0.975); }
+ to { opacity: 1; transform: translateX(-50%); }
+}
+@keyframes dawn-unfold {
+ from { opacity: 0; transform: translateY(-6px); }
+ to { opacity: 1; transform: none; }
+}
+@keyframes dawn-dot {
+ 0%, 70%, 100% { opacity: 0.3; }
+ 35% { opacity: 1; }
+}
 :root:not(#dawn) .sf-chat-reader .sf-message > .sf-msg-body,
 :root:not(#dawn) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
 :root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md {
@@ -1470,9 +1488,11 @@ html.tn-themed {
  transition-duration: 80ms;
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop']:active { transform: scale(0.9); transition-duration: 80ms; }
-:root:not(#dawn) #pal:not([hidden]) { animation: dawn-fade-in 120ms ease-out backwards; }
+:root:not(#dawn) :is(#pal, #thm, #pick:not(.anchored)):not([hidden]) { animation: dawn-fade-in 120ms ease-out backwards; }
 :root:not(#dawn) #pal:not([hidden]) .cmdk { animation: dawn-polish-palette-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
-:root:not(#dawn) #pal .ck-item:not(.dis, [aria-disabled='true']):active { transform: scale(0.985); transition-duration: 70ms; }
+:root:not(#dawn) :is(#thm, #pick:not(.anchored)):not([hidden]) .cmdk { animation: dawn-polish-sheet-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+:root:not(#dawn) #pick.anchored:not([hidden]) .cmdk { transform-origin: 50% 0; animation: popIn 180ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item:not(.dis, [aria-disabled='true']):active { transform: scale(0.985); transition-duration: 0s, 0s, 70ms; }
 :root:not(#dawn) #pal .tn-pl-acts { transition: opacity 150ms ease; }
 :root:not(#dawn) .sf-chat-reader .sf-menu-pop,
 :root:not(#dawn) .sf-chat-reader .sf-menu-pop.sf-menu-subpop,
@@ -1493,10 +1513,32 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip,
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::before,
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::after {
- animation: none;
+ animation: dawn-dot 1200ms ease-in-out infinite;
  opacity: 0.55;
  transform: none;
 }
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip { animation-delay: 150ms; }
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::after { animation-delay: 300ms; }
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible > .sf-section-head,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-head {
+ transition: background-color 160ms ease-out, color 160ms ease-out;
+}
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible > .sf-section-head:hover,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-head:hover { transition-duration: 50ms; }
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible:not(.collapsed) > .sf-section-body,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible:not(.collapsed) > .sf-tool-body {
+ animation: dawn-unfold 220ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+:root:not(#dawn) #tabbar .tt :is(.nm, .sub),
+:root:not(#dawn) #tabbar .tt .sub::before {
+ transition: color 240ms ease-out;
+}
+:root:not(#dawn) .tn-ib-row {
+ transition: background-color 140ms ease-out;
+}
+:root:not(#dawn) .tn-ib-row:hover { transition-duration: 40ms; }
+:root:not(#dawn) .tn-bn-card .tn-bn-x { transition: opacity 120ms ease-out, background-color 120ms ease-out; }
+:root:not(#dawn) #sidebar .tn-vt-find { transition: box-shadow 150ms ease-out; }
 @media (prefers-reduced-motion: reduce) {
 	:root:not(#dawn) #sidebar .tn-vt .nav-row,
 	:root:not(#dawn).lay-rail.tabs-h #tabbar .tt {
@@ -1533,8 +1575,8 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md,
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd,
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop'],
-:root:not(#dawn) #pal:not([hidden]),
-:root:not(#dawn) #pal:not([hidden]) .cmdk,
+:root:not(#dawn) :is(#pal, #thm, #pick):not([hidden]),
+:root:not(#dawn) :is(#pal, #thm, #pick):not([hidden]) .cmdk,
 :root:not(#dawn) .sf-chat-reader .sf-menu-pop,
 :root:not(#dawn) .sf-chat-reader .sf-menu-pop.sf-menu-subpop,
 :root:not(#dawn) .sf-chat-reader .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card { animation: none; }
@@ -1546,7 +1588,9 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader .sf-menu-pop .sf-menu-item:not(.rich, .dis, [aria-disabled='true']):active,
 :root:not(#dawn) .sf-chat-reader .sf-message .sf-msg-act:not(:disabled, .dis, [aria-disabled='true']):active,
 :root:not(#dawn) .sf-chat-reader .sf-button:not([data-role^='omp.composer.'], .disabled, .dis, :disabled, [aria-disabled='true']):active,
-:root:not(#dawn) #pal .ck-item:active { transform: none; transition: none; }
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item:active { transform: none; transition: none; }
+:root:not(#dawn) .sf-chat-reader :is(.sf-section, .sf-tool).collapsible > :is(.sf-section-body, .sf-tool-body),
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) :is(.sf-spin .strip, .sf-spin::before, .sf-spin::after) { animation: none; }
 }
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-message > :is(.sf-msg-body, .sf-msg-av),
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body,
@@ -1563,7 +1607,11 @@ html.tn-themed {
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-menu-pop,
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-menu-pop,
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card,
-:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card { animation: none; }
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader :is(.sf-section, .sf-tool).collapsible > :is(.sf-section-body, .sf-tool-body),
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) :is(.sf-section, .sf-tool).collapsible > :is(.sf-section-body, .sf-tool-body),
+:root:not(#dawn) .sf-chat-reader.sf-still :is([data-role='omp.thinking.spin'], [data-role='omp.working']) :is(.sf-spin .strip, .sf-spin::before, .sf-spin::after),
+:root:not(#dawn) .sf-still .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) :is(.sf-spin .strip, .sf-spin::before, .sf-spin::after) { animation: none; }
 
 html.tn-phone:not(#dawn) .sf-chat-reader.sf-main {
 	padding: 16px 8px;
@@ -1605,7 +1653,7 @@ html.tn-phone:not(#dawn) :is(#pal, #thm, #pick) .cmdk {
 	zoom: 1;
 	transform: none;
 }
-html.tn-phone:not(#dawn) #pal:not([hidden]) .cmdk {
+html.tn-phone:not(#dawn) :is(#pal, #thm, #pick):not([hidden]) .cmdk {
 	animation: none;
 }
 html.tn-phone:not(#dawn) :is(#pal, #thm, #pick) .ck-top input {
@@ -1627,13 +1675,6 @@ html.tn-phone:not(#dawn) :is(div.pop[role='menu'] .mi:not(.bare), .sf-menu-pop .
 :root:not(#dawn) #tabbar .tt.on :is(.nm, .sub, .tn-tx, .mk.keys, .kbd, .tn-num, .ico, svg) {
 	color: var(--dawn-page) !important;
 }
-/** A tinted tab's name and the line under it: rail_status and bot-rail paint a
- ** state word in --pill and fade the whole .sub to 55%, which left every state
- ** between 1.9:1 and 4.0:1 on the tab behind it, while the selected tab's name
- ** and subtitle fell to --dawn-page over its own #ececee. Keep each state's hue
- ** and its full strength, deep enough in light and bright enough in dark to
- ** clear 4.5:1 (WCAG AA) on the tab at rest (#eeeeee), hovered (#dddddd) and
- ** selected (#ececee light, #2a2a2d dark). The ring and dot keep --pill. */
 :root:not(#dawn) #tabbar .tt[data-tc] .nm,
 :root:not(#dawn) #tabbar .tt[data-tc].on .nm {
 	color: light-dark(#18181b, #f2f2f3) !important;
