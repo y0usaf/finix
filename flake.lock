@@ -2810,11 +2810,11 @@
     "omp-bot": {
       "flake": false,
       "locked": {
-        "lastModified": 1794955561,
-        "narHash": "sha256-kUiI3er8AKBsA5HBvWL1TlBOXNNia3GmfZjrDJsJJRc=",
+        "lastModified": 1794974807,
+        "narHash": "sha256-IEa/dPo6CVgjXHXXwJ2XCdSB7KPJ+zgr3CA+PJlOkhM=",
         "owner": "y0usaf",
         "repo": "omp-bot",
-        "rev": "faa3e9bef39e5aa20cd2ee330123f7b937c436e9",
+        "rev": "3c10ae287088e75cbc57b752f082db273a9bb82d",
         "type": "github"
       },
       "original": {
