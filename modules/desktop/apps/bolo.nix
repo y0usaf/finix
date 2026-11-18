@@ -60,7 +60,7 @@
 
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
-    active = "fluid-speech-pro";
+    active = model.name;
     provider = "cuda";
     threads = null;
     # Whole-clip turns: one write of the finished transcript, typed once.
