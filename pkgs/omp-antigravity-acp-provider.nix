@@ -48,60 +48,60 @@ in
     npmDepsHash = "sha256-b/jTJ4TW3Dk3dFMcOVrky9ldp41Jd4VmdNmo2pZLY5E=";
     dontNpmBuild = true;
     postPatch = ''
-      substituteInPlace extension/index.ts --replace-fail \
-        'export default async function (pi: OmpHostApi) {' \
-        'export default async function (pi: OmpHostApi) {
-        process.env.AGY_ACP_BIN ||= "${server}/libexec/agy-acp/agy_acp_server.par";'
-      substituteInPlace extension/runtime.mjs --replace-fail \
-        'const override = explicit || env.NODE;' \
-        'const override = explicit || env.NODE || "${pkgs.nodejs}/bin/node";'
-      substituteInPlace extension/runtime.mjs --replace-fail \
-        'return `''${FORCE_FILE_STORAGE_ENV} set by the user`;' \
-        'return `''${FORCE_FILE_STORAGE_ENV} is set, so each login stays in its GEMINI_HOME folder`;'
-      # Go's ACP server rejects JSON Schema type arrays (e.g. omptype's ["number", "null"]).
-      substituteInPlace extension/runtime.mjs --replace-fail \
-        'if ("const" in output2 && !("enum" in output2)) {' \
-        'if (Array.isArray(output2.type)) {
-    const types = output2.type;
-    if (types.length === 1) {
-      output2.type = types[0];
-    } else {
-      delete output2.type;
-      const variants = types.map((item) => ({ type: item }));
-      spend(budget, 0, 8 + variants.reduce((acc, item) => acc + scalarChars(item.type) + 10, 0));
-      if ("anyOf" in output2) {
-        output2.allOf = [...(output2.allOf ?? []), { anyOf: output2.anyOf }, { anyOf: variants }];
-        delete output2.anyOf;
-      } else {
-        output2.anyOf = variants;
-      }
-    }
-  }
-  if ("const" in output2 && !("enum" in output2)) {'
-      # Crest signs each Antigravity account in inside its own folder and pins
-      # the ACP server to the file store with AGY_ACP_FORCE_FILE_STORAGE. The
-      # shared Secret Service item then belongs to a different account, so this
-      # adapter must neither read it nor clear it for a folder account.
-      substituteInPlace extension/auth-sync.ts --replace-fail \
-        'const execFileAsync = promisify(execFile);' \
-        'const execFileAsync = promisify(execFile);
+            substituteInPlace extension/index.ts --replace-fail \
+              'export default async function (pi: OmpHostApi) {' \
+              'export default async function (pi: OmpHostApi) {
+              process.env.AGY_ACP_BIN ||= "${server}/libexec/agy-acp/agy_acp_server.par";'
+            substituteInPlace extension/runtime.mjs --replace-fail \
+              'const override = explicit || env.NODE;' \
+              'const override = explicit || env.NODE || "${pkgs.nodejs}/bin/node";'
+            substituteInPlace extension/runtime.mjs --replace-fail \
+              'return `''${FORCE_FILE_STORAGE_ENV} set by the user`;' \
+              'return `''${FORCE_FILE_STORAGE_ENV} is set, so each login stays in its GEMINI_HOME folder`;'
+            # Go's ACP server rejects JSON Schema type arrays (e.g. omptype's ["number", "null"]).
+            substituteInPlace extension/runtime.mjs --replace-fail \
+              'if ("const" in output2 && !("enum" in output2)) {' \
+              'if (Array.isArray(output2.type)) {
+          const types = output2.type;
+          if (types.length === 1) {
+            output2.type = types[0];
+          } else {
+            delete output2.type;
+            const variants = types.map((item) => ({ type: item }));
+            spend(budget, 0, 8 + variants.reduce((acc, item) => acc + scalarChars(item.type) + 10, 0));
+            if ("anyOf" in output2) {
+              output2.allOf = [...(output2.allOf ?? []), { anyOf: output2.anyOf }, { anyOf: variants }];
+              delete output2.anyOf;
+            } else {
+              output2.anyOf = variants;
+            }
+          }
+        }
+        if ("const" in output2 && !("enum" in output2)) {'
+            # Crest signs each Antigravity account in inside its own folder and pins
+            # the ACP server to the file store with AGY_ACP_FORCE_FILE_STORAGE. The
+            # shared Secret Service item then belongs to a different account, so this
+            # adapter must neither read it nor clear it for a folder account.
+            substituteInPlace extension/auth-sync.ts --replace-fail \
+              'const execFileAsync = promisify(execFile);' \
+              'const execFileAsync = promisify(execFile);
 
-function crestFileStorage(env: NodeJS.ProcessEnv = process.env): boolean {
-  return Boolean(env.AGY_ACP_FORCE_FILE_STORAGE?.trim());
-}'
-      substituteInPlace extension/auth-sync.ts --replace-fail \
-        '  async removeStoredCredentialsDurably(): Promise<CredentialRemoval> {' \
-        '  async removeStoredCredentialsDurably(): Promise<CredentialRemoval> {
-    // A folder login never owns the keyring entry; clearing it would sign the
-    // keyring account out.
-    if (crestFileStorage()) return { keychainRemoved: undefined, keyringRemoved: undefined };'
-      substituteInPlace extension/auth-sync.ts --replace-fail \
-        '  if ((await secretService.present()) === true) {' \
-        '  if (!crestFileStorage(env) && (await secretService.present()) === true) {'
-      substituteInPlace extension/auth-sync.ts --replace-fail \
-        '  if (fromFile) return fromFile;' \
-        '  if (fromFile) return fromFile;
-  if (crestFileStorage()) return undefined;'
+      function crestFileStorage(env: NodeJS.ProcessEnv = process.env): boolean {
+        return Boolean(env.AGY_ACP_FORCE_FILE_STORAGE?.trim());
+      }'
+            substituteInPlace extension/auth-sync.ts --replace-fail \
+              '  async removeStoredCredentialsDurably(): Promise<CredentialRemoval> {' \
+              '  async removeStoredCredentialsDurably(): Promise<CredentialRemoval> {
+          // A folder login never owns the keyring entry; clearing it would sign the
+          // keyring account out.
+          if (crestFileStorage()) return { keychainRemoved: undefined, keyringRemoved: undefined };'
+            substituteInPlace extension/auth-sync.ts --replace-fail \
+              '  if ((await secretService.present()) === true) {' \
+              '  if (!crestFileStorage(env) && (await secretService.present()) === true) {'
+            substituteInPlace extension/auth-sync.ts --replace-fail \
+              '  if (fromFile) return fromFile;' \
+              '  if (fromFile) return fromFile;
+        if (crestFileStorage()) return undefined;'
     '';
     meta = {
       description = "Google Antigravity ACP provider for OMP";
