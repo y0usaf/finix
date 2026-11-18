@@ -7,8 +7,6 @@
   inherit (config.user) name homeDirectory;
   repo = "/home/y0usaf/dev/maintaining/tomoe";
   runtime = "${config.user.runtimeDir}/agent";
-  # The canonical copy of this script is Tomoe's land.sh; it runs from here until
-  # the package ships bin/tomoe-land, so the queue survives restarts either way.
   queue = pkgs.writeShellScriptBin "tomoe-land" (builtins.readFile ./tomoe-land.sh);
 in {
   config = {

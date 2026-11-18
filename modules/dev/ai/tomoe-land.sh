@@ -381,15 +381,15 @@ cleanup_tree() {
 run_gate() {
 	local tree=$1 tip=$2 log=$3 finix=${4:-} rc=0
 	GATED_FINIX=""
-	[[ -x $tree/gate.sh ]] || {
-		printf 'land: %s has no gate.sh\n' "$tip" >"$log"
+	[[ -x $tree/tools/gate.sh ]] || {
+		printf 'land: %s has no tools/gate.sh\n' "$tip" >"$log"
 		return 1
 	}
 	[[ -n $finix ]] || finix=$(git -C "$FINIX" rev-parse HEAD) || return 1
 	(
 		cd "$tree" || exit 1
 		GATE_FINIX=$FINIX GATE_FINIX_REV=$finix timeout --signal=TERM --kill-after="$KILLWAIT" \
-			"$GATE_TIMEOUT" nice -n 10 ./gate.sh "$tip"
+			"$GATE_TIMEOUT" nice -n 10 ./tools/gate.sh "$tip"
 	) >"$log" 2>&1 || rc=$?
 	if ((rc == 0)); then
 		GATED_FINIX=$finix
