@@ -78,6 +78,12 @@ in {
         ".config/rush/profile.rush".text = ''
           . /etc/profile
           [ -r "$HOME/.config/tokens.sh" ] && . "$HOME/.config/tokens.sh"
+          if [ "''${TERM:-}" = linux ] && [ -t 0 ] && [ -z "''${SSH_CONNECTION:-}" ] &&
+             [ -z "''${WAYLAND_DISPLAY:-}" ] && [ -z "''${TOMOE_SOCKET:-}" ]; then
+            case "$(tty 2>/dev/null)" in
+              /dev/tty1) timeout 2 tomoe commands >/dev/null 2>&1 || { tomoe & } ;;
+            esac
+          fi
         '';
 
         ".config/rush/config.rush".text = lib.mkMerge [
