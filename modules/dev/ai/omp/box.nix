@@ -818,6 +818,7 @@
         enabled: true
         reviewMode: agent-end
       retry:
+        fallbackOn: usage-limit
         fallbackChains: ${builtins.toJSON catalog.fallbackChains}
       # A steer backgrounds a running cell so a message lands at once; the hour
       # keeps omp from backgrounding long cells on its own.

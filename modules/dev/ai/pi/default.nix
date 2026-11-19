@@ -14,6 +14,12 @@
   defaultModel = "gemini-4-neon";
   taskModel = "antigravity-cli/gemini-4-neon";
   fastFlash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
+  neon = "antigravity-cli/gemini-4-neon";
+  opus = "anthropic/claude-opus-5-5";
+  sol = "openai-codex/gpt-6.2-sol:high";
+  providerOf = model: lib.head (lib.splitString "/" model);
+  mainChain = [ opus sol flash ];
+  advisorChain = lib.filter (model: providerOf model != defaultProvider) [ neon opus sol flash ];
 in {
   options.user.dev.modelCatalog = lib.mkOption {
     type = lib.types.attrsOf lib.types.anything;
@@ -22,14 +28,14 @@ in {
       inherit defaultProvider defaultModel taskModel;
       defaultThinkingLevel = "xhigh";
       ompThinkingLevel = "auto";
-      advisorModel = "openai-codex/gpt-6.2-sol:high";
-      taskNote = "omp task workers run on ${taskModel} unless the task names a model; DeepSeek V4.1 Flash 1017 is the fallback; give Lean proofs and compiler work `model: \"anthropic/claude-opus-5-5\"`.";
+      advisorModel = lib.head advisorChain;
+      taskNote = "omp task workers run on ${taskModel} unless the task names a model; Opus 5.5 is the fallback; give Lean proofs and compiler work `model: \"anthropic/claude-opus-5-5\"`.";
       smolModel = flash;
       judgeModel = flash;
       fallbackChains = {
-        default = ["anthropic/claude-opus-5-5" "openai-codex/gpt-6.1-sol:xhigh" flash];
-        advisor = ["openai-codex/gpt-6.1-sol:high" flash];
-        task = [flash fastFlash];
+        default = mainChain;
+        advisor = lib.tail advisorChain;
+        task = mainChain;
       };
 
       enabledModels = [

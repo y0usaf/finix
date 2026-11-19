@@ -846,6 +846,7 @@ in {
             task = catalog.taskModel;
           };
           retry.fallbackChains = catalog.fallbackChains;
+          retry.fallbackOn = "usage-limit";
           tier = {
             openai = "none";
             advisor = "none";
