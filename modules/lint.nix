@@ -234,7 +234,7 @@
   config = (pkgs.formats.toml {}).generate "strictix.toml" {
     lint = {
       schema = schema "finix" (lib.concatMap (host: lib.optionAttrSetToDocList host.options) (builtins.attrValues hosts));
-      enabled = ["unused-option" "never-enabled-option" "constant-option" "duplicate-definitions" "singleton-attrset" "singleton-list" "templated-bindings" "scattered-documentation" "unformatted-file" "wrapped-prose" "repeated-dynamic-path" "repeated-let-value" "per-system-input-lookup"];
+      enabled = ["unused-option" "never-enabled-option" "constant-option" "duplicate-definitions" "singleton-attrset" "singleton-list" "templated-bindings" "scattered-documentation" "unformatted-file" "wrapped-prose" "repeated-dynamic-path" "repeated-let-value" "per-system-input-lookup" "unfiltered-src"];
       generated = ["modules/hosts/steam-frame/beat-saber/beatmods.json"];
       disabled = ["hand-maintained-data-file"];
       constant-option = {
