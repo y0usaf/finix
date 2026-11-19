@@ -308,12 +308,18 @@ local saved = tern.kv.get("on")
 local on = {}
 local by_id = {}
 for _, t in ipairs(TWEAKS) do
-	local ok, css = pcall(tern.fs.read, tern.plugin.dir .. "/snippets/" .. t.id .. ".css")
-	if ok then
-		t.css = css
-	end
 	on[t.id] = if type(saved) == "table" and saved[t.id] ~= nil then saved[t.id] == true else t.default ~= false
 	by_id[t.id] = t
+end
+
+-- A snippet's CSS, read the first time an option wears it: a login that is still starting other programs gives the load
+-- hook less time than reading and parsing every snippet takes.
+local function snippet(t): string?
+	if t.css == nil then
+		local ok, css = pcall(tern.fs.read, tern.plugin.dir .. "/snippets/" .. t.id .. ".css")
+		t.css = if ok then css else false
+	end
+	return if t.css then t.css else nil
 end
 local CARBON = { "departure", "automata", "botanical", "braun", "folio", "blueprint", "eink", "phosphor" }
 local carbon = false
@@ -632,15 +638,17 @@ local function boost(css: string): string
 end
 
 local shown = {}
-local function paint()
+local function paint(from: number?, to: number?)
 	local dawn = BOOST ~= nil and live(by_id.dawn)
-	for _, t in ipairs(TWEAKS) do
-		if t.css then
+	for index = from or 1, to or #TWEAKS do
+		local t = TWEAKS[index]
+		local own = snippet(t)
+		if own then
 			local text = ""
 			if live(t) then
-				text = t.css
+				text = own
 				if dawn and not t.layer then
-					t.boosted = t.boosted or boost(t.css)
+					t.boosted = t.boosted or boost(own)
 					text ..= "\n" .. t.boosted
 				end
 			end
@@ -652,7 +660,19 @@ local function paint()
 	end
 end
 
-paint()
+-- The options land after the first frame, a few at a time, so the sheets and the reads behind them stay out of the load
+-- hook: on the shared login this plugin was the slowest to load of any of them.
+local painted_to = 0
+local function paint_step()
+	local last = math.min(painted_to + 6, #TWEAKS)
+	paint(painted_to + 1, last)
+	painted_to = last
+	if painted_to < #TWEAKS then
+		tern.timer(0, paint_step)
+	end
+end
+
+tern.timer(0, paint_step)
 
 local LOOKS = {
 	{ label = "Mini", layers = { "mini" } },
