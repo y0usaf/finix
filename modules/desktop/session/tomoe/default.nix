@@ -3432,6 +3432,9 @@ in {
         // lib.optionalAttrs (tomoeKnows "pause-readings-when-dark") {
           pause-readings-when-dark = true;
         }
+        // lib.optionalAttrs (tomoeKnows "sound-pause-after") {
+          sound-pause-after = 5;
+        }
         // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;}
         // {
           animations =
