@@ -86,7 +86,7 @@
           (import' [Composer] (str "@oh-my-pi/pi-tui/prompt/composer"))
           blank
           (const STATE (call (dot Symbol "for") [(str "finix.omp-chat-look.state")]))
-          (const HIDDEN (below (str "\\n# Tool activity\\nYour tool calls are hidden from the transcript, so say in words what you found and what you ran rather than pointing at a card.\\n")))
+          (const HIDDEN (below (str "\\nTool calls are hidden from the user; state key findings/commands in text.\\n")))
           blank
           (class Marked [
             ({

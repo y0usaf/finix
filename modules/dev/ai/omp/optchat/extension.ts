@@ -30,78 +30,16 @@ const RAW = Number(process.env.OPTCHAT_RAW) || 128_000;
 const IMAGE = 4_800;
 
 const INTRO = `# Shared memory
+<chat> holds oldest-first summaries: \`id+n|text\` (n messages from id; kinds \`user|work|talk[Chat]\`; "${PLACEHOLDER}" = pending). Tool calls aren't logged. \`zoom(id, n)\` splits id+n in half; \`zoom(id, 1)\` shows message id in full.`;
 
-Every omp chat on this computer, on the host and in the box, logs the
-user's messages and the agent's replies into one shared memory. Below is
-its view, taken when this chat started or was last compacted: everything
-logged before then, oldest first, inside <chat> tags, as one-line
-summaries. Each line is
-
-  id+n|text   the n messages from id on, summarized (newlines shown as spaces)
-
-Each item is tagged with its kind and, in brackets, the chat it came from,
-as talk[Chat]: user (the user's words in that chat), work (text an agent
-or tool sent in the user's place), talk (the agent's replies). Tool calls
-and their results are not logged, so say in your replies what you learned
-that will matter later. Recent lines cover one message each; the older
-the messages, the more a line covers. A message not summarized yet shows
-as "${PLACEHOLDER}". Read other chats' lines as what else is
-going on and answer only this chat's messages; this chat's own turns
-follow in full, or as omp's summary once it has compacted them.
-
-zoom(id, n) opens line id+n into the two lines of n/2 messages it was made
-from; zoom(id, 1) gives message id in full. Zoom whenever a summary only
-mentions something you need, such as a decision, a past attempt or where a
-file is, before you act, guess or ask.`;
-
-const BOT_INTRO = `# Your memory
-
-Your conversation lives in OptChat memory, not in this context. Every
-message you receive (the user typing live, background tasks, answers
-from other bots) and every reply you write is logged into it. Below is
-its view: everything logged before your latest turns, oldest first,
-inside <chat> tags, as one-line summaries. Each line is
-
-  id+n|text   the n messages from id on, summarized (newlines shown as spaces)
-
-Each item is tagged with its kind: user (what you received), work (text
-a tool sent in the user's place), talk (your replies). Recent lines
-cover one message each; the older the messages, the more a line covers.
-A message not summarized yet shows as "${PLACEHOLDER}". Your latest
-turns follow in full, tool calls and results included; older turns exist
-only as these lines, and their tool calls and results are gone, so say in
-your replies what you learned that will matter later.
-
-zoom(id, n) opens line id+n into the two lines of n/2 messages it was made
-from; zoom(id, 1) gives message id in full. Zoom whenever a summary only
-mentions something you need, such as a decision, a past attempt or where a
-file is, before you act, guess or ask. Give zoom a bot name to read that
-bot's memory instead, read-only.`;
+const BOT_INTRO = `# Memory
+<chat> holds older turns as \`id+n|text\` (n messages from id; kinds \`user|work|talk\`; "${PLACEHOLDER}" = pending; tool calls omitted). Latest turns follow in full. \`zoom(id, n[, bot])\` splits id+n in half; \`n=1\` shows message id in full.`;
 
 const RULES_INTRO = `# Standing rules
-
-The rules the user set you, kept word for word and never summarized.
-They hold until the user changes them. When the user sets you a new
-standing rule, pin_rule adds it here.`;
+Verbatim user rules (never summarized). Use \`pin_rule\` to add new ones.`;
 
 const HELPER_INTRO = `# Memory
-
-An omp chat launched you as a helper. Below is the view of OptChat
-memory that chat held when it launched you: everything logged before the
-view was taken, oldest first, inside <chat> tags, as one-line summaries.
-That chat's own latest turns are not in it. Each line is
-
-  id+n|text   the n messages from id on, summarized (newlines shown as spaces)
-
-Each item is tagged with its kind and, in brackets, the chat it came from,
-as talk[Chat]: user (the user's words), work (text an agent, tool or
-helper sent in the user's place), talk (the agent's replies). Recent lines
-cover one message each; the older the messages, the more a line covers.
-A message not summarized yet shows as "${PLACEHOLDER}". The view is
-background for the task you were given, not a request.
-
-zoom(id, n) opens line id+n into the two lines of n/2 messages it was made
-from; zoom(id, 1) gives message id in full.`;
+Background from parent chat (<chat>: \`id+n|text\`, kinds \`user|work|talk[Chat]\`, "${PLACEHOLDER}" = pending). \`zoom(id, n)\` splits id+n; \`n=1\` shows full message.`;
 
 const LIFECYCLE = "task:subagent:lifecycle";
 const RESULT = 2_000;
@@ -397,7 +335,7 @@ export default function optchat(pi: ExtensionAPI): void {
 	pi.registerTool({
 		name: "zoom",
 		label: "Zoom memory",
-		description: `Open the line id+n of the memory view into the two lines of n/2 messages under it; n = 1 gives message id whole${whose}. A work line's helper transcript path as id opens that transcript from message n on.`,
+		description: `Split memory line id+n in half (n=1: full message)${whose}. String id opens helper transcript from message n.`,
 		parameters: z.object({ id: z.union([z.number(), z.string()]), n: z.number(), ...which }),
 		async execute(_toolCallId, params) {
 			const id = params.id;
@@ -452,8 +390,7 @@ export default function optchat(pi: ExtensionAPI): void {
 		pi.registerTool({
 			name: "pin_rule",
 			label: "Pin rule",
-			description:
-				"Add a standing rule the user just set you to your pinned rules, in their words, so it stays in your context word for word and is never summarized. Only for rules the user gave.",
+			description: "Pin a verbatim standing rule from the user.",
 			parameters: z.object({ rule: z.string() }),
 			async execute(_toolCallId, params) {
 				const rule = params.rule.trim().replace(/\s*\n\s*/g, " ");

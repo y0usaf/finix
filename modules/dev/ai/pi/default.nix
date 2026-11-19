@@ -29,7 +29,7 @@ in {
       defaultThinkingLevel = "xhigh";
       ompThinkingLevel = "auto";
       advisorModel = lib.head advisorChain;
-      taskNote = "omp task workers run on ${taskModel} unless the task names a model; Opus 5.5 is the fallback; give Lean proofs and compiler work `model: \"anthropic/claude-opus-5-5\"`.";
+      taskNote = "Task helpers default to ${taskModel} (fallback Opus 5.5); use `model: \"anthropic/claude-opus-5-5\"` for Lean/compiler work.";
       smolModel = flash;
       judgeModel = flash;
       fallbackChains = {

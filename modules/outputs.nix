@@ -17,7 +17,34 @@ inputs: let
         --suffix PATH : ${lib.makeBinPath [pkgs.netcat]}
     '';
   };
-  inputPackages = rawInputPackages // {oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};};
+  piDonsetch = pkgs.runCommand "pi-donsetch-trimmed" {} ''
+        cp -r ${rawInputPackages.pi-donsetch.default} $out
+        chmod -R u+w $out
+        ${pkgs.python3}/bin/python3 - "$out/pi-extension.ts" <<'EOF'
+    import sys
+    p = sys.argv[1]
+    s = open(p).read()
+    old = """      const description = mcpTool.description || mcpTool.name;
+          const inputSchema = mcpTool.inputSchema || { type: "object", properties: {} };"""
+    new = """      const firstLine = (t: unknown, max = 140) => {
+            const line = String(t ?? "").split("\n")[0].split(". ")[0].trim();
+            return line.length > max ? line.slice(0, max - 1) + "…" : line;
+          };
+          const description = firstLine(mcpTool.description || mcpTool.name, 140);
+          const rawSchema = mcpTool.inputSchema || { type: "object", properties: {} };
+          const inputSchema = rawSchema.properties
+            ? { ...rawSchema, properties: Object.fromEntries(Object.entries(rawSchema.properties).map(([k, v]: [string, any]) => [k, v && typeof v === "object" && v.description ? { ...v, description: firstLine(v.description, 80) } : v])) }
+            : rawSchema;"""
+    assert old in s, "pi-extension.ts pattern not found"
+    open(p, "w").write(s.replace(old, new, 1))
+    EOF
+  '';
+  inputPackages =
+    rawInputPackages
+    // {
+      oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};
+      pi-donsetch = rawInputPackages.pi-donsetch // {default = piDonsetch;};
+    };
 
   mkPkgs = cudaSupport:
     import (toString inputs.nixpkgs) {

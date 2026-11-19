@@ -1,88 +1,22 @@
 {config, ...}: {
   user.files."AGENTS.md".text = ''
     # Principles
+    Personal projects only; in work repos, forks, upstream checkouts, and `~/dev/ref`, repo conventions win. Edit only when asked.
 
-    Build up from a floor that always works: small parts with one job each,
-    shipped together, each removable without residue. When the rules below
-    conflict, this decides.
-
-    For personal projects. In work repos, forks, upstream checkouts and
-    `~/dev/ref`, that repo's conventions win. Edit this file only when asked;
-    if a rule keeps losing arguments, propose changing it.
-
-    ## Code
-
-    - **One job.** A project's README opens with its job in one sentence.
-      A reference lends qualities, never a feature list. Each part can run
-      as its own process.
-    - **Least code.** Prefer deletion to addition. Abstract on the third need.
-    - **Least power.** Lowest rung that works on any machine: constant <
-      data < config < pure function < code with I/O or state.
-    - **Deterministic first.** What code can decide (lifecycle, cleanup,
-      routing, retries) is a state machine or a rule, not an agent call.
-      Spend model calls only on judgment.
-    - **Small engine, rich surface.** Few tools, commands and flags in the
-      machinery; play and polish belong in the UI, not the engine.
-    - **No hardcoding.** A value that could differ by machine or user is
-      discovered or read from config, and set in one place.
-    - **Least deps.** Take a dependency only for knowledge you'd otherwise
-      rediscover; when the interface under it is simpler (sysfs, /proc), use
-      that. Ship every dependency you keep inside the package.
-    - **Unix.** Decisions stay out of machinery. Narrow interfaces: a feature
-      lands in the module that owns it. Machine-readable output. State
-      inspectable without a debugger. Fail loudly on bad input where it
-      enters; a command that succeeds prints only its result. Generate
-      what you would hand-maintain. Measure before optimizing.
-
-    ## Architecture, when a system has these parts
-
-    - **Floor first.** The floor is the least a system needs for you to reach
-      it, see its state and fix it: tomoe with its default bindings. It starts with nothing above it and never waits on or
-      dies with what's above it. Anything that could crash it runs in another
-      process, from the same binary if you like; anything that could hang it
-      runs there or under a budget. `nix run` with no config reaches the
-      floor; break any part above it and the floor says what broke.
-    - **Clean unmount.** Anything mounted at runtime reverts all its effects
-      on unmount, child processes, locks and sockets included, and declares
-      what it reads; a changed dependency updates exactly its consumers.
-      Snapshot, mount, exercise, unmount, diff: residue is a bug. After a
-      kill, the next start clears what the dead run left and keeps its data.
-      Ref: github.com/cordiverse/paper
-    - **No privileged path.** Built-ins use the public API a stranger would,
-      and the system still starts without them.
-    - **Daemon, thin client.** State that outlives its viewer lives in a
-      daemon. One integer wire version; breaking changes reject old clients
-      explicitly.
+    ## Design
+    - **Floor first & clean unmount**: minimal always-working floor (tomoe default binds; `nix run` reaches it) isolated from crashes/hangs above it; runtime mounts declare reads and revert all effects/procs/locks/sockets with zero residue (`github.com/cordiverse/paper`); no privileged built-in path.
+    - **One job, least code/power/deps**: prefer deletion, abstract on 3rd need, constant < data < config < pure fn < IO/state, discover/config over hardcoding, take deps only when simpler interfaces (sysfs, `/proc`) don't suffice and package them in.
+    - **Deterministic first**: state machines/rules for lifecycle, cleanup, routing, retries; LLM calls only for judgment.
+    - **Small engine, rich surface**: minimal tools/flags in engine; polish in UI. Persistent state lives in a daemon with thin clients and an integer wire version.
+    - **Unix**: narrow interfaces, machine-readable output, fail loudly at boundaries, generate rather than hand-maintain, measure before optimizing.
 
     ## Verification
-
-    Through Nix, locally: `nix build`, `nix flake check`, `nix run`; no CI.
-    `cargo fmt`, `clippy` and `nix fmt` run natively. Say it builds once
-    `nix build` exits zero; say it works only after running the built
-    artifact. Exercise instances you start (own socket, private bus,
-    `env -i`), never the running session. Quote the command. A commit that
-    deletes a check says so.
+    - Nix locally (`nix build --no-link` or `-o` into scratch, `nix flake check`, `nix run`; no CI); `cargo fmt`/`clippy`/`nix fmt` natively.
+    - Verify running built artifacts in private instances (own socket/bus, `env -i`), never the live session. Quote the command; note deleted checks in commit.
 
     ## Filesystem
-
-    Every file has an owner, a lifetime and a reader; decide all three
-    before writing it.
-
-    - Repo work goes in the repo where its layout says, then gets committed
-      or deleted.
-    - A repo's prose is its README, and AGENTS.md for what an agent can't
-      learn from the code. Write no other markdown unless a person asked to
-      read it: a plan goes in the task list, progress in commit messages,
-      findings in the reply, a procedure in a script. An existing plan,
-      status or notes file is not precedent; delete it rather than update it.
-    - Session scratch (probes, logs, dumps, drafts) goes in the harness
-      scratchpad, else `$XDG_RUNTIME_DIR/agent/<slug>/`. Never the cwd,
-      `$HOME`, `~/dev`, or a repo root.
-    - Work that outlives the session (spike, repro, eval, report) goes in
-      `~/dev/sandbox/<slug>-<YYYYMMDD>/` with a one-line README.
-    - No `.orig` or `.bak`: git is the backup. `nix build` takes `--no-link`
-      or `-o` into scratch; a stray result link pins its store path.
-    - Before finishing, name each file you created outside the repo's
-      tracked tree, then delete it or report it.
+    - Session scratch: harness scratchpad or `$XDG_RUNTIME_DIR/agent/<slug>/` (never cwd, `$HOME`, `~/dev`, or repo root).
+    - Persistent spikes: `~/dev/sandbox/<slug>-<YYYYMMDD>/` with a 1-line README.
+    - No `.orig`/`.bak` files. Delete or report any file created outside the repo before finishing.
   '';
 }
