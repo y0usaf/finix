@@ -461,6 +461,7 @@
     place =
       map (placement: [(keyword placement.frame) (keyword placement.edge)])
       bar.rail.place;
+    sample = 1000;
     colors = lib.mapAttrs (_: keyword) {
       ink = "ink";
       rim = "rim";
