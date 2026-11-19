@@ -3422,6 +3422,9 @@ in {
             color = "#00000040";
           };
         }
+        // lib.optionalAttrs (tomoeKnows "pause-readings-when-dark") {
+          pause-readings-when-dark = true;
+        }
         // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;}
         // {
           animations =
