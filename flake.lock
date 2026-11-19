@@ -86,6 +86,26 @@
         "url": "ssh://git@github.com/y0usaf/ash.git"
       }
     },
+    "auth-router": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795126976,
+        "narHash": "sha256-eaWw3+L7esVLABtlALXRCeLJOdVnDLEgr740Gl7kq6c=",
+        "owner": "y0usaf",
+        "repo": "auth-router",
+        "rev": "f6010d0859fdb968c4b31832b625ae0a7a6e10be",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y0usaf",
+        "repo": "auth-router",
+        "type": "github"
+      }
+    },
     "autolith": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -3234,6 +3254,7 @@
       "inputs": {
         "alejandra": "alejandra",
         "ash": "ash",
+        "auth-router": "auth-router",
         "autolith": "autolith",
         "boar-rs": "boar-rs",
         "bolo": "bolo",

@@ -1432,7 +1432,8 @@ in {
       respawn = true;
       log = true;
       environment = {
-        CREST_AUTH = "${inputPackages.crest.crest-auth}/bin/crest-auth";
+        CREST_AUTH = "${inputPackages.auth-router.default}/bin/crest-auth";
+        AUTH_ROUTER_SOCKET = "${config.user.runtimeDir}/auth-router-restricted.sock";
         HOME = home;
       };
       command = "${proxy}/bin/omp-gateway-proxy";

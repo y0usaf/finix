@@ -56,6 +56,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    auth-router = {
+      url = "github:y0usaf/auth-router";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     iets = {
       url = "github:numtide/iets";
       inputs.nixpkgs.follows = "nixpkgs";
