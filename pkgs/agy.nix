@@ -1,13 +1,13 @@
 {pkgs}: let
   inherit (pkgs) lib;
-  version = "1.5.11";
+  version = "1.5.12";
 in
   pkgs.stdenvNoCC.mkDerivation {
     pname = "agy";
     inherit version;
     src = pkgs.fetchurl {
-      url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/${version}-6132547114106880/linux-x64/cli_linux_x64.tar.gz";
-      sha512 = "dad3c015e8964fcdc1639b13b7152f4cb84cb1bde385707e2bcdf095d6f1831f4f6521199aec499cc052f9e99906b7fdbc52c273df064d5cb7c84b068ba3ce50";
+      url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/${version}-5281398513336320/linux-x64/cli_linux_x64.tar.gz";
+      sha512 = "26de25fccb3fbf0b093e090ce14a14ac1df1ec3e90ef4ea6106887d3a81b0cc9edb0dadea7b9101d07f9606eba159062a6fb7b78e91b73f7520684a24db73428";
     };
     nativeBuildInputs = [pkgs.patchelf];
     sourceRoot = ".";

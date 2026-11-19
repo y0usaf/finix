@@ -1,0 +1,36 @@
+diff --git a/packages/catalog/src/models.ts b/packages/catalog/src/models.ts
+index 460a494..0f19d06 100644
+--- a/packages/catalog/src/models.ts
++++ b/packages/catalog/src/models.ts
+@@ -42,10 +42,31 @@ function getProviderModels(provider: string): Map<string, Model<Api>> | undefine
+ 		row.identity ??= classifyModel(provider, id, { lenient: true });
+ 		providerModels.set(id, row);
+ 	}
++	seedLateCatalogRows(provider, providerModels);
+ 	modelRegistry.set(provider, providerModels);
+ 	return providerModels;
+ }
+ 
++/**
++ * Rows the bundled catalog predates. agy 1.5.12 advertises `gemini-4-neon`, but
++ * the catalog generator still ships the 1.5.11 roster; each entry clones a
++ * sibling row so transport, cost, limits, and thought levels stay in one place.
++ */
++const LATE_CATALOG_ROWS: Readonly<Record<string, Readonly<Record<string, { name: string; like: string }>>>> = {
++	"antigravity-cli": { "gemini-4-neon": { name: "Gemini 4 Neon", like: "gemini-4-hydrogen" } },
++};
++
++function seedLateCatalogRows(provider: string, models: Map<string, Model<Api>>): void {
++	const rows = LATE_CATALOG_ROWS[provider];
++	if (rows === undefined) return;
++	for (const [id, row] of Object.entries(rows)) {
++		if (models.has(id)) continue;
++		const template = models.get(row.like);
++		if (template === undefined) continue;
++		models.set(id, { ...template, id, name: row.name, identity: classifyModel(provider, id, { lenient: true }) });
++	}
++}
++
+ /** Provider identifier accepted by the bundled model registry. */
+ export type GeneratedProvider = string;
+ 
