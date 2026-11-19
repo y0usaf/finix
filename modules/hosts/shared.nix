@@ -37,7 +37,9 @@ in {
     }
     // mounts;
 
-  bashFiles = {interactive ? ""}: {
+  bashFiles = {
+    interactive ? "",
+  }: {
     ".bashrc".text =
       ''
         case $- in
