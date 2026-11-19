@@ -7,14 +7,15 @@
     ".SteamCloud"
     ".steam"
   ];
+  user.files."${config.user.paths.steam}/package/beta".type = "delete";
   environment.systemPackages = [
     (
       if config.user.gaming.proton.enable
       then
-        pkgs.steam.override {
+        pkgs.steamWithMillennium.override {
           extraEnv.STEAM_EXTRA_COMPAT_TOOLS_PATHS = "${pkgs.proton-ge-bin.steamcompattool}";
         }
-      else pkgs.steam
+      else pkgs.steamWithMillennium
     )
     pkgs.steam-run
   ];
