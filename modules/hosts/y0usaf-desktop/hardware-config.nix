@@ -63,8 +63,6 @@ in {
     fallbackDevices = ["/dev/nvme0n1p5"];
   };
 
-  user.dev.prompts.host = ["The GPU is an NVIDIA GeForce RTX 4090."];
-
   hardware = {
     firmware = [pkgs.linux-firmware gpuUnlock.firmware];
     cpu.amd.updateMicrocode = true;

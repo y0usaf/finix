@@ -97,10 +97,10 @@ index 0c57c1c..61db411 100644
 +Shadow advisor watching the main agent. Stay silent unless there is a concrete bug, scope drift, false claim, or safety risk.
 +Call `advise` with `nit`, `concern`, or `blocker` (max {{#if max_notes_per_update}}{{max_notes_per_update}}{{else}}2{{/if}} notes/update). Be terse, cite exact paths/lines, and never repeat an earlier note.
 diff --git a/packages/coding-agent/src/prompts/system/browser-user-session.md b/packages/coding-agent/src/prompts/system/browser-user-session.md
-index cc0848b..333d3bf 100644
+index cc0848b..e69de29 100644
 --- a/packages/coding-agent/src/prompts/system/browser-user-session.md
 +++ b/packages/coding-agent/src/prompts/system/browser-user-session.md
-@@ -1,10 +1,4 @@
+@@ -1,15 +0,0 @@
 -# Browser user sessions
 -
 -- Relay and CDP actions operate on real user sessions.
@@ -108,10 +108,14 @@ index cc0848b..333d3bf 100644
 -- Report a step as done only when the page did it. NEVER alter the page with scripts to make a step look done
 -  (inserting controls, writing app state, revealing hidden elements); when a step cannot be done through the page, say so.
 -  When the user asks you to change the page with a script, do it.
-+Browser drives real user sessions; never navigate a borrowed `target` tab without permission, and never fake page steps with scripts.
- {{#if relay}}
- 
- {{{relay}}}
+-{{#if relay}}
+-
+-{{{relay}}}
+-{{/if}}
+-{{#if x11}}
+-
+-{{{x11}}}
+-{{/if}}
 diff --git a/packages/coding-agent/src/prompts/system/browser-x11.md b/packages/coding-agent/src/prompts/system/browser-x11.md
 index cf7fe9d..8d4fe97 100644
 --- a/packages/coding-agent/src/prompts/system/browser-x11.md
@@ -372,6 +376,18 @@ index a162fd4..6aa8360 100644
 +{{#if asyncEnabled}}`async`: returns immediately, delivers result later (deadline {{defaultTimeoutSec}}s; `timeout: 0` disables).{{/if}}
 +{{#if hasLaunch}}Long-lived service: set `name` + `ready` (`log` regex and/or `port`).{{/if}}
 +{{#if autoBackgroundEnabled}}Calls >{{autoBackgroundSeconds}}s move to `bg_N` and deliver later; don't poll.{{/if}}
+diff --git a/packages/coding-agent/src/prompts/tools/browser-core.md b/packages/coding-agent/src/prompts/tools/browser-core.md
+index 891b1f0..04fbf0f 100644
+--- a/packages/coding-agent/src/prompts/tools/browser-core.md
++++ b/packages/coding-agent/src/prompts/tools/browser-core.md
+@@ -1,6 +1,7 @@
+ Drive real Chromium tabs from JavaScript or Python Eval with the global `browser` object. This is the core; the full reference has every helper's options, application modes (relay, Tern, CDP, app paths) and platform notes.
+ 
+ <instruction>
++- Real user sessions: never navigate a borrowed `target` tab without permission, and never fake page steps with scripts.
+ - Static content? Use `read`. Use `browser` for JavaScript execution, authenticated sessions, and interactive actions.
+ - `await browser.open({name?, url?, app?, timeout?, persist?})` returns a `BrowserTab`;
+   `browser.tab(name)` returns an open one; `await browser.tabs()` lists them;
 diff --git a/packages/coding-agent/src/prompts/tools/commit-guidance.md b/packages/coding-agent/src/prompts/tools/commit-guidance.md
 index bf9702a..2e346c2 100644
 --- a/packages/coding-agent/src/prompts/tools/commit-guidance.md
@@ -380,14 +396,13 @@ index bf9702a..2e346c2 100644
 -To commit your changes, use the eval `commit` namespace (`d = await commit.draft()`, then `await d.commit("subject", ["- body"])`), not `git add`/`git commit`: it selects only the lines you and your subagents wrote and never touches other agents' staged or unstaged work.
 +Commit via eval's `commit` namespace (`d = await commit.draft(); await d.commit(subject, bullets)`), not raw `git add`/`git commit`.
 diff --git a/packages/coding-agent/src/prompts/tools/dsm-guidance.md b/packages/coding-agent/src/prompts/tools/dsm-guidance.md
-index 4251f57..261d750 100644
+index 4251f57..e69de29 100644
 --- a/packages/coding-agent/src/prompts/tools/dsm-guidance.md
 +++ b/packages/coding-agent/src/prompts/tools/dsm-guidance.md
-@@ -1,3 +1 @@
+@@ -1,3 +0,0 @@
 -Binary analysis lives in eval's `dsm` namespace; read `xd://eval/dsm` before use. Bare executable reads show metadata only.
 -
 -Sharing a database with a child: pass the string from `db.handle()` in its task/context. The child MUST `await dsm.open(handle)` to retain its own reference, then close its handle in `finally`. Keep the parent's reference until the children finish; NEVER pass a process-local database object or assume its variable exists in a child.
-+Binary analysis: eval `dsm` (`xd://eval/dsm`); share via `db.handle()` (helper opens/closes in `finally`).
 diff --git a/packages/coding-agent/src/prompts/tools/eval.md b/packages/coding-agent/src/prompts/tools/eval.md
 index fa453bd..1025c17 100644
 --- a/packages/coding-agent/src/prompts/tools/eval.md
@@ -627,3 +642,21 @@ index 045bc31..9695579 100644
 -SHOULD `edit` existing files; `write` for required new files or whole-file replacement. NEVER create docs or emojis unless requested.
 -{{#if readActive}}Archive members and SQLite rows are writable too: xd://read/sources.{{else}}`archive.ext:member`: ZIP/tar families and `.asar` writable, others read-only. `db.sqlite:table`: insert; `db.sqlite:table:key`: JSON update, empty content deletes.{{/if}}
 +Create or overwrite a file (`archive.ext:member` writes into ZIP/tar/.asar; `db.sqlite:table[:key]` inserts/updates, empty deletes).
+diff --git a/packages/coding-agent/src/tools/eval.ts b/packages/coding-agent/src/tools/eval.ts
+index db52cbb..987a9c1 100644
+--- a/packages/coding-agent/src/tools/eval.ts
++++ b/packages/coding-agent/src/tools/eval.ts
+@@ -434,12 +434,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+ 	}
+ 
+ 	/** Only syntax not obvious from the field schema; filtered by enabled language. */
+-	static readonly #examples: readonly ToolExample<typeof evalSchema.infer>[] = [
+-		{
+-			caption: "Load a script with spaces without echoing its source",
+-			call: { language: "py", code: '%load "scripts/my setup.py"' },
+-		},
+-	];
++	static readonly #examples: readonly ToolExample<typeof evalSchema.infer>[] = [];
+ 	get examples(): readonly ToolExample<typeof evalSchema.infer>[] {
+ 		const langs = new Set(this.#enabledLanguages());
+ 		return EvalTool.#examples.filter(ex => "call" in ex && langs.has(ex.call.language));

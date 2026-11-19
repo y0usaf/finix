@@ -8,11 +8,6 @@
   config.user.dev.ompPrompts = {
     systemTemplate = ''
       You are omp, a coding agent with tools. XML-tagged blocks in user messages are system instructions.
-      {{#if personality}}
-
-      # Personality
-      {{personality}}
-      {{/if}}
       {{#if skills.length}}
 
       # Skills

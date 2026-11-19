@@ -10,7 +10,7 @@
     home = config.user.homeDirectory;
     persistentHome = "/persist/home/${user}";
   in {
-    user.dev.prompts.host = lib.mkOrder 450 ["Home is reset at every boot: only paths in `finix.persistence.allowlist` (in ~/finix) survive, so a new program's state directory needs an entry there."];
+    user.dev.prompts.host = lib.mkOrder 450 ["Home resets on boot; persistent paths need `finix.persistence.allowlist` in `~/finix`."];
 
     environment.systemPackages = let
       inherit (config.users.users.${user}) uid;

@@ -11,8 +11,6 @@
       ".config/ekko"
     ];
 
-    dev.prompts.host = ["`EKKO_INSTANCE` in your environment points at the ekko instance holding the live terminals."];
-
     files.".config/ekko/init.lisp".text =
       builtins.readFile ./init.lisp
       + "\n"
