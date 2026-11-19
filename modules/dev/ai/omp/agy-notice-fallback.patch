@@ -1,5 +1,5 @@
 diff --git a/packages/ai/src/error/flags.ts b/packages/ai/src/error/flags.ts
-index 38701a2..beaa672 100644
+index 38701a2..ea6f0fd 100644
 --- a/packages/ai/src/error/flags.ts
 +++ b/packages/ai/src/error/flags.ts
 @@ -270,6 +270,13 @@ const CURSOR_PLAN_POLICY_MARKER_PATTERN = /\bERROR_RATE_LIMITED_CHANGEABLE\b/i;
@@ -16,16 +16,14 @@ index 38701a2..beaa672 100644
  
  function agyUnknownModelFromText(text: string): string | undefined {
  	return AGY_UNKNOWN_MODEL_PATTERN.exec(text.trim())?.[1];
-@@ -693,7 +700,8 @@ function classifyText(
- 		}
+@@ -715,6 +722,7 @@ function classifyText(
  		if (
- 			isAnthropicAccountPolicyText(errorMessage, provider, statusClean) ||
--			isAgyUnknownModelText(errorMessage, provider, modelId)
-+			isAgyUnknownModelText(errorMessage, provider, modelId) ||
-+			isAgyAccountDisabledText(errorMessage, provider)
- 		) {
- 			kinds |= Flag.AccountPolicy;
- 		}
+ 			!concurrencyExcluded &&
+ 			(is402BillingCap ||
++				isAgyAccountDisabledText(cleanMessage, provider) ||
+ 				matchesUsageLimitText(cleanMessage) ||
+ 				((statusClean === 403 || statusClean === undefined) && isAccountScopedCapText(cleanMessage)) ||
+ 				(isLimitStatus && (isOpaque || reason === "QUOTA_EXHAUSTED")))
 diff --git a/packages/ai/src/providers/antigravity-cli/host.ts b/packages/ai/src/providers/antigravity-cli/host.ts
 index 52383c0..34b235d 100644
 --- a/packages/ai/src/providers/antigravity-cli/host.ts
