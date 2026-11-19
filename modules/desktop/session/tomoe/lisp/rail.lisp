@@ -66,13 +66,15 @@
 ;;;
 ;;; The readings are sampled, not streamed: a CPU percentage is two reads of
 ;;; /proc/stat and a GPU is a polled counter, so a number only ever changes when
-;;; it is read. The compositor reads the counters once a second; the rail
-;;; samples them four times a second, so a sample lands within a quarter of a
-;;; second of the read, and between samples each gauge eases toward the last one
-;;; on an exponential approach, sweeping through the values in between instead
-;;; of jumping a whole second's load at once. A step is taken only when a drawn
+;;; it is read. The compositor reads the counters once a second while an output
+;;; is lit, and the rail samples on that read itself, so it holds no timer of its
+;;; own for them; between samples each gauge eases toward the last one on an
+;;; exponential approach, sweeping through the values in between instead of
+;;; jumping a whole second's load at once. A step is taken only when a drawn
 ;;; number would change -- every number on the way is drawn, and no update is
-;;; spent redrawing the same one -- and a gauge that draws its sample stops.
+;;; spent redrawing the same one -- and a gauge that draws its sample stops. The
+;;; clock and the date turn over on a timer at each minute's boundary, the only
+;;; instant their text can change.
 
 (defvar *rail--palette* nil)
 (defvar *rail--look* nil)
@@ -180,6 +182,13 @@ move retargeting rather than a second transition of its own."
                     :let-go 0.015 :gone 0.11)
         :siphon (list :hold 0.16 :gulp 6 :drain 0.16 :drain-ease 1.7 :bulge 6.5
                       :fill-at 0.025 :fill 0.27 :head 5.5 :ripple 1.4 :meet 4)))
+
+;; A read that comes this many seconds after the last one follows a pause -- the
+;; compositor stops reading while every output is dark -- so its CPU percentage
+;; would be the pause's average: it only restarts the count, the gauges keep the
+;; numbers they drew, and the readings that are no difference (memory, the GPU)
+;; are drawn as read rather than glided to.
+(defparameter +rail--sample-gap+ 5)
 
 ;; The gauges: a reading is read once a second, so the number drawn between
 ;; reads glides toward it -- an exponential approach whose next step is taken
@@ -339,6 +348,12 @@ what the last one packed."
         (let ((value (funcall compute)))
           (setf (getf (getf state :rail-memo) key) (cons inputs value))
           value))))
+
+(defun rail--restart-count (cpu)
+  "CPU's sample without the counts its next percentage is taken against, so the
+next read only restarts them and the percentage drawn stays."
+  (loop for (key value) on cpu by #'cddr
+        unless (member key '(:total :idle)) append (list key value)))
 
 (defun rail--glide (state now)
   "Step every gauge toward its last sample: an exponential approach over the time
@@ -1347,14 +1362,21 @@ CONTEXT."
                                       :rail-side nil :rail-focus nil
                                       :rail-switch nil :rail-switched nil
                                       :rail-meter nil :rail-step nil :rail-glide nil
-                                      :rail-memo nil))
+                                      :rail-sampled nil :rail-memo nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
     (cassette--bolo-watch state event))
-  (when (and (eq (getf event :type) :timer) (eq (getf event :name) :sample))
-    (let ((system (context snapshot :system)))
+  (when (eq (getf event :type) :system)
+    (let* ((system (context snapshot :system))
+           (now (hud--now))
+           (last (getf state :rail-sampled))
+           (pause (and (realp last) (> (- now last) +rail--sample-gap+))))
+      (when pause
+        (setf (getf state :cpu) (rail--restart-count (getf state :cpu))
+              (getf state :rail-meter) nil))
       (dolist (probe '(:cpu :memory :gpu))
-        (setf (getf state probe) (probe--sample probe (getf state probe) system)))))
+        (setf (getf state probe) (probe--sample probe (getf state probe) system)))
+      (setf (getf state :rail-sampled) now)))
   (when (and (eq (getf event :type) :command) (equal (getf event :owner) "bar")
              (equal (getf event :name) "rail-theme"))
     (setf (getf state :rail-theme) (rail--next-theme (rail--theme state))))
@@ -1411,7 +1433,7 @@ CONTEXT."
            (switching (and switch (< (- now (getf switch :at)) (rail--settle switch))))
            (old (and switching (getf switch :old))))
       (values state
-              (append (list (interval :sample (getf +rail+ :sample))
+              (append (list (interval :clock :minute)
                             (publish-state :hud-hot (and hot t))
                             (publish-state :rail-theme theme)
                             (publish-state :rail-frame (append (getf *rail--look* :frame)
