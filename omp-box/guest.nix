@@ -27,7 +27,6 @@
   botNames = map (bot: bot.user) bots;
   botsOf = name: lib.findFirst (bot: bot.name == name) null bots;
   sweepBot = botsOf "Sweep";
-  acpBots = lib.filter (bot: bot != null) (map botsOf ["Sweep" "Dash"]);
   loginUser = ompBox.logins;
   loginHome = let
     person = lib.findFirst (candidate: candidate.name == loginUser) null people;
@@ -435,14 +434,14 @@ in {
       };
     }
     // lib.listToAttrs (map (bot:
-        lib.nameValuePair bot.user {
-          isNormalUser = true;
-          inherit (bot) uid;
-          group = "users";
-          home = "/home/${bot.user}";
-          homeMode = "0700";
-        })
-      bots);
+      lib.nameValuePair bot.user {
+        isNormalUser = true;
+        inherit (bot) uid;
+        group = "users";
+        home = "/home/${bot.user}";
+        homeMode = "0700";
+      })
+    bots);
   security.sudo.wheelNeedsPassword = false;
 
   fileSystems =
@@ -459,6 +458,11 @@ in {
       };
     }
     // lib.listToAttrs (lib.concatMap (person: [
+        (lib.nameValuePair "${person.home}/.omp" {
+          device = "tmpfs";
+          fsType = "tmpfs";
+          options = ["mode=0700" "uid=${toString person.uid}" "gid=${toString person.gid}" "size=512M"];
+        })
         (lib.nameValuePair "${person.home}/.omp/run" {
           device = "tmpfs";
           fsType = "tmpfs";
@@ -594,7 +598,7 @@ in {
         omp-natives = {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
-          unitConfig.RequiresMountsFor = ["/mnt/omp-natives"];
+          unitConfig.RequiresMountsFor = ["/mnt/omp-natives"] ++ map (person: "${person.home}/.omp") people;
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
@@ -640,10 +644,10 @@ in {
             fi
           '';
         };
-        omp-antigravity = lib.mkIf (acpBots != []) {
+        omp-antigravity = lib.mkIf (bots != []) {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
-          unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"] ++ lib.concatMap (bot: ["/home/${bot.user}/.omp/agent" "/home/${bot.user}/.omp/run"]) acpBots;
+          unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"] ++ lib.concatMap (bot: ["/home/${bot.user}/.omp/agent" "/home/${bot.user}/.omp/run"]) bots;
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
@@ -656,7 +660,7 @@ in {
               echo "omp-antigravity: the auth share holds no Antigravity account, so the box answers on the fallback" >&2
               exit 0
             fi
-            for bot in ${lib.concatMapStringsSep " " (bot: bot.user) acpBots}; do
+            for bot in ${lib.concatMapStringsSep " " (bot: bot.user) bots}; do
               home=/home/$bot
               # The share copy is root's to read; the bot gets its own copy to import into its omp credential store.
               if inbox=$(${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/mktemp -d "$home/.omp/run/antigravity.XXXXXX"); then
