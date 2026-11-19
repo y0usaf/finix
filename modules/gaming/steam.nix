@@ -7,7 +7,10 @@
     ".SteamCloud"
     ".steam"
   ];
-  user.files."${config.user.paths.steam}/package/beta".type = "delete";
+  user.files."${config.user.paths.steam}/package/beta" = {
+    type = "delete";
+    force = false;
+  };
   environment.systemPackages = [
     (
       if config.user.gaming.proton.enable
