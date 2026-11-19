@@ -1,0 +1,437 @@
+diff --git a/packages/coding-agent/src/prompts/system/browser-user-session.md b/packages/coding-agent/src/prompts/system/browser-user-session.md
+index cc0848b..71f8fb6 100644
+--- a/packages/coding-agent/src/prompts/system/browser-user-session.md
++++ b/packages/coding-agent/src/prompts/system/browser-user-session.md
+@@ -1,10 +1,6 @@
+-# Browser user sessions
+-
+-- Relay and CDP actions operate on real user sessions.
+-- `target` borrows the user's own tab or Tern block: NEVER navigate it (`url`, `goto`) without authorization.
+-- Report a step as done only when the page did it. NEVER alter the page with scripts to make a step look done
+-  (inserting controls, writing app state, revealing hidden elements); when a step cannot be done through the page, say so.
+-  When the user asks you to change the page with a script, do it.
++# Browser
++- The browser drives the user's real sessions. Never navigate a borrowed `target` tab without permission.
++- A step is done only when the page did it; never fake one with a script unless the user asks for the script.
+ {{#if relay}}
+ 
+ {{{relay}}}
+diff --git a/packages/coding-agent/src/prompts/system/browser-x11.md b/packages/coding-agent/src/prompts/system/browser-x11.md
+index cf7fe9d..5f44f39 100644
+--- a/packages/coding-agent/src/prompts/system/browser-x11.md
++++ b/packages/coding-agent/src/prompts/system/browser-x11.md
+@@ -1 +1 @@
+-- On Linux under X11, Chrome 150 and later brings its window to the front when a mouse or touch press lands in the tab a window shows (the relay's `browser.targets()` marks it `shown`) while another window is in front, and what the user types next goes to that page. Presses: `click`, `dblclick`, `tap`, `drag`, `mouseDown`, `clickAt`, `check`/`uncheck` unless the element is already in the requested state (one that refuses the change still presses; unchecking a native radio does not press), and `uploadFile` on anything but an `<input type=file>`. Keys (`type`, `fill`, `press`), `focus`, `select`, `hover`, scrolling and screenshots are not presses, and a tab its window is not showing never comes forward. There, when the user must keep their app in front, use those on a shown tab instead: `focus()` then `press("Enter")` for a button, `press("Space")` for a checkbox, `uploadFile` on the file input itself. A control that opens a new tab or popup may still bring Chrome forward, however it is activated.
++- X11: a press (`click`, `tap`, `drag`, `check`, …) in a shown tab raises Chrome over the user's app and takes their typing. To keep their app in front, use keys: `focus()` then `press("Enter")` for a button, `press("Space")` for a checkbox, `uploadFile` on the file input itself.
+diff --git a/packages/coding-agent/src/prompts/system/subagent-system-prompt.md b/packages/coding-agent/src/prompts/system/subagent-system-prompt.md
+index 9466a08..e025b41 100644
+--- a/packages/coding-agent/src/prompts/system/subagent-system-prompt.md
++++ b/packages/coding-agent/src/prompts/system/subagent-system-prompt.md
+@@ -16,17 +16,16 @@ This session is executing an approved plan. Your assignment above is one part of
+ {{/if}}
+ 
+ ⁂ Coop
+-You are operating on a piece of work assigned to you by the main agent.
++Main assigned you this work.
+ 
+ {{#if worktree}}
+ # Working Tree
+-You are working in an isolated working tree at `{{worktree}}` for this sub-task.
+-You NEVER modify files outside this tree or in the original repository.
++Work only inside `{{worktree}}`; never touch files outside it or in the original repository.
+ {{/if}}
+ 
+ {{#if ircSelfId}}
+ # Peers
+-Message peers via `write` with `path: "agent://<id>"` and `content`. Your id is `{{ircSelfId}}`. Peers when this list was written:
++Your id is `{{ircSelfId}}`; message a peer with `write` to `agent://<id>`. Peers when this was written:
+ {{#if ircPeers}}
+ {{#each ircPeers}}
+ - `{{this.id}}` — {{this.displayName}} ({{this.kind}}, {{this.status}}){{#if this.activity}}: {{this.activity}}{{/if}}
+@@ -41,14 +40,7 @@ Message peers via `write` with `path: "agent://<id>"` and `content`. Your id is
+ {{ircParkedCount}} parked peer(s) omitted.
+ {{/if}}
+ 
+-Your assignment sets your files and scope; stay inside it. Address peers by exact roster id; NEVER invent names.
+-- Messages: only a question that blocks you or a blocker/decision report, sent directly to the one agent that can answer. Short; never long-form content.
+-- NEVER send FYI, progress, or "editing <file>" announcements.
+-- Change needed outside your assignment? Ask its owner or Main first.
+-- Asked a question? Keep working on whatever it does not block; NEVER `wait` on a peer's or Main's progress.
+-- Discovery: the roster above shows live (running+idle) peers when it was written and a parked count; it can be out of date. Read bare `history://` for registered agent transcripts and current peers; parked identities are omitted from the roster.
+-- Follow-up: answer the question first, without quoting it. `write agent://<id>` never blocks.
+-- Your final result reaches Main automatically. Message Main only for questions, blockers, or decisions — never progress or completion reports.
++Stay inside your assignment's files and scope; ask Main before changing anything else. Message only the one agent that can answer, and only with a question that blocks you or a blocker; never progress or FYI. Keep working on what a question doesn't block. Your final message reaches Main automatically.
+ {{/if}}
+ 
+ ⁂ Completion
+@@ -83,14 +75,7 @@ Your terminal `yield` MUST use exactly this shape — the schema fields go insid
+ 
+ Giving up is a last resort. If truly blocked, you MUST {{#if workPoolYieldItems}}yield `{ key, error }` for that item{{else}}terminal-yield `{ error }`{{/if}} describing what you tried and the exact blocker.
+ {{else}}
+-No TODO tracking, no progress updates. Execute; your final message is your result.
+-
+-While work remains, you MUST continue with another tool call — investigate, edit. A reply without a tool call ends the run; its text reaches Main verbatim as your complete result. NEVER end on a plan, a promise of further work, or a question.
+-
+-No `yield` tool exists: ROLE mentions of `yield`, sections, or output fields describe what your final message covers.
+-
+-Giving up is a last resort. If truly blocked, your final message MUST describe what you tried and the exact blocker.
++No progress updates. While work remains, keep calling tools: a reply without a tool call ends the run and is your whole result, so never end on a plan or a question. (No `yield` tool exists; mentions of it describe your final message.)
++If truly blocked, say what you tried and the exact blocker.
+ {{/if}}
+-You NEVER give up due to uncertainty, missing information obtainable via tools or repo context, or needing a design decision you can derive yourself.
+-
+-You MUST keep going until this ticket is closed. This matters.
++Never give up over uncertainty or anything tools can find out.
+diff --git a/packages/coding-agent/src/prompts/tools/ask.md b/packages/coding-agent/src/prompts/tools/ask.md
+index f33768b..3479c90 100644
+--- a/packages/coding-agent/src/prompts/tools/ask.md
++++ b/packages/coding-agent/src/prompts/tools/ask.md
+@@ -1,39 +1,11 @@
+-Ask the user to fill in one HTML form; blocks until they submit or cancel.
+-
+-Ask only for materially different tradeoffs the user must decide.
+-Default: act using code/config/docs/history and conventions.
+-Several viable choices: pick conservative/standard, proceed, state choice.
++Ask the user to fill in one HTML form; blocks until they submit or cancel. Only for a decision that is truly theirs; otherwise pick the standard choice, proceed and say so.
+ 
+ <instruction>
+-- `html`: one <form> of plain semantic HTML, rendered natively in the user's terminal.
+-  - NEVER <script>, <style>, style=, or buttons (<button>, type="submit"): the UI supplies Submit and Cancel.
+-- Every control needs a name; the submitted form data arrives as JSON `{"name": value}`.
+-- One-of: `<input type="radio">`; many-of: type="checkbox"; long lists: <select>.
+-- Wrap each control in a <label>; group a question in a <fieldset> with a <legend>, or put it in a <p> right before the group.
+-- Radio and checkbox groups automatically get an "Other" free-text answer. NEVER add your own "Other" option or a text field for it.
+-- Preselect your recommendation with checked/selected/value: those values are submitted if the user does not answer in time.
+-- Context the user needs to decide (findings, tradeoffs, diffs, drafts) goes inside the form: <p>, <ul>, <table>, <pre>.
+-- Keep forms short: a few questions, 2–5 options each; ask follow-ups in a later call.
+-- Answer values:
+-  - radio group or <select> → the chosen value
+-  - checkbox group (shared name) or <select multiple> → an array
+-  - lone checkbox or radio group left unchecked → omitted
+-  - type="number" → a number; text fields → their text
+-  - automatic "Other" text → the radio's value, or an extra checkbox array entry
+-- Free input: `<input type="text|number|date|email|url">`, <textarea>; placeholder, min/max, pattern, required are enforced.
+-- Pictures: `<img src="…" alt="…">` and inline <svg> diagrams, as their own blocks.
+-  - `src`: an http(s) URL, a data: URI, or a file path relative to the working directory.
+-  - Inside a <label> an image shows only its alt.
+-- Example, a choice with context and a number:
+-```html
+-<form>
+-  <p>Sessions live in memory and are lost on restart.</p>
+-  <fieldset>
+-    <legend>Session store</legend>
+-    <label><input type="radio" name="store" value="sqlite" checked> SQLite: one file, no new service</label>
+-    <label><input type="radio" name="store" value="redis"> Redis: shared across instances, needs ops</label>
+-  </fieldset>
+-  <label>Session lifetime (days) <input type="number" name="ttl_days" value="30" min="1"></label>
+-</form>
+-```
++- `html`: one plain <form>; no <script>, <style>, style= or buttons (the UI adds Submit and Cancel).
++- Every control has a name; answers arrive as JSON `{"name": value}` (checkbox groups and <select multiple> as arrays).
++- One-of: radio; many-of: checkbox; long lists: <select>; free text: <input type="text|number|date|email|url"> or <textarea>.
++- Wrap each control in a <label>; group a question in a <fieldset> with a <legend>.
++- Radio and checkbox groups get an automatic "Other" text answer; never add your own.
++- Preselect your recommendation (checked/selected/value); it is submitted if the user doesn't answer in time.
++- Context needed to decide goes inside the form (<p>, <ul>, <table>, <pre>, <img>). A few questions, 2–5 options each.
+ </instruction>
+diff --git a/packages/coding-agent/src/prompts/tools/bash.md b/packages/coding-agent/src/prompts/tools/bash.md
+index a162fd4..0e13c1b 100644
+--- a/packages/coding-agent/src/prompts/tools/bash.md
++++ b/packages/coding-agent/src/prompts/tools/bash.md
+@@ -1,18 +1,11 @@
+-Persistent bash 5.3.
+-cwd will reset after each turn, don't rely on cd; `pty` = interactive.
+-Internal URIs work as paths for builtins/coreutils, redirects, globs.
+-In-process builtins, ahead of PATH: {{join builtins ", "}}.
++Run a bash command. cwd resets every call; `pty` for interactive programs. Internal URLs (artifact://, agent://, …) work as paths.
++Long output is summarized and saved as an artifact; don't truncate it yourself.
+ {{#if asyncEnabled}}
+-`async` defers finite results but keeps the deadline (default {{defaultTimeoutSec}}s); `timeout: 0` for watchers and long jobs.
++`async` returns at once and delivers the result later (deadline {{defaultTimeoutSec}}s); `timeout: 0` for long jobs.
+ {{/if}}
+-Don't trunc output by habit, result will be summarized and saved as an artifact.
+ {{#if hasLaunch}}
+-Long-lived services:
+-- unique name; ready requires name; no async/timeout; pty defaults true.
+-- ready needs log regex or port (both if given); host defaults 127.0.0.1, ready.timeout 30s.
++Long-lived service: set `name` and `ready` (log regex and/or port).
+ {{/if}}
+ {{#if autoBackgroundEnabled}}
+-Non-`pty` calls still running after {{autoBackgroundSeconds}}s (or 1s before `timeout`, if sooner) usually move to background job `bg_N` and keep running to `timeout`.
+-No backgrounding when the client terminal runs the command or the job cap is reached.
+-The result arrives automatically as a follow-up message. NEVER poll.
++Calls running past {{autoBackgroundSeconds}}s move to background job `bg_N`; the result arrives as a follow-up message. Never poll.
+ {{/if}}
+diff --git a/packages/coding-agent/src/prompts/tools/commit-guidance.md b/packages/coding-agent/src/prompts/tools/commit-guidance.md
+index bf9702a..f09d5db 100644
+--- a/packages/coding-agent/src/prompts/tools/commit-guidance.md
++++ b/packages/coding-agent/src/prompts/tools/commit-guidance.md
+@@ -1 +1 @@
+-To commit your changes, use the eval `commit` namespace (`d = await commit.draft()`, then `await d.commit("subject", ["- body"])`), not `git add`/`git commit`: it selects only the lines you and your subagents wrote and never touches other agents' staged or unstaged work.
++Commit with eval's `commit` namespace (`d = await commit.draft()`, then `await d.commit("subject", ["- body"])`), not `git add`/`git commit`: it takes only the lines you and your helpers wrote.
+diff --git a/packages/coding-agent/src/prompts/tools/dsm-guidance.md b/packages/coding-agent/src/prompts/tools/dsm-guidance.md
+index 4251f57..533312d 100644
+--- a/packages/coding-agent/src/prompts/tools/dsm-guidance.md
++++ b/packages/coding-agent/src/prompts/tools/dsm-guidance.md
+@@ -1,3 +1 @@
+-Binary analysis lives in eval's `dsm` namespace; read `xd://eval/dsm` before use. Bare executable reads show metadata only.
+-
+-Sharing a database with a child: pass the string from `db.handle()` in its task/context. The child MUST `await dsm.open(handle)` to retain its own reference, then close its handle in `finally`. Keep the parent's reference until the children finish; NEVER pass a process-local database object or assume its variable exists in a child.
++Binary analysis: eval's `dsm` namespace; read `xd://eval/dsm` first. To share a database with a helper, pass `db.handle()`; the helper runs `await dsm.open(handle)` and closes it in `finally`; keep yours open until helpers finish.
+diff --git a/packages/coding-agent/src/prompts/tools/eval.md b/packages/coding-agent/src/prompts/tools/eval.md
+index fa453bd..015682f 100644
+--- a/packages/coding-agent/src/prompts/tools/eval.md
++++ b/packages/coding-agent/src/prompts/tools/eval.md
+@@ -1,97 +1,47 @@
+-One cell per call; top-level state persists, including across compaction.{{#if spawns}} Subagents have separate kernels.{{/if}}
+-{{#if spawns}}
+-{{#if eagerDelegation}}
+-For 2+ independent items, use a named `workpool()`; results auto-deliver.
+-{{#if waitTool}}
+-If blocked, leave `eval` and call `wait`.
+-{{/if}}
+-{{/if}}
+-{{/if}}
++Run one cell; top-level state persists.{{#if spawns}} Subagents have separate kernels.{{/if}}
+ {{#if py}}
+-Python: plain Python subprocess, not IPython (no `get_ipython()`, `obj?`, or %matplotlib).
+-Magics like %pip, %load, %time and `!cmd` are rewritten to Python.
+-Top-level `await` works; `asyncio.run(…)` fails.
++Python: plain subprocess, not IPython; `%pip`, `%load`, `!cmd` work; top-level `await` works, `asyncio.run` fails.
+ {{/if}}
+-{{#if js}}JS: Bun (Bun.file, Bun.write, Bun.$); top-level `await`/`return` work.{{/if}}
+-On error, retry only the failed step; earlier steps may have taken effect.
+-Printing an image{{#if py}} or figure{{/if}} attaches it.
+-
++{{#if js}}
++JS: Bun; top-level `await` works.
++{{/if}}
++On error, rerun only the failed step. Printing an image attaches it.
+ <prelude>
+-{{#ifAll py js}}
+-Python helpers take kwargs; JS helpers take the same parameters (camelCase) as positional args or ONE trailing options object.
+-`await` marks async helpers; the rest are sync.
+-```
+-print(value, ...)  log(message)  phase(title)  env(key?, value?)
+-read(path, offset?, limit?)  write(path, content)  output(*ids, format?, query?, offset?, limit?); JS: await read(…)  await write(…)  await output(…)
+-wait(handles, timeout?=None, raise_errors?=True); JS: await wait(…) — agent/completion barrier, ordered results; raise_errors=False retains failures
+-await tool.<name>(args) — session tool; `args` is its parameter object
+-sh(command, cwd?, timeout?); JS: await sh(…) or await sh`cmd ${arg}` — embedded bash engine, runs to completion (never backgrounded)
+-  returns stdout+stderr; non-zero exit raises ShellError (.exit_code/.exitCode, .output)
+-  JS interpolations are shell-quoted; starts in the session cwd unless cwd is given
+-```
+-{{else}}
+-`await` marks async helpers; the rest are sync.
+ {{#if py}}
+-Python (kwargs):
+-```py
+-print(value, ...)  log(message)  phase(title)  env(key?, value?)
++Python (kwargs; `await` only where shown):
++print(...)  log(msg)  phase(title)  env(key?, value?)
+ read(path, offset?, limit?)  write(path, content)  output(*ids, format?, query?, offset?, limit?)
+-wait(handles, timeout?=None, raise_errors?=True) — agent/completion barrier, ordered results; `raise_errors=False` retains failures.
+-await tool.<name>(args) — session tool; `args` is its parameter object
+-sh(command, cwd?, timeout?) — embedded bash engine, runs to completion (never backgrounded)
+-  returns stdout+stderr; non-zero exit raises ShellError (`.exit_code`, `.output`); starts in the session cwd unless `cwd` is given
+-```
++wait(handles, timeout?, raise_errors?) — wait for agents/jobs, ordered results
++await tool.<name>(args) — call a session tool
++sh(command, cwd?, timeout?) — run bash to completion; non-zero exit raises ShellError (`.exit_code`, `.output`)
+ {{/if}}
+ {{#if js}}
+-JS (positional args or ONE trailing options object):
+-```js
+-print(value, ...)  log(message)  phase(title)  env(key?, value?)
+-await read(path, offset?, limit?)  await write(path, content)  await output(...ids, { format?, query?, offset?, limit? })
+-await wait(handles, { timeout?, raiseErrors? }) — agent/completion barrier, ordered results; `raiseErrors: false` retains failures.
+-await tool.<name>(args) — session tool; `args` is its parameter object
+-await sh(command, { cwd?, timeout? })  await sh`cmd ${arg}` — embedded bash engine, runs to completion (never backgrounded)
+-  resolves to stdout+stderr; non-zero exit throws ShellError (`.exitCode`, `.output`)
+-  interpolations are shell-quoted; starts in the session cwd unless `cwd` is given
+-```
++JS (positional args or one options object): print, log, phase, env; await read/write/output/wait/sh(…), sh`cmd ${arg}`; await tool.<name>(args)
+ {{/if}}
+-{{/ifAll}}
+-{{#if toolNames}}Session tool names: {{#each toolNames}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}.{{/if}}
++{{#if toolNames}}Session tools: {{#each toolNames}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}.{{/if}}
+ </prelude>
+-
+ {{#if inlineTopics}}
+ {{{inlineTopics}}}
+ {{else}}
+-<namespaces>
+-More globals; read `xd://eval/<topic>` (eval `read(...)` or `bash` `cat`) before first use:
+-- `judge`, `{{#if py}}judge_batch{{else}}judgeBatch{{/if}}`, `completion`: classification, bulk judgment, model calls → xd://eval/judge
+-- `%load`{{#if py}}, `%pip`{{/if}}{{#if js}}, `%bun add`{{/if}}, `budget`{{#if evalTools}}, `@tool`/`tool(fn)`{{/if}}: setup, installs, utilities → xd://eval/helpers
++Namespaces; read `xd://eval/<topic>` (eval `read(...)` or `bash` `cat`) before first use:
++- `judge`, `completion`: model calls → xd://eval/judge
++- `%load`, `budget`{{#if evalTools}}, `@tool`{{/if}}: utilities → xd://eval/helpers
+ {{#if spawns}}
+-- `agent`, `workpool`: background subagents, DAG waves → xd://eval/agents
++- `agent`, `workpool`: background subagents → xd://eval/agents
+ {{/if}}
+ {{#each preludes}}
+ - `{{name}}`: {{summary}} → xd://eval/{{name}}
+ {{/each}}
+-{{#if firstCallPreludes}}
+-No `read` needed before first use; the guide follows the first call's result (full reference linked):
+ {{#each firstCallPreludes}}
+-- `{{name}}`: {{summary}} → `xd://eval/{{name}}`
++- `{{name}}`: {{summary}}; its guide follows the first call → xd://eval/{{name}}
+ {{/each}}
+-{{/if}}
+-</namespaces>
+ {{#each inlinePreludes}}
+ 
+ <{{name}}>
+-Global `{{name}}`, documented here in full (no `read` needed):
+ {{{documentation}}}
+ </{{name}}>
+ {{/each}}
+ {{/if}}
+-
+-<critical>
+-NEVER repeat successful setup. Kernel-loss notice means reload setup.
+-</critical>
+-
+ {{#if autoBackgroundEnabled}}
+-Long cells may auto-background and deliver later; the kernel stays busy.
+-`timeout: 0` disables the cell deadline, not the foreground wait.
++Long cells may move to the background and deliver later.
+ {{/if}}
+diff --git a/packages/coding-agent/src/prompts/tools/task-async-contract.md b/packages/coding-agent/src/prompts/tools/task-async-contract.md
+index 3e149bc..aeef477 100644
+--- a/packages/coding-agent/src/prompts/tools/task-async-contract.md
++++ b/packages/coding-agent/src/prompts/tools/task-async-contract.md
+@@ -1,2 +1 @@
+-Results auto-deliver; NEVER poll.{{#if waitTool}} Completely blocked? Call `wait` until it returns the first settled job you started.{{/if}}
+-`completed`: subagent yielded successfully; claimed artifacts unverified.
++Results arrive as messages; never poll.{{#if waitTool}} Fully blocked? Call `wait`.{{/if}} `completed` means the helper finished; check what it claims.
+diff --git a/packages/coding-agent/src/prompts/tools/task.md b/packages/coding-agent/src/prompts/tools/task.md
+index fbd03c0..4e91840 100644
+--- a/packages/coding-agent/src/prompts/tools/task.md
++++ b/packages/coding-agent/src/prompts/tools/task.md
+@@ -1,98 +1,37 @@
+ {{#if asyncEnabled}}
+-{{#if batchEnabled}}
+-Spawn `tasks[]` concurrently; IDs return immediately.
+-{{else}}
+-Spawn one agent; ID returns immediately.
+-{{/if}}
++Start {{#if batchEnabled}}the `tasks[]` helpers in parallel{{else}}one helper{{/if}}; IDs return at once. {{asyncGuidance}}
+ {{#if hasBlockingAgents}}
+ BLOCKING agents return inline.
+ {{/if}}
+-{{else}}
+-{{#if batchEnabled}}
+-Run `tasks[]` synchronously.
+-{{else}}
+-Run one agent synchronously.
+-{{/if}}
+-{{/if}}
+-{{#if asyncEnabled}}
+ {{#ifAny structured hasStructuredAgents}}
+-
+-# Results
+-{{#if structured}}`outputSchema`{{else}}STRUCTURED agents'{{/if}} parsed payload, even invalid: agent://<id> (field /<field>, nested /reports/0/data); invalid preview inline.
++Structured results: agent://<id>, fields at /<field>.
+ {{/ifAny}}
+-
+-{{asyncGuidance}}
+-{{/if}}
+-
+-# Inputs
+-- `agent`: most specific{{#if batchEnabled}}, inside each `tasks[]` item, NEVER at the top level{{/if}}.
+-  - Omit only for the default (`{{defaultAgent}}`); NEVER name it.
+-{{#if scoutAvailable}}
+-  - Read-only research MUST use `scout` only when files unknown.
+-{{/if}}
+-  - Prefer one agent to investigate + edit.
+-{{#if batchEnabled}}
+-- `context`: shared (`# Goal`, `# Contract` interfaces); NEVER repeat per task.
++{{else}}
++Run {{#if batchEnabled}}the `tasks[]` helpers{{else}}one helper{{/if}} and return the results.
+ {{/if}}
++Helpers start blank: each `task` states its goal, files, limits and done condition{{#if batchEnabled}}; background shared by all goes once in `context`{{/if}}. Pass large inputs as local://<path>. Give each helper its own files; helpers skip builds and tests unless told.
+ {{#if steps}}
+-- `steps`: ordered stages for one agent; each is sent only after it finishes the previous one. Earlier stages' reports arrive as progress messages; the last stage's result is returned.
+-  - First step carries `# Target` files/non-goals{{#if batchEnabled}} beyond `context`{{/if}}.
+-  - Each step: one `# Change` stage.
+-  - Last step adds `# Acceptance` observable result.
+-  - Children start blank;{{#if ircEnabled}} parent IRC steers immediately;{{/if}} large payloads via local://<path>, NEVER inline.
+-  - Independent work → separate tasks.
+-{{else}}
+-- `task`: self-contained (`# Target` files/non-goals, `# Change` steps/APIs, `# Acceptance` observable result).
+-  - Children start blank;{{#if ircEnabled}} parent IRC steers immediately;{{/if}} large payloads via local://<path>, NEVER inline.
++- `steps`: ordered stages for one helper, each sent after the previous finishes.
+ {{/if}}
+-- `name`: CamelCase ≤32, auto-generated if omitted; address agent by name.{{#if structured}} `outputSchema` overrides agent/session schemas.{{/if}}
+-- `solutionSpace`: how open-ended the child's problem is: fix or design given, or which causes or designs remain open.
+-  - Volume of work does not widen it; NEVER mention sibling agents or coordination.
+-  - Examples: `one fix: rename, names given`; `one fix: slice end in paginate`; `single-flight cache load; races easy to miss`;
+-    `several retry API shapes; error classes to choose`; `deadlock cause open, no repro`
++- `agent`: omit for `{{defaultAgent}}`.
++- `name`: CamelCase, ≤32 chars.
++- `solutionSpace`: how open the problem is, e.g. `one fix, names given` or `cause unknown, no repro`.
+ {{#if evalToolsEnabled}}
+-- `tools`: eval-defined, run in your kernel.
++- `tools`: eval-defined tools, run in your kernel.
+ {{/if}}
+ {{#if effortEnabled}}
+-- `effort`: `"lo"`|`"med"`|`"hi"` by how open-ended the problem is.
++- `effort`: `"lo"`|`"med"`|`"hi"`.
+ {{/if}}
+ {{#if perCallModelEnabled}}
+-- `model`: one exact `provider/model-id[@upstream][:level]` string for this spawn only{{#if batchEnabled}}; per `tasks[]` item{{/if}}.
+-  - `@upstream` pins an aggregator route and is part of the model identity.
+-  - Only operator-approved models; no roles, arrays, globs or partial IDs.
+-  - Approved:
+-{{#each perCallModelAdvertisement.roles}}
+-    - {{#list patterns join=", "}}`{{this}}`{{/list}} ({{role}})
+-{{/each}}
+-{{#unless perCallModelAdvertisement.parentModelWithheld}}
+-    - your own current model
+-{{/unless}}
+-    - the selected bundled/user agent's own configured model
+-  - A listed glob approves matching exact IDs; write the exact ID, NEVER the glob.
+-{{#if perCallModelAdvertisement.allowlist.length}}
+-  - Allowlist: {{#list perCallModelAdvertisement.allowlist join=", "}}`{{this}}`{{/list}} (must also be approved).
+-{{/if}}
+-  - An agent's `task.agentModelOverrides` entry or user-chosen effort conflicts with `model`.
+-  - Omit unless needed.
+-  - Requested model unavailable → stop and report; NEVER substitute another.
+-  - Every request requires an approved model; retry fallback, context promotion and prewalk are off.
++- `model`: only when needed; one exact `provider/model-id` from: {{#each perCallModelAdvertisement.roles}}{{#list patterns join=", "}}`{{this}}`{{/list}} ({{role}}){{#unless @last}}, {{/unless}}{{/each}}{{#unless perCallModelAdvertisement.parentModelWithheld}}, or your own model{{/unless}}. Unavailable → report, never substitute.
+ {{/if}}
+ {{#if structured}}
+-- `schemaMode`: default permissive warns after retries; strict fails.
++- `schemaMode`: permissive (default) or strict.
+ {{/if}}
+ {{#if isolationEnabled}}
+-{{#if applyIsolatedChanges}}
+-- `isolated`: worktree; successful changes apply to parent.
+-{{else}}
+-- `isolated`: worktree; changes retained, not applied.
+-{{/if}}
++- `isolated`: run in a worktree; changes {{#if applyIsolatedChanges}}apply to the parent{{else}}are kept, not applied{{/if}}.
+ {{/if}}
+-
+-Shared edits need one integration owner; give each task its files{{#unless batchEnabled}} and interfaces{{/unless}}.
+-Every task MUST skip build/lint/tests/formatters mid-flight; run once afterward.
+-
+-# Available Agents
+-{{#if spawningDisabled}}Agent spawning is currently disabled.
+-{{else}}{{#if hasModelMentions}}`m<N>` = user-tagged model (`<model agent="m<N>" name="…"/>`), not specialist; spawn only when user names it.
+-{{/if}}{{#list agents join=""}}- `{{name}}`{{#if readOnly}} (read-only, no edits){{/if}}{{#if blocking}} (BLOCKING; inline result){{/if}}{{#if structured}} (STRUCTURED; schema result){{/if}}: {{description}}
++Agents:{{#if spawningDisabled}} spawning is disabled.{{else}}
++{{#if hasModelMentions}}`m<N>` = a model the user tagged; spawn only when the user names it.
++{{/if}}{{#list agents join=""}}- `{{name}}`{{#if readOnly}} (read-only){{/if}}{{#if blocking}} (BLOCKING){{/if}}{{#if structured}} (STRUCTURED){{/if}}: {{description}}
+ {{/list}}{{/if}}
+diff --git a/packages/coding-agent/src/prompts/tools/write.md b/packages/coding-agent/src/prompts/tools/write.md
+index 045bc31..8018c75 100644
+--- a/packages/coding-agent/src/prompts/tools/write.md
++++ b/packages/coding-agent/src/prompts/tools/write.md
+@@ -1,2 +1 @@
+-SHOULD `edit` existing files; `write` for required new files or whole-file replacement. NEVER create docs or emojis unless requested.
+-{{#if readActive}}Archive members and SQLite rows are writable too: xd://read/sources.{{else}}`archive.ext:member`: ZIP/tar families and `.asar` writable, others read-only. `db.sqlite:table`: insert; `db.sqlite:table:key`: JSON update, empty content deletes.{{/if}}
++Create or overwrite a file with `content`.{{#unless readActive}} `archive.ext:member` writes into ZIP/tar/.asar archives; `db.sqlite:table` inserts a row, `db.sqlite:table:key` updates it (empty content deletes).{{/unless}}
