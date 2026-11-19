@@ -11,8 +11,8 @@
   flash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017";
   cheapDeepseek.compat.vercelGatewayRouting.order = ["wafer" "morph" "runware"];
   defaultProvider = "antigravity-cli";
-  defaultModel = "gemini-4-carbon";
-  taskModel = "antigravity-cli/gemini-4-carbon";
+  defaultModel = "gemini-4-neon";
+  taskModel = "antigravity-cli/gemini-4-neon";
   fastFlash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
 in {
   options.user.dev.modelCatalog = lib.mkOption {
