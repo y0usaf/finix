@@ -4,7 +4,7 @@ inputs: let
   packagesFor = platform: builtins.mapAttrs (_: input: input.packages.${platform} or {}) inputs;
   rawInputPackages = packagesFor system;
   ompBuild = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch ./dev/ai/omp/clipboard-paste-deadline.patch ./dev/ai/omp/composer-cost-brief.patch ./dev/ai/omp/eval-internal-read-no-inline.patch ./dev/ai/omp/agy-roster-rotation.patch ./dev/ai/omp/antigravity-neon-roster.patch ./dev/ai/omp/prompt-ablate.patch];
+    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch ./dev/ai/omp/clipboard-paste-deadline.patch ./dev/ai/omp/composer-cost-brief.patch ./dev/ai/omp/eval-internal-read-no-inline.patch ./dev/ai/omp/agy-roster-rotation.patch ./dev/ai/omp/agy-notice-fallback.patch ./dev/ai/omp/antigravity-neon-roster.patch ./dev/ai/omp/prompt-ablate.patch];
   });
   omp = pkgs.symlinkJoin {
     name = "omp-${ompBuild.version}";

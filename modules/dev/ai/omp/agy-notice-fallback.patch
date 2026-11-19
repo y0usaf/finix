@@ -1,0 +1,163 @@
+diff --git a/packages/ai/src/error/flags.ts b/packages/ai/src/error/flags.ts
+index 38701a2..beaa672 100644
+--- a/packages/ai/src/error/flags.ts
++++ b/packages/ai/src/error/flags.ts
+@@ -270,6 +270,13 @@ const CURSOR_PLAN_POLICY_MARKER_PATTERN = /\bERROR_RATE_LIMITED_CHANGEABLE\b/i;
+ const CURSOR_PLAN_POLICY_PATTERN = /\bNamed models unavailable\b|\bModel unavailable on\b|\bFree plans can only use\b/i;
+ 
+ const AGY_UNKNOWN_MODEL_PATTERN = /^Unknown model ID: (\S+)$/;
++const AGY_ACCOUNT_DISABLED_PATTERN =
++	/\bthis service has been disabled in this account\b|\bverify your account to continue\b/i;
++
++function isAgyAccountDisabledText(text: string, provider: string | undefined): boolean {
++	if (provider !== undefined && provider !== "antigravity-cli") return false;
++	return AGY_ACCOUNT_DISABLED_PATTERN.test(text);
++}
+ 
+ function agyUnknownModelFromText(text: string): string | undefined {
+ 	return AGY_UNKNOWN_MODEL_PATTERN.exec(text.trim())?.[1];
+@@ -693,7 +700,8 @@ function classifyText(
+ 		}
+ 		if (
+ 			isAnthropicAccountPolicyText(errorMessage, provider, statusClean) ||
+-			isAgyUnknownModelText(errorMessage, provider, modelId)
++			isAgyUnknownModelText(errorMessage, provider, modelId) ||
++			isAgyAccountDisabledText(errorMessage, provider)
+ 		) {
+ 			kinds |= Flag.AccountPolicy;
+ 		}
+diff --git a/packages/ai/src/providers/antigravity-cli/host.ts b/packages/ai/src/providers/antigravity-cli/host.ts
+index 52383c0..34b235d 100644
+--- a/packages/ai/src/providers/antigravity-cli/host.ts
++++ b/packages/ai/src/providers/antigravity-cli/host.ts
+@@ -15,6 +15,7 @@ import {
+ 	type SessionConfigOption,
+ 	type SessionNotification,
+ } from "@oh-my-pi/pi-utils/acp";
++import * as AIError from "../../error";
+ import type {
+ 	AntigravityCliCheckpoint,
+ 	Context,
+@@ -130,6 +131,7 @@ interface ActiveStep {
+ 	interrupted: PromiseWithResolvers<never>;
+ 	controller: AbortController;
+ 	aborted: boolean;
++	pendingBanner: string | undefined;
+ }
+ 
+ interface PendingCall {
+@@ -206,6 +208,7 @@ export class AgyHost implements ProviderSessionState {
+ 			interrupted: Promise.withResolvers<never>(),
+ 			controller: new AbortController(),
+ 			aborted: false,
++			pendingBanner: "",
+ 		};
+ 		step.done.promise.catch(() => undefined);
+ 		step.interrupted.promise.catch(() => undefined);
+@@ -662,6 +665,7 @@ export class AgyHost implements ProviderSessionState {
+ 			expiry: this.#options.schedule(this.#options.holdLimitMs, () => this.#detach(pending)),
+ 		};
+ 		this.#pending = pending;
++		this.#flushPendingBanner(step);
+ 		step.writer.toolCall({ type: "toolCall", id, name, arguments: args });
+ 		step.writer.usage(this.#contextTokens);
+ 		const digest = transcriptDigest([...step.messages, step.writer.output]);
+@@ -691,17 +695,39 @@ export class AgyHost implements ProviderSessionState {
+ 		return result.promise;
+ 	}
+ 
++	#flushPendingBanner(step: ActiveStep): void {
++		if (step.pendingBanner === undefined) return;
++		const text = step.pendingBanner;
++		step.pendingBanner = undefined;
++		if (text.length > 0) step.writer.text(text);
++	}
++
+ 	#onUpdate(notification: SessionNotification): void {
+ 		if (this.#loading || !this.#turn || notification.sessionId !== this.#conversation?.id || this.#turn.cancelling)
+ 			return;
+ 		const update = notification.update;
+-		const writer = this.#step?.aborted ? undefined : this.#step?.writer;
++		const step = this.#step?.aborted ? undefined : this.#step;
+ 		switch (update.sessionUpdate) {
+ 			case "agent_message_chunk":
+-				if (update.content.type === "text") writer?.text(update.content.text);
++				if (update.content.type === "text" && step) {
++					if (step.pendingBanner !== undefined) {
++						const combined = step.pendingBanner + update.content.text;
++						if (isPotentialAgyNoticeBuffer(combined)) {
++							step.pendingBanner = combined;
++							return;
++						}
++						step.pendingBanner = undefined;
++						step.writer.text(combined);
++						return;
++					}
++					step.writer.text(update.content.text);
++				}
+ 				return;
+ 			case "agent_thought_chunk":
+-				if (update.content.type === "text") writer?.thinking(update.content.text);
++				if (update.content.type === "text" && step) {
++					this.#flushPendingBanner(step);
++					step.writer.thinking(update.content.text);
++				}
+ 				return;
+ 			case "usage_update":
+ 				this.#contextTokens = update.used;
+@@ -730,6 +756,13 @@ export class AgyHost implements ProviderSessionState {
+ 			return;
+ 		}
+ 		const writer = step.writer;
++		const noticeError = extractAgyNoticeError(step.pendingBanner);
++		if (noticeError !== undefined) {
++			step.pendingBanner = undefined;
++			this.#fail(new Error(noticeError));
++			return;
++		}
++		this.#flushPendingBanner(step);
+ 		if (
+ 			!writer.output.content.some(
+ 				block => (block.type === "text" && block.text.trim().length > 0) || block.type === "toolCall",
+@@ -919,6 +952,41 @@ export function describeToolArguments(
+ 	return message.length > MAX_DIAGNOSTIC_MESSAGE ? `${message.slice(0, MAX_DIAGNOSTIC_MESSAGE)}...` : message;
+ }
+ 
++const AGY_NOTICE_MAX_CHARS = 2048;
++const AGY_API_ERROR_PATTERN = /^API error(?:\s*\(attempt \d+\))?:/i;
++const AGY_ACCOUNT_DISABLED_PATTERN =
++	/\bthis service has been disabled in this account\b|\bverify your account to continue\b/i;
++
++function isPotentialAgyNoticeBuffer(text: string): boolean {
++	if (text.length > AGY_NOTICE_MAX_CHARS) return false;
++	if (text.trim().length === 0) return true;
++	const lines = text.split("\n").filter(line => line.trim().length > 0);
++	return lines.every(line => {
++		const trimmed = line.trimStart();
++		return trimmed === "⚠" || trimmed.startsWith("⚠ ");
++	});
++}
++
++function extractAgyNoticeError(text: string | undefined): string | undefined {
++	if (!text) return undefined;
++	const lines = text
++		.split("\n")
++		.map(line => line.trim())
++		.filter(line => line.length > 0);
++	if (lines.length === 0 || !lines.every(line => line.startsWith("⚠ "))) return undefined;
++	const notices = lines.map(line => line.slice(2).trim()).filter(line => line.length > 0);
++	const last = notices.at(-1);
++	if (!last) return undefined;
++	if (
++		AIError.matchesUsageLimitText(last) ||
++		AGY_API_ERROR_PATTERN.test(last) ||
++		AGY_ACCOUNT_DISABLED_PATTERN.test(last)
++	) {
++		return last;
++	}
++	return undefined;
++}
++
+ function mapAgyError(error: unknown): Error {
+ 	if (error instanceof RequestError && /not logged in|unauthenticated|authentication required/i.test(error.message)) {
+ 		return new Error("Antigravity CLI is not signed in. Run /login and choose Antigravity CLI.");
