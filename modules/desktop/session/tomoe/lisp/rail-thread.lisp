@@ -168,7 +168,35 @@ read a zero reach as no reach.)"
                       :radius (rail--design (getf look :radius 0))
                       :border (list :focused "#00000000" :unfocused "#00000000")))))))
 
-(defparameter +rail-thread--strip-height+ 96)
+(defparameter +rail-thread--strip-height+ 48)
+
+(defun rail-thread--bar-layout (strip state)
+  "Horizontal thread geometry in surface-local pixels for a top or bottom bar:
+a thin 11 px filament running the full length of the bar with 28 px tall beads
+(matching the vertical seam's 28 px wide beads) clustered symmetrically at center."
+  (let* ((width (coerce (getf strip :width) 'double-float))
+         (height (coerce (getf strip :height) 'double-float))
+         (mid-x (* 0.5d0 width))
+         (mid-y (* 0.5d0 height))
+         (top-p (eq (getf strip :place) :top))
+         (gpu-p (probe--gpu-p (getf state :gpu)))
+         (specs
+           (if top-p
+               (list (list :time (- mid-x 74d0) 46d0 14d0)
+                     (list :date (+ mid-x 64d0) 56d0 14d0))
+               (if gpu-p
+                   (list (list :cpu (- mid-x 226d0) 48d0 14d0)
+                         (list :memory (- mid-x 102d0) 48d0 14d0)
+                         (list :voice mid-x 26d0 14d0)
+                         (list :gpu (+ mid-x 102d0) 48d0 14d0)
+                         (list :vram (+ mid-x 226d0) 48d0 14d0))
+                   (list (list :cpu (- mid-x 102d0) 48d0 14d0)
+                         (list :voice mid-x 26d0 14d0)
+                         (list :memory (+ mid-x 102d0) 48d0 14d0))))))
+    (list :x mid-y :top 10d0 :bottom (- width 10d0) :weld mid-x
+          :beads (loop for kind in +rail-thread--bead-order+
+                       for found = (find kind specs :key #'first)
+                       collect (or found (list kind 0d0 0d0 0d0))))))
 
 (defun rail-thread--bar-numbers (context strip)
   "THREAD's numbers for a bar, laid out for a surface that is the strip itself:
@@ -212,37 +240,63 @@ names them in LOOK as :NUMBERS and :BAR-NUMBERS."
                           :reach +rail-thread--reach+)))
        (loop for strip in bars
              for blocks = (getf strip :blocks)
+             for horiz = (eq (getf strip :axis) :x)
              for tag = (format nil "-~A" (string-upcase (symbol-name (getf strip :place))))
              when blocks
                append
-               (list
-                (shell-surface
-                 (intern (format nil "RAIL-THREAD-BAR~A" tag) :keyword)
-                 (ui :stack)
-                 :output (getf output :name)
-                 :anchors (if (getf strip :edge) (list (getf strip :edge)) '(:top :left))
-                 :width (rail--design (getf strip :width))
-                 :height (rail--design (getf strip :height))
-                 :margin (if (getf strip :edge) 0
-                             (rail--surface-margin output (getf strip :x) (getf strip :y)))
-                 :exclusive-zone (getf strip :zone 0)
-                 :layer (getf context :layer) :click-through t
-                 :background (list :shader (getf look :bar-shader (getf look :shader))
-                                   :data (funcall bar-numbers context strip)
-                                   :clock (getf context :epoch)
-                                   :until (kit--until look context)))
-                (shell-surface
-                 (intern (format nil "RAIL-THREAD-TYPE~A" tag) :keyword)
-                 (rail--web state snapshot strip blocks
-                            (or (rail--material :ink) (rail--ink)))
-                 :output (getf output :name)
-                 :anchors (if (getf strip :edge) (list (getf strip :edge)) '(:top :left))
-                 :width (rail--design (getf strip :width))
-                 :height (rail--design (getf strip :height))
-                 :margin (if (getf strip :edge) 0
-                             (rail--surface-margin output (getf strip :x) (getf strip :y)))
-                 :layer (getf context :layer) :background "#00000000"
-                 :click-through t :slide t)))))))
+               (if horiz
+                   (let* ((bar-context (list* :output (list :x 0 :y 0
+                                                            :width (getf strip :width)
+                                                            :height (getf strip :height))
+                                              :windows nil
+                                              context))
+                          (bar-mode (if (eq (getf strip :place) :top) 1d0 2d0))
+                          (theme (append (funcall numbers (rail-thread--bar-layout strip state) state)
+                                         (list bar-mode))))
+                     (list
+                      (shell-surface
+                       (intern (format nil "RAIL-THREAD-BAR~A" tag) :keyword)
+                       (ui :stack)
+                       :output (getf output :name)
+                       :anchors (if (getf strip :edge) (list (getf strip :edge)) '(:top :left))
+                       :width (rail--design (getf strip :width))
+                       :height (rail--design (getf strip :height))
+                       :margin (if (getf strip :edge) 0
+                                   (rail--surface-margin output (getf strip :x) (getf strip :y)))
+                       :exclusive-zone (getf strip :zone 0)
+                       :layer (getf context :layer) :click-through t
+                       :background (list :shader (getf look :shader)
+                                         :data (kit--data look bar-context theme)
+                                         :clock (getf context :epoch)
+                                         :until (kit--until look context)))))
+                   (list
+                    (shell-surface
+                     (intern (format nil "RAIL-THREAD-BAR~A" tag) :keyword)
+                     (ui :stack)
+                     :output (getf output :name)
+                     :anchors (if (getf strip :edge) (list (getf strip :edge)) '(:top :left))
+                     :width (rail--design (getf strip :width))
+                     :height (rail--design (getf strip :height))
+                     :margin (if (getf strip :edge) 0
+                                 (rail--surface-margin output (getf strip :x) (getf strip :y)))
+                     :exclusive-zone (getf strip :zone 0)
+                     :layer (getf context :layer) :click-through t
+                     :background (list :shader (getf look :bar-shader (getf look :shader))
+                                       :data (funcall bar-numbers context strip)
+                                       :clock (getf context :epoch)
+                                       :until (kit--until look context)))
+                    (shell-surface
+                     (intern (format nil "RAIL-THREAD-TYPE~A" tag) :keyword)
+                     (rail--web state snapshot strip blocks
+                                (or (rail--material :ink) (rail--ink)))
+                     :output (getf output :name)
+                     :anchors (if (getf strip :edge) (list (getf strip :edge)) '(:top :left))
+                     :width (rail--design (getf strip :width))
+                     :height (rail--design (getf strip :height))
+                     :margin (if (getf strip :edge) 0
+                                 (rail--surface-margin output (getf strip :x) (getf strip :y)))
+                     :layer (getf context :layer) :background "#00000000"
+                     :click-through t :slide t))))))))
 
 (defparameter +rail-thread+
   (list :draw #'rail-thread--draw :settle +rail-thread--settle+

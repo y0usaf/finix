@@ -484,6 +484,82 @@ slab's shape, not a reading."
                 (rail--gauge (if (equal (getf battery :status) "Discharging") "VR" "VR+")
                              (getf battery :percent) nil nil ground))))))
 
+(defun rail--bar-gauge (label percent detail hot ground)
+  "Compact horizontal gauge row for a 50 px horizontal slab."
+  (let* ((percent (max 0 (min 100 (round (or percent 0)))))
+         (value (format nil "~D%" percent)))
+    (ui :row :align :center :gap (rail--design 5)
+        :children
+        (append (list (rail--text label (rail--label) 13 22)
+                      (if (> percent 84) (rail--drop value ground) (rail--number value)))
+                (when detail
+                  (list (if hot
+                            (rail--drop detail ground)
+                            (rail--text detail (rail--detail) 14 22))))))))
+
+(defun rail--bar-clock ()
+  "Single-line horizontal clock for a 50 px horizontal slab."
+  (let ((text (clock-text (getf +cassette+ :time))))
+    (rail--text (if (and text (plusp (length text))) text "--:--") (rail--value) 24 26)))
+
+(defun rail--bar-date ()
+  "Single-line horizontal date for a 50 px horizontal slab."
+  (destructuring-bind (&optional day date month &rest rest)
+      (rail--parts (string-upcase (clock-text (getf +cassette+ :date))))
+    (declare (ignore rest))
+    (ui :row :align :center :gap (rail--design 6)
+        :children (remove nil
+                          (list (when day (rail--text day (rail--label) 13 22))
+                                (when date (rail--text date (rail--value) 21 22))
+                                (when month (rail--text month (rail--label) 13 22)))))))
+
+(defun rail--bar-block (module state snapshot ground)
+  "Compact single-row module for a horizontal bar slab."
+  (let ((cpu (getf state :cpu)) (gpu (getf state :gpu))
+        (meter (getf state :rail-meter)))
+    (ecase module
+      (:time (rail--bar-clock))
+      (:date (rail--bar-date))
+      (:media (destructuring-bind (status played) (rail--media-played snapshot)
+                (ui :row :align :center :gap (rail--design 6)
+                    :children (list (rail--text (if (equal status "Playing") ">" "||")
+                                                (rail--value) 18 22)
+                                    (rail--meter (round (* 100 played)))))))
+      (:cpu (rail--bar-gauge "CPU" (getf meter :cpu) (cassette--degrees (getf cpu :temp))
+                             (cassette--hot-p (getf cpu :temp)) ground))
+      (:memory (rail--bar-gauge "MEM" (getf meter :memory)
+                                (rail--digits (getf meter :memory-used)) nil ground))
+      (:gpu (rail--bar-gauge "GPU" (getf meter :gpu) (cassette--degrees (getf gpu :temp))
+                             (cassette--hot-p (getf gpu :temp)) ground))
+      (:vram (rail--bar-gauge "VRAM" (getf meter :vram)
+                              (rail--digits (getf meter :vram-used)) nil ground))
+      (:battery (let ((battery (service-state snapshot :battery)))
+                  (rail--bar-gauge (if (getf battery :charging) "CHG" "BAT")
+                                   (getf battery :percent) nil nil ground)))
+      (:network (let ((online (getf (service-state snapshot :network) :connected)))
+                  (ui :row :align :center :gap (rail--design 5)
+                      :children (list (rail--text "NET" (rail--label) 13 22)
+                                      (rail--text (if online "ON" "OFF") (rail--value) 15 22)))))
+      (:frame (let ((battery (state-value snapshot :frame-battery)))
+                (rail--bar-gauge (if (equal (getf battery :status) "Discharging") "VR" "VR+")
+                                 (getf battery :percent) nil nil ground))))))
+
+(defun rail--bar-width (module state snapshot)
+  "The compact design width of MODULE's block in a horizontal bar, or NIL."
+  (when (or (eq module :voice) (rail--height module state snapshot))
+    (ecase module
+      (:time 92)
+      (:date 116)
+      (:media 74)
+      (:cpu (if (cassette--degrees (getf (getf state :cpu) :temp)) 136 96))
+      (:memory 146)
+      (:gpu (if (cassette--degrees (getf (getf state :gpu) :temp)) 136 96))
+      (:vram 152)
+      (:battery 92)
+      (:network 72)
+      (:frame 92)
+      (:voice 68))))
+
 (defun rail--place (specs anchor scale extent)
   "SPECS ((MODULE SIZE SPACE) ...) along the strip's axis in design units: SIZE is
 the block's extent along it, SPACE the air before it, the first's ignored. ANCHOR
@@ -762,18 +838,29 @@ the readings and bolo's turn along the bottom."
               (when (cassette--bolo-turn-p (getf state :bolo-state)) (list :voice)))))
 
 (defun rail--bar-blocks (state snapshot strip &optional modules)
-  "STRIP's blocks as (MODULE X Y WIDTH HEIGHT) in output pixels: one equal slot
-each along the strip, by the shared placement, centred in it."
+  "STRIP's blocks as (MODULE X Y WIDTH HEIGHT) in output pixels: compact
+module-sized slots centred along the strip so horizontal slabs wrap snugly
+around the active readings, matching the vertical seam's proportions."
   (let* ((modules (or modules (rail--bar-modules state snapshot (getf strip :place))))
          (n (length modules))
-         (span (if (eq (getf strip :axis) :y) (getf strip :height) (getf strip :width))))
+         (vertical (eq (getf strip :axis) :y))
+         (span (/ (if vertical (getf strip :height) (getf strip :width)) *rail--scale*))
+         (air +rail--air+))
     (when (plusp n)
-      ;; the shared placement scales each size once more, so the slot it is
-      ;; given is a design length, not the strip's physical span
-      (rail--strip-blocks state snapshot strip
-                          (loop for module in modules
-                                collect (list module (floor (/ span *rail--scale*) n) 0))
-                          nil))))
+      (let* ((raw (loop for module in modules
+                        collect (list module
+                                      (if vertical
+                                          (or (rail--height module state snapshot) 44)
+                                          (or (rail--bar-width module state snapshot) 96))
+                                      air)))
+             (total (+ (loop for (m w a) in raw sum w)
+                       (* air (max 0 (1- n)))))
+             (fit (if (and (plusp total) (> total span)) (/ span total) 1))
+             (specs (if (< fit 1)
+                        (loop for (m w a) in raw
+                              collect (list m (max 1 (floor (* w fit))) (floor (* a fit))))
+                        raw)))
+        (rail--strip-blocks state snapshot strip specs nil)))))
 
 (defun rail--windows-on (snapshot output)
   "Every visible window on OUTPUT, as (:ID :SIDE :BOX), nearest each side's front
@@ -883,19 +970,32 @@ pixels."
         (ui :column :align :center :width (rail--design width) :height (rail--design height)
             :children (loop for (tall . node) in (nreverse parts)
                             collect (or node (ui :rect :height (rail--design tall)))))
-        (ui :row :align :center :justify :center :width (rail--design (getf strip :width))
-            :height (rail--design (getf strip :height))
-            :children (loop for (module x y block-width block-height) in blocks
-                            collect (ui :column :align :center :justify :center
-                                        :width (rail--design block-width)
-                                        :height (rail--design block-height)
-                                        :children
-                                        (list (case module
-                                                (:tray (ui :rect :height (rail--design block-height)
-                                                           :width (rail--design 52)
-                                                           :background (rail--c :tray)))
-                                                (:voice (rail--voice state))
-                                                (t (rail--block module state snapshot ground))))))))))
+        (let* ((place (getf strip :place))
+               (pad (case place
+                      (:top (list (rail--design 12) 0 (rail--design 2) 0))
+                      (:bottom (list (rail--design 2) 0 (rail--design 12) 0))
+                      (t 0)))
+               (hcursor 0)
+               (hparts nil))
+          (loop for (module x y block-width block-height) in blocks
+                do (when (> x hcursor)
+                     (push (ui :rect :width (rail--design (- x hcursor))) hparts))
+                   (push (ui :row :align :center :justify :center
+                             :width (rail--design block-width)
+                             :height (rail--design (max 1 (- height 14)))
+                             :children
+                             (list (case module
+                                     (:tray (ui :rect :height (rail--design 24)
+                                                :width (rail--design 52)
+                                                :background (rail--c :tray)))
+                                     (:voice (rail--voice state))
+                                     (t (rail--bar-block module state snapshot ground)))))
+                         hparts)
+                   (setf hcursor (+ x block-width)))
+          (ui :row :align :center :padding pad
+              :width (rail--design (getf strip :width))
+              :height (rail--design height)
+              :children (nreverse hparts))))))
 
 
 (defun rail--gauges (strip state blocks)
@@ -1334,7 +1434,7 @@ CONTEXT."
 
 (defparameter +rail-morph+
   (list :draw #'rail--morph-draw :cast +rail--cast+ :font "IBM Plex Mono Medium"
-        :strip-height 96
+        :strip-height 64
         :trail (list :cell 7d0 :life 0.3d0 :steps 5 :shape :dots
                      :dark :shine :light :shadow)))
 

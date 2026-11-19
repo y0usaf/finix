@@ -385,10 +385,171 @@ void set_type(vec2 p, inout vec3 c) {
     }
 }
 
+
+// Horizontal bar (T_MODE == 1 top, 2 bottom): the exact same living-glass
+// membrane thread and beads rotated 90 degrees, with organic girth wander,
+// caustic, soap film, organelles, gauge fills, voice nucleus, and bitmap type.
+float hbar_off(float x) {
+    float dx = abs(x - g_wy);
+    float lev = voice_env() * voice_level(dx / max(1.0, D(T_VW)));
+    float pluck = D(T_AMP) * lev * sin(dx * D(T_PLUCK) - iTime * D(T_PHZ))
+        * (0.4 + 0.6 * exp(-dx * D(T_ENV)));
+    float node = 1.0;
+    for (int i = 0; i < NBEADS; i++) {
+        float hx = bead_hy(i);
+        if (hx <= 0.0) continue;
+        node = min(node, clamp((abs(x - bead_cy(i)) - hx) / 18.0, 0.0, 1.0));
+    }
+    return pluck * node;
+}
+
+float hbar_field(vec2 p) {
+    float x = clamp(p.x, g_top, g_bot);
+    vec2 d = vec2(p.x - x, p.y - g_mid - hbar_off(x));
+    float girth = 1.0 + 0.14 * D(T_PLASM)
+        * (0.6 * sin(x * 0.017 + 0.7) + 0.4 * sin(x * 0.041 - 1.3));
+    float f = length(d) - D(T_TW) * girth;
+    float swell = voice_env();
+    for (int i = 0; i < NBEADS; i++) {
+        float hx = bead_hy(i);
+        if (hx <= 0.0) continue;
+        float hy = bead_hw(i);
+        if (i == VOICE_BEAD) {
+            hx += 6.0 * swell;
+            hy += 2.0 * swell;
+        }
+        float cx = bead_cy(i);
+        f = smin(f, sd_rbox(p, vec4(cx - hx, g_mid - hy, cx + hx, g_mid + hy), min(hy, 12.0)), 6.0);
+    }
+    return f;
+}
+
+void set_type_hbar(vec2 p, inout vec3 c) {
+    for (int i = 0; i < NBEADS; i++) {
+        float hx = bead_hy(i);
+        if (hx <= 0.0) continue;
+        float cx = bead_cy(i), cy = g_mid, hy = bead_hw(i);
+        if (abs(p.x - cx) > hx + 2.0 || abs(p.y - cy) > hy + 2.0) continue;
+        vec2 mid = vec2(cx, cy);
+        bool on = false;
+        float a = 1.0;
+        if (i == B_CLOCK) {
+            float x0 = cx - 0.5 * text_span(5, 3.0);
+            on = char_hit(p, vec2(x0, cy - 7.5), vec2(3.0), K_CLOCK, 0, 5);
+        } else if (i == B_DATE) {
+            float w_day = text_span(3, 2.0);
+            float w_num = text_span(2, 3.0);
+            float w_mon = text_span(3, 2.0);
+            float gap = 6.0;
+            float x0 = cx - 0.5 * (w_day + gap + w_num + gap + w_mon);
+            on = char_hit(p, vec2(x0, cy - 5.0), vec2(2.0), K_DAY, 0, 3);
+            a = 0.72;
+            if (!on) {
+                on = char_hit(p, vec2(x0 + w_day + gap, cy - 7.5), vec2(3.0), K_DATE, 0, 2);
+                a = 1.0;
+            }
+            if (!on) {
+                on = char_hit(p, vec2(x0 + w_day + gap + w_num + gap, cy - 5.0), vec2(2.0), K_DATE, 3, 3);
+                a = 0.76;
+            }
+        } else if (i != VOICE_BEAD) {
+            int k = i == B_CPU ? 0 : (i == B_MEM ? 1 : (i == B_GPU ? 2 : 3));
+            if (gauge_pct(k) < 0.0) continue;
+            int base = K_GAUGES + k * K_GAUGE;
+            int vlen = clamp(int(D(T_VLEN + k)), 1, 6);
+            float w_lbl = text_span(3, 2.0);
+            float w_val = text_span(vlen, 2.0);
+            float gap = 7.0;
+            float x0 = cx - 0.5 * (w_lbl + gap + w_val);
+            on = char_hit(p, vec2(x0, cy - 5.0), vec2(2.0), base + 4, 0, 3);
+            a = 0.72;
+            if (!on) {
+                on = char_hit(p, vec2(x0 + w_lbl + gap, cy - 7.5), vec2(2.0, 3.0), base + 2, 0, vlen);
+                a = 1.0;
+            }
+        }
+        if (on) c = mix(c, ink_of(mid), a);
+    }
+}
+
+vec4 hbar_render(vec2 p) {
+    g_mid = D(T_X);
+    g_top = D(T_TOP);
+    g_bot = D(T_BOT);
+    g_wy = D(T_WY);
+    g_raw = iTime - D(K_TSW);
+    g_dt = move_age(D(T_FDELAY) + D(T_FDUR));
+
+    float f = hbar_field(p);
+    if (f > 14.0) return vec4(0.0);
+
+    vec2 slant = vec2(hbar_field(p + vec2(1.0, 0.0)) - f, hbar_field(p + vec2(0.0, 1.0)) - f);
+    vec2 dir = slant / (length(slant) + 1e-5);
+
+    vec3 c = vec3(0.0);
+    float a = 0.0;
+    float cov = clamp(0.5 - f, 0.0, 1.0);
+    float sh = f > 0.0 ? 0.16 * pow(clamp(1.0 - f / 10.0, 0.0, 1.0), 2.0) : 0.0;
+    float hair = 0.34 * clamp(1.0 - abs(f - 0.6) / 0.9, 0.0, 1.0);
+    c *= 1.0 - sh;
+    a = sh + a * (1.0 - sh);
+    c *= 1.0 - hair;
+    a = hair + a * (1.0 - hair);
+    cast_light(p, f, dir, c, a, 1.0);
+    if (cov > 0.0) {
+        c = mix(c, glass(p, f, dir, 0.0), cov);
+        a = cov + a * (1.0 - cov);
+    }
+
+    if (cov > 0.25) {
+        for (int k = 0; k < 4; k++) {
+            int bead = k < 2 ? 2 + k : 3 + k;
+            float hx = bead_hy(bead);
+            if (hx <= 0.0) continue;
+            float pct = gauge_pct(k);
+            if (pct < 0.0) continue;
+            float cx = bead_cy(bead), cy = g_mid;
+            vec4 box = vec4(cx - hx + 3.0, cy - 11.0, cx + hx - 3.0, cy + 11.0);
+            float d = sd_rbox(p, box, 9.0);
+            if (d > 1.0) continue;
+            float lum = dot(under(vec2(cx, cy)), vec3(0.3, 0.59, 0.11));
+            float x1 = box.x + (box.z - box.x) * clamp(pct, 0.0, 100.0) / 100.0;
+            float fill = clamp(x1 - p.x, 0.0, 1.0) * clamp(0.5 - d, 0.0, 1.0);
+            float fa = fill * (lum > 0.5 ? 0.22 : 0.30);
+            c = mix(c, lum > 0.5 ? vec3(0.0) : vec3(1.0), fa);
+            a = fa + a * (1.0 - fa);
+        }
+        if (bead_hy(VOICE_BEAD) > 0.0) {
+            float rr = 5.0 + 6.0 * voice_env() * voice_level(0.0);
+            vec2 nc = vec2(bead_cy(VOICE_BEAD), g_mid);
+            float dd = length((p - nc) * vec2(0.82, 1.0)) - rr;
+            if (dd < 1.5) {
+                float lum = dot(under(nc), vec3(0.3, 0.59, 0.11));
+                float da = clamp(0.5 - dd, 0.0, 1.0) * (0.30 + 0.45 * voice_env());
+                c = mix(c, lum > 0.5 ? c * 0.55 : c * 0.70 + vec3(0.10, 0.12, 0.14), da);
+                float nl = length(p - nc - vec2(-1.6, -1.4)) - 1.6 - 1.5 * voice_env();
+                float na = clamp(0.5 - nl, 0.0, 1.0) * 0.8;
+                c = mix(c, lum > 0.5 ? vec3(0.10) : vec3(0.95, 0.94, 0.90), na);
+                a = max(a, da);
+            }
+        }
+        set_type_hbar(p, c);
+    }
+
+    if (a <= 0.0) return vec4(0.0);
+    c = clamp(c + (ign(p) - 0.5) * D(T_GRAIN) / 255.0, 0.0, 1.0);
+    return vec4(c, a);
+}
+
 void mainImage(out vec4 color, in vec2 fragCoord) {
     kit_begin();
     vec2 p = kit_point(fragCoord);
-    if ((D(T_MODE) > 0.5 && D(T_MODE) < 2.5) || D(T_MODE) > 3.5) {
+    if (D(T_MODE) > 0.5 && D(T_MODE) < 2.5) {
+        color = hbar_render(p);
+        if (color.a <= 0.0) discard;
+        return;
+    }
+    if (D(T_MODE) > 3.5) {
         color = thread_bar(p);
         if (color.a <= 0.0) discard;
         return;
