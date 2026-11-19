@@ -3402,8 +3402,15 @@ in {
     ''
       (in-package #:tomoe-user)
       (load-policy "desktop" :only '("commands" "drag" "screenshot-theme" "notification-popups" "config-error" "screencast" "screenshot-clipboard"))
+      (defun policy-known-settings (plist)
+        "PLIST without the settings the running Tomoe does not know: a config is
+      loaded by whatever build is running, and a setting that build lacks would refuse
+      the session extension and every other setting with it."
+        (loop for (key value) on plist by #'cddr
+              when (or (not (boundp 'tomoe::+settings+)) (assoc key tomoe::+settings+))
+                append (list key value)))
       (defparameter +policy-displays+ ${toLisp (lib.mapAttrsToList (name: settings: [name] ++ lib.concatLists (lib.mapAttrsToList (key: value: [(keyword key) value]) settings)) cfg.displays)})
-      (defparameter +policy-settings+ ${toLisp ({
+      (defparameter +policy-settings+ (policy-known-settings ${toLisp ({
           honor-xdg-activation-with-invalid-serial = true;
           focus-follows-mouse = true;
           pointer-follows-focus = true;
@@ -3438,7 +3445,7 @@ in {
               ];
             }
             // lib.optionalAttrs (bar.style == "rail") {focus-outline = false;};
-        })})
+        })}))
       (defparameter +policy-launcher+ ${toLisp {
         app-id = "launcher";
         ratio = mkLispInline "1/3";
