@@ -36,18 +36,18 @@
 (defparameter +kit--bands+ 16)
 (defparameter +kit--theme+ 132)
 
-(defun kit--code (text i)
-  (if (< i (length text))
-      (let ((code (char-code (char-upcase (char text i)))))
-        (if (<= 32 code 126) code 63))
-      32))
-
 (defun kit--pack (text count)
-  "TEXT as COUNT numbers, three characters to each, upper case, space padded."
-  (loop for k below count
-        collect (+ (kit--code text (* 3 k))
-                   (* 256 (kit--code text (+ (* 3 k) 1)))
-                   (* 65536 (kit--code text (+ (* 3 k) 2))))))
+  "TEXT as COUNT numbers, three characters to each, upper case, space padded:
+a character outside printable ASCII travels as a question mark."
+  (let* ((n (min (length text) (* 3 count)))
+         (up (string-upcase (if (< n (length text)) (subseq text 0 n) text))))
+    (flet ((code (i)
+             (if (< i n)
+                 (let ((code (char-code (char up i))))
+                   (if (<= 32 code 126) code 63))
+                 32)))
+      (loop for i from 0 below (* 3 count) by 3
+            collect (+ (code i) (* 256 (code (+ i 1))) (* 65536 (code (+ i 2))))))))
 
 (defun kit--title (snapshot id)
   "ID's title, or its app id when it has none."
@@ -83,10 +83,17 @@ machine lacks, each drawing the rail's glided reading."
                            (kit--pack (getf reading :label) 1))
                    (list -1 0 32 32 32))))
 
-(defun kit--clock ()
-  (append (kit--pack (clock-text "%H:%M") 2)
-          (kit--pack (clock-text "%a") 1)
-          (kit--pack (clock-text "%d %b") 2)))
+(defun kit--clock (state)
+  "The clock, the day and the date, packed once a minute: the text is read in one
+call and packed again only when it reads differently."
+  (let ((text (clock-text "%H:%M|%a|%d %b")))
+    (rail--memo state :clock text
+                (lambda ()
+                  (let* ((bar (position #\| text))
+                         (bar2 (position #\| text :start (1+ bar))))
+                    (append (kit--pack (subseq text 0 bar) 2)
+                            (kit--pack (subseq text (1+ bar) bar2) 1)
+                            (kit--pack (subseq text (1+ bar2)) 2)))))))
 
 (defun kit--voice (state voicing epoch)
   (let* ((history (if voicing (getf state :bolo-history) nil))
@@ -101,12 +108,18 @@ machine lacks, each drawing the rail's glided reading."
             levels
             (make-list (- +kit--levels+ (length levels)) :initial-element 0))))
 
-(defun kit--cards (snapshot windows carried)
-  (loop for i below 8
-        for id = (nth i windows)
-        for entry = (and id (find id carried :key (lambda (e) (getf e :id))))
-        append (cons (rail--side-sign (and entry (getf entry :side)))
-                     (kit--pack (if id (kit--title snapshot id) "") 6))))
+(defun kit--cards (state snapshot windows carried)
+  "Each of the eight :WINDOWS as its side and its title, packed again only when a
+side or a title has changed."
+  (let ((cards (loop for i below 8
+                     for id = (nth i windows)
+                     for entry = (and id (find id carried :key (lambda (e) (getf e :id))))
+                     collect (rail--side-sign (and entry (getf entry :side)))
+                     collect (if id (kit--title snapshot id) ""))))
+    (rail--memo state :cards cards
+                (lambda ()
+                  (loop for (side title) on cards by #'cddr
+                        append (cons side (kit--pack title 6)))))))
 
 (defun kit--settle (look context)
   "How long this draw's switch is drawn for: the rail's own clock for it, which
@@ -141,8 +154,8 @@ theme's own numbers."
                   (rail--curve))
             (kit--voice state voicing epoch)
             (kit--gauges state)
-            (kit--clock)
-            (kit--cards snapshot windows carried)
+            (kit--clock state)
+            (kit--cards state snapshot windows carried)
             theme)))
 
 (defun kit--band (context)

@@ -336,6 +336,19 @@ draws, or NIL when it already draws what TO does."
     (when (if (> to here) (< edge to) (> edge to))
       (* (getf +rail--glide+ :tau) (rail--ln (/ (- here to) (- edge to)))))))
 
+(defun rail--memo (state key inputs compute)
+  "What COMPUTE returns for INPUTS, kept in STATE's :RAIL-MEMO under KEY: the next
+draw whose INPUTS are EQUAL to these takes the kept answer instead of computing
+it again. A gauge's step is a whole redraw of the rail, and almost all of what it
+packs for the shader -- the cards' titles, the clock, the beads' places -- is
+what the last one packed."
+  (let ((kept (getf (getf state :rail-memo) key)))
+    (if (and kept (equal (first kept) inputs))
+        (rest kept)
+        (let ((value (funcall compute)))
+          (setf (getf (getf state :rail-memo) key) (cons inputs value))
+          value))))
+
 (defun rail--restart-count (cpu)
   "CPU's sample without the counts its next percentage is taken against, so the
 next read only restarts them and the percentage drawn stays."
@@ -1349,7 +1362,7 @@ CONTEXT."
                                       :rail-side nil :rail-focus nil
                                       :rail-switch nil :rail-switched nil
                                       :rail-meter nil :rail-step nil :rail-glide nil
-                                      :rail-sampled nil))
+                                      :rail-sampled nil :rail-memo nil))
     (snapshot state event)
   (when (eq (getf event :type) :watch)
     (cassette--bolo-watch state event))
@@ -1405,6 +1418,10 @@ CONTEXT."
          (hot (loop for probe in '(:cpu :gpu)
                     thereis (cassette--hot-p (getf (getf state probe) :temp)))))
     (setf (getf state :rail-theme) theme)
+    ;; A state kept from before :RAIL-MEMO existed gains it here, so the draws
+    ;; below keep their answers in this very state.
+    (unless (getf state :rail-memo)
+      (setf (getf state :rail-memo) (list :kept t)))
     ;; The readings move toward the last sample before anything draws them.
     (rail--glide state now)
     (rail--switch state (or side (and output :free)) (getf key :id) now)

@@ -89,6 +89,10 @@ mock's beads placed by the shared placement, symmetric about the weld."
                        for bead = (find kind by-kind :key #'first)
                        when bead collect bead))))
 
+(defun rail-thread--placed (state strip)
+  "RAIL-THREAD--LAYOUT of STRIP, laid out again only when the strip has moved."
+  (rail--memo state :thread-layout strip (lambda () (rail-thread--layout strip))))
+
 ;;; What a card without focus keeps round it, in the order +RAIL--THREAD-STYLES+:
 ;;; the hairline pair the mock draws, a dimmer dark line alone, nothing at all,
 ;;; or nothing under a soft halo round the focused card's rim. The rail names
@@ -197,13 +201,13 @@ names them in LOOK as :NUMBERS and :BAR-NUMBERS."
            (frame-strip (or seam vertical (first bars))))
       (append
        (if seam
-           (let ((theme (funcall numbers (rail-thread--layout seam) state)))
+           (let ((theme (funcall numbers (rail-thread--placed state seam) state)))
              (if (getf context :windows)
                  (kit--frames look context theme :reach +rail-thread--reach+)
                  (rail-thread--whole look context theme)))
            (when frame-strip
              (kit--frames look context
-                          (append (funcall numbers (rail-thread--layout frame-strip) state)
+                          (append (funcall numbers (rail-thread--placed state frame-strip) state)
                                   (list 3d0))
                           :reach +rail-thread--reach+)))
        (loop for strip in bars
