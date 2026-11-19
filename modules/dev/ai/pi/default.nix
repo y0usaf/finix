@@ -29,7 +29,6 @@ in {
       defaultThinkingLevel = "xhigh";
       ompThinkingLevel = "auto";
       advisorModel = lib.head advisorChain;
-      taskNote = "Use `model: \"anthropic/claude-opus-5-5\"` for Lean/compiler task helpers.";
       smolModel = flash;
       judgeModel = flash;
       fallbackChains = {

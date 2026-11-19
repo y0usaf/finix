@@ -1,5 +1,9 @@
-{config, ...}: let
-  body = "${config.user.dev.prompts.shared}\n";
+{
+  config,
+  lib,
+  ...
+}: let
+  body = lib.optionalString (config.user.dev.prompts.shared != "") "${config.user.dev.prompts.shared}\n";
 in {
   user.files = {
     ".config/phi/APPEND_SYSTEM.md".text = body;

@@ -24,22 +24,9 @@ const RECENT = 64_000;
 const ROW = /^(\d+)\+(\d+)\|/;
 const COMPLETED = /<task-result id="([^"]+)"[^>]*status="completed"[^>]*>/g;
 const BOT = process.env.OPTCHAT_BOT;
-const RULES = process.env.OPTCHAT_RULES;
 const BOTS = process.env.OPTCHAT_BOTS;
 const RAW = Number(process.env.OPTCHAT_RAW) || 128_000;
 const IMAGE = 4_800;
-
-const INTRO = `# Shared memory
-<chat> holds oldest-first summaries: \`id+n|text\` (n messages from id; kinds \`user|work|talk[Chat]\`; "${PLACEHOLDER}" = pending). Tool calls aren't logged. \`zoom(id, n)\` splits id+n in half; \`zoom(id, 1)\` shows message id in full.`;
-
-const BOT_INTRO = `# Memory
-<chat> holds older turns as \`id+n|text\` (n messages from id; kinds \`user|work|talk\`; "${PLACEHOLDER}" = pending; tool calls omitted). Latest turns follow in full. \`zoom(id, n[, bot])\` splits id+n in half; \`n=1\` shows message id in full.`;
-
-const RULES_INTRO = `# Standing rules
-Verbatim user rules (never summarized). Use \`pin_rule\` to add new ones.`;
-
-const HELPER_INTRO = `# Memory
-Background from parent chat (<chat>: \`id+n|text\`, kinds \`user|work|talk[Chat]\`, "${PLACEHOLDER}" = pending). \`zoom(id, n)\` splits id+n; \`n=1\` shows full message.`;
 
 const LIFECYCLE = "task:subagent:lifecycle";
 const RESULT = 2_000;
@@ -219,14 +206,6 @@ function countLines(file: string): number {
 	return n;
 }
 
-function rules(): string {
-	let text = "";
-	try {
-		text = fs.readFileSync(RULES as string, "utf8").trim();
-	} catch {}
-	return `${RULES_INTRO}\n\n<rules>\n${text || "None yet."}\n</rules>`;
-}
-
 function sized(message: unknown): number {
 	let images = 0;
 	const json = JSON.stringify(message, (_key, value) => {
@@ -386,21 +365,6 @@ export default function optchat(pi: ExtensionAPI): void {
 			},
 		});
 	}
-	if (BOT && RULES) {
-		pi.registerTool({
-			name: "pin_rule",
-			label: "Pin rule",
-			description: "Pin a verbatim standing rule from the user.",
-			parameters: z.object({ rule: z.string() }),
-			async execute(_toolCallId, params) {
-				const rule = params.rule.trim().replace(/\s*\n\s*/g, " ");
-				if (!rule) return result("No rule given.");
-				fs.mkdirSync(path.dirname(RULES), { recursive: true });
-				fs.appendFileSync(RULES, `- ${rule}\n`);
-				return result(`Pinned: ${rule}`);
-			},
-		});
-	}
 
 	function backfill(ctx: ExtensionContext): void {
 		const file = path.join(STORE.log, `${ctx.sessionManager.getSessionId()}.jsonl`);
@@ -511,10 +475,7 @@ export default function optchat(pi: ExtensionAPI): void {
 
 	function frame(messages: Logged[], at: number): Logged[] {
 		const pinned = snap as Snapshot;
-		const head = [
-			...(RULES ? [{ type: "text", text: rules() }] : []),
-			{ type: "text", text: `${BOT_INTRO}\n\n${pinned.view}` },
-		];
+		const head = pinned.view.trim() ? [{ type: "text", text: pinned.view }] : [];
 		const turn = turnStart(messages);
 		const recentTurns = messages.slice(at);
 		if (turn >= 0 && turn < at) {
@@ -525,6 +486,7 @@ export default function optchat(pi: ExtensionAPI): void {
 				.map((text) => ({ type: "text", text }));
 			recentTurns.unshift({ ...messages[turn], content: [...blocks(messages[turn].content), ...asks] });
 		}
+		if (head.length === 0) return recentTurns;
 		const first = recentTurns[0];
 		if (first?.role !== "user") return [{ role: "user", content: head, timestamp: pinned.time }, ...recentTurns];
 		return [{ ...first, content: [...head, ...blocks(first.content)] }, ...recentTurns.slice(1)];
@@ -552,7 +514,7 @@ export default function optchat(pi: ExtensionAPI): void {
 		if (need <= limit) return out;
 		const floor = Math.max(at, turnStart(messages));
 		let fold = -1;
-		let rest = system + tokensOf(frame(messages, messages.length)[0]);
+		let rest = system + tokensOf(frame(messages, messages.length)[0] ?? "");
 		for (let k = messages.length - 1; k > floor; k--) {
 			rest += tokensOf(messages[k]);
 			if (rest > limit) break;
@@ -650,7 +612,8 @@ export default function optchat(pi: ExtensionAPI): void {
 		if (!enabled) return undefined;
 		if (!active(ctx)) {
 			const pin = pinned(ctx);
-			return { messages: [{ role: "user", content: [{ type: "text" as const, text: `${HELPER_INTRO}\n\n${pin.view}` }], timestamp: pin.time }, ...event.messages] };
+			if (!pin.view.trim()) return undefined;
+			return { messages: [{ role: "user", content: [{ type: "text" as const, text: pin.view }], timestamp: pin.time }, ...event.messages] };
 		}
 		if (BOT) {
 			const messages = bot(event.messages as Logged[], ctx.sessionManager.getSessionId(), ctx);
@@ -659,7 +622,8 @@ export default function optchat(pi: ExtensionAPI): void {
 			return { messages: messages as typeof event.messages };
 		}
 		const pin = pinned(ctx);
-		const block = { type: "text" as const, text: `${INTRO}\n\n${pin.view}` };
+		if (!pin.view.trim()) return undefined;
+		const block = { type: "text" as const, text: pin.view };
 		const at = event.messages.findIndex((message) => message.role === "user");
 		if (at < 0) return { messages: [{ role: "user", content: [block], timestamp: pin.time }, ...event.messages] };
 		const first = event.messages[at] as Extract<(typeof event.messages)[number], { role: "user" }>;

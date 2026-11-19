@@ -699,10 +699,11 @@ in {
                     echo "omp-seed: cannot create ${person.home}/.omp" >&2
                 fi
                 if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent; then
-                  for file in models.json settings.json config.yml models.yml APPEND_SYSTEM.md SYSTEM_TEMPLATE.md; do
+                  for file in models.json settings.json config.yml models.yml AGENTS.md; do
                     ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$file" ${person.home}/.omp/agent/$file ||
                       echo "omp-seed: cannot install $file for ${person.name}" >&2
                   done
+                  ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/rm -f ${person.home}/.omp/agent/APPEND_SYSTEM.md ${person.home}/.omp/agent/SYSTEM_TEMPLATE.md
                   for pair in agents/task.md:task.md; do
                     dst=''${pair%%:*} srcfile=''${pair#*:}
                     ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent/"''${dst%/*}" &&

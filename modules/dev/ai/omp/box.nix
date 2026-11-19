@@ -75,21 +75,21 @@
     ports;
   browserCdpGuard = lib.concatStringsSep "\n" (
     (lib.mapAttrsToList (name: browser: let
-        owner = lib.findFirst (bot: bot.name == name) null bots;
-        uid =
-          if owner == null
-          then 1001
-          else owner.uid;
-      in
-        cdpGuard "127.0.0.1" uid [browser.port])
-      browsers)
-    ++ (lib.mapAttrsToList (name: host: let
-        owner = lib.findFirst (bot: bot.name == name) null bots;
-      in
+      owner = lib.findFirst (bot: bot.name == name) null bots;
+      uid =
         if owner == null
-        then throw "user.dev.ompBoxHostCdp names ${name}, which is not a bot in the box"
-        else cdpGuard hostAddresses owner.uid host.ports)
-      config.user.dev.ompBoxHostCdp)
+        then 1001
+        else owner.uid;
+    in
+      cdpGuard "127.0.0.1" uid [browser.port])
+    browsers)
+    ++ (lib.mapAttrsToList (name: host: let
+      owner = lib.findFirst (bot: bot.name == name) null bots;
+    in
+      if owner == null
+      then throw "user.dev.ompBoxHostCdp names ${name}, which is not a bot in the box"
+      else cdpGuard hostAddresses owner.uid host.ports)
+    config.user.dev.ompBoxHostCdp)
   );
   privateAddresses = [
     "10.0.0.0/8"
@@ -697,7 +697,7 @@
       trap 'rm -rf "$state"' EXIT
       trap 'exit 130' INT TERM HUP
       mkdir -p "$state/agent/agents"
-      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$seed/APPEND_SYSTEM.md" "$seed/SYSTEM_TEMPLATE.md" "$state/agent/"
+      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$seed/AGENTS.md" "$state/agent/"
       cp "$seed/task.md" "$state/agent/agents/task.md"
       PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
         --model ablit/${ablit.id} --config "$seed/ablit.yml" "$@"
@@ -851,8 +851,7 @@
         perCallModel: "on"
       extensions: ${builtins.toJSON ompExtensions}
     '';
-    appendSystem = pkgs.writeText "APPEND_SYSTEM.md" "${config.user.dev.prompts.portable}\n\n${catalog.taskNote}\n";
-    systemTemplate = pkgs.writeText "SYSTEM_TEMPLATE.md" prompts.systemTemplate;
+    agentsMd = pkgs.writeText "AGENTS.md" config.user.dev.prompts.agentsMd.portable;
     taskAgent = pkgs.writeText "task.md" prompts.taskAgent;
   };
   seed = pkgs.runCommand "omp-box-seed" {} ''
@@ -861,8 +860,7 @@
     cp ${files.modelKeys} $out/models.yml
     cp ${files.settings} $out/settings.json
     cp ${files.config} $out/config.yml
-    cp ${files.appendSystem} $out/APPEND_SYSTEM.md
-    cp ${files.systemTemplate} $out/SYSTEM_TEMPLATE.md
+    cp ${files.agentsMd} $out/AGENTS.md
     cp ${files.taskAgent} $out/task.md
     cp ${files.ablitConfig} $out/ablit.yml
     ${lib.concatStrings (lib.mapAttrsToList (name: path: let
@@ -1353,11 +1351,11 @@ in {
       # Which guest user each boxed bot runs as, and the folders inside the user's home that bot also gets;
       # omp-bot-box refuses a bot this list leaves out, so every bot user the box has is named in finix.
       export OMP_BOT_BOX_USERS=${lib.escapeShellArg (builtins.toJSON (lib.listToAttrs (map (bot:
-          lib.nameValuePair bot.name {
-            inherit (bot) user folders;
-            home = "/home/${bot.user}";
-          })
-        bots)))}
+        lib.nameValuePair bot.name {
+          inherit (bot) user folders;
+          home = "/home/${bot.user}";
+        })
+      bots)))}
       unset OMP_BOT_EXTENSION
     '';
 

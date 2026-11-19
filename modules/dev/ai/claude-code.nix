@@ -16,7 +16,7 @@
     (pkgs.writeShellScriptBin "claude" ''
       exec ${lib.getExe pkgs.claude-code} \
         --effort max \
-        --append-system-prompt ${lib.escapeShellArg config.user.dev.prompts.shared} \
+        ${lib.optionalString (config.user.dev.prompts.shared != "") "--append-system-prompt ${lib.escapeShellArg config.user.dev.prompts.shared}"} \
         "$@"
     '')
   ];

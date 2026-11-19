@@ -62,7 +62,6 @@
           ...
         }: ({
           AssistantMessageComponent,
-          chatTranscriptDisplayPreferences,
           UserMessageComponent,
           TranscriptContainer,
           col,
@@ -70,7 +69,6 @@
           settleNative,
           Composer,
           STATE,
-          HIDDEN,
           Marked,
           same,
           said,
@@ -78,7 +76,6 @@
           chatLook,
         }: [
           (import' [AssistantMessageComponent] (str "@oh-my-pi/pi-tui/chat/assistant-message"))
-          (import' [chatTranscriptDisplayPreferences] (str "@oh-my-pi/pi-tui/chat/display-preferences"))
           (import' [UserMessageComponent] (str "@oh-my-pi/pi-tui/chat/user-message"))
           (import' [TranscriptContainer] (str "@oh-my-pi/pi-tui/chrome"))
           (import' [col] (str "@oh-my-pi/pi-tui/native/describe"))
@@ -86,7 +83,6 @@
           (import' [Composer] (str "@oh-my-pi/pi-tui/prompt/composer"))
           blank
           (const STATE (call (dot Symbol "for") [(str "finix.omp-chat-look.state")]))
-          (const HIDDEN (below (str "\\nTool calls are hidden from the user; state key findings/commands in text.\\n")))
           blank
           (class Marked [
             ({
@@ -234,21 +230,7 @@
                 (call install [])
               ]))
             ])
-            blank
-            (call (dot pi "on") [
-              (str "before_agent_start")
-              (async ({
-                event,
-                ctx,
-                systemPrompt,
-              }: (arrow [event ctx] [
-                (if' (infix [(dot ctx "agent?.kind") "===" (str "sub") "||" (dot ctx "mode") "!==" (str "tui") "||" (not (dot chatTranscriptDisplayPreferences "hideToolActivity"))]) (return undefined))
-                (if' (infix [(not (call (dot Array "isArray") [(dot event "systemPrompt")])) "||" (dot event "systemPrompt.length") "===" 0]) (return undefined))
-                (const systemPrompt (array [(spread (dot event "systemPrompt"))]))
-                (infix [(idx systemPrompt (infix [(dot systemPrompt "length") "-" 1])) "=" (tpl [(sub (idx systemPrompt (infix [(dot systemPrompt "length") "-" 1]))) (sub HIDDEN)])])
-                (return (obj [systemPrompt]))
-              ])))
-            ])
+
           ]))))
         ]))
         generators.ts));
@@ -899,8 +881,7 @@ in {
         generator = toJSON;
         value = catalog.models;
       };
-      ".omp/agent/APPEND_SYSTEM.md".text = "${config.user.dev.prompts.shared}\n\n${catalog.taskNote}\n";
-      ".omp/agent/SYSTEM_TEMPLATE.md".text = prompts.systemTemplate;
+      ".omp/agent/AGENTS.md".text = config.user.dev.prompts.agentsMd.host;
       ".omp/agent/agents/task.md".text = prompts.taskAgent;
     };
 }
