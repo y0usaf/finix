@@ -26,7 +26,7 @@ inputs: let
     s = open(p).read()
     old = """      const description = mcpTool.description || mcpTool.name;
           const inputSchema = mcpTool.inputSchema || { type: "object", properties: {} };"""
-    new = """      const firstLine = (t: unknown, max = 140) => {
+    new = r"""      const firstLine = (t: unknown, max = 140) => {
             const line = String(t ?? "").split(/\r?\n/)[0].split(". ")[0].trim();
             return line.length > max ? line.slice(0, max - 1) + "…" : line;
           };
