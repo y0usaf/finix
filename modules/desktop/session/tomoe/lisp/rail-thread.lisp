@@ -205,7 +205,7 @@ names them in LOOK as :NUMBERS and :BAR-NUMBERS."
              (if (getf context :windows)
                  (kit--frames look context theme :reach +rail-thread--reach+)
                  (rail-thread--whole look context theme)))
-           (when frame-strip
+           (when (and frame-strip (getf context :windows))
              (kit--frames look context
                           (append (funcall numbers (rail-thread--placed state frame-strip) state)
                                   (list 3d0))

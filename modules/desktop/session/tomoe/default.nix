@@ -461,6 +461,9 @@
     place =
       map (placement: [(keyword placement.frame) (keyword placement.edge)])
       bar.rail.place;
+    focal-place =
+      map (placement: [(keyword placement.frame) (keyword placement.edge)])
+      bar.rail.focalPlace;
     colors = lib.mapAttrs (_: keyword) {
       ink = "ink";
       rim = "rim";
@@ -3350,7 +3353,34 @@ in {
               edge = "seam";
             }
           ];
-          description = "Where the rail stands, one strip per declaration: the frame it is attached to and that frame's edge. Each strip takes its length from the frame, its thickness from the theme and its scale from the frame's output, so the same theme draws it on the desktop and on a headset. The default is the layout's own seam. A headset's top and bottom bars hugging the focal card are [{frame = \"focused\"; edge = \"top\";} {frame = \"focused\"; edge = \"bottom\";}]; the old full-output bars are [{frame = \"output\"; edge = \"top\";} {frame = \"output\"; edge = \"bottom\";}]. The value is the Lisp config's :PLACE, so extraConfig can replace it (setf (getf +rail+ :place) ...) and a config reload applies it.";
+          description = "Where the rail stands on a deck output, one strip per declaration: the frame it is attached to and that frame's edge. Each strip takes its length from the frame, its thickness from the theme and its scale from the frame's output. The default is the layout's own seam. The value is the Lisp config's :PLACE, so extraConfig can replace it (setf (getf +rail+ :place) ...) and a config reload applies it.";
+        };
+        focalPlace = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              frame = lib.mkOption {
+                type = lib.types.enum ["focused" "column" "output"];
+                default = "column";
+                description = "The focused card, the layout's focal frame, or the output.";
+              };
+              edge = lib.mkOption {
+                type = lib.types.enum ["top" "bottom" "left" "right" "seam"];
+                default = "top";
+                description = "The edge of that frame the rail stands on.";
+              };
+            };
+          });
+          default = [
+            {
+              frame = "column";
+              edge = "top";
+            }
+            {
+              frame = "column";
+              edge = "bottom";
+            }
+          ];
+          description = "Where the rail stands on a narrow focal-frame (Mado headset) output when no deck seam is active. Defaults to top and bottom bars hugging the focal frame; the value is the Lisp config's :FOCAL-PLACE.";
         };
         width = lib.mkOption {
           type = lib.types.ints.positive;

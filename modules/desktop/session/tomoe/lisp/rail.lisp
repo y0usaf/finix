@@ -545,18 +545,13 @@ pixels from the strip's start, scaling and rounding each number once."
       (cons (getf strip :y) (getf strip :height))))
 
 (defun rail--shader-origin (output x y height)
-  "The corner a shader surface at (X, Y) from the output's top and HEIGHT tall
-counts from: the rail's shaders read the output's own pixels, y up from its
-bottom, so a surface anywhere on the output works the same picture out."
-  (let ((bottom (and output (+ (getf output :y 0) (getf output :height 0)))))
-    (list (or x 0) (- (or bottom 0) (or y 0) (or height 0)))))
+  (declare (ignore output height))
+  (list (or x 0) (or y 0)))
 
 (defun rail--shader-rect (output strip)
-  "STRIP as the rail's shaders read it: (X0 Y0 X1 Y1) in the output's pixels,
-y up from its bottom."
-  (let ((bottom (+ (getf output :y) (getf output :height))))
-    (list (getf strip :x) (- bottom (+ (getf strip :y) (getf strip :height)))
-          (+ (getf strip :x) (getf strip :width)) (- bottom (getf strip :y)))))
+  (declare (ignore output))
+  (list (getf strip :x) (getf strip :y)
+        (+ (getf strip :x) (getf strip :width)) (+ (getf strip :y) (getf strip :height))))
 
 (defun rail--strip-blocks (state snapshot strip specs anchor)
   "SPECS placed along STRIP's axis, as (MODULE X Y WIDTH HEIGHT) in output pixels
@@ -624,10 +619,10 @@ nearest the strip, as (X . Y) in output pixels, or NIL with no card."
 ;;; seam, as wide as the theme asks, is the default. A bar carries its theme's
 ;;; bar look along its axis and the seam its seam look, so the same theme draws
 ;;; the strip wherever it is put.
-(defun rail--placements ()
-  "The config's placements as a list of (FRAME EDGE): the layout's own seam
-unless the rail names others."
-  (let ((place (getf +rail+ :place)))
+(defun rail--placements (&optional (key :place))
+  "The config's placements under KEY as a list of (FRAME EDGE), falling back to
+:PLACE and then the layout's own seam."
+  (let ((place (or (getf +rail+ key) (getf +rail+ :place))))
     (cond ((null place) '((:column :seam)))
           ((keywordp (first place)) (list place))
           (t place))))
@@ -810,8 +805,9 @@ turn and the shelf's tray when they are there."
   "The rail's strips, from the config's placements, grouped by the output they
 stand on: each with the blocks it carries and the weld it attaches to."
   (let ((focus-box (rail--layout-entry snapshot (context snapshot :focus)))
+        (placements (rail--placements (if (and focal (null deck)) :focal-place :place)))
         (outputs nil) (found nil))
-    (dolist (placement (rail--placements))
+    (dolist (placement placements)
       (let* ((frame (first placement))
              (placed (rail--placement-strip snapshot deck focal cards output placement))
              (base (first placed))
@@ -1436,8 +1432,11 @@ CONTEXT."
               (append (list (interval :clock :minute)
                             (publish-state :hud-hot (and hot t))
                             (publish-state :rail-theme theme)
-                            (publish-state :rail-frame (append (getf *rail--look* :frame)
-                                                               (list :seam (getf +layout+ :seam))))
+                            (publish-state :rail-frame
+                                           (if (and focal (null deck) (not has-seam))
+                                               (list* :seam 0 (getf *rail--look* :frame))
+                                               (append (getf *rail--look* :frame)
+                                                       (list :seam (getf +layout+ :seam)))))
                             (define-command "rail-theme"
                               :description "Step the rail to its next theme.")
                             (apply #'bind-key (getf +rail+ :theme-bind)))

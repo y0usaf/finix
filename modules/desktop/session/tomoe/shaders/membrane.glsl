@@ -271,7 +271,7 @@ vec3 glass(vec2 p, float f, vec2 dir, float shine) {
     if (d.t > 0.45 && D(T_PLASM) > 0.0) {
         // organelles: specks in the plasm, carried along the thread by a switch
         float stream = 0.0;
-        bool bar = D(T_MODE) > 0.5 && D(T_MODE) < 4.5;
+        bool bar = (D(T_MODE) > 0.5 && D(T_MODE) < 2.5) || D(T_MODE) > 3.5;
         if (!bar && g_raw >= 0.0 && g_raw < D(K_SETTLE) && D(K_FLOW) > -0.5)
             stream = 60.0 * sm(0.0, 1.0, g_dt / 0.44) * sign(p.y - g_wy);
         vec2 q = (p + vec2(0.0, stream)) / 3.0;
@@ -388,7 +388,7 @@ void set_type(vec2 p, inout vec3 c) {
 void mainImage(out vec4 color, in vec2 fragCoord) {
     kit_begin();
     vec2 p = kit_point(fragCoord);
-    if (D(T_MODE) > 0.5 && D(T_MODE) < 4.5) {
+    if ((D(T_MODE) > 0.5 && D(T_MODE) < 2.5) || D(T_MODE) > 3.5) {
         color = thread_bar(p);
         if (color.a <= 0.0) discard;
         return;
@@ -495,7 +495,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
 
     // inside the beads: each gauge's level of denser glass from its foot up, and
     // the voice bead's own dot; both take their tone from the backdrop's luminance
-    if (cov > 0.25) {
+    if (cov > 0.25 && D(T_MODE) < 2.5) {
         for (int k = 0; k < 4; k++) {
             int bead = k < 2 ? 2 + k : 3 + k;
             float pct = gauge_pct(k);

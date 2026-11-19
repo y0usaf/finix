@@ -489,7 +489,7 @@ void mainImage(out vec4 color, in vec2 fragCoord) {
         g_has_old = true;
         near = min(near, abs(box_b(p, g_old) - 8.0));
     }
-    g_slab = g_slab_on && (D(SIDE) == 0.0 || card_shown(focus));
+    g_slab = g_slab_on && (g_free != 0.0 || D(SIDE) == 0.0 || card_shown(focus));
     g_amp = voice_amp(g_now);
     g_vamp = card_shown(focus) ? g_amp : 0.0;
     if (g_slab) {
