@@ -380,7 +380,14 @@ export async function runGoldfishAudit(
 			sessionFile: null,
 			persistArtifacts: false,
 			modelRegistry: ctx.modelRegistry,
-			settings,
+			settings: settings.overlay(
+				{
+					"grep.enabled": true,
+					"glob.enabled": true,
+					"find.enabled": "on",
+				},
+				{ derived: true },
+			),
 			signal,
 		});
 
