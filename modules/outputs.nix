@@ -21,6 +21,7 @@ inputs: let
         ./dev/ai/omp/antigravity-neon-roster.patch
         ./dev/ai/omp/prompt-ablate-guards.patch
         ./dev/ai/omp/instant-send.patch
+        ./dev/ai/omp/fallback-fit-provider-usage.patch
       ];
     postPatch =
       (old.postPatch or "")

@@ -1,0 +1,24 @@
+--- a/packages/coding-agent/src/session/session-maintenance.ts
++++ b/packages/coding-agent/src/session/session-maintenance.ts
+@@ -4532,15 +4532,15 @@
+ 			replayedReasoningShift =
+ 				tokenizer.replayedReasoningTokens(retained) - this.#tokenizer.replayedReasoningTokens(retained);
+ 		}
++		const providerTokens = Math.max(
++			0,
++			(this.#host.getContextUsage({ contextWindow })?.tokens ?? 0) - providerExcludedTokens + replayedReasoningShift,
++		);
++		if (!this.#compactionSettings.enabled && providerTokens > 0) return providerTokens <= fitBudget;
+ 		const residualTokens = compactionContextTokens(
++			providerTokens,
+ 			Math.max(
+ 				0,
+-				(this.#host.getContextUsage({ contextWindow })?.tokens ?? 0) -
+-					providerExcludedTokens +
+-					replayedReasoningShift,
+-			),
+-			Math.max(
+-				0,
+ 				this.#estimateStoredContextTokens(
+ 					[],
+ 					tokenizer,
