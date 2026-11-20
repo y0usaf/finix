@@ -6,14 +6,14 @@
   generators,
   ...
 }: let
-  version = "0.9.14";
+  version = "0.9.29";
 
   wpewebkit = import ../../../pkgs/wpewebkit.nix {inherit pkgs;};
 
   src = pkgs.requireFile {
     name = "Tern-${version}-linux-x86_64.tar.gz";
     hashMode = "flat";
-    hash = "sha256-BCiqLpp82q3qxoYW0GYEXutcNI1ebYD2bHFfGziJNZw=";
+    hash = "sha256-M/Mc7qr1af6PMCBFf9e6WAGXw9J6LevSt0fjRdyiK30=";
     message = ''
       Tern ${version} is a closed-beta build behind a Stencil account. Sign in
       at https://stencil.so/tern, download Tern-${version}-linux-x86_64.tar.gz
