@@ -29,7 +29,15 @@ local function clip(s, max_len)
 	if #clean <= max_len then
 		return clean
 	end
-	return clean:sub(1, max_len - 1) .. "…"
+	local cut = max_len - 1
+	while cut > 0 do
+		local b = clean:byte(cut + 1)
+		if not b or b < 128 or b >= 192 then
+			break
+		end
+		cut = cut - 1
+	end
+	return clean:sub(1, cut) .. "…"
 end
 
 local function short_path(p)
@@ -106,6 +114,114 @@ local function parse_turns_jsonl(raw, limit)
 	local sliced = {}
 	for i = #turns - limit + 1, #turns do
 		sliced[#sliced + 1] = turns[i]
+	end
+	return sliced
+end
+
+local function extract_plain_text(content)
+	if type(content) == "string" then
+		return content
+	end
+	if type(content) ~= "table" then
+		return ""
+	end
+	local parts = {}
+	for _, block in ipairs(content) do
+		if type(block) == "table" and block.type == "text" and type(block.text) == "string" and block.text ~= "" then
+			parts[#parts + 1] = block.text
+		end
+	end
+	return table.concat(parts, " ")
+end
+
+local function parse_advisor_from_session(raw, limit)
+	local notes = {}
+	if type(raw) ~= "string" or raw == "" then
+		return notes
+	end
+	for line in raw:gmatch("[^\r\n]+") do
+		local ok, rec = pcall(tern.json.decode, line)
+		if ok and type(rec) == "table" then
+			local txt = ""
+			local tag = "advisor"
+			local ct = type(rec.customType) == "string" and rec.customType:lower() or ""
+			if rec.type == "custom_message" and ct:find("advisor", 1, true) then
+				txt = extract_plain_text(rec.content)
+			elseif rec.type == "custom" and ct:find("advisor", 1, true) and type(rec.data) == "table" then
+				txt = tostring(rec.data.text or rec.data.summary or rec.data.note or rec.data.message or "")
+			elseif rec.type == "message" and type(rec.message) == "table" then
+				local mct = type(rec.message.customType) == "string" and rec.message.customType:lower() or ""
+				if rec.message.role == "advisor" or mct:find("advisor", 1, true) then
+					txt = extract_plain_text(rec.message.content)
+					if type(rec.message.model) == "string" and rec.message.model ~= "" then
+						tag = rec.message.model:match("([^/]+)$") or rec.message.model
+					end
+				end
+			end
+			txt = clip(txt, 200)
+			if txt ~= "" then
+				local ts = type(rec.timestamp) == "string" and #rec.timestamp >= 16 and rec.timestamp:sub(12, 16) or ""
+				notes[#notes + 1] = { tag = tag, text = txt, time = ts, full_ts = type(rec.timestamp) == "string" and rec.timestamp or "" }
+			end
+		end
+	end
+	if #notes <= limit then
+		return notes
+	end
+	local sliced = {}
+	for i = #notes - limit + 1, #notes do
+		sliced[#sliced + 1] = notes[i]
+	end
+	return sliced
+end
+
+local function parse_advisor_jsonl(raw, limit)
+	local notes = {}
+	if type(raw) ~= "string" or raw == "" then
+		return notes
+	end
+	for line in raw:gmatch("[^\r\n]+") do
+		local ok, rec = pcall(tern.json.decode, line)
+		if ok and type(rec) == "table" and rec.type == "message" and type(rec.message) == "table" and rec.message.role == "assistant" then
+			local txt = clip(extract_plain_text(rec.message.content), 200)
+			if txt ~= "" then
+				local ts = type(rec.timestamp) == "string" and #rec.timestamp >= 16 and rec.timestamp:sub(12, 16) or ""
+				local model = type(rec.message.model) == "string" and rec.message.model ~= "" and (rec.message.model:match("([^/]+)$") or rec.message.model) or "advisor"
+				notes[#notes + 1] = { tag = model, text = txt, time = ts, full_ts = type(rec.timestamp) == "string" and rec.timestamp or "" }
+			end
+		end
+	end
+	if #notes <= limit then
+		return notes
+	end
+	local sliced = {}
+	for i = #notes - limit + 1, #notes do
+		sliced[#sliced + 1] = notes[i]
+	end
+	return sliced
+end
+
+local function merge_advisor_notes(a, b, limit)
+	local combined = {}
+	local seen = {}
+	for _, list in ipairs({ a or {}, b or {} }) do
+		for _, item in ipairs(list) do
+			local key = (item.time or "") .. "|" .. (item.text or "")
+			if not seen[key] then
+				seen[key] = true
+				combined[#combined + 1] = item
+			end
+		end
+	end
+	table.sort(combined, function(x, y)
+		return (x.full_ts or "") < (y.full_ts or "")
+	end)
+	if #combined <= limit then
+		return combined
+	end
+	local sliced = {}
+	for i = #combined - limit + 1, #combined do
+		sliced[#sliced + 1] = combined[i]
 	end
 	return sliced
 end
@@ -248,10 +364,8 @@ local function parse_git_status(out)
 		if first and line:sub(1, 3) == "## " then
 			first = false
 			local rest = line:sub(4)
-			local head = rest:match("^([^%.%s]+)") or rest
-			if head == "No" then
-				head = rest:match("on (%S+)$") or "main"
-			end
+			local unborn = rest:match("^No commits yet on (%S+)") or rest:match("^Initial commit on (%S+)")
+			local head = unborn or rest:match("^(.-)%.%.%.") or rest:match("^(%S+)") or rest
 			info.branch = head
 			local a = rest:match("ahead (%d+)")
 			local b = rest:match("behind (%d+)")
@@ -310,6 +424,10 @@ local function refresh_git(state, force)
 			if not state.alive then
 				return
 			end
+			if (state.ctx and state.ctx.cwd or "") ~= cwd then
+				refresh_git(state, true)
+				return
+			end
 			if r.status == 0 then
 				local parsed = parse_git_status(r.stdout)
 				parsed.cwd = cwd
@@ -331,6 +449,8 @@ local function refresh_bot(state, force)
 		state.work = {}
 		state.helpers = {}
 		state.turns = {}
+		state.session_advisor = {}
+		state.file_advisor = {}
 		state.done_items = {}
 		return
 	end
@@ -338,11 +458,18 @@ local function refresh_bot(state, force)
 	if not force and state.bot_name == bot and (now - state.bot_at) < BOT_COOLDOWN_MS then
 		return
 	end
+	if state.bot_name ~= bot then
+		state.turns = {}
+		state.session_advisor = {}
+		state.file_advisor = {}
+		state.done_items = {}
+	end
 	state.bot_name = bot
 	state.bot_at = now
 	local bot_dir = STATE_ROOT .. "/bots/" .. bot
 	state.work = load_work_items(bot_dir)
 	state.helpers = load_helpers(bot_dir)
+	local req_bot = bot
 	local session_path = latest_session_path(bot_dir)
 	if session_path and not state.session_busy then
 		state.session_busy = true
@@ -351,15 +478,48 @@ local function refresh_bot(state, force)
 			if not state.alive then
 				return
 			end
+			if state.bot_name ~= req_bot then
+				refresh_bot(state, true)
+				return
+			end
 			if r.status == 0 then
 				state.turns = parse_turns_jsonl(r.stdout, 10)
+				state.session_advisor = parse_advisor_from_session(r.stdout, 12)
 			else
 				state.turns = {}
+				state.session_advisor = {}
 			end
 			if state.cx then
 				state.cx:render()
 			end
 		end)
+	elseif not session_path then
+		state.turns = {}
+		state.session_advisor = {}
+	end
+	local advisor_path = session_path and (session_path:gsub("%.jsonl$", "") .. "/__advisor.jsonl") or nil
+	if advisor_path and tern.fs.exists(advisor_path) and not state.advisor_busy then
+		state.advisor_busy = true
+		tern.process.run({ "tail", "-n", "120", advisor_path }, { timeout_ms = 1500 }, function(r)
+			state.advisor_busy = false
+			if not state.alive then
+				return
+			end
+			if state.bot_name ~= req_bot then
+				refresh_bot(state, true)
+				return
+			end
+			if r.status == 0 then
+				state.file_advisor = parse_advisor_jsonl(r.stdout, 12)
+			else
+				state.file_advisor = {}
+			end
+			if state.cx then
+				state.cx:render()
+			end
+		end)
+	elseif not advisor_path or not tern.fs.exists(advisor_path) then
+		state.file_advisor = {}
 	end
 	local done_path = bot_dir .. "/done.log"
 	if tern.fs.exists(done_path) and not state.done_busy then
@@ -367,6 +527,10 @@ local function refresh_bot(state, force)
 		tern.process.run({ "tail", "-n", "8", done_path }, { timeout_ms = 1500 }, function(r)
 			state.done_busy = false
 			if not state.alive then
+				return
+			end
+			if state.bot_name ~= req_bot then
+				refresh_bot(state, true)
 				return
 			end
 			local items = {}
@@ -391,6 +555,8 @@ local function refresh_bot(state, force)
 				state.cx:render()
 			end
 		end)
+	elseif not tern.fs.exists(done_path) then
+		state.done_items = {}
 	end
 end
 
@@ -437,7 +603,17 @@ local function sync_context(state, force)
 		local prev_bot = state.ctx and state.ctx.bot or nil
 		local prev_mode = state.ctx and state.ctx.mode or nil
 		state.ctx = ctx
-		if ctx.mode ~= prev_mode then
+		if prev_mode == nil then
+			local valid
+			if ctx.mode == "bot" then
+				valid = state.tab == "outline" or state.tab == "jobs" or state.tab == "advisor" or state.tab == "workspace"
+			else
+				valid = state.tab == "workspace" or state.tab == "sessions"
+			end
+			if not valid then
+				state.tab = ctx.mode == "bot" and "outline" or "workspace"
+			end
+		elseif ctx.mode ~= prev_mode then
 			state.peek = nil
 			state.tab = ctx.mode == "bot" and "outline" or "workspace"
 		elseif ctx.bot ~= prev_bot then
@@ -461,25 +637,26 @@ local function view_workspace(state)
 	if ctx.mode == "bot" and ctx.bot_box then
 		info_rows[#info_rows + 1] = { "Sandbox", ui.span("omp-box VM", "dim") }
 	end
-	if state.git and state.git.is_repo then
-		local branch_txt = state.git.branch or "HEAD"
-		if (state.git.ahead or 0) > 0 then
-			branch_txt = branch_txt .. " ↑" .. tostring(state.git.ahead)
+	local git = state.git and state.git.cwd == cwd and state.git or nil
+	if git and git.is_repo then
+		local branch_txt = git.branch or "HEAD"
+		if (git.ahead or 0) > 0 then
+			branch_txt = branch_txt .. " ↑" .. tostring(git.ahead)
 		end
-		if (state.git.behind or 0) > 0 then
-			branch_txt = branch_txt .. " ↓" .. tostring(state.git.behind)
+		if (git.behind or 0) > 0 then
+			branch_txt = branch_txt .. " ↓" .. tostring(git.behind)
 		end
 		info_rows[#info_rows + 1] = { "Branch", ui.span(branch_txt, "mono") }
 	end
 	nodes[#nodes + 1] = with(ui.card("Context", { ui.kv(info_rows) }, { icon = "folder" }), { role = "rr.card.ctx" })
 
-	if state.git and state.git.is_repo then
-		local files = state.git.files or {}
+	if git and git.is_repo then
+		local files = git.files or {}
 		local summary = string.format(
 			"%d staged · %d mod · %d new",
-			state.git.staged or 0,
-			state.git.modified or 0,
-			state.git.untracked or 0
+			git.staged or 0,
+			git.modified or 0,
+			git.untracked or 0
 		)
 		local fchildren = {}
 		if #files == 0 then
@@ -501,9 +678,10 @@ local function view_workspace(state)
 			{ role = "rr.card.git" }
 		)
 	else
+		local msg = (git == nil and state.git_busy) and "Loading…" or "Not a git repository"
 		nodes[#nodes + 1] = with(
 			ui.card("Changes", {
-				with(ui.text(ui.span("Not a git repository", "dim")), { role = "rr.empty" }),
+				with(ui.text(ui.span(msg, "dim")), { role = "rr.empty" }),
 			}, { icon = "branch" }),
 			{ role = "rr.card.git" }
 		)
@@ -612,6 +790,31 @@ local function view_jobs(state)
 	return nodes
 end
 
+local function view_advisor(state)
+	local notes = merge_advisor_notes(state.session_advisor, state.file_advisor, 12)
+	local children = {}
+	if #notes == 0 then
+		children[#children + 1] = with(ui.text(ui.span("No advisor notes recorded", "dim")), { role = "rr.empty" })
+	else
+		for i = #notes, 1, -1 do
+			local n = notes[i]
+			children[#children + 1] = with(
+				ui.col({
+					ui.row({
+						ui.badge(clip(n.tag or "advisor", 20), "accent"),
+						ui.text(ui.span(n.time or "", "dim")),
+					}),
+					ui.text(n.text),
+				}),
+				{ role = "rr.advisor.row" }
+			)
+		end
+	end
+	return {
+		with(ui.card("Advisor Notes", children, { icon = "eye", meta = tostring(#notes) }), { role = "rr.card.advisor" }),
+	}
+end
+
 local function view_sessions(state)
 	local tabs = (state.ctx and state.ctx.tabs) or {}
 	local children = {}
@@ -712,6 +915,7 @@ local function render_view(state, _cx)
 		and {
 			{ id = "outline", label = "Outline" },
 			{ id = "jobs", label = "Jobs" },
+			{ id = "advisor", label = "Advisor" },
 			{ id = "workspace", label = "Workspace" },
 		}
 		or {
@@ -734,6 +938,8 @@ local function render_view(state, _cx)
 	if is_bot then
 		if state.tab == "jobs" then
 			body_nodes = view_jobs(state)
+		elseif state.tab == "advisor" then
+			body_nodes = view_advisor(state)
 		elseif state.tab == "workspace" then
 			body_nodes = view_workspace(state)
 		else
@@ -783,10 +989,13 @@ tern.block.define("inspector", {
 			bot_name = nil,
 			bot_at = 0,
 			session_busy = false,
+			advisor_busy = false,
 			done_busy = false,
 			work = {},
 			helpers = {},
 			turns = {},
+			session_advisor = {},
+			file_advisor = {},
 			done_items = {},
 			peek = nil,
 		}
@@ -814,6 +1023,10 @@ tern.block.define("inspector", {
 			state.tab = is_bot and "jobs" or "sessions"
 			return true
 		elseif name == "3" and is_bot then
+			state.peek = nil
+			state.tab = "advisor"
+			return true
+		elseif name == "4" and is_bot then
 			state.peek = nil
 			state.tab = "workspace"
 			return true

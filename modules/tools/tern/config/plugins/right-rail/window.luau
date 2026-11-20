@@ -321,7 +321,9 @@ tern.on("focus", function(ev, cx)
 	if ev and ev.tab then
 		follow_tab(cx, ev.tab)
 	end
-	schedule_sync(cx, false)
+	if find_inspector(cx) then
+		schedule_sync(cx, false)
+	end
 end)
 
 tern.on("cwd", function(_ev, cx)

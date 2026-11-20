@@ -12,7 +12,7 @@ html.tn-themed {
 	--sand-bg-tertiary: light-dark(#1c1c1c0f, #f5f5f50a);
 	--sand-bg-quaternary: light-dark(#1c1c1c0a, #f5f5f505);
 	--sand-fill-bubble-agent: light-dark(#1c1c1c0f, #f5f5f50a);
-	--sand-fill-bubble-user: light-dark(#1c1c1c, #f5f5f52e);
+	--sand-fill-bubble-user: light-dark(#126fd4, #116dd2);
 	--sand-text-primary: light-dark(#1c1c1c, #f5f5f5);
 	--sand-text-primary-hover: light-dark(#363636, #dbdbdb);
 	--sand-text-secondary: light-dark(#1c1c1cad, #f5f5f5a8);
@@ -27,14 +27,51 @@ html.tn-themed {
 	--sand-specular-primary: light-dark(#ffffff8f, #ffffff1f);
 	--sand-specular-secondary: light-dark(#ffffff29, #ffffff08);
 	--sand-accent: light-dark(#1680f3, #4d9bff);
+	--sand-unread-blue: light-dark(#1680f3, #4d9bff);
+	--sand-prompt-cta-fill: var(--sand-accent);
+	--sand-prompt-cta-text: var(--sand-text-on-primary);
 	--sand-focus: light-dark(#1e86fc, #1884fc);
 	--sand-ok: light-dark(#10ab61, #00ba69);
 	--sand-warn: light-dark(#da830e, #e28600);
 	--sand-bad: light-dark(#e72e3b, #ff6463);
-	--sand-shadow-card: light-dark(0 1px 4px #1c1c1c12, none);
-	--sand-shadow-composer: light-dark(0 2px 8px #1c1c1c0f, none);
-	--sand-shadow-popover: light-dark(0 10px 24px -4px #1c1c1c1a, none);
-	--sand-shadow-modal: light-dark(0 16px 36px -6px #1c1c1c1a, none);
+	--sand-shadow-control-color: light-dark(#1c1c1c1f, #00000052);
+	--sand-shadow-card-color: light-dark(#1c1c1c09, #00000038);
+	--sand-shadow-inline-ambient: light-dark(#1c1c1c14, #00000048);
+	--sand-shadow-inline-key: light-dark(#1c1c1c0f, #00000038);
+	--sand-shadow-popover-ambient: light-dark(#1c1c1c1a, #00000066);
+	--sand-shadow-popover-key: light-dark(#1c1c1c1a, #0000004d);
+	--sand-shadow-modal-ambient: light-dark(#1c1c1c1a, #0000007a);
+	--sand-shadow-modal-key: light-dark(#1c1c1c1a, #0000005c);
+	--sand-shadow-window-ambient: light-dark(#1c1c1c8f, #00000099);
+	--sand-shadow-window-edge: light-dark(#1c1c1c1a, #ffffff14);
+	--sand-shadow-ring: light-dark(#1c1c1c08, #ffffff12);
+	--sand-shadow-control: 0 1px 3px 0 var(--sand-shadow-control-color), 0 0 0 0.5px var(--sand-shadow-ring);
+	--sand-shadow-inline: 0 4px 12px -1px var(--sand-shadow-inline-ambient), 0 2px 4px -2px var(--sand-shadow-inline-key), 0 0 0 1px var(--sand-shadow-ring);
+	--sand-shadow-card: 0 1px 3px 0 var(--sand-shadow-card-color), 0 0 0 0.5px var(--sand-shadow-ring);
+	--sand-shadow-composer: var(--sand-shadow-inline);
+	--sand-shadow-popover: 0 10px 20px -3px var(--sand-shadow-popover-ambient), 0 4px 6px -4px var(--sand-shadow-popover-key), 0 0 0 1px var(--sand-shadow-ring);
+	--sand-shadow-modal: 0 20px 32px -5px var(--sand-shadow-modal-ambient), 0 8px 12px -6px var(--sand-shadow-modal-key), 0 0 0 1px var(--sand-shadow-ring);
+	--sand-shadow-window: 0 22px 70px 4px var(--sand-shadow-window-ambient), 0 0 0 0.5px var(--sand-shadow-window-edge);
+	--sand-text-xs: 11px;
+	--sand-text-sm: 12px;
+	--sand-text-base: 14px;
+	--sand-text-lg: 16px;
+	--sand-text-xl: 18px;
+	--sand-text-2xl: 22px;
+	--sand-text-3xl: 26px;
+	--sand-tracking-xs: 0.07px;
+	--sand-tracking-sm: 0px;
+	--sand-tracking-base: -0.08px;
+	--sand-tracking-lg: -0.15px;
+	--sand-tracking-xl: -0.22px;
+	--sand-tracking-2xl: -0.46px;
+	--sand-tracking-3xl: -0.26px;
+	--sand-duration-instant: 50ms;
+	--sand-duration-fast: 100ms;
+	--sand-duration-normal: 150ms;
+	--sand-duration-slow: 200ms;
+	--sand-duration-slower: 300ms;
+	--sand-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 	--dawn-page: var(--sand-bg-pane);
 	--dawn-chrome: var(--sand-bg-chrome);
 	--dawn-side: var(--sand-bg-sidebar);
@@ -95,6 +132,9 @@ html.tn-themed {
 :root:not(#dawn) body {
 	background: var(--sand-bg-chrome);
 	color: var(--sand-text-primary);
+	letter-spacing: var(--sand-tracking-base);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
 	--accent: var(--sand-text-primary);
 	--accent-ink: var(--sand-text-primary);
 	--accent-fill: var(--sand-text-primary);
@@ -321,17 +361,17 @@ html.tn-themed {
 	border-radius: 9999px;
 	font-size: 0;
 	line-height: 0;
-	color: var(--sand-text-inverted);
-	background: var(--sand-text-primary);
-	box-shadow: none;
-	transition: background-color 120ms ease, opacity 140ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+	color: var(--sand-prompt-cta-text);
+	background: var(--sand-prompt-cta-fill);
+	box-shadow: var(--sand-shadow-control);
+	transition: background-color var(--sand-duration-fast) ease, opacity var(--sand-duration-normal) ease, transform var(--sand-duration-normal) var(--sand-ease-out);
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd::before {
 	content: '↑';
 	font: 600 14px/1 var(--sans);
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:hover .kbd {
-	background: var(--sand-text-primary-hover);
+	background: color-mix(in srgb, var(--sand-prompt-cta-fill) 88%, var(--sand-text-primary));
 }
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.composer.send'], [data-role='omp.composer.stop']):focus-visible {
 	outline: 2px solid var(--sand-focus);
@@ -453,7 +493,11 @@ html.tn-themed {
 :root:not(#dawn):not(.tn-phone).lay-rail.tabs-h #tabbar { width: 280px; }
 :root:not(#dawn):not(.tn-phone).lay-rail.tabs-h #panel { left: calc(280px * var(--tn-zoom, 1)); }
 :root:not(#dawn):not(.tn-phone).lay-rail.tabs-h.tn-widgets #widgetbar { left: calc(280px * var(--tn-zoom, 1)); }
-:root:not(#dawn) #tabbar .tn-ib-pip { color: var(--sand-bg-pane); }
+:root:not(#dawn) #tabbar .tn-ib-pip,
+:root:not(#dawn) #tabbar .tn-dk-pip {
+	background: var(--sand-unread-blue);
+	color: var(--sand-bg-pane);
+}
 
 :root:not(#dawn) :is(#pal, #thm, #pick) {
 	--t1: var(--dawn-ink);
@@ -1636,15 +1680,51 @@ html.tn-themed {
 }
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip { animation-delay: 150ms; }
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::after { animation-delay: 300ms; }
+@keyframes dawn-soft-enter {
+	from { opacity: 0; transform: translateY(4px) scale(0.985); }
+	to { opacity: 1; transform: translateY(0) scale(1); }
+}
+:root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-hovercard, .tn-bn-card, .sf-col[data-role^='omp.overlay.'], .sf-card[data-role='omp.bot.asked']) {
+	animation: dawn-soft-enter var(--sand-duration-normal) var(--sand-ease-out) backwards;
+}
 :root:not(#dawn) .sf-chat-reader .sf-section.collapsible > .sf-section-head,
 :root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-head {
- transition: background-color 160ms ease-out, color 160ms ease-out;
+	transition: background-color var(--sand-duration-normal) ease-out, color var(--sand-duration-normal) ease-out;
 }
 :root:not(#dawn) .sf-chat-reader .sf-section.collapsible > .sf-section-head:hover,
-:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-head:hover { transition-duration: 50ms; }
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-head:hover {
+	transition-duration: var(--sand-duration-instant);
+}
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible > .sf-section-body,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-body {
+	display: grid;
+	grid-template-rows: 1fr;
+	transition: grid-template-rows var(--sand-duration-slow) var(--sand-ease-out), opacity var(--sand-duration-normal) ease-out;
+}
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible.collapsed > .sf-section-body > *,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible.collapsed.nopreview > .sf-tool-body > * {
+	min-height: 0;
+	overflow: hidden;
+}
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible.collapsed > .sf-section-body,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible.collapsed.nopreview > .sf-tool-body {
+	grid-template-rows: 0fr;
+	grid-auto-rows: 0fr;
+	gap: 0;
+	margin-top: 0;
+	margin-bottom: 0;
+	opacity: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+:root:not(#dawn) .sf-chat-reader :is(.sf-section-body:empty, .sf-tool-body:empty) {
+	display: none;
+}
 :root:not(#dawn) .sf-chat-reader .sf-section.collapsible:not(.collapsed) > .sf-section-body,
 :root:not(#dawn) .sf-chat-reader .sf-tool.collapsible:not(.collapsed) > .sf-tool-body {
- animation: dawn-unfold 220ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+	animation: dawn-unfold var(--sand-duration-slow) var(--sand-ease-out) backwards;
 }
 :root:not(#dawn) #tabbar .tt :is(.nm, .sub),
 :root:not(#dawn) #tabbar .tt .sub::before {
@@ -1707,6 +1787,7 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader .sf-message .sf-msg-act:not(:disabled, .dis, [aria-disabled='true']):active,
 :root:not(#dawn) .sf-chat-reader .sf-button:not([data-role^='omp.composer.'], .disabled, .dis, :disabled, [aria-disabled='true']):active,
 :root:not(#dawn) :is(#pal, #thm, #pick) .ck-item:active { transform: none; transition: none; }
+:root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-hovercard, .tn-bn-card, .sf-col[data-role^='omp.overlay.'], .sf-card[data-role='omp.bot.asked']),
 :root:not(#dawn) .sf-chat-reader :is(.sf-section, .sf-tool).collapsible > :is(.sf-section-body, .sf-tool-body),
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip,
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::before,
@@ -1731,6 +1812,7 @@ html.tn-themed {
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card,
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card,
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader :is(.sf-section, .sf-tool).collapsible > :is(.sf-section-body, .sf-tool-body),
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-hovercard, .tn-bn-card, .sf-col[data-role^='omp.overlay.'], .sf-card[data-role='omp.bot.asked']),
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) :is(.sf-section, .sf-tool).collapsible > :is(.sf-section-body, .sf-tool-body),
 :root:not(#dawn) .sf-chat-reader.sf-still :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip,
 :root:not(#dawn) .sf-chat-reader.sf-still :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::before,
