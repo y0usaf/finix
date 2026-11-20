@@ -242,6 +242,10 @@
         generators.markdown));
       "plugins/agent-tabs/plugin.toml" = ./config/plugins/agent-tabs/plugin.toml;
       "plugins/agent-tabs/window.luau" = ./config/plugins/agent-tabs/window.luau;
+      "plugins/right-rail/plugin.toml" = ./config/plugins/right-rail/plugin.toml;
+      "plugins/right-rail/host.luau" = ./config/plugins/right-rail/host.luau;
+      "plugins/right-rail/window.luau" = ./config/plugins/right-rail/window.luau;
+      "plugins/right-rail/right-rail.css" = ./config/plugins/right-rail/right-rail.css;
       "plugins/block-menu/plugin.toml" = ./config/plugins/block-menu/plugin.toml;
       "plugins/block-menu/window.luau" = generators.sourceFile "window.luau" (generators.luau.render (({
           PickItem,

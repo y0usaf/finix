@@ -20,6 +20,7 @@ inputs: let
         ./dev/ai/omp/agy-notice-fallback.patch
         ./dev/ai/omp/antigravity-neon-roster.patch
         ./dev/ai/omp/prompt-ablate-guards.patch
+        ./dev/ai/omp/instant-send.patch
       ];
     postPatch =
       (old.postPatch or "")

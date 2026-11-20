@@ -391,6 +391,12 @@
         fi
       done
 
+      if [ -z "''${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+        bus="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/tomoe.tomoe-0.bus"
+        if [ -S "$bus" ]; then
+          export DBUS_SESSION_BUS_ADDRESS="unix:path=$bus"
+        fi
+      fi
       dconf write /org/gnome/desktop/interface/color-scheme "'prefer-$1'"
       dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk'"
       "''${cursor[@]}"

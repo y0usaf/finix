@@ -6,13 +6,15 @@ SHEETS = [
     "ua.css", "theme.css", "base.css", "doc.css", "highlight.css", "markdown.css", "termview.css", "surface.css",
     "surface-crash.css", "surface-content.css", "surface-data.css", "surface-list.css", "surface-input.css",
     "surface-controls.css", "surface-lens.css", "surface-el.css", "surface-attachment.css", "surface-avatar.css",
-    "surface-buttons.css", "surface-cite.css", "surface-empty.css", "surface-field.css", "surface-menu.css",
-    "surface-message.css", "surface-questions.css", "surface-scroll.css", "surface-skeleton.css",
-    "surface-suggestions.css", "omp.css", "omp-transcript.css", "omp-tools.css", "omp-composer.css", "omp-panels.css",
-    "omp-chat-reader.css",
+    "surface-breadcrumb.css", "surface-buttons.css", "surface-cite.css", "surface-doc.css", "surface-empty.css",
+    "surface-field.css", "surface-menu.css", "surface-message.css", "surface-nav.css", "surface-pager.css",
+    "surface-questions.css", "surface-scroll.css", "surface-skeleton.css", "surface-slider.css", "surface-split.css",
+    "surface-stacktrace.css", "surface-suggestions.css", "surface-switch.css", "surface-trace.css", "omp.css",
+    "omp-agents.css", "omp-apps.css", "omp-pickers.css", "omp-tray.css", "omp-transcript.css", "omp-tools.css",
+    "omp-composer.css", "omp-panels.css", "omp-chat-reader.css",
 ]
 ELSEWHERE = re.compile(
-    r"\.sf-chat-(?:console|spine|touch)\b|\.tn-phone\b|omp\.rewind|#(?:tabbar|sidebar|statusline|pal|thm|pick|banners|inbox)\b"
+    r"\.sf-chat-(?:console|spine|touch)\b|\.tn-phone\b|omp\.rewind|#(?:tabbar|sidebar|widgetbar|wg-gallery|pal|thm|pick|banners|inbox)\b"
     r"|\.(?:cmdk|mdl|mdl-layer|dlg-card|pk-sheet|tn-hd|tn-ib|tn-bn-card|tn-signin|toast|tooltip|pf)\b"
 )
 PSEUDO = re.compile(r"::|:(?:before|after|first-line|first-letter)\b")

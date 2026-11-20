@@ -1,0 +1,15 @@
+schema = 1
+id = "right-rail"
+name = "Right Inspector"
+version = "0.1.0"
+description = "Grokbot-style right inspector pane for bot and terminal tabs."
+icon = "dock-right"
+host = "host.luau"
+window = "window.luau"
+styles = ["right-rail.css"]
+
+[[blocks]]
+id = "inspector"
+title = "Inspector"
+icon = "dock-right"
+palette = true

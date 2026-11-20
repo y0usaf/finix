@@ -1,0 +1,329 @@
+diff --git a/packages/agent/src/agent-loop.ts b/packages/agent/src/agent-loop.ts
+index 2b16c4a..48e79c2 100644
+--- a/packages/agent/src/agent-loop.ts
++++ b/packages/agent/src/agent-loop.ts
+@@ -1439,7 +1439,13 @@ async function runLoopBody(
+ 
+ 					preparedProviderCall = await prepareProviderCall(currentContext, config, signal);
+ 					if (signal?.aborted && (await endAbortedBeforeModel(turnMessages, turnOpen))) return;
+-					preparedProviderCall.liveSteering = openLiveSteering(config, signal, preparedProviderCall);
++					const canPreemptStreamOnSteering =
++						config.interruptMode !== "wait" &&
++						config.hasSteeringMessages !== undefined &&
++						config.waitForSteeringMessages !== undefined;
++					preparedProviderCall.liveSteering = canPreemptStreamOnSteering
++						? undefined
++						: openLiveSteering(config, signal, preparedProviderCall);
+ 					gateResult = (await config.beforeModelCall?.(preparedProviderCall.context, signal)) || undefined;
+ 				} catch (error) {
+ 					if (signal?.aborted && (await endAbortedBeforeModel(turnMessages, turnOpen))) return;
+@@ -1646,8 +1652,16 @@ async function runLoopBody(
+ 							status: message.stopReason === "aborted" ? "aborted" : "error",
+ 						});
+ 					}
+-					await emitTurnEnd(stream, currentContext, message, toolResults, config, signal, { willContinue: false });
++					const steeredPreempt = steeringPreemptedMessages.has(message) && !signal?.aborted;
++					await emitTurnEnd(stream, currentContext, message, toolResults, config, signal, {
++						willContinue: steeredPreempt,
++					});
+ 					turnOpen = false;
++					if (steeredPreempt) {
++						pendingMessages = (await config.getSteeringMessages?.(signal)) || [];
++						hasMoreToolCalls = false;
++						continue;
++					}
+ 
+ 					stream.push(buildAgentEndEvent(newMessages, telemetry, stepCounter.count));
+ 					stream.end(newMessages);
+@@ -2098,11 +2112,23 @@ async function streamAssistantResponse(
+ 	const harmonyMitigationEnabled = isHarmonyLeakMitigationTarget(model);
+ 	const dsmlLeakRecoveryEnabled = isDsmlLeakRecoveryTarget(model);
+ 	const harmonyAbortController = harmonyMitigationEnabled ? new AbortController() : undefined;
+-	const requestSignal = harmonyAbortController
+-		? signal
+-			? AbortSignal.any([signal, harmonyAbortController.signal])
+-			: harmonyAbortController.signal
+-		: signal;
++	const steeringPreemptController =
++		config.interruptMode !== "wait" &&
++		config.hasSteeringMessages !== undefined &&
++		config.waitForSteeringMessages !== undefined
++			? new AbortController()
++			: undefined;
++	const requestSignals: AbortSignal[] = [];
++	if (signal) requestSignals.push(signal);
++	if (harmonyAbortController) requestSignals.push(harmonyAbortController.signal);
++	if (steeringPreemptController) requestSignals.push(steeringPreemptController.signal);
++	const requestSignal =
++		requestSignals.length === 0
++			? undefined
++			: requestSignals.length === 1
++				? requestSignals[0]
++				: AbortSignal.any(requestSignals);
++	const isSteeringPreempt = (): boolean => Boolean(steeringPreemptController?.signal.aborted && !signal?.aborted);
+ 	// Owned tool calling: aborted by the stream wrapper when the model starts
+ 	// fabricating a `<tool_response>`, so the provider stops generating the rest of
+ 	// the hallucinated turn. Merged into the provider signal ONLY (not
+@@ -2224,24 +2250,134 @@ async function streamAssistantResponse(
+ 		});
+ 	};
+ 
++	const watchAbortController = new AbortController();
++	const { promise: watchStopped, resolve: resolveWatchStop } = Promise.withResolvers<void>();
++	const stopSteeringWatch = (): void => {
++		if (!watchAbortController.signal.aborted) watchAbortController.abort();
++		resolveWatchStop();
++	};
++	const watchSignal = signal ? AbortSignal.any([signal, watchAbortController.signal]) : watchAbortController.signal;
++	if (watchSignal.aborted) resolveWatchStop();
++	else watchSignal.addEventListener("abort", () => resolveWatchStop(), { once: true });
++	const watchStoppedFalse = watchStopped.then(() => false);
+ 	try {
+ 		return await runInActiveSpan(chatSpan, async () => {
+ 			onProviderStart?.();
+-			let response = await streamFunction(model, llmContext, {
+-				...config,
+-				apiKey,
+-				metadata: resolvedMetadata,
+-				toolChoice: effectiveToolChoice,
+-				reasoning: effectiveReasoning,
+-				disableReasoning: effectiveDisableReasoning,
+-				temperature: effectiveTemperature,
+-				serviceTier: effectiveServiceTier,
+-				cwd: effectiveCwd,
+-				signal: finalRequestSignal,
+-				onResponse: captureOnResponse,
+-				cursorOnToolResult: collectCursorToolResult,
+-				liveSteering: providerCall.liveSteering,
+-			});
++			if (steeringPreemptController && !signal?.aborted && (await hasUserSteeringMessages(config))) {
++				steeringPreemptController.abort(STEERING_PREEMPT_MARKER);
++				const aborted = emitAbortedAssistantMessage(
++					null,
++					false,
++					new Set(),
++					context,
++					config,
++					stream,
++					requestSignal,
++					true,
++				);
++				steeringPreemptedMessages.add(aborted);
++				await finishChat(aborted);
++				return aborted;
++			}
++			if (steeringPreemptController) {
++				void (async () => {
++					while (!watchSignal.aborted && !steeringPreemptController.signal.aborted) {
++						const waited = config.waitForSteeringMessages?.(watchSignal).then(
++							() => true,
++							() => false,
++						);
++						if (await hasUserSteeringMessages(config)) {
++							if (!watchSignal.aborted && !signal?.aborted) {
++								steeringPreemptController.abort(STEERING_PREEMPT_MARKER);
++							}
++							return;
++						}
++						if (!waited || !(await Promise.race([waited, watchStoppedFalse]))) return;
++						if (watchSignal.aborted || steeringPreemptController.signal.aborted) return;
++						if (await hasUserSteeringMessages(config)) {
++							if (!watchSignal.aborted && !signal?.aborted) {
++								steeringPreemptController.abort(STEERING_PREEMPT_MARKER);
++							}
++							return;
++						}
++						await new Promise<void>(resolve => {
++							const timer = setTimeout(resolve, STEERING_POLL_INTERVAL_MS);
++							watchStopped.then(() => {
++								clearTimeout(timer);
++								resolve();
++							});
++						});
++					}
++				})();
++			}
++			let response: Awaited<ReturnType<typeof streamFunction>>;
++			try {
++				const streamPromise = Promise.resolve(
++					streamFunction(model, llmContext, {
++						...config,
++						apiKey,
++						metadata: resolvedMetadata,
++						toolChoice: effectiveToolChoice,
++						reasoning: effectiveReasoning,
++						disableReasoning: effectiveDisableReasoning,
++						temperature: effectiveTemperature,
++						serviceTier: effectiveServiceTier,
++						cwd: effectiveCwd,
++						signal: finalRequestSignal,
++						onResponse: captureOnResponse,
++						cursorOnToolResult: collectCursorToolResult,
++						liveSteering: providerCall.liveSteering,
++					}),
++				);
++				if (steeringPreemptController) {
++					const { promise: openAbortPromise, resolve: resolveOpenAbort } = Promise.withResolvers<typeof ABORTED>();
++					const onOpenAbort = () => resolveOpenAbort(ABORTED);
++					if (requestSignal?.aborted) resolveOpenAbort(ABORTED);
++					else requestSignal?.addEventListener("abort", onOpenAbort, { once: true });
++					try {
++						const raced = await Promise.race([streamPromise, openAbortPromise]);
++						if (raced === ABORTED) {
++							void streamPromise.then(s => s[Symbol.asyncIterator]().return?.()).catch(() => {});
++							const preempted = isSteeringPreempt();
++							const aborted = emitAbortedAssistantMessage(
++								null,
++								false,
++								new Set(),
++								context,
++								config,
++								stream,
++								requestSignal,
++								preempted,
++							);
++							if (preempted) steeringPreemptedMessages.add(aborted);
++							await finishChat(aborted);
++							return aborted;
++						}
++						response = raced;
++					} finally {
++						requestSignal?.removeEventListener("abort", onOpenAbort);
++					}
++				} else {
++					response = await streamPromise;
++				}
++			} catch (err) {
++				if (isSteeringPreempt()) {
++					const aborted = emitAbortedAssistantMessage(
++						null,
++						false,
++						new Set(),
++						context,
++						config,
++						stream,
++						requestSignal,
++						true,
++					);
++					steeringPreemptedMessages.add(aborted);
++					await finishChat(aborted);
++					return aborted;
++				}
++				throw err;
++			}
+ 			if (promptToolWireTools && ownedDialect) {
+ 				// Re-materialize in-band tool-call text as native toolCall content blocks
+ 				// so the rest of the loop executes them unchanged. When the model starts
+@@ -2302,6 +2438,7 @@ async function streamAssistantResponse(
+ 				}
+ 				await speculationCoordinator?.discardAll("run aborted", "aborted");
+ 				speculationSettled = true;
++				const preempted = isSteeringPreempt();
+ 				const aborted = emitAbortedAssistantMessage(
+ 					partialMessage,
+ 					addedPartial,
+@@ -2310,7 +2447,9 @@ async function streamAssistantResponse(
+ 					config,
+ 					stream,
+ 					requestSignal,
++					preempted,
+ 				);
++				if (preempted) steeringPreemptedMessages.add(aborted);
+ 				await finishChat(aborted);
+ 				return aborted;
+ 			};
+@@ -2344,6 +2483,9 @@ async function streamAssistantResponse(
+ 						next = await responseIterator.next();
+ 					}
+ 					if (next.done) {
++						if (isSteeringPreempt()) {
++							return await finishAbortedStream();
++						}
+ 						providerStreamSettled = true;
+ 						break;
+ 					}
+@@ -2372,6 +2514,15 @@ async function streamAssistantResponse(
+ 							}
+ 						}
+ 						finalMessage = snapshotAssistantMessage(finalMessage);
++						if (isSteeringPreempt() && (finalMessage.stopReason === "aborted" || finalMessage.stopReason === "error")) {
++							finalMessage = {
++								...finalMessage,
++								stopReason: "aborted",
++								errorMessage: STEERING_PREEMPT_MARKER,
++								errorId: AIError.create(AIError.Flag.SilentAbort | AIError.Flag.UserInterrupt),
++							};
++							steeringPreemptedMessages.add(finalMessage);
++						}
+ 						// Unhealed DSML markup must not reach history, including reasoning
+ 						// and turns with a valid structured call. Only a failed text-only
+ 						// call needs the recovery nudge.
+@@ -2725,6 +2876,8 @@ async function streamAssistantResponse(
+ 			baseUrl: model.baseUrl,
+ 		});
+ 		throw err;
++	} finally {
++		stopSteeringWatch();
+ 	}
+ }
+ 
+@@ -2860,11 +3013,13 @@ function emitAbortedAssistantMessage(
+ 	config: AgentLoopConfig,
+ 	stream: EventStream<AgentEvent, AgentMessage[]>,
+ 	requestSignal: AbortSignal | undefined,
++	silentUserPreempt = false,
+ ): AssistantMessage {
+ 	const model = config.getModel?.() ?? config.model;
+-	const errorMessage = abortReasonText(requestSignal);
+-	const errorId =
+-		errorMessage === "Request was aborted"
++	const errorMessage = silentUserPreempt ? STEERING_PREEMPT_MARKER : abortReasonText(requestSignal);
++	const errorId = silentUserPreempt
++		? AIError.create(AIError.Flag.SilentAbort | AIError.Flag.UserInterrupt)
++		: errorMessage === "Request was aborted"
+ 			? AIError.create(AIError.Flag.Abort)
+ 			: AIError.classify(requestSignal?.reason) || undefined;
+ 	const base: AssistantMessage = partialMessage
+@@ -2931,6 +3086,15 @@ interface PreparedToolCall {
+ 
+ /** Committed assistant messages whose unhealed DSML tool-call markup was stripped; the loop answers them with a failure nudge. */
+ const dsmlLeakMessages = new WeakSet<AssistantMessage>();
++const steeringPreemptedMessages = new WeakSet<AssistantMessage>();
++const STEERING_PREEMPT_MARKER = "__omp.silent_abort__";
++
++async function hasUserSteeringMessages(config: AgentLoopConfig): Promise<boolean> {
++	if (!config.hasSteeringMessages) return false;
++	const state = await config.hasSteeringMessages();
++	if (typeof state === "boolean") return state;
++	return state.queued && state.source === "user";
++}
+ 
+ /**
+  * Prepare results computed in the stream-done branch (before `message_start`/
+diff --git a/packages/coding-agent/src/modes/utils/ui-helpers.ts b/packages/coding-agent/src/modes/utils/ui-helpers.ts
+index 3030015..f07edfc 100644
+--- a/packages/coding-agent/src/modes/utils/ui-helpers.ts
++++ b/packages/coding-agent/src/modes/utils/ui-helpers.ts
+@@ -1333,7 +1333,7 @@ export class UiHelpers {
+ 		this.ctx.pendingMessagesContainer.disposeChildren();
+ 		const queuedMessages = this.ctx.viewSession.getQueuedMessages() as QueuedMessages;
+ 
+-		const steeringMessages = [...queuedMessages.steering];
++		const steeringMessages = this.ctx.viewSession.interruptMode === "wait" ? [...queuedMessages.steering] : [];
+ 		const followUpMessages = [...queuedMessages.followUp];
+ 		if (!this.ctx.focusedAgentId) {
+ 			if (this.ctx.yieldCompaction) followUpMessages.push(this.ctx.yieldCompaction.text);
+diff --git a/packages/coding-agent/src/session/agent-session.ts b/packages/coding-agent/src/session/agent-session.ts
+index 11f3d6a..6ef3557 100644
+--- a/packages/coding-agent/src/session/agent-session.ts
++++ b/packages/coding-agent/src/session/agent-session.ts
+@@ -10514,6 +10514,9 @@ export class AgentSession implements SettingsScope, AgentViewSession {
+ 			return group;
+ 		}
+ 		for (const message of group) this.agent.steer(message);
++		if (attribution === "user" && this.interruptMode !== "wait" && this.isRetrying) {
++			this.abortRetry();
++		}
+ 		// Wake any listener parked on steering arrival (the ACP permission
+ 		// gate): the message is on the queue now, so its wait ends even
+ 		// though the streaming boundary poll has not run yet. The whole

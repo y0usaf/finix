@@ -1,63 +1,138 @@
 :root,
 html.tn-themed {
-	--dawn-page: var(--tn-page);
-	--dawn-chrome: var(--tbl-head);
-	--dawn-side: oklch(from var(--tn-page) calc(l * 0.97) c h);
-	--dawn-ink: light-dark(oklch(from var(--tn-page) 0.2 0.003 h), oklch(from var(--tn-page) 0.96 0.004 h));
-	--dawn-muted: color-mix(in srgb, var(--t3) 60%, var(--dawn-ink));
-	--dawn-line: color-mix(in srgb, var(--dawn-ink) 8%, transparent);
-	--dawn-soft: color-mix(in srgb, var(--dawn-ink) 6%, transparent);
-	--dawn-user: light-dark(var(--dawn-ink), color-mix(in srgb, var(--dawn-ink) 18%, transparent));
-	--frost-you-fill: color-mix(in srgb, var(--dawn-user) 72%, transparent);
-	--frost-you-ink: oklch(from var(--dawn-ink) 0.97 0 0);
-	--frost-reply-fill: var(--dawn-soft);
-	--frost-reply-ink: var(--dawn-ink);
-	--page: rgb(from var(--dawn-page) r g b / var(--surface-a, 1)) !important;
-	--panel: rgb(from var(--dawn-page) r g b / var(--surface-a, 1)) !important;
-	--card: var(--dawn-chrome);
-	--pop-bg: var(--dawn-chrome);
-	--modal-bg: var(--dawn-chrome);
+	--sand-bg-pane: light-dark(#ffffff, #161616);
+	--sand-bg-chrome: light-dark(#fcfcfc, #121212);
+	--sand-bg-sidebar: light-dark(#f5f5f5, #0e0e0e);
+	--sand-bg-elevated: light-dark(#ffffff, #1f1f1f);
+	--sand-bg-elevated-hover: light-dark(#f1f1f1, #2c2c2c);
+	--sand-bg-hover: light-dark(#1c1c1c0f, #f5f5f50f);
+	--sand-bg-active: light-dark(#1c1c1c14, #f5f5f514);
+	--sand-bg-secondary: light-dark(#1c1c1c0f, #f5f5f50a);
+	--sand-bg-secondary-hover: light-dark(#1c1c1c1a, #f5f5f514);
+	--sand-bg-tertiary: light-dark(#1c1c1c0f, #f5f5f50a);
+	--sand-bg-quaternary: light-dark(#1c1c1c0a, #f5f5f505);
+	--sand-fill-bubble-agent: light-dark(#1c1c1c0f, #f5f5f50a);
+	--sand-fill-bubble-user: light-dark(#1c1c1c, #f5f5f52e);
+	--sand-text-primary: light-dark(#1c1c1c, #f5f5f5);
+	--sand-text-primary-hover: light-dark(#363636, #dbdbdb);
+	--sand-text-secondary: light-dark(#1c1c1cad, #f5f5f5a8);
+	--sand-text-tertiary: light-dark(#1c1c1c8f, #f5f5f58a);
+	--sand-text-quaternary: light-dark(#1c1c1c66, #f5f5f561);
+	--sand-text-on-primary: light-dark(#ffffff, #f5f5f5);
+	--sand-text-inverted: light-dark(#fcfcfc, #121212);
+	--sand-border-primary: light-dark(#1c1c1c3d, #f5f5f538);
+	--sand-border-secondary: light-dark(#1c1c1c1f, #f5f5f51a);
+	--sand-border-tertiary: light-dark(#1c1c1c14, #f5f5f50f);
+	--sand-border-quaternary: light-dark(#1c1c1c0f, #f5f5f50a);
+	--sand-specular-primary: light-dark(#ffffff8f, #ffffff1f);
+	--sand-specular-secondary: light-dark(#ffffff29, #ffffff08);
+	--sand-accent: light-dark(#1680f3, #4d9bff);
+	--sand-focus: light-dark(#1e86fc, #1884fc);
+	--sand-ok: light-dark(#10ab61, #00ba69);
+	--sand-warn: light-dark(#da830e, #e28600);
+	--sand-bad: light-dark(#e72e3b, #ff6463);
+	--sand-shadow-card: light-dark(0 1px 4px #1c1c1c12, none);
+	--sand-shadow-composer: light-dark(0 2px 8px #1c1c1c0f, none);
+	--sand-shadow-popover: light-dark(0 10px 24px -4px #1c1c1c1a, none);
+	--sand-shadow-modal: light-dark(0 16px 36px -6px #1c1c1c1a, none);
+	--dawn-page: var(--sand-bg-pane);
+	--dawn-chrome: var(--sand-bg-chrome);
+	--dawn-side: var(--sand-bg-sidebar);
+	--dawn-elevated: var(--sand-bg-elevated);
+	--dawn-ink: var(--sand-text-primary);
+	--dawn-muted: var(--sand-text-secondary);
+	--dawn-line: var(--sand-border-tertiary);
+	--dawn-soft: var(--sand-bg-secondary);
+	--dawn-user: var(--sand-fill-bubble-user);
+	--frost-you-fill: var(--sand-fill-bubble-user);
+	--frost-you-ink: var(--sand-text-on-primary);
+	--frost-reply-fill: var(--sand-fill-bubble-agent);
+	--frost-reply-ink: var(--sand-text-primary);
+	--page: rgb(from var(--sand-bg-pane) r g b / var(--surface-a, 1)) !important;
+	--panel: rgb(from var(--sand-bg-pane) r g b / var(--surface-a, 1)) !important;
+	--card: var(--sand-bg-elevated);
+	--raise: var(--sand-bg-elevated);
+	--pop-bg: var(--sand-bg-elevated);
+	--modal-bg: var(--sand-bg-elevated);
 	--modal-filter: none;
-	--modal-dim: light-dark(rgb(0 0 0 / 50%), rgb(0 0 0 / 70%));
+	--modal-dim: light-dark(#00000080, #000000b2);
 	--modal-dim-filter: none;
-	--glass-hi: transparent;
-	--tv-bg: var(--dawn-page);
-	--tv-fg: var(--dawn-ink);
-	--ink: var(--dawn-ink);
-	--omp-text: var(--dawn-ink);
-	--omp-accent: var(--dawn-ink);
-	--omp-mdHeading: var(--dawn-ink);
-	--accent-ink: var(--dawn-ink);
-	--accent-fill: var(--dawn-ink);
-	--t1: var(--dawn-ink);
-	--l1: var(--dawn-line);
-	--l2: var(--dawn-soft);
-	--l3: color-mix(in srgb, var(--dawn-ink) 15%, transparent);
-	--accent: var(--dawn-ink);
-	--code-bg: var(--dawn-side);
-	--r-card: 16px;
+	--glass-hi: var(--sand-specular-secondary);
+	--tv-bg: var(--sand-bg-pane);
+	--tv-fg: var(--sand-text-primary);
+	--ink: var(--sand-text-primary);
+	--ink2: var(--sand-text-secondary);
+	--ink3: var(--sand-text-tertiary);
+	--ink4: var(--sand-text-quaternary);
+	--omp-text: var(--sand-text-primary);
+	--omp-accent: var(--sand-text-primary);
+	--omp-mdHeading: var(--sand-text-primary);
+	--accent: var(--sand-text-primary);
+	--accent-ink: var(--sand-text-primary);
+	--accent-fill: var(--sand-text-primary);
+	--ok: var(--sand-ok);
+	--warn: var(--sand-warn);
+	--bad: var(--sand-bad);
+	--t1: var(--sand-text-primary);
+	--t2: var(--sand-text-secondary);
+	--t3: var(--sand-text-tertiary);
+	--t4: var(--sand-text-quaternary);
+	--l1: var(--sand-border-quaternary);
+	--l2: var(--sand-border-tertiary);
+	--l3: var(--sand-border-secondary);
+	--l4: var(--sand-border-primary);
+	--code-bg: var(--sand-bg-sidebar);
+	--topbar-bg: var(--sand-bg-chrome);
+	--console-pane: var(--sand-bg-elevated);
+	--omp-panel-well: var(--sand-bg-quaternary);
+	--r-chip: 6px;
 	--r-ctl: 10px;
+	--r-card: 12px;
+	--r-panel: 16px;
+	--sans: 'SF Pro', 'SF Pro Text', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+	-webkit-font-smoothing: antialiased;
 }
 :root:not(#dawn) body {
-	--accent: var(--dawn-ink);
-	--accent-ink: var(--dawn-ink);
-	--accent-fill: var(--dawn-ink);
+	background: var(--sand-bg-chrome);
+	color: var(--sand-text-primary);
+	--accent: var(--sand-text-primary);
+	--accent-ink: var(--sand-text-primary);
+	--accent-fill: var(--sand-text-primary);
 }
-:root:not(#dawn) .tv-cover {
+:root:not(#dawn) #ambient {
+	display: none;
+}
+:root:not(#dawn) .tv,
+:root:not(#dawn) .tv-cover,
+:root:not(#dawn) .tn-stage,
+:root:not(#dawn) #panel {
 	background: var(--page);
 }
-:root:not(#dawn) #tabbar {
-	--t1: var(--dawn-ink);
-	--t2: color-mix(in oklab, var(--dawn-ink) 76%, var(--dawn-side));
-	--t3: color-mix(in oklab, var(--dawn-ink) 68%, var(--dawn-side));
-	--t4: color-mix(in oklab, var(--dawn-ink) 64%, var(--dawn-side));
-	--dawn-select: light-dark(color-mix(in oklab, var(--dawn-ink) 12%, var(--dawn-side)), color-mix(in oklab, var(--dawn-ink) 19%, var(--dawn-side)));
-	--dawn-select-ring: color-mix(in srgb, var(--dawn-ink) 16%, transparent);
-	--dawn-working: var(--dawn-ink);
-	--dawn-waiting: light-dark(oklch(from var(--warn) 0.42 c h), oklch(from var(--warn) 0.82 c h));
-	--dawn-done: light-dark(oklch(from var(--ok) 0.42 c h), oklch(from var(--ok) 0.82 c h));
-	--dawn-failed: light-dark(oklch(from var(--bad) 0.42 c h), oklch(from var(--bad) 0.78 c h));
-	background: rgb(from var(--dawn-side) r g b / var(--surface-a, 1));
+:root:not(#dawn) .sv-grip {
+	width: 1px;
+	background: var(--sand-border-tertiary);
+}
+:root:not(#dawn) .sv.col > .sv-grip {
+	width: auto;
+	height: 1px;
+}
+:root:not(#dawn) .sv-grip:is(:hover, :active, .dragging, :focus-visible) {
+	background: var(--sand-focus);
+}
+:root:not(#dawn) #tabbar,
+:root:not(#dawn) #sidebar {
+	--t1: var(--sand-text-primary);
+	--t2: var(--sand-text-secondary);
+	--t3: var(--sand-text-tertiary);
+	--t4: var(--sand-text-quaternary);
+	--dawn-select: var(--sand-bg-active);
+	--dawn-select-ring: transparent;
+	--dawn-working: var(--sand-text-primary);
+	--dawn-waiting: var(--sand-warn);
+	--dawn-done: var(--sand-ok);
+	--dawn-failed: var(--sand-bad);
+	background: rgb(from var(--sand-bg-sidebar) r g b / var(--surface-a, 1));
+	box-shadow: inset -1px 0 0 var(--sand-border-tertiary);
 }
 :root:not(#dawn) #tabbar .tt {
 	border-radius: 10px;
@@ -65,18 +140,18 @@ html.tn-themed {
 }
 :root:not(#dawn) #tabbar .tt.on,
 :root:not(#dawn) #tabbar .tt[data-tc].on {
-	background: var(--dawn-select) !important;
-	box-shadow: inset 0 0 0 1px var(--dawn-select-ring);
-	color: var(--t1);
+	background: var(--sand-bg-active) !important;
+	box-shadow: none;
+	color: var(--sand-text-primary);
 }
-:root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-clist, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.'], .toast, .tn-bn-card, .tn-find) {
-	background: var(--pop-bg);
+:root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.'], .toast, .tn-bn-card, .tn-find, #wg-gallery) {
+	background: var(--sand-bg-elevated);
 	-webkit-backdrop-filter: none;
 	backdrop-filter: none;
-	box-shadow: 0 10px 20px -3px color-mix(in srgb, var(--dawn-ink) calc(10% * 0.6), transparent), 0 4px 6px -4px color-mix(in srgb, var(--dawn-ink) calc(10% * 0.6), transparent), inset 0 0 0 0.5px color-mix(in srgb, var(--dawn-ink) 12%, transparent);
+	box-shadow: var(--sand-shadow-popover), inset 0 0.5px 0 var(--sand-specular-secondary), inset 0 0 0 0.5px var(--sand-border-secondary);
 }
-:root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-clist, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.']) {
-	border-radius: 16px;
+:root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-menu-pop, .tn-ib, .tn-hp, :where(.sf-overlay:not(.modal)) > .sf-ov-card, .sf-hovercard, #cmp, .tn-crumbs, .sf-date-pop, .sf-nav-pop, .sf-ck-pop, .sq-pop, :where(.pp.float) .pp-pop, .sf-col[data-role^='omp.overlay.'], #wg-gallery) {
+	border-radius: 12px;
 }
 :root:not(#dawn) :is(.sf-overlay:not(.modal) > .sf-ov-card, .tn-bn-card)::after,
 :root:not(#dawn) :is(.pk-sheet, .tn-signin-card, .tn-bn-card)::before,
@@ -85,25 +160,26 @@ html.tn-themed {
 }
 :root:not(#dawn) :is(.cmdk, .mdl, .dlg-card, .pk-sheet, .tn-hd, .tn-signin-card, :where(.sf-overlay.modal) > .sf-ov-card, :where(.sf-prefs .pf-editor) > .sf-col) {
 	border-radius: 14px;
-	background: var(--modal-bg);
+	background: var(--sand-bg-elevated);
 	-webkit-backdrop-filter: none;
 	backdrop-filter: none;
-	box-shadow: 0 0 0 1px color-mix(in srgb, var(--dawn-ink) 12%, transparent);
+	box-shadow: var(--sand-shadow-modal), inset 0 0.5px 0 var(--sand-specular-secondary), inset 0 0 0 1px var(--sand-border-secondary);
 }
-:root:not(#dawn) :is(.mdl-layer, .tn-hd-back, .tn-signin) {
+:root:not(#dawn) :is(.mdl-layer, .tn-signin) {
 	background: var(--modal-dim);
 	-webkit-backdrop-filter: none;
 	backdrop-filter: none;
 }
 :root:not(#dawn) .sf-chat-reader.sf-main {
-	--rd-measure: 960px;
-	gap: 14px 0;
-	padding: 24px 16px 20px;
+	--rd-measure: 672px;
+	gap: 12px 0;
+	padding: 20px 16px 20px;
+	background: var(--page);
 }
 :root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md {
 	font: 400 15px/22px var(--sans);
-	letter-spacing: 0.15px;
-	color: var(--dawn-ink);
+	letter-spacing: 0em;
+	color: var(--sand-text-primary);
 }
 :root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md p {
 	margin: 0 0 10px;
@@ -118,16 +194,16 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader .md :is(h1, h2, h3, h4) {
 	font-family: var(--sans);
 	font-weight: 600;
-	letter-spacing: -0.025em;
+	letter-spacing: -0.012em;
 	line-height: 1.35;
-	margin: 20px 0 10px;
+	margin: 18px 0 8px;
 }
 :root:not(#dawn) .sf-chat-reader .md :is(ul, ol) {
-	padding-left: 24px;
-	margin: 0 0 12px;
+	padding-left: 22px;
+	margin: 0 0 10px;
 }
 :root:not(#dawn) .sf-chat-reader .md li {
-	margin-bottom: 6px;
+	margin-bottom: 5px;
 }
 :root:not(#dawn) .sf-chat-reader .md :not(pre) > code {
 	font-family: var(--mono);
@@ -136,7 +212,7 @@ html.tn-themed {
 	padding: 0 0.3em;
 	border-radius: 5px;
 	color: inherit;
-	background: var(--dawn-soft);
+	background: var(--sand-bg-secondary);
 	box-shadow: none;
 }
 :root:not(#dawn) .sf-chat-reader :is([data-role^='omp.assistant'], [data-role^='omp.user']) .md :not(pre) > code {
@@ -146,220 +222,238 @@ html.tn-themed {
 }
 :root:not(#dawn) .sf-chat-reader .md .code {
 	border-radius: 12px;
-	background: var(--code-bg);
-	box-shadow: inset 0 0 0 1px var(--dawn-line);
+	background: var(--sand-bg-sidebar);
+	box-shadow: inset 0 0 0 1px var(--sand-border-tertiary);
 }
 :root:not(#dawn) .sf-chat-reader .md .code-head {
 	background: none;
-	color: var(--dawn-muted);
-	box-shadow: inset 0 -1px 0 var(--dawn-line);
+	color: var(--sand-text-tertiary);
+	box-shadow: inset 0 -1px 0 var(--sand-border-tertiary);
 }
 :root:not(#dawn) .sf-chat-reader .md .code pre {
 	font: 13px/1.6 var(--mono);
-	padding: 14px 16px;
+	padding: 12px 14px;
 }
 :root:not(#dawn) .sf-chat-reader .md a {
-	color: inherit;
+	color: var(--sand-accent);
 	text-decoration: underline;
+	text-decoration-color: color-mix(in srgb, var(--sand-accent) 45%, transparent);
 	box-shadow: none;
 }
 :root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] {
 	width: calc(100% - 32px);
-	max-width: 960px;
+	max-width: 640px;
 	margin-left: auto;
 	margin-right: auto;
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
- box-sizing: border-box;
- min-height: 44px;
- padding: 7px 14px;
- gap: 0 12px;
- margin-bottom: 16px;
- border: 0.5px solid rgb(from var(--t1) r g b / 12%);
- border-radius: 22px;
- background: rgb(from var(--card) r g b / var(--surface-a, 1));
- transition: border-color 150ms ease, background-color 150ms ease, box-shadow 200ms ease-out, border-radius 300ms cubic-bezier(0.22, 1, 0.36, 1), padding 300ms cubic-bezier(0.22, 1, 0.36, 1);
+	box-sizing: border-box;
+	min-height: 44px;
+	padding: 7px 14px;
+	gap: 0 10px;
+	margin-bottom: 14px;
+	border: 0.5px solid var(--sand-border-secondary);
+	border-radius: 20px;
+	background: rgb(from var(--sand-bg-elevated) r g b / var(--surface-a, 1));
+	box-shadow: var(--sand-shadow-composer), inset 0 0.5px 0 var(--sand-specular-secondary);
+	transition: border-color 150ms ease, background-color 150ms ease, box-shadow 180ms ease-out, border-radius 240ms cubic-bezier(0.22, 1, 0.36, 1), padding 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
- display: grid;
- grid-template-columns: minmax(0, 1fr) auto;
- grid-template-rows: auto auto auto;
- align-items: center;
-}
-:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col[data-role='omp.editor'] {
- box-shadow: 0 2px 8px -1px rgb(0 0 0 / 5%), 0 1px 2px rgb(0 0 0 / 3%), 0 0 0 1px var(--dawn-line);
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-rows: auto auto auto;
+	align-items: center;
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']):is(:hover, :focus-within) {
- border-color: color-mix(in srgb, var(--dawn-ink) 24%, transparent);
+	border-color: var(--sand-border-primary);
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col[data-role='omp.editor']:focus-within {
- box-shadow: 0 6px 18px -4px rgb(0 0 0 / 9%), 0 1px 3px rgb(0 0 0 / 4%), 0 0 0 1px color-mix(in srgb, var(--dawn-ink) 10%, transparent);
+	box-shadow: var(--sand-shadow-composer), inset 0 0.5px 0 var(--sand-specular-primary);
 }
 :root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor']:has(.sf-editor.empty) [data-role='omp.composer.send'] .kbd {
- opacity: 0.38;
- transform: scale(0.86);
+	opacity: 0.32;
+	transform: scale(0.9);
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python'])::before,
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python'])::after {
- content: none;
+	content: none;
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine).sf-folded .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
- padding: 8px 12px;
+	padding: 8px 12px;
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.effort'] {
- display: none;
+	display: none;
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.line'] {
- grid-column: 1;
- grid-row: 2;
- min-width: 0;
- min-height: 22px;
- align-items: center;
+	grid-column: 1;
+	grid-row: 2;
+	min-width: 0;
+	min-height: 22px;
+	align-items: center;
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.bar'] {
- grid-column: 2;
- grid-row: 2;
- width: auto;
- min-height: 28px;
- height: 28px;
- margin: 0;
- gap: 8px;
+	grid-column: 2;
+	grid-row: 2;
+	justify-content: flex-end;
+	height: 28px;
+	padding: 0;
+	gap: 6px;
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.focus'] {
- grid-column: 1 / -1;
- grid-row: 1;
+	grid-column: 1 / -1;
+	grid-row: 1;
 }
 :root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine):not(.sf-folded) [data-role='omp.composer.chips'] {
- grid-column: 1 / -1;
- grid-row: 3;
+	grid-column: 1 / -1;
+	grid-row: 3;
 }
 :root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-ed-ph {
- color: var(--dawn-muted);
- letter-spacing: 0.15px;
+	color: var(--sand-text-tertiary);
+	font: 400 14px/20px var(--sans);
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd {
- box-sizing: border-box;
- display: inline-flex;
- align-items: center;
- justify-content: center;
- width: 28px;
- min-width: 28px;
- height: 28px;
- padding: 0;
- border-radius: 50%;
- font-size: 0;
- color: var(--dawn-page);
- background: var(--t1);
- box-shadow: none;
- animation: dawn-polish-control-enter 220ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
- transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease, transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+	display: inline-grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 0;
+	border-radius: 9999px;
+	font-size: 0;
+	line-height: 0;
+	color: var(--sand-text-inverted);
+	background: var(--sand-text-primary);
+	box-shadow: none;
+	transition: background-color 120ms ease, opacity 140ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd::before {
- content: '↑';
- font: 500 18px/1 var(--sans);
+	content: '↑';
+	font: 600 14px/1 var(--sans);
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:hover .kbd {
- color: var(--dawn-page);
- background: color-mix(in srgb, var(--t1) 88%, transparent);
+	background: var(--sand-text-primary-hover);
 }
 :root:not(#dawn) .sf-chat-reader :is([data-role='omp.composer.send'], [data-role='omp.composer.stop']):focus-visible {
- outline: 2px solid var(--accent);
- outline-offset: -2px;
+	outline: 2px solid var(--sand-focus);
+	outline-offset: -2px;
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop']:is([disabled], [aria-disabled='true'], .disabled) {
- color: color-mix(in srgb, var(--t4) 55%, var(--dawn-ink));
- background: transparent;
- transform: none;
- cursor: default;
+	color: var(--sand-text-quaternary);
+	background: transparent;
+	transform: none;
+	cursor: default;
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:is([disabled], [aria-disabled='true'], .disabled) .kbd {
- color: color-mix(in srgb, var(--t4) 55%, var(--dawn-ink));
- background: var(--l1);
- transform: none;
- cursor: default;
+	color: var(--sand-text-quaternary);
+	background: var(--sand-bg-secondary);
+	transform: none;
+	cursor: default;
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop'] {
- box-sizing: border-box;
- height: 28px;
- padding: 0 8px;
- border-radius: 14px;
- background: var(--l1);
- box-shadow: none;
- animation: dawn-polish-control-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
- transition: background-color 150ms ease, color 150ms ease, transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+	box-sizing: border-box;
+	height: 28px;
+	padding: 0 10px;
+	border-radius: 9999px;
+	background: var(--sand-bg-secondary);
+	color: var(--sand-text-primary);
+	box-shadow: none;
+	animation: dawn-polish-control-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+	transition: background-color 120ms ease, color 120ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 :root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop']:hover {
- background: var(--l2);
+	background: var(--sand-bg-secondary-hover);
+}
+:root:not(#dawn) .sf-chat-reader .sf-dock > .sf-tray-low,
+:root:not(#dawn) .sf-chat-reader .sf-tray {
+	--sf-tray-face: var(--sand-bg-quaternary);
+	--sf-tray-ring: var(--sand-border-tertiary);
+	max-width: 640px;
+	margin-left: auto;
+	margin-right: auto;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.tool'],
+:root:not(#dawn) .sf-chat-reader [data-role='omp.thinking'] {
+	border-radius: 10px;
+	background: var(--sand-bg-quaternary);
+	box-shadow: inset 0 0 0 0.5px var(--sand-border-tertiary);
 }
 :root:not(#dawn) #sidebar .tn-vt {
-	gap: 4px;
+	gap: 2px;
 }
 :root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row,
 :root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt {
 	box-sizing: border-box;
-	height: 54px;
+	height: 52px;
 	gap: 8px;
-	padding: 0 8px;
-	border-radius: 12px;
-	color: var(--t2);
+	padding: 0 10px;
+	border-radius: 10px;
+	color: var(--sand-text-secondary);
 	background: transparent;
 	box-shadow: none;
-	transition: background-color 180ms ease-out, color 180ms ease-out, transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), width 0.2s cubic-bezier(0.22, 1, 0.36, 1), padding 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+	transition: background-color 140ms ease-out, color 140ms ease-out, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 :root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row:active:not(#dawn),
 :root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt:active:not(#dawn) {
 	transform: scale(0.98);
-	transition-duration: 0s, 0s, 70ms, 0.2s, 0.2s;
+	transition-duration: 0s, 0s, 70ms;
 }
 :root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row:hover:not(.off):not([aria-disabled='true']),
 :root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt:hover:not(.on) {
-	background: var(--l1);
-	color: var(--t1);
-	transition-duration: 60ms, 60ms, 280ms, 0.2s, 0.2s;
+	background: var(--sand-bg-hover);
+	color: var(--sand-text-primary);
+	transition-duration: 50ms, 50ms, 180ms;
 }
 :root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row.on,
 :root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row.on:hover {
-	background: var(--l2);
-	color: var(--t1);
+	background: var(--sand-bg-active);
+	color: var(--sand-text-primary);
 	box-shadow: none;
 }
 :root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt.on {
-	background: var(--dawn-select) !important;
-	color: var(--t1);
-	box-shadow: inset 0 0 0 1px var(--dawn-select-ring);
+	background: var(--sand-bg-active) !important;
+	color: var(--sand-text-primary);
+	box-shadow: none;
 }
 :root:not(#dawn) #sidebar .tn-vt .nav-row:focus-visible,
 :root:not(#dawn).lay-rail.tabs-h #tabbar .tt:focus-visible {
-	outline: 2px solid var(--accent);
+	outline: 2px solid var(--sand-focus);
 	outline-offset: -2px;
 }
 :root:not(#dawn) #sidebar .tn-vt .nav-row .lbl {
+	font-size: 13px;
+	line-height: 18px;
 	font-weight: 500;
 }
 :root:not(#dawn) #sidebar .tn-vt .nav-row .meta {
-	color: var(--t3);
+	font-size: 12px;
+	line-height: 16px;
+	color: var(--sand-text-tertiary);
 }
 :root:not(#dawn) #sidebar .tn-vt .nav-head {
 	box-sizing: border-box;
-	height: 30px;
-	padding-left: 8px;
-	padding-right: 8px;
-	color: var(--t3);
+	height: 28px;
+	padding-left: 10px;
+	padding-right: 10px;
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 0.005em;
+	color: var(--sand-text-tertiary);
 }
 :root:not(#dawn) #sidebar .tn-vt-find {
-	border-radius: 12px;
-	background: var(--l1);
+	border-radius: 10px;
+	background: var(--sand-bg-secondary);
 	box-shadow: none;
 }
 :root:not(#dawn) #sidebar .tn-vt-find:focus-within {
-	box-shadow: inset 0 0 0 0.5px var(--l3);
+	box-shadow: inset 0 0 0 1px var(--sand-border-secondary);
 }
 :root:not(#dawn).lay-rail.tabs-h #tabbar .tt.on::before,
 :root:not(#dawn).lay-rail.tabs-h #tabbar .tt.on::after { content: none; }
-:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs { gap: 4px; padding-right: 8px; }
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs { gap: 2px; padding-right: 8px; }
 :root:not(#dawn):not(.tn-phone).lay-rail.tabs-h #tabbar { width: 280px; }
 :root:not(#dawn):not(.tn-phone).lay-rail.tabs-h #panel { left: calc(280px * var(--tn-zoom, 1)); }
-:root:not(#dawn) #tabbar .tn-ib-pip { color: var(--dawn-page); }
+:root:not(#dawn):not(.tn-phone).lay-rail.tabs-h.tn-widgets #widgetbar { left: calc(280px * var(--tn-zoom, 1)); }
+:root:not(#dawn) #tabbar .tn-ib-pip { color: var(--sand-bg-pane); }
 
 :root:not(#dawn) :is(#pal, #thm, #pick) {
 	--t1: var(--dawn-ink);
@@ -1283,7 +1377,7 @@ html.tn-themed {
 :root:not(#dawn) .sf-progress:not(.indeterminate) .fill {
  transition: width 200ms cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-:root:not(#dawn) :is(.mdl-layer, .tn-hd-back) { animation: dawn-fade-in 200ms cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
+:root:not(#dawn) :is(.mdl-layer) { animation: dawn-fade-in 200ms cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
 :root:not(#dawn) :is(.mdl:not(.shake), .tn-hd) { animation: dawn-dialog-enter 200ms cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
 :root:not(#dawn) :is(.toast:not(.swap), .tn-bn-card:not(.out)) { animation: dawn-toast-enter 200ms cubic-bezier(0.165, 0.84, 0.44, 1); }
 :root:not(#dawn) .tn-find { animation: dawn-find-enter 140ms cubic-bezier(0.22, 1, 0.36, 1); }
@@ -1319,104 +1413,100 @@ html.tn-themed {
 :root:not(#dawn) .sf-still .sf-message,
 :root:not(#dawn) .sf-message.sf-still { animation: none; }
 
-:root:not(#dawn).tn-status footer#statusline {
+
+:root:not(#dawn).tn-widgets #widgetbar {
 	font-family: var(--sans);
-	justify-content: flex-start;
-	overflow-y: auto;
-	scrollbar-width: thin;
-	scrollbar-color: var(--dawn-line) transparent;
-	color: var(--dawn-muted);
-	border-left-color: var(--dawn-line);
-	background: rgb(from var(--dawn-side) r g b / var(--surface-a, 1));
-}
-:root:not(#dawn).tn-status:not(.tabs-auto):not(.side-collapsed) footer#statusline {
-	padding: 16px 12px;
-}
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin:is([data-tone='deck'], [data-tone='deck-busy']) {
-	align-self: stretch;
-	min-height: 32px;
-	padding: 6px 8px;
-	margin-bottom: 16px;
-	font-size: 13px;
-	line-height: 20px;
-	letter-spacing: 0;
-	text-align: left;
-	background: transparent;
-	box-shadow: none;
-	border-radius: 8px;
-}
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone='deck-busy'] {
-	padding-right: 24px;
-}
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin:is([data-tone='deck'], [data-tone='deck-busy']) svg.ico {
-	width: 14px;
-	height: 14px;
-	margin-right: 8px;
-	vertical-align: -2px;
-	opacity: 1;
-}
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone='time'] {
-	padding: 0 8px;
-	font-size: 24px;
-	line-height: 32px;
-	letter-spacing: -0.02em;
-	text-align: left;
-}
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone='date'] {
-	padding: 2px 8px 20px;
-	font-size: 13px;
-	line-height: 18px;
-	letter-spacing: 0;
-	text-align: left;
-}
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone^='m-'] {
-	box-sizing: border-box;
-	padding: 6px 8px;
-	margin: 0;
-	border: 0;
-	border-radius: 8px;
-	font-size: 14px;
-	line-height: 20px;
-	background: transparent;
-	box-shadow: none;
-}
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone^='m-']::before {
-	padding: 0;
-	font-size: 13px;
-	line-height: 18px;
-	letter-spacing: 0;
-}
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin[data-tone^='spark-'] {
-	--spark-c: var(--dawn-ink);
-	--spark-track: var(--dawn-line);
-	box-sizing: border-box;
-	width: calc(100% - 16px);
-	height: 32px;
-	margin: 0 8px 12px;
-	padding: 0;
-	border-radius: 0;
-	background-color: transparent;
-	background-origin: content-box;
-	background-clip: content-box;
-	box-shadow: none;
-}
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin:is([data-tone^='m-net'], [data-tone^='m-load']) {
-	min-height: 32px;
 	font-size: 12px;
-	line-height: 20px;
+	line-height: 16px;
+	color: var(--sand-text-tertiary);
+	background: rgb(from var(--sand-bg-chrome) r g b / var(--surface-a, 1));
+	box-shadow: inset 0 1px 0 var(--sand-border-tertiary);
+	padding: 0 12px calc(var(--tn-wg-lift, 0px) / var(--tn-zoom, 1));
 }
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on {
-	transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+:root:not(#dawn).tn-widgets #widgetbar .wg-row {
+	gap: 8px;
 }
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on:not([data-tone^='spark-']):hover {
-	background-color: rgb(from var(--dawn-ink) r g b / 6%);
+:root:not(#dawn).tn-widgets #widgetbar .wg {
+	height: 20px;
+	padding: 0 6px;
+	border-radius: 6px;
+	font-family: var(--sans);
+	font-size: 12px;
+	color: var(--sand-text-tertiary);
+	transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
 }
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on:not([data-tone^='spark-']):active {
-	background-color: rgb(from var(--dawn-ink) r g b / 8%);
+:root:not(#dawn).tn-widgets #widgetbar .wg:is(.on, .carded):hover,
+:root:not(#dawn).tn-widgets #widgetbar .wg.carded.open {
+	color: var(--sand-text-primary);
+	background: var(--sand-bg-hover);
+	box-shadow: none;
 }
-:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on:focus-visible {
-	outline: 2px solid var(--accent);
+:root:not(#dawn).tn-widgets #widgetbar .wg:is(.on, .carded):active {
+	background: var(--sand-bg-active);
+	box-shadow: none;
+	transform: scale(0.98);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg[data-tone='accent'] {
+	color: var(--sand-accent);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg[data-tone='muted'] {
+	color: var(--sand-text-quaternary);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg[data-tone='ok'] {
+	color: var(--sand-ok);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg[data-tone='warn'] {
+	color: var(--sand-warn);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg:is([data-tone='error'], [data-tone='bad']) {
+	color: var(--sand-bad);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg-seg {
+	height: 20px;
+	padding: 0 6px;
+	border-radius: 6px;
+	font-family: var(--sans);
+	font-size: 12px;
+	color: var(--sand-text-tertiary);
+	transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg-seg.on:hover {
+	color: var(--sand-text-primary);
+	background: var(--sand-bg-hover);
+	box-shadow: none;
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg-seg.on:active {
+	background: var(--sand-bg-active);
+	box-shadow: none;
+	transform: scale(0.98);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg-seg.on:focus-visible,
+:root:not(#dawn).tn-widgets #widgetbar .wg.on:focus-visible {
+	outline: 2px solid var(--sand-focus);
 	outline-offset: -2px;
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg-seg[data-tone='accent'] {
+	color: var(--sand-accent);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg-seg[data-tone='ok'] {
+	color: var(--sand-ok);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg-seg[data-tone='warn'] {
+	color: var(--sand-warn);
+}
+:root:not(#dawn).tn-widgets #widgetbar .wg-seg:is([data-tone='error'], [data-tone='bad']) {
+	color: var(--sand-bad);
+}
+:root:not(#dawn) #wg-gallery .wg-tile {
+	border-radius: 10px;
+	background: var(--sand-bg-secondary);
+}
+:root:not(#dawn) #wg-gallery .wg-tile:hover {
+	background: var(--sand-bg-secondary-hover);
+}
+:root:not(#dawn) #wg-gallery .wg-pv {
+	background: var(--sand-bg-pane);
+	box-shadow: inset 0 0 0 0.5px var(--sand-border-tertiary);
 }
 
 :root:not(#dawn) :is(#thm .ck-foot, #pick .ck-foot, .tn-ib-foot) {
@@ -1592,7 +1682,7 @@ html.tn-themed {
  :root:not(#dawn) :is(.sf-switch-track, .sf-switch-thumb, .sf-input):not(#pal *) { transition-duration: 0.01ms; }
  :root:not(#dawn) .sf-message { animation: dawn-fade-in 120ms ease-out backwards; }
  :root:not(#dawn) :is(.sf-menu-pop, div.pop) { animation-duration: 0.01ms; }
-	:root:not(#dawn).tn-status footer#statusline > span.sl-plugins > span.sl-plugin.on {
+	:root:not(#dawn).tn-widgets #widgetbar :is(.wg, .wg-seg) {
 		transition: none;
 	}
 :root:not(#dawn) .sf-chat-reader .sf-editor.focused,
@@ -1618,7 +1708,9 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader .sf-button:not([data-role^='omp.composer.'], .disabled, .dis, :disabled, [aria-disabled='true']):active,
 :root:not(#dawn) :is(#pal, #thm, #pick) .ck-item:active { transform: none; transition: none; }
 :root:not(#dawn) .sf-chat-reader :is(.sf-section, .sf-tool).collapsible > :is(.sf-section-body, .sf-tool-body),
-:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) :is(.sf-spin .strip, .sf-spin::before, .sf-spin::after) { animation: none; }
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::before,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::after { animation: none; }
 }
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-message > :is(.sf-msg-body, .sf-msg-av),
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body,
@@ -1640,8 +1732,12 @@ html.tn-themed {
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card,
 :root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader :is(.sf-section, .sf-tool).collapsible > :is(.sf-section-body, .sf-tool-body),
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) :is(.sf-section, .sf-tool).collapsible > :is(.sf-section-body, .sf-tool-body),
-:root:not(#dawn) .sf-chat-reader.sf-still :is([data-role='omp.thinking.spin'], [data-role='omp.working']) :is(.sf-spin .strip, .sf-spin::before, .sf-spin::after),
-:root:not(#dawn) .sf-still .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) :is(.sf-spin .strip, .sf-spin::before, .sf-spin::after) { animation: none; }
+:root:not(#dawn) .sf-chat-reader.sf-still :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip,
+:root:not(#dawn) .sf-chat-reader.sf-still :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::before,
+:root:not(#dawn) .sf-chat-reader.sf-still :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::after,
+:root:not(#dawn) .sf-still .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin .strip,
+:root:not(#dawn) .sf-still .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::before,
+:root:not(#dawn) .sf-still .sf-chat-reader :is([data-role='omp.thinking.spin'], [data-role='omp.working']) .sf-spin::after { animation: none; }
 
 html.tn-phone:not(#dawn) .sf-chat-reader.sf-main {
 	padding: 16px 8px;
@@ -1703,68 +1799,73 @@ html.tn-phone:not(#dawn) :is(div.pop[role='menu'] .mi:not(.bare), .sf-menu-pop .
 	min-height: 40px;
 }
 :root:not(#dawn) #tabbar .tt .nm {
-	color: var(--t1);
+	font-size: 13px;
+	line-height: 18px;
+	font-weight: 500;
+	color: var(--sand-text-primary);
 }
 :root:not(#dawn) #tabbar .tt .sub {
 	opacity: 1;
-	color: var(--t2);
+	font-size: 12px;
+	line-height: 16px;
+	color: var(--sand-text-secondary);
 }
 :root:not(#dawn) #tabbar .tt.working {
-	--pill: var(--dawn-working);
+	--pill: var(--sand-text-primary);
 }
 :root:not(#dawn) #tabbar .tt[title*='\206B'] {
-	--pill: var(--dawn-waiting);
+	--pill: var(--sand-warn);
 }
 :root:not(#dawn) #tabbar .tt[title*='\206C'] {
-	--pill: var(--dawn-done);
+	--pill: var(--sand-ok);
 }
 :root:not(#dawn) #tabbar .tt[title*='\206D'] {
-	--pill: var(--dawn-failed);
+	--pill: var(--sand-bad);
 }
 :root:not(#dawn) #tabbar .tt.working .nm {
-	--sh-lo: var(--dawn-ink);
-	--t1: var(--t3);
-	color: var(--dawn-ink);
+	--sh-lo: var(--sand-text-primary);
+	--t1: var(--sand-text-tertiary);
+	color: var(--sand-text-primary);
 }
 :root:not(#dawn) #tabbar .tt.working::after {
 	color: var(--pill);
 }
 :root:not(#dawn) .sf-chat-reader :is(.sf-t-dim, .sf-t-muted) {
-	color: var(--t2);
+	color: var(--sand-text-secondary);
 }
 :root:not(#dawn) .sf-chat-reader.sf-main > [data-role='omp.assistant'] > .sf-md,
 :root:not(#dawn) .sf-chat-reader.sf-main > [data-role='omp.chat.msg'] > [data-role='omp.assistant'] > .sf-md,
 :root:not(#dawn) [data-role='omp.bot.reply'] > [data-role^='omp.assistant'] {
 	align-self: flex-start;
 	width: auto;
-	max-width: min(80%, 560px, 100% - 82px);
-	padding: 7px 12px;
+	max-width: min(85%, 640px, 100% - 56px);
+	padding: 7px 14px;
 	border-radius: 18px;
-	background: linear-gradient(to bottom, color-mix(in srgb, var(--dawn-page) 12%, transparent), transparent), var(--dawn-soft);
-	box-shadow: inset 0 0.5px 0 color-mix(in srgb, var(--dawn-page) 12%, transparent), inset 0 -0.5px 0 color-mix(in srgb, var(--dawn-page) 12%, transparent), inset 0 0 0 0.5px var(--dawn-soft);
+	background: var(--sand-fill-bubble-agent);
+	box-shadow: inset 0 0 0 0.5px var(--sand-border-quaternary);
 	overflow-wrap: anywhere;
 }
 :root:not(#dawn) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] > .sf-card-body {
 	align-self: flex-end;
 	width: auto;
-	max-width: min(80%, 560px, 100% - 82px);
+	max-width: min(82%, 640px, 100% - 56px);
 	margin-left: auto;
-	padding: 7px 12px;
+	padding: 7px 14px;
 	border-radius: 18px;
-	background: linear-gradient(to bottom, color-mix(in srgb, var(--dawn-page) 5%, transparent), transparent), var(--dawn-user);
-	color: var(--t1);
-	--t1: oklch(from var(--dawn-ink) 0.98 0 0);
-	--t2: var(--t1);
-	--t3: color-mix(in srgb, var(--t1) 80%, transparent);
-	--t4: color-mix(in srgb, var(--t1) 50%, transparent);
-	--tv-fg: var(--t1);
-	--omp-userMessageText: var(--t1);
-	--omp-mdHeading: var(--t1);
-	box-shadow: inset 0 0.5px 0 color-mix(in srgb, var(--dawn-page) 5%, transparent), inset 0 -0.5px 0 color-mix(in srgb, var(--dawn-page) 5%, transparent), inset 0 0 0 0.5px var(--dawn-soft);
+	background: var(--sand-fill-bubble-user);
+	color: var(--sand-text-on-primary);
+	--t1: var(--sand-text-on-primary);
+	--t2: var(--sand-text-on-primary);
+	--t3: color-mix(in srgb, var(--sand-text-on-primary) 80%, transparent);
+	--t4: color-mix(in srgb, var(--sand-text-on-primary) 50%, transparent);
+	--tv-fg: var(--sand-text-on-primary);
+	--omp-userMessageText: var(--sand-text-on-primary);
+	--omp-mdHeading: var(--sand-text-on-primary);
+	box-shadow: light-dark(none, inset 0 0 0 0.5px var(--sand-border-tertiary));
 	overflow-wrap: anywhere;
 }
 :root:not(#dawn) [data-role='omp.chat.msg'] .sf-card[data-role='omp.user'] .md {
-	color: var(--t1);
+	color: var(--sand-text-on-primary);
 }
 section.tn-pane > .tn-body > .tn-glow {
 	display: none;
