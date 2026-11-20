@@ -62,7 +62,7 @@
     mkdir $out
     python3 ${./config/plugins/ui-menu/dawn.py} ${tern}/bin/.tern-wrapped $out \
       ${lib.escapeShellArg ".sf-chat-reader:not(.sf-layer)"} \
-      ${lib.escapeShellArg "[data-role^='omp.bot.chao.'], [data-role^='omp.bot.chao.'] *, [data-role='omp.bot.event.avatar'], svg *"} \
+      ${lib.escapeShellArg "[data-role^='omp.bot.chao.'], [data-role^='omp.bot.chao.'] *, [data-role='omp.bot.event.avatar'], svg *, .sf-caret"} \
       ${./config/plugins/ui-menu/dawn.css} ${flakeInputs.omp-bot}/tern/chat.css
   '';
 
