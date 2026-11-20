@@ -45,7 +45,6 @@
             pkgs.vimPlugins.lualine-nvim
             pkgs.vimPlugins.cyberdream-nvim
             pkgs.vimPlugins.toggleterm-nvim
-            inputPackages.crest.crest-nvim
           ];
           opt = [];
         };

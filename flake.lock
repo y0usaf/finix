@@ -650,26 +650,6 @@
     "crest": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1795060148,
-        "narHash": "sha256-M0/M7lv+hnDEGeoyWJ5to3CekBn1iRzQ9eC7QrXV+lY=",
-        "ref": "refs/heads/main",
-        "rev": "54dfed48e367f8d061a26e3164b75d9f8059c396",
-        "revCount": 1280,
-        "type": "git",
-        "url": "ssh://git@github.com/sylvarant-ai/crest.git"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/sylvarant-ai/crest.git"
-      }
-    },
-    "crest_2": {
-      "inputs": {
-        "nixpkgs": [
           "tomoe-stable",
           "nixpkgs"
         ]
@@ -3261,7 +3241,6 @@
         "bootvine": "bootvine",
         "claude-code-nix": "claude-code-nix",
         "cleanker": "cleanker",
-        "crest": "crest",
         "cudaterm": "cudaterm",
         "cursors": "cursors",
         "deepseek-harness-flake": "deepseek-harness-flake",
@@ -3969,7 +3948,7 @@
         "bootvine": "bootvine_2",
         "claude-code-nix": "claude-code-nix_2",
         "cleanker": "cleanker_2",
-        "crest": "crest_2",
+        "crest": "crest",
         "cudaterm": "cudaterm_2",
         "cursors": "cursors_2",
         "deepseek-harness-flake": "deepseek-harness-flake_2",

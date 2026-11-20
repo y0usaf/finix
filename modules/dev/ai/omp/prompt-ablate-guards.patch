@@ -1,0 +1,61 @@
+diff --git a/packages/coding-agent/src/session/session-advisors.ts b/packages/coding-agent/src/session/session-advisors.ts
+index 1fca25f..04ec142 100644
+--- a/packages/coding-agent/src/session/session-advisors.ts
++++ b/packages/coding-agent/src/session/session-advisors.ts
+@@ -1438,7 +1438,8 @@ export class SessionAdvisors {
+ 
+ 			// `#advisorWatchdogPrompt` already carries WATCHDOG.md + YAML shared
+ 			// instructions; `config.instructions` adds this advisor's specialization.
+-			const systemPrompt = [prompt.render(advisorSystemPrompt, { max_notes_per_update: budgetPerUpdate })];
++			const advisorHead = prompt.render(advisorSystemPrompt, { max_notes_per_update: budgetPerUpdate }).trim();
++			const systemPrompt: string[] = advisorHead ? [advisorHead] : [];
+ 			if (this.#advisorContextPrompt) systemPrompt.push(this.#advisorContextPrompt);
+ 			if (this.#advisorMemoryPrompt) systemPrompt.push(this.#advisorMemoryPrompt);
+ 			if (this.#advisorWatchdogPrompt) systemPrompt.push(this.#advisorWatchdogPrompt);
+diff --git a/packages/coding-agent/src/system-prompt.ts b/packages/coding-agent/src/system-prompt.ts
+index feae698..2b0c157 100644
+--- a/packages/coding-agent/src/system-prompt.ts
++++ b/packages/coding-agent/src/system-prompt.ts
+@@ -1172,8 +1172,8 @@ export async function buildSystemPrompt(options: BuildSystemPromptOptions = {}):
+ 		resolvedSystemPromptTemplate = undefined;
+ 		rendered = prompt.renderTracked(systemPromptTemplate, data, sourceItems);
+ 	}
+-	const systemPrompt = [rendered.text];
+-	const sources = trackedSources(rendered, 0, sourceIdentities);
++	const systemPrompt: string[] = rendered.text.trim() ? [rendered.text] : [];
++	const sources = rendered.text.trim() ? trackedSources(rendered, 0, sourceIdentities) : [];
+ 	for (const prelude of evalPreludes) {
+ 		const guidance = prelude.guidance?.trim();
+ 		if (guidance) systemPrompt.push(guidance);
+diff --git a/packages/coding-agent/src/task/executor.ts b/packages/coding-agent/src/task/executor.ts
+index 6b32f28..66ab082 100644
+--- a/packages/coding-agent/src/task/executor.ts
++++ b/packages/coding-agent/src/task/executor.ts
+@@ -4332,7 +4332,8 @@ function buildSubagentSessionOptions(
+ 			// Per-spawn text (context, worktree, IRC roster) goes after the trailing
+ 			// `<project-context>` block so spawns of the same agent share the static
+ 			// prompt prefix as a cache hit.
+-			return [...defaultPrompt, subagentPrompt];
++			const trimmedSubagent = subagentPrompt.trim();
++			return trimmedSubagent ? [...defaultPrompt, trimmedSubagent] : [...defaultPrompt];
+ 		},
+ 	};
+ }
+diff --git a/packages/coding-agent/src/tools/eval.ts b/packages/coding-agent/src/tools/eval.ts
+index db52cbb..987a9c1 100644
+--- a/packages/coding-agent/src/tools/eval.ts
++++ b/packages/coding-agent/src/tools/eval.ts
+@@ -434,12 +434,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+ 	}
+ 
+ 	/** Only syntax not obvious from the field schema; filtered by enabled language. */
+-	static readonly #examples: readonly ToolExample<typeof evalSchema.infer>[] = [
+-		{
+-			caption: "Load a script with spaces without echoing its source",
+-			call: { language: "py", code: '%load "scripts/my setup.py"' },
+-		},
+-	];
++	static readonly #examples: readonly ToolExample<typeof evalSchema.infer>[] = [];
+ 	get examples(): readonly ToolExample<typeof evalSchema.infer>[] {
+ 		const langs = new Set(this.#enabledLanguages());
+ 		return EvalTool.#examples.filter(ex => "call" in ex && langs.has(ex.call.language));

@@ -12,6 +12,8 @@
   in
     builtins.pathExists api && lib.hasInfix ":${name}" (builtins.readFile api);
 
+  whenTomoeKnows = name: attrs: lib.optionalAttrs (tomoeKnows name) attrs;
+
   source_probe = generators.lisp.render (({
       and,
       cond,
@@ -3444,23 +3446,23 @@ in {
           pointer-follows-focus = true;
           mod = mkLispInline ":super";
         }
-        // lib.optionalAttrs (tomoeKnows "cursor-glass") {
+        // whenTomoeKnows "cursor-glass" {
           cursor-glass = {
             enabled = true;
             delay-ms = 120;
           };
         }
-        // lib.optionalAttrs (tomoeKnows "shadow") {
+        // whenTomoeKnows "shadow" {
           shadow = {
             range = 4;
             power = 2;
             color = "#00000040";
           };
         }
-        // lib.optionalAttrs (tomoeKnows "pause-readings-when-dark") {
+        // whenTomoeKnows "pause-readings-when-dark" {
           pause-readings-when-dark = true;
         }
-        // lib.optionalAttrs (tomoeKnows "sound-pause-after") {
+        // whenTomoeKnows "sound-pause-after" {
           sound-pause-after = 5;
         }
         // lib.optionalAttrs config.hardware.nvidia.enable {wait-for-frame-completion = true;}

@@ -434,14 +434,14 @@ in {
       };
     }
     // lib.listToAttrs (map (bot:
-      lib.nameValuePair bot.user {
-        isNormalUser = true;
-        inherit (bot) uid;
-        group = "users";
-        home = "/home/${bot.user}";
-        homeMode = "0700";
-      })
-    bots);
+        lib.nameValuePair bot.user {
+          isNormalUser = true;
+          inherit (bot) uid;
+          group = "users";
+          home = "/home/${bot.user}";
+          homeMode = "0700";
+        })
+      bots);
   security.sudo.wheelNeedsPassword = false;
 
   fileSystems =

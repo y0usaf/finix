@@ -75,21 +75,21 @@
     ports;
   browserCdpGuard = lib.concatStringsSep "\n" (
     (lib.mapAttrsToList (name: browser: let
-      owner = lib.findFirst (bot: bot.name == name) null bots;
-      uid =
-        if owner == null
-        then 1001
-        else owner.uid;
-    in
-      cdpGuard "127.0.0.1" uid [browser.port])
-    browsers)
+        owner = lib.findFirst (bot: bot.name == name) null bots;
+        uid =
+          if owner == null
+          then 1001
+          else owner.uid;
+      in
+        cdpGuard "127.0.0.1" uid [browser.port])
+      browsers)
     ++ (lib.mapAttrsToList (name: host: let
-      owner = lib.findFirst (bot: bot.name == name) null bots;
-    in
-      if owner == null
-      then throw "user.dev.ompBoxHostCdp names ${name}, which is not a bot in the box"
-      else cdpGuard hostAddresses owner.uid host.ports)
-    config.user.dev.ompBoxHostCdp)
+        owner = lib.findFirst (bot: bot.name == name) null bots;
+      in
+        if owner == null
+        then throw "user.dev.ompBoxHostCdp names ${name}, which is not a bot in the box"
+        else cdpGuard hostAddresses owner.uid host.ports)
+      config.user.dev.ompBoxHostCdp)
   );
   privateAddresses = [
     "10.0.0.0/8"
@@ -1351,11 +1351,11 @@ in {
       # Which guest user each boxed bot runs as, and the folders inside the user's home that bot also gets;
       # omp-bot-box refuses a bot this list leaves out, so every bot user the box has is named in finix.
       export OMP_BOT_BOX_USERS=${lib.escapeShellArg (builtins.toJSON (lib.listToAttrs (map (bot:
-        lib.nameValuePair bot.name {
-          inherit (bot) user folders;
-          home = "/home/${bot.user}";
-        })
-      bots)))}
+          lib.nameValuePair bot.name {
+            inherit (bot) user folders;
+            home = "/home/${bot.user}";
+          })
+        bots)))}
       unset OMP_BOT_EXTENSION
     '';
 

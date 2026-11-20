@@ -3,7 +3,6 @@
   inputPackages,
   ...
 }: let
-  inherit (inputPackages) crest;
   authRouter = inputPackages.auth-router.default;
   user = config.user.name;
   home = config.users.users.${user}.home;
@@ -11,28 +10,11 @@
   socket = "${runtimeDir}/auth-router.sock";
   restrictedSocket = "${runtimeDir}/auth-router-restricted.sock";
 in {
-  user.persist.directories = [
-    ".local/state/ouro"
-    ".local/state/guild"
-    ".local/state/crest-auth"
-  ];
+  user.persist.directories = [".local/state/crest-auth"];
   finix.persistence.homeServices = ["auth-router"];
   environment = {
     variables.AUTH_ROUTER_SOCKET = socket;
-    systemPackages = [
-      authRouter
-      crest.crest-cli
-      crest.crest-web
-      crest.crest-agent
-      crest.crest-cell
-      crest.crest-map
-      crest.crest-mcp
-      crest.crest-mux
-      crest.muntin
-      crest.guild
-      crest.ouro
-      crest.jev-review
-    ];
+    systemPackages = [authRouter];
   };
   finit.services.auth-router = {
     description = "auth-router credential and routing daemon";

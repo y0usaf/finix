@@ -51,11 +51,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    crest = {
-      url = "git+ssh://git@github.com/sylvarant-ai/crest.git";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     auth-router = {
       url = "github:y0usaf/auth-router";
       inputs.nixpkgs.follows = "nixpkgs";

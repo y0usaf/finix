@@ -38,19 +38,6 @@ index 10b95e3..cba6a80 100644
  	// Wire aliases share every guard, status and bookkeeping path with the canonical tool.
  	name = tool.name;
  	if (!isEvalBridgeToolCallable(tool)) {
-diff --git a/packages/coding-agent/src/prompts/tools/eval.md b/packages/coding-agent/src/prompts/tools/eval.md
-index aaa7ae3..fa453bd 100644
---- a/packages/coding-agent/src/prompts/tools/eval.md
-+++ b/packages/coding-agent/src/prompts/tools/eval.md
-@@ -62,7 +62,7 @@ await sh(command, { cwd?, timeout? })  await sh`cmd ${arg}` — embedded bash en
- {{{inlineTopics}}}
- {{else}}
- <namespaces>
--More globals; `read` the linked docs before first use:
-+More globals; read `xd://eval/<topic>` (eval `read(...)` or `bash` `cat`) before first use:
- - `judge`, `{{#if py}}judge_batch{{else}}judgeBatch{{/if}}`, `completion`: classification, bulk judgment, model calls → xd://eval/judge
- - `%load`{{#if py}}, `%pip`{{/if}}{{#if js}}, `%bun add`{{/if}}, `budget`{{#if evalTools}}, `@tool`/`tool(fn)`{{/if}}: setup, installs, utilities → xd://eval/helpers
- {{#if spawns}}
 diff --git a/packages/coding-agent/src/session/session-tools.ts b/packages/coding-agent/src/session/session-tools.ts
 index c10efcd..f0341a9 100644
 --- a/packages/coding-agent/src/session/session-tools.ts

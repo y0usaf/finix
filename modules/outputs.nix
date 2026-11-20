@@ -4,7 +4,114 @@ inputs: let
   packagesFor = platform: builtins.mapAttrs (_: input: input.packages.${platform} or {}) inputs;
   rawInputPackages = packagesFor system;
   ompBuild = rawInputPackages.oh-my-pi.omp.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [./dev/ai/omp/advisor-dedup.patch ./dev/ai/omp/advisor-bounded-replay.patch ./dev/ai/omp/date-cwd-append-only.patch ./dev/ai/omp/spawn-launch-check.patch ./dev/ai/omp/advisor-claim-hold.patch ./dev/ai/omp/lazy-restore-scan.patch ./dev/ai/omp/clipboard-paste-deadline.patch ./dev/ai/omp/composer-cost-brief.patch ./dev/ai/omp/eval-internal-read-no-inline.patch ./dev/ai/omp/agy-roster-rotation.patch ./dev/ai/omp/agy-notice-fallback.patch ./dev/ai/omp/antigravity-neon-roster.patch ./dev/ai/omp/prompt-ablate.patch];
+    patches =
+      (old.patches or [])
+      ++ [
+        ./dev/ai/omp/advisor-dedup.patch
+        ./dev/ai/omp/advisor-bounded-replay.patch
+        ./dev/ai/omp/date-cwd-append-only.patch
+        ./dev/ai/omp/spawn-launch-check.patch
+        ./dev/ai/omp/advisor-claim-hold.patch
+        ./dev/ai/omp/lazy-restore-scan.patch
+        ./dev/ai/omp/clipboard-paste-deadline.patch
+        ./dev/ai/omp/composer-cost-brief.patch
+        ./dev/ai/omp/eval-internal-read-no-inline.patch
+        ./dev/ai/omp/agy-roster-rotation.patch
+        ./dev/ai/omp/agy-notice-fallback.patch
+        ./dev/ai/omp/antigravity-neon-roster.patch
+        ./dev/ai/omp/prompt-ablate-guards.patch
+      ];
+    postPatch =
+      (old.postPatch or "")
+      + ''
+        prompts=packages/coding-agent/src/prompts
+        for f in \
+          advisor/active-repo-watchdog.md \
+          advisor/boundary-guidance.md \
+          advisor/memory-context.md \
+          advisor/system.md \
+          agents/task.md \
+          system/browser-user-session.md \
+          system/browser-x11.md \
+          system/computer-use.md \
+          system/system-prompt.md \
+          tools/commit-guidance.md \
+          tools/dsm-guidance.md; do
+          test -f "$prompts/$f"
+          : > "$prompts/$f"
+        done
+        for f in \
+          advisor/context-files.md \
+          system/project-prompt.md \
+          system/subagent-system-prompt.md \
+          tools/ask.md \
+          tools/bash.md \
+          tools/browser-core.md \
+          tools/eval.md \
+          tools/task-async-contract.md \
+          tools/task.md \
+          tools/write.md; do
+          test -f "$prompts/$f"
+        done
+        for f in advisor/context-files.md system/project-prompt.md; do
+          cat > "$prompts/$f" <<'EOF'
+        {{#each contextFiles}}
+        {{content}}
+
+        {{/each}}
+        EOF
+        done
+        cat > "$prompts/system/subagent-system-prompt.md" <<'EOF'
+        {{#if context}}{{context}}{{/if}}{{#if outputSchema}}
+        {{renderYieldSchema outputSchema}}{{/if}}
+        EOF
+        cat > "$prompts/tools/ask.md" <<'EOF'
+        Show the user one semantic HTML `<form>` (blocks until Submit/Cancel). No `<script>`, `<style>`, `style=`, or `<button>`/`type="submit"` (UI adds Submit/Cancel). Every control needs `name`; returns JSON `{"name": value}`. Wrap controls in `<label>`, group in `<fieldset><legend>`. Radio/checkbox groups auto-get "Other" (don't add one). Preselect recommendation with `checked`/`selected`/`value`.
+        EOF
+        cat > "$prompts/tools/bash.md" <<'EOF'
+        Run a bash command (`cwd` resets per call; `pty` for interactive programs; internal URIs work as paths; long output spills to `artifact://`).
+        {{#if asyncEnabled}}`async`: returns immediately, delivers result later (deadline {{defaultTimeoutSec}}s; `timeout: 0` disables).{{/if}}
+        {{#if hasLaunch}}Long-lived service: set `name` + `ready` (`log` regex and/or `port`).{{/if}}
+        {{#if autoBackgroundEnabled}}Calls >{{autoBackgroundSeconds}}s move to `bg_N` and deliver later; don't poll.{{/if}}
+        EOF
+        cat > "$prompts/tools/eval.md" <<'EOF'
+        Persistent {{#if py}}Python{{/if}}{{#ifAll py js}}/{{/ifAll}}{{#if js}}JS{{/if}} cell (subagents have separate kernels; top-level `await` works).
+        {{#if py}}Python: `print`, `log`, `phase`, `env`, `read(path, offset?, limit?)`, `write(path, content)`, `output(*ids, format?, query?, offset?, limit?)`, `wait(handles, timeout?, raise_errors?)`, `await tool.<name>(args)`, `sh(cmd, cwd?, timeout?)` (raises `ShellError`).{{/if}}
+        {{#if js}}JS: `print`, `log`, `phase`, `env`, `read`, `write`, `output`, `wait`, `await tool.<name>(args)`, `sh`.{{/if}}
+        {{#if toolNames}}Tools: {{#each toolNames}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}.{{/if}}
+        {{#if preludes}}Namespaces (read `xd://eval/<topic>` before first use):
+        {{#each preludes}}- `{{name}}`: {{summary}} → `xd://eval/{{name}}`
+        {{/each}}{{/if}}
+        {{#if inlinePreludes}}{{#each inlinePreludes}}{{{documentation}}}
+        {{/each}}{{/if}}
+        {{#if inlineTopics}}{{{inlineTopics}}}{{/if}}
+        {{#if autoBackgroundEnabled}}Long cells move to background and deliver later.{{/if}}
+        EOF
+        cat > "$prompts/tools/task-async-contract.md" <<'EOF'
+        IDs return immediately; results arrive as follow-up messages. Never poll.
+        EOF
+        cat > "$prompts/tools/task.md" <<'EOF'
+        Spawn subagents in `tasks[]` in parallel (IDs return immediately; results arrive later; never poll). Helpers start blank: put shared background in `context` and per-helper goal/files/limits/done-check in `task`.
+        - `agent`: omit for `{{defaultAgent}}`. `name`: CamelCase ≤32 chars. `solutionSpace`: openness hint.
+        {{#if evalToolsEnabled}}- `tools`: eval-defined tools (run in your kernel).{{/if}}
+        {{#if perCallModelEnabled}}- `model`: exact `provider/model-id` from {{#if perCallModelAdvertisement.allowlist.length}}{{#list perCallModelAdvertisement.allowlist join=", "}}`{{this}}`{{/list}}{{else}}configured models{{/if}}{{#unless perCallModelAdvertisement.parentModelWithheld}} or own model{{/unless}}.{{/if}}
+        Agents:
+        {{#list agents join=""}}- `{{name}}`: {{description}}
+        {{/list}}
+        EOF
+        cat > "$prompts/tools/write.md" <<'EOF'
+        Create or overwrite a file (`archive.ext:member` writes into ZIP/tar/.asar; `db.sqlite:table[:key]` inserts/updates, empty deletes).
+        EOF
+        ${pkgs.python3}/bin/python3 - "$prompts/tools/browser-core.md" <<'PY'
+        import sys
+        p = sys.argv[1]
+        s = open(p).read()
+        marker = "<instruction>\n"
+        line = "- Real user sessions: never navigate a borrowed `target` tab without permission, and never fake page steps with scripts.\n"
+        assert marker in s, "browser-core.md marker not found"
+        open(p, "w").write(s.replace(marker, marker + line, 1))
+        PY
+      '';
   });
   omp = pkgs.symlinkJoin {
     name = "omp-${ompBuild.version}";
