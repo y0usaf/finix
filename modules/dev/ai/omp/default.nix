@@ -21,6 +21,7 @@
       "message-interrupts.ts" = ./message-interrupts.ts;
       "crest-reroute.ts" = ./crest-reroute.ts;
       "tools.ts" = ./tools.ts;
+      "goldfish.ts" = ./goldfish.ts;
       "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (({
           Array,
           Symbol,
@@ -849,6 +850,7 @@ in {
             "crest-reroute.ts"
             "optchat/extension.ts"
             "tools.ts"
+            "goldfish.ts"
           ];
         };
       };
@@ -883,5 +885,6 @@ in {
       };
       ".omp/agent/AGENTS.md".text = config.user.dev.prompts.agentsMd.host;
       ".omp/agent/agents/task.md".text = prompts.taskAgent;
+      ".omp/agent/agents/goldfish.md".source = ./goldfish.md;
     };
 }
