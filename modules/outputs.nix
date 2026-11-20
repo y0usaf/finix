@@ -61,8 +61,11 @@ inputs: let
         {{/each}}
         EOF
         done
+        grep -q 'agent: inputs.agentSystemPrompt' packages/coding-agent/src/task/executor.ts
         cat > "$prompts/system/subagent-system-prompt.md" <<'EOF'
-        {{#if context}}{{context}}{{/if}}{{#if outputSchema}}
+        {{#if agent}}{{agent}}
+
+        {{/if}}{{#if context}}{{context}}{{/if}}{{#if outputSchema}}
         {{renderYieldSchema outputSchema}}{{/if}}
         EOF
         cat > "$prompts/tools/ask.md" <<'EOF'
