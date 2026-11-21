@@ -3559,11 +3559,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795234622,
-        "narHash": "sha256-YGmCj/F4vXF9DvC0egRyNiT8Zn0h0gYaCsrhB79BFo4=",
+        "lastModified": 1795236189,
+        "narHash": "sha256-vCH83ycbqDNCtAmml7rPxkaqSdELj2yhuNlhuMgS7Wg=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "068fd9f3cd3293557ba939b770193ff9959ab7a8",
+        "rev": "2806ad99e6a69976af86a7a8caaa31a27651e09f",
         "type": "github"
       },
       "original": {
@@ -3582,11 +3582,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795234622,
-        "narHash": "sha256-YGmCj/F4vXF9DvC0egRyNiT8Zn0h0gYaCsrhB79BFo4=",
+        "lastModified": 1795236189,
+        "narHash": "sha256-vCH83ycbqDNCtAmml7rPxkaqSdELj2yhuNlhuMgS7Wg=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "068fd9f3cd3293557ba939b770193ff9959ab7a8",
+        "rev": "2806ad99e6a69976af86a7a8caaa31a27651e09f",
         "type": "github"
       },
       "original": {
