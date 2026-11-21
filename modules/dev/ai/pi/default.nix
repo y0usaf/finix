@@ -18,9 +18,8 @@
   agyOpus = "antigravity-cli/claude-opus-5-5";
   opus = "anthropic/claude-opus-5-5";
   sol = "openai-codex/gpt-6.2-sol:high";
-  providerOf = model: lib.head (lib.splitString "/" model);
   mainChain = [agyOpus opus sol flash];
-  advisorChain = lib.filter (model: providerOf model != defaultProvider) [neon opus sol flash];
+  advisorChain = [neon agyOpus opus sol flash];
 in {
   options.user.dev.modelCatalog = lib.mkOption {
     type = lib.types.attrsOf lib.types.anything;

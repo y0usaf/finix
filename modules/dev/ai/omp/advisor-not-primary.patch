@@ -1,0 +1,127 @@
+diff --git a/packages/coding-agent/src/session/session-advisors.ts b/packages/coding-agent/src/session/session-advisors.ts
+index 04ec142..5618028 100644
+--- a/packages/coding-agent/src/session/session-advisors.ts
++++ b/packages/coding-agent/src/session/session-advisors.ts
+@@ -2161,49 +2161,75 @@ export class SessionAdvisors {
+ 	/** Restore an advisor's configured primary once its fallback cooldown expires. */
+ 	async #maybeRestoreAdvisorRetryFallbackPrimary(advisor: ActiveAdvisor, signal: AbortSignal): Promise<void> {
+ 		const fallback = advisor.retryFallback;
+-		if (!fallback || fallback.pinned || getRetryFallbackRevertPolicy(this.#host.settings) !== "cooldown-expiry") {
++		const current = advisor.agent.state.model;
++		const main = this.#host.agent.state.model;
++		if (
++			(fallback?.pinned || getRetryFallbackRevertPolicy(this.#host.settings) !== "cooldown-expiry") &&
++			current.id !== main?.id
++		) {
+ 			return;
+ 		}
+ 
+-		const originalSelector = parseRetryFallbackSelector(fallback.originalSelector, this.#host.modelRegistry);
+-		if (!originalSelector) {
++		const currentSelector = formatRetryFallbackSelector(current, advisor.thinkingLevel);
++		const primary = parseRetryFallbackSelector(
++			fallback?.originalSelector ?? currentSelector,
++			this.#host.modelRegistry,
++		);
++		if (!primary) {
+ 			advisor.retryFallback = undefined;
+ 			advisor.retryFallbackPendingSuccess = false;
+ 			return;
+ 		}
+-		const currentSelector = formatRetryFallbackSelector(advisor.agent.state.model, advisor.thinkingLevel);
+-		if (currentSelector === originalSelector.raw) {
+-			if (!this.#host.isRetryFallbackSelectorSuppressed(originalSelector)) {
+-				advisor.retryFallback = undefined;
+-				advisor.retryFallbackPendingSuccess = false;
++		const resolveSelector = (selector: RetryFallbackSelector) =>
++			resolveModelOverride([selector.raw], this.#host.modelRegistry, this.#host.settings).model ??
++			this.#host.modelRegistry.find(selector.provider, selector.id);
++		const primaryModel = resolveSelector(primary);
++		const role = fallback?.role ?? this.#host.resolveRetryFallbackRole(primary.raw, primaryModel, "advisor");
++		const chain = [primary, ...(role ? this.#host.findRetryFallbackCandidates(role, primary.raw, primaryModel) : [])];
++		for (const selector of chain) {
++			if (this.#host.isRetryFallbackSelectorSuppressed(selector)) continue;
++			const candidate = resolveSelector(selector);
++			if (!candidate || candidate.id === main?.id) continue;
++			if (cfgOffline.get(this.#host.settings) && candidate.provider !== main?.provider) continue;
++			if (modelsAreEqual(candidate, current)) {
++				if (selector === primary) {
++					advisor.retryFallback = undefined;
++					advisor.retryFallbackPendingSuccess = false;
++				}
++				return;
+ 			}
++			if (!this.#canReplayAdvisorHistory(advisor, candidate)) continue;
++			const apiKey = await this.#host.modelRegistry.getApiKey(candidate, advisor.providerSessionId, { signal });
++			if (!apiKey) continue;
++			signal.throwIfAborted();
++
++			const originalThinkingLevel = fallback?.originalThinkingLevel ?? advisor.thinkingLevel;
++			const thinkingToApply =
++				selector === primary
++					? advisor.autoThinking
++						? this.#autoAdvisorThinkingLevel()
++						: advisor.thinkingLevel === fallback?.lastAppliedThinkingLevel
++							? originalThinkingLevel
++							: advisor.thinkingLevel
++					: selector.thinkingLevel === AUTO_THINKING
++						? automaticThinkingLevel(candidate, this.#autoAdvisorThinkingLevel())
++						: (selector.thinkingLevel ?? originalThinkingLevel);
++			const applied = this.#setAdvisorModel(advisor, candidate, thinkingToApply);
++			this.#host.settings.getStorage()?.recordModelUsage(formatModelStringWithRouting(candidate));
++			advisor.retryFallbackPendingSuccess = false;
++			advisor.retryFallback =
++				selector === primary
++					? undefined
++					: {
++							role: role ?? "advisor",
++							originalSelector: primary.raw,
++							originalThinkingLevel,
++							lastAppliedThinkingLevel: applied,
++							autoThinking: selector.thinkingLevel === AUTO_THINKING,
++							pinned: fallback?.pinned ?? false,
++						};
+ 			return;
+ 		}
+-		if (this.#host.isRetryFallbackSelectorSuppressed(originalSelector)) return;
+-
+-		const resolvedPrimary = resolveModelOverride(
+-			[originalSelector.raw],
+-			this.#host.modelRegistry,
+-			this.#host.settings,
+-		);
+-		const primaryModel =
+-			resolvedPrimary.model ?? this.#host.modelRegistry.find(originalSelector.provider, originalSelector.id);
+-		if (!primaryModel || !this.#canReplayAdvisorHistory(advisor, primaryModel)) return;
+-		const apiKey = await this.#host.modelRegistry.getApiKey(primaryModel, advisor.providerSessionId, { signal });
+-		if (!apiKey) return;
+-		signal.throwIfAborted();
+-
+-		// Rejoin the primary's live level for an auto advisor, or restore the
+-		// fixed effort it had before falling back.
+-		const thinkingToApply = advisor.autoThinking
+-			? this.#autoAdvisorThinkingLevel()
+-			: advisor.thinkingLevel === fallback.lastAppliedThinkingLevel
+-				? fallback.originalThinkingLevel
+-				: advisor.thinkingLevel;
+-		this.#setAdvisorModel(advisor, primaryModel, thinkingToApply);
+-		this.#host.settings.getStorage()?.recordModelUsage(formatModelStringWithRouting(primaryModel));
+-		advisor.retryFallback = undefined;
+-		advisor.retryFallbackPendingSuccess = false;
+ 	}
+ 
+ 	/**
+@@ -2345,7 +2371,12 @@ export class SessionAdvisors {
+ 				if (this.#host.isRetryFallbackSelectorSuppressed(selector)) continue;
+ 				const resolved = resolveModelOverride([selector.raw], this.#host.modelRegistry, this.#host.settings);
+ 				const candidate = resolved.model ?? this.#host.modelRegistry.find(selector.provider, selector.id);
+-				if (!candidate || modelsAreEqual(candidate, currentModel)) continue;
++				if (
++					!candidate ||
++					modelsAreEqual(candidate, currentModel) ||
++					candidate.id === this.#host.agent.state.model?.id
++				)
++					continue;
+ 				if (cfgOffline.get(this.#host.settings) && candidate.provider !== this.#host.agent.state.model?.provider)
+ 					continue;
+ 				if (!this.#canReplayAdvisorHistory(advisor, candidate)) continue;

@@ -9,13 +9,17 @@
   userName = config.user.name;
   home = config.user.homeDirectory;
   inherit (inputPackages.oh-my-pi) omp;
+  lloydConfig = pkgs.writeText "lloyd-advisor.yml" (lib.generators.toYAML {} {advisor.enabled = true;});
+  botOmp = pkgs.writeShellScriptBin "omp" ''
+    if [ "''${OMP_BOT_NAME-}" = Lloyd ]; then
+      exec ${omp}/bin/omp "$@" --config ${lloydConfig}
+    fi
+    exec ${omp}/bin/omp "$@"
+  '';
   src = flakeInputs.omp-bot;
   tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
   persistentHome = "/persist/home/${userName}";
-  # The links to omp's extensions the ai_omp module keeps, named the same as in its config.yml, so a bot with
-  # "extensions": true loads each once and a switch shows a running bot no new extension path.
   ext = "${home}/.omp/agent/ext";
-  # Prints the persist paths of every bot on the persisted roster, relative to home, for persist-user-binds.
   persistPaths = pkgs.writeShellScript "omp-bot-persist-paths" ''
     roster=${persistentHome}/.local/state/omp-bot/bots.json
     [ -r "$roster" ] || exit 0
@@ -27,9 +31,6 @@
       esac
     done
   '';
-  # bin/omp-bot's OMP_BOT_PERSIST hook. mount PATH: keep PATH in ${persistentHome} from now on, copying
-  # what it holds the first time, and bind it over PATH (persist-user-binds does it at boot). purge PATH:
-  # unmount it and delete both copies, only ever called by omp-bot-remove --purge.
   persist = pkgs.writeShellScript "omp-bot-persist" ''
     set -euo pipefail
     export PATH=${pkgs.lib.makeBinPath [pkgs.coreutils pkgs.util-linux]}:$PATH
@@ -82,7 +83,7 @@ in {
 
   user.files = {
     ".config/omp-bot/env".text = ''
-      : "''${OMP_BIN:=${omp}/bin/omp}"
+      : "''${OMP_BIN:=${botOmp}/bin/omp}"
       : "''${OMP_BOT_EXTENSION:=${ext}/crest-auth.ts}"
       : "''${OMP_BOT_CWD_EXTENSION:=${ext}/cwd.ts}"
       : "''${OMP_BOT_SECRETS_EXTENSION:=${ext}/secrets/secrets.ts}"

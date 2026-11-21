@@ -23,6 +23,7 @@ inputs: let
         ./dev/ai/omp/instant-send.patch
         ./dev/ai/omp/fallback-fit-provider-usage.patch
         ./dev/ai/omp/message-helper.patch
+        ./dev/ai/omp/advisor-not-primary.patch
       ];
     postPatch =
       (old.postPatch or "")
