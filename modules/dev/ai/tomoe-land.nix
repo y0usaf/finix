@@ -12,7 +12,7 @@ in {
   config = {
     environment.systemPackages = [queue];
     finit.services.tomoe-land = {
-      description = "Tomoe landing queue: smoke gate, then push main";
+      description = "Tomoe landing queue: build, then push main and pin finix";
       user = name;
       group = "users";
       command = "${pkgs.writeShellScript "tomoe-land-start" ''

@@ -11,15 +11,11 @@ SYSTEM=${LAND_SYSTEM:-x86_64-linux}
 BASE=${LAND_BASE:-origin/main}
 FINIX=${LAND_FINIX:-$HOME/finix}
 FINIX_REV=""
-GATED_FINIX=""
-SMOKE=${LAND_SMOKE:-smoke}
 NIXCORES=${LAND_NIX_CORES:-4}
 LEASEWAIT=${LAND_LEASE_WAIT:-10800}
 PENDINGWAIT=${LAND_PENDING_WAIT:-600}
 LANDPEND=${LAND_PENDING_WAIT_LAND:-30}
-SMOKE_TIMEOUT=${LAND_SMOKE_TIMEOUT:-1200}
-TIMING_TIMEOUT=${LAND_TIMING_TIMEOUT:-1800}
-GATE_TIMEOUT=${LAND_GATE_TIMEOUT:-1800}
+BUILD_TIMEOUT=${LAND_BUILD_TIMEOUT:-1800}
 KILLWAIT=${LAND_KILL_AFTER:-60}
 KEEP=${LAND_KEEP:-0}
 
@@ -44,17 +40,14 @@ usage() {
 usage: tomoe-land <command> [args]
 
   daemon                          run the queue (one job at a time, in order)
-  submit <sha|branch>             land that commit: rebase, smoke, gate, push both remotes
-  submit --timing [-s SUITE] [--timeout SEC] [REF]
-                                  measure one suite in its own VM, time boxed
+  submit <sha|branch>             land that commit: rebase, build, push both remotes, pin finix
   wait <id> [-t SEC]              block until the result file exists, then print it
   status                          queue, active job and the last results
   cancel <id>                     remove a queued job, or kill the running one
 
 Paths: queue, active and results live under $TOMOE_LAND_ROOT
 (default ${XDG_RUNTIME_DIR}/agent/tomoe-land). The lock is
-${XDG_RUNTIME_DIR}/agent/tomoe-vm.lock; timing jobs and smoke runs take it
-exclusively, builds take it shared.
+${XDG_RUNTIME_DIR}/agent/tomoe-vm.lock; builds take it shared.
 EOF
 }
 
@@ -168,24 +161,14 @@ take_lease() {
 release_lease() { lease_release "$LOCK"; }
 
 submit() {
-	local type=land ref="" suite=timing timeout=""
+	local type=land ref=""
 	while (($#)); do
 		case $1 in
-		--timing | --bench) type=timing ;;
-		-s | --suite)
-			shift
-			suite=${1:-}
-			;;
-		--timeout)
-			shift
-			timeout=${1:-}
-			;;
 		-*) die "unknown option $1" ;;
 		*) ref=$1 ;;
 		esac
 		shift
 	done
-	if [[ $type == timing && -z $ref ]]; then ref=$BASE; fi
 	[[ -n $ref ]] || die "submit needs a commit or branch"
 	local ns id file tmp
 	ns=$(date +%s%N)
@@ -193,7 +176,7 @@ submit() {
 	file=$QUEUE/$ns-$id
 	tmp=$ROOT/.submitting/$$-$ns
 	mkdir -p "$ROOT/.submitting" || die "cannot write the submission"
-	printf '%s\t%s\t%s\t%s\n' "$type" "$ref" "$suite" "$timeout" >"$tmp" ||
+	printf '%s\t%s\n' "$type" "$ref" >"$tmp" ||
 		die "cannot write the submission"
 	mv "$tmp" "$file" || die "cannot queue the submission"
 	printf '%s queued %s %s %s\n' "$(date -u +%FT%TZ)" "$id" "$type" "$ref" >>"$ROOT/journal.log"
@@ -321,22 +304,12 @@ run_land() {
 	printf 'tip %s\n' "$tip" >>"$log/rebase.log"
 	note_step rebase passed "$log/rebase.log"
 
-	if ! run_smoke "$id" "$tree" "$log/smoke.log"; then
+	if ! run_build "$id" "$tree" "$log/build.log"; then
 		cleanup_tree "$repo" "$tree"
-		finish "$id" failed "$tip" "$base_sha" smoke "$log/smoke.log"
+		finish "$id" failed "$tip" "$base_sha" build "$log/build.log"
 		return 1
 	fi
-	note_step smoke passed "$log/smoke.log"
-	[[ -f $RESULTS/$id ]] && {
-		cleanup_tree "$repo" "$tree"
-		return 1
-	}
-	if ! run_gate "$tree" "$tip" "$log/gate.log"; then
-		cleanup_tree "$repo" "$tree"
-		finish "$id" failed "$tip" "$base_sha" gate "$log/gate.log"
-		return 1
-	fi
-	note_step gate passed "$log/gate.log"
+	note_step build passed "$log/build.log"
 	[[ -f $RESULTS/$id ]] && {
 		cleanup_tree "$repo" "$tree"
 		return 1
@@ -347,12 +320,12 @@ run_land() {
 	0)
 		note_step push passed "$log/push.log"
 		note_step forgejo passed "$log/push.log.forgejo"
-		printf '%s %s\n' "$tip" "$GATED_FINIX" >"$ROOT/undeployed"
+		printf '%s\n' "$tip" >"$ROOT/undeployed"
 		;;
 	2)
 		note_step push passed "$log/push.log"
 		note_step forgejo failed "$log/push.log.forgejo"
-		printf '%s %s\n' "$tip" "$GATED_FINIX" >"$ROOT/undeployed"
+		printf '%s\n' "$tip" >"$ROOT/undeployed"
 		;;
 	*)
 		cleanup_tree "$repo" "$tree"
@@ -360,7 +333,7 @@ run_land() {
 		return 1
 		;;
 	esac
-	if pin_finix "$log/pin.log" "$tip" "$GATED_FINIX"; then
+	if pin_finix "$log/pin.log" "$tip"; then
 		note_step pin passed "$log/pin.log"
 	else
 		note_step pin failed "$log/pin.log"
@@ -376,110 +349,33 @@ cleanup_tree() {
 	git -C "$1" worktree prune >/dev/null 2>&1 || true
 }
 
-# run_gate TREE TIP LOG [FINIX_REV]: gate TIP against the config that finix revision
-# (default its HEAD now) generates; on a pass GATED_FINIX names that revision.
-run_gate() {
-	local tree=$1 tip=$2 log=$3 finix=${4:-} rc=0
-	GATED_FINIX=""
-	[[ -x $tree/tools/gate.sh ]] || {
-		printf 'land: %s has no tools/gate.sh\n' "$tip" >"$log"
-		return 1
-	}
-	[[ -n $finix ]] || finix=$(git -C "$FINIX" rev-parse HEAD) || return 1
-	(
-		cd "$tree" || exit 1
-		GATE_FINIX=$FINIX GATE_FINIX_REV=$finix timeout --signal=TERM --kill-after="$KILLWAIT" \
-			"$GATE_TIMEOUT" nice -n 10 ./tools/gate.sh "$tip"
-	) >"$log" 2>&1 || rc=$?
-	if ((rc == 0)); then
-		GATED_FINIX=$finix
-		return 0
-	fi
-	printf 'land: the gate failed (exit %s)\n' "$rc" >>"$log"
-	return 1
-}
-
-# gated_pair GATED PIN: the pin commit deploys exactly what the gate ran, the gated finix
-# revision with only the tomoe input moved; anything else in between was never gated.
-# Every other input is compared as its whole resolved graph, nested locks included.
-gated_pair() {
-	local gated=$1 pin=$2 sans
-	sans='def resolve($n): if type == "string" then $n[.] as $node
-	        | {locked: $node.locked, inputs: (($node.inputs // {}) | map_values(resolve($n)))} else . end;
-	      .nodes as $n | $n.root.inputs | del(.tomoe) | map_values(resolve($n))'
-	[[ -n $gated ]] || return 1
-	git -C "$FINIX" diff --quiet "$gated" "$pin" -- . ':(exclude)flake.lock' || return 1
-	[[ "$(git -C "$FINIX" show "$gated:flake.lock" | jq -S "$sans")" == "$(git -C "$FINIX" show "$pin:flake.lock" | jq -S "$sans")" ]]
-}
-
-# gate_pin TIP PIN LOG: gate the pin commit itself, from a worktree of TIP.
-gate_pin() {
-	local tip=$1 pin=$2 log=$3 tree=$ROOT/work/pin-$$ rc=0
-	git -C "$REPO" worktree add --quiet --detach "$tree" "$tip" >>"$log" 2>&1 || return 1
-	run_gate "$tree" "$tip" "$log.gate" "$pin" || rc=1
-	cleanup_tree "$REPO" "$tree"
-	return $rc
-}
-
-run_smoke() {
-	local id=$1 tree=$2 log=$3 driver rc=0
-	{
-		printf 'land: building the smoke driver\n'
-	} >>"$log"
+run_build() {
+	local id=$1 tree=$2 log=$3 rc=0
 	if ! take_lease -s "$LANDPEND"; then
 		printf 'land: the shared lease timed out\n' >>"$log"
 		return 75
 	fi
-	driver=$(
+	(
 		cd "$tree" || exit 1
-		nice -n 10 nix build --no-link --print-out-paths --max-jobs 1 \
-			--option cores "$NIXCORES" ".#checks.$SYSTEM.$SMOKE.driver"
-	) >>"$log" 2>&1
+		timeout --signal=TERM --kill-after="$KILLWAIT" "$BUILD_TIMEOUT" \
+			nice -n 10 nix build --no-link --print-build-logs --max-jobs 1 \
+			--option cores "$NIXCORES" ".#packages.$SYSTEM.tomoe"
+	) >>"$log" 2>&1 || rc=$?
 	release_lease
 	[[ -f $RESULTS/$id ]] && {
-		printf 'land: cancelled before the run\n' >>"$log"
+		printf 'land: cancelled during the build\n' >>"$log"
 		return 75
 	}
-	if [[ -z $driver ]]; then
-		printf 'land: the smoke driver did not build\n' >>"$log"
-		return 76
-	fi
-	if ! take_lease -x; then
-		printf 'land: the exclusive lease timed out\n' >>"$log"
-		return 75
-	fi
-	mkdir -p "$ROOT/run/$id/out"
-	local pid
-	set -m
-	timeout --signal=TERM --kill-after="$KILLWAIT" "$SMOKE_TIMEOUT" \
-		bash -c 'cd "$1" && LOGFILE=/dev/null nice -n 10 "$2/bin/nixos-test-driver" -o "$1/out"' _ \
-		"$ROOT/run/$id" "$driver" >>"$log" 2>&1 &
-	pid=$!
-	set +m
-	printf '%s\n' "$pid" >"$ACTIVE_FILE.pid"
-	wait "$pid" || rc=$?
-	rm -f "$ACTIVE_FILE.pid"
-	release_lease
-	case $rc in
-	124 | 137)
-		printf 'land: smoke hit its %ss limit\n' "$SMOKE_TIMEOUT" >>"$log"
-		return 1
-		;;
-	esac
-	if ((rc == 0)) && ! grep -q 'tomoe suite FAILED' "$log"; then
-		printf 'land: smoke passed\n' >>"$log"
+	if ((rc == 0)); then
+		printf 'land: built\n' >>"$log"
 		return 0
 	fi
-	printf 'land: smoke failed (exit %s); see the suite lines above\n' "$rc" >>"$log"
+	printf 'land: the build failed (exit %s)\n' "$rc" >>"$log"
 	return 1
 }
 
-# pin_finix LOG TIP [GATED]: commit a finix pin of TIP, push that commit and queue a
-# switch to it. GATED is the finix revision TIP's gate ran with; when the pin is not
-# that revision plus the tomoe input (finix moved since), the pin commit is gated
-# itself, and dropped again if it fails, so what is deployed is always what was gated.
 pin_finix() {
-	local log=$1 tip=$2 gated=${3:-} rev short full remote=github
+	local log=$1 tip=$2 rev short full remote=github
 	[[ -d $FINIX/.git ]] || {
 		printf 'no finix checkout at %s\n' "$FINIX" >"$log"
 		return 1
@@ -517,21 +413,6 @@ pin_finix() {
 			printf 'committed flake.lock pins %s, not %s; not pushing\n' "$locked" "$full"
 			exit 1
 		}
-		if gated_pair "$gated" "$pin"; then
-			printf 'pin %s is the gated finix %s with tomoe %s\n' "$pin" "$gated" "$short"
-		else
-			printf 'pin %s is not the gated finix %s with tomoe %s; gating the pin itself\n' \
-				"$pin" "${gated:-(none recorded)}" "$short"
-			if ! gate_pin "$full" "$pin" "$log"; then
-				printf 'the gate failed on pin %s (%s.gate); dropping it\n' "$pin" "$log"
-				if [[ $(git rev-parse HEAD) == "$pin" ]]; then
-					git reset --quiet --soft HEAD^ && git restore --quiet --staged --worktree -- flake.lock
-				else
-					git -c user.name=tomoe-land -c user.email=tomoe-land@localhost revert --no-edit "$pin"
-				fi
-				exit 1
-			fi
-		fi
 		git push "$remote" "$pin:refs/heads/main" || exit 1
 		printf '%s\n' "$pin" >"$log.rev"
 	) >"$log" 2>&1 || return 1
@@ -572,83 +453,6 @@ push_landing() {
 	return 2
 }
 
-run_timing() {
-	local id=$1 suite=$2 limit=$3 ref=$4
-	local log=$LOGS/$id rc=0 repo tree driver pid sha
-	mkdir -p "$log"
-	repo=$(repo_root) || {
-		finish "$id" failed "" "" resolve "$log/resolve.log"
-		return 1
-	}
-	git -C "$repo" fetch --quiet origin >/dev/null 2>&1 || true
-	sha=$(git -C "$repo" rev-parse --verify --quiet "refs/remotes/origin/$ref^{commit}")
-	[[ -n $sha ]] || sha=$(git -C "$repo" rev-parse --verify --quiet "$ref^{commit}")
-	[[ -n $sha ]] || {
-		printf '%s is not a commit here\n' "$ref" >"$log/resolve.log"
-		finish "$id" failed "" "" resolve "$log/resolve.log"
-		return 1
-	}
-	printf 'ref %s\nsha %s\n' "$ref" "$sha" >"$log/resolve.log"
-	tree=$ROOT/work/$id
-	rm -rf "$tree"
-	git -C "$repo" worktree prune >/dev/null 2>&1 || true
-	git -C "$repo" worktree add --quiet --detach "$tree" "$sha" >>"$log/resolve.log" 2>&1 || {
-		finish "$id" failed "" "" resolve "$log/resolve.log"
-		return 1
-	}
-	if ! take_lease -s; then
-		cleanup_tree "$repo" "$tree"
-		finish "$id" failed "$sha" "" lease "$log/timing.log"
-		return 75
-	fi
-	driver=$(
-		cd "$tree" || exit 1
-		nice -n 10 nix build --no-link --print-out-paths --max-jobs 1 \
-			--option cores "$NIXCORES" ".#legacyPackages.$SYSTEM.suites.$suite.driver"
-	) >"$log/timing.log" 2>&1
-	release_lease
-	[[ -f $RESULTS/$id ]] && {
-		printf 'land: cancelled before the run\n' >>"$log/timing.log"
-		cleanup_tree "$repo" "$tree"
-		return 75
-	}
-	if [[ -z $driver ]]; then
-		cleanup_tree "$repo" "$tree"
-		finish "$id" failed "$sha" "" driver "$log/timing.log"
-		return 1
-	fi
-	if ! take_lease -x; then
-		cleanup_tree "$repo" "$tree"
-		finish "$id" failed "$sha" "" lease "$log/timing.log"
-		return 75
-	fi
-	mkdir -p "$ROOT/run/$id/out"
-	set -m
-	timeout --signal=TERM --kill-after="$KILLWAIT" "$limit" \
-		bash -c 'cd "$1" && LOGFILE=/dev/null nice -n 10 "$2/bin/nixos-test-driver" -o "$1/out"' _ \
-		"$ROOT/run/$id" "$driver" >>"$log/timing.log" 2>&1 &
-	pid=$!
-	set +m
-	printf '%s\n' "$pid" >"$ACTIVE_FILE.pid"
-	wait "$pid" || rc=$?
-	rm -f "$ACTIVE_FILE.pid"
-	release_lease
-	cleanup_tree "$repo" "$tree"
-	case $rc in
-	124 | 137)
-		printf 'land: %s hit its %ss limit\n' "$suite" "$limit" >>"$log/timing.log"
-		finish "$id" failed "$sha" "" timing "$log/timing.log"
-		return 1
-		;;
-	esac
-	if ((rc == 0)) && ! grep -q 'tomoe suite FAILED' "$log/timing.log"; then
-		finish "$id" passed "$sha" "$sha" timing "$log/timing.log"
-		return 0
-	fi
-	finish "$id" failed "$sha" "" timing "$log/timing.log"
-	return 1
-}
-
 finish() {
 	local id=$1 status=$2 sha=$3 main=$4 step=$5 log=$6 tmp=$RESULTS/.$1.tmp
 	[[ -f $RESULTS/$id ]] && return 0
@@ -683,8 +487,8 @@ print(d["nodes"]["tomoe"]["locked"].get("rev", ""))' "$FINIX/flake.lock" 2>/dev/
 }
 
 retry_pin() {
-	local sha gated pinned to now
-	read -r sha gated <"$ROOT/undeployed" 2>/dev/null
+	local sha pinned to now
+	read -r sha _ <"$ROOT/undeployed" 2>/dev/null
 	[[ -n $sha ]] || {
 		rm -f "$ROOT/undeployed"
 		return 0
@@ -700,12 +504,12 @@ retry_pin() {
 			return 0
 		fi
 	fi
-	pin_finix "$ROOT/pin-retry.log" "$sha" "$gated" || true
+	pin_finix "$ROOT/pin-retry.log" "$sha" || true
 	return 0
 }
 
 job_main() {
-	local ticket=$1 next id type ref suite timeout
+	local ticket=$1 next id type ref
 	next=$(basename "$ticket")
 	id=${next#*-}
 	ACTIVE_FILE=$ticket
@@ -714,16 +518,11 @@ job_main() {
 		mv "$ticket" "$DONE/$next" 2>/dev/null || rm -f "$ticket"
 		return 0
 	fi
-	IFS=$'\t' read -r type ref suite timeout <"$ticket"
+	IFS=$'\t' read -r type ref _ <"$ticket"
 	printf '%s start %s %s %s\n' "$(date -u +%FT%TZ)" "$id" "$type" "$ref" >>"$ROOT/daemon.log"
 	printf '%s taken %s\n' "$(date -u +%FT%TZ)" "$id" >>"$ROOT/journal.log"
 	case $type in
 	land) run_land "$id" "$ref" ;;
-	timing)
-		[[ -n $timeout ]] || timeout=$TIMING_TIMEOUT
-		[[ -n $suite ]] || suite=timing
-		run_timing "$id" "$suite" "$timeout" "$ref"
-		;;
 	*) finish "$id" failed "" "" type "" ;;
 	esac
 	if [[ ! -f $RESULTS/$id ]]; then

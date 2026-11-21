@@ -43,7 +43,7 @@ pkill -KILL -x tomoe   # only if the daily one is still holding the screen
 tomoe-stable
 ```
 
-It takes over the screen like `tomoe` does, and `tomoe` starts the daily one again next time. It is the `tomoe-stable` flake input: a finix revision whose lock pins that Tomoe and whose config was generated for it, today finix `add5ffdb` with Tomoe `259c8ac`, the SBCL build that ran this desktop until the C core replaced it. Tomoe's `nix run .#release -- promote` moves both lines to a release once it has soaked; nothing else touches them. `nix build .#tomoe-stable` builds the launcher on its own.
+It takes over the screen like `tomoe` does, and `tomoe` starts the daily one again next time. It is the `tomoe-stable` flake input: a finix revision whose lock pins that Tomoe and whose config was generated for it, today finix `add5ffdb` with Tomoe `259c8ac`, the SBCL build that ran this desktop until the C core replaced it. Both lines move by hand, to a Tomoe that has been the daily desktop for a while. `nix build .#tomoe-stable` builds the launcher on its own.
 
 Other machines:
 
