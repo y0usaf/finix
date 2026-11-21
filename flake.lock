@@ -1535,11 +1535,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793020731,
-        "narHash": "sha256-yJcILU+cQfGcFKfhJ3dNmfWinVwz0UqNnbuWYap71Io=",
+        "lastModified": 1795234136,
+        "narHash": "sha256-aXfmu5ZcQpj5AgKb7miXiAdqrFjM6XegxGoklCf6ogA=",
         "ref": "refs/heads/main",
-        "rev": "882063f1734e79a2cfdf92c8c678e3823bd93139",
-        "revCount": 1,
+        "rev": "48763d827bf8733dd9c957e095e967c54e6dde3f",
+        "revCount": 2,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/leverage-linux.git"
       },
@@ -1556,11 +1556,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793020731,
-        "narHash": "sha256-yJcILU+cQfGcFKfhJ3dNmfWinVwz0UqNnbuWYap71Io=",
+        "lastModified": 1795234136,
+        "narHash": "sha256-aXfmu5ZcQpj5AgKb7miXiAdqrFjM6XegxGoklCf6ogA=",
         "ref": "refs/heads/main",
-        "rev": "882063f1734e79a2cfdf92c8c678e3823bd93139",
-        "revCount": 1,
+        "rev": "48763d827bf8733dd9c957e095e967c54e6dde3f",
+        "revCount": 2,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/leverage-linux.git"
       },
@@ -3519,11 +3519,11 @@
         "nixpkgs": "nixpkgs_10"
       },
       "locked": {
-        "lastModified": 1794454639,
-        "narHash": "sha256-lX+Krlq7MKc6VojgkA7rQ4+cikr7KzZnbzD/n0q+y6E=",
+        "lastModified": 1795234104,
+        "narHash": "sha256-OowtHKcckq9XDoqiw4sQv7XzoRWKo8LbtBbuT7kwo5I=",
         "owner": "y0usaf",
         "repo": "steam-frame-nixos",
-        "rev": "89151d1d3735777177e301dcc74c91f7bb15e400",
+        "rev": "4fab2ee04f3131f2805f5ff64f85870a600f52b0",
         "type": "github"
       },
       "original": {
@@ -3537,11 +3537,11 @@
         "nixpkgs": "nixpkgs_21"
       },
       "locked": {
-        "lastModified": 1794454639,
-        "narHash": "sha256-lX+Krlq7MKc6VojgkA7rQ4+cikr7KzZnbzD/n0q+y6E=",
+        "lastModified": 1795234104,
+        "narHash": "sha256-OowtHKcckq9XDoqiw4sQv7XzoRWKo8LbtBbuT7kwo5I=",
         "owner": "y0usaf",
         "repo": "steam-frame-nixos",
-        "rev": "89151d1d3735777177e301dcc74c91f7bb15e400",
+        "rev": "4fab2ee04f3131f2805f5ff64f85870a600f52b0",
         "type": "github"
       },
       "original": {
@@ -3559,11 +3559,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795156518,
-        "narHash": "sha256-SpdoqXgHQyCE94hjt0loWBsw6rIYGh6o4JDJyuJ7CA8=",
+        "lastModified": 1795234622,
+        "narHash": "sha256-YGmCj/F4vXF9DvC0egRyNiT8Zn0h0gYaCsrhB79BFo4=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "c51255742cb9dc91c3578dc572622d0aa9d25b2c",
+        "rev": "068fd9f3cd3293557ba939b770193ff9959ab7a8",
         "type": "github"
       },
       "original": {
@@ -3582,11 +3582,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794073217,
-        "narHash": "sha256-/NSYUerAXMbnrlBM5Ki8Omj5LDPwBhdbN1ntG83mdeY=",
+        "lastModified": 1795234622,
+        "narHash": "sha256-YGmCj/F4vXF9DvC0egRyNiT8Zn0h0gYaCsrhB79BFo4=",
         "owner": "y0usaf",
         "repo": "strictix",
-        "rev": "2656de71e9a764a877d6c508418a347516d2333f",
+        "rev": "068fd9f3cd3293557ba939b770193ff9959ab7a8",
         "type": "github"
       },
       "original": {
