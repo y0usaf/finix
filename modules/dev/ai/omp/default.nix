@@ -22,6 +22,7 @@
       "crest-reroute.ts" = ./crest-reroute.ts;
       "tools.ts" = ./tools.ts;
       "goldfish.ts" = ./goldfish.ts;
+      "message-helper.ts" = ./message-helper.ts;
       "chat-look.ts" = generators.sourceFile "chat-look.ts" (generators.ts.render (({
           Array,
           Symbol,
@@ -850,6 +851,7 @@ in {
             "optchat/extension.ts"
             "tools.ts"
             "goldfish.ts"
+            "message-helper.ts"
           ];
         };
       };

@@ -22,6 +22,7 @@ inputs: let
         ./dev/ai/omp/prompt-ablate-guards.patch
         ./dev/ai/omp/instant-send.patch
         ./dev/ai/omp/fallback-fit-provider-usage.patch
+        ./dev/ai/omp/message-helper.patch
       ];
     postPatch =
       (old.postPatch or "")
@@ -118,6 +119,30 @@ inputs: let
         PY
       '';
   });
+  ompMessageHelperE2e = let
+    marker = ''echo "Compiling OMP"'';
+    parts = lib.splitString marker ompBuild.buildPhase;
+  in
+    assert lib.length parts == 2;
+      ompBuild.overrideAttrs {
+        pname = "omp-message-helper-e2e";
+        buildPhase =
+          lib.head parts
+          + ''
+            cp ${./dev/ai/omp/message-helper.ts} packages/coding-agent/test/finix-message-helper.ts
+            cp ${./dev/ai/omp/message-helper.e2e.ts} packages/coding-agent/test/finix-message-helper.e2e.test.ts
+            export HOME="$TMPDIR/home"
+            mkdir -p "$HOME"
+            bun --cwd="$PWD/packages/coding-agent" test test/finix-message-helper.e2e.test.ts
+            runHook postBuild
+          '';
+        installPhase = ''
+          touch $out
+        '';
+        dontFixup = true;
+        doInstallCheck = false;
+        disallowedReferences = [];
+      };
   omp = pkgs.symlinkJoin {
     name = "omp-${ompBuild.version}";
     inherit (ompBuild) version;
@@ -447,6 +472,7 @@ in {
     lib.mapAttrs' (name: host: lib.nameValuePair name host.config.system.build.toplevel) hosts
     // {
       strictix = lint.check;
+      omp-message-helper-e2e = ompMessageHelperE2e;
     };
 
   formatter.${system} = inputPackages.alejandra.default;

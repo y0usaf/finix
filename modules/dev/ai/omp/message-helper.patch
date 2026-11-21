@@ -1,0 +1,158 @@
+diff --git a/packages/coding-agent/package.json b/packages/coding-agent/package.json
+index 6b85b8a..173d8c6 100644
+--- a/packages/coding-agent/package.json
++++ b/packages/coding-agent/package.json
+@@ -444,6 +444,10 @@
+ 			"types": "./src/plan-mode/*.ts",
+ 			"import": "./src/plan-mode/*.ts"
+ 		},
++		"./irc/*": {
++			"types": "./src/irc/*.ts",
++			"import": "./src/irc/*.ts"
++		},
+ 		"./registry/*": {
+ 			"types": "./src/registry/*.ts",
+ 			"import": "./src/registry/*.ts"
+diff --git a/packages/coding-agent/src/irc/bus.ts b/packages/coding-agent/src/irc/bus.ts
+index 782988b..b640ad3 100644
+--- a/packages/coding-agent/src/irc/bus.ts
++++ b/packages/coding-agent/src/irc/bus.ts
+@@ -12,7 +12,7 @@
+ import { type IrcDeliveryReceipt, type IrcMessage } from "@oh-my-pi/pi-tui/tools/irc";
+ import { logger, Snowflake } from "@oh-my-pi/pi-utils";
+ import { type AgentLifecycleApi, AgentLifecycleManager } from "../registry/agent-lifecycle";
+-import { AgentRegistry, type AgentRegistryApi, MAIN_AGENT_ID } from "../registry/agent-registry";
++import { AgentRegistry, type AgentRegistryApi, isBlindAuditor, MAIN_AGENT_ID } from "../registry/agent-registry";
+ import type { CustomMessage } from "../session/messages";
+ 
+ interface IrcWaiter {
+@@ -231,6 +231,13 @@ export class IrcBus implements IrcBusApi {
+ 				error: `Agent "${message.to}" is a read-only advisor transcript and cannot be messaged.`,
+ 			};
+ 		}
++		if (isBlindAuditor(ref)) {
++			return {
++				to: message.to,
++				outcome: "failed",
++				error: `Agent "${message.to}" is a Goldfish audit agent (blind, zero-history by design) and cannot be messaged.`,
++			};
++		}
+ 
+ 		// A `parked` or killed (`aborted`) recipient always needs the lifecycle to
+ 		// revive it from its transcript — this is read from *this* bus's registry,
+diff --git a/packages/coding-agent/src/irc/messaging.ts b/packages/coding-agent/src/irc/messaging.ts
+index be1300a..1a6e6b8 100644
+--- a/packages/coding-agent/src/irc/messaging.ts
++++ b/packages/coding-agent/src/irc/messaging.ts
+@@ -2,7 +2,7 @@ import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
+ import type { CoordinationDetails } from "@oh-my-pi/pi-tui/tools/wait";
+ import type { Settings } from "../config/settings";
+ import { IrcBus } from "./bus";
+-import type { AgentRegistryApi } from "../registry/agent-registry";
++import { type AgentRegistryApi, isBlindAuditor } from "../registry/agent-registry";
+ import { ensurePersistedRoster } from "../registry/persisted-agents";
+ import { canSpawnAtDepth } from "../task/types";
+ 
+@@ -46,7 +46,12 @@ export async function executeSend(
+ 		if (!recipient || recipient.status === "parked") await ensurePersistedRoster(registry, sessionFileHint);
+ 	}
+ 
+-	const targets = isBroadcast ? registry.listVisibleTo(senderId).map(ref => ref.id) : [to];
++	const targets = isBroadcast
++		? registry
++				.listVisibleTo(senderId)
++				.filter(ref => !isBlindAuditor(ref))
++				.map(ref => ref.id)
++		: [to];
+ 	const bus = IrcBus.global();
+ 	const receipts = await Promise.all(
+ 		targets.map(target =>
+diff --git a/packages/coding-agent/src/registry/agent-registry.ts b/packages/coding-agent/src/registry/agent-registry.ts
+index 05107fa..c3b4c30 100644
+--- a/packages/coding-agent/src/registry/agent-registry.ts
++++ b/packages/coding-agent/src/registry/agent-registry.ts
+@@ -87,6 +87,12 @@ export interface AgentRef {
+ 
+ export type AgentRefExpectation = AgentRef | AgentSessionHandle;
+ 
++export const BLIND_AUDITOR_AGENT = "goldfish";
++
++export function isBlindAuditor(ref: AgentRef | undefined): boolean {
++	return ref?.history?.agent?.trim().toLowerCase() === BLIND_AUDITOR_AGENT;
++}
++
+ const kMintedRef = Symbol("agent-registry.ref");
+ 
+ /** Whether `value` is a ref object minted by an {@link AgentRegistry} on this thread (thread bridges encode these). */
+diff --git a/packages/coding-agent/src/sdk.ts b/packages/coding-agent/src/sdk.ts
+index 9b90137..9f305c2 100644
+--- a/packages/coding-agent/src/sdk.ts
++++ b/packages/coding-agent/src/sdk.ts
+@@ -4714,6 +4714,7 @@ async function createAgentSessionScoped(options: CreateAgentSessionOptions): Pro
+ 			session: null,
+ 			sessionFile: sessionManager.getSessionFile() ?? null,
+ 			status: "running" as const,
++			history: { agent: resolvedAgentName },
+ 		};
+ 		registeredAgentRef =
+ 			options.expectedAgentRef === undefined
+@@ -4736,6 +4737,9 @@ async function createAgentSessionScoped(options: CreateAgentSessionOptions): Pro
+ 		if (!registeredAgentRef) {
+ 			throw new Error(`Agent "${resolvedAgentId}" is already owned by another session generation.`);
+ 		}
++		if (registeredAgentRef.history?.agent !== resolvedAgentName) {
++			agentRegistry.setHistory(resolvedAgentId, { agent: resolvedAgentName });
++		}
+ 		// A reused parked ref remains parked until the new AgentSession is fully
+ 		// constructed and attached. Startup failure therefore leaves it revivable.
+ 		hasRegistered = options.expectedAgentRef === undefined || options.expectedAgentRef === null;
+diff --git a/packages/coding-agent/src/session/irc-bridge.ts b/packages/coding-agent/src/session/irc-bridge.ts
+index bb2ebc6..f54be67 100644
+--- a/packages/coding-agent/src/session/irc-bridge.ts
++++ b/packages/coding-agent/src/session/irc-bridge.ts
+@@ -211,6 +211,7 @@ export class IrcBridge {
+ 			seen.add(id);
+ 		}
+ 		const peerMessage = parentId !== undefined && (msg.broadcast === true || (!fromParent && !fromDescendant));
++		const parentAside = fromParent && !peerMessage && msg.aside === true;
+ 		// An idle subagent runs a monitored wake turn whose output is relayed
+ 		// back to the sender (task executor `relayWakeTurnOutput`); the main
+ 		// agent, mid-turn asides, relays, broadcast legs and progress notes have no such relay.
+@@ -242,7 +243,7 @@ export class IrcBridge {
+ 			}),
+ 			// The parent steer becomes the transcript card when consumed; keep this
+ 			// observation available to listeners without also painting a live card.
+-			display: !(streaming && fromParent && !peerMessage),
++			display: parentAside || !(streaming && fromParent && !peerMessage),
+ 			details: {
+ 				id: msg.id,
+ 				from: msg.from,
+@@ -252,6 +253,7 @@ export class IrcBridge {
+ 				...(msg.broadcast ? { broadcast: true } : {}),
+ 				...(msg.progress ? { progress: true } : {}),
+ 				...(fromParent ? { fromParent: true } : {}),
++				...(parentAside ? { aside: true } : {}),
+ 			},
+ 			attribution: "agent",
+ 			timestamp: msg.ts,
+@@ -259,7 +261,7 @@ export class IrcBridge {
+ 		if (peerMessage) this.#peerMessages.add(record);
+ 		void this.#host.emitSessionEvent({ type: "irc_message", message: record });
+ 		if (streaming) {
+-			if (fromParent && !peerMessage) {
++			if (fromParent && !peerMessage && !parentAside) {
+ 				const steer: AgentMessage = {
+ 					role: "user",
+ 					content: prompt.render(parentIrcSteerTemplate, { from: msg.from, message: envelopeBody }),
+diff --git a/packages/tui/src/tools/irc.ts b/packages/tui/src/tools/irc.ts
+index 50287f9..0c0df5a 100644
+--- a/packages/tui/src/tools/irc.ts
++++ b/packages/tui/src/tools/irc.ts
+@@ -33,6 +33,7 @@ export interface IrcMessage {
+ 	 * so the recipient's `wait` keeps waiting for the actual reply.
+ 	 */
+ 	progress?: boolean;
++	aside?: boolean;
+ }
+ 
+ /** Delivery outcome for one peer recipient. */
