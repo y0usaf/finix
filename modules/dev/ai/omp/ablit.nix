@@ -133,9 +133,21 @@
       else
         printf '{"scrollback_lines":0}\n' > "$ephemeral/cfg/settings.json"
       fi
-      env -u TERN_PANE -u TERN_WINDOW_KEY \
+      {
+        printf '#!${pkgs.bash}/bin/bash\n'
+        printf 'export OMP_ABLIT_EPHEMERAL_TERM=1\n'
+        printf 'exec'
+        for arg in "$0" "$@"; do
+          printf ' %q' "$arg"
+        done
+        printf '\n'
+      } > "$ephemeral/run.sh"
+      chmod 700 "$ephemeral/run.sh"
+      env -u TERN_PANE -u TERN_WINDOW_KEY -u TERN_PANE_SOCKET -u TERN_WINDOW_SOCKET -u TERN_IDENTITY \
+        OMP_ABLIT_EPHEMERAL_TERM=1 \
         TERN_CONFIG_DIR="$ephemeral/cfg" \
         TERN_DAEMON_SOCKET="$ephemeral/tern.sock" \
+        TERN_CRASH_REPORTS=0 \
         XDG_STATE_HOME="$ephemeral/state" \
         XDG_CACHE_HOME="$ephemeral/cache" \
         tern daemon --socket "$ephemeral/tern.sock" >/dev/null 2>&1 &
@@ -145,13 +157,14 @@
         sleep 0.1
       done
       rc=0
-      env -u TERN_PANE -u TERN_WINDOW_KEY \
+      env -u TERN_PANE -u TERN_WINDOW_KEY -u TERN_PANE_SOCKET -u TERN_WINDOW_SOCKET -u TERN_IDENTITY \
         OMP_ABLIT_EPHEMERAL_TERM=1 \
         TERN_CONFIG_DIR="$ephemeral/cfg" \
         TERN_DAEMON_SOCKET="$ephemeral/tern.sock" \
+        TERN_CRASH_REPORTS=0 \
         XDG_STATE_HOME="$ephemeral/state" \
         XDG_CACHE_HOME="$ephemeral/cache" \
-        tern -e "$0" "$@" || rc=$?
+        tern -e "$ephemeral/run.sh" || rc=$?
       cleanup_tern "$rc"
     fi
   '';
