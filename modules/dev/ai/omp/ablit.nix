@@ -90,8 +90,8 @@
   url = "http://127.0.0.1:${toString model.port}";
   inklingUrl = "http://127.0.0.1:${toString inkling.port}";
   inkling-ingine = import ../../../../pkgs/inkling-ingine.nix {inherit pkgs;};
-  omp-ablit = pkgs.writeShellApplication {
-    name = "omp-ablit";
+  omp-ablit-qwen = pkgs.writeShellApplication {
+    name = "omp-ablit-qwen";
     runtimeInputs = [pkgs.coreutils pkgs.curl pkgs.llama-cpp];
     text = ''
       dir=${dir}
@@ -259,9 +259,19 @@
       OMP_BOX_PROGRAM=${inkling.program} omp-box "$@"
     '';
   };
+  omp-ablit =
+    if config.hardware.nvidia.enable
+    then
+      pkgs.writeShellScriptBin "omp-ablit" ''
+        exec ${omp-ablit-inkling}/bin/omp-ablit-inkling "$@"
+      ''
+    else
+      pkgs.writeShellScriptBin "omp-ablit" ''
+        exec ${omp-ablit-qwen}/bin/omp-ablit-qwen "$@"
+      '';
 in {
   _module.args.ablit = model // {inherit inkling;};
   user.persist.directories = [model.dir];
 
-  environment.systemPackages = [omp-ablit] ++ lib.optionals config.hardware.nvidia.enable [inkling-ingine omp-ablit-inkling];
+  environment.systemPackages = [omp-ablit omp-ablit-qwen] ++ lib.optionals config.hardware.nvidia.enable [inkling-ingine omp-ablit-inkling];
 }
