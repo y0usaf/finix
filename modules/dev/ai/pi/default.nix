@@ -15,10 +15,11 @@
   taskModel = "antigravity-cli/gemini-4-neon";
   fastFlash = "vercel-ai-gateway/deepseek/deepseek-v4.1-flash-1017-fast";
   neon = "antigravity-cli/gemini-4-neon";
+  agyOpus = "antigravity-cli/claude-opus-5-5";
   opus = "anthropic/claude-opus-5-5";
   sol = "openai-codex/gpt-6.2-sol:high";
   providerOf = model: lib.head (lib.splitString "/" model);
-  mainChain = [opus sol flash];
+  mainChain = [agyOpus opus sol flash];
   advisorChain = lib.filter (model: providerOf model != defaultProvider) [neon opus sol flash];
 in {
   options.user.dev.modelCatalog = lib.mkOption {

@@ -30,6 +30,10 @@ providers:
         maxTokens: 128000
         name: Claude Fable 5.2
         reasoning: true
+  antigravity-cli:
+    modelOverrides:
+      claude-opus-5-5:
+        contextWindow: 100000
   google-antigravity:
     baseUrl: https://daily-cloudcode-pa.googleapis.com
     auth: oauth

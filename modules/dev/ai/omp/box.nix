@@ -715,6 +715,10 @@
     models = pkgs.writeText "models.json" (json catalog.models);
     modelKeys = pkgs.writeText "models.yml" ''
       providers:
+        antigravity-cli:
+          modelOverrides:
+            claude-opus-5-5:
+              contextWindow: 100000
         vercel-ai-gateway:
           baseUrl: ${gatewayUrl}
           apiKey: "!echo unused"
