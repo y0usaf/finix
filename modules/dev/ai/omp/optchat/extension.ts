@@ -3,6 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {
 	type Entry,
+	type ImageRef,
 	Messages,
 	PLACEHOLDER,
 	STORE,
@@ -13,8 +14,10 @@ import {
 	key,
 	line,
 	open,
+	readImage,
 	readState,
 	readView,
+	saveImage,
 	when,
 } from "./store.ts";
 
@@ -48,9 +51,13 @@ interface Snapshot extends Pin {
 interface Block {
 	type: string;
 	text?: string;
+	data?: string;
+	mimeType?: string;
 	name?: string;
 	arguments?: unknown;
 }
+
+type ToolBlock = { type: "text"; text: string } | { type: "image"; data: string; mimeType: string };
 
 interface Run {
 	id: string;
@@ -94,12 +101,27 @@ function askText(message: Logged): string {
 	return answer && typeof question === "string" ? `Asked: ${question}\n${answer}` : answer;
 }
 
+function replied(message: Logged): boolean {
+	return message.role === "assistant" && message.stopReason !== "error" && message.stopReason !== "aborted";
+}
+
+function imagesOf(content: unknown): { data: string; mimeType: string }[] {
+	if (!Array.isArray(content)) return [];
+	const out: { data: string; mimeType: string }[] = [];
+	for (const block of content as Block[]) {
+		if (block?.type === "image" && typeof block.data === "string" && typeof block.mimeType === "string") {
+			out.push({ data: block.data, mimeType: block.mimeType });
+		}
+	}
+	return out;
+}
+
 function entriesOf(message: Logged): { kind: string; text: string }[] {
 	if (message.role === "user") {
 		const text = joinText(message.content).trim();
 		return text ? [{ kind: message.attribution === "agent" ? "work" : "user", text }] : [];
 	}
-	if (message.role === "assistant" && message.stopReason !== "error" && message.stopReason !== "aborted") {
+	if (replied(message)) {
 		const content = Array.isArray(message.content) ? (message.content as Block[]) : [];
 		const text = content
 			.filter((block) => block.type === "text")
@@ -188,10 +210,16 @@ function transcript(file: string, from: number): string {
 }
 
 function rowsOf(message: Logged, name: string): string[] {
+	const entries = entriesOf(message);
+	if (!entries.length) return [];
 	const time = typeof message.timestamp === "number" ? message.timestamp : Date.now();
-	return entriesOf(message).map(
-		({ kind, text }) => `${JSON.stringify({ kind, text: capText(text), time, name } satisfies Entry)}\n`,
-	);
+	const images = imagesOf(message.content)
+		.map((img) => saveImage(STORE, img.data, img.mimeType))
+		.filter((ref): ref is ImageRef => ref !== undefined);
+	return entries.map(({ kind, text }) => {
+		const entry: Entry = images.length ? { kind, text: capText(text), time, name, images } : { kind, text: capText(text), time, name };
+		return `${JSON.stringify(entry)}\n`;
+	});
 }
 
 function countLines(file: string): number {
@@ -218,7 +246,16 @@ function sized(message: unknown): number {
 
 const blocks = (content: unknown) => (typeof content === "string" ? [{ type: "text", text: content }] : (content as Block[]));
 
-const turnStart = (messages: Logged[]) => messages.findLastIndex((message) => message.role === "user");
+function turnStart(messages: Logged[]): number {
+	const last = messages.findLastIndex((message) => message.role === "user");
+	if (last < 0) return -1;
+	let start = last;
+	for (let k = last - 1; k >= 0; k--) {
+		if (replied(messages[k])) break;
+		if (messages[k].role === "user") start = k;
+	}
+	return start;
+}
 
 function turnMark(messages: Logged[]): number {
 	const turn = turnStart(messages);
@@ -248,7 +285,7 @@ class Reader {
 		return this.nodes.get(key(l, i));
 	}
 
-	zoom(id: number, n: number): string {
+	zoom(id: number, n: number): ToolBlock[] {
 		const total = readState(this.store)?.messages ?? 0;
 		if (
 			!Number.isSafeInteger(id) ||
@@ -260,15 +297,26 @@ class Reader {
 			id % n !== 0 ||
 			id + n > total
 		) {
-			return `No line ${id}+${n}.`;
+			return [{ type: "text", text: `No line ${id}+${n}.` }];
 		}
 		if (n === 1) {
 			const message = this.messages.get(id);
-			return message ? `${id}+1|${line(message)}` : `No message ${id}.`;
+			if (!message) return [{ type: "text", text: `No message ${id}.` }];
+			const out: ToolBlock[] = [{ type: "text", text: `${id}+1|${line(message)}` }];
+			for (const ref of message.images ?? []) {
+				const image = readImage(this.store, ref);
+				if (image) out.push(image);
+			}
+			return out;
 		}
 		const half = n / 2;
 		const l = Math.log2(half);
-		return [id, id + half].map((at) => `${at}+${half}|${flat(this.node(l, at / half) ?? PLACEHOLDER)}`).join("\n");
+		return [
+			{
+				type: "text",
+				text: [id, id + half].map((at) => `${at}+${half}|${flat(this.node(l, at / half) ?? PLACEHOLDER)}`).join("\n"),
+			},
+		];
 	}
 
 	date(id: number): string {
@@ -319,7 +367,9 @@ export default function optchat(pi: ExtensionAPI): void {
 		async execute(_toolCallId, params) {
 			const id = params.id;
 			if (typeof id === "string") return result(transcript(id, params.n));
-			return read((params as { bot?: string }).bot, (memory) => memory.zoom(id, params.n));
+			const memory = reader((params as { bot?: string }).bot);
+			if (typeof memory === "string") return result(memory);
+			return { content: memory.zoom(id, params.n) };
 		},
 	});
 	pi.registerTool({
@@ -413,6 +463,7 @@ export default function optchat(pi: ExtensionAPI): void {
 			pickNeed = need;
 			pickLogged = logged;
 		}
+
 		const hidden = new Set<number>();
 		for (let at = upto - 1, left = pickLogged - lag; left > 0 && at >= 0; at--) {
 			const message = own.messages.get(at);
@@ -479,12 +530,17 @@ export default function optchat(pi: ExtensionAPI): void {
 		const turn = turnStart(messages);
 		const recentTurns = messages.slice(at);
 		if (turn >= 0 && turn < at) {
+			const prompt: Block[] = [];
+			for (let k = turn; k < at; k++) {
+				if (replied(messages[k])) break;
+				if (messages[k].role === "user") prompt.push(...blocks(messages[k].content));
+			}
 			const asks = messages
 				.slice(turn, at)
 				.map(askText)
 				.filter(Boolean)
 				.map((text) => ({ type: "text", text }));
-			recentTurns.unshift({ ...messages[turn], content: [...blocks(messages[turn].content), ...asks] });
+			recentTurns.unshift({ ...messages[turn], content: [...prompt, ...asks] });
 		}
 		if (head.length === 0) return recentTurns;
 		const first = recentTurns[0];
@@ -518,7 +574,7 @@ export default function optchat(pi: ExtensionAPI): void {
 		for (let k = messages.length - 1; k > floor; k--) {
 			rest += tokensOf(messages[k]);
 			if (rest > limit) break;
-			if (messages[k].role === "assistant" && (fold < 0 || rest <= limit / 2)) fold = k;
+			if (replied(messages[k]) && (fold < 0 || rest <= limit / 2)) fold = k;
 		}
 		if (fold >= 0) {
 			out = frame(messages, repin(messages, session, fold));

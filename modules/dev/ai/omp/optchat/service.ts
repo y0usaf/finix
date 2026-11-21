@@ -7,6 +7,7 @@ import {
 	CHUNK,
 	DIR,
 	type Entry,
+	type ImageRef,
 	type Message,
 	Messages,
 	NODE,
@@ -140,7 +141,6 @@ class Memory {
 	readonly model;
 	dirty = true;
 
-	/** Nothing to ingest, nothing merging, no retry waiting, nothing unsaved. */
 	quiet(): boolean {
 		return this.busy.size === 0 && this.pending.length === 0 && this.later.size === 0 && !this.dirty;
 	}
@@ -228,7 +228,12 @@ class Memory {
 		fresh.sort((a, b) => a.entry.time - b.entry.time || a.session.localeCompare(b.session) || a.src - b.src);
 		for (const { session, src, entry } of fresh) {
 			const i = this.tree.msgs.length;
-			const message: Message = { i, kind: entry.kind, text: entry.text, time: entry.time, name: entry.name, session, src };
+			const images = Array.isArray(entry.images)
+				? entry.images.filter((img): img is ImageRef => typeof img?.file === "string" && typeof img?.mimeType === "string")
+				: [];
+			const message: Message = images.length
+				? { i, kind: entry.kind, text: entry.text, time: entry.time, name: entry.name, images, session, src }
+				: { i, kind: entry.kind, text: entry.text, time: entry.time, name: entry.name, session, src };
 			fs.appendFileSync(chunkPath(STORE, Math.floor(i / CHUNK)), `${JSON.stringify(message)}\n`);
 			this.tree.add({ time: entry.time, session }, line(message));
 			this.dirty = true;

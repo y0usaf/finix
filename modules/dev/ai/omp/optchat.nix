@@ -13,7 +13,7 @@
     name = "optchat";
     runtimeInputs = [pkgs.coreutils pkgs.jq pkgs.util-linux];
     text = ''
-      mkdir -p ${dir}/log
+      mkdir -p ${dir}/log ${dir}/images
       [ -p ${dir}/optchatd.fifo ] || mkfifo ${dir}/optchatd.fifo
       grant() {
         ${config.system.build.ompBox}/bin/omp-box list --json | jq -e --arg p "$1" 'any(.[]; .path == $p)' >/dev/null \
@@ -21,6 +21,7 @@
       }
       grant ${dir} --ro
       grant ${dir}/log --name optchat.log
+      grant ${dir}/images --name optchat.images
       cd ${dir}
       exec 9>${dir}/optchatd.lock
       flock -n 9 || { echo "optchat: already running (${dir}/optchatd.lock is held)" >&2; exit 1; }

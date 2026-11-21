@@ -1,3 +1,4 @@
+import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -8,11 +9,30 @@ export const NODE = 512;
 export const PLACEHOLDER = "(not summarized yet: zoom it)";
 export const EMPTY_VIEW = "<chat>\n</chat>";
 
+const IMAGE_FILE = /^[0-9a-f]{64}\.[a-z0-9]+$/;
+const IMAGE_EXT: Record<string, string> = {
+	"image/png": "png",
+	"image/jpeg": "jpg",
+	"image/jpg": "jpg",
+	"image/webp": "webp",
+	"image/gif": "gif",
+	"image/bmp": "bmp",
+	"image/avif": "avif",
+	"image/tiff": "tiff",
+	"image/svg+xml": "svg",
+};
+
+export interface ImageRef {
+	file: string;
+	mimeType: string;
+}
+
 export interface Entry {
 	kind: string;
 	text: string;
 	time: number;
 	name: string;
+	images?: ImageRef[];
 }
 
 export interface Message extends Entry {
@@ -38,6 +58,7 @@ export interface Store {
 	dir: string;
 	log: string;
 	main: string;
+	images: string;
 	tree: string;
 	view: string;
 	viewText: string;
@@ -49,6 +70,7 @@ export function open(dir: string): Store {
 		dir,
 		log: path.join(dir, "log"),
 		main: path.join(dir, "main"),
+		images: path.join(dir, "images"),
 		tree: path.join(dir, "tree.jsonl"),
 		view: path.join(dir, "view.json"),
 		viewText: path.join(dir, "view.txt"),
@@ -63,6 +85,48 @@ export const line = (m: Entry) => `${m.kind}[${m.name}]: ${m.text}`;
 export const bytes = (text: string) => Buffer.byteLength(text, "utf8");
 export const flat = (text: string) => text.replaceAll("\n", " ");
 export const key = (l: number, i: number) => `${l},${i}`;
+
+export function saveImage(store: Store, data: string, mimeType: string): ImageRef | undefined {
+	if (!data || !mimeType) return undefined;
+	const buf = Buffer.from(data, "base64");
+	if (buf.length === 0) return undefined;
+	const mime = mimeType.split(";")[0].trim().toLowerCase();
+	if (!mime) return undefined;
+	const file = `${crypto.createHash("sha256").update(buf).digest("hex")}.${IMAGE_EXT[mime] ?? "bin"}`;
+	const target = path.join(store.images, file);
+	try {
+		if (!fs.existsSync(target)) {
+			fs.mkdirSync(store.images, { recursive: true });
+			const temp = `${target}.${process.pid}.${crypto.randomBytes(4).toString("hex")}.tmp`;
+			fs.writeFileSync(temp, buf);
+			try {
+				fs.renameSync(temp, target);
+			} catch {
+				try {
+					fs.unlinkSync(temp);
+				} catch {}
+				if (!fs.existsSync(target)) return undefined;
+			}
+		}
+		return { file, mimeType: mime };
+	} catch {
+		return undefined;
+	}
+}
+
+export function readImage(store: Store, ref: ImageRef): { type: "image"; data: string; mimeType: string } | undefined {
+	if (typeof ref?.file !== "string" || typeof ref?.mimeType !== "string" || !IMAGE_FILE.test(ref.file)) return undefined;
+	const root = path.resolve(store.images);
+	const target = path.resolve(root, ref.file);
+	if (path.dirname(target) !== root) return undefined;
+	try {
+		const buf = fs.readFileSync(target);
+		if (buf.length === 0) return undefined;
+		return { type: "image", data: buf.toString("base64"), mimeType: ref.mimeType };
+	} catch {
+		return undefined;
+	}
+}
 
 export function when(time: number): string {
 	const date = new Date(time);
