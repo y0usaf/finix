@@ -1,0 +1,37 @@
+diff --git a/packages/coding-agent/src/session/retry-fallback-chains.ts b/packages/coding-agent/src/session/retry-fallback-chains.ts
+index 1a3bf20..44222c6 100644
+--- a/packages/coding-agent/src/session/retry-fallback-chains.ts
++++ b/packages/coding-agent/src/session/retry-fallback-chains.ts
+@@ -363,8 +363,17 @@ export function getRetryFallbackRevertPolicy(settings: Settings): RetryFallbackR
+ 	return cfgRetryFallbackRevertPolicy.get(settings) === "never" ? "never" : "cooldown-expiry";
+ }
+ 
+-/** Whether `retry.fallbackOn` lets a failure walk the fallback chain. */
+-export function retryFallbackAdmits(fallbackOn: RetrySettings["fallbackOn"], usageLimit: boolean): boolean {
++/**
++ * Whether `retry.fallbackOn` lets a failure walk the fallback chain. A classifier
++ * refusal always admits: the same model reproduces the refusal, so the chain is
++ * the only retry that can answer.
++ */
++export function retryFallbackAdmits(
++	fallbackOn: RetrySettings["fallbackOn"],
++	usageLimit: boolean,
++	classifierRefusal = false,
++): boolean {
++	if (classifierRefusal) return true;
+ 	switch (fallbackOn) {
+ 		case "any":
+ 			return true;
+diff --git a/packages/coding-agent/src/session/turn-recovery.ts b/packages/coding-agent/src/session/turn-recovery.ts
+index 197a4be..6b84fbb 100644
+--- a/packages/coding-agent/src/session/turn-recovery.ts
++++ b/packages/coding-agent/src/session/turn-recovery.ts
+@@ -3118,7 +3118,7 @@ export class TurnRecovery {
+ 			if (
+ 				allowModelFallback &&
+ 				retrySettings.modelFallback &&
+-				retryFallbackAdmits(retrySettings.fallbackOn, AIError.is(id, AIError.Flag.UsageLimit)) &&
++				retryFallbackAdmits(retrySettings.fallbackOn, AIError.is(id, AIError.Flag.UsageLimit), classifierRefusal) &&
+ 				!staleUsageLimit &&
+ 				!thinkingLoop &&
+ 				!sameModelSteerReplay &&

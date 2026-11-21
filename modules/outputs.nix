@@ -24,6 +24,7 @@ inputs: let
         ./dev/ai/omp/fallback-fit-provider-usage.patch
         ./dev/ai/omp/message-helper.patch
         ./dev/ai/omp/advisor-not-primary.patch
+        ./dev/ai/omp/refusal-fallback.patch
       ];
     postPatch =
       (old.postPatch or "")

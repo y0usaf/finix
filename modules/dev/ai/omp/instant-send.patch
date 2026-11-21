@@ -134,14 +134,14 @@ index 2b16c4a..48e79c2 100644
 +							return;
 +						}
 +						await new Promise<void>(resolve => {
-+							const timer = setTimeout(resolve, STEERING_POLL_INTERVAL_MS);
++							const timer = setTimeout(resolve, STEERING_INTERRUPT_POLL_MS);
 +							watchStopped.then(() => {
 +								clearTimeout(timer);
 +								resolve();
 +							});
 +						});
 +					}
-+				})();
++				})().catch(() => {});
 +			}
 +			let response: Awaited<ReturnType<typeof streamFunction>>;
 +			try {
