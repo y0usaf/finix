@@ -261,7 +261,7 @@
           prompt=$(cat "$prompt_file")
         fi
         set -- --ablit-system-prompt "$prompt" "$@"
-        OMP_BOX_PROGRAM=${spec.program} omp-box "$@"
+        XDG_STATE_HOME=${home}/.local/state OMP_BOX_PROGRAM=${spec.program} omp-box "$@"
       '';
     };
 
@@ -381,7 +381,7 @@
         prompt=$(cat "$prompt_file")
       fi
       set -- --ablit-system-prompt "$prompt" "$@"
-      OMP_BOX_PROGRAM=${inkling.program} omp-box "$@"
+      XDG_STATE_HOME=${home}/.local/state OMP_BOX_PROGRAM=${inkling.program} omp-box "$@"
     '';
   };
   selector =
