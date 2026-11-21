@@ -1,0 +1,35 @@
+diff --git a/native/CMakeLists.txt b/native/CMakeLists.txt
+index a1d304b..9e37f60 100644
+--- a/native/CMakeLists.txt
++++ b/native/CMakeLists.txt
+@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.28)
+ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+   set(CMAKE_CUDA_ARCHITECTURES 120a CACHE STRING "CUDA architectures to build")
+ endif()
+-if(NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^(120a|86)$")
++if(NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^(120a|86|89)$")
+   message(FATAL_ERROR
+     "ingine supports only CMAKE_CUDA_ARCHITECTURES=120a (RTX 5090) or 86 (RTX 3090 port); got "
+     "'${CMAKE_CUDA_ARCHITECTURES}'")
+@@ -47,7 +47,7 @@ include(cmake/Dependencies.cmake)
+ 
+ # RTX 3090 port: sm_86 has no programmatic dependent launch, thread-block clusters / distributed shared
+ # memory or hardware FP8 / FP4 conversions; INGINE_AMPERE selects the replacements (host and device code).
+-if(CMAKE_CUDA_ARCHITECTURES STREQUAL "86")
++if(CMAKE_CUDA_ARCHITECTURES MATCHES "^(86|89)$")
+   add_compile_definitions(INGINE_AMPERE=1)
+ endif()
+ 
+diff --git a/native/src/kernels/common/fp8.cuh b/native/src/kernels/common/fp8.cuh
+index 6cd195d..85a6c10 100644
+--- a/native/src/kernels/common/fp8.cuh
++++ b/native/src/kernels/common/fp8.cuh
+@@ -21,7 +21,7 @@ namespace ingine::kernels::fp {
+ 
+ // Two E4M3 codes (low 16 bits of v, element 0 in the low byte) -> f16x2 (element 0 in the low half).
+ __device__ __forceinline__ uint32_t e4m3x2_to_f16x2(uint32_t v) {
+-#ifndef INGINE_AMPERE
++#if !defined(INGINE_AMPERE) || (defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 890)
+   uint32_t r;
+   asm("cvt.rn.f16x2.e4m3x2 %0, %1;" : "=r"(r) : "h"(static_cast<uint16_t>(v)));
+   return r;

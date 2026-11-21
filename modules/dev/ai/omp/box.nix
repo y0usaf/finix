@@ -118,6 +118,7 @@
     "ip daddr ${dnsAddress} tcp dport 53 accept"
     "ip daddr ${hostAddress} tcp dport ${toString gatewayPort} accept"
     "ip daddr ${hostAddress} tcp dport ${toString ablit.port} accept"
+    "ip daddr ${hostAddress} tcp dport ${toString ablit.inkling.port} accept"
     browserCdpGuard
     "ip daddr ${privateAddressSet} ip daddr != ${guestAddress} ct state new meta l4proto tcp reject with tcp reset"
     "ip daddr ${privateAddressSet} ip daddr != ${guestAddress} ct state new reject"
@@ -717,6 +718,19 @@
       PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
         --model ablit/${ablit.id} --config "$seed/ablit.yml" "$@"
     '';
+    omp-ablit-inkling = pkgs.writeScript "omp-ablit-inkling" ''
+      #!/bin/sh
+      set -eu
+      seed=${seedMount}/current
+      state=$(mktemp -d "$HOME/.omp-ablit-inkling.XXXXXX")
+      trap 'rm -rf "$state"' EXIT
+      trap 'exit 130' INT TERM HUP
+      mkdir -p "$state/agent/agents"
+      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$seed/AGENTS.md" "$state/agent/"
+      cp "$seed/task.md" "$state/agent/agents/task.md"
+      PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
+        --model ablit-inkling/${ablit.inkling.id} --config "$seed/ablit.yml" "$@"
+    '';
   };
   optchatExtension = "${inBox "optchat"}/extension.ts";
   ompExtensions = [
@@ -810,6 +824,17 @@
               input: [text]
               contextWindow: ${toString ablit.contextWindow}
               maxTokens: ${toString ablit.maxTokens}
+        ablit-inkling:
+          baseUrl: http://10.0.2.2:${toString ablit.inkling.port}/v1
+          apiKey: "!echo unused"
+          models:
+            - api: openai-completions
+              id: ${ablit.inkling.id}
+              name: ${ablit.inkling.name}
+              reasoning: true
+              input: [text]
+              contextWindow: ${toString ablit.inkling.contextWindow}
+              maxTokens: ${toString ablit.inkling.maxTokens}
     '';
     ablitConfig = pkgs.writeText "ablit.yml" ''
       advisor:
@@ -819,7 +844,7 @@
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel;
       defaultThinkingLevel = catalog.ompThinkingLevel;
-      enabledModels = catalog.enabledModels ++ ["antigravity-cli/*" "ablit/${ablit.id}"];
+      enabledModels = catalog.enabledModels ++ ["antigravity-cli/*" "ablit/${ablit.id}" "ablit-inkling/${ablit.inkling.id}"];
       packages = [];
     });
     config = pkgs.writeText "config.yml" ''
