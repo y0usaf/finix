@@ -60,6 +60,10 @@
         min-size = 262144
         avg-size = 1048576
         max-size = 4194304
+
+        [garbage-collection]
+        interval = "12 hours"
+        default-retention-period = "30 days"
       ''}
     '';
     path = [pkgs.coreutils];
