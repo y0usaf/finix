@@ -93,11 +93,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795224241,
-        "narHash": "sha256-yTBRqwcCHGHEC6h90PtJACmmBUQJcKfGbtXHpk/8Wqs=",
+        "lastModified": 1795227853,
+        "narHash": "sha256-JkK/7Y529z7S0/kLocBS3/9CcJosYtt2YjkZNu4F5GM=",
         "owner": "y0usaf",
         "repo": "auth-router",
-        "rev": "1ee21adafe705225c8afff08d8de9519067b3fb3",
+        "rev": "ebff09bde8be2fa8f8e28285be2bbd99bebc889c",
         "type": "github"
       },
       "original": {

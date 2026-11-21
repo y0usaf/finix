@@ -10,7 +10,7 @@
   socket = "${runtimeDir}/auth-router.sock";
   restrictedSocket = "${runtimeDir}/auth-router-restricted.sock";
 in {
-  user.persist.directories = [".local/state/crest-auth"];
+  user.persist.directories = [".local/state/crest-auth" ".local/state/atop"];
   finix.persistence.homeServices = ["auth-router"];
   environment = {
     variables.AUTH_ROUTER_SOCKET = socket;
