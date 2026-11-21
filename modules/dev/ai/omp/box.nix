@@ -44,6 +44,12 @@
       uid = 2005;
       folders = ["dash-workbench"];
     }
+    {
+      name = "Mint";
+      user = "mintbot";
+      uid = 2006;
+      folders = [];
+    }
   ];
   loginPaths = [
     ".npmrc"
@@ -90,6 +96,13 @@
         then throw "user.dev.ompBoxHostCdp names ${name}, which is not a bot in the box"
         else cdpGuard hostAddresses owner.uid host.ports)
       config.user.dev.ompBoxHostCdp)
+    ++ (lib.mapAttrsToList (name: host: let
+        owner = lib.findFirst (bot: bot.name == name) null bots;
+      in
+        if owner == null
+        then throw "user.dev.ompBoxHostServices names ${name}, which is not a bot in the box"
+        else cdpGuard hostAddresses owner.uid host.ports)
+      config.user.dev.ompBoxHostServices)
   );
   privateAddresses = [
     "10.0.0.0/8"
@@ -678,6 +691,7 @@
     "work-fold.ts" = "${./work-fold.ts}";
     "crest-reroute.ts" = "${./crest-reroute.ts}";
     "tools.ts" = "${./tools.ts}";
+    "heartbeat.ts" = "${./heartbeat.ts}";
     optchat = "${./optchat}";
     secrets = "${./secrets}";
   };
@@ -685,6 +699,7 @@
   seedBin = {
     age = "${pkgs.age}/bin/age";
     age-keygen = "${pkgs.age}/bin/age-keygen";
+    mint-ctl = "${inputPackages.mint.default}/bin/mint-ctl";
     omp-secret = pkgs.writeScript "omp-secret" ''
       #!/bin/sh
       exec bun "''${0%/*}/../ext/secrets/omp-secret.ts" "$@"
@@ -709,6 +724,7 @@
     "${inBox "work-fold.ts"}"
     "${inBox "crest-reroute.ts"}"
     "${inBox "tools.ts"}"
+    "${inBox "heartbeat.ts"}"
     optchatExtension
   ];
   files = {
@@ -1255,6 +1271,8 @@
       if box sudo -n -u baobot sudo -n true 2>/dev/null; then flunk "baobot can sudo in the box"; else pass "baobot cannot sudo in the box"; fi
       if [ "$(box id -u regal 2>/dev/null)" = "2003" ]; then pass "regal is the box's own Unix user"; else flunk "regal is not uid 2003 in the box"; fi
       if box sudo -n -u regal sudo -n true 2>/dev/null; then flunk "regal can sudo in the box"; else pass "regal cannot sudo in the box"; fi
+      if [ "$(box id -u mintbot 2>/dev/null)" = "2006" ]; then pass "mintbot is the box's own Unix user"; else flunk "mintbot is not uid 2006 in the box"; fi
+      if box sudo -n -u mintbot sudo -n true 2>/dev/null; then flunk "mintbot can sudo in the box"; else pass "mintbot cannot sudo in the box"; fi
       kill -TERM "$pid"
       rc=0
       wait "$pid" || rc=$?
@@ -1323,21 +1341,33 @@
     '';
   };
 in {
-  options.user.dev.ompBoxHostCdp = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule {
-      options.ports = lib.mkOption {
-        type = lib.types.listOf lib.types.port;
-        description = ''
-          The ports the browser answers on, as the box reaches the host's loopback at 10.0.2.2: the port in
-          front of it, and the DevTools behind that one.
-        '';
-      };
-    });
-    default = {};
-    description = ''
-      Browsers on the host that the box can reach, keyed by the boxed bot that owns each. Every other box user
-      is refused at each port, because DevTools carries whatever that browser is signed in to.
-    '';
+  options.user.dev = {
+    ompBoxHostCdp = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options.ports = lib.mkOption {
+          type = lib.types.listOf lib.types.port;
+          description = ''
+            The ports the browser answers on, as the box reaches the host's loopback at 10.0.2.2: the port in
+            front of it, and the DevTools behind that one.
+          '';
+        };
+      });
+      default = {};
+      description = ''
+        Browsers on the host that the box can reach, keyed by the boxed bot that owns each. Every other box user
+        is refused at each port, because DevTools carries whatever that browser is signed in to.
+      '';
+    };
+    ompBoxHostServices = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options.ports = lib.mkOption {
+          type = lib.types.listOf lib.types.port;
+          description = "Host loopback ports reachable at 10.0.2.2 by the named boxed bot.";
+        };
+      });
+      default = {};
+      description = "Host loopback services reachable from the box, keyed by the boxed bot that owns each.";
+    };
   };
   config = {
     user.persist.directories = [".local/state/omp-box"];

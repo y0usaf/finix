@@ -56,6 +56,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    mint = {
+      url = "git+ssh://git@github.com/y0usaf/mint.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     iets = {
       url = "github:numtide/iets";
       inputs.nixpkgs.follows = "nixpkgs";

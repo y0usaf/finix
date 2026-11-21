@@ -1732,6 +1732,26 @@
         "type": "github"
       }
     },
+    "mint": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795280134,
+        "narHash": "sha256-/Pc26NvKlH2eUkHices16CeNK/xwovb8xZxJyOLav/w=",
+        "ref": "refs/heads/main",
+        "rev": "f329a4d07f14c481abdc6c4bd4cab07933752581",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/mint.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/y0usaf/mint.git"
+      }
+    },
     "monstar": {
       "inputs": {
         "nixpkgs": [
@@ -3257,6 +3277,7 @@
         "mado": "mado",
         "manzil": "manzil",
         "microvm": "microvm",
+        "mint": "mint",
         "monstar": "monstar",
         "nh": "nh",
         "nix-generators": "nix-generators",
