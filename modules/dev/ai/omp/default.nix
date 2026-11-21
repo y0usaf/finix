@@ -747,6 +747,7 @@
           ])))))
         ]))
         generators.ts));
+      "ablit-system.ts" = ./ablit-system.ts;
       optchat = ./optchat;
     };
   ompSecret = pkgs.writeShellScriptBin "omp-secret" ''
@@ -852,6 +853,7 @@ in {
             "tools.ts"
             "goldfish.ts"
             "message-helper.ts"
+            "ablit-system.ts"
           ];
         };
       };

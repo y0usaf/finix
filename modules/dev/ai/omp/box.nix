@@ -688,6 +688,7 @@
   '';
   seedMount = "/mnt/seed";
   extensions = {
+    "ablit-system.ts" = "${./ablit-system.ts}";
     "compact-eval.ts" = "${./compact-eval.ts}";
     "work-fold.ts" = "${./work-fold.ts}";
     "crest-reroute.ts" = "${./crest-reroute.ts}";
@@ -697,6 +698,37 @@
     secrets = "${./secrets}";
   };
   inBox = name: "${seedMount}/current/ext/${name}";
+  mkAblitBin = {
+    name,
+    modelSpec,
+  }:
+    pkgs.writeScript name ''
+      #!/bin/sh
+      set -eu
+      seed=${seedMount}/current
+      state=$(mktemp -d "$HOME/.${name}.XXXXXX")
+      chmod 700 "$state"
+      cleanup() {
+        status=$?
+        trap - EXIT HUP INT TERM
+        rm -rf "$state"
+        exit "$status"
+      }
+      trap cleanup EXIT
+      trap 'exit 129' HUP
+      trap 'exit 130' INT
+      trap 'exit 143' TERM
+      mkdir -p "$state/agent" "$state/data" "$state/state" "$state/cache" "$state/tmp" "$state/work"
+      cp "$seed/models.json" "$seed/settings.json" "$seed/models.yml" "$state/agent/"
+      cp "$seed/ablit.yml" "$state/agent/config.yml"
+      prompt=""
+      if [ "''${1:-}" = "--ablit-system-prompt" ] && [ "$#" -ge 2 ]; then
+        prompt=$2
+        shift 2
+      fi
+      cd "$state/work"
+      PI_CONFIG_DIR="''${state#"$HOME"/}"         XDG_DATA_HOME="$state/data"         XDG_STATE_HOME="$state/state"         XDG_CACHE_HOME="$state/cache"         TMPDIR="$state/tmp"         HISTFILE=/dev/null         OMP_ABLIT_BARE=1         OMP_ABLIT_SYSTEM_PROMPT="$prompt"         ${inputPackages.oh-my-pi.omp}/bin/omp         --no-session         --no-tools         --no-extensions         --no-skills         --no-rules         --no-context-files         --no-title         --no-lsp         --offline         -e "$seed/ext/ablit-system.ts"         --system-prompt "$prompt"         --model ${modelSpec}         --config "$seed/ablit.yml"         "$@"
+    '';
   seedBin = {
     age = "${pkgs.age}/bin/age";
     age-keygen = "${pkgs.age}/bin/age-keygen";
@@ -705,35 +737,22 @@
       #!/bin/sh
       exec bun "''${0%/*}/../ext/secrets/omp-secret.ts" "$@"
     '';
-    omp-ablit = pkgs.writeScript "omp-ablit" ''
-      #!/bin/sh
-      set -eu
-      seed=${seedMount}/current
-      state=$(mktemp -d "$HOME/.omp-ablit.XXXXXX")
-      trap 'rm -rf "$state"' EXIT
-      trap 'exit 130' INT TERM HUP
-      mkdir -p "$state/agent/agents"
-      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$state/agent/"
-      cp "$seed/task.md" "$state/agent/agents/task.md"
-      PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
-        --model ablit/${ablit.id} --config "$seed/ablit.yml" "$@"
-    '';
-    omp-ablit-inkling = pkgs.writeScript "omp-ablit-inkling" ''
-      #!/bin/sh
-      set -eu
-      seed=${seedMount}/current
-      state=$(mktemp -d "$HOME/.omp-ablit-inkling.XXXXXX")
-      trap 'rm -rf "$state"' EXIT
-      trap 'exit 130' INT TERM HUP
-      mkdir -p "$state/agent/agents"
-      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$state/agent/"
-      cp "$seed/task.md" "$state/agent/agents/task.md"
-      PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
-        --model ablit-inkling/${ablit.inkling.id} --config "$seed/ablit.yml" "$@"
-    '';
+    omp-ablit = mkAblitBin {
+      name = "omp-ablit";
+      modelSpec = "ablit/${ablit.id}";
+    };
+    omp-ablit-gemma = mkAblitBin {
+      name = "omp-ablit-gemma";
+      modelSpec = "ablit/${ablit.gemma.id}";
+    };
+    omp-ablit-inkling = mkAblitBin {
+      name = "omp-ablit-inkling";
+      modelSpec = "ablit-inkling/${ablit.inkling.id}";
+    };
   };
   optchatExtension = "${inBox "optchat"}/extension.ts";
   ompExtensions = [
+    "${inBox "ablit-system.ts"}"
     "${inBox "compact-eval.ts"}"
     "${inBox "work-fold.ts"}"
     "${inBox "crest-reroute.ts"}"
@@ -824,6 +843,13 @@
               input: [text]
               contextWindow: ${toString ablit.contextWindow}
               maxTokens: ${toString ablit.maxTokens}
+            - api: openai-completions
+              id: ${ablit.gemma.id}
+              name: ${ablit.gemma.name}
+              reasoning: true
+              input: [text]
+              contextWindow: ${toString ablit.gemma.contextWindow}
+              maxTokens: ${toString ablit.gemma.maxTokens}
         ablit-inkling:
           baseUrl: http://10.0.2.2:${toString ablit.inkling.port}/v1
           apiKey: "!echo unused"
@@ -837,14 +863,30 @@
               maxTokens: ${toString ablit.inkling.maxTokens}
     '';
     ablitConfig = pkgs.writeText "ablit.yml" ''
+      setupVersion: 2
+      startup:
+        setupWizard: false
+        checkUpdate: false
       advisor:
         enabled: false
-      extensions: ${builtins.toJSON (lib.subtractLists [optchatExtension] ompExtensions)}
+      spelling:
+        autocomplete: "off"
+      composer:
+        predictions: false
+        predictionAlternatives: false
+        recallClearedDrafts: false
+      memory:
+        backend: "off"
+      debug:
+        enabled: false
+      telemetry:
+        otlpExportEnabled: false
+      extensions: ${builtins.toJSON ["${inBox "ablit-system.ts"}"]}
     '';
     settings = pkgs.writeText "settings.json" (json {
       inherit (catalog) defaultProvider defaultModel;
       defaultThinkingLevel = catalog.ompThinkingLevel;
-      enabledModels = catalog.enabledModels ++ ["antigravity-cli/*" "ablit/${ablit.id}" "ablit-inkling/${ablit.inkling.id}"];
+      enabledModels = catalog.enabledModels ++ ["antigravity-cli/*" "ablit/${ablit.id}" "ablit/${ablit.gemma.id}" "ablit-inkling/${ablit.inkling.id}"];
       packages = [];
     });
     config = pkgs.writeText "config.yml" ''
