@@ -161,9 +161,11 @@
       fi
 
       prompt_file="${dir}/system.md"
-      if [ -s "$prompt_file" ]; then
-        set -- --system-prompt "$(cat "$prompt_file")" "$@"
+      prompt=""
+      if [ -f "$prompt_file" ]; then
+        prompt=$(cat "$prompt_file")
       fi
+      set -- --system-prompt "$prompt" "$@"
       OMP_BOX_PROGRAM=${model.program} omp-box "$@"
     '';
   };
@@ -261,9 +263,11 @@
       fi
 
       prompt_file="${dir}/system.md"
-      if [ -s "$prompt_file" ]; then
-        set -- --system-prompt "$(cat "$prompt_file")" "$@"
+      prompt=""
+      if [ -f "$prompt_file" ]; then
+        prompt=$(cat "$prompt_file")
       fi
+      set -- --system-prompt "$prompt" "$@"
       OMP_BOX_PROGRAM=${inkling.program} omp-box "$@"
     '';
   };

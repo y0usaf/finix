@@ -713,7 +713,7 @@
       trap 'rm -rf "$state"' EXIT
       trap 'exit 130' INT TERM HUP
       mkdir -p "$state/agent/agents"
-      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$seed/AGENTS.md" "$state/agent/"
+      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$state/agent/"
       cp "$seed/task.md" "$state/agent/agents/task.md"
       PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
         --model ablit/${ablit.id} --config "$seed/ablit.yml" "$@"
@@ -726,7 +726,7 @@
       trap 'rm -rf "$state"' EXIT
       trap 'exit 130' INT TERM HUP
       mkdir -p "$state/agent/agents"
-      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$seed/AGENTS.md" "$state/agent/"
+      cp "$seed/models.json" "$seed/settings.json" "$seed/config.yml" "$seed/models.yml" "$state/agent/"
       cp "$seed/task.md" "$state/agent/agents/task.md"
       PI_CONFIG_DIR="''${state#"$HOME"/}" ${inputPackages.oh-my-pi.omp}/bin/omp --no-session \
         --model ablit-inkling/${ablit.inkling.id} --config "$seed/ablit.yml" "$@"
