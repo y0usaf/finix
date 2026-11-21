@@ -3946,11 +3946,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1795260258,
-        "narHash": "sha256-HQ5xyYQknGW1N0ZCOt8bEgj0C8ZN3rYJMtoBwkx0nH0=",
+        "lastModified": 1795287534,
+        "narHash": "sha256-rwXfm5M9/UDl1HGrdORHUs0w+8kwLS08cpRnhq6hLZQ=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "388b13297ce5f8db736be099c3da9d0ac7bf6e00",
+        "rev": "0cad428120ec2afa5b346f084e39750418a41c86",
         "type": "github"
       },
       "original": {
