@@ -160,6 +160,10 @@
         echo "omp-ablit: VRAM used,total after the load: $(mem || echo unknown) MiB; before it: $before" >&2
       fi
 
+      prompt_file="${dir}/system.md"
+      if [ -s "$prompt_file" ]; then
+        set -- --system-prompt "$(cat "$prompt_file")" "$@"
+      fi
       OMP_BOX_PROGRAM=${model.program} omp-box "$@"
     '';
   };
@@ -256,6 +260,10 @@
         echo "omp-ablit-inkling: VRAM used,total after the load: $(mem || echo unknown) MiB; before it: $before" >&2
       fi
 
+      prompt_file="${dir}/system.md"
+      if [ -s "$prompt_file" ]; then
+        set -- --system-prompt "$(cat "$prompt_file")" "$@"
+      fi
       OMP_BOX_PROGRAM=${inkling.program} omp-box "$@"
     '';
   };
