@@ -25,6 +25,7 @@ inputs: let
         ./dev/ai/omp/message-helper.patch
         ./dev/ai/omp/advisor-not-primary.patch
         ./dev/ai/omp/refusal-fallback.patch
+        ./dev/ai/omp/agy-session-idle-reap.patch
       ];
     postPatch =
       (old.postPatch or "")

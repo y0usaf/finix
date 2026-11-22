@@ -1,0 +1,59 @@
+--- a/packages/ai/src/providers/antigravity-cli.ts
++++ b/packages/ai/src/providers/antigravity-cli.ts
+@@ -6,7 +6,7 @@
+  */
+ import * as path from "node:path";
+ import type { Effort } from "@oh-my-pi/pi-catalog/effort";
+-import type { Context, Model, StreamFunction, StreamOptions } from "../types";
++import type { Context, Model, ProviderSessionState, StreamFunction, StreamOptions } from "../types";
+ import { AssistantMessageEventStream } from "../utils/event-stream";
+ import { agyGeminiDir } from "./antigravity-cli/binary";
+ import { agyCredentialKey, agyCredentialVersion, stageAgyCredentials } from "./antigravity-cli/credentials";
+@@ -26,6 +26,7 @@
+ }
+ 
+ const implicitSessions = new Map<string, RetainedHost>();
++const sessionIdleTimers = new WeakMap<AgyHost, NodeJS.Timeout>();
+ const IDLE_MS = 5 * 60_000;
+ 
+ /** Streams one assistant step while retaining agy's unfinished turn across tool results. */
+@@ -67,8 +68,14 @@
+ 	if (sessions) {
+ 		const existing = sessions.get(key);
+ 		const host = existing instanceof AgyHost ? existing : new AgyHost(directory);
++		clearTimeout(sessionIdleTimers.get(host));
++		sessionIdleTimers.delete(host);
+ 		if (host !== existing) sessions.set(key, host);
+-		await host.step(model, context, stepOptions, writer);
++		try {
++			await host.step(model, context, stepOptions, writer);
++		} finally {
++			retireSessionWhenIdle(sessions, key, host);
++		}
+ 		return;
+ 	}
+ 
+@@ -118,3 +125,23 @@
+ 	}, IDLE_MS);
+ 	entry.idle.unref();
+ }
++
++function retireSessionWhenIdle(
++	sessions: Map<string, ProviderSessionState>,
++	key: string,
++	host: AgyHost,
++): void {
++	clearTimeout(sessionIdleTimers.get(host));
++	const timer = setTimeout(() => {
++		sessionIdleTimers.delete(host);
++		if (sessions.get(key) !== host) return;
++		if (host.hasPendingTurn) {
++			retireSessionWhenIdle(sessions, key, host);
++			return;
++		}
++		host.close();
++		sessions.delete(key);
++	}, IDLE_MS);
++	timer.unref();
++	sessionIdleTimers.set(host, timer);
++}
