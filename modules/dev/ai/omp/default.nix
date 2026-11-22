@@ -871,6 +871,10 @@ in {
           };
         };
       };
+      ".omp/agent/work-fold.json" = {
+        generator = toJSON;
+        value.lazyUnmount = true;
+      };
       ".omp/agent/settings.json" = {
         generator = toJSON;
         value = {

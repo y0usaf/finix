@@ -1,8 +1,79 @@
 diff --git a/packages/agent/src/agent-loop.ts b/packages/agent/src/agent-loop.ts
-index 2b16c4a..48e79c2 100644
+index 2b16c4a..c226add 100644
 --- a/packages/agent/src/agent-loop.ts
 +++ b/packages/agent/src/agent-loop.ts
-@@ -1439,7 +1439,13 @@ async function runLoopBody(
+@@ -810,13 +810,63 @@ async function emitTurnEnd(
+ 	const isAbortedOrError =
+ 		message.role === "assistant" && (message.stopReason === "aborted" || message.stopReason === "error");
+ 	if ((signal?.aborted && !terminalYield) || (isAbortedOrError && !runHookOnAbortedMessage)) return;
+-	await config.onTurnEnd?.(currentContext.messages, terminalYield ? undefined : signal, {
+-		message,
+-		toolResults,
+-		additionalMessages: [],
+-		willContinue: false,
+-		...context,
+-	});
++	if (!config.onTurnEnd) return;
++	const baseSignal = terminalYield ? undefined : signal;
++	const canPreemptOnSteering =
++		config.interruptMode !== "wait" &&
++		config.hasSteeringMessages !== undefined &&
++		config.waitForSteeringMessages !== undefined;
++	if (!canPreemptOnSteering) {
++		await config.onTurnEnd(currentContext.messages, baseSignal, {
++			message,
++			toolResults,
++			additionalMessages: [],
++			willContinue: false,
++			...context,
++		});
++		return;
++	}
++	const turnEndAbort = new AbortController();
++	const watchAbort = new AbortController();
++	const { promise: watchStopped, resolve: resolveWatchStop } = Promise.withResolvers<void>();
++	const stopWatch = (): void => {
++		if (!watchAbort.signal.aborted) watchAbort.abort();
++		resolveWatchStop();
++	};
++	const watchSignal = baseSignal ? AbortSignal.any([baseSignal, watchAbort.signal]) : watchAbort.signal;
++	if (watchSignal.aborted) resolveWatchStop();
++	else watchSignal.addEventListener("abort", () => resolveWatchStop(), { once: true });
++	const watchStoppedFalse = watchStopped.then(() => false);
++	const turnEndSignal = baseSignal ? AbortSignal.any([baseSignal, turnEndAbort.signal]) : turnEndAbort.signal;
++	const watchPromise = (async () => {
++		while (!watchSignal.aborted) {
++			const waited = config.waitForSteeringMessages?.(watchSignal).then(
++				() => true,
++				() => false,
++			);
++			const queued = await Promise.race([
++				hasUserSteeringMessages(config).catch(() => false),
++				watchStoppedFalse,
++			]);
++			if (queued) {
++				if (!turnEndAbort.signal.aborted) turnEndAbort.abort(STEERING_PREEMPT_MARKER);
++				return;
++			}
++			if (watchSignal.aborted || !waited || !(await Promise.race([waited, watchStoppedFalse]))) return;
++		}
++	})();
++	try {
++		await config.onTurnEnd(currentContext.messages, turnEndSignal, {
++			message,
++			toolResults,
++			additionalMessages: [],
++			willContinue: false,
++			...context,
++		});
++	} finally {
++		stopWatch();
++		await watchPromise.catch(() => undefined);
++	}
+ }
+ 
+ function createGateStopMessage(model: Model, reason: string | undefined): AssistantMessage {
+@@ -1439,7 +1489,13 @@ async function runLoopBody(
  
  					preparedProviderCall = await prepareProviderCall(currentContext, config, signal);
  					if (signal?.aborted && (await endAbortedBeforeModel(turnMessages, turnOpen))) return;
@@ -17,7 +88,7 @@ index 2b16c4a..48e79c2 100644
  					gateResult = (await config.beforeModelCall?.(preparedProviderCall.context, signal)) || undefined;
  				} catch (error) {
  					if (signal?.aborted && (await endAbortedBeforeModel(turnMessages, turnOpen))) return;
-@@ -1646,8 +1652,16 @@ async function runLoopBody(
+@@ -1646,8 +1702,16 @@ async function runLoopBody(
  							status: message.stopReason === "aborted" ? "aborted" : "error",
  						});
  					}
@@ -35,7 +106,7 @@ index 2b16c4a..48e79c2 100644
  
  					stream.push(buildAgentEndEvent(newMessages, telemetry, stepCounter.count));
  					stream.end(newMessages);
-@@ -2098,11 +2112,23 @@ async function streamAssistantResponse(
+@@ -2098,11 +2162,23 @@ async function streamAssistantResponse(
  	const harmonyMitigationEnabled = isHarmonyLeakMitigationTarget(model);
  	const dsmlLeakRecoveryEnabled = isDsmlLeakRecoveryTarget(model);
  	const harmonyAbortController = harmonyMitigationEnabled ? new AbortController() : undefined;
@@ -64,7 +135,7 @@ index 2b16c4a..48e79c2 100644
  	// Owned tool calling: aborted by the stream wrapper when the model starts
  	// fabricating a `<tool_response>`, so the provider stops generating the rest of
  	// the hallucinated turn. Merged into the provider signal ONLY (not
-@@ -2224,24 +2250,134 @@ async function streamAssistantResponse(
+@@ -2224,24 +2300,134 @@ async function streamAssistantResponse(
  		});
  	};
  
@@ -214,7 +285,7 @@ index 2b16c4a..48e79c2 100644
  			if (promptToolWireTools && ownedDialect) {
  				// Re-materialize in-band tool-call text as native toolCall content blocks
  				// so the rest of the loop executes them unchanged. When the model starts
-@@ -2302,6 +2438,7 @@ async function streamAssistantResponse(
+@@ -2302,6 +2488,7 @@ async function streamAssistantResponse(
  				}
  				await speculationCoordinator?.discardAll("run aborted", "aborted");
  				speculationSettled = true;
@@ -222,7 +293,7 @@ index 2b16c4a..48e79c2 100644
  				const aborted = emitAbortedAssistantMessage(
  					partialMessage,
  					addedPartial,
-@@ -2310,7 +2447,9 @@ async function streamAssistantResponse(
+@@ -2310,7 +2497,9 @@ async function streamAssistantResponse(
  					config,
  					stream,
  					requestSignal,
@@ -232,7 +303,7 @@ index 2b16c4a..48e79c2 100644
  				await finishChat(aborted);
  				return aborted;
  			};
-@@ -2344,6 +2483,9 @@ async function streamAssistantResponse(
+@@ -2344,6 +2533,9 @@ async function streamAssistantResponse(
  						next = await responseIterator.next();
  					}
  					if (next.done) {
@@ -242,7 +313,7 @@ index 2b16c4a..48e79c2 100644
  						providerStreamSettled = true;
  						break;
  					}
-@@ -2372,6 +2514,15 @@ async function streamAssistantResponse(
+@@ -2372,6 +2564,15 @@ async function streamAssistantResponse(
  							}
  						}
  						finalMessage = snapshotAssistantMessage(finalMessage);
@@ -258,7 +329,7 @@ index 2b16c4a..48e79c2 100644
  						// Unhealed DSML markup must not reach history, including reasoning
  						// and turns with a valid structured call. Only a failed text-only
  						// call needs the recovery nudge.
-@@ -2725,6 +2876,8 @@ async function streamAssistantResponse(
+@@ -2725,6 +2926,8 @@ async function streamAssistantResponse(
  			baseUrl: model.baseUrl,
  		});
  		throw err;
@@ -267,7 +338,7 @@ index 2b16c4a..48e79c2 100644
  	}
  }
  
-@@ -2860,11 +3013,13 @@ function emitAbortedAssistantMessage(
+@@ -2860,11 +3063,13 @@ function emitAbortedAssistantMessage(
  	config: AgentLoopConfig,
  	stream: EventStream<AgentEvent, AgentMessage[]>,
  	requestSignal: AbortSignal | undefined,
@@ -284,7 +355,7 @@ index 2b16c4a..48e79c2 100644
  			? AIError.create(AIError.Flag.Abort)
  			: AIError.classify(requestSignal?.reason) || undefined;
  	const base: AssistantMessage = partialMessage
-@@ -2931,6 +3086,15 @@ interface PreparedToolCall {
+@@ -2931,6 +3136,15 @@ interface PreparedToolCall {
  
  /** Committed assistant messages whose unhealed DSML tool-call markup was stripped; the loop answers them with a failure nudge. */
  const dsmlLeakMessages = new WeakSet<AssistantMessage>();
@@ -300,19 +371,6 @@ index 2b16c4a..48e79c2 100644
  
  /**
   * Prepare results computed in the stream-done branch (before `message_start`/
-diff --git a/packages/coding-agent/src/modes/utils/ui-helpers.ts b/packages/coding-agent/src/modes/utils/ui-helpers.ts
-index 3030015..f07edfc 100644
---- a/packages/coding-agent/src/modes/utils/ui-helpers.ts
-+++ b/packages/coding-agent/src/modes/utils/ui-helpers.ts
-@@ -1333,7 +1333,7 @@ export class UiHelpers {
- 		this.ctx.pendingMessagesContainer.disposeChildren();
- 		const queuedMessages = this.ctx.viewSession.getQueuedMessages() as QueuedMessages;
- 
--		const steeringMessages = [...queuedMessages.steering];
-+		const steeringMessages = this.ctx.viewSession.interruptMode === "wait" ? [...queuedMessages.steering] : [];
- 		const followUpMessages = [...queuedMessages.followUp];
- 		if (!this.ctx.focusedAgentId) {
- 			if (this.ctx.yieldCompaction) followUpMessages.push(this.ctx.yieldCompaction.text);
 diff --git a/packages/coding-agent/src/session/agent-session.ts b/packages/coding-agent/src/session/agent-session.ts
 index 11f3d6a..6ef3557 100644
 --- a/packages/coding-agent/src/session/agent-session.ts

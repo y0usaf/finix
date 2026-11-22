@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { AssistantMessageComponent } from "@oh-my-pi/pi-tui/chat/assistant-message";
 import { BashExecutionComponent } from "@oh-my-pi/pi-tui/chat/bash-execution";
 import { CollabPromptMessageComponent } from "@oh-my-pi/pi-tui/chat/collab-prompt-message";
@@ -30,6 +33,28 @@ const INITIATORS = [
 	HandoffSummaryMessageComponent,
 	BranchSummaryMessageComponent,
 ];
+
+
+function parseBool(raw) {
+	if (typeof raw === "boolean") return raw;
+	if (typeof raw !== "string") return undefined;
+	const v = raw.trim().toLowerCase();
+	if (v === "1" || v === "true" || v === "yes" || v === "on") return true;
+	if (v === "0" || v === "false" || v === "no" || v === "off") return false;
+	return undefined;
+}
+
+function resolveLazyUnmount() {
+	const env = parseBool(process.env.OMP_WORK_FOLD_LAZY_UNMOUNT);
+	if (env !== undefined) return env;
+	const dir = process.env.OMP_AGENT_DIR || join(homedir(), ".omp", "agent");
+	try {
+		const raw = JSON.parse(readFileSync(join(dir, "work-fold.json"), "utf8"));
+		const cfg = parseBool(raw?.lazyUnmount);
+		if (cfg !== undefined) return cfg;
+	} catch {}
+	return true;
+}
 
 function isTool(block) {
 	return TOOLS.some(kind => block instanceof kind);
@@ -199,7 +224,8 @@ function install(state) {
 			const time = this.live ? undefined : (wall ?? spent(this.blocks, cx));
 			const shown = collapsed && this.ended ? failed : [];
 			const hidden = chatTranscriptDisplayPreferences.hideToolActivity;
-			const key = [...this.blocks, ...failed, collapsed, this.live, this.ended, time, hidden];
+			const lazy = state.lazyUnmount;
+			const key = [...this.blocks, ...failed, collapsed, this.live, this.ended, time, hidden, lazy];
 			if (this.key && same(this.key, key)) return this.node;
 			this.key = key;
 			const steps = this.blocks.filter(isTool).length;
@@ -210,7 +236,7 @@ function install(state) {
 			label.push(text([span(count, "dim")], { basis: "content" }));
 			if (failed.length > 0) label.push(node("badge", { text: `${failed.length} failed`, tone: "error" }));
 			const head = node("row", { gap: "sm", align: collapsed ? "center" : "baseline" }, label, "head");
-			const body = this.blocks.filter(block => !shown.includes(block));
+			const body = collapsed && lazy ? [] : this.blocks.filter(block => !shown.includes(block));
 			this.node = withHidden(
 				col(
 					[
@@ -283,9 +309,11 @@ function install(state) {
 export default function workFold(pi) {
 	let state = globalThis[STATE];
 	if (!state) {
-		state = { running: false, cx: undefined };
+		state = { running: false, cx: undefined, lazyUnmount: resolveLazyUnmount() };
 		globalThis[STATE] = state;
 		install(state);
+	} else {
+		state.lazyUnmount = resolveLazyUnmount();
 	}
 	pi.on("agent_start", async (_event, ctx) => {
 		if (ctx.hasUI) state.running = true;

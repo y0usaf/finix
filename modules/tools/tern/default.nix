@@ -58,14 +58,6 @@
     };
   };
 
-  dawn = pkgs.runCommand "tern-dawn" {nativeBuildInputs = [pkgs.python3];} ''
-    mkdir $out
-    python3 ${./config/plugins/ui-menu/dawn.py} ${tern}/bin/.tern-wrapped $out \
-      ${lib.escapeShellArg ".sf-chat-reader:not(.sf-layer)"} \
-      ${lib.escapeShellArg "[data-role^='omp.bot.chao.'], [data-role^='omp.bot.chao.'] *, [data-role='omp.bot.event.avatar'], svg *, .sf-caret"} \
-      ${./config/plugins/ui-menu/dawn.css} ${flakeInputs.omp-bot}/tern/chat.css
-  '';
-
   registration = pkgs.runCommand "tern-registration" {} ''
     export HOME=$TMPDIR/home
     export XDG_DATA_HOME=$HOME/.local/share
@@ -4462,8 +4454,7 @@
       ]);
       "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
       "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
-      "plugins/ui-menu/snippets/dawn.css" = "${dawn}/dawn.css";
-      "plugins/ui-menu/snippets/dawn.boost" = "${dawn}/dawn.boost";
+      "plugins/ui-menu/snippets/dawn.css" = ./config/plugins/ui-menu/dawn.css;
       "plugins/ui-menu/snippets/grok.css" = "${flakeInputs.tern-ozette}/grok.css";
       "plugins/ui-menu/snippets/grok-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-answer-bubbles.css";
       "plugins/ui-menu/snippets/grok-user-bubbles.css" = "${flakeInputs.tern-ozette}/grok-user-bubbles.css";

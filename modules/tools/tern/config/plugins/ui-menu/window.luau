@@ -559,99 +559,13 @@ local function live(t)
 	return true
 end
 
-local BOOST = (function()
-	local ok, text = pcall(tern.fs.read, tern.plugin.dir .. "/snippets/dawn.boost")
-	return if ok then (text:gsub("%s+$", "")) else nil
-end)()
-
-local function selectors(head: string): { string }
-	local list, depth, start = {}, 0, 1
-	for i = 1, #head do
-		local c = head:sub(i, i)
-		if c == "(" or c == "[" then
-			depth += 1
-		elseif c == ")" or c == "]" then
-			depth -= 1
-		elseif c == "," and depth == 0 then
-			table.insert(list, head:sub(start, i - 1))
-			start = i + 1
-		end
-	end
-	table.insert(list, head:sub(start))
-	return list
-end
-
-local function pseudo(item: string): number?
-	local depth = 0
-	for i = 1, #item do
-		local c = item:sub(i, i)
-		if c == "(" or c == "[" then
-			depth += 1
-		elseif c == ")" or c == "]" then
-			depth -= 1
-		elseif depth == 0 and c == ":" then
-			local rest = item:sub(i)
-			if rest:find("^::") or rest:find("^:before") or rest:find("^:after") or rest:find("^:first%-l") then
-				return i
-			end
-		end
-	end
-	return nil
-end
-
-local function boost(css: string): string
-	local out, i = {}, 1
-	while true do
-		local open = css:find("{", i, true)
-		if not open then
-			break
-		end
-		local head = css:sub(i, open - 1):match("^%s*(.-)%s*$")
-		if head:sub(1, 1) == "@" then
-			local depth, j = 1, open + 1
-			while depth > 0 and j <= #css do
-				local c = css:sub(j, j)
-				if c == "{" then
-					depth += 1
-				elseif c == "}" then
-					depth -= 1
-				end
-				j += 1
-			end
-			if head:find("^@media") or head:find("^@supports") then
-				table.insert(out, head .. " {\n" .. boost(css:sub(open + 1, j - 2)) .. "}\n")
-			end
-			i = j
-		else
-			local close = css:find("}", open, true) or #css + 1
-			local items = {}
-			for _, s in ipairs(selectors(head)) do
-				s = s:match("^%s*(.-)%s*$")
-				local at = pseudo(s)
-				table.insert(items, if at then s:sub(1, at - 1) .. BOOST .. s:sub(at) else s .. BOOST)
-			end
-			table.insert(out, table.concat(items, ", ") .. " {" .. css:sub(open + 1, close - 1) .. "}\n")
-			i = close + 1
-		end
-	end
-	return table.concat(out)
-end
-
 local shown = {}
 local function paint(from: number?, to: number?)
-	local dawn = BOOST ~= nil and live(by_id.dawn)
 	for index = from or 1, to or #TWEAKS do
 		local t = TWEAKS[index]
 		local own = snippet(t)
 		if own then
-			local text = ""
-			if live(t) then
-				text = own
-				if dawn and not t.layer then
-					t.boosted = t.boosted or boost(own)
-					text ..= "\n" .. t.boosted
-				end
-			end
+			local text = if live(t) then own else ""
 			if shown[t.id] ~= text then
 				shown[t.id] = text
 				tern.css("ui-menu-" .. t.id, text)

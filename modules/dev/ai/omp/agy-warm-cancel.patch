@@ -1,0 +1,33 @@
+diff --git a/packages/ai/src/providers/antigravity-cli/host.ts b/packages/ai/src/providers/antigravity-cli/host.ts
+index e75d617..bef8c2a 100644
+--- a/packages/ai/src/providers/antigravity-cli/host.ts
++++ b/packages/ai/src/providers/antigravity-cli/host.ts
+@@ -215,7 +215,14 @@ export class AgyHost implements ProviderSessionState {
+ 		this.#step = step;
+ 		const onAbort = () => {
+ 			step.aborted = true;
+-			this.#fail(new Error("Request was aborted"));
++			const error = new Error("Request was aborted");
++			if (this.#process && !this.#loading && !this.#pending) {
++				step.controller.abort(error);
++				step.interrupted.reject(error);
++				step.done.reject(error);
++				return;
++			}
++			this.#fail(error);
+ 		};
+ 		options.signal?.addEventListener("abort", onAbort, { once: true });
+ 		try {
+@@ -331,7 +338,11 @@ export class AgyHost implements ProviderSessionState {
+ 			}
+ 			await step.done.promise;
+ 		} catch (error) {
+-			this.#fail(error);
++			if (step.aborted && this.#process && !this.#loading && !this.#pending) {
++				await this.#abandonTurn();
++			} else {
++				this.#fail(error);
++			}
+ 			throw step.aborted ? new Error("Request was aborted") : mapAgyError(error);
+ 		} finally {
+ 			options.signal?.removeEventListener("abort", onAbort);
