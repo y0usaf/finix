@@ -2173,8 +2173,6 @@
         generators.luau));
       "plugins/ui-menu/snippets/rail.css" = "${flakeInputs.tern-ozette}/rail.css";
       "plugins/ui-menu/snippets/settings.css" = "${flakeInputs.tern-ozette}/settings.css";
-        }
-      ]);
       "plugins/ui-menu/snippets/account.css" = generators.sourceFile "account.css" (generators.cssSource [
         {
           select = ".tn-peers";
