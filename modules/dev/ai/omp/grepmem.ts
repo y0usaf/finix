@@ -9,6 +9,8 @@ const DEFAULT_CONTEXT = 240;
 const MAX_CONTEXT = 600;
 const MAX_OUTPUT_CHARS = 16_000;
 const MAX_LINE_CHARS = 8_000_000;
+const ENV_SECRET_RE = /\b([A-Za-z0-9_]*(?:TOKEN|SECRET|PASSWORD|PASSWD|API_KEY|APIKEY|PRIVATE_KEY|CREDENTIALS?)[A-Za-z0-9_]*)(\\?["']?\s*[:=]\s*\\?["']?)(?:\\[^"'\s]|[^\s"'\\,}])+/gi;
+const SECRET_RE = /\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|glpat-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9_-]{20,}|xox[abpr]-[A-Za-z0-9-]{10,}|AKIA[A-Z0-9]{16})\b/g;
 
 interface MatchRow {
 	tsMs: number;
@@ -228,6 +230,7 @@ export default function grepmem(pi: ExtensionAPI): void {
 						if (sinceMs > 0 && rec.tsMs < sinceMs) continue;
 						if (Number.isFinite(untilMs) && rec.tsMs > untilMs) continue;
 						if (Number.isFinite(maxTsMs) && rec.tsMs >= maxTsMs) continue;
+						rec.text = rec.text.replace(ENV_SECRET_RE, "$1$2[redacted]").replace(SECRET_RE, "[redacted]");
 						const m = re.exec(rec.text);
 						if (!m) continue;
 						totalMatches++;
