@@ -3,13 +3,6 @@ tern.css("ui-menu-base", tern.fs.read(tern.plugin.dir .. "/snippets/rail.css") .
 
 local TWEAKS = {
 	{
-		id = "mini",
-		label = "Mini",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
 		id = "ozette",
 		label = "Ozette",
 		group = "Look layers",
@@ -44,78 +37,8 @@ local TWEAKS = {
 		layer = true,
 	},
 	{
-		id = "dawn",
-		label = "Dawn",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
 		id = "grok",
 		label = "Grok",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
-		id = "departure",
-		label = "Departure",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
-		id = "automata",
-		label = "Automata",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
-		id = "botanical",
-		label = "Botanical",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
-		id = "braun",
-		label = "Braun",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
-		id = "folio",
-		label = "Folio",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
-		id = "blueprint",
-		label = "Blueprint",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
-		id = "eink",
-		label = "Eink",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
-		id = "phosphor",
-		label = "Phosphor",
-		group = "Look layers",
-		default = false,
-		layer = true,
-	},
-	{
-		id = "scratch",
-		label = "Unset all",
 		group = "Look layers",
 		default = false,
 		layer = true,
@@ -273,30 +196,6 @@ local TWEAKS = {
 	{
 		id = "yorha-answer-bubbles",
 		requires = { "yorha", "answer-bubbles" },
-	},
-	{
-		id = "grok-answer-bubbles",
-		label = false,
-		default = false,
-		layer = true,
-		requires = { "grok" },
-	},
-	{
-		id = "grok-user-bubbles",
-		requires = { "grok" },
-	},
-	{
-		id = "carbon-user-frost",
-		label = false,
-		default = false,
-		layer = true,
-		requires = { "bubbles", "user-frost" },
-	},
-	{
-		id = "bubbles",
-		label = false,
-		default = false,
-		layer = true,
 	},
 }
 
@@ -589,20 +488,9 @@ end
 tern.timer(0, paint_step)
 
 local LOOKS = {
-	{ label = "Mini", layers = { "mini" } },
 	{ label = "Ozette", layers = { "ozette", "ozette-motion", "ozette-cmus" } },
 	{ label = "YoRHa", layers = { "yorha" } },
-	{ label = "Dawn", layers = { "dawn" } },
-	{ label = "Grok", layers = { "grok", "grok-answer-bubbles" } },
-	{ label = "Departure", layers = { "departure", "bubbles" } },
-	{ label = "Automata", layers = { "automata", "bubbles" } },
-	{ label = "Botanical", layers = { "botanical", "bubbles" } },
-	{ label = "Braun", layers = { "braun", "bubbles" } },
-	{ label = "Folio", layers = { "folio", "bubbles" } },
-	{ label = "Blueprint", layers = { "blueprint", "bubbles" } },
-	{ label = "Eink", layers = { "eink", "bubbles" } },
-	{ label = "Phosphor", layers = { "phosphor", "bubbles" } },
-	{ label = "Unset all", layers = { "scratch" } },
+	{ label = "Grok", layers = { "grok" } },
 	{ label = "None", layers = {} },
 }
 

@@ -3304,7 +3304,6 @@
         "strictix": "strictix",
         "tern-ekko": "tern-ekko",
         "tern-ozette": "tern-ozette",
-        "tern-scratch": "tern-scratch",
         "tern-script": "tern-script",
         "tomoe": "tomoe",
         "tomoe-stable": "tomoe-stable"
@@ -3839,11 +3838,11 @@
     "tern-ozette": {
       "flake": false,
       "locked": {
-        "lastModified": 1795337806,
-        "narHash": "sha256-+2AW8GMubmGl40+dZ12n1Rq0/+3peJVIWzQrGlCGowo=",
+        "lastModified": 1795343836,
+        "narHash": "sha256-aqSTjcxTYpuTN0ujKF8BIa7GXYMrvHGDZl1w12G1hDc=",
         "owner": "y0usaf",
         "repo": "tern-ozette",
-        "rev": "7ebeda4864b2e536cd3a1a55a07ffc63c2bd4449",
+        "rev": "608eeb03df161ea3851b98e50dbed5fd148251e2",
         "type": "github"
       },
       "original": {
@@ -3869,22 +3868,6 @@
       }
     },
     "tern-scratch": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1794716105,
-        "narHash": "sha256-ZlPGmLmaVEkMBvpHSOQl9+Yr9lGLyQrmnU1OxMlmuzA=",
-        "ref": "refs/heads/main",
-        "rev": "fc16f17e364831540f6da3137c13a5d8898c663e",
-        "revCount": 19,
-        "type": "git",
-        "url": "ssh://git@github.com/y0usaf/tern-scratch.git"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/y0usaf/tern-scratch.git"
-      }
-    },
-    "tern-scratch_2": {
       "flake": false,
       "locked": {
         "lastModified": 1794716100,
@@ -4012,7 +3995,7 @@
         "strictix": "strictix_2",
         "tern-ekko": "tern-ekko_2",
         "tern-ozette": "tern-ozette_2",
-        "tern-scratch": "tern-scratch_2",
+        "tern-scratch": "tern-scratch",
         "tern-script": "tern-script_2",
         "tomoe": "tomoe_2"
       },

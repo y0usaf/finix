@@ -2173,19 +2173,6 @@
         generators.luau));
       "plugins/ui-menu/snippets/rail.css" = "${flakeInputs.tern-ozette}/rail.css";
       "plugins/ui-menu/snippets/settings.css" = "${flakeInputs.tern-ozette}/settings.css";
-      "plugins/ui-menu/snippets/bubbles.css" = "${flakeInputs.tern-ozette}/bubbles.css";
-      "plugins/ui-menu/snippets/carbon-user-frost.css" = generators.sourceFile "carbon-user-frost.css" (generators.cssSource [
-        {
-          select = ":root:not(#s0):not(#s1) .sf-chat-reader.sf-main > .sf-card[data-role='omp.user'] > .sf-card-body";
-          set = [
-            ["background" "var(--frost-you-fill)"]
-            ["-webkit-backdrop-filter" "var(--frost) !important"]
-            ["backdrop-filter" "var(--frost) !important"]
-            ["box-shadow" "var(--frost-edge)"]
-            ["--t1" "var(--frost-you-ink, var(--frost-ink))"]
-            ["--omp-userMessageText" "var(--frost-you-ink, var(--frost-ink))"]
-            ["color" "var(--frost-you-ink, var(--frost-ink))"]
-          ];
         }
       ]);
       "plugins/ui-menu/snippets/account.css" = generators.sourceFile "account.css" (generators.cssSource [
@@ -2583,7 +2570,6 @@
           ];
         }
       ]);
-      "plugins/ui-menu/snippets/mini.css" = "${flakeInputs.tern-ozette}/mini.css";
       "plugins/ui-menu/snippets/ozette-answer-bubbles.css" = "${flakeInputs.tern-ozette}/ozette-answer-bubbles.css";
       "plugins/ui-menu/snippets/ozette-cmus.css" = "${flakeInputs.tern-ozette}/cmus.css";
       "plugins/ui-menu/snippets/ozette-motion.css" = "${flakeInputs.tern-ozette}/motion.css";
@@ -4322,7 +4308,6 @@
           ];
         }
       ]);
-      "plugins/ui-menu/snippets/scratch.css" = "${flakeInputs.tern-scratch}/min.css";
       "plugins/ui-menu/snippets/single.css" = generators.sourceFile "single.css" (generators.cssSource [
         {
           select = ".tn-session-tab, .tn-vt > .nav-group:is(.g-sp, .g-sp-cur) > .nav-head, .tn-pl-scope[title^='Sessions']";
@@ -4454,18 +4439,7 @@
       ]);
       "plugins/ui-menu/snippets/yorha-answer-bubbles.css" = "${flakeInputs.tern-ozette}/yorha-answer-bubbles.css";
       "plugins/ui-menu/snippets/yorha.css" = "${flakeInputs.tern-ozette}/yorha.css";
-      "plugins/ui-menu/snippets/dawn.css" = ./config/plugins/ui-menu/dawn.css;
-      "plugins/ui-menu/snippets/grok.css" = "${flakeInputs.tern-ozette}/grok.css";
-      "plugins/ui-menu/snippets/grok-answer-bubbles.css" = "${flakeInputs.tern-ozette}/grok-answer-bubbles.css";
-      "plugins/ui-menu/snippets/grok-user-bubbles.css" = "${flakeInputs.tern-ozette}/grok-user-bubbles.css";
-      "plugins/ui-menu/snippets/departure.css" = "${flakeInputs.tern-ozette}/departure.css";
-      "plugins/ui-menu/snippets/automata.css" = "${flakeInputs.tern-ozette}/automata.css";
-      "plugins/ui-menu/snippets/botanical.css" = "${flakeInputs.tern-ozette}/botanical.css";
-      "plugins/ui-menu/snippets/braun.css" = "${flakeInputs.tern-ozette}/braun.css";
-      "plugins/ui-menu/snippets/folio.css" = "${flakeInputs.tern-ozette}/folio.css";
-      "plugins/ui-menu/snippets/blueprint.css" = "${flakeInputs.tern-ozette}/blueprint.css";
-      "plugins/ui-menu/snippets/eink.css" = "${flakeInputs.tern-ozette}/eink.css";
-      "plugins/ui-menu/snippets/phosphor.css" = "${flakeInputs.tern-ozette}/phosphor.css";
+      "plugins/ui-menu/snippets/grok.css" = ./config/plugins/ui-menu/grok.css;
       "plugins/ui-menu/window.luau" = ./config/plugins/ui-menu/window.luau;
       "settings.json" = ./config/settings.json;
     }

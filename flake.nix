@@ -91,11 +91,6 @@
       flake = false;
     };
 
-    tern-scratch = {
-      url = "git+ssh://git@github.com/y0usaf/tern-scratch.git";
-      flake = false;
-    };
-
     fonts = {
       url = "github:y0usaf/fonts";
       inputs.nixpkgs.follows = "nixpkgs";
