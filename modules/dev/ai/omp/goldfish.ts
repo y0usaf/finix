@@ -49,6 +49,7 @@ export interface GoldfishAuditResult {
 const MAX_DIFF_BYTES = 200000;
 const MAX_CHECK_CHARS = 40000;
 const CHECK_TIMEOUT_MS = 300000;
+const GOLDFISH_TIMEOUT_MS = Number(process.env.OMP_GOLDFISH_TIMEOUT_MS) || 600000;
 
 const OUTPUT_SCHEMA = {
 	type: "object",
@@ -360,6 +361,8 @@ export async function runGoldfishAudit(
 		}
 
 		const agent = loadGoldfishAgent();
+		const timeoutSignal = AbortSignal.timeout(GOLDFISH_TIMEOUT_MS);
+		const runSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
 		const result = await runSubprocess({
 			cwd: ctx.cwd,
 			additionalDirectories: [snapDir, ...targetDirs],
@@ -388,8 +391,11 @@ export async function runGoldfishAudit(
 				},
 				{ derived: true },
 			),
-			signal,
+			signal: runSignal,
 		});
+		if (timeoutSignal.aborted && !signal?.aborted) {
+			throw new Error(`Goldfish audit timed out after ${Math.round(GOLDFISH_TIMEOUT_MS / 1000)}s`);
+		}
 
 		const candidate =
 			result.structuredOutput?.status === "valid"
