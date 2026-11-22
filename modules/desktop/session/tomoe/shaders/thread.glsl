@@ -265,7 +265,7 @@ void set_type(vec2 p, inout vec3 c) {
                           base + 4, 0, 3);
             a = 0.72;
             if (!on) {
-                on = char_hit(p, vec2(mid.x - 0.5 * text_span(vlen, 3.0), cy), vec2(2.0, 3.0),
+                on = char_hit(p, vec2(mid.x - 0.5 * text_span(vlen, 2.0), cy), vec2(2.0, 3.0),
                               base + 2, 0, vlen);
                 a = 1.0;
             }
