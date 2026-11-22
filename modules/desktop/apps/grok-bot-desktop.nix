@@ -98,8 +98,24 @@
         mainProgram = "grok-bot";
       };
   };
+  grok-bot-fonts = pkgs.runCommand "grok-bot-fonts-${unwrapped.version}" {nativeBuildInputs = [pkgs.asar pkgs.woff2];} ''
+    archive=${unwrapped}/lib/grok-bot/resources/app.asar
+    mkdir -p work "$out/share/fonts/truetype"
+    cd work
+    asar list "$archive" | grep -E '/assets/X(Mono)?-VF-[^/]*[.]woff2$' > fonts
+    test "$(wc -l < fonts)" -eq 2
+    while read -r font; do
+      asar extract-file "$archive" "''${font#/}"
+    done < fonts
+    for font in *.woff2; do
+      woff2_decompress "$font"
+    done
+    cp X-VF-*.ttf "$out/share/fonts/truetype/XVF.ttf"
+    cp XMono-VF-*.ttf "$out/share/fonts/truetype/XMonoVF.ttf"
+  '';
 in {
   environment.systemPackages = [grok-bot-desktop];
+  fonts.packages = [grok-bot-fonts];
   system.build.grok-bot-desktop = grok-bot-desktop;
   user.persist.directories = [
     ".config/Grok Bot"

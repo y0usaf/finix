@@ -80,6 +80,16 @@ in {
             <!-- Tern looks name these; keep them available to the interface. -->
             <pattern>
               <patelt name="family">
+                <string>X VF</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
+                <string>X Mono VF</string>
+              </patelt>
+            </pattern>
+            <pattern>
+              <patelt name="family">
                 <string>IBM Plex Sans</string>
               </patelt>
             </pattern>

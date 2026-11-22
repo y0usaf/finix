@@ -40,7 +40,6 @@ local TWEAKS = {
 		id = "grok",
 		label = "Grok",
 		group = "Look layers",
-		default = false,
 		layer = true,
 	},
 	{
@@ -206,8 +205,17 @@ end
 local saved = tern.kv.get("on")
 local on = {}
 local by_id = {}
+local wearing = false
 for _, t in ipairs(TWEAKS) do
-	on[t.id] = if type(saved) == "table" and saved[t.id] ~= nil then saved[t.id] == true else t.default ~= false
+	if t.layer and type(saved) == "table" and saved[t.id] == true then
+		wearing = true
+	end
+end
+for _, t in ipairs(TWEAKS) do
+	on[t.id] = if type(saved) == "table" and saved[t.id] ~= nil
+		then saved[t.id] == true
+		elseif t.layer and wearing then false
+		else t.default ~= false
 	by_id[t.id] = t
 end
 
