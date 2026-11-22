@@ -171,11 +171,12 @@ function install(state) {
 		describe(cx) {
 			if (cx) state.cx = cx;
 			const whole = this.source.describe(cx);
-			if (this.opened || !whole?.p) return whole;
+			if (this.opened || whole?.p?.collapsible !== true) return whole;
 			if (whole === this.whole && this.lazy === state.lazyUnmount) return this.node;
 			this.whole = whole;
 			this.lazy = state.lazyUnmount;
-			this.node = { ...whole, p: { ...whole.p, collapsed: true }, ...(this.lazy ? { c: [] } : {}) };
+			const head = whole.k === "tool" ? [] : (whole.c ?? []).filter(child => child?.key === "head");
+			this.node = { ...whole, p: { ...whole.p, collapsed: true }, ...(this.lazy ? { c: head } : {}) };
 			return this.node;
 		}
 	}
@@ -255,14 +256,16 @@ function install(state) {
 			const rest = this.blocks.filter(block => !shown.includes(block));
 			const tools = rest.filter(isTool);
 			const earlier = tools.length - LIVE_TAIL;
+			const cut = earlier > 0 ? rest.indexOf(tools[earlier]) : 0;
+			const tail = rest.slice(cut);
 			const body =
 				lazy && (collapsed || hidden)
 					? []
-					: lazy && this.live && this.toggled === undefined && earlier > 0
-						? this.all
-							? [...rest.slice(0, rest.indexOf(tools[earlier])).map(block => (isTool(block) ? folded(block, earlierFolds) : block)), ...rest.slice(rest.indexOf(tools[earlier]))]
-							: [moreSteps(earlier), ...rest.slice(rest.indexOf(tools[earlier]))]
-						: rest;
+					: !lazy || earlier <= 0
+						? rest
+						: this.live && this.toggled === undefined && !this.all
+							? [moreSteps(earlier), ...tail]
+							: [...rest.slice(0, cut).map(block => (isTool(block) ? folded(block, earlierFolds) : block)), ...tail];
 			this.node = withHidden(
 				col(
 					[
