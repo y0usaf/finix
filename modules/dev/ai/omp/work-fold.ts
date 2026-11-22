@@ -44,6 +44,8 @@ function parseBool(raw) {
 	return undefined;
 }
 
+const LIVE_TAIL = 6;
+
 function resolveLazyUnmount() {
 	const env = parseBool(process.env.OMP_WORK_FOLD_LAZY_UNMOUNT);
 	if (env !== undefined) return env;
@@ -93,6 +95,7 @@ function install(state) {
 	const groups = new WeakMap();
 	const voices = new WeakMap();
 	const failures = new WeakMap();
+	const earlierFolds = new WeakMap();
 	const shownBy = new WeakMap();
 	const nodeBy = new WeakMap();
 
@@ -177,13 +180,23 @@ function install(state) {
 		}
 	}
 
-	function folded(source) {
-		let wrapper = failures.get(source);
+	function folded(source, cache = failures) {
+		let wrapper = cache.get(source);
 		if (!wrapper) {
 			wrapper = new Folded(source);
-			failures.set(source, wrapper);
+			cache.set(source, wrapper);
 		}
 		return wrapper;
+	}
+
+	function moreSteps(count) {
+		const label = text([span(`${count} earlier ${count === 1 ? "step" : "steps"}`, "dim")]);
+		return node(
+			"section",
+			{ role: "omp.notice.work.earlier", collapsible: true, collapsed: true },
+			[node("row", { gap: "sm", align: "center" }, [label], "head")],
+			"earlier",
+		);
 	}
 
 	function spent(blocks, cx) {
@@ -207,7 +220,9 @@ function install(state) {
 		}
 		invalidate() {}
 		handleNativeEvent(event) {
-			if (event.type === "toggle" && event.key === "work") this.toggled = event.collapsed;
+			if (event.type !== "toggle") return;
+			if (event.key === "work") this.toggled = event.collapsed;
+			else if (typeof event.key === "string" && event.key.endsWith("earlier") && !event.collapsed) this.all = true;
 		}
 		update(blocks, live, ended) {
 			if (live && this.startedAt === undefined) this.startedAt = performance.now();
@@ -226,7 +241,7 @@ function install(state) {
 			const hidden = chatTranscriptDisplayPreferences.hideToolActivity;
 			const lazy = state.lazyUnmount;
 			const shown = collapsed && this.ended && !(hidden && lazy) ? failed : [];
-			const key = [...this.blocks, ...failed, collapsed, this.live, this.ended, time, hidden, lazy];
+			const key = [...this.blocks, ...failed, collapsed, this.live, this.ended, time, hidden, lazy, this.toggled, this.all];
 			if (this.key && same(this.key, key)) return this.node;
 			this.key = key;
 			const steps = this.blocks.filter(isTool).length;
@@ -238,12 +253,21 @@ function install(state) {
 			if (failed.length > 0) label.push(node("badge", { text: `${failed.length} failed`, tone: "error" }));
 			const head = node("row", { gap: "sm", align: collapsed ? "center" : "baseline" }, label, "head");
 			const rest = this.blocks.filter(block => !shown.includes(block));
-			const body = lazy && (collapsed || hidden) ? [] : rest;
+			const tools = rest.filter(isTool);
+			const earlier = tools.length - LIVE_TAIL;
+			const body =
+				lazy && (collapsed || hidden)
+					? []
+					: lazy && this.live && this.toggled === undefined && earlier > 0
+						? this.all
+							? [...rest.slice(0, rest.indexOf(tools[earlier])).map(block => (isTool(block) ? folded(block, earlierFolds) : block)), ...rest.slice(rest.indexOf(tools[earlier]))]
+							: [moreSteps(earlier), ...rest.slice(rest.indexOf(tools[earlier]))]
+						: rest;
 			this.node = withHidden(
 				col(
 					[
 						node("section", { role: "omp.notice.work", collapsible: true, collapsed }, [head, ...body], "work"),
-						...shown.map(folded),
+						...shown.map(block => folded(block)),
 					],
 					{ gap: "sm" },
 				),
