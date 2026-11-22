@@ -89,23 +89,26 @@ function makeSnippet(text: string, matchIndex: number, matchLen: number, windowC
 }
 
 function resolveSessionsDir(requested?: string): string | { error: string } {
-	const stateRoot = process.env.OMP_BOT_STATE || path.join(process.env.XDG_STATE_HOME || path.join(process.env.HOME || "/", ".local/state"), "omp-bot");
-	const botsRoot = process.env.GREPMEM_BOTS ?? path.join(stateRoot, "bots");
-	const bot = requested || (process.env.GREPMEM_SESSIONS_DIR ? undefined : process.env.OMP_BOT_NAME);
-	if (bot) {
-		if (!botsRoot || bot.startsWith(".") || bot.includes("/") || bot.includes("\\")) {
-			return { error: `Unknown or disallowed bot: ${bot}` };
+	const explicit = process.env.GREPMEM_SESSIONS_DIR?.trim();
+	const botsRoot = process.env.GREPMEM_BOTS?.trim();
+	if (requested) {
+		if (!botsRoot || requested.startsWith(".") || requested.includes("/") || requested.includes("\\")) {
+			return { error: `Cross-bot search is not enabled for this bot: ${requested}` };
 		}
-		const dir = path.join(botsRoot, bot, "sessions");
-		if (!fs.existsSync(dir)) return { error: `No sessions directory for bot: ${bot}` };
+		const dir = path.join(botsRoot, requested, "sessions");
+		if (!fs.existsSync(dir)) return { error: `No sessions directory for bot: ${requested}` };
 		return dir;
 	}
-	const explicit = process.env.GREPMEM_SESSIONS_DIR?.trim();
 	if (explicit) {
 		if (!fs.existsSync(explicit)) return { error: `GREPMEM_SESSIONS_DIR does not exist: ${explicit}` };
 		return explicit;
 	}
-	return { error: "GrepMem is not configured: set GREPMEM_SESSIONS_DIR or GREPMEM_BOTS with a valid bot parameter." };
+	const name = process.env.OMP_BOT_NAME;
+	if (!name || name.startsWith(".") || name.includes("/")) return { error: "GrepMem needs OMP_BOT_NAME or GREPMEM_SESSIONS_DIR." };
+	const stateRoot = process.env.OMP_BOT_STATE || path.join(process.env.XDG_STATE_HOME || path.join(process.env.HOME || "/", ".local/state"), "omp-bot");
+	const dir = path.join(stateRoot, "bots", name, "sessions");
+	if (!fs.existsSync(dir)) return { error: `No sessions directory for bot: ${name}` };
+	return dir;
 }
 
 function parseRecord(raw: string): { ts: string; tsMs: number; role: string; speaker: string; text: string } | undefined {
@@ -154,7 +157,7 @@ export default function grepmem(pi: ExtensionAPI): void {
 			include_helpers: z.boolean().optional().describe("Also search helper sub-transcripts (default false)"),
 			limit: z.number().int().min(1).max(MAX_LIMIT).optional().describe("Maximum matches to return (default 20, max 50)"),
 			context_chars: z.number().int().min(40).max(MAX_CONTEXT).optional().describe("Snippet width in characters (default 240, max 600)"),
-			bot: z.string().optional().describe("Optional bot name when GREPMEM_BOTS is configured"),
+			bot: z.string().optional().describe("Another bot's name; only works where cross-bot search is enabled"),
 		}),
 		async execute(_toolCallId, params) {
 			const dirOrErr = resolveSessionsDir(params.bot);
