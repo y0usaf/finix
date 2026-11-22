@@ -34,6 +34,7 @@ const GOLDFISH_DENY: Record<string, true> = {
 	task: true,
 	goldfish: true,
 	message_helper: true,
+	grepmem: true,
 };
 
 async function prune(pi: ExtensionAPI, ctx?: ExtensionContext): Promise<void> {
