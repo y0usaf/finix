@@ -169,9 +169,10 @@ function install(state) {
 			if (cx) state.cx = cx;
 			const whole = this.source.describe(cx);
 			if (this.opened || !whole?.p) return whole;
-			if (whole === this.whole) return this.node;
+			if (whole === this.whole && this.lazy === state.lazyUnmount) return this.node;
 			this.whole = whole;
-			this.node = { ...whole, p: { ...whole.p, collapsed: true } };
+			this.lazy = state.lazyUnmount;
+			this.node = { ...whole, p: { ...whole.p, collapsed: true }, ...(this.lazy ? { c: [] } : {}) };
 			return this.node;
 		}
 	}
@@ -222,9 +223,9 @@ function install(state) {
 			const wall =
 				this.startedAt !== undefined && this.endedAt !== undefined ? this.endedAt - this.startedAt : undefined;
 			const time = this.live ? undefined : (wall ?? spent(this.blocks, cx));
-			const shown = collapsed && this.ended ? failed : [];
 			const hidden = chatTranscriptDisplayPreferences.hideToolActivity;
 			const lazy = state.lazyUnmount;
+			const shown = collapsed && this.ended && !(hidden && lazy) ? failed : [];
 			const key = [...this.blocks, ...failed, collapsed, this.live, this.ended, time, hidden, lazy];
 			if (this.key && same(this.key, key)) return this.node;
 			this.key = key;
@@ -236,7 +237,8 @@ function install(state) {
 			label.push(text([span(count, "dim")], { basis: "content" }));
 			if (failed.length > 0) label.push(node("badge", { text: `${failed.length} failed`, tone: "error" }));
 			const head = node("row", { gap: "sm", align: collapsed ? "center" : "baseline" }, label, "head");
-			const body = collapsed && lazy ? [] : this.blocks.filter(block => !shown.includes(block));
+			const rest = this.blocks.filter(block => !shown.includes(block));
+			const body = lazy && (collapsed || hidden) ? [] : rest;
 			this.node = withHidden(
 				col(
 					[
