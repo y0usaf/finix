@@ -4551,3 +4551,43 @@ section.tn-pane > .tn-body > .tn-glow {
 	font-weight: 400;
 	color: var(--t2);
 }
+:root:not(#dawn) .sf-chat-reader .sf-row > .sf-text:not(.nowrap, .trunc-end, .sf-shrink, .sf-grow) {
+	min-width: auto;
+	overflow-wrap: normal;
+}
+:root:not(#dawn) .sf-chat-reader .sf-section-body > .sf-row > .sf-text:is(.nowrap, .trunc-end) {
+	flex: 1 1 0;
+}
+:root:not(#dawn) .sf-chat-reader .pk-row :is(.pk-label, .pk-badge, .pk-fact) {
+	flex: none;
+	white-space: nowrap;
+}
+:root:not(#dawn) .sf-chat-reader .pk-row .pk-tags {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+}
+:root:not(#dawn) .sf-chat-reader .pk-row .pk-chip {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+:root:not(#dawn) .sf-chat-reader .pk-row .pk-detail {
+	flex: 1 1 0;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+:root:not(#dawn) .sf-chat-reader .pk-tabs {
+	min-height: 36px;
+	padding: 6px 12px;
+}
+:root:not(#dawn) .sf-chat-reader .pk-tab {
+	flex: none;
+	min-height: 24px;
+	padding: 0 10px;
+	white-space: nowrap;
+}
