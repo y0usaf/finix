@@ -4659,3 +4659,159 @@ section.tn-pane > .tn-body > .tn-glow {
 :root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) [data-role^='omp.bot.chat.'] [data-role='omp.bot.say'] .sf-fx-shimmer * {
 	color: var(--sand-text-secondary);
 }
+@keyframes grok-row-enter {
+	from { transform: translateY(12px); }
+	to { transform: none; }
+}
+@keyframes grok-pop-in {
+	from { opacity: 0; transform: translateY(2px) scale(0.98); }
+	to { opacity: 1; transform: none; }
+}
+:root:not(#dawn) .sf-chat-reader .sf-message > :is(.sf-msg-body, .sf-msg-av),
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md,
+:root:not(#dawn) .sf-card[data-role='omp.bot.asked'] {
+	animation: grok-row-enter 240ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+:root:not(#dawn) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md:has(> .md.streaming) > .md:not(.streaming) > :last-child,
+:root:not(#dawn) .sf-chat-reader .sf-editor.empty .sf-ed-ph,
+:root:not(#dawn) .sf-chat-reader:where(:not(.sf-chat-spine, .sf-folded)) :where(.sf-col[data-role^='omp.editor']) .sf-editor.focused,
+:root:not(#dawn) :is(#pal, #thm):not([hidden]),
+:root:not(#dawn) #pal:not([hidden]) .cmdk,
+:root:not(#dawn) #thm:not([hidden]) .cmdk,
+:root:not(#dawn) :is(.mdl-layer, .mdl:not(.shake), .tn-hd) {
+	animation: none;
+}
+:root:not(#dawn) :is(.sf-menu-pop, div.pop),
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop,
+:root:not(#dawn) .sf-chat-reader .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card,
+:root:not(#dawn) :is(.pop:not(:is(.cp, .tn-ql, .gb-peek, .kit-web-sugg, .mde-bubble)), .sf-hovercard, .tn-bn-card, .sf-col[data-role^='omp.overlay.']),
+:root:not(#dawn) .tn-ib,
+:root:not(#dawn) .tooltip,
+:root:not(#dawn) .sf-chat-reader .sf-picker.at-composer > .pk-sheet {
+	animation: grok-pop-in 100ms cubic-bezier(0.165, 0.84, 0.44, 1) backwards;
+}
+:root:not(#dawn) .sf-menu-pop.sf-menu-subpop,
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop.sf-menu-subpop,
+:root:not(#dawn) .tooltip.warm {
+	animation: none;
+}
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible > .sf-section-body,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-body {
+	transition: grid-template-rows 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible:not(.collapsed) > .sf-section-body,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible:not(.collapsed) > .sf-tool-body {
+	animation: none;
+}
+:root:not(#dawn) .sf-chat-reader .sf-chev {
+	transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible > .sf-section-head,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-head,
+:root:not(#dawn) .sf-chat-reader .sf-section.collapsible > .sf-section-head:hover,
+:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-head:hover {
+	transition: background-color 120ms ease, color 120ms ease;
+}
+:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row,
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt,
+:root:not(#dawn) #sidebar .tn-vt:not(.dragging) .nav-row:hover:not(.off):not([aria-disabled='true']),
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-tabs:not(.dragging, .flying) .tt:hover:not(.on) {
+	transition: background-color 0s, color 0s, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root:not(#dawn) #tabbar .tt :is(.nm, .sub),
+:root:not(#dawn) #tabbar .tt .sub::before {
+	transition: none;
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-item:not(.rich), .pop .mi:not(.bare)),
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi):is(:hover, .active, .sel, .open):not(.dis, .danger),
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop .sf-menu-item:not(.rich),
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item,
+:root:not(#dawn) #pal .ck-item,
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item:not([aria-selected='true']):hover,
+:root:not(#dawn) .tn-ib-row,
+:root:not(#dawn) .tn-ib-row:hover {
+	transition: none;
+}
+:root:not(#dawn) :is(.sf-menu-pop .sf-menu-item, .pop .mi):active:not(.dis, .danger),
+:root:not(#dawn) .sf-chat-reader .sf-menu-pop .sf-menu-item:not(.rich, .dis, [aria-disabled='true']):active,
+:root:not(#dawn) :is(#pal, #thm, #pick) .ck-item:not(.dis, [aria-disabled='true']):active {
+	transform: none;
+}
+:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(#pal *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']),
+:root:not(#dawn) .sf-chat-reader .sf-button:not([data-role^='omp.composer.']) {
+	transition: color 100ms ease, background-color 100ms ease, transform 50ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(#pal *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']):active:not(.disabled, .dis, .busy, :disabled),
+:root:not(#dawn) .sf-chat-reader .sf-button:not([data-role^='omp.composer.'], .disabled, .dis, :disabled, [aria-disabled='true']):active {
+	transform: scale(0.98);
+	transition-duration: 0s, 0s, 50ms;
+}
+:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-in > :is(.tb-add, .tn-ib-badge) {
+	transition: background-color 120ms ease-out, color 120ms ease-out, transform 50ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+:root:not(#dawn) .sf-chat-reader .sf-icon.sf-act,
+:root:not(#dawn) .sf-chat-reader .sf-message .sf-msg-act {
+	transition: background-color 120ms ease;
+}
+:root:not(#dawn) .sf-chat-reader .sf-message .sf-msg-act:not(:disabled, .dis, [aria-disabled='true']):active {
+	transform: scale(0.98);
+	transition-duration: 50ms;
+}
+:root:not(#dawn) .sf-chat-reader .sf-msg-acts,
+:root:not(#dawn) .sf-chat-reader :is([data-role='omp.turn.usage'], [data-role='omp.user.tools']) {
+	transform: none;
+	transition: none;
+}
+:root:not(#dawn) .sf-chat-reader:not(.sf-chat-spine) .sf-col:is([data-role='omp.editor'], [data-role='omp.editor.bash'], [data-role='omp.editor.python']) {
+	transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, border-radius 240ms cubic-bezier(0.22, 1, 0.36, 1), padding 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send'] .kbd {
+	transition: background-color 100ms ease, opacity 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:not(.disabled, .dis, [aria-disabled='true']):hover .kbd {
+	transform: none;
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.send']:not(.disabled, .dis, [aria-disabled='true']):active .kbd {
+	transform: scale(0.98);
+	transition-duration: 0s, 0s, 50ms;
+	transition-timing-function: ease, ease, cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.stop']:active {
+	transform: scale(0.98);
+	transition-duration: 50ms;
+}
+:root:not(#dawn) .sf-fx-shimmer:not([data-role='omp.hud.activity'] *) {
+	animation-duration: 2.2s;
+	animation-timing-function: steps(60);
+}
+@media (prefers-reduced-motion: reduce) {
+	:root:not(#dawn) .tooltip,
+	:root:not(#dawn) .tn-ib {
+		animation: none;
+	}
+	:root:not(#dawn) .sf-chat-reader .sf-section.collapsible > .sf-section-body,
+	:root:not(#dawn) .sf-chat-reader .sf-tool.collapsible > .sf-tool-body,
+	:root:not(#dawn) .sf-chat-reader .sf-chev,
+	:root:not(#dawn) :is(.sf-button, .btn, .icon-btn):not(#pal *):not([data-role^='omp.editor'] *):not([data-role^='omp.composer.']),
+	:root:not(#dawn) .sf-chat-reader .sf-button:not([data-role^='omp.composer.']),
+	:root:not(#dawn).lay-rail.tabs-h #tabbar .tb-in > :is(.tb-add, .tn-ib-badge),
+	:root:not(#dawn) .sf-chat-reader .sf-icon.sf-act,
+	:root:not(#dawn) .sf-chat-reader .sf-message .sf-msg-act {
+		transition: none;
+	}
+}
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-message > :is(.sf-msg-body, .sf-msg-av),
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-message > :is(.sf-msg-body, .sf-msg-av),
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-card[data-role='omp.user'] > .sf-card-body,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader [data-role^='omp.assistant'] > .sf-md,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) [data-role^='omp.assistant'] > .sf-md,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-menu-pop,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-menu-pop,
+:root:not(#dawn) :is(.sf-still, .sf-paused, .sf-covered) .sf-chat-reader .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card,
+:root:not(#dawn) .sf-chat-reader:is(.sf-still, .sf-paused, .sf-covered) .sf-overlay:is(.at-node, .at-caret) > .sf-ov-card,
+:root:not(#dawn) .sf-still .sf-message,
+:root:not(#dawn) .sf-message.sf-still {
+	animation: none;
+}
