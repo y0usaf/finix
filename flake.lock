@@ -2884,11 +2884,11 @@
     "omp-bot": {
       "flake": false,
       "locked": {
-        "lastModified": 1795434780,
-        "narHash": "sha256-3+mmwGEU1e+cmRiy0vxnIq0ouBKtuVEyYi/9ohlAEeE=",
+        "lastModified": 1795435959,
+        "narHash": "sha256-rSCs/+LaRFYYwrWbQKiq48cxGmvOpHrU2HhJKdnIZhU=",
         "owner": "y0usaf",
         "repo": "omp-bot",
-        "rev": "8cfe8632a59d61295149ea774db03b88aead6b96",
+        "rev": "a5f8a34e61528f4d92fed7fcd96dd5980dfd122e",
         "type": "github"
       },
       "original": {

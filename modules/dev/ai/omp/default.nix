@@ -755,7 +755,7 @@
   optchatCli = pkgs.writeShellScriptBin "optchat" ''
     exec ${pkgs.bun}/bin/bun ${./optchat}/cli.ts "$@"
   '';
-  ompSecret = pkgs.writeShellScriptBin "omp-secret" ''
+  ompSecret = pkgs.writeShellScriptBin "secret" ''
     PATH=${lib.makeBinPath [pkgs.age]}:$PATH exec ${pkgs.bun}/bin/bun ${secrets}/omp-secret.ts "$@"
   '';
 in {

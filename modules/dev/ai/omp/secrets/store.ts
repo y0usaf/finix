@@ -3,7 +3,6 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 export const NAME = /^[A-Z][A-Z0-9_]{0,63}$/;
-export const REFERENCE = /\$\{?SECRET_([A-Z][A-Z0-9_]{0,63})/g;
 const STATE = process.env.XDG_STATE_HOME || join(homedir(), ".local", "state");
 const BOXED = Boolean(process.env.OMP_SECRETS_DIR);
 export const ROOT = process.env.OMP_SECRETS_DIR || join(STATE, "omp-secrets");
@@ -45,10 +44,6 @@ export function scopes(): Scope[] {
 	const found = new Set<string>(existsSync(bots) ? readdirSync(bots) : []);
 	for (const bot of boxed()) if (existsSync(dir(bot))) found.add(bot);
 	return [...(existsSync(dir(undefined)) ? [undefined] : []), ...found];
-}
-
-export function names(command: string): string[] {
-	return [...new Set([...command.matchAll(REFERENCE)].map(match => match[1]))];
 }
 
 export function ttl(text: string | undefined): number | null {

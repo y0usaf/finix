@@ -1,15 +1,15 @@
-import { current, forget, held, label, list, meta, NAME, names, pending, reveal, scopes, share, store, type Request, type Scope } from "./store";
+import { current, forget, held, label, list, meta, NAME, pending, reveal, scopes, share, store, type Request, type Scope } from "./store";
 
-const USAGE = `usage: omp-secret [COMMAND]
+const USAGE = `usage: secret [COMMAND]
   (nothing)                              secrets omp chats and bots asked for and haven't got, and the ones set
   NAME [--bot BOT | --user] [--ttl TTL]  enter NAME's value, masked, for the bot that asked, else shared (--user): every bot without its own NAME and your own chats read it (TTL: 30m, 12h, 7d or never; default the ask's, else 24h)
   list [--bot BOT | --user]              set secrets: scope, name, when set, when they expire; never values
   forget NAME [--bot BOT | --user]       delete a secret now
   sync [--bot BOT]                       copy the shared secrets each boxed bot's roster entry allows into its own store (omp-bot-box runs it before a boxed bot starts)
-  run                                    run the command on stdin with its $SECRET_ names set (the bot's own, else the shared one) and their values redacted (omp's bash hook uses it)`;
+  run NAME... -- CMD [ARG...]            run CMD with $SECRET_NAME set for each NAME (the bot's own, else the shared one) and their values redacted from its output; runs nothing if any NAME is missing`;
 
 function fail(message: string): never {
-	console.error(`omp-secret: ${message}`);
+	console.error(`secret: ${message}`);
 	process.exit(1);
 }
 
@@ -150,19 +150,35 @@ async function pipe(stream: ReadableStream<Uint8Array>, sink: ReturnType<typeof 
 	sink.end();
 }
 
-async function run() {
+async function run(args: string[]) {
+	const split = args.indexOf("--");
+	const wanted = split < 0 ? [] : args.slice(0, split);
+	const argv = split < 0 ? [] : args.slice(split + 1);
+	if (wanted.length === 0 || argv.length === 0 || !wanted.every(name => NAME.test(name))) fail("usage: secret run NAME [NAME...] -- CMD [ARG...]");
 	const bot = current();
-	const command = (await new Response(Bun.stdin.stream()).text()).replace(/\n$/, "");
 	const env: Record<string, string | undefined> = { ...process.env };
+	for (const key of Object.keys(env)) if (key.startsWith("SECRET_")) delete env[key];
 	const values: [string, Buffer][] = [];
-	for (const name of names(command)) {
+	const missing: string[] = [];
+	for (const name of new Set(wanted)) {
 		const found = held(bot, name);
-		const value = found && (await reveal(found.scope, name));
-		if (value === undefined) fail(`${label(bot)} has no secret ${name}, or it expired; ask for it with the secret tool`);
+		const value = found && (await reveal(found.scope, name).catch(() => undefined));
+		if (value === undefined) {
+			missing.push(name);
+			continue;
+		}
 		env[`SECRET_${name}`] = value;
 		if (value.length > 0) values.push([name, Buffer.from(value)]);
 	}
-	const child = Bun.spawn(["bash", "-c", command], { env, stdin: "ignore", stdout: "pipe", stderr: "pipe" });
+	if (missing.length > 0) {
+		fail(`${label(bot)} has no ${missing.join(", ")} (never set, forgotten, expired or unreadable), so nothing ran. Ask the user to run: ${missing.map(name => `secret ${name}${bot ? flag(bot) : ""}`).join("; ")}`);
+	}
+	let child: ReturnType<typeof Bun.spawn>;
+	try {
+		child = Bun.spawn(argv, { env, stdin: "inherit", stdout: "pipe", stderr: "pipe" });
+	} catch (error) {
+		fail(`can't run ${argv[0]}: ${error.message}`);
+	}
 	for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) process.on(signal, () => child.kill(signal));
 	const out = values.length ? redactor(values, process.stdout) : undefined;
 	const err = values.length ? redactor(values, process.stderr) : undefined;
@@ -174,12 +190,13 @@ async function run() {
 }
 
 const [command, ...args] = process.argv.slice(2);
+if (command === "run") await run(args);
 const { rest, opts, scope } = flags(args);
 switch (command) {
 	case undefined: {
 		const open = asked();
 		if (open.length === 0) console.log("Nothing is waiting for a secret.");
-		for (const entry of open) console.log(`${label(entry.bot)} asks for ${entry.name} (${when(entry.at)}): ${entry.reason}\n  omp-secret ${entry.name}${open.filter(other => other.name === entry.name).length > 1 ? flag(entry.bot) : ""}`);
+		for (const entry of open) console.log(`${label(entry.bot)} asks for ${entry.name} (${when(entry.at)}): ${entry.reason}\n  secret ${entry.name}${open.filter(other => other.name === entry.name).length > 1 ? flag(entry.bot) : ""}`);
 		console.log("");
 		show();
 		break;
@@ -195,9 +212,6 @@ switch (command) {
 		console.log(`Forgot ${label(bot)}'s ${name}.`);
 		break;
 	}
-	case "run":
-		await run();
-		break;
 	case "sync":
 		await share(opts.bot).catch(error => fail(error.message));
 		break;

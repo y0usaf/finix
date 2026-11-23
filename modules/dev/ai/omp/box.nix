@@ -733,7 +733,7 @@
     age = "${pkgs.age}/bin/age";
     age-keygen = "${pkgs.age}/bin/age-keygen";
     mint-ctl = "${inputPackages.mint.default}/bin/mint-ctl";
-    omp-secret = pkgs.writeScript "omp-secret" ''
+    secret = pkgs.writeScript "secret" ''
       #!/bin/sh
       exec bun "''${0%/*}/../ext/secrets/omp-secret.ts" "$@"
     '';

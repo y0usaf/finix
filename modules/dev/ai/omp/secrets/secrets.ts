@@ -4,13 +4,9 @@ import { boundKeys, editorKey, interruptKey, OverlayPanel } from "@oh-my-pi/pi-t
 import { formTheme } from "@oh-my-pi/pi-tui/chrome/form-theme";
 import { matchesAppInterrupt } from "@oh-my-pi/pi-tui/keybinding-matchers";
 import { actionBar, actionButton } from "@oh-my-pi/pi-tui/native/overlay";
-import { current, dir, forget, held, label, list, meta, modified, NAME, names, pending, request, reveal, type Scope, settle, store, ttl } from "./store";
+import { current, dir, forget, held, label, list, meta, modified, NAME, pending, request, reveal, type Scope, settle, store, ttl } from "./store";
 
 const WAIT_MS = 600_000;
-
-function quote(text: string): string {
-	return `'${text.replaceAll("'", `'\\''`)}'`;
-}
 
 function text(message: string) {
 	return { content: [{ type: "text", text: message }], details: {} };
@@ -75,7 +71,6 @@ class SecretEntry extends OverlayPanel {
 
 export default function secrets(pi) {
 	const bot = current();
-	const runner = Bun.which("omp-secret");
 	const z = pi.zod;
 	const known = new Map<string, { mtime: number; value: string }>();
 	const seen = new Map<string, string>();
@@ -172,7 +167,7 @@ export default function secrets(pi) {
 		name: "secret",
 		label: "Secret",
 		description:
-			"Manage user-supplied secrets (hidden from you; write $SECRET_NAME in bash, scrubbed in output). action=request (name like GITHUB_TOKEN, one-line reason, optional ttl 30m|12h|7d|never default 24h, optional shared), list, or forget. Never ask for or inspect values.",
+			"Manage user-supplied secrets (hidden from you; in bash, `secret run NAME -- CMD` gives CMD $SECRET_NAME and scrubs it from output). action=request (name like GITHUB_TOKEN, one-line reason, optional ttl 30m|12h|7d|never default 24h, optional shared), list, or forget. Never ask for or inspect values.",
 		parameters: z.object({
 			action: z.enum(["request", "list", "forget"]),
 			name: z.string().optional(),
@@ -185,7 +180,7 @@ export default function secrets(pi) {
 				const mine = list(bot);
 				const shared = bot ? list(undefined).filter(found => !mine.some(own => own.name === found.name)) : [];
 				if (mine.length + shared.length === 0) return text("You hold no secrets.");
-				const line = (found, whose: string) => `${found.name} (as $SECRET_${found.name}), ${whose}expires ${found.expires === null ? "never" : new Date(found.expires).toISOString()}`;
+				const line = (found, whose: string) => `${found.name} (use: secret run ${found.name} -- CMD), ${whose}expires ${found.expires === null ? "never" : new Date(found.expires).toISOString()}`;
 				return text([...mine.map(found => line(found, "")), ...shared.map(found => line(found, "shared with all bots, "))].join("\n"));
 			}
 			const name = params.name ?? "";
@@ -197,7 +192,7 @@ export default function secrets(pi) {
 			}
 			const scope = params.shared ? undefined : bot;
 			if (scope === undefined && bot && boxed) return text("A bot in a box can't add a shared secret; ask for your own with shared left out, or the user can ask a bot outside a box to add the shared one.");
-			if (scope === undefined ? meta(undefined, name) : held(bot, name)) return text(`${name} is already set; use $SECRET_${name} in bash.`);
+			if (scope === undefined ? meta(undefined, name) : held(bot, name)) return text(`${name} is already set; use it with secret run ${name} -- CMD in bash.`);
 			const reason = (params.reason ?? "").trim();
 			if (!reason) return text("Give a one-line reason so the user knows what the secret is for.");
 			try {
@@ -206,7 +201,7 @@ export default function secrets(pi) {
 				return text(error.message);
 			}
 			request(scope, name, reason, params.ttl);
-			const set = `The user set ${name}. Use $SECRET_${name} in bash; you will never see its value.`;
+			const set = `The user set ${name}. Use it with secret run ${name} -- CMD in bash; you will never see its value.`;
 			if (ctx?.mode === "tui") {
 				await enter(ctx, scope, name, reason, params.ttl, signal);
 				if (held(bot, name)) return text(set);
@@ -229,21 +224,6 @@ export default function secrets(pi) {
 		void (async () => {
 			for (const ask of pending()) if (ask.bot === bot && !held(bot, ask.name)) await enter(ctx, bot, ask.name, ask.reason, ask.ttl);
 		})();
-	});
-
-	pi.on("tool_call", async event => {
-		if (event.toolName !== "bash") return undefined;
-		const command = String(event.input?.command ?? "");
-		const wanted = names(command);
-		if (wanted.length === 0) return undefined;
-		if (!runner) return { block: true, reason: "omp-secret is not on PATH, so secrets can't be used here." };
-		if (command.startsWith(`${quote(runner)} run <<`)) return undefined;
-		const missing = wanted.filter(name => !held(bot, name));
-		if (missing.length > 0) {
-			return { block: true, reason: `No secret ${missing.join(", ")} (never set, forgotten or expired). Ask the user for it with the secret tool.` };
-		}
-		const end = `OMP_SECRET_${crypto.randomUUID().replaceAll("-", "")}`;
-		return { input: { ...event.input, command: `${quote(runner)} run <<'${end}'\n${command}\n${end}` } };
 	});
 
 	pi.on("tool_result", async event => {
