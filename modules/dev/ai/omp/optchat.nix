@@ -62,6 +62,7 @@ in {
     environment = {
       HOME = home;
       XDG_STATE_HOME = "${home}/.local/state";
+      OPTCHAT_IDLE_MS = "0";
     };
     command = "${service}/bin/optchat";
   };

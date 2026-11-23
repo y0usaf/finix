@@ -7,11 +7,8 @@ inputs: let
     patches =
       (old.patches or [])
       ++ [
-        ./dev/ai/omp/advisor-dedup.patch
         ./dev/ai/omp/advisor-bounded-replay.patch
         ./dev/ai/omp/date-cwd-append-only.patch
-        ./dev/ai/omp/spawn-launch-check.patch
-        ./dev/ai/omp/advisor-claim-hold.patch
         ./dev/ai/omp/lazy-restore-scan.patch
         ./dev/ai/omp/clipboard-paste-deadline.patch
         ./dev/ai/omp/composer-cost-brief.patch
@@ -27,6 +24,7 @@ inputs: let
         ./dev/ai/omp/refusal-fallback.patch
         ./dev/ai/omp/agy-session-idle-reap.patch
         ./dev/ai/omp/agy-warm-cancel.patch
+        ./dev/ai/omp/helper-compaction.patch
       ];
     postPatch =
       (old.postPatch or "")

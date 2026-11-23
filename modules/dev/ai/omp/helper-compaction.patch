@@ -1,0 +1,10 @@
+--- a/packages/coding-agent/src/task/executor.ts
++++ b/packages/coding-agent/src/task/executor.ts
+@@ -1287,6 +1287,7 @@
+ 			// that has no counterpart here, so inheriting `false` left hours-long
+ 			// worker runs sailing past the configured threshold until the provider
+ 			// rejected the context (#13211). A per-spawn override still wins.
++			"compaction.enabled": true,
+ 			"compaction.midTurnEnabled": true,
+ 			...overrides,
+ 		},

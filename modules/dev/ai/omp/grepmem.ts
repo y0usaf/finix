@@ -364,6 +364,7 @@ function runScan(job: ScanJob, signal?: AbortSignal): Promise<ScanRun> {
 }
 
 export default function grepmem(pi: ExtensionAPI): void {
+	if (!process.env.OMP_BOT_NAME) return;
 	const z = pi.zod;
 
 	pi.registerTool({
