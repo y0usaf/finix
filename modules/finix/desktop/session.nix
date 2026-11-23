@@ -10,8 +10,6 @@
 
   tomoePkg = inputPackages.tomoe.default;
 
-  # The known-good pair: the Tomoe the tomoe-stable revision of finix pins, with the
-  # config that revision generates for this host, never the one in ~/.config.
   stableConfig = flakeInputs.tomoe-stable.nixosConfigurations.${config.networking.hostName}.config;
   tomoeStable = pkgs.writeShellScriptBin "tomoe-stable" ''
     exec ${inputPackages.tomoe-stable.tomoe}/bin/tomoe --config ${stableConfig.manzil.users.${userName}.files.".config/tomoe/init.lisp".source} "$@"

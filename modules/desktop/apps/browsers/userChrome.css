@@ -1,8 +1,3 @@
-/* One design system for the whole chrome: the two bars, the URL pop-out and
-   its results, right-click menus, panels and tooltips. A surface is solid
-   paper and a row is one line of it; whatever a pointer or the keyboard lands
-   on becomes a block of ink, so the same row looks the same in every one of
-   them. Nothing here is translucent or blurred. */
 :root {
   --font-family: monospace;
   --chrome-font-size: 11px;
@@ -13,25 +8,20 @@
   --pop-top: 22vh;
   --pop-row: calc(2 * var(--line));
 
-  /* surface: the fill of every chrome surface and the ink on it. */
   --surface: var(--lwt-accent-color, -moz-dialog);
   --surface-ink: color-mix(in srgb, contrast-color(var(--surface)) 94%, var(--surface));
   --soft: color-mix(in srgb, var(--surface-ink) 86%, var(--surface));
   --faint: color-mix(in srgb, var(--surface-ink) 78%, var(--surface));
 
-  /* row: one menu entry, result or panel button. hot is that row under the
-     pointer or on the keyboard, and hot-ink is the solid ink it becomes. */
   --row-h: calc(var(--line) + 8px);
   --row-inset: 2ch;
   --row-hot: var(--surface-ink);
   --row-hot-ink: var(--surface);
   --row-hot-soft: color-mix(in srgb, var(--row-hot-ink) 86%, var(--row-hot));
 
-  /* divider: every rule and every outline between surfaces. */
   --divider-ink: color-mix(in srgb, var(--surface-ink) 30%, var(--surface));
   --divider-h: 8px;
 
-  /* motion: row highlights change together, at one speed. */
   --tint: var(--snap) linear;
 
   --accent: var(--focus-outline-color, AccentColor);
@@ -174,8 +164,6 @@ body {
   transition: color var(--tint), background-color var(--tint) !important;
 }
 
-/* Pointing at a control, or leaving one open or on, is the same row highlight
-   the rest of the chrome uses: a block of ink. */
 :is(
   #sidebar-button,
   #back-button,
@@ -357,10 +345,6 @@ moz-urlbar-slot {
   display: contents !important;
 }
 
-/* The address is a box the size of the URL in it, so the whole row is one
-   object: [ example.com/path ]. It keeps the row's height whether the URL is
-   long, short, or being typed into. The brackets are anchored to the text box
-   because the wrapper around it is a XUL box that fills the row. */
 .urlbar-input-box {
   display: flex !important;
   align-items: center !important;
@@ -423,8 +407,6 @@ findbar .findbar-textbox::selection {
   color: var(--warn) !important;
 }
 
-/* Site info and the page actions are single-character marks pinned to the row's
-   ends, so they never push the address off centre and the row keeps its size. */
 #trust-icon-container {
   display: flex !important;
   align-items: center !important;
@@ -518,8 +500,6 @@ findbar .findbar-textbox::selection {
   width: 100% !important;
   max-height: 60vh !important;
   overflow-y: auto !important;
-  /* The results hang off the pop-out box as one object: its side and bottom
-     rules line up with the box's own, and its top rule is the box's border. */
   border: 1px solid var(--divider-ink) !important;
   border-top: 0 !important;
   padding-block: 0 !important;
@@ -547,8 +527,6 @@ findbar .findbar-textbox::selection {
   transition: background-color var(--tint), color var(--tint) !important;
 }
 
-/* The row under the pointer and the row the keyboard is on are the same block
-   of ink that every menu and panel row uses. */
 .urlbarView-row:is(:hover, [selected]) {
   --soft: var(--row-hot-soft);
   background-color: var(--row-hot) !important;
@@ -683,10 +661,6 @@ spacer[part^="overflow-"]:is(:has(+ scrollbox[orient="horizontal"]), scrollbox[o
   display: none !important;
 }
 
-/* The group sits in the middle of the strip while it fits: the two auto margins
-   share the free space, and give it up entirely once the tabs overflow, so an
-   overflowing strip is laid out from the start and stock scrolling still brings
-   an off-screen selected tab into view. */
 #tabbrowser-arrowscrollbox > .tabbrowser-tab:nth-child(1 of .tabbrowser-tab[fadein], tab-group),
 #tabbrowser-arrowscrollbox > tab-group:nth-child(1 of .tabbrowser-tab[fadein], tab-group) > .tab-group-label-container {
   margin-inline-start: auto !important;
@@ -772,8 +746,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   color: var(--surface-ink) !important;
 }
 
-/* A tab is a row on the strip, so pointing at one is the same block of ink a
-   menu row or a result becomes. */
 .tabbrowser-tab:hover {
   color: var(--row-hot-ink) !important;
   background-color: var(--row-hot) !important;
@@ -836,9 +808,6 @@ tab-group[collapsed] > .tabbrowser-tab:not([visuallyselected]) {
   text-overflow: ellipsis !important;
 }
 
-/* The underline is a box under the label, so it can be drawn and withdrawn
-   rather than switched: the tab that loses the selection retracts it, the one
-   that gains it runs it out, both in the same direction. */
 .tab-label::after {
   content: "" !important;
   position: absolute !important;
@@ -1173,8 +1142,6 @@ body:has(#toolbar-menubar:not([inactive])) {
   pointer-events: none !important;
 }
 
-/* Every floating surface — panel, menu, tooltip, tab preview — is the same
-   object: the paper fill, one divider rule around it, rows of one height. */
 #notification-popup,
 #permission-popup,
 #identity-popup,
@@ -1280,8 +1247,6 @@ menuseparator:not([hidden]) {
   background-repeat: no-repeat !important;
 }
 
-/* Firefox paints the account row's rule with its brand gradient; a separator
-   is only ever the divider ink, so nothing else draws a line there. */
 :is(menupopup, panel) :is(toolbarseparator, menuseparator)::before,
 :is(menupopup, panel) :is(toolbarseparator, menuseparator)::after {
   border: 0 !important;
