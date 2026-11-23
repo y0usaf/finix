@@ -50,6 +50,12 @@
       uid = 2006;
       folders = [];
     }
+    {
+      name = "CU-Security-Bot";
+      user = "cusecbot";
+      uid = 2007;
+      folders = ["cu-workbench"];
+    }
   ];
   loginPaths = [
     ".npmrc"
