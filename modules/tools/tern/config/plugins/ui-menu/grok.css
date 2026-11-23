@@ -4633,6 +4633,8 @@ section.tn-pane > .tn-body > .tn-glow {
 :root:not(#dawn) .sf-chat-reader [data-role^='omp.bot.chat.'] [data-role='omp.bot.say'] .sf-fx-shimmer {
 	background-image: linear-gradient(90deg, color-mix(in srgb, var(--sand-text-primary) 40%, transparent) 0%, color-mix(in srgb, var(--sand-text-primary) 40%, transparent) 25%, var(--sand-text-primary) 60%, color-mix(in srgb, var(--sand-text-primary) 40%, transparent) 75%, color-mix(in srgb, var(--sand-text-primary) 40%, transparent) 100%);
 	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
 	animation: grok-activity-shimmer 2.2s steps(60) infinite;
 }
 :root:not(#dawn) .sf-chat-reader [data-role^='omp.bot.chat.'] [data-role='omp.bot.say'] .sf-fx-shimmer * {
