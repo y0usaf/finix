@@ -194,7 +194,10 @@
 
     emeraldian.url = "github:y0usaf/emeraldian/4557d20ce664a12dec7d5acf3d76a467cf4972a4";
 
-    nectarlink.url = "github:thtbee/nectarlink/2fb0091b2625a42b0de9b1e41f7a09696f50f21a";
+    nectarlink = {
+      url = "github:thtbee/nectarlink/2fb0091b2625a42b0de9b1e41f7a09696f50f21a";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     linear-cli = {
       url = "github:y0usaf/linear-cli?ref=nix-flake";
