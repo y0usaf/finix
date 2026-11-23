@@ -19,7 +19,6 @@
       "compact-eval.ts" = ./compact-eval.ts;
       "work-fold.ts" = ./work-fold.ts;
       "msg-timestamps.ts" = ./msg-timestamps.ts;
-      "grepmem.ts" = ./grepmem.ts;
       "message-interrupts.ts" = ./message-interrupts.ts;
       "crest-reroute.ts" = ./crest-reroute.ts;
       "tools.ts" = ./tools.ts;
@@ -823,7 +822,6 @@ in {
             "compact-eval.ts"
             "work-fold.ts"
             "msg-timestamps.ts"
-            "grepmem.ts"
             "message-interrupts.ts"
             "chat-look.ts"
             "box-commands.ts"
