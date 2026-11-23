@@ -737,6 +737,10 @@
       #!/bin/sh
       exec bun "''${0%/*}/../ext/secrets/omp-secret.ts" "$@"
     '';
+    optchat = pkgs.writeScript "optchat" ''
+      #!/bin/sh
+      exec bun "''${0%/*}/../ext/optchat/cli.ts" "$@"
+    '';
     omp-ablit = mkAblitBin {
       name = "omp-ablit";
       modelSpec = "ablit/${ablit.id}";

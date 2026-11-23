@@ -752,6 +752,9 @@
       "ablit-system.ts" = ./ablit-system.ts;
       optchat = ./optchat;
     };
+  optchatCli = pkgs.writeShellScriptBin "optchat" ''
+    exec ${pkgs.bun}/bin/bun ${./optchat}/cli.ts "$@"
+  '';
   ompSecret = pkgs.writeShellScriptBin "omp-secret" ''
     PATH=${lib.makeBinPath [pkgs.age]}:$PATH exec ${pkgs.bun}/bin/bun ${secrets}/omp-secret.ts "$@"
   '';
@@ -762,7 +765,7 @@ in {
     ".local/state/omp-secrets"
   ];
 
-  environment.systemPackages = [pkgs.jq pkgs.age pkgs.poppler-utils pkgs.sqlite ompSecret];
+  environment.systemPackages = [pkgs.jq pkgs.age pkgs.poppler-utils pkgs.sqlite ompSecret optchatCli];
 
   user.files =
     lib.mapAttrs' (name: source: lib.nameValuePair ".omp/agent/ext/${name}" {source = "${source}";}) extLinks
