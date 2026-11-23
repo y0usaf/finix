@@ -37,7 +37,7 @@ async function prune(pi: ExtensionAPI, ctx?: ExtensionContext): Promise<void> {
 	const active = pi.getActiveTools();
 	const kept = isGoldfish
 		? active.filter(name => !(name in GOLDFISH_DENY) && (name in GOLDFISH_ALLOW || !(name in OFF)))
-		: active.filter(name => !(name in OFF));
+		: active.filter(name => name === "bash");
 	if (kept.length !== active.length) await pi.setActiveTools(kept);
 }
 
