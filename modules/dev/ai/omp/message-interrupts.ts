@@ -11,10 +11,6 @@
 // A run started by such a message is a wake: its first model call waits a few seconds and anything
 // arriving in that window folds into the same run instead of being held, so two reports arriving
 // while idle cost one wake. A failed helper report never waits.
-//
-// OMP_MESSAGE_INTERRUPTS=1 turns the interrupt behavior on. OMP_MESSAGE_INTERRUPTS_LOG=path appends
-// one JSON line per decision (hold, delay, fold, release, wake) for tests and for looking at what a
-// bot actually did. OMP_MESSAGE_INTERRUPTS_BATCH_MS overrides the idle batch window (3000 ms).
 import type {
 	AgentEndEvent,
 	AgentStartEvent,
@@ -22,22 +18,12 @@ import type {
 	ExtensionAPI,
 	ExtensionContext,
 } from "@oh-my-pi/pi-coding-agent";
-import * as fs from "node:fs";
 
 type Message = ContextEvent["messages"][number];
 
-const ON = process.env.OMP_MESSAGE_INTERRUPTS === "1";
-const BATCH_MS = Number(process.env.OMP_MESSAGE_INTERRUPTS_BATCH_MS) || 3_000;
-const LOG = process.env.OMP_MESSAGE_INTERRUPTS_LOG;
+const BATCH_MS = 3_000;
 const WAKE = "message-interrupts";
 const FAILED_TASK = /<task-result\b[^>]*\bstatus="(?:failed|aborted|killed)"/;
-
-function note(event: string, data: Record<string, unknown> = {}): void {
-	if (LOG === undefined) return;
-	try {
-		fs.appendFileSync(LOG, `${JSON.stringify({ time: Date.now(), event, ...data })}\n`);
-	} catch {}
-}
 
 function record(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null;
@@ -93,13 +79,8 @@ export default function messageInterrupts(pi: ExtensionAPI) {
 				},
 				{ deliverAs: "nextTurn", triggerTurn: true },
 			);
-			note("wake", { held: count });
-		} catch (error) {
-			note("wake-failed", { held: count, error: String(error) });
-		}
+		} catch {}
 	};
-
-	if (ON) return;
 
 	pi.on("agent_start", (_event: AgentStartEvent, ctx) => {
 		if (!main(ctx)) return;
@@ -121,10 +102,8 @@ export default function messageInterrupts(pi: ExtensionAPI) {
 			}
 			if (trigger === undefined) return undefined;
 			if (trigger.failed) {
-				note("wake-immediate", { kind: trigger.kind, reason: "failed" });
 				return undefined;
 			}
-			note("wake-delay", { kind: trigger.kind, ms: BATCH_MS });
 			await Bun.sleep(BATCH_MS);
 			// omp queues a report that lands during the wait and only commits it once this model
 			// call runs, so the request after the wait is where those arrivals show up: fold them
@@ -149,13 +128,11 @@ export default function messageInterrupts(pi: ExtensionAPI) {
 			if (fold) {
 				// Arrived while the wake waited out the batch window: fold it into this run.
 				run.baseline.add(info.key);
-				note("fold", { kind: info.kind, key: info.key });
 				kept.push(message);
 				continue;
 			}
 			if (!run.held.has(info.key)) {
 				run.held.add(info.key);
-				note("hold", { kind: info.kind, key: info.key });
 			}
 			dropped++;
 		}
@@ -169,12 +146,10 @@ export default function messageInterrupts(pi: ExtensionAPI) {
 		const count = run.held.size;
 		run = { fresh: true, baseline: new Set<string>(), held: new Set<string>(), foldNext: false };
 		if (count === 0) return;
-		note("release", { held: count });
 		// The user stopped this run: like omp's own background deliveries, the report joins the
 		// next deliberate turn instead of restarting what they stopped.
 		const last = [...event.messages].reverse().find(message => message.role === "assistant");
 		if (last?.role === "assistant" && last.stopReason === "aborted") {
-			note("wake-skipped", { held: count, reason: "aborted" });
 			return;
 		}
 		wake(count);

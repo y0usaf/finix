@@ -1,13 +1,11 @@
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import {
 	type AgentDefinition,
 	type ExtensionAPI,
 	type ExtensionContext,
-	getAgentDir,
 	runSubprocess,
 	settings,
 } from "@oh-my-pi/pi-coding-agent";
@@ -49,7 +47,7 @@ export interface GoldfishAuditResult {
 const MAX_DIFF_BYTES = 200000;
 const MAX_CHECK_CHARS = 40000;
 const CHECK_TIMEOUT_MS = 300000;
-const GOLDFISH_TIMEOUT_MS = Number(process.env.OMP_GOLDFISH_TIMEOUT_MS) || 600000;
+const GOLDFISH_TIMEOUT_MS = 600000;
 
 const OUTPUT_SCHEMA = {
 	type: "object",
@@ -90,11 +88,31 @@ const TOOL_SCHEMA = {
 };
 
 const DEFAULT_PROMPT = [
-	"You are Goldfish, a blind, zero-history adversarial auditor.",
-	"Inspect only the provided target paths and snapshot files using read, grep, and find.",
-	"Default verdict is SHIP. Use FIX_FIRST only for >=1 concrete blocking defect with exact file:line, reproducible failure scenario, and minimal fix.",
-	"Style nits, hypothetical refactors, and speculation must not trigger FIX_FIRST.",
-	"Use RETHINK only for fundamental architectural or design mismatches.",
+	"You are Goldfish, a blind, zero-history adversarial auditor. You have no conversation history and no allegiance to the author.",
+	"",
+	"Rules:",
+	"- Inspect only the provided target paths and snapshot files using `read`, `grep`, and `find`.",
+	"- Default verdict is `SHIP`. Returning `SHIP` with zero blocking findings when the artifact is sound is a successful audit. Never invent defects to justify running.",
+	"- Use `FIX_FIRST` only when there is at least one concrete `blocking` finding with an exact `file:line`, a reproducible failure scenario (logic bug, race condition, security flaw, resource leak, broken contract, or wrong runtime behavior), and a minimal fix.",
+	"- Style nits, hypothetical refactors, unverified speculation, and missing tests (unless a test is broken or explicitly required by the target contract) MUST NOT trigger `FIX_FIRST`. Either omit them or record them with `severity: \"note\"`.",
+	"- Reserve `RETHINK` for fundamental architectural or design mismatches where local patches cannot fix the problem.",
+	"- Verify every file path and line number directly against the files before reporting.",
+	"",
+	"Return a JSON object strictly matching:",
+	"{",
+	"  \"verdict\": \"SHIP\" | \"FIX_FIRST\" | \"RETHINK\",",
+	"  \"summary\": string,",
+	"  \"findings\": [",
+	"    {",
+	"      \"severity\": \"blocking\" | \"note\",",
+	"      \"file\": string,",
+	"      \"line\": number,",
+	"      \"issue\": string,",
+	"      \"scenario\": string,",
+	"      \"fix\": string",
+	"    }",
+	"  ]",
+	"}",
 ].join("\n");
 
 function makeSnapDir(): string {
@@ -106,67 +124,18 @@ function makeSnapDir(): string {
 	return dir;
 }
 
-function unquote(value: string): string {
-	const trimmed = value.trim();
-	if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
-		return trimmed.slice(1, -1);
-	}
-	return trimmed;
-}
-
 function loadGoldfishAgent(): AgentDefinition {
-	const candidates = [
-		process.env.OMP_GOLDFISH_AGENT,
-		join(getAgentDir(), "agents", "goldfish.md"),
-		join(dirname(fileURLToPath(import.meta.url)), "goldfish.md"),
-	].filter((p): p is string => typeof p === "string" && p.length > 0);
-
-	let filePath: string | undefined;
-	let body = DEFAULT_PROMPT;
-	let model: string[] = ["@advisor"];
-	let description = "Blind zero-history adversarial auditor";
-	let thinkingLevel: AgentDefinition["thinkingLevel"] = "auto";
-
-	for (const candidate of candidates) {
-		if (!existsSync(candidate)) continue;
-		filePath = candidate;
-		const content = readFileSync(candidate, "utf8");
-		const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/.exec(content);
-		if (!match) {
-			body = content.trim() || DEFAULT_PROMPT;
-			break;
-		}
-		const [, rawFm, rawBody] = match;
-		body = rawBody.trim() || DEFAULT_PROMPT;
-		for (const line of rawFm.split(/\r?\n/)) {
-			const idx = line.indexOf(":");
-			if (idx <= 0) continue;
-			const key = line.slice(0, idx).trim();
-			const val = unquote(line.slice(idx + 1));
-			if (key === "description" && val) description = val;
-			if (key === "model" && val) {
-				const list = val.split(",").map(s => unquote(s)).filter(Boolean);
-				if (list.length > 0) model = list;
-			}
-			if ((key === "thinkingLevel" || key === "thinking-level" || key === "thinking") && val) {
-				thinkingLevel = val as AgentDefinition["thinkingLevel"];
-			}
-		}
-		break;
-	}
-
 	return {
 		name: "goldfish",
-		description,
-		systemPrompt: body,
+		description: "Blind zero-history adversarial auditor",
+		systemPrompt: DEFAULT_PROMPT,
 		tools: ["read", "grep", "find"],
-		model,
-		thinkingLevel,
+		model: ["@advisor"],
+		thinkingLevel: "auto",
 		structured: true,
 		readSummarize: false,
 		advisor: false,
 		source: "user",
-		filePath,
 	};
 }
 

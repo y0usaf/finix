@@ -100,22 +100,9 @@ function makeSnippet(text: string, matchIndex: number, matchLen: number, windowC
 }
 
 function resolveSessionsDir(requested?: string): string | { error: string } {
-	const explicit = process.env.GREPMEM_SESSIONS_DIR?.trim();
-	const botsRoot = process.env.GREPMEM_BOTS?.trim();
-	if (requested) {
-		if (!botsRoot || requested.startsWith(".") || requested.includes("/") || requested.includes("\\")) {
-			return { error: `Cross-bot search is not enabled for this bot: ${requested}` };
-		}
-		const dir = path.join(botsRoot, requested, "sessions");
-		if (!fs.existsSync(dir)) return { error: `No sessions directory for bot: ${requested}` };
-		return dir;
-	}
-	if (explicit) {
-		if (!fs.existsSync(explicit)) return { error: `GREPMEM_SESSIONS_DIR does not exist: ${explicit}` };
-		return explicit;
-	}
+	if (requested) return { error: `Cross-bot search is not enabled for this bot: ${requested}` };
 	const name = process.env.OMP_BOT_NAME;
-	if (!name || name.startsWith(".") || name.includes("/")) return { error: "GrepMem needs OMP_BOT_NAME or GREPMEM_SESSIONS_DIR." };
+	if (!name || name.startsWith(".") || name.includes("/")) return { error: "GrepMem needs OMP_BOT_NAME." };
 	const stateRoot = process.env.OMP_BOT_STATE || path.join(process.env.XDG_STATE_HOME || path.join(process.env.HOME || "/", ".local/state"), "omp-bot");
 	const dir = path.join(stateRoot, "bots", name, "sessions");
 	if (!fs.existsSync(dir)) return { error: `No sessions directory for bot: ${name}` };
@@ -427,15 +414,6 @@ export default function grepmem(pi: ExtensionAPI): void {
 				}
 			}
 
-			let maxTsMs = Number.POSITIVE_INFINITY;
-			const maxTsEnv = process.env.GREPMEM_MAX_TS;
-			if (maxTsEnv !== undefined && maxTsEnv.length > 0) {
-				const envMs = parseTimestamp(maxTsEnv);
-				if (envMs <= 0) {
-					return { content: [{ type: "text" as const, text: `Invalid GREPMEM_MAX_TS configuration: ${maxTsEnv}` }] };
-				}
-				maxTsMs = envMs;
-			}
 
 			if (signal?.aborted) {
 				return { content: [{ type: "text" as const, text: "GrepMem search was aborted before it started." }] };
@@ -450,7 +428,7 @@ export default function grepmem(pi: ExtensionAPI): void {
 					roleFilter: params.role ?? "all",
 					sinceMs,
 					untilMs: Number.isFinite(untilMs) ? untilMs : null,
-					maxTsMs: Number.isFinite(maxTsMs) ? maxTsMs : null,
+					maxTsMs: null,
 					limit: Math.min(MAX_LIMIT, Math.max(1, params.limit ?? DEFAULT_LIMIT)),
 					contextChars: Math.min(MAX_CONTEXT, Math.max(40, params.context_chars ?? DEFAULT_CONTEXT)),
 					deadlineMs: DEADLINE_MS,

@@ -901,9 +901,6 @@
         smol: ${catalog.smolModel}
         judge: ${catalog.judgeModel}
         task: ${catalog.taskModel}
-      advisor:
-        enabled: true
-        reviewMode: agent-end
       retry:
         fallbackOn: usage-limit
         fallbackChains: ${builtins.toJSON catalog.fallbackChains}

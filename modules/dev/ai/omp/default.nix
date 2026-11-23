@@ -777,27 +777,10 @@ in {
           startup.checkUpdate = false;
           startup.setupWizard = false;
           setupVersion = 3;
-          symbolPreset = "unicode";
-          theme.dark = "titanium";
-          composer.tokenRate = false;
-          disabledExtensions = [];
           dev.autoqa = false;
           debug.enabled = false;
           exa.enabled = false;
-          colorBlindMode = false;
           hideThinkingBlock = true;
-          statusLine = {
-            sessionAccent = true;
-            contextLine = "embedded";
-          };
-          tui = {
-            renderMermaid = true;
-            scrollbackRebuild = true;
-          };
-          display = {
-            shimmer = "classic";
-            smoothStreaming = true;
-          };
           todo.enabled = false;
           grep.enabled = false;
           glob.enabled = false;
@@ -806,9 +789,7 @@ in {
           fetch.enabled = false;
           task = {
             disabledAgents = ["scout" "reviewer" "security-reviewer" "sonic" "designer" "librarian" "seance"];
-            showResolvedModelBadge = false;
             eager = "preferred";
-            enableLsp = false;
             completionProbe = false;
             softRequestBudget = 0;
             perCallModel = "on";
@@ -822,8 +803,6 @@ in {
           };
           python.interpreter = "${pkgs.python3.withPackages (ps: [ps.pillow ps.numpy ps.pandas ps.fonttools])}/bin/python3";
           codexResets.autoRedeem = "no";
-          title.icons = "nf+emoji";
-          interruptMode = "immediate";
           modelRoles = {
             default = "${catalog.defaultProvider}/${catalog.defaultModel}";
             advisor = catalog.advisorModel;
@@ -833,11 +812,7 @@ in {
           };
           retry.fallbackChains = catalog.fallbackChains;
           retry.fallbackOn = "usage-limit";
-          tier = {
-            openai = "none";
-            advisor = "none";
-            subagent = "none";
-          };
+          tier.subagent = "none";
           extensions = map (path: "${extDir}/${path}") [
             "pi-chronobreak"
             "pi-recap"
@@ -861,41 +836,12 @@ in {
           ];
         };
       };
-      ".omp/config.json" = {
-        generator = toJSON;
-        value = {
-          terminal_width_percent = 50;
-          panel_width_percent = 13;
-          ascii = true;
-          keybinds = {
-            project_next = "ctrl+l";
-            project_prev = "ctrl+h";
-            session_next = "ctrl+j";
-            session_prev = "ctrl+k";
-          };
-        };
-      };
       ".omp/agent/work-fold.json" = {
         generator = toJSON;
         value.lazyUnmount = true;
       };
-      ".omp/agent/settings.json" = {
-        generator = toJSON;
-        value = {
-          inherit (catalog) defaultProvider;
-          inherit (catalog) defaultModel;
-          defaultThinkingLevel = catalog.ompThinkingLevel;
-          enabledModels = catalog.enabledModels ++ ["antigravity-cli/*"];
-          packages = [];
-        };
-      };
       ".omp/agent/models.yml".text = builtins.readFile ./models.yml;
-      ".omp/agent/models.json" = {
-        generator = toJSON;
-        value = catalog.models;
-      };
       ".omp/agent/AGENTS.md".text = config.user.dev.prompts.agentsMd.host;
       ".omp/agent/agents/task.md".text = prompts.taskAgent;
-      ".omp/agent/agents/goldfish.md".text = prompts.goldfishAgent;
     };
 }

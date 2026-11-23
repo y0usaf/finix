@@ -6,7 +6,7 @@ import { matchesAppInterrupt } from "@oh-my-pi/pi-tui/keybinding-matchers";
 import { actionBar, actionButton } from "@oh-my-pi/pi-tui/native/overlay";
 import { current, dir, forget, held, label, list, meta, modified, NAME, names, pending, request, reveal, type Scope, settle, store, ttl } from "./store";
 
-const WAIT_MS = Number(process.env.OMP_SECRET_WAIT_MS) || 600_000;
+const WAIT_MS = 600_000;
 
 function quote(text: string): string {
 	return `'${text.replaceAll("'", `'\\''`)}'`;

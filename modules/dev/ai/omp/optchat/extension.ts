@@ -28,7 +28,7 @@ const ROW = /^(\d+)\+(\d+)\|/;
 const COMPLETED = /<task-result id="([^"]+)"[^>]*status="completed"[^>]*>/g;
 const BOT = process.env.OPTCHAT_BOT;
 const BOTS = process.env.OPTCHAT_BOTS;
-const RAW = Number(process.env.OPTCHAT_RAW) || 128_000;
+const RAW = 128_000;
 const IMAGE = 4_800;
 
 const LIFECYCLE = "task:subagent:lifecycle";
@@ -152,23 +152,6 @@ function pins(ctx: ExtensionContext): Pin[] {
 
 function take(): Pin {
 	return { view: readView(STORE), upto: readState(STORE)?.messages ?? 0, time: Date.now() };
-}
-
-function recent(store: Store, since: number, empty: string): string {
-	const rows = readView(store)
-		.split("\n")
-		.filter((row) => {
-			const match = ROW.exec(row);
-			return match !== null && Number(match[1]) + Number(match[2]) > since;
-		});
-	if (!rows.length) return empty;
-	const kept: string[] = [];
-	let size = 0;
-	for (let k = rows.length - 1; k >= 0 && size < RECENT; k--) {
-		kept.unshift(rows[k]);
-		size += bytes(rows[k]) + 1;
-	}
-	return `<chat>\n${kept.join("\n")}\n</chat>`;
 }
 
 function said(message: Logged): string {
@@ -354,11 +337,6 @@ export default function optchat(pi: ExtensionAPI): void {
 		return found;
 	}
 
-	function read(bot: string | undefined, run: (memory: Reader) => string) {
-		const memory = reader(bot);
-		return result(typeof memory === "string" ? memory : run(memory));
-	}
-
 	pi.registerTool({
 		name: "zoom",
 		label: "Zoom memory",
@@ -372,49 +350,6 @@ export default function optchat(pi: ExtensionAPI): void {
 			return { content: memory.zoom(id, params.n) };
 		},
 	});
-	pi.registerTool({
-		name: "date",
-		label: "Memory date",
-		description: `The date and time of memory message id${whose}.`,
-		parameters: z.object({ id: z.number(), ...which }),
-		async execute(_toolCallId, params) {
-			return read((params as { bot?: string }).bot, (memory) => memory.date(params.id));
-		},
-	});
-	pi.registerTool({
-		name: "recent",
-		label: "Recent memory",
-		description: `The memory lines logged after this chat's view was taken${BOTS ? "; with bot, that bot's latest lines, read-only" : ""}.`,
-		parameters: z.object({ ...which }),
-		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-			const bot = (params as { bot?: string }).bot;
-			return read(bot, (memory) =>
-				memory === own
-					? recent(own.store, (BOT && active(ctx) ? snap?.upto : pins(ctx).at(-1)?.upto) ?? 0, "Nothing was logged after this chat's view was taken.")
-					: recent(memory.store, 0, `${bot} has logged nothing yet.`),
-			);
-		},
-	});
-	if (BOTS) {
-		pi.registerTool({
-			name: "memories",
-			label: "Bot memories",
-			description: "The bots that keep a memory, with how many messages each holds; pass a name as bot to zoom, date or recent.",
-			parameters: z.object({}),
-			async execute() {
-				const rows: string[] = [];
-				let names: string[] = [];
-				try {
-					names = fs.readdirSync(BOTS).sort();
-				} catch {}
-				for (const name of names) {
-					const state = readState(open(path.join(BOTS, name, "optchat")));
-					if (state !== undefined) rows.push(`${name}: ${state.messages} messages${name === BOT ? " (you)" : ""}`);
-				}
-				return result(rows.length ? rows.join("\n") : "No bot keeps a memory yet.");
-			},
-		});
-	}
 
 	function backfill(ctx: ExtensionContext): void {
 		const file = path.join(STORE.log, `${ctx.sessionManager.getSessionId()}.jsonl`);
