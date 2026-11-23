@@ -1,0 +1,96 @@
+diff --git a/desktop/app/src/bridge/app.rs b/desktop/app/src/bridge/app.rs
+index 40aac1c..0d9ca05 100644
+--- a/desktop/app/src/bridge/app.rs
++++ b/desktop/app/src/bridge/app.rs
+@@ -595,6 +595,10 @@ pub fn toggle_shelf_from_anywhere() {
+ /// showing how far the download is. The app quits for the installer only
+ /// once the download is checked; until then it keeps working.
+ pub fn install_update_in_background() {
++    if true {
++        tracing::warn!("update install refused: updates are managed by Nix");
++        return;
++    }
+     let Some(qt) = controller() else { return };
+     let started = qt.queue(|mut object| {
+         if object.update_busy {
+diff --git a/desktop/app/src/bridge/report.rs b/desktop/app/src/bridge/report.rs
+index a8c8ae5..93fd278 100644
+--- a/desktop/app/src/bridge/report.rs
++++ b/desktop/app/src/bridge/report.rs
+@@ -405,7 +405,7 @@ pub fn follow_up() {
+ /// Sends today's count (`diag::usage`) if it hasn't gone yet.
+ fn daily_count() {
+     // Builds from source and test runs aren't installs.
+-    if cfg!(debug_assertions) {
++    if true {
+         return;
+     }
+     let dir = diag_dir();
+diff --git a/desktop/app/src/updater.rs b/desktop/app/src/updater.rs
+index 0b8b6d1..d500604 100644
+--- a/desktop/app/src/updater.rs
++++ b/desktop/app/src/updater.rs
+@@ -371,6 +371,9 @@ struct Asset {
+ 
+ /// The newest build for this install's channel, if it's newer than this one.
+ fn latest() -> Result<Option<Update>, String> {
++    if true {
++        return Ok(None);
++    }
+     latest_for(channel(), env!("CARGO_PKG_VERSION"))
+ }
+ 
+@@ -664,6 +667,10 @@ fn task_registered() -> bool {
+ /// Blocking. Returns what went wrong, in words for the user. On success the
+ /// app is about to quit for the installer.
+ pub fn install(progress: impl FnMut(u64, u64)) -> Result<(), String> {
++    if true {
++        tracing::warn!("update install refused: updates are managed by Nix");
++        return Err("Updates are managed by Nix.".into());
++    }
+     let update = available().ok_or("There's no update to install.")?;
+     let staged = stage(&update, progress).map_err(|e| {
+         tracing::warn!(error = %e, "update download failed");
+@@ -776,6 +783,9 @@ fn sha256_file(path: &Path) -> std::io::Result<String> {
+ /// cut short before), checks it, and returns its path. Reuses one already
+ /// downloaded and checked.
+ pub fn stage(update: &Update, progress: impl FnMut(u64, u64)) -> Result<PathBuf, StageError> {
++    if true {
++        return Err(StageError::Disk("updates are managed by Nix".into()));
++    }
+     let expected = expected_hash(update)?;
+     let dir = staging_dir();
+     #[cfg(target_os = "linux")]
+@@ -969,6 +979,10 @@ pub fn run_elevated(channel: Option<&str>) -> ExitCode {
+ /// [`service_dir`] checked there; with `open_after`, the installer opens the
+ /// new version (`/RUN`).
+ fn install_latest(log: &dyn Fn(&str), open_after: bool) -> ExitCode {
++    if true {
++        log("refused: updates are managed by Nix");
++        return ExitCode::FAILURE;
++    }
+     let update = match latest() {
+         Ok(Some(update)) => update,
+         Ok(None) => {
+@@ -1116,6 +1130,9 @@ fn service_dir() -> std::io::Result<PathBuf> {
+ /// the release's sums: copied from the app's download when that matches,
+ /// downloaded otherwise. Errors are for the log.
+ fn download_verified(update: &Update, dir: &Path) -> Result<PathBuf, String> {
++    if true {
++        return Err("updates are managed by Nix".into());
++    }
+     let expected = expected_hash(update).map_err(|e| e.to_string())?;
+     let path = dir.join(&update.installer_name);
+     // Copied first and checked after, so what's checked is what runs.
+@@ -1242,6 +1259,11 @@ fn relaunch_after_install(exe: &Path, version: &str) -> Result<(), String> {
+ fn install_with_prompt(update: &Update, staged: &Path) -> Result<(), String> {
+     use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
+ 
++    if true {
++        tracing::warn!("update installer refused: updates are managed by Nix");
++        return Err("Updates are managed by Nix.".into());
++    }
++
+     let failed = |e: String| {
+         tracing::warn!(error = e, "update failed");
+         tr!("Updater", "The update couldn't be started. Try again.")
