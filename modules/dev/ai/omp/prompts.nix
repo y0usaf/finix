@@ -5,15 +5,13 @@
     description = "Zero-prompt OMP agent definitions.";
   };
 
-  config.user.dev.ompPrompts = {
-    taskAgent = ''
-      ---
-      name: "task"
-      description: "General-purpose helper"
-      spawns: "*"
-      model: "@task"
-      thinking-level: "auto"
-      ---
-    '';
-  };
+  config.user.dev.ompPrompts.taskAgent = ''
+    ---
+    name: "task"
+    description: "General-purpose helper"
+    spawns: "*"
+    model: "@task"
+    thinking-level: "auto"
+    ---
+  '';
 }

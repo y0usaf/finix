@@ -52,11 +52,12 @@
       })
     modelDirs;
 
-  modelDir = name: pkgs.linkFarm "bolo-model-${name}" (lib.mapAttrsToList (f: src: {
-    name = f;
-    path = src;
-  })
-  models.${name}.files);
+  modelDir = name:
+    pkgs.linkFarm "bolo-model-${name}" (lib.mapAttrsToList (f: src: {
+        name = f;
+        path = src;
+      })
+      models.${name}.files);
 
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
