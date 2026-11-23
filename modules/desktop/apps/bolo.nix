@@ -52,7 +52,11 @@
       })
     modelDirs;
 
-  modelDir = name: "${config.user.homeDirectory}/.local/share/bolo/models/${name}";
+  modelDir = name: pkgs.linkFarm "bolo-model-${name}" (lib.mapAttrsToList (f: src: {
+    name = f;
+    path = src;
+  })
+  models.${name}.files);
 
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
@@ -135,16 +139,7 @@ in {
       })
     ];
 
-    user.files =
-      {
-        ".config/bolo/manifest.json".source = manifestFile;
-      }
-      // lib.foldl' (acc: name:
-        acc
-        // lib.mapAttrs' (f: src:
-          lib.nameValuePair ".local/share/bolo/models/${name}/${f}" {source = src;})
-        models.${name}.files) {}
-      (lib.attrNames (lib.filterAttrs (_: m: m ? files) models));
+    user.files.".config/bolo/manifest.json".source = manifestFile;
 
     finit.services.bolod = {
       description = "bolo speech-to-text daemon (${userName})";
