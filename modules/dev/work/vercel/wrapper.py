@@ -53,8 +53,6 @@ if not account:
             owner = origin.removeprefix(prefix).split('/')[0].lower()
             account = @owners@.get(owner, '')
             break
-# A copy built for one account answers as that account wherever a folder with no GitHub origin cannot decide; on
-# the host nothing is substituted here, and the command below says what to do instead.
 account = account or '@default@'
 if account not in ('personal', 'work'):
     fail('use vercel-personal/vercel-work or set VERCEL_ACCOUNT=personal|work')

@@ -8,18 +8,6 @@
   userName = config.user.name;
   home = config.user.homeDirectory;
   inherit (config.user) runtimeDir;
-  # A headed Chromium on the desktop that baobot, in omp-box, drives for Taobao over DevTools. It binds
-  # 127.0.0.1 only; QEMU's user networking hands the box the host's loopback as 10.0.2.2, as it does the
-  # model gateway on 8899, so the box reaches it and the LAN never does. Its own profile, apart from the
-  # everyday browser's, and apart from the box's own headless browser-baobot on 9222. Both of its ports are
-  # guarded in the box (box.nix) the way that headless one is: only baobot may connect, since DevTools carries
-  # the logged-in session and has no authentication of its own.
-  #
-  # Nothing starts it at boot: a browser no one asked for costs a few hundred MB of RAM for the whole
-  # session. What holds the port the box reaches (9233) is `broker`: a connection there starts the
-  # browser when it is down and then carries the connection to its DevTools, which listens on 9234. So
-  # a bot that just connects finds a browser, and every bot in the box shares that one browser. The
-  # desktop entry, or `baobot-chromium` on a shell, starts the same browser and opens a window in it.
   port = 9233;
   devtoolsPort = 9234;
   state = "${home}/.local/state/baobot-desktop";
@@ -27,9 +15,6 @@
   url = "https://www.taobao.com";
   appId = "baobot-chromium";
 
-  # Chromium if it is not already up, in the desktop session. It is the only thing that starts the
-  # browser, so the browser starts the same way whoever asked: the broker, the desktop entry, or a
-  # shell. Callers that arrive together wait on the lock and share the one browser.
   ensure = pkgs.writeShellScriptBin "baobot-chromium-ensure" ''
     set -eu
     PATH=${lib.makeBinPath [pkgs.coreutils pkgs.curl pkgs.procps pkgs.util-linux]}:$PATH
@@ -117,8 +102,6 @@ in {
   user = {
     persist.directories = [".local/state/baobot-desktop"];
 
-    # The broker and the DevTools behind it, as the box reaches this host's loopback (10.0.2.2); box.nix opens
-    # both ports to baobot alone inside the guest.
     dev.ompBoxHostCdp.baobot.ports = [port devtoolsPort];
 
     ui.tomoe.extraConfig =
@@ -152,9 +135,6 @@ in {
     };
   };
 
-  # What the box connects to at 10.0.2.2:${port}: the browser starts when that port is asked for, and
-  # nothing else on the host is reachable from the box through it. Only baobot gets this far: the box refuses
-  # every other box user at ${toString port} and ${toString devtoolsPort} before either one answers.
   finit.services.baobot-chromium = {
     description = "baobot's Taobao Chromium, started when the box connects (${userName})";
     user = userName;
