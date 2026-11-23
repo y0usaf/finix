@@ -1,8 +1,5 @@
 {
   pkgs,
-  # The account this copy answers as where neither VERCEL_ACCOUNT nor a GitHub origin picks one. The host leaves it
-  # empty, since it holds both logins and refuses to guess; a copy built into a box that exists for one account
-  # names it, so `vercel whoami` there needs neither a repository nor an environment variable.
   default ? "",
   ...
 }: let

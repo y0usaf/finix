@@ -28,15 +28,12 @@ usage: omp-box [OMP ARGS...]   run omp in the box, in this folder
 EOF
 }
 
-# The box is ready once its root-run share service has mounted what the grants name.
 up() { "${ssh[@]}" -o ConnectTimeout=1 "$target" "test -e /run/omp-box/ready" 2>/dev/null; }
 
 fail() { printf 'omp-box: %s\n' "$*" >&2; exit 1; }
 
 covers() { local base=${1%/}; case "$2/" in "$base"/*) return 0 ;; *) return 1 ;; esac; }
 
-# Where a grant appears in the box: paths inside the user's home keep their place under it, so a bot's folder
-# shows up in the bot's own home and nowhere else. The user's own sessions may also name any absolute path.
 box_target() {
   local path=$1 who=$2 tilde='~'
   case $path in
@@ -56,19 +53,11 @@ apply_host() {
     bind) if ! findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1; then /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; fi ;;
     ro) if ! findmnt -n -o TARGET "$shares/$name" >/dev/null 2>&1; then /run/wrappers/bin/sudo -n mount --bind "$path" "$shares/$name"; fi; if test -w "$shares/$name"; then /run/wrappers/bin/sudo -n mount -o remount,bind,ro "$shares/$name"; fi ;;
   esac
-  # Nothing here touches the shared files: a bot in the box is another Unix user, and it works in the folder through
-  # a view that makes the host user's files its own (omp-box/guest.nix), so the host's modes stay the host's own and
-  # no file is rewritten for the box's benefit.
 }
 
-# What each user gets, one `user grant target flags` line per grant, read by the box's own root-run service: the
-# box mounts every folder as root when it runs and when this file changes, so no guest user ever needs to mount
-# anything, and a bot sees exactly the targets this file names for it.
 write_manifest() {
   local f name path mode who tmp
   mkdir -p "$meta"
-  # The guest maps a granted folder to the bot it was granted to by the uid the folder's files belong to here, so it
-  # needs that uid beside the grants (omp-box/guest.nix, shareApply).
   id -u >"$meta/host-uid"
   tmp=$(mktemp "$meta/.manifest.XXXXXX")
   for f in "$grants"/*; do

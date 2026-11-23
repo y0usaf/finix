@@ -74,9 +74,6 @@ in {
   config.environment = {
     systemPackages = [variants.dark variants.light fallback];
     variables = {
-      # cursor-apply relinks the stable name in the user's icon directory, so that
-      # directory has to come first on the path the compositor and Xwayland search;
-      # the login default names only the system profile, which holds the dark fallback.
       XCURSOR_PATH = "${config.user.homeDirectory}/.local/share/icons:${config.security.pam.environment.XCURSOR_PATH.default}";
       XCURSOR_THEME = config.user.appearance.cursorTheme;
       XCURSOR_SIZE = toString config.user.appearance.cursorSize;

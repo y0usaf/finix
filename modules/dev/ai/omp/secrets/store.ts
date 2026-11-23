@@ -5,15 +5,11 @@ import { join } from "node:path";
 export const NAME = /^[A-Z][A-Z0-9_]{0,63}$/;
 export const REFERENCE = /\$\{?SECRET_([A-Z][A-Z0-9_]{0,63})/g;
 const STATE = process.env.XDG_STATE_HOME || join(homedir(), ".local", "state");
-// OMP_SECRETS_DIR moves the store: omp-bot points a boxed bot's at a folder of its own shared into the box, where
-// the shared secrets are a copy the host keeps in step.
 const BOXED = Boolean(process.env.OMP_SECRETS_DIR);
 export const ROOT = process.env.OMP_SECRETS_DIR || join(STATE, "omp-secrets");
 const BOTS = process.env.OMP_BOT_STATE || join(STATE, "omp-bot");
 const DEFAULT_TTL = "24h";
 
-// A scope is one bot's secrets, or undefined: the shared ones, which every bot without its own copy reads and your
-// own omp chats use.
 export type Scope = string | undefined;
 export type Meta = { name: string; reason?: string; set: number; expires: number | null };
 export type Request = { bot?: string; name: string; reason: string; ttl?: string; at: number };
@@ -26,15 +22,12 @@ export function label(bot: Scope): string {
 	return bot ?? "shared";
 }
 
-// The bots omp-bot runs in its box (bots.json "box": true); seen from the host only, since in a box the store is
-// already that bot's own.
 export function boxed(): string[] {
 	if (BOXED) return [];
 	const roster = readJson<{ name?: unknown; box?: unknown }[]>(join(BOTS, "bots.json"), []);
 	return Array.isArray(roster) ? roster.filter(bot => bot?.box === true && typeof bot.name === "string").map(bot => bot.name as string) : [];
 }
 
-// The store a scope's secrets live in: a boxed bot's own folder, which its box shares, else this one.
 function root(bot: Scope): string {
 	return bot && boxed().includes(bot) ? join(BOTS, "bots", bot, "secrets") : ROOT;
 }
@@ -66,8 +59,6 @@ export function ttl(text: string | undefined): number | null {
 	return Number(match[1]) * { m: 60_000, h: 3_600_000, d: 86_400_000 }[match[2] as "m" | "h" | "d"];
 }
 
-// A boxed bot reads its store from inside the box, as a Unix user of its own, so the store keeps the user's own
-// group readable: who it belongs to is still only the user and the bots, and a bot reaches nothing but its own.
 function own(path: string) {
 	mkdirSync(path, { recursive: true, mode: 0o750 });
 	chmodSync(path, 0o750);
@@ -111,7 +102,6 @@ export function meta(bot: Scope, name: string): Meta | undefined {
 	return found;
 }
 
-// Where a bot finds a secret: its own copy wins, else the shared one.
 export function held(bot: Scope, name: string): { scope: Scope; meta: Meta } | undefined {
 	const mine = meta(bot, name);
 	if (mine) return { scope: bot, meta: mine };
@@ -176,8 +166,6 @@ export async function store(bot: Scope, name: string, value: string, expiry: str
 	return found;
 }
 
-// The shared secrets a boxed bot may read: the names its roster entry lists in "secrets". A bot without a list
-// gets none, so sharing a secret never quietly hands it to every bot in a box.
 function allowed(bot: string): Set<string> {
 	const roster = readJson<{ name?: unknown; secrets?: unknown }[]>(join(BOTS, "bots.json"), []);
 	const entry = Array.isArray(roster) ? roster.find(candidate => candidate?.name === bot) : undefined;
@@ -185,9 +173,6 @@ function allowed(bot: string): Set<string> {
 	return new Set(Array.isArray(names) ? names.filter((name): name is string => typeof name === "string") : []);
 }
 
-// Copies the shared secrets a boxed bot allows into its store (or only BOT's), sealed with that store's own key,
-// and drops copies that are no longer shared or no longer allowed, so a bot in a box reads them without the host's
-// key and reads nothing else. Store and forget keep it in step; omp-bot-box runs it before a boxed bot starts.
 export async function share(only?: string) {
 	const shared = list(undefined);
 	for (const bot of boxed()) {

@@ -7,9 +7,6 @@
 }: let
   inherit ((import ../../hosts/shared.nix {inherit lib;}).bolo) model vocabulary;
 
-  # One directory per model under ~/.local/share/bolo/models. The graphs load
-  # their weights from a sibling `.data` file by name, so every file of a
-  # model has to be installed side by side.
   modelDirs = {
     fluid-speech-pro = {
       engine = "sherpa-onnx-transducer";
@@ -30,7 +27,6 @@
         "vocab.txt" = "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=";
       };
     };
-    # NVIDIA Parakeet TDT v3, int8: the CPU alternative (see shared.nix).
     ${model.name} = {
       inherit (model) engine url hashes;
       layout = {
@@ -63,7 +59,6 @@
     active = model.name;
     provider = "cuda";
     threads = null;
-    # Whole-clip turns: one write of the finished transcript, typed once.
     pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool";
     models =
       lib.mapAttrsToList (name: m:
