@@ -4364,3 +4364,190 @@ section.tn-pane > .tn-body > .tn-glow {
 :root:not(#dawn):not(#grok) .sf-chat-reader .sf-col[data-role^='omp.editor'] [data-role='omp.composer.send']:not([disabled], [aria-disabled='true'], .disabled):hover .kbd {
 	background: color-mix(in srgb, var(--grok-cta) 88%, var(--sand-text-primary));
 }
+:root:not(#dawn) .sf-chat-reader [data-role='omp.composer.bar'] > [data-role='omp.composer.usage'].sf-text {
+	display: none;
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock > .sf-col:has(> [data-role='omp.hud']) {
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	align-content: flex-end;
+	column-gap: 8px;
+	align-self: center;
+	width: 100%;
+	max-width: var(--grok-measure);
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock > .sf-col:has(> [data-role='omp.hud']) > * {
+	flex: 1 1 100%;
+	width: auto;
+	min-width: 0;
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock > .sf-col:has(> [data-role='omp.hud']) > :has(> .sf-spacer:only-child) {
+	flex: 0 0 0;
+	margin-right: -8px;
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock > .sf-col:has(> [data-role='omp.hud']) > :not(:has([data-role^='omp.editor'])):has(> .sf-text:only-child),
+:root:not(#dawn) .sf-chat-reader.sf-dock > .sf-col:has(> [data-role='omp.hud']) > :not(:has([data-role^='omp.editor'])):has(> .sf-col > .sf-text:only-child) {
+	flex: 0 1 auto;
+	padding-bottom: 6px;
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock > .sf-col:has(> [data-role='omp.hud']) > :not(:has([data-role^='omp.editor'])) > .sf-text:only-child,
+:root:not(#dawn) .sf-chat-reader.sf-dock > .sf-col:has(> [data-role='omp.hud']) > :not(:has([data-role^='omp.editor'])) > .sf-col > .sf-text:only-child {
+	font: 500 12px/24px var(--sans);
+	letter-spacing: 0.01em;
+	color: var(--sand-text-secondary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock > .sf-col:has(> [data-role='omp.hud']) > :has([data-role^='omp.editor']) {
+	flex: 0 0 100%;
+	width: 100%;
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock > .sf-col:has(> [data-role='omp.hud']) > [data-role='omp.hud'] {
+	flex: 0 0 auto;
+	width: auto;
+	justify-content: flex-start;
+	padding: 0 0 6px 10px;
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock [data-role='omp.hud.pill'] {
+	gap: 2px;
+	height: 24px;
+	padding: 0 4px;
+	border: 1px solid var(--grok-pill-border);
+	border-radius: 9999px;
+	background: var(--sand-bg-elevated);
+	box-shadow: var(--sand-shadow-inline);
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock [data-role='omp.hud.seg'] {
+	gap: 4px;
+	height: 18px;
+	padding: 0 6px;
+	border-radius: 9999px;
+	font: 500 12px/16px var(--sans);
+	letter-spacing: 0.01em;
+	color: var(--sand-text-secondary);
+	cursor: pointer;
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock [data-role='omp.hud.seg']:hover {
+	background: var(--sand-bg-hover);
+	color: var(--sand-text-primary);
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock [data-role='omp.hud.seg'] :is(.sf-icon, .sf-icon > svg.ico) {
+	width: 13px;
+	height: 13px;
+	color: inherit;
+}
+:root:not(#dawn) .sf-chat-reader.sf-dock [data-role='omp.hud.seg'] :is(.sf-text, .sf-t-num, [data-role='omp.hud.glance']) {
+	font: inherit;
+	color: inherit;
+	font-variant-numeric: tabular-nums;
+}
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body:has(.sf-image) {
+	display: block;
+	max-width: min(var(--grok-bubble), 100%);
+	padding: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+}
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body:has(.sf-image) > .sf-row:has(> .sf-image) {
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-end;
+	gap: 8px;
+	height: auto;
+	max-width: 100%;
+}
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] .sf-image {
+	display: block;
+	flex: 0 1 auto;
+	min-width: 0;
+	max-width: 100%;
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 0 0 0.5px var(--sand-border-tertiary);
+}
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] .sf-image > .sf-img-frame {
+	display: block;
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: 200px;
+	object-fit: contain;
+	border-radius: 12px;
+}
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body:has(.sf-image) > .sf-md {
+	width: max-content;
+	max-width: 100%;
+	margin: 8px 0 0 auto;
+	padding: 7px 12px;
+	border-radius: 18px;
+	background: linear-gradient(var(--grok-user-sheen), transparent), var(--sand-fill-bubble-user);
+	box-shadow: inset 0 0.5px 0 var(--grok-edge), inset 0 -0.5px 0 var(--grok-edge), inset 0 0 0 0.5px var(--sand-border-quaternary);
+}
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body:has(.sf-image) .md .sf-t-icon.sf-link:has(+ .sf-link) {
+	display: none;
+}
+:root:not(#dawn) .sf-chat-reader .sf-card[data-role='omp.user'] > .sf-card-body:has(.sf-image) .md .sf-t-icon.sf-link + .sf-link.sf-t-strong {
+	font-weight: 400;
+	opacity: 0.6;
+	text-decoration: none;
+}
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-row:has(> .sf-card > .sf-card-body .sf-image) {
+	gap: 8px;
+	padding: 2px 0 6px;
+}
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-card:has(> .sf-card-body .sf-image) {
+	position: relative;
+	flex: none;
+	width: 52px;
+	height: 52px;
+	padding: 0;
+	border: 0.5px solid var(--sand-border-secondary);
+	border-radius: 12px;
+	background: var(--sand-bg-elevated);
+	box-shadow: none;
+	overflow: hidden;
+}
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-card:has(> .sf-card-body .sf-image) > .sf-card-head,
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-card:has(> .sf-card-body .sf-image) > .sf-card-body > .sf-text {
+	display: none;
+}
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-card:has(> .sf-card-body .sf-image) > .sf-card-body {
+	display: block;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+}
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-card:has(> .sf-card-body .sf-image) .sf-image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: 0;
+	overflow: hidden;
+}
+:root:not(#dawn) .sf-chat-reader .sf-col[data-role^='omp.editor'] .sf-card:has(> .sf-card-body .sf-image) .sf-image > .sf-img-frame {
+	position: static;
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none !important;
+	max-height: none !important;
+	margin: 0;
+	transform: none;
+	object-fit: cover;
+}
+:root:not(#dawn) .tn-bn-k::before,
+:root:not(#dawn) .tn-bn-k > .ico {
+	display: none;
+}
+:root:not(#dawn) .tn-bn-card:has(.tn-bn-k:is(.done, .waiting)) .tn-bn-b {
+	display: none;
+}
+:root:not(#dawn) .tn-bn-k.done::after {
+	content: 'Finished working';
+	flex: 0 0 100%;
+	font-weight: 400;
+	color: var(--t2);
+}
