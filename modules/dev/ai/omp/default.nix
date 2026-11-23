@@ -830,10 +830,10 @@ in {
             "crest-auth.ts"
             "crest-reroute.ts"
             "optchat/extension.ts"
-            "tools.ts"
             "goldfish.ts"
             "message-helper.ts"
             "ablit-system.ts"
+            "tools.ts"
           ];
         };
       };
