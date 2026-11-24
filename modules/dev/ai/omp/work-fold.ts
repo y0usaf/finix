@@ -49,7 +49,7 @@ const LIVE_TAIL = 6;
 function resolveLazyUnmount() {
 	const env = parseBool(process.env.OMP_WORK_FOLD_LAZY_UNMOUNT);
 	if (env !== undefined) return env;
-	const dir = process.env.OMP_AGENT_DIR || join(homedir(), ".omp", "agent");
+	const dir = process.env.OMP_AGENT_DIR || join(homedir(), process.env.PI_CONFIG_DIR || ".omp", "agent");
 	try {
 		const raw = JSON.parse(readFileSync(join(dir, "work-fold.json"), "utf8"));
 		const cfg = parseBool(raw?.lazyUnmount);

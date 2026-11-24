@@ -7,7 +7,7 @@
   user = config.user.name;
   home = config.users.users.${user}.home;
   dir = "${home}/.local/state/optchat";
-  inherit (inputPackages.oh-my-pi) omp;
+  inherit (inputPackages.oh-no-pi) onp;
 
   service = pkgs.writeShellApplication {
     name = "optchat";
@@ -25,7 +25,7 @@
       cd ${dir}
       exec 9>${dir}/optchatd.lock
       flock -n 9 || { echo "optchat: already running (${dir}/optchatd.lock is held)" >&2; exit 1; }
-      exec ${omp}/bin/omp --mode rpc --no-ui --no-session --no-extensions --no-tools --no-lsp --no-skills --no-rules --no-title \
+      exec ${onp}/bin/onp --mode rpc --no-ui --no-session --no-extensions --no-tools --no-lsp --no-skills --no-rules --no-title \
         -e ${./optchat}/service.ts <>${dir}/optchatd.fifo >/dev/null
     '';
   };
@@ -61,6 +61,7 @@ in {
     log = true;
     environment = {
       HOME = home;
+      XDG_DATA_HOME = "${home}/.local/share";
       XDG_STATE_HOME = "${home}/.local/state";
       OPTCHAT_IDLE_MS = "0";
     };

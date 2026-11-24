@@ -145,6 +145,7 @@ inputs: let
         doInstallCheck = false;
         disallowedReferences = [];
       };
+  agy = import ../pkgs/agy.nix {inherit pkgs;};
   omp = pkgs.symlinkJoin {
     name = "omp-${ompBuild.version}";
     inherit (ompBuild) version;
@@ -152,7 +153,7 @@ inputs: let
     nativeBuildInputs = [pkgs.makeWrapper];
     postBuild = ''
       wrapProgram $out/bin/omp \
-        --set-default PI_AGY_PATH ${import ../pkgs/agy.nix {inherit pkgs;}}/bin/agy \
+        --set-default PI_AGY_PATH ${agy}/bin/agy \
         --suffix PATH : ${lib.makeBinPath [pkgs.netcat]}
     '';
   };
@@ -164,9 +165,14 @@ inputs: let
       mkdir -p $out/bin
       makeWrapper ${onpBuild}/bin/omp $out/bin/onp \
         --set-default PI_CONFIG_DIR .onp \
-        --set-default PI_AGY_PATH ${import ../pkgs/agy.nix {inherit pkgs;}}/bin/agy \
+        --set-default PI_AGY_PATH ${agy}/bin/agy \
         --suffix PATH : ${lib.makeBinPath [pkgs.netcat]}
     '';
+  onpAsOmp = pkgs.runCommand "onp-as-omp-${onpBuild.version}" {} ''
+    mkdir -p $out/bin
+    ln -s ${onp}/bin/onp $out/bin/onp
+    ln -s ${onp}/bin/onp $out/bin/omp
+  '';
   piDonsetch = pkgs.runCommand "pi-donsetch-trimmed" {} ''
         cp -r ${rawInputPackages.pi-donsetch.default} $out
         chmod -R u+w $out
@@ -193,7 +199,7 @@ inputs: let
     rawInputPackages
     // {
       oh-my-pi = rawInputPackages.oh-my-pi // {inherit omp;};
-      oh-no-pi = rawInputPackages.oh-no-pi // {inherit onp;};
+      oh-no-pi = rawInputPackages.oh-no-pi // {inherit onp onpAsOmp;};
       pi-donsetch = rawInputPackages.pi-donsetch // {default = piDonsetch;};
     };
 

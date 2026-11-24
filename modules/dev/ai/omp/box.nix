@@ -733,7 +733,7 @@
         shift 2
       fi
       cd "$state/work"
-      PI_CONFIG_DIR="''${state#"$HOME"/}"         XDG_DATA_HOME="$state/data"         XDG_STATE_HOME="$state/state"         XDG_CACHE_HOME="$state/cache"         TMPDIR="$state/tmp"         HISTFILE=/dev/null         OMP_ABLIT_BARE=1         OMP_ABLIT_SYSTEM_PROMPT="$prompt"         ${inputPackages.oh-my-pi.omp}/bin/omp         --no-session         --no-tools         --no-extensions         --no-skills         --no-rules         --no-context-files         --no-title         --no-lsp         --offline         -e "$seed/ext/ablit-system.ts"         --system-prompt "$prompt"         --model ${modelSpec}         --config "$seed/ablit.yml"         "$@"
+      PI_CONFIG_DIR="''${state#"$HOME"/}"         XDG_DATA_HOME="$state/data"         XDG_STATE_HOME="$state/state"         XDG_CACHE_HOME="$state/cache"         TMPDIR="$state/tmp"         HISTFILE=/dev/null         OMP_ABLIT_BARE=1         OMP_ABLIT_SYSTEM_PROMPT="$prompt"         ${inputPackages.oh-no-pi.onp}/bin/onp         --no-session         --no-tools         --no-extensions         --no-skills         --no-rules         --no-context-files         --no-title         --no-lsp         --offline         -e "$seed/ext/ablit-system.ts"         --system-prompt "$prompt"         --model ${modelSpec}         --config "$seed/ablit.yml"         "$@"
     '';
   seedBin = {
     age = "${pkgs.age}/bin/age";
@@ -1001,7 +1001,7 @@
         sharesDir = "${state}/shares";
         authDir = "${state}/auth";
         nativesDir = "${state}/natives";
-        inherit (inputPackages.oh-my-pi) omp;
+        omp = inputPackages.oh-no-pi.onpAsOmp;
       };
       modules = [
         {nixpkgs.pkgs = pkgs;}
@@ -1264,6 +1264,7 @@
     inherit user;
     inherit shares;
     inherit (inputPackages.oh-my-pi) omp;
+    boxOmp = inputPackages.oh-no-pi.onpAsOmp;
   };
 
   selftestBox = mkBox {
