@@ -25,10 +25,12 @@ inputs: let
         ./dev/ai/omp/agy-session-idle-reap.patch
         ./dev/ai/omp/agy-warm-cancel.patch
         ./dev/ai/omp/helper-compaction.patch
+        ./dev/ai/omp/eval-only-nested-tools.patch
       ];
     postPatch =
       (old.postPatch or "")
       + ''
+        substituteInPlace packages/coding-agent/scripts/compile-binary.ts --replace-fail 'chunks/[name]-[hash].[ext]' 'chunks/[dir]/[name]-[hash].[ext]'
         prompts=packages/coding-agent/src/prompts
         for f in \
           advisor/active-repo-watchdog.md \
@@ -84,9 +86,11 @@ inputs: let
         EOF
         cat > "$prompts/tools/eval.md" <<'EOF'
         Persistent {{#if py}}Python{{/if}}{{#ifAll py js}}/{{/ifAll}}{{#if js}}JS{{/if}} cell (subagents have separate kernels; top-level `await` works).
-        {{#if py}}Python: `print`, `log`, `phase`, `env`, `read(path, offset?, limit?)`, `write(path, content)`, `output(*ids, format?, query?, offset?, limit?)`, `wait(handles, timeout?, raise_errors?)`, `await tool.<name>(args)`, `sh(cmd, cwd?, timeout?)` (raises `ShellError`).{{/if}}
+        {{#if py}}Python: `print`, `log`, `phase`, `env`, `read(path, offset?, limit?)`, `write(path, content)`, `output(*ids, format?, query?, offset?, limit?)`, `wait(handles, timeout?, raise_errors?)`, `await tool.<name>(**kwargs)`, `tool.list()`, `tool.help(name?)`, `tool.schema(name)`, `sh(cmd, cwd?, timeout?)` (raises `ShellError`).{{/if}}
         {{#if js}}JS: `print`, `log`, `phase`, `env`, `read`, `write`, `output`, `wait`, `await tool.<name>(args)`, `sh`.{{/if}}
-        {{#if toolNames}}Tools: {{#each toolNames}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}.{{/if}}
+        {{#if nestedTools}}Nested tools (`await tool.<name>(**kwargs)`; call `tool.help("<name>")` or `tool.schema("<name>")` for full parameters):
+        {{#each nestedTools}}- `{{name}}`: {{summary}}
+        {{/each}}{{else}}{{#if toolNames}}Tools: {{#each toolNames}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}.{{/if}}{{/if}}
         {{#if preludes}}Namespaces (read `xd://eval/<topic>` before first use):
         {{#each preludes}}- `{{name}}`: {{summary}} → `xd://eval/{{name}}`
         {{/each}}{{/if}}
@@ -465,6 +469,7 @@ in {
     inherit (hosts.y0usaf-desktop.config.system.build) p4g-setup;
     omp-box-selftest = hosts.y0usaf-desktop.config.system.build.ompBoxSelftest;
     boot-screen-vm = import ./finix/bootvine-vm.nix {inherit inputs pkgs lib;};
+    inherit omp;
     tomoe = inputPackages.tomoe.default;
     tomoe-stable = hosts.y0usaf-desktop.config.system.build.tomoeStable;
     glsl-gate = lint.glslGate;

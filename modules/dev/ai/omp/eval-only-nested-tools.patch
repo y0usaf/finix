@@ -1,0 +1,812 @@
+diff --git a/packages/coding-agent/src/async/auto-background.ts b/packages/coding-agent/src/async/auto-background.ts
+index 1ab4760..e429c73 100644
+--- a/packages/coding-agent/src/async/auto-background.ts
++++ b/packages/coding-agent/src/async/auto-background.ts
+@@ -23,6 +23,12 @@ export function resolveAutoBackgroundWaitMs(thresholdMs: number, timeoutMs: numb
+ /** Non-settled outcomes of {@link raceJobSettlement}. */
+ export type JobWaitInterrupt = { kind: "running" } | { kind: "steer" } | { kind: "aborted" };
+ 
++export interface ForegroundHoldHandle {
++	pauseForeground(): void;
++	resumeForeground(): void;
++	setSteerBlocked(blocked: boolean): void;
++}
++
+ /**
+  * Race a managed job's settlement against the auto-background threshold, the
+  * caller's abort signal, and the turn's steering signal. Returns the job's own
+@@ -35,6 +41,7 @@ export async function raceJobSettlement<C>(
+ 	thresholdMs: number,
+ 	signal?: AbortSignal,
+ 	steeringSignal?: AbortSignal,
++	bindControls?: (handle: ForegroundHoldHandle) => void,
+ ): Promise<C | JobWaitInterrupt> {
+ 	if (signal?.aborted) {
+ 		return { kind: "aborted" };
+@@ -43,19 +50,49 @@ export async function raceJobSettlement<C>(
+ 		return { kind: "steer" };
+ 	}
+ 
+-	// Cancellable threshold: a bare Bun.sleep(thresholdMs) leaves a live, ref'd
+-	// timer for the full threshold after the job finishes (or abort/steer) wins
+-	// the race first — delaying SDK/headless shutdown and accumulating timers
+-	// under fast completion rates. Settle a withResolvers promise from
+-	// setTimeout so the finally can clear it regardless of which waiter wins.
+ 	const { promise: thresholdPromise, resolve: resolveThreshold } = Promise.withResolvers<{ kind: "running" }>();
+-	const thresholdTimer = setTimeout(() => resolveThreshold({ kind: "running" }), thresholdMs);
++	let remainingMs = Math.max(0, thresholdMs);
++	let armedAt = Date.now();
++	let pauseDepth = 0;
++	let steerBlocked = false;
++	let settled = false;
++	let thresholdTimer: NodeJS.Timeout | undefined;
++	const armTimer = () => {
++		if (settled || pauseDepth > 0 || thresholdTimer) return;
++		armedAt = Date.now();
++		thresholdTimer = setTimeout(() => {
++			thresholdTimer = undefined;
++			if (!settled && pauseDepth === 0) resolveThreshold({ kind: "running" });
++		}, remainingMs);
++	};
++	armTimer();
+ 	const waiters: Array<Promise<C | JobWaitInterrupt>> = [completion, thresholdPromise];
+ 
+ 	const { promise: abortedPromise, resolve: resolveAborted } = Promise.withResolvers<{ kind: "aborted" }>();
+ 	const onAbort = () => resolveAborted({ kind: "aborted" });
+ 	const { promise: steerPromise, resolve: resolveSteer } = Promise.withResolvers<{ kind: "steer" }>();
+-	const onSteer = () => resolveSteer({ kind: "steer" });
++	const onSteer = () => {
++		if (!steerBlocked) resolveSteer({ kind: "steer" });
++	};
++	bindControls?.({
++		pauseForeground() {
++			pauseDepth++;
++			if (pauseDepth !== 1) return;
++			if (thresholdTimer) {
++				clearTimeout(thresholdTimer);
++				thresholdTimer = undefined;
++				remainingMs = Math.max(1, remainingMs - (Date.now() - armedAt));
++			}
++		},
++		resumeForeground() {
++			if (pauseDepth === 0) return;
++			pauseDepth--;
++			if (pauseDepth === 0) armTimer();
++		},
++		setSteerBlocked(blocked: boolean) {
++			steerBlocked = blocked;
++		},
++	});
+ 	if (signal) {
+ 		signal.addEventListener("abort", onAbort, { once: true });
+ 		waiters.push(abortedPromise);
+@@ -67,7 +104,8 @@ export async function raceJobSettlement<C>(
+ 	try {
+ 		return await Promise.race(waiters);
+ 	} finally {
+-		clearTimeout(thresholdTimer);
++		settled = true;
++		if (thresholdTimer) clearTimeout(thresholdTimer);
+ 		signal?.removeEventListener("abort", onAbort);
+ 		steeringSignal?.removeEventListener("abort", onSteer);
+ 	}
+diff --git a/packages/coding-agent/src/eval/backend.ts b/packages/coding-agent/src/eval/backend.ts
+index cc75700..dd041bf 100644
+--- a/packages/coding-agent/src/eval/backend.ts
++++ b/packages/coding-agent/src/eval/backend.ts
+@@ -1,3 +1,4 @@
++import type { ToolCallContext } from "@oh-my-pi/pi-agent-core";
+ import { buildEvalUrlRoots, LocalProtocolHandler } from "../internal-urls";
+ import { contextLocalProtocolOptions } from "../internal-urls/context";
+ import type { OutputArtifactError } from "@oh-my-pi/pi-tui/tools/streaming-output";
+@@ -43,6 +44,7 @@ export interface ExecutorBackendExecOptions {
+ 	 * `> out://`). Throws to refuse a reply; absent, such calls fail instead of replying unseen.
+ 	 */
+ 	onReply?: (text: string) => void;
++	toolCall?: ToolCallContext;
+ }
+ 
+ /** Result returned by a backend's execute(). */
+diff --git a/packages/coding-agent/src/eval/bridge-timeout.ts b/packages/coding-agent/src/eval/bridge-timeout.ts
+index 471d5ca..9df868b 100644
+--- a/packages/coding-agent/src/eval/bridge-timeout.ts
++++ b/packages/coding-agent/src/eval/bridge-timeout.ts
+@@ -37,6 +37,8 @@ export interface BridgeTimeoutPauseOptions {
+ 	 * turn cancel still stops them immediately.
+ 	 */
+ 	deferExternalAbort?: boolean;
++	holdForeground?: boolean;
++	blockSteer?: boolean;
+ }
+ 
+ /**
+@@ -49,18 +51,14 @@ export async function withBridgeTimeoutPause<T>(
+ 	options?: BridgeTimeoutPauseOptions,
+ ): Promise<T> {
+ 	if (!emitStatus) return operation();
+-	emitStatus(
+-		options?.deferExternalAbort
+-			? { op: EVAL_TIMEOUT_PAUSE_OP, deferExternalAbort: true }
+-			: { op: EVAL_TIMEOUT_PAUSE_OP },
+-	);
++	const flags: Record<string, boolean> = {};
++	if (options?.deferExternalAbort) flags.deferExternalAbort = true;
++	if (options?.holdForeground) flags.holdForeground = true;
++	if (options?.blockSteer) flags.blockSteer = true;
++	emitStatus({ op: EVAL_TIMEOUT_PAUSE_OP, ...flags });
+ 	try {
+ 		return await operation();
+ 	} finally {
+-		emitStatus(
+-			options?.deferExternalAbort
+-				? { op: EVAL_TIMEOUT_RESUME_OP, deferExternalAbort: true }
+-				: { op: EVAL_TIMEOUT_RESUME_OP },
+-		);
++		emitStatus({ op: EVAL_TIMEOUT_RESUME_OP, ...flags });
+ 	}
+ }
+diff --git a/packages/coding-agent/src/eval/executor-base.ts b/packages/coding-agent/src/eval/executor-base.ts
+index 3774984..a49d1eb 100644
+--- a/packages/coding-agent/src/eval/executor-base.ts
++++ b/packages/coding-agent/src/eval/executor-base.ts
+@@ -2,6 +2,7 @@ import { logger, toError } from "@oh-my-pi/pi-utils";
+ import { Settings } from "../config/settings";
+ import { type OutputArtifactError, OutputSink } from "@oh-my-pi/pi-tui/tools/streaming-output";
+ import { statusEventKey } from "@oh-my-pi/pi-tui/tools/eval";
++import type { ToolCallContext } from "@oh-my-pi/pi-agent-core";
+ import type { ToolSession } from "../tools";
+ import { ToolAbortError } from "../tools/tool-errors";
+ import {
+@@ -83,6 +84,7 @@ export interface KernelExecutorBaseOptions {
+ 	/** Shows the user `out://` replies of the cell's bridged tool calls; absent, those calls are refused. */
+ 	onReply?: (text: string) => void;
+ 	toolSession?: ToolSession;
++	toolCall?: ToolCallContext;
+ 	bridgeSessionId?: string;
+ 	artifactId?: string;
+ 	artifactPath?: string;
+@@ -547,6 +549,7 @@ export async function executeWithKernelBase<
+ 					shieldedSignal: abortShield.signal,
+ 					emitStatus,
+ 					onReply: options.onReply,
++					toolCall: options.toolCall,
+ 					shadowCell: getActiveEvalShadowCell(),
+ 					abortRequested: () => {
+ 						return abortShield.abortRequested;
+diff --git a/packages/coding-agent/src/eval/js/tool-bridge.ts b/packages/coding-agent/src/eval/js/tool-bridge.ts
+index cba6a80..45de202 100644
+--- a/packages/coding-agent/src/eval/js/tool-bridge.ts
++++ b/packages/coding-agent/src/eval/js/tool-bridge.ts
+@@ -2,9 +2,10 @@ import {
+ 	type AgentTool,
+ 	type AgentToolResult,
+ 	type AgentToolUpdateCallback,
++	type ToolCallContext,
+ 	validateAgentToolArguments,
+ } from "@oh-my-pi/pi-agent-core";
+-import { type ImageContent, toolWireSchema } from "@oh-my-pi/pi-ai";
++import { type ImageContent, jsonSchemaToTypeScript, toolWireSchema } from "@oh-my-pi/pi-ai";
+ import { isRecord } from "@oh-my-pi/pi-utils";
+ import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+ import { InternalUrlRouter } from "../../internal-urls";
+@@ -43,7 +44,9 @@ import type { RuntimeCallIdentity } from "./shared/runtime";
+ import type { JsStatusEvent } from "./shared/types";
+ 
+ /** These tools await delegated subagents/jobs, not the cell runtime's own work. */
+-const DELEGATED_WORK_TOOLS = new Set(["task", "wait"]);
++const EVAL_TOOLS_LIST_BRIDGE_NAME = "__tools__";
++const EVAL_TOOL_DOC_BRIDGE_NAME = "__tool_doc__";
++const INTERACTIVE_USER_TOOLS = new Set(["ask", "secret"]);
+ 
+ const NO_REPLY_SINK =
+ 	"out:// replies do not reach the user from here; write to out:// from a foreground eval cell or reply in your final message.";
+@@ -58,6 +61,7 @@ export interface ToolBridgeOptions {
+ 	emitStatus?: (event: JsStatusEvent) => void;
+ 	identity?: RuntimeCallIdentity;
+ 	shadowCell?: EvalShadowCellSession;
++	toolCall?: ToolCallContext;
+ 	/**
+ 	 * Shows the user what a bridged call sent to a reply URL (`out://`): a `write`'s content, or the
+ 	 * `details.replies` of a call whose commands wrote there. Throws to refuse a reply. Absent: nothing
+@@ -78,6 +82,8 @@ type ToolValue =
+ 	| EvalWorkpoolResult
+ 	| { items: EvalHandleSnapshot[] }
+ 	| { cancelled: boolean }
++	| { tools: Array<{ name: string; label?: string; summary: string; description: string; parameters: unknown }> }
++	| { name: string; label?: string; summary: string; description: string; parameters: unknown; docs: string }
+ 	| {
+ 			text: string;
+ 			details?: unknown;
+@@ -107,6 +113,46 @@ function getTool(session: ToolSession, name: string, args?: unknown): AgentTool
+ 	throw new ToolError(`Unknown tool from js runtime: ${name}`);
+ }
+ 
++function evalToolSummary(tool: AgentTool): string {
++	if (typeof tool.summary === "string" && tool.summary.trim().length > 0) return tool.summary.trim();
++	const first = (tool.description ?? "").split("\n").find(line => line.trim().length > 0)?.trim();
++	return first || tool.label || tool.name;
++}
++
++export function renderEvalToolDoc(tool: AgentTool): string {
++	const schema = jsonSchemaToTypeScript(toolWireSchema(tool));
++	return [
++		`# ${tool.name}${tool.label ? ` — ${tool.label}` : ""}`,
++		"",
++		tool.description ?? "",
++		"",
++		"## Parameters",
++		"```ts",
++		`type Args = ${schema};`,
++		"```",
++		`Call: await tool.${tool.name}(**kwargs)`,
++	].join("\n");
++}
++
++function listBridgeTools(session: ToolSession): Array<{ name: string; label?: string; summary: string; description: string; parameters: unknown }> {
++	const names = session.getEvalBridgeToolNames?.() ?? session.getAdvertisedEvalToolNames?.() ?? [];
++	const seen = new Set<string>();
++	const items: Array<{ name: string; label?: string; summary: string; description: string; parameters: unknown }> = [];
++	for (const candidate of names) {
++		const tool = session.getToolForEvalBridge ? session.getToolForEvalBridge(candidate) : session.getToolByName?.(candidate);
++		if (!tool || !isEvalBridgeToolCallable(tool) || seen.has(tool.name)) continue;
++		seen.add(tool.name);
++		items.push({
++			name: tool.name,
++			label: tool.label,
++			summary: evalToolSummary(tool),
++			description: tool.description ?? "",
++			parameters: toolWireSchema(tool),
++		});
++	}
++	return items.sort((a, b) => a.name.localeCompare(b.name));
++}
++
+ function parsePreludeRequest(args: unknown): { name: string; parameters: unknown } {
+ 	if (!isRecord(args)) throw new ToolError("Invalid eval prelude bridge request");
+ 	const name = args.name;
+@@ -163,6 +209,28 @@ const summarizeToolResult: StatusSummarizer = (name, args, result, text, hasErro
+ 			});
+ 		case "todo":
+ 			return withError({ op: "todo", chars: text.length, committed: committedTodoPhases(result) !== undefined });
++		case "ask": {
++			const count = Array.isArray(details.answers) ? details.answers.length : undefined;
++			return withError({ op: "ask", detail: count !== undefined ? `${count} answer${count === 1 ? "" : "s"}` : undefined, chars: text.length });
++		}
++		case "secret": {
++			const detail = [record.action, record.name].filter(v => typeof v === "string" && v.length > 0).join(" ");
++			return withError({ op: "secret", detail: detail || undefined, chars: text.length });
++		}
++		case "goldfish": {
++			const parts = [record.kind, details.verdict].filter(v => typeof v === "string" && v.length > 0);
++			return withError({ op: "goldfish", detail: parts.length > 0 ? parts.join(" · ") : undefined, chars: text.length });
++		}
++		case "task": {
++			const n = Array.isArray(record.tasks) ? record.tasks.length : 1;
++			return withError({ op: "task", detail: `${n} task${n === 1 ? "" : "s"}`, chars: text.length });
++		}
++		case "web_search":
++			return withError({ op: "web_search", detail: typeof record.query === "string" ? record.query : undefined, chars: text.length });
++		case "zoom":
++			return withError({ op: "zoom", detail: record.id !== undefined ? `${record.id}+${record.n ?? ""}` : undefined, chars: text.length });
++		case "message_helper":
++			return withError({ op: "message_helper", detail: typeof record.to === "string" ? `→ ${record.to}` : undefined, chars: text.length });
+ 		default:
+ 			return withError({ op: name, chars: text.length });
+ 	}
+@@ -304,6 +372,25 @@ async function dispatchSessionTool(name: string, args: unknown, options: ToolBri
+ 	if (name === EVAL_WORKPOOL_BRIDGE_NAME) {
+ 		return await runEvalWorkpool(args, options);
+ 	}
++	if (name === EVAL_TOOLS_LIST_BRIDGE_NAME) {
++		return { tools: listBridgeTools(options.session) };
++	}
++	if (name === EVAL_TOOL_DOC_BRIDGE_NAME) {
++		const targetName = isRecord(args) && typeof args.name === "string" ? args.name.trim() : "";
++		if (!targetName) throw new ToolError("tool.help() expects a non-empty tool name");
++		const target = getTool(options.session, targetName);
++		if (!isEvalBridgeToolCallable(target)) {
++			throw new ToolError(`\`${target.name}\` cannot run through the eval bridge.`);
++		}
++		return {
++			name: target.name,
++			label: target.label,
++			summary: evalToolSummary(target),
++			description: target.description ?? "",
++			parameters: toolWireSchema(target),
++			docs: renderEvalToolDoc(target),
++		};
++	}
+ 	const tool = getTool(options.session, name, args);
+ 	// Wire aliases share every guard, status and bookkeeping path with the canonical tool.
+ 	name = tool.name;
+@@ -327,10 +414,11 @@ async function dispatchSessionTool(name: string, args: unknown, options: ToolBri
+ 			"payload",
+ 		);
+ 	} catch (error) {
+-		options.emitStatus?.({
+-			op: name,
+-			error: error instanceof Error ? error.message : String(error),
+-		});
++		const message = error instanceof Error ? error.message : String(error);
++		options.emitStatus?.({ op: name, error: message });
++		if (options.session.isToolActive?.(name) === false) {
++			throw new ToolError(`${message}\n\n${renderEvalToolDoc(tool)}`);
++		}
+ 		throw error;
+ 	}
+ 	// The transcript draws a direct `write out://` from its args; a bridged one only reaches the user through `onReply`.
+@@ -361,10 +449,13 @@ async function dispatchSessionTool(name: string, args: unknown, options: ToolBri
+ 				}
+ 			: undefined;
+ 	try {
+-		// A delegated-work tool pauses only the cell's runtime-work watchdog; the turn's
+-		// signal still reaches it. Without a status sink the pause wrapper is a no-op.
++		const baseContext = options.session.getToolContext?.();
++		const toolContext =
++			baseContext && options.toolCall && !baseContext.toolCall
++				? { ...baseContext, toolCall: options.toolCall }
++				: baseContext;
+ 		const result = await withBridgeTimeoutPause(
+-			DELEGATED_WORK_TOOLS.has(name) ? options.emitStatus : undefined,
++			options.emitStatus,
+ 			async () => {
+ 				try {
+ 					return await tool.execute(
+@@ -372,12 +463,13 @@ async function dispatchSessionTool(name: string, args: unknown, options: ToolBri
+ 						validatedArgs,
+ 						options.signal,
+ 						onUpdate,
+-						options.session.getToolContext?.(),
++						toolContext,
+ 					);
+ 				} finally {
+ 					settled = true;
+ 				}
+ 			},
++			{ holdForeground: true, blockSteer: INTERACTIVE_USER_TOOLS.has(name) },
+ 		);
+ 		if (name === "todo") {
+ 			// A bridged call emits no `todo` toolResult entry, the only thing branch
+diff --git a/packages/coding-agent/src/eval/py/executor.ts b/packages/coding-agent/src/eval/py/executor.ts
+index 6a0ef13..4fc192e 100644
+--- a/packages/coding-agent/src/eval/py/executor.ts
++++ b/packages/coding-agent/src/eval/py/executor.ts
+@@ -3,6 +3,7 @@ import * as path from "node:path";
+ 
+ import { getProjectDir, isRecord, logger, Snowflake } from "@oh-my-pi/pi-utils";
+ import type { OutputArtifactError } from "@oh-my-pi/pi-tui/tools/streaming-output";
++import type { ToolCallContext } from "@oh-my-pi/pi-agent-core";
+ import type { ToolSession } from "../../tools";
+ import {
+ 	abortReasonError,
+@@ -117,6 +118,7 @@ export interface PythonExecutorOptions {
+ 	 * not injected and any `tool.foo(...)` raises in Python.
+ 	 */
+ 	toolSession?: ToolSession;
++	toolCall?: ToolCallContext;
+ 	/** Callback for status events emitted by tool bridge invocations. */
+ 	emitStatus?: (event: JsStatusEvent) => void;
+ 	/**
+diff --git a/packages/coding-agent/src/eval/py/index.ts b/packages/coding-agent/src/eval/py/index.ts
+index 4a8d413..18f3eb0 100644
+--- a/packages/coding-agent/src/eval/py/index.ts
++++ b/packages/coding-agent/src/eval/py/index.ts
+@@ -67,6 +67,7 @@ export default {
+ 			onStatus: opts.onStatus,
+ 			onReply: opts.onReply,
+ 			toolSession: opts.session,
++			toolCall: opts.toolCall,
+ 		};
+ 		const result = await executePython(code, executorOptions);
+ 		return toExecutorBackendResult(result);
+diff --git a/packages/coding-agent/src/eval/py/prelude.py b/packages/coding-agent/src/eval/py/prelude.py
+index 872ba1e..6d4cf06 100644
+--- a/packages/coding-agent/src/eval/py/prelude.py
++++ b/packages/coding-agent/src/eval/py/prelude.py
+@@ -541,6 +541,20 @@ if "__omp_prelude_loaded__" not in globals():
+         def __repr__(self) -> str:
+             return f"<tool.{self._name}>"
+ 
++        def help(self) -> str:
++            doc = _bridge_call("__tool_doc__", {"name": self._name})
++            return doc["docs"] if isinstance(doc, dict) and isinstance(doc.get("docs"), str) else str(doc)
++
++        def schema(self) -> dict:
++            doc = _bridge_call("__tool_doc__", {"name": self._name})
++            if isinstance(doc, dict):
++                return {
++                    "name": doc.get("name", self._name),
++                    "description": doc.get("description", ""),
++                    "parameters": doc.get("parameters", {}),
++                }
++            return {"name": self._name, "description": "", "parameters": {}}
++
+         async def __call__(self, args=None, /, **kwargs):
+             if args is None:
+                 merged: dict = {}
+@@ -721,6 +735,31 @@ if "__omp_prelude_loaded__" not in globals():
+         def undefine(self, name) -> bool:
+             return __omp_tools__.pop(name, None) is not None
+ 
++        def list(self) -> list[str]:
++            data = _bridge_call("__tools__", {})
++            items = data.get("tools", []) if isinstance(data, dict) else []
++            return [item["name"] for item in items if isinstance(item, dict) and isinstance(item.get("name"), str)]
++
++        def help(self, name: str | None = None) -> str:
++            if name is not None:
++                return _ToolCallable(name).help()
++            data = _bridge_call("__tools__", {})
++            items = data.get("tools", []) if isinstance(data, dict) else []
++            lines = [f"- {item['name']}: {item.get('summary', '')}" for item in items if isinstance(item, dict) and isinstance(item.get("name"), str)]
++            if not lines:
++                return "No host tools available."
++            return "Available tools (await tool.<name>(**kwargs); tool.help(\"<name>\") for full schema):\n" + "\n".join(lines)
++
++        def schema(self, name: str) -> dict:
++            return _ToolCallable(name).schema()
++
++        def __dir__(self) -> list[str]:
++            base = ["defined", "help", "list", "schema", "undefine"]
++            try:
++                return sorted(set(base + self.list()))
++            except Exception:
++                return base
++
+         def __getattr__(self, name: str) -> _ToolCallable:
+             if name.startswith("_"):
+                 raise AttributeError(name)
+diff --git a/packages/coding-agent/src/eval/py/tool-bridge.ts b/packages/coding-agent/src/eval/py/tool-bridge.ts
+index 883f1d1..fbe854e 100644
+--- a/packages/coding-agent/src/eval/py/tool-bridge.ts
++++ b/packages/coding-agent/src/eval/py/tool-bridge.ts
+@@ -8,6 +8,7 @@
+  * the JavaScript bridge uses.
+  */
+ import { logger, postmortem } from "@oh-my-pi/pi-utils";
++import type { ToolCallContext } from "@oh-my-pi/pi-agent-core";
+ import type { ToolSession } from "../../tools";
+ import type { RuntimeCallIdentity } from "../js/shared/runtime";
+ import { bridgeValueFromToolResult, callSessionTool, type JsStatusEvent } from "../js/tool-bridge";
+@@ -34,6 +35,7 @@ export interface PyToolBridgeEntry {
+ 	emitStatus?: (event: JsStatusEvent) => void;
+ 	/** Shows the user `out://` replies of bridged calls (`ToolBridgeOptions.onReply`). */
+ 	onReply?: (text: string) => void;
++	toolCall?: ToolCallContext;
+ 	abortRequested?: () => boolean;
+ }
+ 
+@@ -132,6 +134,7 @@ async function callSessionToolPromptOnAbort(
+ 		cellTimeoutMs: entry.cellTimeoutMs,
+ 		emitStatus: entry.emitStatus,
+ 		onReply: entry.onReply,
++		toolCall: entry.toolCall,
+ 		identity,
+ 	});
+ 	const signal = entry.shieldedSignal ?? entry.signal;
+@@ -158,6 +161,7 @@ async function startServer(): Promise<BridgeServer> {
+ 	const server = Bun.serve({
+ 		hostname: "127.0.0.1",
+ 		port: 0,
++		idleTimeout: 0,
+ 		async fetch(req) {
+ 			const url = new URL(req.url);
+ 			if (req.method !== "POST" || url.pathname !== "/v1/tool") {
+diff --git a/packages/coding-agent/src/eval/tool-bridge-policy.ts b/packages/coding-agent/src/eval/tool-bridge-policy.ts
+index efabcb3..d88973f 100644
+--- a/packages/coding-agent/src/eval/tool-bridge-policy.ts
++++ b/packages/coding-agent/src/eval/tool-bridge-policy.ts
+@@ -22,5 +22,5 @@ export function isEvalBridgeToolCall(origin: object): boolean {
+  * yield needs direct loop events to finalize the delegated task.
+  */
+ export function isEvalBridgeToolCallable(tool: Pick<AgentTool, "name">): boolean {
+-	return tool.name !== "checkpoint" && tool.name !== "rewind" && tool.name !== "yield";
++	return tool.name !== "checkpoint" && tool.name !== "rewind" && tool.name !== "yield" && tool.name !== "eval";
+ }
+diff --git a/packages/coding-agent/src/internal-urls/xd-protocol.ts b/packages/coding-agent/src/internal-urls/xd-protocol.ts
+index 8343233..65a3a47 100644
+--- a/packages/coding-agent/src/internal-urls/xd-protocol.ts
++++ b/packages/coding-agent/src/internal-urls/xd-protocol.ts
+@@ -8,6 +8,7 @@ import type { ToolSession } from "../tools";
+ import { resolveToolTier } from "../tools/approval";
+ import { dispatchReportIssueDevice, reportIssueDeviceUsage } from "../tools/report-tool-issue";
+ import { dispatchResolutionDevice, resolutionDeviceUsage } from "../tools/resolve";
++import { renderEvalToolDoc } from "../eval/js/tool-bridge";
+ import { dispatchXdevTool, resolveXdevTool, xdevDocs, xdevListing } from "../tools/xdev";
+ import type {
+ 	InternalResource,
+@@ -123,8 +124,25 @@ export class XdProtocolHandler implements ProtocolHandler {
+ 		if (name === REPORT_ISSUE_DEVICE_NAME) return reportIssueDeviceUsage();
+ 		if (name && isResolutionDeviceName(name)) return resolutionDeviceUsage(name);
+ 		const xdev = session.xdev;
++		if (name !== null) {
++			if (xdev && resolveXdevTool(xdev, name)) return xdevDocs(xdev, name);
++			const bridged = session.getToolForEvalBridge?.(name);
++			if (bridged) return renderEvalToolDoc(bridged);
++			if (!xdev) throw new ToolError(`No such tool: xd://${name}`);
++			return xdevDocs(xdev, name);
++		}
++		if (xdev && xdev.mountedNames.size > 0) return xdevListing(xdev);
++		const names = session.getEvalBridgeToolNames?.() ?? [];
++		if (names.length > 0) {
++			const rows = [...new Set(names)].sort().map(toolName => {
++				const tool = session.getToolForEvalBridge?.(toolName);
++				const first = (tool?.summary ?? tool?.description ?? "").split("\n").find(l => l.trim().length > 0)?.trim() ?? "";
++				return `xd://${toolName.padEnd(14)} ${first}`;
++			});
++			return [`xd:// ${rows.length} eval-bridged tools.`, ...rows, "", "Read xd://<tool> for docs + schema; call await tool.<tool>(**kwargs) in eval."].join("\n");
++		}
+ 		if (!xdev) throw new ToolError(NOT_MOUNTED);
+-		return name === null ? xdevListing(xdev) : xdevDocs(xdev, name);
++		return xdevListing(xdev);
+ 	}
+ 
+ 	/** `read xd://<tool>/<topic>`: one named doc topic of a tool. */
+diff --git a/packages/coding-agent/src/sdk.ts b/packages/coding-agent/src/sdk.ts
+index 9f305c2..148acb9 100644
+--- a/packages/coding-agent/src/sdk.ts
++++ b/packages/coding-agent/src/sdk.ts
+@@ -2736,6 +2736,7 @@ async function createAgentSessionScoped(options: CreateAgentSessionOptions): Pro
+ 			},
+ 			getToolByName: name => session?.getToolByName(name),
+ 			getToolForEvalBridge: name => session?.getToolForEvalBridge(name),
++			getEvalBridgeToolNames: () => session?.getEvalBridgeToolNames() ?? [],
+ 			getAdvertisedEvalToolNames: () => session?.getAdvertisedEvalToolNames() ?? [],
+ 			agentRegistry,
+ 			// The global lifecycle releases through AgentRegistry.global(); wiring it
+@@ -5445,6 +5446,7 @@ async function createAgentSessionScoped(options: CreateAgentSessionOptions): Pro
+ 			interactivePrompts: options.interactivePrompts,
+ 			rebindModelAfterDiscovery: options.model === undefined || options.rebindModelAfterDiscovery === true,
+ 			toolRegistry,
++			restrictToolNames,
+ 			reconcileBrowserMcpFilter: mcpManager
+ 				? async enabled => {
+ 						await mcpManager.reconcileBrowserFilter(enabled);
+diff --git a/packages/coding-agent/src/session/agent-session-types.ts b/packages/coding-agent/src/session/agent-session-types.ts
+index bc6510a..ead2f10 100644
+--- a/packages/coding-agent/src/session/agent-session-types.ts
++++ b/packages/coding-agent/src/session/agent-session-types.ts
+@@ -304,6 +304,7 @@ export interface AgentSessionConfig {
+ 	rebindModelAfterDiscovery?: boolean;
+ 	/** Tool registry for LSP and settings. */
+ 	toolRegistry?: Map<string, AgentTool>;
++	restrictToolNames?: boolean;
+ 	/** Creates tools registered only while vibe mode is active. */
+ 	createVibeTools?: () => AgentTool[];
+ 	/** Names whose current registry entry is the built-in implementation. */
+diff --git a/packages/coding-agent/src/session/agent-session.ts b/packages/coding-agent/src/session/agent-session.ts
+index 6ef3557..e65c650 100644
+--- a/packages/coding-agent/src/session/agent-session.ts
++++ b/packages/coding-agent/src/session/agent-session.ts
+@@ -2701,6 +2701,7 @@ export class AgentSession implements SettingsScope, AgentViewSession {
+ 		this.#tools = new SessionTools(sessionToolsHost, {
+ 			autoApprove: config.autoApprove,
+ 			toolRegistry: config.toolRegistry,
++			restrictToolNames: config.restrictToolNames,
+ 			createVibeTools: config.createVibeTools,
+ 			createThinkTool: config.createThinkTool,
+ 			builtInToolNames: config.builtInToolNames,
+diff --git a/packages/coding-agent/src/session/session-tools.ts b/packages/coding-agent/src/session/session-tools.ts
+index f0341a9..d321667 100644
+--- a/packages/coding-agent/src/session/session-tools.ts
++++ b/packages/coding-agent/src/session/session-tools.ts
+@@ -182,6 +182,7 @@ export type SystemPromptRebuilder = (
+ interface SessionToolsOptions {
+ 	autoApprove?: boolean;
+ 	toolRegistry?: Map<string, AgentTool>;
++	restrictToolNames?: boolean;
+ 	createVibeTools?: () => AgentTool[];
+ 	/** Creates the private `think` scratchpad tool for runtime setting changes. */
+ 	createThinkTool?: () => Promise<AgentTool | null>;
+@@ -421,6 +422,7 @@ export class SessionTools {
+ 	readonly #host: SessionToolsHost;
+ 	#autoApprove: boolean;
+ 	#toolRegistry: Map<string, AgentTool>;
++	readonly #restrictToolNames: boolean;
+ 	#createVibeTools: (() => AgentTool[]) | undefined;
+ 	#createThinkTool: SessionToolsOptions["createThinkTool"];
+ 	#installedVibeToolNames = new Set<string>();
+@@ -575,6 +577,7 @@ export class SessionTools {
+ 		this.#host = host;
+ 		this.#autoApprove = options.autoApprove === true;
+ 		this.#toolRegistry = options.toolRegistry ?? new Map();
++		this.#restrictToolNames = options.restrictToolNames === true;
+ 		this.#createVibeTools = options.createVibeTools;
+ 		this.#createThinkTool = options.createThinkTool;
+ 		this.#builtInToolNames = new Set(options.builtInToolNames ?? []);
+@@ -920,22 +923,35 @@ export class SessionTools {
+ 	 * {@link resolveMCPToolAlias} pass over every enabled tool (top-level plus
+ 	 * mounted devices), so an alias two enabled tools answer resolves to nothing.
+ 	 */
++	#isEvalOnlyBridgeMode(): boolean {
++		if (this.#restrictToolNames || this.#host.planModeEnabled()) return false;
++		const enabled = this.getEnabledToolNames();
++		if (!enabled.includes("eval")) return false;
++		return enabled.every(name => {
++			if (name === "eval") return true;
++			const tool = this.#toolRegistry.get(name);
++			return tool !== undefined && !isEvalBridgeToolCallable(tool);
++		});
++	}
++
++	#getEvalBridgeCandidateNames(): string[] {
++		return this.#isEvalOnlyBridgeMode() ? [...this.#toolRegistry.keys()] : this.getEnabledToolNames();
++	}
++
+ 	getToolForEvalBridge(name: string): AgentTool | undefined {
+ 		const bareName = stripXdUrlPrefix(name);
+-		const enabled = new Set(this.getEnabledToolNames());
++		const allowed = new Set(this.#getEvalBridgeCandidateNames());
+ 		const named = resolveToolWireName(this.#toolRegistry, bareName);
+-		// A registered name never falls through to an alias guess, even when disabled.
+-		if (named) return enabled.has(named.name) ? this.#wrapToolForAcpPermission(named) : undefined;
++		if (named) return allowed.has(named.name) ? this.#wrapToolForAcpPermission(named) : undefined;
+ 		const alias = resolveMCPToolAlias(bareName, candidate =>
+-			enabled.has(candidate) ? this.#toolRegistry.get(candidate) : undefined,
++			allowed.has(candidate) ? this.#toolRegistry.get(candidate) : undefined,
+ 		);
+ 		return alias && this.#wrapToolForAcpPermission(alias);
+ 	}
+ 
+-	/** Canonical and unambiguous wire names accepted by the eval bridge. */
+ 	getEvalBridgeToolNames(): string[] {
+ 		const names = new Set<string>();
+-		for (const name of this.getEnabledToolNames()) {
++		for (const name of this.#getEvalBridgeCandidateNames()) {
+ 			const tool = this.#toolRegistry.get(name);
+ 			if (!tool || !isEvalBridgeToolCallable(tool)) continue;
+ 			names.add(name);
+diff --git a/packages/coding-agent/src/tools/eval.ts b/packages/coding-agent/src/tools/eval.ts
+index 987a9c1..1a1320e 100644
+--- a/packages/coding-agent/src/tools/eval.ts
++++ b/packages/coding-agent/src/tools/eval.ts
+@@ -4,6 +4,7 @@ import type {
+ 	AgentToolContext,
+ 	AgentToolResult,
+ 	AgentToolUpdateCallback,
++	ToolCallContext,
+ 	ToolSpeculationPolicy,
+ } from "@oh-my-pi/pi-agent-core";
+ import type { ImageContent, ToolExample } from "@oh-my-pi/pi-ai";
+@@ -16,7 +17,7 @@ import {
+ } from "@oh-my-pi/pi-tui/render/render-utils";
+ import { parseConfiguredThinkingLevel } from "@oh-my-pi/pi-tui/thinking";
+ import { isRecord, prompt, sanitizeText } from "@oh-my-pi/pi-utils";
+-import { raceJobSettlement, resolveAutoBackgroundWaitMs } from "../async";
++import { type ForegroundHoldHandle, raceJobSettlement, resolveAutoBackgroundWaitMs } from "../async";
+ import { jsBackend, pythonBackend } from "../eval";
+ import type { ExecutorBackend, ExecutorBackendResult } from "../eval/backend";
+ import { EVAL_TIMEOUT_PAUSE_OP, EVAL_TIMEOUT_RESUME_OP } from "../eval/bridge-timeout";
+@@ -216,6 +217,7 @@ export interface EvalToolDescriptionOptions {
+ 	perCallModelAdvertisement?: PerCallModelAdvertisement;
+ 	/** Canonical and wire names currently accepted by the session tool bridge. */
+ 	toolNames?: readonly string[];
++	nestedTools?: readonly { name: string; summary: string }[];
+ }
+ 
+ function evalTemplateContext(options: EvalToolDescriptionOptions) {
+@@ -280,6 +282,7 @@ export function getEvalToolDescription(options: EvalToolDescriptionOptions = {})
+ 		preludes,
+ 		firstCallPreludes: firstCallPreludes.length > 0 ? firstCallPreludes : undefined,
+ 		toolNames: options.toolNames,
++		nestedTools: options.nestedTools && options.nestedTools.length > 0 ? options.nestedTools : undefined,
+ 		inlinePreludes,
+ 		inlineTopics: options.inlineTopics ? Object.values(getEvalDocTopics(options)).join("\n\n") : undefined,
+ 	});
+@@ -425,10 +428,28 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+ 			perCallModel,
+ 			perCallModelAdvertisement,
+ 			toolNames: session.getAdvertisedEvalToolNames?.(),
++			nestedTools: this.#nestedTools(session),
+ 		};
+ 	}
+ 
+ 	/** Frozen advertised snapshot; sessions without a snapshot owner advertise the live set. */
++	#nestedTools(session: ToolSession): readonly { name: string; summary: string }[] {
++		const advertised = session.getAdvertisedEvalToolNames?.() ?? [];
++		const seen = new Set<string>();
++		const items: { name: string; summary: string }[] = [];
++		for (const candidate of advertised) {
++			const tool = session.getToolForEvalBridge ? session.getToolForEvalBridge(candidate) : session.getToolByName?.(candidate);
++			if (!tool || seen.has(tool.name) || session.isToolActive?.(tool.name) === true) continue;
++			seen.add(tool.name);
++			const raw = typeof tool.summary === "string" && tool.summary.trim().length > 0
++				? tool.summary.trim()
++				: (tool.description ?? "").split("\n").find(line => line.trim().length > 0)?.trim() || tool.label || tool.name;
++			const summary = raw.length > 140 ? `${raw.slice(0, 139).trimEnd()}…` : raw;
++			items.push({ name: tool.name, summary });
++		}
++		return items.sort((a, b) => a.name.localeCompare(b.name));
++	}
++
+ 	#advertisedPreludes(session: ToolSession): readonly EvalPreludeDefinition[] {
+ 		return session.getAdvertisedEvalPreludes?.() ?? getEnabledEvalPreludes(session.getEvalPreludes?.() ?? []);
+ 	}
+@@ -597,6 +618,25 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+ 					onUpdate({ content: [{ type: "text", text }], details });
+ 				}
+ 			: undefined;
++		let foregroundHold: ForegroundHoldHandle | undefined;
++		let pendingHoldDepth = 0;
++		let pendingSteerBlockDepth = 0;
++		const onBridgeTimeoutControl = (paused: boolean, holdForeground: boolean, blockSteer: boolean): void => {
++			if (holdForeground) {
++				if (paused) {
++					pendingHoldDepth++;
++					foregroundHold?.pauseForeground();
++				} else if (pendingHoldDepth > 0) {
++					pendingHoldDepth--;
++					foregroundHold?.resumeForeground();
++				}
++			}
++			if (blockSteer) {
++				if (paused) pendingSteerBlockDepth++;
++				else if (pendingSteerBlockDepth > 0) pendingSteerBlockDepth--;
++				foregroundHold?.setSteerBlocked(pendingSteerBlockDepth > 0);
++			}
++		};
+ 		const run = async (
+ 			runSignal: AbortSignal | undefined,
+ 			emitUpdate: ((text: string, details: EvalToolDetails) => void) | undefined,
+@@ -631,6 +671,8 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+ 					sessionAbortController,
+ 					emitUpdate,
+ 					foreground,
++					toolCall: ctx?.toolCall,
++					onBridgeTimeoutControl,
+ 				}),
+ 			);
+ 			return session.trackEvalExecution?.(execution, sessionAbortController) ?? execution;
+@@ -753,6 +795,11 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+ 			autoBackgroundWaitMs,
+ 			signal,
+ 			ctx?.toolCall?.steeringSignal,
++			handle => {
++				foregroundHold = handle;
++				for (let i = 0; i < pendingHoldDepth; i++) handle.pauseForeground();
++				if (pendingSteerBlockDepth > 0) handle.setSteerBlocked(true);
++			},
+ 		);
+ 		if (waitResult.kind === "completed") {
+ 			autoBgManager.releaseForegroundJob(jobId);
+@@ -839,8 +886,10 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+ 		emitUpdate?: (text: string, details: EvalToolDetails) => void;
+ 		/** Whether the call still waits on the cells; `out://` replies are drawn only then. */
+ 		foreground: () => boolean;
++		toolCall?: ToolCallContext;
++		onBridgeTimeoutControl?: (paused: boolean, holdForeground: boolean, blockSteer: boolean) => void;
+ 	}): Promise<AgentToolResult<EvalToolDetails | undefined>> {
+-		const { session, cells, languages, notice, excludeWebP, signal, sessionAbortController, emitUpdate, foreground } =
++		const { session, cells, languages, notice, excludeWebP, signal, sessionAbortController, emitUpdate, foreground, toolCall, onBridgeTimeoutControl } =
+ 			options;
+ 		let outputSink: OutputSink | undefined;
+ 		let outputSummary: OutputSummary | undefined;
+@@ -1002,13 +1051,16 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
+ 							outputSink!.push(chunk);
+ 						},
+ 						onReply,
++						toolCall,
+ 						onStatus: event => {
+ 							if (event.op === EVAL_TIMEOUT_PAUSE_OP) {
+ 								idle?.pause();
++								onBridgeTimeoutControl?.(true, event.holdForeground === true, event.blockSteer === true);
+ 								return;
+ 							}
+ 							if (event.op === EVAL_TIMEOUT_RESUME_OP) {
+ 								idle?.resume();
++								onBridgeTimeoutControl?.(false, event.holdForeground === true, event.blockSteer === true);
+ 								return;
+ 							}
+ 							recordStatusEvent(cellResult, {
+diff --git a/packages/coding-agent/src/tools/index.ts b/packages/coding-agent/src/tools/index.ts
+index 5bb3126..70a5c8d 100644
+--- a/packages/coding-agent/src/tools/index.ts
++++ b/packages/coding-agent/src/tools/index.ts
+@@ -394,6 +394,7 @@ export interface ToolSession {
+ 	getToolByName?: (name: string) => AgentTool | undefined;
+ 	/** Look up an enabled tool through the eval bridge's normal permission pipeline. */
+ 	getToolForEvalBridge?: (name: string) => AgentTool | undefined;
++	getEvalBridgeToolNames?: () => string[];
+ 	/** Current session context for eval-bridged tool execution. */
+ 	getToolContext?: () => AgentToolContext | undefined;
+ 	/** Tool names the eval description advertises as callable from cells; frozen with the cached prompt prefix. */
