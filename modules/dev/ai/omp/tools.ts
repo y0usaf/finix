@@ -20,19 +20,12 @@ const GOLDFISH_ALLOW: Record<string, true> = {
 	find: true,
 };
 
-const EVAL_TOP_LEVEL: Record<string, true> = {
-	eval: true,
-	yield: true,
-};
-
 async function prune(pi: ExtensionAPI, ctx?: ExtensionContext): Promise<void> {
 	const isGoldfish = ctx?.agent?.name === "goldfish";
 	const active = pi.getActiveTools();
 	const kept = isGoldfish
 		? active.filter(name => name in GOLDFISH_ALLOW)
-		: active.includes("eval")
-			? active.filter(name => name in EVAL_TOP_LEVEL)
-			: active.filter(name => !(name in OFF));
+		: active.filter(name => !(name in OFF));
 	if (kept.length !== active.length) await pi.setActiveTools(kept);
 }
 
