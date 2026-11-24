@@ -3040,11 +3040,11 @@
     "omp-bot": {
       "flake": false,
       "locked": {
-        "lastModified": 1795450424,
-        "narHash": "sha256-ZTf0jmhLPtDw8QvFUHKJabVahsfPv/23VUhj/+4+YeI=",
+        "lastModified": 1795488179,
+        "narHash": "sha256-Ma7d+dscMurhsEEBWMLMXeNsap3MLtnzJ5S273xA8OM=",
         "owner": "y0usaf",
         "repo": "omp-bot",
-        "rev": "acc11af22eb32da3d87974f513fb107cf9bc148d",
+        "rev": "56bdb37a00a18d2f28c0ff477d4195b55bbd3b76",
         "type": "github"
       },
       "original": {
