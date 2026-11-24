@@ -416,26 +416,36 @@
     then throw "user.ui.tomoe.bar.rail.themes: no rail theme named ${name}; there is ${lib.concatStringsSep ", " railThemeNames}"
     else builtins.head found;
 
-  screenshotShader = builtins.readFile ./shaders/screenshot-thread.glsl;
+  threadGlassShader = builtins.readFile ./shaders/thread-glass.glsl;
+  screenshotShader = threadGlassShader + "\n" + builtins.readFile ./shaders/screenshot-thread.glsl;
   screenshotMarks = builtins.readFile ./shaders/screenshot-thread-marks.glsl;
   screenshotColours = builtins.readFile ./shaders/screenshot-thread-colours.glsl;
   screenshotPlain =
     pkgs.writeText "screenshot-thread.glsl"
-    (builtins.replaceStrings ["/*@MARKS@*/"] [""] screenshotShader);
+    (builtins.replaceStrings ["@MARKS@"] [""] screenshotShader);
   screenshotMarked =
     pkgs.writeText "screenshot-thread-marks.glsl"
-    (builtins.replaceStrings ["/*@MARKS@*/"] [screenshotMarks] screenshotShader);
+    (builtins.replaceStrings ["@MARKS@"] [screenshotMarks] screenshotShader);
   screenshotColoured =
     pkgs.writeText "screenshot-thread-colours.glsl"
-    (builtins.replaceStrings ["/*@MARKS@*/"] [screenshotColours] screenshotShader);
+    (builtins.replaceStrings ["@MARKS@"] [screenshotColours] screenshotShader);
+  notificationShader =
+    pkgs.writeText "notification-thread.glsl"
+    (threadGlassShader + "\n" + builtins.readFile ./shaders/notification-thread.glsl);
 
   tomoeCompatLisp = builtins.readFile ./lisp/tomoe-compat.lisp;
+  threadDesignLisp = builtins.readFile ./lisp/thread-design.lisp;
 
   screenshotLisp = lib.concatStrings [
     "(defparameter +screenshot-thread--shader+ \"${screenshotPlain}\")\n"
     "(defparameter +screenshot-thread--marks+ \"${screenshotMarked}\")\n"
     "(defparameter +screenshot-thread--colours+ \"${screenshotColoured}\")\n"
     (builtins.readFile ./lisp/screenshot-thread.lisp)
+  ];
+
+  notificationLisp = lib.concatStrings [
+    "(defparameter +notification-thread--shader+ \"${notificationShader}\")\n"
+    (builtins.readFile ./lisp/notification-thread.lisp)
   ];
 
   railThemeLisp = let
@@ -3431,7 +3441,7 @@ in {
   config.user.files.".config/tomoe/init.lisp".text = lib.concatStringsSep "\n" [
     ''
       (in-package #:tomoe-user)
-      (load-policy "desktop" :only '("commands" "drag" "screenshot-theme" "notification-popups" "config-error" "screencast" "screenshot-clipboard"))
+      (load-policy "desktop" :only '("commands" "drag" "screenshot-theme" "config-error" "screencast" "screenshot-clipboard"))
       (defun policy-known-settings (plist)
         "PLIST without the settings the running Tomoe does not know: a config is
       loaded by whatever build is running, and a setting that build lacks would refuse
@@ -4481,7 +4491,9 @@ in {
           ])
       ]))
       generators.lisp))
+    threadDesignLisp
     barLisp.${bar.style}
+    notificationLisp
     "(defparameter +shader-wallpaper+ ${toLisp shaderWallpaperParameters})"
     ''
       (in-package #:tomoe-user)
