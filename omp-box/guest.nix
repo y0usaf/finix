@@ -446,29 +446,29 @@ in {
 
   fileSystems =
     {
-      "${home}/.onp/run" = {
+      "${home}/.omp/run" = {
         device = "tmpfs";
         fsType = "tmpfs";
         options = ["mode=0700" "uid=1001" "gid=100" "size=512M"];
       };
-      "${home}/.onp/agent" = {
+      "${home}/.omp/agent" = {
         device = "tmpfs";
         fsType = "tmpfs";
         options = ["mode=0700" "uid=1001" "gid=100" "size=2G"];
       };
     }
     // lib.listToAttrs (lib.concatMap (person: [
-        (lib.nameValuePair "${person.home}/.onp" {
+        (lib.nameValuePair "${person.home}/.omp" {
           device = "tmpfs";
           fsType = "tmpfs";
           options = ["mode=0700" "uid=${toString person.uid}" "gid=${toString person.gid}" "size=512M"];
         })
-        (lib.nameValuePair "${person.home}/.onp/run" {
+        (lib.nameValuePair "${person.home}/.omp/run" {
           device = "tmpfs";
           fsType = "tmpfs";
           options = ["mode=0700" "uid=${toString person.uid}" "gid=${toString person.gid}" "size=512M"];
         })
-        (lib.nameValuePair "${person.home}/.onp/agent" {
+        (lib.nameValuePair "${person.home}/.omp/agent" {
           device = "tmpfs";
           fsType = "tmpfs";
           options = ["mode=0700" "uid=${toString person.uid}" "gid=${toString person.gid}" "size=2G"];
@@ -598,7 +598,7 @@ in {
         omp-natives = {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
-          unitConfig.RequiresMountsFor = ["/mnt/omp-natives"] ++ map (person: "${person.home}/.onp") people;
+          unitConfig.RequiresMountsFor = ["/mnt/omp-natives"] ++ map (person: "${person.home}/.omp") people;
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
@@ -610,9 +610,9 @@ in {
                 mkdir -p /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name}
                 # The mount point lives under a home the bot can rename, so the helper opens it a component at a
                 # time without following a link and mounts on the fd; the upper and work folders are root's.
-                if ! ${shareMount}/bin/omp-share-mount overlay ${person.home} .onp/natives /mnt/omp-natives \
+                if ! ${shareMount}/bin/omp-share-mount overlay ${person.home} .omp/natives /mnt/omp-natives \
                   /run/omp-natives/upper-${person.name} /run/omp-natives/work-${person.name}; then
-                  echo "omp-natives: cannot mount ${person.home}/.onp/natives" >&2
+                  echo "omp-natives: cannot mount ${person.home}/.omp/natives" >&2
                 fi
               '')
               people}
@@ -647,7 +647,7 @@ in {
         omp-antigravity = lib.mkIf (bots != []) {
           wantedBy = ["multi-user.target"];
           before = ["sshd.service"];
-          unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"] ++ lib.concatMap (bot: ["/home/${bot.user}/.onp/agent" "/home/${bot.user}/.onp/run"]) bots;
+          unitConfig.RequiresMountsFor = ["/etc/ssh/omp-box"] ++ lib.concatMap (bot: ["/home/${bot.user}/.omp/agent" "/home/${bot.user}/.omp/run"]) bots;
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
@@ -663,12 +663,12 @@ in {
             for bot in ${lib.concatMapStringsSep " " (bot: bot.user) bots}; do
               home=/home/$bot
               # The share copy is root's to read; the bot gets its own copy to import into its omp credential store.
-              if inbox=$(${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/mktemp -d "$home/.onp/run/antigravity.XXXXXX"); then
+              if inbox=$(${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/mktemp -d "$home/.omp/run/antigravity.XXXXXX"); then
                 for file in "$agy"/*.json; do
                   ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.bash}/bin/bash -c "umask 077; cat > $(printf %q "$inbox/''${file##*/}")" <"$file" ||
                     echo "omp-antigravity: cannot copy $file for $bot" >&2
                 done
-                if ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/env HOME="$home" ${ompBox.omp}/bin/onp auth-broker import "$inbox" --provider=antigravity-cli; then
+                if ${pkgs.util-linux}/bin/runuser -u "$bot" -- ${pkgs.coreutils}/bin/env HOME="$home" ${ompBox.omp}/bin/omp auth-broker import "$inbox" --provider=antigravity-cli; then
                   echo "omp-antigravity: imported the Antigravity accounts for $bot"
                 else
                   echo "omp-antigravity: cannot import the Antigravity accounts for $bot" >&2
@@ -682,7 +682,7 @@ in {
         };
         omp-seed = {
           wantedBy = ["multi-user.target"];
-          unitConfig.RequiresMountsFor = [ompBox.seedMount] ++ map (person: "${person.home}/.onp/agent") people;
+          unitConfig.RequiresMountsFor = [ompBox.seedMount] ++ map (person: "${person.home}/.omp/agent") people;
           serviceConfig = {
             Type = "oneshot";
             TimeoutStartSec = "infinity";
@@ -694,24 +694,24 @@ in {
             # Every write below is the bot's own: the seed is world-readable, and running install as the user
             # means a path the bot swapped for a link can only be followed with the bot's rights, never root's.
             ${lib.concatMapStringsSep "\n" (person: ''
-                if [ ! -d ${person.home}/.onp ]; then
-                  ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 755 ${person.home}/.onp ||
-                    echo "omp-seed: cannot create ${person.home}/.onp" >&2
+                if [ ! -d ${person.home}/.omp ]; then
+                  ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 755 ${person.home}/.omp ||
+                    echo "omp-seed: cannot create ${person.home}/.omp" >&2
                 fi
-                if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.onp/agent; then
+                if ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent; then
                   for file in models.json settings.json config.yml models.yml AGENTS.md; do
-                    ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$file" ${person.home}/.onp/agent/$file ||
+                    ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$file" ${person.home}/.omp/agent/$file ||
                       echo "omp-seed: cannot install $file for ${person.name}" >&2
                   done
-                  ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/rm -f ${person.home}/.onp/agent/APPEND_SYSTEM.md ${person.home}/.onp/agent/SYSTEM_TEMPLATE.md
+                  ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/rm -f ${person.home}/.omp/agent/APPEND_SYSTEM.md ${person.home}/.omp/agent/SYSTEM_TEMPLATE.md
                   for pair in agents/task.md:task.md; do
                     dst=''${pair%%:*} srcfile=''${pair#*:}
-                    ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.onp/agent/"''${dst%/*}" &&
-                      ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$srcfile" ${person.home}/.onp/agent/"$dst" ||
+                    ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -d -m 700 ${person.home}/.omp/agent/"''${dst%/*}" &&
+                      ${pkgs.util-linux}/bin/runuser -u ${person.name} -- ${pkgs.coreutils}/bin/install -m 600 "$src/$srcfile" ${person.home}/.omp/agent/"$dst" ||
                       echo "omp-seed: cannot install $dst for ${person.name}" >&2
                   done
                 else
-                  echo "omp-seed: cannot prepare ${person.home}/.onp/agent" >&2
+                  echo "omp-seed: cannot prepare ${person.home}/.omp/agent" >&2
                 fi
               '')
               people}

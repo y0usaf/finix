@@ -11,7 +11,7 @@
   prompts = config.user.dev.ompPrompts;
   toJSON = lib.generators.toJSON {};
   secrets = ./secrets;
-  homeDir = config.users.users.${config.user.name}.home;
+  extDir = "${config.users.users.${config.user.name}.home}/.omp/agent/ext";
   extLinks =
     lib.genAttrs ["pi-chronobreak" "pi-recap"] (name: "${flakeInputs.${name}}")
     // {
@@ -751,104 +751,95 @@
       "ablit-system.ts" = ./ablit-system.ts;
       optchat = ./optchat;
     };
-  optchatCli = pkgs.writeShellScriptBin "optchat" ''
-    exec ${pkgs.bun}/bin/bun ${./optchat}/cli.ts "$@"
-  '';
   ompSecret = pkgs.writeShellScriptBin "secret" ''
     PATH=${lib.makeBinPath [pkgs.age]}:$PATH exec ${pkgs.bun}/bin/bun ${secrets}/omp-secret.ts "$@"
   '';
 in {
   user.persist.directories = [
     ".omp"
-    ".onp"
     ".local/share/omp"
     ".local/state/omp-secrets"
   ];
 
-  environment.systemPackages = [pkgs.jq pkgs.age pkgs.poppler-utils pkgs.sqlite ompSecret optchatCli inputPackages.oh-no-pi.onp];
+  environment.systemPackages = [pkgs.jq pkgs.age pkgs.poppler-utils pkgs.sqlite ompSecret];
 
-  user.files = let
-    mkAgentFiles = dir: let
-      extDir = "${homeDir}/${dir}/agent/ext";
-    in
-      lib.mapAttrs' (name: source: lib.nameValuePair "${dir}/agent/ext/${name}" {source = "${source}";}) extLinks
-      // {
-        "${dir}/agent/config.yml" = {
-          generator = lib.generators.toYAML {};
-          value = {
-            defaultThinkingLevel = catalog.ompThinkingLevel;
-            advisor.enabled = true;
-            advisor.reviewMode = "agent-end";
-            task.agentAdvisor.task = "on";
-            startup.checkUpdate = false;
-            startup.setupWizard = false;
-            setupVersion = 3;
-            dev.autoqa = false;
-            debug.enabled = false;
-            exa.enabled = false;
-            hideThinkingBlock = true;
-            todo.enabled = false;
-            grep.enabled = false;
-            glob.enabled = false;
-            find.enabled = "off";
-            astEdit.enabled = false;
-            fetch.enabled = false;
-            task = {
-              disabledAgents = ["scout" "reviewer" "security-reviewer" "sonic" "designer" "librarian" "seance"];
-              eager = "preferred";
-              completionProbe = false;
-              softRequestBudget = 0;
-              perCallModel = "on";
-            };
-            eval = {
-              autoBackground = {
-                enabled = true;
-                thresholdMs = 3600000;
-              };
-              js = false;
-            };
-            python.interpreter = "${pkgs.python3.withPackages (ps: [ps.pillow ps.numpy ps.pandas ps.fonttools])}/bin/python3";
-            codexResets.autoRedeem = "no";
-            modelRoles = {
-              default = "${catalog.defaultProvider}/${catalog.defaultModel}";
-              advisor = catalog.advisorModel;
-              smol = catalog.smolModel;
-              judge = catalog.judgeModel;
-              task = catalog.taskModel;
-            };
-            retry.fallbackChains = catalog.fallbackChains;
-            retry.fallbackOn = "usage-limit";
-            tier.subagent = "none";
-            extensions = map (path: "${extDir}/${path}") [
-              "pi-chronobreak"
-              "pi-recap"
-              "pi-donsetch"
-              "compact-eval.ts"
-              "work-fold.ts"
-              "msg-timestamps.ts"
-              "message-interrupts.ts"
-              "chat-look.ts"
-              "box-commands.ts"
-              "cwd.ts"
-              "secrets/secrets.ts"
-              "crest-auth.ts"
-              "crest-reroute.ts"
-              "optchat/extension.ts"
-              "goldfish.ts"
-              "message-helper.ts"
-              "ablit-system.ts"
-              "tools.ts"
-            ];
+  user.files =
+    lib.mapAttrs' (name: source: lib.nameValuePair ".omp/agent/ext/${name}" {source = "${source}";}) extLinks
+    // {
+      ".omp/agent/config.yml" = {
+        generator = lib.generators.toYAML {};
+        value = {
+          defaultThinkingLevel = catalog.ompThinkingLevel;
+          advisor.enabled = true;
+          advisor.reviewMode = "agent-end";
+          task.agentAdvisor.task = "on";
+          startup.checkUpdate = false;
+          startup.setupWizard = false;
+          setupVersion = 3;
+          dev.autoqa = false;
+          debug.enabled = false;
+          exa.enabled = false;
+          hideThinkingBlock = true;
+          todo.enabled = false;
+          grep.enabled = false;
+          glob.enabled = false;
+          find.enabled = "off";
+          astEdit.enabled = false;
+          fetch.enabled = false;
+          task = {
+            disabledAgents = ["scout" "reviewer" "security-reviewer" "sonic" "designer" "librarian" "seance"];
+            eager = "preferred";
+            completionProbe = false;
+            softRequestBudget = 0;
+            perCallModel = "on";
           };
+          eval = {
+            autoBackground = {
+              enabled = true;
+              thresholdMs = 3600000;
+            };
+            js = false;
+          };
+          python.interpreter = "${pkgs.python3.withPackages (ps: [ps.pillow ps.numpy ps.pandas ps.fonttools])}/bin/python3";
+          codexResets.autoRedeem = "no";
+          modelRoles = {
+            default = "${catalog.defaultProvider}/${catalog.defaultModel}";
+            advisor = catalog.advisorModel;
+            smol = catalog.smolModel;
+            judge = catalog.judgeModel;
+            task = catalog.taskModel;
+          };
+          retry.fallbackChains = catalog.fallbackChains;
+          retry.fallbackOn = "usage-limit";
+          tier.subagent = "none";
+          extensions = map (path: "${extDir}/${path}") [
+            "pi-chronobreak"
+            "pi-recap"
+            "pi-donsetch"
+            "compact-eval.ts"
+            "work-fold.ts"
+            "msg-timestamps.ts"
+            "message-interrupts.ts"
+            "chat-look.ts"
+            "box-commands.ts"
+            "cwd.ts"
+            "secrets/secrets.ts"
+            "crest-auth.ts"
+            "crest-reroute.ts"
+            "optchat/extension.ts"
+            "goldfish.ts"
+            "message-helper.ts"
+            "ablit-system.ts"
+            "tools.ts"
+          ];
         };
-        "${dir}/agent/work-fold.json" = {
-          generator = toJSON;
-          value.lazyUnmount = true;
-        };
-        "${dir}/agent/models.yml".text = builtins.readFile ./models.yml;
-        "${dir}/agent/AGENTS.md".text = config.user.dev.prompts.agentsMd.host;
-        "${dir}/agent/agents/task.md".text = prompts.taskAgent;
       };
-  in
-    mkAgentFiles ".omp" // mkAgentFiles ".onp";
+      ".omp/agent/work-fold.json" = {
+        generator = toJSON;
+        value.lazyUnmount = true;
+      };
+      ".omp/agent/models.yml".text = builtins.readFile ./models.yml;
+      ".omp/agent/AGENTS.md".text = config.user.dev.prompts.agentsMd.host;
+      ".omp/agent/agents/task.md".text = prompts.taskAgent;
+    };
 }

@@ -8,18 +8,18 @@
 }: let
   userName = config.user.name;
   home = config.user.homeDirectory;
-  inherit (inputPackages.oh-no-pi) onp onpAsOmp;
+  inherit (inputPackages.oh-my-pi) omp;
   lloydConfig = pkgs.writeText "lloyd-advisor.yml" (lib.generators.toYAML {} {advisor.enabled = true;});
-  botOnp = pkgs.writeShellScriptBin "onp" ''
+  botOmp = pkgs.writeShellScriptBin "omp" ''
     if [ "''${OMP_BOT_NAME-}" = Lloyd ]; then
-      exec ${onp}/bin/onp "$@" --config ${lloydConfig}
+      exec ${omp}/bin/omp "$@" --config ${lloydConfig}
     fi
-    exec ${onp}/bin/onp "$@"
+    exec ${omp}/bin/omp "$@"
   '';
   src = flakeInputs.omp-bot;
   tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
   persistentHome = "/persist/home/${userName}";
-  ext = "${home}/.onp/agent/ext";
+  ext = "${home}/.omp/agent/ext";
   persistPaths = pkgs.writeShellScript "omp-bot-persist-paths" ''
     roster=${persistentHome}/.local/state/omp-bot/bots.json
     [ -r "$roster" ] || exit 0
@@ -83,8 +83,7 @@ in {
 
   user.files = {
     ".config/omp-bot/env".text = ''
-      export PATH="${onpAsOmp}/bin:$PATH"
-      : "''${OMP_BIN:=${botOnp}/bin/onp}"
+      : "''${OMP_BIN:=${botOmp}/bin/omp}"
       : "''${OMP_BOT_EXTENSION:=${ext}/crest-auth.ts}"
       : "''${OMP_BOT_CWD_EXTENSION:=${ext}/cwd.ts}"
       : "''${OMP_BOT_SECRETS_EXTENSION:=${ext}/secrets/secrets.ts}"
