@@ -157,15 +157,16 @@ inputs: let
     '';
   };
   onpBuild = rawInputPackages.oh-no-pi.omp;
-  onp = pkgs.runCommand "onp-${onpBuild.version}" {
-    nativeBuildInputs = [pkgs.makeWrapper];
-  } ''
-    mkdir -p $out/bin
-    makeWrapper ${onpBuild}/bin/omp $out/bin/onp \
-      --set-default PI_CONFIG_DIR .onp \
-      --set-default PI_AGY_PATH ${import ../pkgs/agy.nix {inherit pkgs;}}/bin/agy \
-      --suffix PATH : ${lib.makeBinPath [pkgs.netcat]}
-  '';
+  onp =
+    pkgs.runCommand "onp-${onpBuild.version}" {
+      nativeBuildInputs = [pkgs.makeWrapper];
+    } ''
+      mkdir -p $out/bin
+      makeWrapper ${onpBuild}/bin/omp $out/bin/onp \
+        --set-default PI_CONFIG_DIR .onp \
+        --set-default PI_AGY_PATH ${import ../pkgs/agy.nix {inherit pkgs;}}/bin/agy \
+        --suffix PATH : ${lib.makeBinPath [pkgs.netcat]}
+    '';
   piDonsetch = pkgs.runCommand "pi-donsetch-trimmed" {} ''
         cp -r ${rawInputPackages.pi-donsetch.default} $out
         chmod -R u+w $out
