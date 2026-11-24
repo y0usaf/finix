@@ -446,6 +446,7 @@ in {
 
   fileSystems =
     {
+      "/nix/store".options = ["cache=loose"];
       "${home}/.omp/run" = {
         device = "tmpfs";
         fsType = "tmpfs";
@@ -583,13 +584,37 @@ in {
           serviceConfig.Restart = "always";
           script = ''
             set -u
+            shopt -s nullglob
             mkdir -p /run/omp-box
             # The share tree itself is root's: a bot reaches its own view through the folders omp-box granted it.
             chmod 0700 /run/omp-shares 2>/dev/null || true
+            last=
+            checks=0
             while :; do
-              for person in ${lib.concatMapStringsSep " " (person: lib.escapeShellArg person.name) people}; do
-                ${shareApply} "$person" || echo "omp-shares: a grant for $person did not apply" >&2
-              done
+              uid=
+              manifest=
+              [ -r /etc/omp-box/host-uid ] && IFS= read -r -d "" uid </etc/omp-box/host-uid || true
+              [ -r /etc/omp-box/manifest ] && IFS= read -r -d "" manifest </etc/omp-box/manifest || true
+              now="$uid|$manifest"
+              need=0
+              [ "$now" = "$last" ] || need=1
+              if [ "$need" = 0 ]; then
+                checks=$((checks + 1))
+                if [ "$checks" -ge 15 ]; then
+                  checks=0
+                  for view in /run/omp-mapped/*/*; do
+                    ${pkgs.coreutils}/bin/stat -c %i -- "$view" >/dev/null 2>&1 || { need=1; break; }
+                  done
+                fi
+              fi
+              if [ "$need" = 1 ]; then
+                ok=1
+                for person in ${lib.concatMapStringsSep " " (person: lib.escapeShellArg person.name) people}; do
+                  ${shareApply} "$person" || { ok=0; echo "omp-shares: a grant for $person did not apply" >&2; }
+                done
+                if [ "$ok" = 1 ]; then last=$now; else last=; fi
+                checks=0
+              fi
               : >/run/omp-box/ready
               sleep 2
             done
