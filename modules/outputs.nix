@@ -86,17 +86,9 @@ inputs: let
         EOF
         cat > "$prompts/tools/eval.md" <<'EOF'
         Persistent {{#if py}}Python{{/if}}{{#ifAll py js}}/{{/ifAll}}{{#if js}}JS{{/if}} cell (subagents have separate kernels; top-level `await` works).
-        {{#if py}}Python: `print`, `log`, `phase`, `env`, `read(path, offset?, limit?)`, `write(path, content)`, `output(*ids, format?, query?, offset?, limit?)`, `wait(handles, timeout?, raise_errors?)`, `await tool.<name>(**kwargs)`, `tool.list()`, `tool.help(name?)`, `tool.schema(name)`, `sh(cmd, cwd?, timeout?)` (raises `ShellError`).{{/if}}
-        {{#if js}}JS: `print`, `log`, `phase`, `env`, `read`, `write`, `output`, `wait`, `await tool.<name>(args)`, `sh`.{{/if}}
-        {{#if nestedTools}}Nested tools (`await tool.<name>(**kwargs)`; call `tool.help("<name>")` or `tool.schema("<name>")` for full parameters):
-        {{#each nestedTools}}- `{{name}}`: {{summary}}
-        {{/each}}{{else}}{{#if toolNames}}Tools: {{#each toolNames}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}.{{/if}}{{/if}}
-        {{#if preludes}}Namespaces (read `xd://eval/<topic>` before first use):
-        {{#each preludes}}- `{{name}}`: {{summary}} → `xd://eval/{{name}}`
-        {{/each}}{{/if}}
-        {{#if inlinePreludes}}{{#each inlinePreludes}}{{{documentation}}}
-        {{/each}}{{/if}}
-        {{#if inlineTopics}}{{{inlineTopics}}}{{/if}}
+        {{#if py}}Builtins: `print`, `log`, `phase`, `env`, `read(path, offset?, limit?)`, `write(path, content)`, `output(*ids, format?, query?, offset?, limit?)`, `wait(handles, timeout?, raise_errors?)`, `sh(cmd, cwd?, timeout?)` (raises `ShellError`).{{/if}}
+        {{#if js}}Builtins: `print`, `log`, `phase`, `env`, `read`, `write`, `output`, `wait`, `sh`.{{/if}}
+        {{#if nestedTools}}Tools (`await tool.<name>(**kwargs)`; `tool.help(name?)`, `tool.schema(name)`): {{#each nestedTools}}`{{name}}`{{#unless @last}}, {{/unless}}{{/each}}.{{else}}{{#if toolNames}}Tools (`await tool.<name>(**kwargs)`): {{#each toolNames}}`{{this}}`{{#unless @last}}, {{/unless}}{{/each}}.{{/if}}{{/if}}
         {{#if autoBackgroundEnabled}}Long cells move to background and deliver later.{{/if}}
         EOF
         cat > "$prompts/tools/task-async-contract.md" <<'EOF'
