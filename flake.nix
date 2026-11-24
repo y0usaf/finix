@@ -183,6 +183,7 @@
     };
 
     oh-my-pi.url = "github:can1357/oh-my-pi";
+    oh-no-pi.url = "git+ssh://git@github.com/y0usaf/oh-no-pi.git";
 
     microvm = {
       url = "github:microvm-nix/microvm.nix";

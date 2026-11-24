@@ -760,11 +760,12 @@
 in {
   user.persist.directories = [
     ".omp"
+    ".onp"
     ".local/share/omp"
     ".local/state/omp-secrets"
   ];
 
-  environment.systemPackages = [pkgs.jq pkgs.age pkgs.poppler-utils pkgs.sqlite ompSecret optchatCli];
+  environment.systemPackages = [pkgs.jq pkgs.age pkgs.poppler-utils pkgs.sqlite ompSecret optchatCli inputPackages.oh-no-pi.onp];
 
   user.files =
     lib.mapAttrs' (name: source: lib.nameValuePair ".omp/agent/ext/${name}" {source = "${source}";}) extLinks
