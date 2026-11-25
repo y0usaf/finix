@@ -4368,6 +4368,62 @@ section.tn-pane > .tn-body > .tn-glow {
 	font: 400 13px/20px var(--mono);
 	letter-spacing: normal;
 }
+:root:not(#dawn) .sf-chat-reader .md .mfig {
+	display: flex;
+	flex-direction: column;
+	margin: 10px 0;
+	border-radius: 12px;
+	overflow: hidden;
+	background: var(--sand-bg-quaternary);
+	box-shadow: inset 0 0 0 0.5px var(--sand-border-quaternary);
+}
+:root:not(#dawn) .sf-chat-reader .md .mfig-head {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-height: 32px;
+	padding: 0 6px 0 12px;
+	font: 400 12px/16px var(--sans);
+	letter-spacing: 0.01em;
+	color: var(--sand-text-secondary);
+}
+:root:not(#dawn) .sf-chat-reader .md .mfig-head > .grow {
+	flex: 1;
+}
+:root:not(#dawn) .sf-chat-reader .md .mfig-head svg.ico {
+	width: 12px;
+	height: 12px;
+}
+:root:not(#dawn) .sf-chat-reader .md .mfig-head :is(button.btn, button) {
+	height: 24px;
+	padding: 0 8px;
+	border-radius: 8px;
+	font: inherit;
+	color: var(--sand-text-secondary);
+}
+:root:not(#dawn) .sf-chat-reader .md .mfig-head :is(button.btn, button):hover:not(.disabled, .dis, :disabled) {
+	background: var(--sand-bg-hover);
+	color: var(--sand-text-primary);
+}
+:root:not(#dawn) .sf-chat-reader .md .mfig-body {
+	display: block;
+	padding: 0 12px 12px;
+	overflow: auto;
+}
+:root:not(#dawn) .sf-chat-reader .md .mfig-src {
+	display: none;
+	margin: 0;
+	padding: 0 12px 12px;
+	overflow: auto;
+	font: 400 13px/20px var(--mono);
+	white-space: pre;
+}
+:root:not(#dawn) .sf-chat-reader .md .mfig.source > .mfig-body {
+	display: none;
+}
+:root:not(#dawn) .sf-chat-reader .md .mfig.source > .mfig-src {
+	display: block;
+}
 :root:not(#dawn) .sf-chat-reader .sf-section.collapsible.collapsed {
 	align-items: center;
 }
