@@ -10,6 +10,21 @@
   shared = import ../shared.nix {inherit lib;};
   btrfs = shared.btrfs diskUuid ["compress=zstd:3" "noatime" "ssd" "space_cache=v2"];
   cfg = config.programs.limine;
+  emitWorld = import "${flakeInputs.luin}/nix/emit-world.nix" {
+    inherit pkgs lib;
+    luinc = inputPackages.luin.luinc;
+    luinSrc = flakeInputs.luin;
+  };
+  luinitWorld = emitWorld {
+    name = "y0usaf-desktop-luinit-world";
+    activateCmd = "/nix/var/nix/profiles/system/activate";
+    services = config.finit.services;
+    tasks = config.finit.tasks;
+    run = config.finit.run;
+    ttys = config.finit.ttys;
+    users = config.users.users;
+    groups = config.users.groups;
+  };
   gpuUnlock = rec {
     nv = "610.43.03";
     src = pkgs.fetchFromGitHub {
@@ -156,6 +171,8 @@ in {
     };
   });
 
+  environment.systemPackages = [inputPackages.luin.luinit-ctl];
+
   programs.limine = {
     enable = true;
 
@@ -178,7 +195,7 @@ in {
         protocol: linux
         comment: y0usaf-desktop booted with luinit PID 1
         kernel_path: boot():/EFI/luinos/kernel
-        cmdline: init=${inputPackages.luin.luinit}/bin/luinit ${lib.concatStringsSep " " config.boot.kernelParams}
+        cmdline: init=${inputPackages.luin.luinit-floor}/bin/luinit-floor luinit.world=${luinitWorld}/bin/luinit-world ${lib.concatStringsSep " " config.boot.kernelParams}
         module_path: boot():/EFI/luinos/initrd
 
       /Vinix
