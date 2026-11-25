@@ -864,7 +864,7 @@
               id: ${ablit.inkling.id}
               name: ${ablit.inkling.name}
               reasoning: true
-              input: [text]
+              input: [text, image]
               contextWindow: ${toString ablit.inkling.contextWindow}
               maxTokens: ${toString ablit.inkling.maxTokens}
     '';

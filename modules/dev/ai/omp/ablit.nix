@@ -46,8 +46,8 @@
     contextWindow = 65536;
     maxTokens = 16384;
     program = "/mnt/seed/current/bin/omp-ablit-inkling";
-    repoBase = "https://huggingface.co/satellitedown/Inkling-2-Mini-abliterated-ingine/resolve/6e823ba00310";
-    minFreeVramMiB = 18500;
+    repoBase = "https://huggingface.co/satellitedown/Inkling-2-Mini-abliterated-ingine/resolve/cea73d67cd0e424c14c8b5cd276a9a2c2a5d7cbd";
+    minFreeVramMiB = 10000;
     files = [
       {
         path = "chat_template.jinja";
@@ -67,7 +67,7 @@
       }
       {
         path = "inkling-2-mini-abliterated.safetensors";
-        sha256 = "9467240bdbcd4737a3496bf167525989d79196dbeec582361880ad4d8cbe4d73";
+        sha256 = "45686f11454c98c9e393aac4129695d0c2b86e90327e7f61421eff470bc0dcb9";
       }
       {
         path = "model-00001-of-00001.safetensors";
@@ -304,7 +304,11 @@
         expected=$2
         dest="$model_dir/$rel"
         if [ -f "$dest" ]; then
-          return 0
+          sz=$(stat -c %s "$dest" 2>/dev/null || echo 0)
+          if [ "$sz" -gt 52428800 ] || printf '%s  %s\n' "$expected" "$dest" | sha256sum -c --status -; then
+            return 0
+          fi
+          echo "omp-ablit-inkling: updating $rel (checksum changed)" >&2
         fi
         mkdir -p "$(dirname "$dest")"
         echo "omp-ablit-inkling: fetching $rel into $model_dir" >&2
@@ -342,6 +346,16 @@
       if curl -fsS "$url/health" >/dev/null 2>&1; then
         echo "omp-ablit-inkling: using the ingine-serve another session already runs on $url" >&2
       else
+        ctx="''${INGINE_CTX:-${toString inkling.contextWindow}}"
+        vision_flag=()
+        base_mib=21288
+        if [ "''${OMP_ABLIT_NO_VISION:-0}" = "1" ]; then
+          vision_flag=(--no-vision)
+          base_mib=20652
+        fi
+        extra_kv_mib=$(( (ctx - 65536) * 1024 / 65536 ))
+        base_mib=$(( base_mib + extra_kv_mib ))
+        offload_gib="''${INGINE_OFFLOAD_GIB:-}"
         if command -v nvidia-smi >/dev/null 2>&1; then
           vram=$(nvidia-smi --query-gpu=memory.free,memory.total --format=csv,noheader,nounits | head -n1)
           free_mib=$(printf '%s' "$vram" | cut -d',' -f1 | tr -d ' ')
@@ -350,9 +364,24 @@
             echo "omp-ablit-inkling: insufficient free VRAM ($free_mib / $total_mib MiB free; need >= ${toString inkling.minFreeVramMiB} MiB)" >&2
             exit 1
           fi
+          if [ -z "$offload_gib" ] && [ -n "$free_mib" ]; then
+            headroom_mib=1400
+            budget_mib=$(( free_mib - headroom_mib ))
+            if [ "$budget_mib" -ge "$base_mib" ]; then
+              offload_gib="0"
+            else
+              need_mib=$(( base_mib - budget_mib ))
+              quarters=$(( (need_mib + 255) / 256 ))
+              if [ "$quarters" -gt 56 ]; then
+                quarters=56
+              fi
+              offload_gib=$(printf '%d.%02d' $(( quarters / 4 )) $(( (quarters % 4) * 25 )))
+            fi
+          fi
         fi
+        offload_gib="''${offload_gib:-3.0}"
 
-        echo "omp-ablit-inkling: starting ${inkling.name} on $url" >&2
+        echo "omp-ablit-inkling: starting ${inkling.name} on $url (ctx=$ctx, offload=''${offload_gib}GiB, vision=$([ ''${#vision_flag[@]} -eq 0 ] && echo gpu || echo off))" >&2
         before=$(mem || true)
         ingine-serve \
           --engine \
@@ -361,13 +390,13 @@
           --model-id ${inkling.id} \
           --host 127.0.0.1 \
           --port ${toString inkling.port} \
-          --max-ctx ${toString inkling.contextWindow} \
+          --max-ctx "$ctx" \
           --dense-fp8 \
           --kv-fp8 \
-          --offload-experts 4 \
+          --offload-experts "$offload_gib" \
           --spec \
           --spec-threshold 0.8 \
-          --no-vision \
+          "''${vision_flag[@]}" \
           >/dev/null 2>&1 &
         server=$!
         ready=""
@@ -404,7 +433,7 @@
       runInkling = ''exec ${omp-ablit-inkling}/bin/omp-ablit-inkling "$@"'';
       menu = ''
         printf 'Select omp-ablit model:\n' >&2
-        printf '  1) inkling  (Inkling 2 Mini Abliterated, 64K, ingine-serve)\n' >&2
+        printf '  1) inkling  (Inkling 2 Mini Abliterated, 64K, vision, ingine-serve)\n' >&2
         printf '  2) gemma    (Gemma 4 26B A4B Heretic + StyleTune v2 Q4_K_M, 64K, llama-server)\n' >&2
         printf '  3) qwen     (Qwen 3.8 27B Abliterated Q4_K_M, 128K, llama-server)\n' >&2
         printf 'Choice [1-3, default 1]: ' >&2
@@ -479,6 +508,26 @@
 in {
   _module.args.ablit = model // {inherit gemma inkling;};
   user.persist.directories = [model.dir];
+
+  user.files.".nv/nvidia-application-profiles-rc.d/50-ingine" = lib.mkIf config.hardware.nvidia.enable {
+    generator = builtins.toJSON;
+    value.rules = [
+      {
+        pattern = {
+          feature = "procname";
+          matches = "ingine-serve";
+        };
+        profile = ["0x166c5e" 0];
+      }
+      {
+        pattern = {
+          feature = "procname";
+          matches = "ingine-bench";
+        };
+        profile = ["0x166c5e" 0];
+      }
+    ];
+  };
 
   environment.systemPackages =
     [omp-ablit omp-ablit-gemma omp-ablit-qwen]
