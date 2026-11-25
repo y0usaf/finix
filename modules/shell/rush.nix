@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   aliases =
@@ -106,7 +105,5 @@ in {
         ];
       };
     };
-
-    environment.systemPackages = [pkgs.bat];
   };
 }

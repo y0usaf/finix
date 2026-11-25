@@ -7,12 +7,10 @@
     pkgs.wget
     pkgs.cachix
     pkgs.unzip
-    pkgs.lsd
     pkgs.tree
     pkgs.psmisc
     pkgs.lm_sensors
     pkgs.fzf
-    pkgs.ripgrep
     pkgs.gnused
     inputPackages.strictix.default
     pkgs.alejandra

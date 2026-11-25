@@ -19,6 +19,7 @@ in {
   };
 
   user.persist.directories = [
+    "luin"
     ".local/state/luin"
     ".config/luin"
   ];
