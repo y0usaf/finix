@@ -27,6 +27,7 @@ inputs: let
         ./dev/ai/omp/helper-compaction.patch
         ./dev/ai/omp/eval-only-nested-tools.patch
         ./dev/ai/omp/mcp-reliability.patch
+        ./dev/ai/omp/agy-checkpoint-and-replay-budget.patch
       ];
     postPatch =
       (old.postPatch or "")

@@ -1,0 +1,160 @@
+diff --git a/packages/ai/src/providers/antigravity-cli/conversation-store.ts b/packages/ai/src/providers/antigravity-cli/conversation-store.ts
+index ab4a94a..0c2f8ce 100644
+--- a/packages/ai/src/providers/antigravity-cli/conversation-store.ts
++++ b/packages/ai/src/providers/antigravity-cli/conversation-store.ts
+@@ -157,7 +157,6 @@ function prefixFingerprint(db: Database, checkpoint: AntigravityCliCheckpoint):
+ 	const tables = [
+ 		["steps", checkpoint.steps],
+ 		["parent_references", checkpoint.steps],
+-		["gen_metadata", checkpoint.generations],
+ 		["executor_metadata", checkpoint.executions],
+ 	] as const;
+ 	for (const [table, end] of tables) {
+diff --git a/packages/ai/src/providers/antigravity-cli/host.ts b/packages/ai/src/providers/antigravity-cli/host.ts
+index bef8c2a..888e8a0 100644
+--- a/packages/ai/src/providers/antigravity-cli/host.ts
++++ b/packages/ai/src/providers/antigravity-cli/host.ts
+@@ -266,8 +266,10 @@ export class AgyHost implements ProviderSessionState {
+ 				let forkId: string | undefined;
+ 				try {
+ 					forkId = forkConversation(this.#geminiDir, plan.conversationId, plan.checkpoint, plan.digest);
+-				} catch {
+-					logger.debug("Antigravity CLI checkpoint unavailable; replaying the supplied transcript");
++				} catch (error) {
++					logger.debug("Antigravity CLI checkpoint unavailable; replaying the supplied transcript", {
++						error: error instanceof Error ? error.message : String(error),
++					});
+ 				}
+ 				if (forkId) {
+ 					this.#ownedConversations.add(forkId);
+diff --git a/packages/ai/src/providers/antigravity-cli/reconcile.ts b/packages/ai/src/providers/antigravity-cli/reconcile.ts
+index fc9e2e0..e4789a9 100644
+--- a/packages/ai/src/providers/antigravity-cli/reconcile.ts
++++ b/packages/ai/src/providers/antigravity-cli/reconcile.ts
+@@ -82,48 +82,92 @@ export function transcriptDigest(messages: readonly Message[]): string {
+ 	return hash.digest("hex");
+ }
+ 
++const MAX_REPLAY_BYTES = 120_000;
++const MAX_HISTORICAL_PART_CHARS = 16_000;
++
++function clipHistoryText(text: string): string {
++	if (text.length <= MAX_HISTORICAL_PART_CHARS) return text;
++	const omitted = text.length - MAX_HISTORICAL_PART_CHARS;
++	return `${text.slice(0, MAX_HISTORICAL_PART_CHARS)}\n[... truncated ${omitted} chars ...]`;
++}
++
++function replayMessageBlocks(message: Message): { blocks: ContentBlock[]; bytes: number } {
++	const blocks: ContentBlock[] = [];
++	let bytes = 0;
++	const pushText = (text: string) => {
++		blocks.push({ type: "text", text });
++		bytes += Buffer.byteLength(text, "utf8");
++	};
++	const tag = message.role === "toolResult" ? "tool_result" : message.role;
++	const attrs =
++		message.role === "toolResult"
++			? ` id=${JSON.stringify(message.toolCallId)} name=${JSON.stringify(message.toolName)} error=${message.isError}`
++			: "";
++	pushText(`<${tag}${attrs}>`);
++	if (typeof message.content === "string") pushText(clipHistoryText(message.content));
++	else
++		for (const part of message.content) {
++			switch (part.type) {
++				case "text":
++					pushText(clipHistoryText(part.text));
++					break;
++				case "image":
++					blocks.push({ type: "image", data: part.data, mimeType: part.mimeType });
++					bytes += 256;
++					break;
++				case "thinking":
++					pushText(`<thinking>${clipHistoryText(part.thinking)}</thinking>`);
++					break;
++				case "toolCall":
++					pushText(
++						`<tool_call id=${JSON.stringify(part.id)} name=${JSON.stringify(part.name)}>${clipHistoryText(stableStringifyJson(part.arguments))}</tool_call>`,
++					);
++					break;
++			}
++		}
++	pushText(`</${tag}>`);
++	return { blocks, bytes };
++}
++
+ /** Replay earlier turns as labelled text and image blocks, then send trailing input directly. */
+ export function replayPrompt(replay: readonly Message[]): ContentBlock[] {
+ 	let split = replay.length;
+ 	while (split > 0 && isInputMessage(replay[split - 1]!)) split--;
++	const trailing: ContentBlock[] = [];
++	let trailingBytes = 0;
++	for (const message of replay.slice(split)) {
++		if (!isInputMessage(message)) continue;
++		for (const block of inputBlocks(message)) {
++			trailing.push(block);
++			trailingBytes += block.type === "text" ? Buffer.byteLength(block.text, "utf8") : 256;
++		}
++	}
+ 	const blocks: ContentBlock[] = [];
+ 	if (split > 0) {
+-		blocks.push({ type: "text", text: prompt.render(transcriptTemplate, {}) });
+-		for (const message of replay.slice(0, split)) {
+-			const tag = message.role === "toolResult" ? "tool_result" : message.role;
+-			const attrs =
+-				message.role === "toolResult"
+-					? ` id=${JSON.stringify(message.toolCallId)} name=${JSON.stringify(message.toolName)} error=${message.isError}`
+-					: "";
+-			blocks.push({ type: "text", text: `<${tag}${attrs}>` });
+-			if (typeof message.content === "string") blocks.push({ type: "text", text: message.content });
+-			else
+-				for (const part of message.content) {
+-					switch (part.type) {
+-						case "text":
+-							blocks.push({ type: "text", text: part.text });
+-							break;
+-						case "image":
+-							blocks.push({ type: "image", data: part.data, mimeType: part.mimeType });
+-							break;
+-						case "thinking":
+-							blocks.push({ type: "text", text: `<thinking>${part.thinking}</thinking>` });
+-							break;
+-						case "toolCall":
+-							blocks.push({
+-								type: "text",
+-								text: `<tool_call id=${JSON.stringify(part.id)} name=${JSON.stringify(part.name)}>${stableStringifyJson(part.arguments)}</tool_call>`,
+-							});
+-							break;
+-					}
+-				}
+-			blocks.push({ type: "text", text: `</${tag}>` });
++		const header = prompt.render(transcriptTemplate, {});
++		const footer = "</conversation-checkpoint>";
++		const overhead = Buffer.byteLength(header, "utf8") + Buffer.byteLength(footer, "utf8") + 128;
++		const historyBudget = Math.max(0, MAX_REPLAY_BYTES - trailingBytes - overhead);
++		const kept: ContentBlock[][] = [];
++		let used = 0;
++		let omitted = 0;
++		for (let i = split - 1; i >= 0; i--) {
++			const rendered = replayMessageBlocks(replay[i]!);
++			if (used + rendered.bytes > historyBudget) {
++				omitted = i + 1;
++				break;
++			}
++			kept.push(rendered.blocks);
++			used += rendered.bytes;
+ 		}
+-		blocks.push({ type: "text", text: "</conversation-checkpoint>" });
+-	}
+-	for (const message of replay.slice(split)) {
+-		if (isInputMessage(message)) blocks.push(...inputBlocks(message));
++		blocks.push({ type: "text", text: header });
++		if (omitted > 0) {
++			blocks.push({ type: "text", text: `[... ${omitted} earlier message(s) omitted to fit input limit ...]\n` });
++		}
++		for (let i = kept.length - 1; i >= 0; i--) blocks.push(...kept[i]!);
++		blocks.push({ type: "text", text: footer });
+ 	}
++	blocks.push(...trailing);
+ 	return blocks;
+ }
+ 
