@@ -248,7 +248,7 @@
 
     nixpkgs-librewolf.url = "github:NixOS/nixpkgs/56c02bc00adcf003215cc4bd996d6efaf4cff188";
     luin = {
-      url = "git+file:///home/y0usaf/dev/developing/luin";
+      url = "git+ssh://git@github.com/y0usaf/luin.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

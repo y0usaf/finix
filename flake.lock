@@ -1643,11 +1643,11 @@
         "rev": "d33da77a9184f61067c4a205ec9cc61e1e2c8ee6",
         "revCount": 5,
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/luin"
+        "url": "ssh://git@github.com/y0usaf/luin.git"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/y0usaf/dev/developing/luin"
+        "url": "ssh://git@github.com/y0usaf/luin.git"
       }
     },
     "mado": {
