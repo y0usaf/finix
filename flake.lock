@@ -1630,6 +1630,26 @@
         "type": "github"
       }
     },
+    "luin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795620730,
+        "narHash": "sha256-uVX6FvslUNJKVfL7SmBa+Vr3e3LnBLzQ/8M6yjRefjs=",
+        "ref": "refs/heads/main",
+        "rev": "174165472f5e5ff4c559496c3e35c3b3c482a052",
+        "revCount": 4,
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/luin"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/y0usaf/dev/developing/luin"
+      }
+    },
     "mado": {
       "inputs": {
         "nixpkgs": "nixpkgs_6"
@@ -3314,6 +3334,7 @@
         "iets": "iets",
         "leverage": "leverage",
         "linear-cli": "linear-cli",
+        "luin": "luin",
         "mado": "mado",
         "manzil": "manzil",
         "microvm": "microvm",

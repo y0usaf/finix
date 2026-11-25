@@ -247,6 +247,11 @@
     };
 
     nixpkgs-librewolf.url = "github:NixOS/nixpkgs/56c02bc00adcf003215cc4bd996d6efaf4cff188";
+    luin = {
+      url = "git+file:///home/y0usaf/dev/developing/luin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     alejandra = {
       url = "github:kamadorueda/alejandra";
       inputs.nixpkgs.follows = "nixpkgs";
