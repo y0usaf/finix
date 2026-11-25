@@ -18,11 +18,19 @@ in {
     '';
   };
 
-  user.persist.directories = [
-    "luin"
-    ".local/state/luin"
-    ".config/luin"
-  ];
+  user = {
+    persist.directories = [
+      "luin"
+      ".local/state/luin"
+      ".config/luin"
+    ];
+    shell.rcExtra = lib.mkBefore ''
+      case ":$PATH:" in
+        *":$HOME/.local/state/luin/current/bin:"*) ;;
+        *) export PATH="$HOME/.local/state/luin/current/bin:$PATH" ;;
+      esac
+    '';
+  };
 
   finit.tasks.luin-deploy = {
     description = "deploy active luin generation for ${userName}";

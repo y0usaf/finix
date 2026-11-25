@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   aliases =
@@ -105,5 +106,7 @@ in {
         ];
       };
     };
+
+    environment.systemPackages = lib.optional (config.networking.hostName != "y0usaf-desktop") pkgs.bat;
   };
 }

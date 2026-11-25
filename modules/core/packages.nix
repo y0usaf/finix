@@ -1,29 +1,36 @@
 {
+  config,
+  lib,
   pkgs,
   inputPackages,
   ...
 }: {
-  environment.systemPackages = [
-    pkgs.wget
-    pkgs.cachix
-    pkgs.unzip
-    pkgs.tree
-    pkgs.psmisc
-    pkgs.lm_sensors
-    pkgs.fzf
-    pkgs.gnused
-    inputPackages.strictix.default
-    pkgs.alejandra
-    pkgs.statix
-    pkgs.deadnix
-    pkgs.bluez-tools
-    pkgs.rsync
-    pkgs.bind
-    pkgs.btrbk
-    pkgs.fuse3
-    pkgs.strace
-    pkgs.bc
-    pkgs.file
-    pkgs.hostname-debian
-  ];
+  environment.systemPackages =
+    [
+      pkgs.wget
+      pkgs.cachix
+      pkgs.unzip
+      pkgs.tree
+      pkgs.psmisc
+      pkgs.lm_sensors
+      pkgs.fzf
+      pkgs.gnused
+      inputPackages.strictix.default
+      pkgs.alejandra
+      pkgs.statix
+      pkgs.deadnix
+      pkgs.bluez-tools
+      pkgs.rsync
+      pkgs.bind
+      pkgs.btrbk
+      pkgs.fuse3
+      pkgs.strace
+      pkgs.bc
+      pkgs.file
+      pkgs.hostname-debian
+    ]
+    ++ lib.optionals (config.networking.hostName != "y0usaf-desktop") [
+      pkgs.lsd
+      pkgs.ripgrep
+    ];
 }
