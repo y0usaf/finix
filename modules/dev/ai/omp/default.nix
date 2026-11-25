@@ -840,6 +840,7 @@ in {
       };
       ".omp/agent/models.yml".text = builtins.readFile ./models.yml;
       ".omp/agent/AGENTS.md".text = config.user.dev.prompts.agentsMd.host;
+      ".omp/agent/SYSTEM.md".text = prompts.systemPrompt;
       ".omp/agent/agents/task.md".text = prompts.taskAgent;
     };
 }
