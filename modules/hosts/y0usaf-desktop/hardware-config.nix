@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputPackages,
   flakeInputs,
   ...
 }: let
@@ -160,6 +161,11 @@ in {
 
     maxGenerations = 20;
 
+    additionalFiles = {
+      "EFI/luinos/kernel" = "${config.boot.kernelPackages.kernel}/bzImage";
+      "EFI/luinos/initrd" = "${config.boot.initrd.package}/initrd";
+    };
+
     extraEntries = ''
       /Finix golden
         protocol: linux
@@ -167,6 +173,13 @@ in {
         kernel_path: boot():/EFI/finix/kernels/golden/kernel
         cmdline: init=/nix/store/ralz7prz3545kixkfwag61ky42z1j8b9-finix-system/init nvidia-drm.modeset=1 nvidia-drm.fbdev=1 nvidia.NVreg_UsePageAttributeTable=1 nvidia.NVreg_EnableResizableBar=1 nvidia.NVreg_RegistryDwords=RmEnableAggressiveVblank=1 nvidia_modeset.disable_vrr_memclk_switch=1 nvidia.NVreg_TemporaryFilePath=/var/tmp amd_pstate=active mitigations=off console=tty0 panic=30 oops=panic softlockup_panic=1 hung_task_panic=1
         module_path: boot():/EFI/finix/kernels/golden/initrd
+
+      /LuinOS (luinit)
+        protocol: linux
+        comment: y0usaf-desktop booted with luinit PID 1
+        kernel_path: boot():/EFI/luinos/kernel
+        cmdline: init=${inputPackages.luin.luinit}/bin/luinit ${lib.concatStringsSep " " config.boot.kernelParams}
+        module_path: boot():/EFI/luinos/initrd
 
       /Vinix
         protocol: limine
