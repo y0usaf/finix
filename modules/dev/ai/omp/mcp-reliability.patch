@@ -1,0 +1,292 @@
+diff --git a/packages/coding-agent/src/eval/js/shared/prelude.txt b/packages/coding-agent/src/eval/js/shared/prelude.txt
+index 804c74c..6d67b70 100644
+--- a/packages/coding-agent/src/eval/js/shared/prelude.txt
++++ b/packages/coding-agent/src/eval/js/shared/prelude.txt
+@@ -134,6 +134,43 @@ if (!globalThis.__omp_js_prelude_loaded__) {
+ 		get(_target, prop) {
+ 			if (prop === "defined") return () => [...__tools.keys()];
+ 			if (prop === "undefine") return name => __tools.delete(name);
++			if (prop === "list")
++				return async () => {
++					const data = await globalThis.__omp_call_tool__("__tools__", {});
++					const items = Array.isArray(data?.tools) ? data.tools : [];
++					return items.filter(item => typeof item?.name === "string").map(item => item.name);
++				};
++			if (prop === "help")
++				return async name => {
++					if (typeof name === "string" && name.trim()) {
++						const doc = await globalThis.__omp_call_tool__("__tool_doc__", { name });
++						return typeof doc?.docs === "string" ? doc.docs : "";
++					}
++					const data = await globalThis.__omp_call_tool__("__tools__", {});
++					const items = Array.isArray(data?.tools) ? data.tools : [];
++					const failed = Array.isArray(data?.failedMcpServers) ? data.failedMcpServers : [];
++					const lines = items
++						.filter(item => typeof item?.name === "string")
++						.map(item => `- ${item.name}: ${item.summary ?? ""}`);
++					let out = lines.length
++						? `Available tools (await tool.<name>(args); await tool.help("<name>") for full schema):\n${lines.join("\n")}`
++						: "No host tools available.";
++					const flines = failed
++						.filter(s => typeof s?.name === "string")
++						.map(s => `- ${s.name}: ${s.error ?? ""}`);
++					if (flines.length) {
++						out += `\n\nFailed MCP servers (call await tool.reconnect_mcp("<name>") to retry):\n${flines.join("\n")}`;
++					}
++					return out;
++				};
++			if (prop === "reconnect_mcp")
++				return async name =>
++					globalThis.__omp_call_tool__("__mcp_reconnect__", typeof name === "string" ? { name } : {});
++			if (prop === "schema")
++				return async name => {
++					const doc = await globalThis.__omp_call_tool__("__tool_doc__", { name });
++					return doc?.parameters ?? {};
++				};
+ 			if (typeof prop !== "string") return undefined;
+ 			return async args => globalThis.__omp_call_tool__(prop, args ?? {});
+ 		},
+diff --git a/packages/coding-agent/src/eval/js/tool-bridge.ts b/packages/coding-agent/src/eval/js/tool-bridge.ts
+index 45de202..37da4a1 100644
+--- a/packages/coding-agent/src/eval/js/tool-bridge.ts
++++ b/packages/coding-agent/src/eval/js/tool-bridge.ts
+@@ -46,6 +46,7 @@ import type { JsStatusEvent } from "./shared/types";
+ /** These tools await delegated subagents/jobs, not the cell runtime's own work. */
+ const EVAL_TOOLS_LIST_BRIDGE_NAME = "__tools__";
+ const EVAL_TOOL_DOC_BRIDGE_NAME = "__tool_doc__";
++const EVAL_MCP_RECONNECT_BRIDGE_NAME = "__mcp_reconnect__";
+ const INTERACTIVE_USER_TOOLS = new Set(["ask", "secret"]);
+ 
+ const NO_REPLY_SINK =
+@@ -82,8 +83,12 @@ type ToolValue =
+ 	| EvalWorkpoolResult
+ 	| { items: EvalHandleSnapshot[] }
+ 	| { cancelled: boolean }
+-	| { tools: Array<{ name: string; label?: string; summary: string; description: string; parameters: unknown }> }
++	| {
++			tools: Array<{ name: string; label?: string; summary: string; description: string; parameters: unknown }>;
++			failedMcpServers?: Array<{ name: string; error: string }>;
++	  }
+ 	| { name: string; label?: string; summary: string; description: string; parameters: unknown; docs: string }
++	| { results: Array<{ name: string; connected: boolean; tools: string[]; error?: string }> }
+ 	| {
+ 			text: string;
+ 			details?: unknown;
+@@ -110,6 +115,13 @@ function getTool(session: ToolSession, name: string, args?: unknown): AgentTool
+ 	if (session.getToolForEvalBridge && session.getToolByName?.(name)) {
+ 		throw new ToolError(`Tool is registered but not available in this session: ${name}`);
+ 	}
++	const failed = listFailedMcpServers(session);
++	if (failed.length > 0) {
++		const summary = failed.map(s => `${s.name}: ${s.error}`).join("; ");
++		throw new ToolError(
++			`Unknown tool from js runtime: ${name}. Failed MCP servers: ${summary}. Call tool.reconnect_mcp("<server>") to retry.`,
++		);
++	}
+ 	throw new ToolError(`Unknown tool from js runtime: ${name}`);
+ }
+ 
+@@ -134,6 +146,14 @@ export function renderEvalToolDoc(tool: AgentTool): string {
+ 	].join("\n");
+ }
+ 
++function listFailedMcpServers(session: ToolSession): Array<{ name: string; error: string }> {
++	const failed = session.mcpManager?.getFailedServers?.();
++	if (!failed || failed.size === 0) return [];
++	return Array.from(failed.entries())
++		.map(([name, error]) => ({ name, error }))
++		.sort((a, b) => a.name.localeCompare(b.name));
++}
++
+ function listBridgeTools(session: ToolSession): Array<{ name: string; label?: string; summary: string; description: string; parameters: unknown }> {
+ 	const names = session.getEvalBridgeToolNames?.() ?? session.getAdvertisedEvalToolNames?.() ?? [];
+ 	const seen = new Set<string>();
+@@ -373,7 +393,30 @@ async function dispatchSessionTool(name: string, args: unknown, options: ToolBri
+ 		return await runEvalWorkpool(args, options);
+ 	}
+ 	if (name === EVAL_TOOLS_LIST_BRIDGE_NAME) {
+-		return { tools: listBridgeTools(options.session) };
++		return {
++			tools: listBridgeTools(options.session),
++			failedMcpServers: listFailedMcpServers(options.session),
++		};
++	}
++	if (name === EVAL_MCP_RECONNECT_BRIDGE_NAME) {
++		const manager = options.session.mcpManager;
++		if (!manager?.reconnectServer) {
++			throw new ToolError("MCP manager is not available in this session.");
++		}
++		const requested = isRecord(args) && typeof args.name === "string" ? args.name.trim() : "";
++		const targets = requested ? [requested] : listFailedMcpServers(options.session).map(s => s.name);
++		const results: Array<{ name: string; connected: boolean; tools: string[]; error?: string }> = [];
++		for (const serverName of targets) {
++			const conn = await manager.reconnectServer(serverName, { manual: true });
++			const connected = conn !== null && conn !== undefined;
++			const availableNames = new Set(listBridgeTools(options.session).map(t => t.name));
++			const tools = (manager.getTools?.() ?? [])
++				.filter(t => t.mcpServerName === serverName && availableNames.has(t.name))
++				.map(t => t.name);
++			const error = connected ? undefined : manager.getFailedServers?.().get(serverName) ?? "Reconnect failed";
++			results.push({ name: serverName, connected, tools, ...(error ? { error } : {}) });
++		}
++		return { results };
+ 	}
+ 	if (name === EVAL_TOOL_DOC_BRIDGE_NAME) {
+ 		const targetName = isRecord(args) && typeof args.name === "string" ? args.name.trim() : "";
+diff --git a/packages/coding-agent/src/eval/py/prelude.py b/packages/coding-agent/src/eval/py/prelude.py
+index 6d4cf06..2454479 100644
+--- a/packages/coding-agent/src/eval/py/prelude.py
++++ b/packages/coding-agent/src/eval/py/prelude.py
+@@ -745,16 +745,28 @@ if "__omp_prelude_loaded__" not in globals():
+                 return _ToolCallable(name).help()
+             data = _bridge_call("__tools__", {})
+             items = data.get("tools", []) if isinstance(data, dict) else []
++            failed = data.get("failedMcpServers", []) if isinstance(data, dict) else []
+             lines = [f"- {item['name']}: {item.get('summary', '')}" for item in items if isinstance(item, dict) and isinstance(item.get("name"), str)]
+-            if not lines:
+-                return "No host tools available."
+-            return "Available tools (await tool.<name>(**kwargs); tool.help(\"<name>\") for full schema):\n" + "\n".join(lines)
++            out = (
++                "Available tools (await tool.<name>(**kwargs); tool.help(\"<name>\") for full schema):\n" + "\n".join(lines)
++                if lines
++                else "No host tools available."
++            )
++            if failed:
++                flines = [f"- {s['name']}: {s.get('error', '')}" for s in failed if isinstance(s, dict) and isinstance(s.get("name"), str)]
++                if flines:
++                    out += "\n\nFailed MCP servers (call tool.reconnect_mcp(\"<name>\") to retry):\n" + "\n".join(flines)
++            return out
++
++        def reconnect_mcp(self, name: str | None = None) -> dict:
++            args = {"name": name} if name is not None else {}
++            return _bridge_call("__mcp_reconnect__", args)
+ 
+         def schema(self, name: str) -> dict:
+             return _ToolCallable(name).schema()
+ 
+         def __dir__(self) -> list[str]:
+-            base = ["defined", "help", "list", "schema", "undefine"]
++            base = ["defined", "help", "list", "reconnect_mcp", "schema", "undefine"]
+             try:
+                 return sorted(set(base + self.list()))
+             except Exception:
+diff --git a/packages/coding-agent/src/mcp/manager.ts b/packages/coding-agent/src/mcp/manager.ts
+index 4fbd8a5..7c63c6a 100644
+--- a/packages/coding-agent/src/mcp/manager.ts
++++ b/packages/coding-agent/src/mcp/manager.ts
+@@ -313,6 +313,8 @@ export interface MCPManagerApi {
+ 	addNotificationListener(listener: (serverName: string, method: string, params: unknown) => void): () => void;
+ 	/** Names of currently connected servers. */
+ 	getConnectedServers(): string[];
++	getFailedServers?(): Map<string, string>;
++	reconnectServer?(name: string, options?: { manual?: boolean }): Promise<unknown>;
+ 	/** Cached resources/templates of one server. */
+ 	getServerResources(name: string): { resources: MCPResource[]; templates: MCPResourceTemplate[] } | undefined;
+ 	/** Wait until one server's resource catalog is loaded. */
+@@ -509,7 +511,7 @@ export class MCPManager implements MCPManagerApi {
+ 	}
+ 
+ 	#emitConnectionStatus(event: McpConnectionStatusEvent): void {
+-		if (event.type === "failed" && this.#startupServers.has(event.serverName)) {
++		if (event.type === "failed") {
+ 			this.#startupFailures.set(event.serverName, event.error);
+ 		} else if (event.type === "connected") {
+ 			this.#startupFailures.delete(event.serverName);
+@@ -1563,6 +1565,10 @@ export class MCPManager implements MCPManagerApi {
+ 		return Array.from(this.#connections.keys());
+ 	}
+ 
++	getFailedServers(): Map<string, string> {
++		return new Map(this.#startupFailures);
++	}
++
+ 	/**
+ 	 * Get all known server names (connected, connecting, or discovered).
+ 	 */
+@@ -1960,7 +1966,7 @@ export class MCPManager implements MCPManagerApi {
+ 			const customTools = MCPTool.fromTools(connection, serverTools, reconnect, this.#observeToolCall(name));
+ 			void this.toolCache?.set(name, config, serverTools);
+ 			this.#replaceServerTools(name, customTools);
+-			this.#notifyOwnerToolsChanged().catch(error => logger.debug("MCP tools-changed handler failed", { error }));
++			await this.#notifyOwnerToolsChanged().catch(error => logger.debug("MCP tools-changed handler failed", { error }));
+ 			void this.#loadServerResourcesAndPrompts(name, connection);
+ 			return connection;
+ 		} catch (error) {
+diff --git a/packages/coding-agent/src/mcp/transports/stdio.ts b/packages/coding-agent/src/mcp/transports/stdio.ts
+index c101a05..f424dbd 100644
+--- a/packages/coding-agent/src/mcp/transports/stdio.ts
++++ b/packages/coding-agent/src/mcp/transports/stdio.ts
+@@ -566,6 +566,8 @@ export class StdioTransport implements MCPTransport {
+ 	>();
+ 	#connected = false;
+ 	#readLoop: Promise<void> | null = null;
++	#stderrLoop: Promise<void> | null = null;
++	#stderrTail = "";
+ 	/**
+ 	 * Set from `resolveStdioSpawnCommand()`'s `detached` flag in `connect()`.
+ 	 * Gates process-group signaling in `close()` — only a transport that
+@@ -634,8 +636,8 @@ export class StdioTransport implements MCPTransport {
+ 		// Start reading stdout
+ 		this.#readLoop = this.#startReadLoop();
+ 
+-		// Log stderr for debugging
+-		this.#startStderrLoop();
++		this.#stderrTail = "";
++		this.#stderrLoop = this.#startStderrLoop();
+ 	}
+ 
+ 	async #startReadLoop(): Promise<void> {
+@@ -671,16 +673,21 @@ export class StdioTransport implements MCPTransport {
+ 					exitCode = proc.exitCode;
+ 					signalCode = proc.signalCode;
+ 				}
++				if (this.#stderrLoop) {
++					await waitForProcessExit(this.#stderrLoop, EXIT_SETTLE_MS);
++				}
++				const stderr = this.#stderrTail.trim();
++				const baseMessage =
++					exitCode !== null && exitCode !== undefined
++						? `MCP subprocess exited with code ${exitCode} before responding`
++						: signalCode
++							? `MCP subprocess was killed by ${signalCode} before responding`
++							: "MCP subprocess closed stdout before responding";
+ 				closeError = new MCPTransportError({
+ 					transport: "stdio",
+ 					stage: "receive",
+ 					failure: "eof",
+-					message:
+-						exitCode !== null && exitCode !== undefined
+-							? `MCP subprocess exited with code ${exitCode} before responding`
+-							: signalCode
+-								? `MCP subprocess was killed by ${signalCode} before responding`
+-								: "MCP subprocess closed stdout before responding",
++					message: stderr ? `${baseMessage}\nstderr:\n${stderr}` : baseMessage,
+ 					retryable: false,
+ 					code: exitCode ?? signalCode ?? undefined,
+ 				});
+@@ -696,16 +703,20 @@ export class StdioTransport implements MCPTransport {
+ 		const decoder = new TextDecoder();
+ 
+ 		try {
+-			while (this.#connected) {
++			while (true) {
+ 				const { done, value } = await reader.read();
+ 				if (done) break;
+-				// Log stderr but don't treat as error - servers use it for logging
+ 				const text = decoder.decode(value, { stream: true });
+-				if (text.trim()) {
+-					// Could expose via onStderr callback if needed
+-					// For now, silent - MCP spec says clients MAY capture/ignore
++				if (text) {
++					this.#stderrTail += text;
++					if (this.#stderrTail.length > 4096) this.#stderrTail = this.#stderrTail.slice(-4096);
+ 				}
+ 			}
++			const tail = decoder.decode();
++			if (tail) {
++				this.#stderrTail += tail;
++				if (this.#stderrTail.length > 4096) this.#stderrTail = this.#stderrTail.slice(-4096);
++			}
+ 		} catch {
+ 			// Ignore stderr read errors
+ 		} finally {

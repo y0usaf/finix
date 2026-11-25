@@ -26,6 +26,7 @@ inputs: let
         ./dev/ai/omp/agy-warm-cancel.patch
         ./dev/ai/omp/helper-compaction.patch
         ./dev/ai/omp/eval-only-nested-tools.patch
+        ./dev/ai/omp/mcp-reliability.patch
       ];
     postPatch =
       (old.postPatch or "")
