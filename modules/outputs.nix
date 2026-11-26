@@ -295,6 +295,12 @@ inputs: let
           ./server/attic.nix
           ./server/packages.nix
           ./dev/ai/prompts/policy.nix
+          ./dev/ai/prompts/principles.nix
+          ./dev/ai/auth-router.nix
+          ./dev/ai/pi
+          ./dev/ai/omp/prompts.nix
+          ./dev/ai/omp
+          ./dev/ai/omp-bot.nix
           ./dev/ai/claude-code.nix
           ./dev/ai/paseo.nix
           ./tools/git.nix
