@@ -81,7 +81,7 @@
 
 (defparameter +rail-thread--strip-height+ (thread-design--geom :strip-height))
 
-(defun rail-thread--bar-layout (strip state)
+(defun rail-thread--bar-layout (strip state &optional clock)
   (let* ((width (coerce (getf strip :width) 'double-float))
          (height (coerce (getf strip :height) 'double-float))
          (mid-x (* 0.5d0 width))
@@ -93,15 +93,20 @@
            (if top-p
                (list (list :time (- mid-x 74d0) 46d0 bead-hw)
                      (list :date (+ mid-x 64d0) 56d0 bead-hw))
-               (if gpu-p
-                   (list (list :cpu (- mid-x 226d0) 48d0 bead-hw)
-                         (list :memory (- mid-x 102d0) 48d0 bead-hw)
-                         (list :voice mid-x 26d0 bead-hw)
-                         (list :gpu (+ mid-x 102d0) 48d0 bead-hw)
-                         (list :vram (+ mid-x 226d0) 48d0 bead-hw))
-                   (list (list :cpu (- mid-x 102d0) 48d0 bead-hw)
-                         (list :voice mid-x 26d0 bead-hw)
-                         (list :memory (+ mid-x 102d0) 48d0 bead-hw))))))
+               (append
+                (when clock
+                  (let ((reach (if gpu-p 350d0 228d0)))
+                    (list (list :time (- mid-x reach) 46d0 bead-hw)
+                          (list :date (+ mid-x reach 6d0) 56d0 bead-hw))))
+                (if gpu-p
+                    (list (list :cpu (- mid-x 226d0) 48d0 bead-hw)
+                          (list :memory (- mid-x 102d0) 48d0 bead-hw)
+                          (list :voice mid-x 26d0 bead-hw)
+                          (list :gpu (+ mid-x 102d0) 48d0 bead-hw)
+                          (list :vram (+ mid-x 226d0) 48d0 bead-hw))
+                    (list (list :cpu (- mid-x 102d0) 48d0 bead-hw)
+                          (list :voice mid-x 26d0 bead-hw)
+                          (list :memory (+ mid-x 102d0) 48d0 bead-hw)))))))
     (list :x mid-y :top 10d0 :bottom (- width 10d0) :weld mid-x
           :beads (loop for kind in +rail-thread--bead-order+
                        for found = (find kind specs :key #'first)
@@ -126,6 +131,7 @@
            (bar-numbers (getf look :bar-numbers #'rail-thread--bar-numbers))
            (seam (find :seam strips :key (lambda (strip) (getf strip :place))))
            (bars (remove seam strips))
+           (clock (notany (lambda (strip) (eq (getf strip :place) :top)) bars))
            (vertical (find-if (lambda (strip) (eq (getf strip :axis) :y)) bars))
            (frame-strip (or seam vertical (first bars))))
       (append
@@ -152,7 +158,7 @@
                                               :windows nil
                                               context))
                           (bar-mode (if (eq (getf strip :place) :top) 1d0 2d0))
-                          (theme (append (funcall numbers (rail-thread--bar-layout strip state) state)
+                          (theme (append (funcall numbers (rail-thread--bar-layout strip state clock) state)
                                          (list bar-mode))))
                      (list
                       (shell-surface

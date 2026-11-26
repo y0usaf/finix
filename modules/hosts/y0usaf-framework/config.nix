@@ -124,10 +124,16 @@ in {
       foot.lineHeight = "32px";
       tomoe = {
         layout = "sway";
+        wallpapers = ["llama-herd" "llama-herd-night"];
         bar = {
-          style = "gap";
-          modules = ["time" "date" "battery" "network"];
-          edges = ["bottom"];
+          style = "rail";
+          modules = ["media" "cpu" "memory" "time" "date" "battery" "network" "gpu" "vram" "frame"];
+          rail.place = [
+            {
+              frame = "output";
+              edge = "bottom";
+            }
+          ];
         };
       };
     };

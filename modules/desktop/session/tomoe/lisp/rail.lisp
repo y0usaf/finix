@@ -825,15 +825,16 @@ not depend on where a bar would put it."
   "MODULE as the rail's shaders read a block's kind."
   (or (cdr (assoc module +rail--kinds+)) 11))
 
-(defun rail--bar-modules (state snapshot place)
+(defun rail--bar-modules (state snapshot place &optional with-clock)
   "The blocks a bar at PLACE carries: the clock and the date along the top bar,
-the readings and bolo's turn along the bottom."
+the readings and bolo's turn along the bottom, with the clock and the date among
+them when WITH-CLOCK says no top bar carries them."
   (if (eq place :top)
       (loop for module in '(:time :date)
             when (rail--height module state snapshot) collect module)
       (append (loop for module in (getf +rail+ :modules)
                     when (and (rail--height module state snapshot)
-                              (not (member module '(:time :date))))
+                              (or with-clock (not (member module '(:time :date)))))
                       collect module)
               (when (cassette--bolo-turn-p (getf state :bolo-state)) (list :voice)))))
 
@@ -906,7 +907,12 @@ stand on: each with the blocks it carries and the weld it attaches to."
                    (across (rail--across base))
                    (blocks (if (eq (getf base :axis) :y)
                                (rail--blocks state snapshot base)
-                               (rail--bar-blocks state snapshot base)))
+                               (rail--bar-blocks
+                                state snapshot base
+                                (rail--bar-modules
+                                 state snapshot (getf base :place)
+                                 (notany (lambda (placement) (eq (second placement) :top))
+                                         placements)))))
                    (strip (append base
                                   (list :blocks blocks
                                         :weld (rail--weld base focus-box)
@@ -1232,7 +1238,7 @@ layout publishes, in output pixels, with its :OUTPUT; NIL when there is none."
   (let* ((frame (state-value snapshot :focal-frame))
          (output (and frame (find (getf frame :output) (context snapshot :outputs)
                                   :key (lambda (o) (getf o :name)) :test #'equal))))
-    (when (and output (deck--narrow-p (list :output output)))
+    (when (and output (< (* 9 (getf output :width)) (* 21 (getf output :height))))
       (let ((scale (/ (getf output :scale-120 120) 120)))
         (flet ((px (key) (round (* scale (getf frame key)))))
           (list :output output :x (+ (getf output :x) (px :left)) :y (+ (getf output :y) (px :top))
