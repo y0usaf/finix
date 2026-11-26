@@ -3992,11 +3992,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795710434,
-        "narHash": "sha256-FLJWAGX01VlonDgPv8SvqyQUWtgbu+GFDh4RK4de5/A=",
+        "lastModified": 1795714101,
+        "narHash": "sha256-n30ko6OamybUJOFAI2frLu9D1/M4KkURz8+u7Xu8E7Q=",
         "owner": "y0usaf",
         "repo": "tomoe",
-        "rev": "c4433e2c962b5dc26a7256459fdcf54f12d8a6e8",
+        "rev": "371b889291a37a1a788922abc9c8436a00cb63f1",
         "type": "github"
       },
       "original": {
