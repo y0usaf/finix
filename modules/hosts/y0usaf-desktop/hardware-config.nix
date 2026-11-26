@@ -15,9 +15,18 @@
     luinc = inputPackages.luin.luinc;
     luinSrc = flakeInputs.luin;
   };
+  luinitCtl = "${inputPackages.luin.luinit-ctl}/bin/luinit-ctl";
+  luinitWireVer = let
+    m = builtins.match ".*\\(defconst LUINIT_WIRE_VER ([0-9]+)\\).*" (builtins.readFile "${flakeInputs.luin}/lib/luinit_proto.luin");
+  in
+    assert lib.assertMsg (m != null) "could not parse LUINIT_WIRE_VER from luin";
+      builtins.head m;
+  luinitActivate = pkgs.writeShellScript "luinit-activate" ''
+    [ -L /run/current-system ] || exec /nix/var/nix/profiles/system/activate
+  '';
   luinitWorld = emitWorld {
     name = "y0usaf-desktop-luinit-world";
-    activateCmd = "/nix/var/nix/profiles/system/activate";
+    activateCmd = "${luinitActivate}";
     services = builtins.removeAttrs config.finit.services ["boot-screen"];
     tasks = builtins.removeAttrs config.finit.tasks ["ctrl-alt-del"];
     run = config.finit.run;
@@ -25,6 +34,109 @@
     users = config.users.users;
     groups = config.users.groups;
   };
+  luinitReload = pkgs.writeShellScript "luinit-reload" ''
+    set -eu
+    mode="''${LUINIT_SWITCH:-apply}"
+    case "$mode" in
+      0|skip|none|boot)
+        echo "initctl: LUINIT_SWITCH=$mode; skipping live luinit world switch" >&2
+        exit 0
+        ;;
+    esac
+    world="$(${pkgs.coreutils}/bin/readlink -f /etc/luinit/world || true)"
+    [ -x "$world" ] || {
+      echo "initctl: /etc/luinit/world ($world) is not executable" >&2
+      exit 1
+    }
+    live_ver="$(${luinitCtl} wire-ver 2>/dev/null || true)"
+    if [ "$live_ver" != "${luinitWireVer}" ]; then
+      echo "initctl: luinit wire version mismatch (live=''${live_ver:-unknown}, target=${luinitWireVer}); skipping live switch, reboot to activate new world" >&2
+      exit 0
+    fi
+    if [ "$mode" = "dry-run" ] || [ "$mode" = "plan" ]; then
+      ${pkgs.gawk}/bin/awk '
+        FNR==NR { live_pid[$1]=$3; live_hash[$1]=$4; next }
+        {
+          seen[$1]=1
+          if (!($1 in live_hash)) print "START " $1
+          else if (live_hash[$1] == $2) print "KEEP " $1 " pid=" live_pid[$1]
+          else if ($3 == 1 && live_pid[$1] > 0) print "KEEP(session) " $1 " pid=" live_pid[$1]
+          else print "RESTART " $1 " pid=" live_pid[$1]
+        }
+        END {
+          for (c in live_hash) if (!(c in seen)) print "REMOVE " c " pid=" live_pid[c]
+        }
+      ' <(${luinitCtl} hashes) <("$world" --plan)
+      exit 0
+    fi
+    exec ${luinitCtl} switch "$world"
+  '';
+  mkLuinitFinit = {
+    plymouthSupport ? false,
+    plymouth ? pkgs.plymouth,
+    udevSupport ? false,
+  }:
+    (pkgs.finit.override {
+      inherit plymouthSupport plymouth udevSupport;
+    }).overrideAttrs (old: {
+      configureFlags =
+        (old.configureFlags or [])
+        ++ lib.optional (config.finix.bootScreen.enable or false) "--enable-kernel-cmdline";
+      postFixup =
+        (old.postFixup or "")
+        + ''
+          mv "$out/bin/initctl" "$out/bin/.initctl-real"
+          cat > initctl-shim.c <<EOF
+          #define REAL_INITCTL "$out/bin/.initctl-real"
+          #define LUINIT_CTL "${luinitCtl}"
+          #define LUINIT_RELOAD "${luinitReload}"
+          EOF
+          cat >> initctl-shim.c <<'EOF'
+          #include <string.h>
+          #include <sys/stat.h>
+          #include <unistd.h>
+
+          int main(int argc, char **argv) {
+            struct stat st;
+            if (stat("/run/luinit/ctl", &st) == 0 && S_ISSOCK(st.st_mode)) {
+              const char *prog = argc > 0 && argv[0] ? strrchr(argv[0], '/') : 0;
+              prog = prog ? prog + 1 : (argc > 0 && argv[0] ? argv[0] : "");
+              if (!strcmp(prog, "reboot")) {
+                execl(LUINIT_CTL, "luinit-ctl", "reboot", (char *)0);
+                _exit(127);
+              }
+              if (!strcmp(prog, "poweroff") || !strcmp(prog, "halt")) {
+                execl(LUINIT_CTL, "luinit-ctl", "poweroff", (char *)0);
+                _exit(127);
+              }
+              if (!strcmp(prog, "initctl") && argc >= 2) {
+                if (!strcmp(argv[1], "reload")) {
+                  execl(LUINIT_RELOAD, "luinit-reload", (char *)0);
+                  _exit(127);
+                }
+                if (!strcmp(argv[1], "status")) {
+                  execl(LUINIT_CTL, "luinit-ctl", "status", (char *)0);
+                  _exit(127);
+                }
+                if (!strcmp(argv[1], "reboot")) {
+                  execl(LUINIT_CTL, "luinit-ctl", "reboot", (char *)0);
+                  _exit(127);
+                }
+                if (!strcmp(argv[1], "poweroff") || !strcmp(argv[1], "halt")) {
+                  execl(LUINIT_CTL, "luinit-ctl", "poweroff", (char *)0);
+                  _exit(127);
+                }
+              }
+            }
+            execv(REAL_INITCTL, argv);
+            _exit(127);
+          }
+          EOF
+          "$CC" -O2 -s -Wall -Wextra -Werror initctl-shim.c -o "$out/bin/initctl"
+          chmod 0755 "$out/bin/initctl"
+        '';
+    });
+  luinitFinit = mkLuinitFinit {} // {override = mkLuinitFinit;};
   gpuUnlock = rec {
     nv = "610.43.03";
     src = pkgs.fetchFromGitHub {
@@ -171,7 +283,14 @@ in {
     };
   });
 
-  environment.systemPackages = [inputPackages.luin.luinit-ctl];
+  finit.package = lib.mkForce luinitFinit;
+
+  system.switch.inhibitors.luinit-wire-ver = luinitWireVer;
+
+  environment = {
+    etc."luinit/world".source = "${luinitWorld}/bin/luinit-world";
+    systemPackages = [inputPackages.luin.luinit-ctl];
+  };
 
   programs.limine = {
     enable = true;
