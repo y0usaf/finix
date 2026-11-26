@@ -52,7 +52,13 @@ in {
     };
   };
 
-  environment.systemPackages = [pkgs.btrbk];
+  environment.systemPackages = [
+    pkgs.btrbk
+    pkgs.wol
+    (pkgs.writeShellScriptBin "wake-desktop" ''
+      exec ${lib.getExe pkgs.wol} -i 192.168.2.255 58:11:22:b7:f0:29
+    '')
+  ];
 
   finix.persistence.allowlist.directories = [
     "/var/lib/btrbk"

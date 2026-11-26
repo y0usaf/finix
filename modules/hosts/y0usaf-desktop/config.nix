@@ -115,6 +115,15 @@ in {
       };
     };
     sysklogd.extraConfig = "*.* @192.168.2.66:514";
+    udev.packages = [
+      (pkgs.writeTextFile {
+        name = "eno1-wol-rules";
+        destination = "/lib/udev/rules.d/99-eno1-wol.rules";
+        text = ''
+          ACTION=="add", SUBSYSTEM=="net", ATTR{address}=="58:11:22:b7:f0:29", RUN+="${pkgs.ethtool}/bin/ethtool -s $name wol g"
+        '';
+      })
+    ];
     cron.enable = true;
     networkmanager.settings.keyfile.unmanaged-devices = "interface-name:wlp96s0";
   };
