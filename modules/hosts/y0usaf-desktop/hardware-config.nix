@@ -54,19 +54,23 @@
       exit 0
     fi
     if [ "$mode" = "dry-run" ] || [ "$mode" = "plan" ]; then
+      tmp_dir="$(${pkgs.coreutils}/bin/mktemp -d)"
+      trap '${pkgs.coreutils}/bin/rm -rf "$tmp_dir"' EXIT
+      ${luinitCtl} hashes > "$tmp_dir/hashes"
+      "$world" --plan > "$tmp_dir/plan"
       ${pkgs.gawk}/bin/awk '
         FNR==NR { live_pid[$1]=$3; live_hash[$1]=$4; next }
         {
           seen[$1]=1
           if (!($1 in live_hash)) print "START " $1
-          else if (live_hash[$1] == $2) print "KEEP " $1 " pid=" live_pid[$1]
-          else if ($3 == 1 && live_pid[$1] > 0) print "KEEP(session) " $1 " pid=" live_pid[$1]
+          else if ((live_hash[$1] "") == ($2 "")) print "KEEP " $1 " pid=" live_pid[$1]
+          else if ($3 == 1 && (live_pid[$1] + 0) > 0) print "KEEP(session) " $1 " pid=" live_pid[$1]
           else print "RESTART " $1 " pid=" live_pid[$1]
         }
         END {
           for (c in live_hash) if (!(c in seen)) print "REMOVE " c " pid=" live_pid[c]
         }
-      ' <(${luinitCtl} hashes) <("$world" --plan)
+      ' "$tmp_dir/hashes" "$tmp_dir/plan"
       exit 0
     fi
     exec ${luinitCtl} switch "$world"
@@ -101,15 +105,15 @@
             if (stat("/run/luinit/ctl", &st) == 0 && S_ISSOCK(st.st_mode)) {
               const char *prog = argc > 0 && argv[0] ? strrchr(argv[0], '/') : 0;
               prog = prog ? prog + 1 : (argc > 0 && argv[0] ? argv[0] : "");
-              if (!strcmp(prog, "reboot")) {
+              if (argc == 1 && !strcmp(prog, "reboot")) {
                 execl(LUINIT_CTL, "luinit-ctl", "reboot", (char *)0);
                 _exit(127);
               }
-              if (!strcmp(prog, "poweroff") || !strcmp(prog, "halt")) {
+              if (argc == 1 && (!strcmp(prog, "poweroff") || !strcmp(prog, "halt"))) {
                 execl(LUINIT_CTL, "luinit-ctl", "poweroff", (char *)0);
                 _exit(127);
               }
-              if (!strcmp(prog, "initctl") && argc >= 2) {
+              if (!strcmp(prog, "initctl") && argc == 2) {
                 if (!strcmp(argv[1], "reload")) {
                   execl(LUINIT_RELOAD, "luinit-reload", (char *)0);
                   _exit(127);
