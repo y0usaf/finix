@@ -15,6 +15,7 @@ in {
       description = "Tomoe landing queue: build, then push main and pin finix";
       user = name;
       group = "users";
+      conditions = [config.user.runtimeDirReady];
       command = "${pkgs.writeShellScript "tomoe-land-start" ''
         set -eu
         export PATH=${

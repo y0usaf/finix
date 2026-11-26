@@ -23,7 +23,7 @@ in {
     reload-signal = "none";
     respawn = true;
     log = true;
-    conditions = ["task/tmpfiles-setup/success"];
+    conditions = [config.user.runtimeDirReady];
     environment = {
       HOME = home;
       XDG_RUNTIME_DIR = runtimeDir;

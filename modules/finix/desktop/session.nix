@@ -40,14 +40,6 @@ in {
     };
   };
 
-  finit.tasks.xdg-runtime-dir = lib.mkIf (!config.services.elogind.enable) {
-    description = "runtime dir for ${userName}";
-    command = pkgs.writeShellScript "xdg-runtime-dir" ''
-      export PATH=${lib.makeBinPath [pkgs.coreutils]}
-      install -d -m 0700 -o ${userName} -g users ${config.user.runtimeDir}
-    '';
-    log = true;
-  };
   environment = {
     etc."profile.d/xdg-runtime-dir.sh".text = ''
       if [ -z "''${XDG_RUNTIME_DIR:-}" ]; then

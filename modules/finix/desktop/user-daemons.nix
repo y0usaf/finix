@@ -1,22 +1,11 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }: let
   userName = config.user.name;
   home = config.user.homeDirectory;
-  inherit (config.user) runtimeDir;
-
-  waitRuntimeDir = pkgs.writeShellScript "wait-user-daemon-runtime" ''
-    export PATH=${lib.makeBinPath [pkgs.coreutils]}
-    for _ in $(seq 1 60); do
-      [ -d ${runtimeDir} ] && exec "$@"
-      sleep 1
-    done
-    echo "wait-user-daemon-runtime: ${runtimeDir} never appeared" >&2
-    exit 1
-  '';
+  inherit (config.user) runtimeDir runtimeDirReady;
 in {
   environment.systemPackages = [pkgs.udiskie];
 
@@ -28,7 +17,8 @@ in {
         HOME = home;
         XDG_RUNTIME_DIR = runtimeDir;
       };
-      command = "${waitRuntimeDir} ${pkgs.openssh}/bin/ssh-agent -D -a ${runtimeDir}/ssh-agent";
+      conditions = [runtimeDirReady];
+      command = "${pkgs.openssh}/bin/ssh-agent -D -a ${runtimeDir}/ssh-agent";
       log = true;
     };
 
@@ -39,8 +29,8 @@ in {
         HOME = home;
         XDG_RUNTIME_DIR = runtimeDir;
       };
-      command = "${waitRuntimeDir} ${pkgs.udiskie}/bin/udiskie --automount";
-      conditions = ["net/lo/up"];
+      command = "${pkgs.udiskie}/bin/udiskie --automount";
+      conditions = ["net/lo/up" runtimeDirReady];
       log = true;
     };
   };

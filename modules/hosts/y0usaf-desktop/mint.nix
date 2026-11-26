@@ -48,7 +48,7 @@ in {
     respawn = true;
     restart-sec = 5;
     log = true;
-    conditions = ["task/tmpfiles-setup/success" "service/auth-router/running"];
+    conditions = [config.user.runtimeDirReady "service/auth-router/running"];
     environment = {
       HOME = home;
       XDG_RUNTIME_DIR = runtimeDir;

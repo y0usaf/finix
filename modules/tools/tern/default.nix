@@ -4523,8 +4523,6 @@ in {
   user.files = files // tuturu;
 
   finit = {
-    tmpfiles.rules = ["d ${config.user.runtimeDir} 0700 ${config.user.name} users"];
-
     tasks.tern-authorized-keys = {
       description = "seed ~/.ssh/authorized_keys for tern remote (${config.user.name})";
       user = config.user.name;
@@ -4540,7 +4538,7 @@ in {
         XDG_RUNTIME_DIR = config.user.runtimeDir;
       };
       command = remoteServe;
-      conditions = ["net/lo/up" "task/tmpfiles-setup/success"];
+      conditions = ["net/lo/up" config.user.runtimeDirReady];
       log = true;
     };
   };

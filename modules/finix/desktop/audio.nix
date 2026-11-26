@@ -103,15 +103,8 @@ in {
       description = "pipewire (${userName})";
       user = userName;
       environment = svcEnv;
-      command = "${pkgs.writeShellScript "wait-runtime-dir" ''
-        export PATH=${lib.makeBinPath [pkgs.coreutils]}
-        for _ in $(seq 1 60); do
-          [ -d ${runtimeDir} ] && exec "$@"
-          sleep 1
-        done
-        echo "wait-runtime-dir: ${runtimeDir} never appeared" >&2
-        exit 1
-      ''} ${pkgs.writeShellScript "pipewire-rt" ''
+      conditions = [config.user.runtimeDirReady];
+      command = "${pkgs.writeShellScript "pipewire-rt" ''
         export PATH=${lib.makeBinPath [pkgs.coreutils]}
         nice -n -20 "$@"
       ''} ${pkgs.pipewire}/bin/pipewire";
@@ -121,6 +114,7 @@ in {
       description = "wireplumber session manager (${userName})";
       user = userName;
       environment = svcEnv;
+      conditions = [config.user.runtimeDirReady];
       command = "${waitSock} ${pkgs.wireplumber}/bin/wireplumber";
       log = true;
     };
@@ -128,6 +122,7 @@ in {
       description = "pulseaudio compat (${userName})";
       user = userName;
       environment = svcEnv;
+      conditions = [config.user.runtimeDirReady];
       command = "${waitSock} ${pkgs.pipewire}/bin/pipewire-pulse";
       log = true;
     };

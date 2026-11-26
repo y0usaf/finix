@@ -40,6 +40,13 @@ in {
       description = "The user's XDG_RUNTIME_DIR.";
     };
 
+    runtimeDirReady = lib.mkOption {
+      type = lib.types.str;
+      default = "task/xdg-runtime-dir/success";
+      readOnly = true;
+      description = "finit condition that holds once runtimeDir is usable: created on hosts without elogind, mounted by elogind for the lingering user on hosts with it. Services that put sockets or files there wait for it.";
+    };
+
     account = lib.mkOption {
       type = lib.types.deferredModule;
       default = {};
@@ -103,6 +110,32 @@ in {
 
     finit.tasks = {
       remount-nix-store.enable = false;
+      xdg-runtime-dir =
+        if config.services.elogind.enable
+        then {
+          description = "linger ${user} so elogind mounts ${config.user.runtimeDir}";
+          conditions = ["service/elogind/ready"];
+          command = pkgs.writeShellScript "xdg-runtime-dir" ''
+            set -eu
+            export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.util-linux config.services.elogind.package]}
+            for _ in $(seq 1 30); do
+              loginctl enable-linger ${user} && mountpoint -q ${config.user.runtimeDir} && exit 0
+              sleep 1
+            done
+            echo "xdg-runtime-dir: ${config.user.runtimeDir} was not mounted by elogind" >&2
+            exit 1
+          '';
+          log = true;
+        }
+        else {
+          description = "runtime dir for ${user}";
+          command = pkgs.writeShellScript "xdg-runtime-dir" ''
+            set -eu
+            export PATH=${lib.makeBinPath [pkgs.coreutils]}
+            install -d -m 0700 -o ${user} -g users ${config.user.runtimeDir}
+          '';
+          log = true;
+        };
       ssh-keygen.command = lib.mkForce (pkgs.writeShellScript "check-host-keys" ''
         [ -s ${persistedSshDir}/ssh_host_ed25519_key ]
       '');
