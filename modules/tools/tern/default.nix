@@ -4465,7 +4465,12 @@
         permissions = "0644";
         source = file;
       }) (removeAttrs configFiles (lib.attrNames orphans))
-    // lib.mapAttrs' (name: _: lib.nameValuePair ".config/tern/${name}" {type = "delete"; force = false;}) orphans;
+    // lib.mapAttrs' (name: _:
+      lib.nameValuePair ".config/tern/${name}" {
+        type = "delete";
+        force = false;
+      })
+    orphans;
 
   ternPeers = {
     y0usaf-desktop = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF6ZHkn1pACV406TM5yUCRt/874vybgpUW3sUKka9nAC y0usaf@y0usaf-desktop";
