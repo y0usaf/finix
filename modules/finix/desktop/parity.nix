@@ -32,7 +32,7 @@
     ];
   };
 
-  boot.kernelModules = ["v4l2loopback" "zram" "uinput" "ntsync"];
+  boot.kernelModules = ["v4l2loopback" "zram" "uinput" "uhid" "ntsync"];
   finit = {
     services.polkit.command = lib.mkForce "${config.services.polkit.package.out}/lib/polkit-1/polkitd --no-debug --replace";
     services.rtkit-daemon.enable = false;
