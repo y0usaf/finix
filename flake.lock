@@ -1637,11 +1637,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795659229,
-        "narHash": "sha256-yU21ea5zvoccRSlf70AKvbEnAbN7hzYYGuLsqcHdZto=",
+        "lastModified": 1795670959,
+        "narHash": "sha256-tE7m0wesc3ZjxAqkrOebk1wH+cERRogFZIdPKwTDVVw=",
         "ref": "refs/heads/main",
-        "rev": "c52291650cd5d694a933fd7400484225ca97d97d",
-        "revCount": 19,
+        "rev": "4af3cd417fb9bfa9dd5edb7caf273c4c4061beda",
+        "revCount": 21,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/luin.git"
       },
@@ -3883,11 +3883,11 @@
     "tern-ekko": {
       "flake": false,
       "locked": {
-        "lastModified": 1793930802,
-        "narHash": "sha256-FjP96Bii33IJNxV+qSD4f9h4HwzydQZJWkc/Zctd2N0=",
+        "lastModified": 1795671463,
+        "narHash": "sha256-8p5do6Q98ao+4g59ui/3pfEfacVgJm8sEm56YewhO6U=",
         "ref": "refs/heads/main",
-        "rev": "34f51c9e4698f03e79f6421b1d4b57d7cf3b4413",
-        "revCount": 8,
+        "rev": "96fd63b51cba2793a3e8cdbcfd73f4581b077d28",
+        "revCount": 9,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/tern-ekko.git"
       },

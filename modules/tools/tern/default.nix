@@ -4452,12 +4452,16 @@
     then {}
     else devLinks;
 
+  storeLinks = lib.filterAttrs (_: path: lib.hasPrefix builtins.storeDir path) pluginPaths;
+
   files =
-    lib.mapAttrs' (name: file:
+    lib.mapAttrs' (name: file: let
+      managed = lib.hasAttr name storeLinks;
+    in
       lib.nameValuePair ".config/tern/${name}" {
         type = "copy";
-        clobber = false;
-        force = false;
+        clobber = managed;
+        force = managed;
         permissions = "0644";
         source = file;
       }) (removeAttrs configFiles (lib.attrNames orphans))
