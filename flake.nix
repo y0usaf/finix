@@ -218,7 +218,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    tomoe.url = "github:y0usaf/tomoe";
+    tomoe = {
+      url = "github:y0usaf/tomoe";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     tomoe-stable.url = "github:y0usaf/finix/add5ffdbe6984292ba26bbf5fea0828ba3e354cb";
     tomoe-stable.inputs.tomoe.url = "github:y0usaf/tomoe/259c8ac4be5bc9d598ea8f8a2bbf38559327d7ad";
