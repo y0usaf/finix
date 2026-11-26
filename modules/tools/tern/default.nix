@@ -4474,8 +4474,30 @@
 
   ternPeers = {
     y0usaf-desktop = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF6ZHkn1pACV406TM5yUCRt/874vybgpUW3sUKka9nAC y0usaf@y0usaf-desktop";
+    tern-desktop = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBpNR9XkPWTZalt/b4kOcS9RzeposwLvNZhHuf176PTZ tern@y0usaf-desktop";
     y0usaf-server = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINjN9qndKm1iN0ctrucDNRBkfcZqC7zbRKR8SCD9E7KW y0usaf@y0usaf-server";
+    y0usaf-framework = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK9Vm7VOl8yfl6Yk0PhItA6rXOq62te+K1P4GHFw4fjM y0usaf@y0usaf-framework";
+    tern-framework = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINE00yNFJPR2AJxn/5dQ5a+1/GQmdf/k+YcJYqEIiCJW tern@y0usaf-framework";
+    android-phone = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIInIo3JhZHnt9L/JFYBy6R8Ig059z/ueGUMuR9/HUefI y0usaf@android-phone";
+    tern-mobile = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA56BywjcA6RTTj5ywm8aUI2+wPbaE0UuB+EXrlkWld4 tern-paired 2026-10-31";
   };
+
+  ternMeshHosts = {
+    y0usaf-desktop = {
+      label = "desktop";
+      endpoint = "cb8f36476b6f99e062c06559f8f244f83b05372e9b0d085fd4fdf01c58035f89";
+      fingerprint = "SHA256:D783p6f2UbzzNap190f5pdBmO+NrzkNqGPLBocAJUfk";
+      ip = config.tailnet.addresses.y0usaf-desktop;
+    };
+    y0usaf-server = {
+      label = "server";
+      endpoint = "aa0bceb7e0146c955866301fbe584d03fd55455cdc8ff021dce829a673768797";
+      fingerprint = "SHA256:vzWu92cIQa1j69TDKyWgy1HVkOruXEedEz1xSa8WyeQ";
+      ip = config.tailnet.addresses.y0usaf-server;
+    };
+  };
+
+  otherMeshHosts = lib.removeAttrs ternMeshHosts [config.networking.hostName];
 
   waitForMount = path: ''
     for _ in $(seq 1 20); do
@@ -4497,13 +4519,14 @@
       set -eu
       export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gawk]}
       ${waitForMount "${config.user.homeDirectory}/.ssh"}
+      ${waitForMount "${config.user.homeDirectory}/.config/tern"}
       dir="$HOME/.ssh"
       mkdir -p "$dir"
       chmod 0700 "$dir"
       auth="$dir/authorized_keys"
       touch "$auth"
       chmod 0600 "$auth"
-      add() {
+      add_key() {
         kind="''${1%% *}"
         blob="$(printf '%s' "$1" | cut -d' ' -f2)"
         if awk -v k="$kind" -v b="$blob" '$1 == k && $2 == b { found = 1 } END { exit !found }' "$auth"; then
@@ -4512,7 +4535,40 @@
         printf '%s\n' "$1" >> "$auth"
       }
       ${lib.concatMapStringsSep "
-" (key: "add '${key}'") (lib.attrValues (lib.removeAttrs ternPeers [config.networking.hostName]))}
+" (key: "add_key '${key}'") (lib.attrValues (lib.removeAttrs ternPeers [config.networking.hostName]))}
+
+      tern_dir="$HOME/.config/tern"
+      mkdir -p "$tern_dir"
+      hosts="$tern_dir/hosts"
+      touch "$hosts"
+      chmod 0644 "$hosts"
+      known="$tern_dir/known_hosts"
+      touch "$known"
+      chmod 0600 "$known"
+      add_host() {
+        spec="$1"
+        label="$2"
+        if awk -v s="$spec" '$1 == s { found = 1 } END { exit !found }' "$hosts"; then
+          return 0
+        fi
+        printf '%s\t%s\n' "$spec" "$label" >> "$hosts"
+      }
+      add_known() {
+        addr="$1"
+        fp="$2"
+        if awk -v a="$addr" '$1 == a { found = 1 } END { exit !found }' "$known"; then
+          return 0
+        fi
+        printf '%s %s\n' "$addr" "$fp" >> "$known"
+      }
+      ${lib.concatStringsSep "
+" (lib.mapAttrsToList (hostName: peer: ''
+            add_host '${config.user.name}@${peer.endpoint}' '${peer.label}'
+            add_known '${peer.endpoint}' '${peer.fingerprint}'
+            add_known '${peer.ip}:8376' '${peer.fingerprint}'
+            add_known '${hostName}:8376' '${peer.fingerprint}'
+          '')
+          otherMeshHosts)}
     '';
 in {
   environment.variables.GIO_EXTRA_MODULES = lib.mkDefault "${pkgs.glib-networking}/lib/gio/modules";

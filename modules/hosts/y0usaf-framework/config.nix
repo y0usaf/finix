@@ -86,6 +86,7 @@ in {
 
             iifname "wlp191s0" tcp dport 22000 accept comment "Syncthing TLS transport"
             iifname "wlp191s0" udp dport { 21027, 22000 } accept comment "Syncthing discovery and QUIC"
+            iifname "wlp191s0" udp dport 8376 accept comment "tern remote sessions over the LAN"
           '';
           forward = ''
             iifname "docker0" accept

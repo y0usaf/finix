@@ -7,40 +7,63 @@
   user = config.user.name;
   home = config.user.homeDirectory;
   inherit (config.user) runtimeDir;
-  lloydPane = pkgs.writeShellScript "server-lloyd-pane" ''
-    exec 3>"$1"
-    rc=0
-    omp-bot Lloyd 3>&- || rc=$?
-    printf '%s\n' "$rc" >&3
+  lloydPath = "/run/wrappers/bin:/etc/profiles/per-user/${user}/bin:${home}/.nix-profile/bin:/run/current-system/sw/bin";
+  lloydLaunch = pkgs.writeShellScript "server-lloyd-launch" ''
+    export PATH=${lib.escapeShellArg lloydPath}
+    export HOME=${lib.escapeShellArg home}
+    export USER=${lib.escapeShellArg user}
+    export SHELL=${lib.escapeShellArg "${pkgs.bashInteractive}/bin/bash"}
+    export XDG_CONFIG_HOME=${lib.escapeShellArg "${home}/.config"}
+    export XDG_DATA_HOME=${lib.escapeShellArg "${home}/.local/share"}
+    export XDG_STATE_HOME=${lib.escapeShellArg "${home}/.local/state"}
+    export XDG_CACHE_HOME=${lib.escapeShellArg "${home}/.cache"}
+    export XDG_RUNTIME_DIR=${lib.escapeShellArg runtimeDir}
+    export AUTH_ROUTER_SOCKET=${lib.escapeShellArg "${runtimeDir}/auth-router.sock"}
+    exec omp-bot Lloyd
   '';
   lloydWrapper = pkgs.writeShellScript "server-lloyd" ''
     set -eu
-    tmux=${lib.getExe pkgs.tmux}
-    rm=${pkgs.coreutils}/bin/rm
-    mkfifo=${pkgs.coreutils}/bin/mkfifo
-    head=${pkgs.coreutils}/bin/head
-    cat=${pkgs.coreutils}/bin/cat
-    fifo=${lib.escapeShellArg "${runtimeDir}/lloyd-tmux.fifo"}
-    rcfile=${lib.escapeShellArg "${runtimeDir}/lloyd-tmux.rc"}
-    "$rm" -f "$fifo" "$rcfile"
-    "$mkfifo" -m 0600 "$fifo"
-    "$tmux" -L lloyd kill-session -t lloyd 2>/dev/null || true
-    reader=""
+    export PATH=${lib.escapeShellArg lloydPath}:${lib.makeBinPath [pkgs.coreutils pkgs.jq]}
+    sock=${lib.escapeShellArg "${runtimeDir}/tern/daemon.sock"}
+    export TERN_DAEMON_SOCKET="$sock"
+    mkdir -p ${lib.escapeShellArg "${home}/dev"}
+
+    tern daemon --socket "$sock" --login
+    for _ in $(seq 1 50); do
+      [ -S "$sock" ] && break
+      sleep 0.1
+    done
+    [ -S "$sock" ]
+
+    for dead in $(tern inspect --json | jq -r '.sessions[]?.tabs[]? | select(.name == "Lloyd") | .blocks[]? | select(.exited != null or .live != true) | .id'); do
+      tern close "$dead" >/dev/null 2>&1 || true
+    done
+
+    block="$(tern inspect --json | jq -r '[ .sessions[]?.tabs[]? | select(.name == "Lloyd") | .blocks[]? | select(.live == true and .exited == null) | .id ] | first // empty')"
+    if [ -z "$block" ]; then
+      if tern inspect --json | jq -e '(.sessions | length) > 0' >/dev/null 2>&1; then
+        out="$(tern new tab --json --cwd ${lib.escapeShellArg "${home}/dev"} -- ${lib.escapeShellArg "exec ${lloydLaunch}"})"
+      else
+        out="$(tern new session Default --json --cwd ${lib.escapeShellArg "${home}/dev"} -- ${lib.escapeShellArg "exec ${lloydLaunch}"})"
+      fi
+      block="$(printf '%s' "$out" | jq -r '.block')"
+      tern rename "$block" Lloyd >/dev/null
+    fi
+    tern focus "$block" >/dev/null || true
+
+    wait_pid=""
     cleanup() {
-      "$tmux" -L lloyd kill-session -t lloyd 2>/dev/null || true
-      [ -z "$reader" ] || kill "$reader" 2>/dev/null || true
-      "$rm" -f "$fifo" "$rcfile"
+      [ -z "$wait_pid" ] || kill "$wait_pid" 2>/dev/null || true
+      tern close "$block" >/dev/null 2>&1 || true
       exit 0
     }
     trap cleanup TERM INT
-    export PATH="/run/wrappers/bin:/etc/profiles/per-user/${user}/bin:${home}/.nix-profile/bin:/run/current-system/sw/bin"
-    "$tmux" -L lloyd -f /dev/null new-session -d -s lloyd -x 140 -y 40 -- ${lloydPane} "$fifo"
-    "$head" -n 1 "$fifo" >"$rcfile" &
-    reader=$!
-    wait "$reader" || true
-    rc=$("$cat" "$rcfile" 2>/dev/null || true)
-    "$rm" -f "$fifo" "$rcfile"
-    exit "''${rc:-1}"
+
+    tern wait "$block" --until exit &
+    wait_pid=$!
+    rc=0
+    wait "$wait_pid" || rc=$?
+    exit "$rc"
   '';
 in {
   networking = {
