@@ -1637,11 +1637,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795652647,
-        "narHash": "sha256-ZWUq16KfJV67gaJahEDx8SHjXzY7hy/kQGlkm49Gu+c=",
+        "lastModified": 1795656923,
+        "narHash": "sha256-SKSEEsy5FqChmiYWvLwLXTjiOMfbwO2gamYL7ytitp4=",
         "ref": "refs/heads/main",
-        "rev": "a74877bb70a6029d407d908f08f760f4687b16c5",
-        "revCount": 15,
+        "rev": "b3711809a5ed9da8a737ba41762e8f0d7988d5b7",
+        "revCount": 16,
         "type": "git",
         "url": "ssh://git@github.com/y0usaf/luin.git"
       },
