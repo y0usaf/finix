@@ -17,7 +17,7 @@
     exec ${omp}/bin/omp "$@"
   '';
   src = flakeInputs.omp-bot;
-  tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.bash];
+  tools = [pkgs.bun pkgs.jq pkgs.util-linux pkgs.age pkgs.openssh pkgs.gnutar pkgs.gnused pkgs.bash];
   persistentHome = "/persist/home/${userName}";
   ext = "${home}/.omp/agent/ext";
   persistPaths = pkgs.writeShellScript "omp-bot-persist-paths" ''

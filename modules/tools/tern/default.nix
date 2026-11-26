@@ -4500,10 +4500,12 @@
   otherMeshHosts = lib.removeAttrs ternMeshHosts [config.networking.hostName];
 
   waitForMount = path: ''
-    for _ in $(seq 1 20); do
-      ${pkgs.util-linux}/bin/findmnt -n -o TARGET --mountpoint "${path}" >/dev/null 2>&1 && break
-      sleep 0.5
-    done
+    if [ "$(${pkgs.util-linux}/bin/findmnt -n -o FSTYPE --target "${config.user.homeDirectory}" 2>/dev/null || true)" = "tmpfs" ]; then
+      for _ in $(seq 1 20); do
+        ${pkgs.util-linux}/bin/findmnt -n -o TARGET --mountpoint "${path}" >/dev/null 2>&1 && break
+        sleep 0.5
+      done
+    fi
   '';
 
   remoteServe = pkgs.writeShellScript "tern-remote-serve" ''
