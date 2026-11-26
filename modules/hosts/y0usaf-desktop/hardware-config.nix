@@ -22,7 +22,19 @@
     assert lib.assertMsg (m != null) "could not parse LUINIT_WIRE_VER from luin";
       builtins.head m;
   luinitActivate = pkgs.writeShellScript "luinit-activate" ''
-    [ -L /run/current-system ] || exec /nix/var/nix/profiles/system/activate
+    [ -L /run/current-system ] && exit 0
+    sys=""
+    if read -r cmdline < /proc/cmdline; then
+      for tok in $cmdline; do
+        case "$tok" in
+          luinit.system=/*) sys="''${tok#luinit.system=}" ;;
+        esac
+      done
+    fi
+    if [ -n "$sys" ] && [ -x "$sys/activate" ]; then
+      exec "$sys/activate"
+    fi
+    exec /nix/var/nix/profiles/system/activate
   '';
   luinitWorld = emitWorld {
     name = "y0usaf-desktop-luinit-world";
@@ -249,6 +261,7 @@ in {
       sed -e 's/+NixOS {group_name}/+finix {group_name}/' \
           -e 's/NixOS boot entries/finix boot entries/g' \
           -e '/specialisations = bootjson\[/a\    specialisations = {k: v for k, v in specialisations.items() if k != "vbios-maintenance"}' \
+          -e "s|config_file += str(config('extraEntries'))|config_file += str(config('extraEntries')).replace(\"__LUINIT_SYSTEM__\", os.path.realpath(sys.argv[1]) if len(sys.argv) > 1 else \"\")|" \
           ${flakeInputs.finix}/modules/programs/limine/limine-install.py > $out
     '';
     isExecutable = true;
@@ -318,7 +331,7 @@ in {
         protocol: linux
         comment: y0usaf-desktop booted with luinit PID 1
         kernel_path: boot():/EFI/luinos/kernel
-        cmdline: init=${inputPackages.luin.luinit-floor}/bin/luinit-floor luinit.world=${luinitWorld}/bin/luinit-world ${lib.concatStringsSep " " config.boot.kernelParams}
+        cmdline: init=${inputPackages.luin.luinit-floor}/bin/luinit-floor luinit.world=${luinitWorld}/bin/luinit-world luinit.system=__LUINIT_SYSTEM__ ${lib.concatStringsSep " " config.boot.kernelParams}
         module_path: boot():/EFI/luinos/initrd
 
       /Vinix
