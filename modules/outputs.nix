@@ -330,6 +330,7 @@ inputs: let
           inputs.finix.nixosModules.brightnessctl
           inputs.finix.nixosModules.docker
           inputs.finix.nixosModules.fwupd
+          inputs.finix.nixosModules.limine
           inputs.finix.nixosModules.networkmanager
           inputs.finix.nixosModules.power-profiles-daemon
           inputs.finix.nixosModules.zzz

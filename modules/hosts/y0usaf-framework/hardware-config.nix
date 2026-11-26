@@ -24,6 +24,7 @@ in {
     initrd.availableKernelModules = ["nvme" "xhci_pci" "thunderbolt" "usbhid" "usb_storage" "sd_mod"];
     kernelModules = ["kvm-amd" "amdgpu"];
     supportedFilesystems.efivarfs.enable = true;
+    loader.efi.canTouchEfiVariables = true;
     kernelParams = [
       "amd_pstate=active"
       "amdgpu.ppfeaturemask=0xffffffff"
@@ -34,6 +35,17 @@ in {
       "softlockup_panic=1"
       "hung_task_panic=1"
     ];
+  };
+
+  programs.limine = {
+    enable = true;
+    maxGenerations = 20;
+    settings.timeout = 5;
+    extraEntries = ''
+      /Finix fallback (existing boot slots)
+        protocol: efi
+        path: boot():/EFI/finix/BOOTX64.EFI
+    '';
   };
 
   fileSystems = shared.fileSystems {
