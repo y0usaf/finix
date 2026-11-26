@@ -6,6 +6,7 @@
   ...
 }: let
   user = config.user.name;
+  home = config.user.homeDirectory;
   persistedSshDir = "/persist/etc/ssh";
 in {
   options.user = {
@@ -110,6 +111,13 @@ in {
 
     finit.tasks = {
       remount-nix-store.enable = false;
+      tmp-mode = {
+        description = "ensure /tmp has mode 1777";
+        command = pkgs.writeShellScript "tmp-mode" ''
+          exec ${pkgs.coreutils}/bin/chmod 1777 /tmp
+        '';
+        log = true;
+      };
       xdg-runtime-dir =
         if config.services.elogind.enable
         then {
@@ -172,6 +180,12 @@ in {
     };
 
     environment = {
+      variables = {
+        XDG_CONFIG_HOME = "${home}/.config";
+        XDG_DATA_HOME = "${home}/.local/share";
+        XDG_STATE_HOME = "${home}/.local/state";
+        XDG_CACHE_HOME = "${home}/.cache";
+      };
       etc."ssh/authorized_keys.d/y0usaf".text = ''
         ${lib.fileContents ../hosts/y0usaf-desktop/user-ssh.pub}
         ${lib.fileContents ../hosts/y0usaf-framework/user-ssh.pub}

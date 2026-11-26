@@ -53,11 +53,9 @@
         log = true;
       };
       x11-socket-dir = {
-        description = "fix /tmp mode + create X11 socket dirs";
+        description = "create X11 socket dirs";
         command = pkgs.writeShellScript "x11-socket-dir" ''
-          export PATH=${lib.makeBinPath [pkgs.coreutils]}
-          chmod 1777 /tmp
-          install -d -m 1777 /tmp/.X11-unix /tmp/.ICE-unix
+          exec ${pkgs.coreutils}/bin/install -d -m 1777 /tmp/.X11-unix /tmp/.ICE-unix
         '';
         log = true;
       };

@@ -3,7 +3,46 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  user = config.user.name;
+  home = config.user.homeDirectory;
+  inherit (config.user) runtimeDir;
+  lloydPane = pkgs.writeShellScript "server-lloyd-pane" ''
+    exec 3>"$1"
+    rc=0
+    omp-bot Lloyd 3>&- || rc=$?
+    printf '%s\n' "$rc" >&3
+  '';
+  lloydWrapper = pkgs.writeShellScript "server-lloyd" ''
+    set -eu
+    tmux=${lib.getExe pkgs.tmux}
+    rm=${pkgs.coreutils}/bin/rm
+    mkfifo=${pkgs.coreutils}/bin/mkfifo
+    head=${pkgs.coreutils}/bin/head
+    cat=${pkgs.coreutils}/bin/cat
+    fifo=${lib.escapeShellArg "${runtimeDir}/lloyd-tmux.fifo"}
+    rcfile=${lib.escapeShellArg "${runtimeDir}/lloyd-tmux.rc"}
+    "$rm" -f "$fifo" "$rcfile"
+    "$mkfifo" -m 0600 "$fifo"
+    "$tmux" -L lloyd kill-session -t lloyd 2>/dev/null || true
+    reader=""
+    cleanup() {
+      "$tmux" -L lloyd kill-session -t lloyd 2>/dev/null || true
+      [ -z "$reader" ] || kill "$reader" 2>/dev/null || true
+      "$rm" -f "$fifo" "$rcfile"
+      exit 0
+    }
+    trap cleanup TERM INT
+    export PATH="/run/wrappers/bin:/etc/profiles/per-user/${user}/bin:${home}/.nix-profile/bin:/run/current-system/sw/bin"
+    "$tmux" -L lloyd -f /dev/null new-session -d -s lloyd -x 140 -y 40 -- ${lloydPane} "$fifo"
+    "$head" -n 1 "$fifo" >"$rcfile" &
+    reader=$!
+    wait "$reader" || true
+    rc=$("$cat" "$rcfile" 2>/dev/null || true)
+    "$rm" -f "$fifo" "$rcfile"
+    exit "''${rc:-1}"
+  '';
+in {
   networking = {
     hostName = "y0usaf-server";
     staticFallback.address = "192.168.2.66/24";
@@ -67,13 +106,40 @@
 
   user.account.shell = lib.mkForce "${pkgs.bashInteractive}/bin/bash";
 
-  finit.services.dhcpcd = {
-    command = lib.mkForce (
-      "${lib.getExe config.services.dhcpcd.package} -B "
-      + lib.escapeShellArgs config.services.dhcpcd.extraArgs
-    );
-    type = lib.mkForce null;
-    pid = lib.mkForce null;
+  finix.persistence.homeServices = ["lloyd"];
+
+  finit.services = {
+    dhcpcd = {
+      command = lib.mkForce (
+        "${lib.getExe config.services.dhcpcd.package} -B "
+        + lib.escapeShellArgs config.services.dhcpcd.extraArgs
+      );
+      type = lib.mkForce null;
+      pid = lib.mkForce null;
+    };
+    lloyd = {
+      description = "Lloyd omp-bot session";
+      inherit user;
+      group = "users";
+      reload-signal = "none";
+      respawn = true;
+      restart-sec = 5;
+      log = true;
+      conditions = [config.user.runtimeDirReady "service/auth-router/running"];
+      environment = {
+        HOME = home;
+        USER = user;
+        SHELL = "${pkgs.bashInteractive}/bin/bash";
+        TERM = "xterm-256color";
+        XDG_CONFIG_HOME = "${home}/.config";
+        XDG_DATA_HOME = "${home}/.local/share";
+        XDG_STATE_HOME = "${home}/.local/state";
+        XDG_CACHE_HOME = "${home}/.cache";
+        XDG_RUNTIME_DIR = runtimeDir;
+        AUTH_ROUTER_SOCKET = "${runtimeDir}/auth-router.sock";
+      };
+      command = "${lloydWrapper}";
+    };
   };
 
   user.dev.paseo = {

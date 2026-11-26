@@ -6,11 +6,6 @@
   xdgCache = "${home}/.cache";
 in {
   environment.variables = {
-    XDG_CONFIG_HOME = xdgConfig;
-    XDG_DATA_HOME = xdgData;
-    XDG_STATE_HOME = xdgState;
-    XDG_CACHE_HOME = xdgCache;
-
     XDG_SCREENSHOTS_DIR = "${home}/Pictures/Screenshots";
     XDG_WALLPAPERS_DIR = "${home}/Pictures/Wallpapers";
 
