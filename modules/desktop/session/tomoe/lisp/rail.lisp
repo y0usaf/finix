@@ -1232,7 +1232,7 @@ layout publishes, in output pixels, with its :OUTPUT; NIL when there is none."
   (let* ((frame (state-value snapshot :focal-frame))
          (output (and frame (find (getf frame :output) (context snapshot :outputs)
                                   :key (lambda (o) (getf o :name)) :test #'equal))))
-    (when (and output (deck--narrow-p (list :output output)))
+    (when (and output (< (* 9 (getf output :width)) (* 21 (getf output :height))))
       (let ((scale (/ (getf output :scale-120 120) 120)))
         (flet ((px (key) (round (* scale (getf frame key)))))
           (list :output output :x (+ (getf output :x) (px :left)) :y (+ (getf output :y) (px :top))

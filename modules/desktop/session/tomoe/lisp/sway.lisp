@@ -17,7 +17,7 @@
   (cond ((integerp tree) (if (eql tree target) (list direction tree id) tree))
         ((and (eq (first tree) direction) (member target (rest tree)))
          (let ((tail (member target (rest tree))))
-           (append (ldiff tree (rest tail)) (list id) (rest tail))))
+           (append (subseq tree 0 (- (length tree) (length (rest tail)))) (list id) (rest tail))))
         (t (cons (first tree)
                  (loop for kid in (rest tree)
                        collect (if (member target (sway--leaves kid))
@@ -27,7 +27,7 @@
 (defun sway--swap (tree a b)
   (cond ((eql tree a) b)
         ((eql tree b) a)
-        ((atom tree) tree)
+        ((not (consp tree)) tree)
         (t (cons (first tree) (loop for kid in (rest tree) collect (sway--swap kid a b))))))
 
 (defun sway--boxes (tree x y width height gap)
@@ -64,8 +64,25 @@
                   (setf best (first box) distance far))))))))
     best))
 
+(defparameter +sway-commands+
+  (list (define-command "focus-left" :description "Focus the window to the left.")
+        (define-command "focus-right" :description "Focus the window to the right.")
+        (define-command "focus-down" :description "Focus the window below.")
+        (define-command "focus-up" :description "Focus the window above.")
+        (define-command "workspace-next" :description "Switch to the next workspace.")
+        (define-command "workspace-previous" :description "Switch to the previous workspace.")
+        (define-command "move-next" :description "Move the focused window to the next workspace.")
+        (define-command "move-previous" :description "Move the focused window to the previous workspace.")
+        (define-command "swap-previous" :description "Swap the focused window with the previous one.")
+        (define-command "swap-next" :description "Swap the focused window with the next one.")
+        (define-command "split-horizontal" :description "Split the next window in horizontally.")
+        (define-command "split-vertical" :description "Split the next window in vertically.")
+        (define-command "fullscreen" :description "Toggle the focused window between fullscreen and tiled.")
+        (define-command "floating" :description "Toggle the focused window between floating and tiled.")
+        (define-command "terminal" :description "Focus the terminal, or start one when none is open.")))
+
 (define-extension "sway"
-    (:reads (:windows :rules :data :workareas :outputs :focus :key :button :pointer :request :settings)
+    (:reads (:windows :rules :data :workareas :outputs :focus :command :button :pointer :request :settings)
      :state (list :active 1 :workspaces nil :trees nil :split nil :focus nil
                   :fullscreen nil :floating nil)
      :admission t)
@@ -79,7 +96,7 @@
          (output (and area (find (getf area :name) (context snapshot :outputs)
                                  :test #'equal :key (lambda (output) (getf output :name)))))
          (type (getf event :type))
-         (command (and (eq type :key) (equal (getf event :owner) "sway") (getf event :command)))
+         (command (and (eq type :command) (equal (getf event :owner) "sway") (getf event :name)))
          (motion (rest (assoc command '(("focus-left" -1 0) ("focus-right" 1 0)
                                         ("focus-up" 0 -1) ("focus-down" 0 1))
                               :test #'equal)))
@@ -199,7 +216,7 @@
                  (box (cond ((member id fullscreen)
                              (and output (list (getf output :x) (getf output :y)
                                                (getf output :width) (getf output :height))))
-                            ((cdr (assoc id floating)))
+                            ((assoc id floating) (cdr (assoc id floating)))
                             (t (rest (assoc id (boxes (nth (1- number) trees))))))))
             (push (if box
                       (destructuring-bind (x y width height) box
@@ -216,6 +233,8 @@
         (push (focus focused :raise nil) effects)
         (push (settings :animations nil) effects)
         (dolist (binding +layout-bindings+) (push (apply #'bind-key binding) effects))
+        (push (motion-contract :hover t) effects)
+        (dolist (definition +sway-commands+) (push definition effects))
         (values (list :active active :workspaces workspaces :trees trees :split split
                       :focus focused :fullscreen fullscreen :floating floating)
                 (nreverse effects)
