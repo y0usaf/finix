@@ -4558,10 +4558,14 @@
       add_known() {
         addr="$1"
         fp="$2"
-        if awk -v a="$addr" '$1 == a { found = 1 } END { exit !found }' "$known"; then
+        if awk -v a="$addr" -v f="$fp" '$1 == a && $2 == f { ok = 1 } $1 == a && $2 != f { bad = 1 } END { exit !(ok && !bad) }' "$known"; then
           return 0
         fi
-        printf '%s %s\n' "$addr" "$fp" >> "$known"
+        tmp="$(mktemp "$tern_dir/.known_hosts.XXXXXX")"
+        chmod 0600 "$tmp"
+        awk -v a="$addr" '$1 != a { print }' "$known" > "$tmp"
+        printf '%s %s\n' "$addr" "$fp" >> "$tmp"
+        mv "$tmp" "$known"
       }
       ${lib.concatStringsSep "
 " (lib.mapAttrsToList (hostName: peer: ''
@@ -4589,6 +4593,7 @@ in {
     tasks.tern-authorized-keys = {
       description = "seed ~/.ssh/authorized_keys for tern remote (${config.user.name})";
       user = config.user.name;
+      conditions = lib.optional (config.finix.persistence.homeCondition != null) config.finix.persistence.homeCondition;
       environment.HOME = config.user.homeDirectory;
       command = seedAuthorizedKeys;
     };
