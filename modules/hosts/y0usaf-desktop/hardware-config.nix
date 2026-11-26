@@ -18,8 +18,8 @@
   luinitWorld = emitWorld {
     name = "y0usaf-desktop-luinit-world";
     activateCmd = "/nix/var/nix/profiles/system/activate";
-    services = config.finit.services;
-    tasks = config.finit.tasks;
+    services = builtins.removeAttrs config.finit.services ["boot-screen"];
+    tasks = builtins.removeAttrs config.finit.tasks ["ctrl-alt-del"];
     run = config.finit.run;
     ttys = config.finit.ttys;
     users = config.users.users;
