@@ -262,6 +262,7 @@ in {
           -e 's/NixOS boot entries/finix boot entries/g' \
           -e '/specialisations = bootjson\[/a\    specialisations = {k: v for k, v in specialisations.items() if k != "vbios-maintenance"}' \
           -e "s|config_file += str(config('extraEntries'))|config_file += str(config('extraEntries')).replace(\"__LUINIT_SYSTEM__\", os.path.realpath(sys.argv[1]) if len(sys.argv) > 1 else \"\")|" \
+          -e "/if config('secureBoot', 'enable'):/i\        if not config('efiRemovable'):\n            copy_file(dest_path, os.path.join(str(config('efiMountPoint')), 'EFI', 'BOOT', boot_file))" \
           ${flakeInputs.finix}/modules/programs/limine/limine-install.py > $out
     '';
     isExecutable = true;
