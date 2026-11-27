@@ -6,37 +6,56 @@
   ...
 }: let
   inherit ((import ../../hosts/shared.nix {inherit lib;}).bolo) model vocabulary;
+  useCuda = config.hardware.nvidia.enable;
 
-  modelDirs = {
-    fluid-speech-pro = {
-      engine = "sherpa-onnx-transducer";
-      url = "https://huggingface.co/FluidVoice-Labs/fluid-speech-pro-onnx/resolve/main";
-      layout = {
-        encoder = "encoder-model.onnx";
-        decoder = "decoder.onnx";
-        joiner = "joiner.onnx";
-        tokens = "vocab.txt";
+  backend =
+    if useCuda
+    then {
+      active = "fluid-speech-pro";
+      provider = "cuda";
+      bolod = inputPackages.bolo.bolod.override {
+        sherpa-onnx = sherpaOnnxGpu;
       };
-      hashes = {
-        "encoder-model.onnx" = "sha256-YGMe+Msd8H7+bhmYtWrA+y/ahwWF/vz0lIrOa782G4k=";
-        "encoder-model.onnx.data" = "sha256-w1C/NgZcOwdkKdHdRYyGlS1a7UnYz7ptqAOUS8YM9Y4=";
-        "decoder.onnx" = "sha256-G6tePF+9ulCal55t8gkK4xCCn4vnLvpeJtxUEK2h5JQ=";
-        "decoder.onnx.data" = "sha256-Yyw8v1nT5S0vf03aO/jijARfejuz2+8PRFKbpjkm76o=";
-        "joiner.onnx" = "sha256-gE2WzIJcr4Kuu4DV4jX/wVva02qCIlASbia15xd9h8Y=";
-        "joiner.onnx.data" = "sha256-QITbAjwESChwyoqqqkp7ktLOfJ9t3Y12LSH7VVInH+Q=";
-        "vocab.txt" = "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=";
+      extraModels.fluid-speech-pro = {
+        engine = "sherpa-onnx-transducer";
+        url = "https://huggingface.co/FluidVoice-Labs/fluid-speech-pro-onnx/resolve/main";
+        layout = {
+          encoder = "encoder-model.onnx";
+          decoder = "decoder.onnx";
+          joiner = "joiner.onnx";
+          tokens = "vocab.txt";
+        };
+        hashes = {
+          "encoder-model.onnx" = "sha256-YGMe+Msd8H7+bhmYtWrA+y/ahwWF/vz0lIrOa782G4k=";
+          "encoder-model.onnx.data" = "sha256-w1C/NgZcOwdkKdHdRYyGlS1a7UnYz7ptqAOUS8YM9Y4=";
+          "decoder.onnx" = "sha256-G6tePF+9ulCal55t8gkK4xCCn4vnLvpeJtxUEK2h5JQ=";
+          "decoder.onnx.data" = "sha256-Yyw8v1nT5S0vf03aO/jijARfejuz2+8PRFKbpjkm76o=";
+          "joiner.onnx" = "sha256-gE2WzIJcr4Kuu4DV4jX/wVva02qCIlASbia15xd9h8Y=";
+          "joiner.onnx.data" = "sha256-QITbAjwESChwyoqqqkp7ktLOfJ9t3Y12LSH7VVInH+Q=";
+          "vocab.txt" = "sha256-1YVEZ56kvGrFY9H1Ret9R0vWz6Rn8KbiwdwcfTfjw10=";
+        };
+      };
+    }
+    else {
+      active = model.name;
+      provider = "cpu";
+      inherit (inputPackages.bolo) bolod;
+      extraModels = {};
+    };
+
+  modelDirs =
+    backend.extraModels
+    // {
+      ${model.name} = {
+        inherit (model) engine url hashes;
+        layout = {
+          encoder = "encoder.int8.onnx";
+          decoder = "decoder.int8.onnx";
+          joiner = "joiner.int8.onnx";
+          tokens = "tokens.txt";
+        };
       };
     };
-    ${model.name} = {
-      inherit (model) engine url hashes;
-      layout = {
-        encoder = "encoder.int8.onnx";
-        decoder = "decoder.int8.onnx";
-        joiner = "joiner.int8.onnx";
-        tokens = "tokens.txt";
-      };
-    };
-  };
 
   models =
     lib.mapAttrs (_: m:
@@ -61,8 +80,7 @@
 
   manifestFile = pkgs.writeText "bolo-manifest" (builtins.toJSON {
     version = 1;
-    active = "fluid-speech-pro";
-    provider = "cuda";
+    inherit (backend) active provider;
     threads = null;
     pipe_to = "{ printf 'keyup leftctrl rightctrl leftalt rightalt leftshift rightshift leftmeta rightmeta\\ntypedelay 1\\ntypehold 1\\ntype '; tr '\\n' ' '; } | dotool";
     models =
@@ -115,11 +133,7 @@
 
   bolod = pkgs.symlinkJoin {
     name = "bolod-wrapped";
-    paths = [
-      (inputPackages.bolo.bolod.override {
-        sherpa-onnx = sherpaOnnxGpu;
-      })
-    ];
+    paths = [backend.bolod];
     nativeBuildInputs = [pkgs.makeWrapper];
     postBuild = ''
       wrapProgram $out/bin/bolod \
@@ -127,60 +141,58 @@
     '';
   };
 in {
-  config = lib.mkIf config.hardware.nvidia.enable {
-    environment.systemPackages = [bolo];
+  environment.systemPackages = [bolo];
 
-    services.udev.packages = [
-      (pkgs.writeTextFile {
-        name = "bolo-uinput-rules";
-        destination = "/lib/udev/rules.d/99-bolo-uinput.rules";
-        text = ''
-          KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
-        '';
-      })
-    ];
+  services.udev.packages = [
+    (pkgs.writeTextFile {
+      name = "bolo-uinput-rules";
+      destination = "/lib/udev/rules.d/99-bolo-uinput.rules";
+      text = ''
+        KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+      '';
+    })
+  ];
 
-    user.files.".config/bolo/manifest.json".source = manifestFile;
+  user.files.".config/bolo/manifest.json".source = manifestFile;
 
-    finit.services.bolod = {
-      description = "bolo speech-to-text daemon (${userName})";
-      user = userName;
-      reload-signal = "none";
-      environment = {
-        HOME = config.users.users.${userName}.home;
-        XDG_RUNTIME_DIR = runtimeDir;
-        BOLO_MANIFEST = "${manifestFile}";
-        WAYLAND_DISPLAY = "tomoe-0";
-        DBUS_SESSION_BUS_ADDRESS = "unix:path=${runtimeDir}/tomoe.tomoe-0.bus";
-      };
-      command = "${pkgs.writeShellScript "bolod-start" ''
-        i=0
-        while [ "$i" -lt 600 ]; do
-          [ -S ${runtimeDir}/pipewire-0 ] && exec ${bolod}/bin/bolod
-          ${pkgs.coreutils}/bin/sleep 1
-          i=$((i + 1))
-        done
-        echo "bolod-start: pipewire-0 never appeared" >&2
-        exit 1
-      ''}";
-      log = true;
+  finit.services.bolod = {
+    description = "bolo speech-to-text daemon (${userName})";
+    user = userName;
+    reload-signal = "none";
+    environment = {
+      HOME = config.users.users.${userName}.home;
+      XDG_RUNTIME_DIR = runtimeDir;
+      BOLO_MANIFEST = "${manifestFile}";
+      WAYLAND_DISPLAY = "tomoe-0";
+      DBUS_SESSION_BUS_ADDRESS = "unix:path=${runtimeDir}/tomoe.tomoe-0.bus";
     };
-
-    user.ui.tomoe.extraConfig = ''
-      (define-extension "bolo" (:reads (:command)) (snapshot state event)
-        (declare (ignore snapshot))
-        (values state
-                (list (define-command "toggle-bolo"
-                        :description "Start dictating, or stop (bolo).")
-                      (define-command "release-bolo"
-                        :description "Stop dictating if the key was held (bolo).")
-                      (bind-key (list :alt) "m" "toggle-bolo" :release "release-bolo"
-                                :description "Tap to dictate, or hold (bolo)."))
-                (let ((name (and (eq (getf event :type) :command)
-                                 (getf event :name))))
-                  (when (member name '("toggle-bolo" "release-bolo") :test #'equal)
-                    (list (launch "${bolo}/bin/bolo"
-                                  (if (string= name "toggle-bolo") "toggle" "release")))))))
-    '';
+    command = "${pkgs.writeShellScript "bolod-start" ''
+      i=0
+      while [ "$i" -lt 600 ]; do
+        [ -S ${runtimeDir}/pipewire-0 ] && exec ${bolod}/bin/bolod
+        ${pkgs.coreutils}/bin/sleep 1
+        i=$((i + 1))
+      done
+      echo "bolod-start: pipewire-0 never appeared" >&2
+      exit 1
+    ''}";
+    log = true;
   };
+
+  user.ui.tomoe.extraConfig = ''
+    (define-extension "bolo" (:reads (:command)) (snapshot state event)
+      (declare (ignore snapshot))
+      (values state
+              (list (define-command "toggle-bolo"
+                      :description "Start dictating, or stop (bolo).")
+                    (define-command "release-bolo"
+                      :description "Stop dictating if the key was held (bolo).")
+                    (bind-key (list :alt) "m" "toggle-bolo" :release "release-bolo"
+                              :description "Tap to dictate, or hold (bolo)."))
+              (let ((name (and (eq (getf event :type) :command)
+                               (getf event :name))))
+                (when (member name '("toggle-bolo" "release-bolo") :test #'equal)
+                  (list (launch "${bolo}/bin/bolo"
+                                (if (string= name "toggle-bolo") "toggle" "release")))))))
+  '';
 }
