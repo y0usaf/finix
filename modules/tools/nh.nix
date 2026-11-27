@@ -1,13 +1,24 @@
 {
   config,
+  lib,
   pkgs,
   inputPackages,
   ...
 }: let
   luinPin = inputPackages.luin.luin-pin;
-  nh = inputPackages.nh.default.overrideAttrs (old: {
+  nhPatched = inputPackages.nh.default.overrideAttrs (old: {
     patches = (old.patches or []) ++ [./nh-iets.patch];
   });
+  nh = pkgs.symlinkJoin {
+    name = "nh-wrapped";
+    paths = [nhPatched];
+    nativeBuildInputs = [pkgs.makeWrapper];
+    postBuild = ''
+      wrapProgram $out/bin/nh \
+        --set-default NH_FILE ${lib.escapeShellArg "${config.user.homeDirectory}/finix/default.nix"} \
+        --set-default NH_ATTRP ${lib.escapeShellArg "nixosConfigurations.${config.networking.hostName}"}
+    '';
+  };
   ship = pkgs.writeShellApplication {
     name = "ship";
     runtimeInputs = [pkgs.coreutils pkgs.git pkgs.gnugrep pkgs.nix pkgs.util-linux inputPackages.iets.default nh luinPin];
