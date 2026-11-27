@@ -1,11 +1,21 @@
-{config, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
+  userName = config.user.name;
   home = config.user.homeDirectory;
   xdgConfig = "${home}/.config";
   xdgData = "${home}/.local/share";
   xdgState = "${home}/.local/state";
   xdgCache = "${home}/.cache";
-in {
-  environment.variables = {
+
+  xdgVars = {
+    XDG_CONFIG_HOME = xdgConfig;
+    XDG_DATA_HOME = xdgData;
+    XDG_STATE_HOME = xdgState;
+    XDG_CACHE_HOME = xdgCache;
+
     XDG_SCREENSHOTS_DIR = "${home}/Pictures/Screenshots";
     XDG_WALLPAPERS_DIR = "${home}/Pictures/Wallpapers";
 
@@ -62,17 +72,32 @@ in {
 
     KERAS_HOME = "${xdgState}/keras";
   };
+in {
+  options.finit.services = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule ({config, ...}: {
+      config.environment = lib.mkIf (config.user == userName) (lib.mapAttrs (_: lib.mkDefault) xdgVars);
+    }));
+  };
 
-  user.files.".config/user-dirs.dirs".text = ''
-    XDG_DESKTOP_DIR="${home}/Desktop"
-    XDG_DOWNLOAD_DIR="${home}/Downloads"
-    XDG_TEMPLATES_DIR="${home}/Templates"
-    XDG_PUBLICSHARE_DIR="${home}/Public"
-    XDG_DOCUMENTS_DIR="${home}/Documents"
-    XDG_MUSIC_DIR="${home}/Music"
-    XDG_PICTURES_DIR="${home}/Pictures"
-    XDG_VIDEOS_DIR="${home}/Videos"
-    XDG_SCREENSHOTS_DIR="${home}/Pictures/Screenshots"
-    XDG_WALLPAPERS_DIR="${home}/Pictures/Wallpapers"
-  '';
+  config = {
+    environment.variables = builtins.removeAttrs xdgVars [
+      "XDG_CONFIG_HOME"
+      "XDG_DATA_HOME"
+      "XDG_STATE_HOME"
+      "XDG_CACHE_HOME"
+    ];
+
+    user.files.".config/user-dirs.dirs".text = ''
+      XDG_DESKTOP_DIR="${home}/Desktop"
+      XDG_DOWNLOAD_DIR="${home}/Downloads"
+      XDG_TEMPLATES_DIR="${home}/Templates"
+      XDG_PUBLICSHARE_DIR="${home}/Public"
+      XDG_DOCUMENTS_DIR="${home}/Documents"
+      XDG_MUSIC_DIR="${home}/Music"
+      XDG_PICTURES_DIR="${home}/Pictures"
+      XDG_VIDEOS_DIR="${home}/Videos"
+      XDG_SCREENSHOTS_DIR="${home}/Pictures/Screenshots"
+      XDG_WALLPAPERS_DIR="${home}/Pictures/Wallpapers"
+    '';
+  };
 }
