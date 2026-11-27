@@ -6,9 +6,12 @@
   ...
 }: let
   luinPin = inputPackages.luin.luin-pin;
+  nh = inputPackages.nh.default.overrideAttrs (old: {
+    patches = (old.patches or []) ++ [./nh-iets.patch];
+  });
   finix-switch = pkgs.writeShellApplication {
     name = "finix-switch";
-    runtimeInputs = [pkgs.git pkgs.util-linux inputPackages.nh.default luinPin];
+    runtimeInputs = [pkgs.git pkgs.util-linux nh luinPin];
     text = ''
       dry=false
       if [ "''${1:-}" = --dry ]; then
@@ -53,7 +56,7 @@
   };
 in {
   environment = {
-    systemPackages = [inputPackages.nh.default inputPackages.luin.default luinPin finix-switch];
+    systemPackages = [nh inputPackages.luin.default luinPin finix-switch];
     variables.NH_FLAKE = "${config.user.homeDirectory}/finix";
   };
   user.shell.rcExtra = lib.mkAfter ''
@@ -80,26 +83,14 @@ in {
       if [ -n "$(git -C "$NH_FLAKE" status --porcelain --untracked-files=no)" ]; then
         echo "nhs: uncommitted changes in $NH_FLAKE are left out; only commits are deployed" >&2
       fi
-      local rev expr out rc
+      local rev expr
       rev=$(git -C "$NH_FLAKE" rev-parse HEAD) || return
-      expr="(import (builtins.fetchGit { url = \"file://$NH_FLAKE\"; rev = \"$rev\"; allRefs = true; }) {}).nixosConfigurations.\"$(hostname)\".config.system.build.toplevel"
-      out="$XDG_RUNTIME_DIR/nhs-system"
-      rm -f "$out"
+      expr="(import (builtins.fetchGit { url = \"file://$NH_FLAKE\"; rev = \"$rev\"; allRefs = true; }) {}).nixosConfigurations.\"$(hostname)\""
       if [ -n "$nix" ]; then
-        GC_DONT_GC=1 nix build --impure -o "$out" --expr "$expr" || return
-        nh os switch $dry "$@" "$out"
-        rc=$?
-        rm -f "$out"
-        return $rc
+        GC_DONT_GC=1 NH_BUILD_BACKEND=nix nh os switch $dry -E "$expr" "$@" -- --impure
+        return
       fi
-      if ! iets build --impure -o "$out" -E "$expr"; then
-        echo "nhs: iets failed; 'nhs --nix' evaluates with nix instead" >&2
-        return 1
-      fi
-      nh os switch $dry "$@" "$out"
-      rc=$?
-      rm -f "$out"
-      return $rc
+      nh os switch $dry -E "$expr" "$@" -- --impure
     }
     alias nhd="nhs -d"
     alias nhu="nhs -u"

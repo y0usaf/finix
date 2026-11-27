@@ -1,0 +1,72 @@
+--- a/crates/nh-core/src/command.rs
++++ b/crates/nh-core/src/command.rs
+@@ -1049,6 +1049,14 @@
+     self.extra_args(passthrough.generate_build_args())
+   }
+ 
++  fn use_iets() -> bool {
++    match env::var("NH_BUILD_BACKEND").as_deref() {
++      Ok("nix") => false,
++      Ok("iets") => true,
++      _ => which("iets").is_ok(),
++    }
++  }
++
+   /// Print what the build would do without building anything.
+   ///
+   /// # Errors
+@@ -1059,12 +1067,21 @@
+       info!("{m}");
+     }
+ 
+-    let mut cmd = NixCommand::new(CommandKind::Build)
+-      .print_build_logs(false)
+-      .args(&self.installable.to_args()?)
+-      .arg("--dry-run")
+-      .args(&self.extra_args)
+-      .to_exec();
++    let installable_args = self.installable.to_args()?;
++    let mut cmd = if Self::use_iets() {
++      Exec::cmd("iets")
++        .args(["nix", "build"])
++        .args(&installable_args)
++        .arg("--dry-run")
++        .args(&self.extra_args)
++    } else {
++      NixCommand::new(CommandKind::Build)
++        .print_build_logs(false)
++        .args(&installable_args)
++        .arg("--dry-run")
++        .args(&self.extra_args)
++        .to_exec()
++    };
+     for (key, value) in &self.envs {
+       cmd = cmd.env(key, value);
+     }
+@@ -1099,12 +1116,20 @@
+ 
+     let installable_args = self.installable.to_args()?;
+ 
+-    let mut cmd = NixCommand::new(CommandKind::Build)
+-      .print_build_logs(false)
+-      .args(&installable_args)
+-      .arg("--print-out-paths")
+-      .args(&self.extra_args)
+-      .to_exec();
++    let mut cmd = if Self::use_iets() {
++      Exec::cmd("iets")
++        .args(["nix", "build"])
++        .args(&installable_args)
++        .arg("--print-out-paths")
++        .args(&self.extra_args)
++    } else {
++      NixCommand::new(CommandKind::Build)
++        .print_build_logs(false)
++        .args(&installable_args)
++        .arg("--print-out-paths")
++        .args(&self.extra_args)
++        .to_exec()
++    };
+     for (key, value) in &self.envs {
+       cmd = cmd.env(key, value);
+     }
