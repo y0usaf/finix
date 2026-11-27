@@ -5,6 +5,7 @@
 }: {
   user.persist.directories = [
     ".SteamCloud"
+    ".config/millennium"
     ".steam"
   ];
   environment.systemPackages = [

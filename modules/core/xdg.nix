@@ -18,6 +18,7 @@ in {
     CARGO_HOME = "${xdgData}/cargo";
     RUSTUP_HOME = "${xdgData}/rustup";
     BUN_INSTALL = "${xdgData}/bun";
+    BUN_INSTALL_CACHE_DIR = "${xdgCache}/bun";
     BUNFIG = "${xdgConfig}/bun/bunfig.toml";
     DOTNET_CLI_HOME = "${xdgData}/dotnet";
     GOPATH = "${xdgData}/go";
@@ -27,7 +28,7 @@ in {
     _JAVA_OPTIONS = "-Djava.util.prefs.userRoot=${xdgConfig}/java";
 
     NODE_REPL_HISTORY = "${xdgState}/node_repl_history";
-    NPM_CONFIG_USERCONFIG = "${home}/.npmrc";
+    NPM_CONFIG_USERCONFIG = "${xdgConfig}/npm/npmrc";
     NPM_CONFIG_PREFIX = "${xdgData}/npm";
     NPM_CONFIG_CACHE = "${xdgCache}/npm";
     NPM_CONFIG_INIT_MODULE = "${xdgConfig}/npm/config/npm-init.js";
@@ -35,6 +36,8 @@ in {
     CLAUDE_CONFIG_DIR = "${xdgConfig}/claude";
     CODEX_HOME = "${xdgConfig}/codex";
 
+    AWS_CONFIG_FILE = "${xdgConfig}/aws/config";
+    AWS_SHARED_CREDENTIALS_FILE = "${xdgConfig}/aws/credentials";
     AZURE_CONFIG_DIR = "${xdgData}/azure";
     CUDA_CACHE_PATH = "${xdgCache}/nv";
     IPYTHONDIR = "${xdgConfig}/ipython";
