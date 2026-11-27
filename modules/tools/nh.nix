@@ -5,12 +5,11 @@
   inputPackages,
   ...
 }: let
+  luinPin = inputPackages.luin.luin-pin;
   finix-switch = pkgs.writeShellApplication {
     name = "finix-switch";
-    runtimeInputs = [pkgs.git pkgs.util-linux inputPackages.nh.default];
+    runtimeInputs = [pkgs.git pkgs.util-linux inputPackages.nh.default luinPin];
     text = ''
-      # finix-switch [--dry] [REV]: build the committed REV (default HEAD) of $NH_FLAKE,
-      # never its working tree, and switch to it; --dry prints the system without switching.
       dry=false
       if [ "''${1:-}" = --dry ]; then
         dry=true
@@ -26,13 +25,12 @@
       pinned=''${1:-}
       while :; do
         rev=$(git -C "$flake" rev-parse --verify "''${pinned:-HEAD}^{commit}")
-        system=$(nix build --no-link --print-out-paths "git+file://$flake?rev=$rev#nixosConfigurations.$host.config.system.build.toplevel")
+        system=$(nix build --impure --no-link --print-out-paths --expr "(import (builtins.fetchGit { url = \"file://$flake\"; rev = \"$rev\"; allRefs = true; }) {}).nixosConfigurations.\"$host\".config.system.build.toplevel")
         exec 9>"$lock"
         if ! flock -n 9; then
           echo "finix-switch: waiting for another switch to finish ($lock)" >&2
           flock 9
         fi
-        # A named revision is the one deployed; HEAD follows commits made during the build.
         [ -z "$pinned" ] && [ "$(git -C "$flake" rev-parse HEAD)" != "$rev" ] || break
         echo "finix-switch: $flake moved past $rev during the build; building again" >&2
         exec 9>&-
@@ -55,7 +53,7 @@
   };
 in {
   environment = {
-    systemPackages = [inputPackages.nh.default finix-switch];
+    systemPackages = [inputPackages.nh.default inputPackages.luin.default luinPin finix-switch];
     variables.NH_FLAKE = "${config.user.homeDirectory}/finix";
   };
   user.shell.rcExtra = lib.mkAfter ''
@@ -75,27 +73,31 @@ in {
         shift
       done
       if [ -n "$update" ]; then
-        nix flake update --flake "$NH_FLAKE" || return
-        git -C "$NH_FLAKE" diff --quiet -- flake.lock ||
-          git -C "$NH_FLAKE" commit -q -m "flake: nix flake update" -- flake.lock || return
+        luin-pin -C "$NH_FLAKE" update || return
+        git -C "$NH_FLAKE" diff --quiet -- .luin/pins.lock.json ||
+          git -C "$NH_FLAKE" commit -q -m "pins: luin-pin update" -- .luin/pins.lock.json || return
       fi
       if [ -n "$(git -C "$NH_FLAKE" status --porcelain --untracked-files=no)" ]; then
         echo "nhs: uncommitted changes in $NH_FLAKE are left out; only commits are deployed" >&2
       fi
-      local ref
-      ref="git+file://$NH_FLAKE?rev=$(git -C "$NH_FLAKE" rev-parse HEAD)" || return
-      if [ -n "$nix" ]; then
-        GC_DONT_GC=1 nh os switch $dry "$ref" "$@"
-        return
-      fi
-      local out="$XDG_RUNTIME_DIR/nhs-system"
+      local rev expr out rc
+      rev=$(git -C "$NH_FLAKE" rev-parse HEAD) || return
+      expr="(import (builtins.fetchGit { url = \"file://$NH_FLAKE\"; rev = \"$rev\"; allRefs = true; }) {}).nixosConfigurations.\"$(hostname)\".config.system.build.toplevel"
+      out="$XDG_RUNTIME_DIR/nhs-system"
       rm -f "$out"
-      if ! iets build --impure -o "$out" "$ref#nixosConfigurations.$(hostname).config.system.build.toplevel"; then
+      if [ -n "$nix" ]; then
+        GC_DONT_GC=1 nix build --impure -o "$out" --expr "$expr" || return
+        nh os switch $dry "$@" "$out"
+        rc=$?
+        rm -f "$out"
+        return $rc
+      fi
+      if ! iets build --impure -o "$out" -E "$expr"; then
         echo "nhs: iets failed; 'nhs --nix' evaluates with nix instead" >&2
         return 1
       fi
       nh os switch $dry "$@" "$out"
-      local rc=$?
+      rc=$?
       rm -f "$out"
       return $rc
     }

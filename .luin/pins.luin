@@ -1,0 +1,206 @@
+(pins
+  (all-follow
+    (nixpkgs "nixpkgs")
+  )
+
+  (input alejandra
+    (url "github:kamadorueda/alejandra")
+  )
+  (input ash
+    (url "git+ssh://git@github.com/y0usaf/ash.git")
+  )
+  (input auth-router
+    (url "github:y0usaf/auth-router")
+  )
+  (input autolith
+    (url "github:y0usaf/autolith/fix-clinedi-pin")
+    (exclude-follow nixpkgs)
+  )
+  (input boar-rs
+    (url "git+ssh://git@github.com/y0usaf/boar-rs.git?rev=00902d9e90c0c7525f5e3b862d48a75fa2ba5184")
+  )
+  (input bolo
+    (url "git+ssh://git@github.com/y0usaf/bolo.git")
+  )
+  (input bootvine
+    (url "git+ssh://git@github.com/y0usaf/finit-bootvine.git")
+  )
+  (input claude-code-nix
+    (url "github:sadjow/claude-code-nix")
+  )
+  (input cleanker
+    (url "github:y0usaf/cleanker")
+  )
+  (input cudaterm
+    (url "github:y0usaf/cudaterm")
+    (exclude-follow nixpkgs)
+  )
+  (input cursors
+    (url "github:y0usaf/cursors")
+  )
+  (input deepseek-harness-flake
+    (url "github:y0usaf/deepseek-harness-flake")
+  )
+  (input dsh-tern
+    (url "git+ssh://git@github.com/y0usaf/dsh-tern.git")
+  )
+  (input durapi
+    (url "github:y0usaf/durapi")
+    (follows
+      (pi "pi")
+      (pi-donsetch "pi-donsetch")
+    )
+  )
+  (input ekko
+    (url "github:y0usaf/ekko")
+  )
+  (input emeraldian
+    (url "github:y0usaf/emeraldian/4557d20ce664a12dec7d5acf3d76a467cf4972a4")
+    (exclude-follow nixpkgs)
+  )
+  (input finix
+    (url "github:finix-community/finix")
+  )
+  (input fonts
+    (url "github:y0usaf/fonts")
+  )
+  (input frame-charge
+    (url "github:y0usaf/frame-charge")
+    (exclude-follow nixpkgs)
+  )
+  (input iets
+    (url "github:numtide/iets")
+  )
+  (input leverage
+    (url "git+ssh://git@github.com/y0usaf/leverage-linux.git")
+  )
+  (input linear-cli
+    (url "github:y0usaf/linear-cli/nix-flake")
+  )
+  (input luin
+    (url "git+ssh://git@github.com/y0usaf/luin.git")
+  )
+  (input mado
+    (url "git+ssh://git@github.com/y0usaf/mado.git")
+    (exclude-follow nixpkgs)
+  )
+  (input manzil
+    (url "github:y0usaf/manzil")
+  )
+  (input microvm
+    (url "github:microvm-nix/microvm.nix")
+  )
+  (input mint
+    (url "git+ssh://git@github.com/y0usaf/mint.git")
+  )
+  (input monstar
+    (url "github:rockorager/monstar")
+  )
+  (input nectarlink
+    (url "github:thtbee/nectarlink/2fb0091b2625a42b0de9b1e41f7a09696f50f21a")
+  )
+  (input nh
+    (url "github:nix-community/nh")
+  )
+  (input nix-generators
+    (url "github:y0usaf/nix-generators")
+    (follows (iets "strictix/iets"))
+  )
+  (input nix-on-droid
+    (url "github:nix-community/nix-on-droid")
+  )
+  (input nixpkgs
+    (url "github:NixOS/nixpkgs/nixos-unstable")
+  )
+  (input nixpkgs-discord-legacy
+    (url "github:NixOS/nixpkgs/2fc6539b481e1d2569f25f8799236694180c0993")
+    (type fetch)
+  )
+  (input nixpkgs-librewolf
+    (url "github:NixOS/nixpkgs/56c02bc00adcf003215cc4bd996d6efaf4cff188")
+  )
+  (input obs-image-reaction
+    (url "github:y0usaf/obs-image-reaction")
+  )
+  (input obs-twitch-tts
+    (url "github:y0usaf/obs-twitch-tts")
+  )
+  (input oh-my-fx
+    (url "github:y0usaf/oh-my-fx/8ea7aa8df1c82c915b6ea1d918f10a945e79b01d")
+    (exclude-follow nixpkgs)
+  )
+  (input oh-my-pi
+    (url "github:can1357/oh-my-pi")
+    (exclude-follow nixpkgs)
+  )
+  (input omp-bot
+    (url "github:y0usaf/omp-bot")
+    (type fetch)
+  )
+  (input paseo
+    (url "github:getpaseo/paseo")
+  )
+  (input phi
+    (url "git+ssh://git@github.com/y0usaf/phi.git?ref=main")
+  )
+  (input pi
+    (url "github:earendil-works/pi/v1.0.2")
+    (follows (nixpkgs-darwin-x64 "nixpkgs"))
+  )
+  (input pi-ampersand
+    (url "github:y0usaf/pi-ampersand")
+    (type fetch)
+  )
+  (input pi-chronobreak
+    (url "github:y0usaf/pi-chronobreak")
+    (type fetch)
+  )
+  (input pi-donsetch
+    (url "github:y0usaf/pi-donsetch")
+  )
+  (input pi-harness
+    (url "git+ssh://git@github.com/y0usaf/amux.git?ref=main")
+    (follows (pi "pi"))
+  )
+  (input pi-recap
+    (url "github:y0usaf/pi-recap")
+    (type fetch)
+  )
+  (input pi-rlm
+    (url "github:y0usaf/pi-rlm")
+    (type fetch)
+  )
+  (input rush
+    (url "github:rockorager/rush")
+  )
+  (input steam-frame-nixos
+    (url "github:y0usaf/steam-frame-nixos")
+    (exclude-follow nixpkgs)
+  )
+  (input strictix
+    (url "github:y0usaf/strictix")
+  )
+  (input tern-ekko
+    (url "git+ssh://git@github.com/y0usaf/tern-ekko.git")
+    (type fetch)
+  )
+  (input tern-ozette
+    (url "github:y0usaf/tern-ozette")
+    (type fetch)
+  )
+  (input tern-script
+    (url "git+ssh://git@github.com/y0usaf/tern-script.git")
+  )
+  (input tomoe
+    (url "github:y0usaf/tomoe")
+  )
+  (input tomoe-stable
+    (url "github:y0usaf/finix/add5ffdbe6984292ba26bbf5fea0828ba3e354cb")
+    (follows (tomoe "tomoe-stable--tomoe"))
+    (exclude-follow nixpkgs)
+  )
+  (input tomoe-stable--tomoe
+    (url "github:y0usaf/tomoe/259c8ac4be5bc9d598ea8f8a2bbf38559327d7ad")
+    (exclude-follow nixpkgs)
+  )
+)

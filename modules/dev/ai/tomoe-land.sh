@@ -384,8 +384,8 @@ pin_finix() {
 		printf '%s has staged changes; not touching its index\n' "$FINIX" >"$log"
 		return 1
 	fi
-	if ! git -C "$FINIX" diff --quiet -- flake.lock; then
-		printf '%s has an uncommitted flake.lock; not overwriting it\n' "$FINIX" >"$log"
+	if ! git -C "$FINIX" diff --quiet -- .luin/pins.lock.json; then
+		printf '%s has an uncommitted .luin/pins.lock.json; not overwriting it\n' "$FINIX" >"$log"
 		return 1
 	fi
 	full=$(git -C "$REPO" rev-parse "$tip") || return 1
@@ -396,21 +396,20 @@ pin_finix() {
 		cd "$FINIX" || exit 1
 		lease_take "$SWITCH_LOCK" -x 0 || exit 1
 		git fetch --quiet "$remote" || exit 1
-		src=$(jq -r '.nodes.tomoe.original | "\(.owner)/\(.repo)"' flake.lock) || exit 1
-		nix flake lock --override-input tomoe "github:$src/$full" || exit 1
-		locked=$(jq -r .nodes.tomoe.locked.rev flake.lock) || exit 1
+		luin-pin -C "$FINIX" update tomoe || exit 1
+		locked=$(jq -r .nodes.tomoe.rev .luin/pins.lock.json) || exit 1
 		[[ $locked == "$full" ]] || {
-			printf 'flake.lock pins %s, not %s; not committing\n' "$locked" "$full"
-			git checkout -- flake.lock
+			printf '.luin/pins.lock.json pins %s, not %s; not committing\n' "$locked" "$full"
+			git checkout -- .luin/pins.lock.json
 			exit 1
 		}
-		git add flake.lock || exit 1
+		git add .luin/pins.lock.json || exit 1
 		git -c user.name=tomoe-land -c user.email=tomoe-land@localhost commit --quiet \
-			-m "finix: pin tomoe $short" -- flake.lock || exit 1
+			-m "finix: pin tomoe $short" -- .luin/pins.lock.json || exit 1
 		pin=$(git rev-parse HEAD) || exit 1
-		locked=$(git show "$pin:flake.lock" | jq -r .nodes.tomoe.locked.rev) || exit 1
+		locked=$(git show "$pin:.luin/pins.lock.json" | jq -r .nodes.tomoe.rev) || exit 1
 		[[ $locked == "$full" ]] || {
-			printf 'committed flake.lock pins %s, not %s; not pushing\n' "$locked" "$full"
+			printf 'committed .luin/pins.lock.json pins %s, not %s; not pushing\n' "$locked" "$full"
 			exit 1
 		}
 		git push "$remote" "$pin:refs/heads/main" || exit 1
@@ -478,11 +477,11 @@ finish() {
 
 finix_pin_rev() {
 	if command -v jq >/dev/null 2>&1; then
-		jq -r '.nodes.tomoe.locked.rev // empty' "$FINIX/flake.lock" 2>/dev/null
+		jq -r '.nodes.tomoe.rev // empty' "$FINIX/.luin/pins.lock.json" 2>/dev/null
 	elif command -v python3 >/dev/null 2>&1; then
 		python3 -c 'import json,sys
 d = json.load(open(sys.argv[1]))
-print(d["nodes"]["tomoe"]["locked"].get("rev", ""))' "$FINIX/flake.lock" 2>/dev/null
+print(d["nodes"]["tomoe"].get("rev", ""))' "$FINIX/.luin/pins.lock.json" 2>/dev/null
 	fi
 }
 
