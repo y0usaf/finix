@@ -110,6 +110,7 @@
           cat >> initctl-shim.c <<'EOF'
           #include <string.h>
           #include <sys/stat.h>
+          #include <sys/wait.h>
           #include <unistd.h>
 
           int main(int argc, char **argv) {
@@ -140,6 +141,29 @@
                 }
                 if (!strcmp(argv[1], "poweroff") || !strcmp(argv[1], "halt")) {
                   execl(LUINIT_CTL, "luinit-ctl", "poweroff", (char *)0);
+                  _exit(127);
+                }
+              }
+              if (!strcmp(prog, "initctl") && argc == 3) {
+                if (!strcmp(argv[1], "start")) {
+                  execl(LUINIT_CTL, "luinit-ctl", "mount", argv[2], (char *)0);
+                  _exit(127);
+                }
+                if (!strcmp(argv[1], "stop")) {
+                  execl(LUINIT_CTL, "luinit-ctl", "unmount", argv[2], (char *)0);
+                  _exit(127);
+                }
+                if (!strcmp(argv[1], "restart")) {
+                  pid_t pid = fork();
+                  if (pid == 0) {
+                    execl(LUINIT_CTL, "luinit-ctl", "unmount", argv[2], (char *)0);
+                    _exit(127);
+                  }
+                  if (pid > 0) {
+                    int st = 0;
+                    waitpid(pid, &st, 0);
+                  }
+                  execl(LUINIT_CTL, "luinit-ctl", "mount", argv[2], (char *)0);
                   _exit(127);
                 }
               }
@@ -315,6 +339,11 @@ in {
 
     maxGenerations = 20;
 
+    additionalFiles = {
+      "EFI/luinos/kernel" = "${config.boot.kernelPackages.kernel}/bzImage";
+      "EFI/luinos/initrd" = "${config.boot.initrd.package}/initrd";
+    };
+
     extraEntries = ''
       /Finix golden
         protocol: linux
@@ -322,6 +351,13 @@ in {
         kernel_path: boot():/EFI/finix/kernels/golden/kernel
         cmdline: init=/nix/store/ralz7prz3545kixkfwag61ky42z1j8b9-finix-system/init nvidia-drm.modeset=1 nvidia-drm.fbdev=1 nvidia.NVreg_UsePageAttributeTable=1 nvidia.NVreg_EnableResizableBar=1 nvidia.NVreg_RegistryDwords=RmEnableAggressiveVblank=1 nvidia_modeset.disable_vrr_memclk_switch=1 nvidia.NVreg_TemporaryFilePath=/var/tmp amd_pstate=active mitigations=off console=tty0 panic=30 oops=panic softlockup_panic=1 hung_task_panic=1
         module_path: boot():/EFI/finix/kernels/golden/initrd
+
+      /LuinOS (luinit)
+        protocol: linux
+        comment: y0usaf-desktop booted with luinit PID 1
+        kernel_path: boot():/EFI/luinos/kernel
+        cmdline: init=${inputPackages.luin.luinit-floor}/bin/luinit-floor luinit.world=${luinitWorld}/bin/luinit-world luinit.system=__LUINIT_SYSTEM__ ${lib.concatStringsSep " " config.boot.kernelParams}
+        module_path: boot():/EFI/luinos/initrd
     '';
 
     settings = {
