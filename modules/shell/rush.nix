@@ -24,7 +24,7 @@
       adb = ''HOME="$XDG_DATA_HOME/android" adb'';
       pkgs = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | rg -i";
       pkgcount = "nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l";
-      buildtime = ''time (nix build "$NH_FLAKE#nixosConfigurations.$HOST.config.system.build.toplevel" --option eval-cache false)'';
+      buildtime = ''time (nix build --no-link -f "$NH_FILE" "$NH_ATTRP.config.system.build.toplevel" --option eval-cache false)'';
       hmpull = "git -C ${config.user.homeDirectory}/finix fetch origin && git -C ${config.user.homeDirectory}/finix reset --hard origin/main";
     }
     // lib.optionalAttrs config.hardware.nvidia.enable {

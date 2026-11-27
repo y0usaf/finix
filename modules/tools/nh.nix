@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   inputPackages,
   ...
@@ -9,54 +8,127 @@
   nh = inputPackages.nh.default.overrideAttrs (old: {
     patches = (old.patches or []) ++ [./nh-iets.patch];
   });
-  finix-switch = pkgs.writeShellApplication {
-    name = "finix-switch";
-    runtimeInputs = [pkgs.git pkgs.util-linux nh luinPin];
+  ship = pkgs.writeShellApplication {
+    name = "ship";
+    runtimeInputs = [pkgs.coreutils pkgs.git pkgs.gnugrep pkgs.nix pkgs.util-linux inputPackages.iets.default nh luinPin];
     text = ''
-      dry=false
-      if [ "''${1:-}" = --dry ]; then
-        dry=true
-        shift
-      fi
-      flake=''${NH_FLAKE:-$HOME/finix}
-      host=$(cat /proc/sys/kernel/hostname)
-      lock=''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/agent/finix-switch.lock
-      mkdir -p "''${lock%/*}"
-      if [ -n "$(git -C "$flake" status --porcelain --untracked-files=no)" ]; then
-        echo "finix-switch: uncommitted changes in $flake are left out" >&2
-      fi
-      pinned=''${1:-}
-      while :; do
-        rev=$(git -C "$flake" rev-parse --verify "''${pinned:-HEAD}^{commit}")
-        system=$(nix build --impure --no-link --print-out-paths --expr "(import (builtins.fetchGit { url = \"file://$flake\"; rev = \"$rev\"; allRefs = true; }) {}).nixosConfigurations.\"$host\".config.system.build.toplevel")
-        exec 9>"$lock"
-        if ! flock -n 9; then
-          echo "finix-switch: waiting for another switch to finish ($lock)" >&2
-          flock 9
-        fi
-        [ -z "$pinned" ] && [ "$(git -C "$flake" rev-parse HEAD)" != "$rev" ] || break
-        echo "finix-switch: $flake moved past $rev during the build; building again" >&2
-        exec 9>&-
-      done
-      from=$(readlink -f /run/current-system)
-      if $dry; then
-        printf '{"rev":"%s","from":"%s","to":"%s","switched":false,"dry":true}\n' "$rev" "$from" "$system"
-        exit 0
-      fi
-      [ "$from" = "$system" ] || nh os switch "$system" >&2
-      to=$(readlink -f /run/current-system)
-      if [ "$to" != "$system" ]; then
-        echo "finix-switch: /run/current-system is $to, not $system" >&2
-        exit 1
-      fi
-      switched=false
-      [ "$from" = "$to" ] || switched=true
-      printf '{"rev":"%s","from":"%s","to":"%s","switched":%s}\n' "$rev" "$from" "$to" "$switched"
+            die() { echo "ship: $*" >&2; exit 1; }
+
+            repo=""
+            input=""
+            while [ "$#" -gt 0 ]; do
+              case "$1" in
+                -h | --help)
+                  echo "usage: ship [REPO] [--input NAME]"
+                  exit 0
+                  ;;
+                --input)
+                  [ "$#" -ge 2 ] || die "--input wants an input name"
+                  input=$2
+                  shift 2
+                  ;;
+                -*)
+                  die "unknown option: $1"
+                  ;;
+                *)
+                  [ -z "$repo" ] || die "unexpected argument: $1"
+                  repo=$1
+                  shift
+                  ;;
+              esac
+            done
+
+            finix=$(realpath -m "''${FINIX_DIR:-$HOME/finix}")
+            remotes=''${SHIP_FINIX_REMOTES:-github forgejo}
+            lock=''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/agent/finix-switch.lock
+            repo=$(realpath "''${repo:-$PWD}")
+
+            git -C "$repo" rev-parse --git-dir >/dev/null 2>&1 || die "$repo is not a git repository"
+            dirty=$(git -C "$repo" status --porcelain --untracked-files=no)
+            [ -z "$dirty" ] || { printf 'ship: %s has uncommitted changes:\n%s\n' "$repo" "$dirty" >&2; exit 1; }
+            branch=$(git -C "$repo" symbolic-ref --quiet --short HEAD) || die "$repo has a detached HEAD"
+            rev=$(git -C "$repo" rev-parse HEAD)
+            subject=$(git -C "$repo" log -1 --format=%s)
+
+            switch_and_push_finix() {
+              local finix_rev
+              finix_rev=$(git -C "$finix" rev-parse HEAD)
+              nh os switch --impure "git+file://$finix?rev=$finix_rev" 9>&-
+              for remote in $remotes; do
+                git -C "$finix" push "$remote" HEAD 9>&- || die "cannot push $finix to $remote"
+              done
+            }
+
+            lock_finix() {
+              mkdir -p "''${lock%/*}"
+              exec 9>"$lock"
+              if ! flock -n 9; then
+                echo "ship: waiting for another switch ($lock)" >&2
+                flock 9
+              fi
+              git -C "$finix" symbolic-ref --quiet HEAD >/dev/null || die "$finix has a detached HEAD"
+              [ -z "$(git -C "$finix" status --porcelain --untracked-files=no)" ] || die "$finix has uncommitted changes"
+            }
+
+            if [ "$repo" = "$finix" ]; then
+              [ -z "$input" ] || die "--input is not valid when shipping $finix directly"
+              lock_finix
+              switch_and_push_finix
+              echo "ship: finix $rev"
+              exit 0
+            fi
+
+            if git -C "$finix" rev-parse --git-dir >/dev/null 2>&1; then
+              [ -z "$(git -C "$finix" status --porcelain --untracked-files=no)" ] || die "$finix has uncommitted changes"
+            fi
+
+            if [ -f "$repo/.luin/pins.lock.json" ] && [ -f "$repo/default.nix" ]; then
+              sys=$(nix eval --raw --impure --expr builtins.currentSystem)
+              if nix eval --impure -f "$repo" --apply "x: x ? checks && x.checks ? $sys" 2>/dev/null | grep -qx true; then
+                echo "ship: nix build checks $repo" >&2
+                nix build --impure --no-link -f "$repo" "checks.$sys"
+              fi
+            elif [ -f "$repo/flake.nix" ]; then
+              echo "ship: nix flake check $repo" >&2
+              nix flake check --no-write-lock-file "$repo"
+            fi
+
+            echo "ship: push $branch $rev" >&2
+            git -C "$repo" push origin "HEAD:$branch"
+
+            if [ -z "$input" ]; then
+              origin=$(git -C "$repo" remote get-url origin)
+              matches=$(luin-pin -C "$finix" match-url "$origin")
+              count=$(printf '%s' "$matches" | grep -c . || true)
+              [ "$count" -le 1 ] || die "$repo matches several inputs (''${matches//$'
+      '/ }); pass --input NAME"
+              if [ "$count" -eq 1 ]; then input=$(printf '%s' "$matches" | head -1); fi
+            fi
+
+            if [ -z "$input" ]; then
+              echo "ship: $repo is in no finix input; pushed $branch ($rev)"
+              exit 0
+            fi
+
+            lock_finix
+            echo "ship: luin-pin update $input" >&2
+            luin-pin -C "$finix" update "$input" 9>&-
+            if git -C "$finix" diff --quiet -- .luin/pins.lock.json; then
+              echo "ship: .luin/pins.lock.json already pins $input at $rev" >&2
+            else
+              git -C "$finix" commit -q -m "bump $input: $subject" -- .luin/pins.lock.json 9>&-
+            fi
+
+            switch_and_push_finix
+            echo "ship: $input $rev -> finix $(git -C "$finix" rev-parse --short HEAD)"
     '';
   };
 in {
   environment = {
-    systemPackages = [nh inputPackages.luin.default luinPin finix-switch];
-    variables.NH_FLAKE = "${config.user.homeDirectory}/finix";
+    systemPackages = [nh ship];
+    variables = {
+      NH_FILE = "${config.user.homeDirectory}/finix/default.nix";
+      NH_ATTRP = "nixosConfigurations.${config.networking.hostName}";
+    };
   };
 }

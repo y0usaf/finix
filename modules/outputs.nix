@@ -319,7 +319,6 @@ inputs: let
           inputs.finix.nixosModules.limine
           ./finix/static-net.nix
           ./hosts/wireguard.nix
-          ./dev/ai/tomoe-land.nix
         ]
         ++ graphicalModules
         ++ [
@@ -439,7 +438,7 @@ inputs: let
 
   lint = import ./lint.nix {inherit inputs inputPackages lib pkgs hosts droid;};
 in {
-  nixosConfigurations = hosts // {y0usaf-server-finix = hosts.y0usaf-server;};
+  nixosConfigurations = hosts;
 
   nixOnDroidConfigurations.default = droid;
 
@@ -459,11 +458,6 @@ in {
       defaultHost = "server";
       sshHost = hosts.y0usaf-server.config.networking.hostName;
       sshPort = builtins.head hosts.y0usaf-server.config.services.openssh.settings.Port;
-    };
-    finix-desktop-deploy = mkDeploy {
-      name = "finix-desktop-deploy";
-      toplevel = hosts.y0usaf-desktop.config.system.topLevel;
-      defaultHost = "local";
     };
     finix-frame-deploy = import ./hosts/steam-frame/deploy.nix {inherit inputs pkgs;};
     drift = import ./drift.nix {inherit lib pkgs hosts;};

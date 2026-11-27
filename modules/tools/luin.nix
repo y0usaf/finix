@@ -9,7 +9,7 @@
   luinPkg = inputPackages.luin.default;
 in {
   environment = {
-    systemPackages = [luinPkg inputPackages.luin.luinitctl];
+    systemPackages = [luinPkg inputPackages.luin.luin-pin inputPackages.luin.luinitctl];
     etc."profile.d/luin-path.sh".text = ''
       case ":$PATH:" in
         *":$HOME/.local/state/luin/current/bin:"*) ;;
