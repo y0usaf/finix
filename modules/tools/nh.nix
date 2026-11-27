@@ -59,42 +59,4 @@ in {
     systemPackages = [nh inputPackages.luin.default luinPin finix-switch];
     variables.NH_FLAKE = "${config.user.homeDirectory}/finix";
   };
-  user.shell.rcExtra = lib.mkAfter ''
-    nhs() {
-      clear
-      local update=""
-      local dry=""
-      local nix=""
-      while [ $# -gt 0 ]; do
-        case $1 in
-          -d|--dry) dry="--dry" ;;
-          -u|--update) update="--update" ;;
-          -du|-ud) dry="--dry"; update="--update" ;;
-          --nix) nix=1 ;;
-          *) break ;;
-        esac
-        shift
-      done
-      if [ -n "$update" ]; then
-        luin-pin -C "$NH_FLAKE" update || return
-        git -C "$NH_FLAKE" diff --quiet -- .luin/pins.lock.json ||
-          git -C "$NH_FLAKE" commit -q -m "pins: luin-pin update" -- .luin/pins.lock.json || return
-      fi
-      if [ -n "$(git -C "$NH_FLAKE" status --porcelain --untracked-files=no)" ]; then
-        echo "nhs: uncommitted changes in $NH_FLAKE are left out; only commits are deployed" >&2
-      fi
-      local rev expr
-      rev=$(git -C "$NH_FLAKE" rev-parse HEAD) || return
-      expr="(import (builtins.fetchGit { url = \"file://$NH_FLAKE\"; rev = \"$rev\"; allRefs = true; }) {}).nixosConfigurations.\"$(hostname)\""
-      if [ -n "$nix" ]; then
-        GC_DONT_GC=1 NH_BUILD_BACKEND=nix nh os switch $dry -E "$expr" "$@" -- --impure
-        return
-      fi
-      nh os switch $dry -E "$expr" "$@" -- --impure
-    }
-    alias nhd="nhs -d"
-    alias nhu="nhs -u"
-    alias nhud="nhs -ud"
-    alias nhc="nh clean all"
-  '';
 }
