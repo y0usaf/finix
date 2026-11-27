@@ -1027,19 +1027,20 @@
       export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.findutils pkgs.gnugrep pkgs.iproute2 pkgs.openssh pkgs.jq pkgs.python3]}
       status=${state}/status.json
       runner=${runner}
+      boot_id=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null || echo unknown)
       limit=3
       qemu=
       stopping=0
       timedout=0
 
       record() {
-        jq -n --arg state "$1" --arg reason "$2" --argjson failures "$3" --argjson updated "$(date +%s%3N)" --arg runner "$runner" \
-          '{state: $state, reason: (if $reason == "" then null else $reason end), failures: $failures, updated: $updated, runner: $runner}' >"$status.tmp"
+        jq -n --arg state "$1" --arg reason "$2" --argjson failures "$3" --argjson updated "$(date +%s%3N)" --arg runner "$runner" --arg boot_id "$boot_id" \
+          '{state: $state, reason: (if $reason == "" then null else $reason end), failures: $failures, updated: $updated, runner: $runner, boot_id: $boot_id}' >"$status.tmp"
         mv -f "$status.tmp" "$status"
       }
 
       recorded_failures() {
-        if [ -f "$status" ] && [ "$(jq -r '.runner // empty' "$status" 2>/dev/null)" = "$runner" ]; then
+        if [ -f "$status" ] && [ "$(jq -r '(.runner // "") + " " + (.boot_id // "")' "$status" 2>/dev/null)" = "$runner $boot_id" ]; then
           jq -r '.failures // 0' "$status" 2>/dev/null || echo 0
         else
           echo 0
@@ -1048,7 +1049,7 @@
 
       blocked() {
         [ -f "$status" ] || return 1
-        [ "$(jq -r '.state + " " + .runner' "$status" 2>/dev/null || true)" = "failed $runner" ]
+        [ "$(jq -r '(.state // "") + " " + (.runner // "") + " " + (.boot_id // "")' "$status" 2>/dev/null || true)" = "failed $runner $boot_id" ]
       }
 
       hold() {
