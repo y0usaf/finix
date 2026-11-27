@@ -38,7 +38,8 @@
   '';
   luinitWorld = emitWorld {
     name = "y0usaf-desktop-luinit-world";
-    activateCmd = "${luinitActivate}";
+    shell = "${pkgs.dash}/bin/dash";
+    activateCmd = ["${luinitActivate}"];
     services = builtins.removeAttrs config.finit.services ["boot-screen"];
     tasks = builtins.removeAttrs config.finit.tasks ["ctrl-alt-del"];
     run = config.finit.run;
