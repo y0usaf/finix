@@ -865,12 +865,12 @@
       "follows": {
         "nixpkgs": ["nixpkgs"]
       },
-      "lastModified": 1795714101,
-      "narHash": "sha256-n30ko6OamybUJOFAI2frLu9D1/M4KkURz8+u7Xu8E7Q=",
+      "lastModified": 1795842055,
+      "narHash": "sha256-d56fh32xCX6jJbxo3Jw79LOCbW/18YZXtjiEFnj/y6M=",
       "owner": "y0usaf",
       "pinType": "flake",
       "repo": "tomoe",
-      "rev": "371b889291a37a1a788922abc9c8436a00cb63f1",
+      "rev": "4606c4c7d4f92b3e6a3392beb18d345b8b6a9e4b",
       "type": "github"
     },
     "tomoe-stable": {
