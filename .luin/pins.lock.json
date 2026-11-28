@@ -498,12 +498,12 @@
       "follows": {
         "nixpkgs": ["nixpkgs"]
       },
-      "lastModified": 1795843641,
-      "narHash": "sha256-aUeNTEto/aZNaYXXSRuAzbMiHJgrmLYKUcHqqs4Ftps=",
+      "lastModified": 1795870388,
+      "narHash": "sha256-cqM7vfk/pO7+qziZYCdYMkvjg509sKqGtCvxmFflcmg=",
       "pinType": "flake",
       "ref": "refs/heads/main",
-      "rev": "9afc0089adb3dbbdfa80d1707575e535e718d181",
-      "revCount": 38,
+      "rev": "0ecf825e6d651f390a19c219533440cf63df15ea",
+      "revCount": 40,
       "type": "git",
       "url": "ssh://git@github.com/y0usaf/luin.git"
     },
