@@ -688,12 +688,12 @@
       "type": "github"
     },
     "omp-bot": {
-      "lastModified": 1795546763,
-      "narHash": "sha256-Zs433oKzkFC3pMeEMfki9bPRlPW5vqxixRi5LSoeuQQ=",
+      "lastModified": 1795893624,
+      "narHash": "sha256-Yc6/ud65+wwtvr2p3IXLwq1gSn6reerAuOH1rS2r1Iw=",
       "owner": "y0usaf",
       "pinType": "fetch",
       "repo": "omp-bot",
-      "rev": "ca897a355623421417578e4e26a4df97f230bae7",
+      "rev": "fc14553285bc2f86e1a5c41468153abbd1d188f9",
       "type": "github"
     },
     "paseo": {

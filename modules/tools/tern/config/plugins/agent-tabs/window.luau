@@ -6,7 +6,24 @@ local SHELLS = { sh = true, bash = true, zsh = true, fish = true, dash = true, n
 local GONE_MS = 10000
 local SETTLE_MS = 15000
 
-type Agent = { command: string, tint: string?, cwd: string? }
+type Agent = { command: string, tint: string?, cwd: string?, owner: string? }
+
+local function parked_pane(cx: WindowCx, agent: Agent): number?
+	local path = agent.owner
+	if not (path and path ~= "" and tern.fs.exists(path)) then
+		return nil
+	end
+	local id = tonumber((tern.fs.read(path):match("^%s*(%d+)")))
+	if not id then
+		return nil
+	end
+	for _, pane in ipairs(cx.session:panes()) do
+		if pane.pane == id and pane.parked and pane.exited == nil then
+			return pane.pane
+		end
+	end
+	return nil
+end
 
 local function entries(path: string): { [string]: Agent }
 	local agents = {}
@@ -77,6 +94,18 @@ local function relaunch(cx: WindowCx, pane: number, name: string, agent: Agent)
 		return
 	end
 	last[name] = now
+	local parked = parked_pane(cx, agent)
+	local target_tab = cx.session:tab_of(pane)
+	if parked and target_tab then
+		local moved = cx.layout:move_to_tab(parked, target_tab, { focus = false })
+		if moved then
+			cx.layout:close(pane)
+			if agent.tint then
+				cx.layout:color_tab(target_tab, agent.tint :: any)
+			end
+			return
+		end
+	end
 	local new = cx.layout:split(pane, "right", launch(agent))
 	if not new then
 		cx:toast("error", "Could not reopen " .. name)
@@ -118,8 +147,15 @@ local function restore(cx: WindowCx, reopen: boolean)
 						relaunch(cx, tab.pane, entry.name, agent)
 					end
 				elseif reopen and s.current then
-					local id = cx.layout:new_tab(launch(agent), { focus = false })
-					local new = id and (cx.session:tab_of(id) or id)
+					local parked = parked_pane(cx, agent)
+					local new: number? = nil
+					if parked then
+						new = cx.layout:move_to_new_tab(parked, s.id, { focus = false })
+					end
+					if not new then
+						local id = cx.layout:new_tab(launch(agent), { focus = false })
+						new = id and (cx.session:tab_of(id) or id)
+					end
 					if new then
 						cx.layout:name_tab(new, entry.name)
 						if agent.tint then
