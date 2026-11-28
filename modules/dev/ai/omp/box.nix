@@ -1546,6 +1546,7 @@ in {
     finit.services.omp-box = {
       description = "omp NixOS microVM";
       inherit user;
+      conditions = lib.optional (config.finit.tasks ? modprobe) "task/modprobe/success";
       reload-signal = "none";
       respawn = true;
       log = true;
