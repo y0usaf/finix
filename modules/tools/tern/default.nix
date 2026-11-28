@@ -4589,6 +4589,8 @@ in {
 
   user.files = files // tuturu;
 
+  finix.persistence.homeServices = ["tern-remote"];
+
   finit = {
     tasks.tern-authorized-keys = {
       description = "seed ~/.ssh/authorized_keys for tern remote (${config.user.name})";
